@@ -27,18 +27,18 @@ def build_repo(tmp_path: Path) -> Path:
                     "description": "gateway",
                     "category": "automation",
                     "lifecycle_status": "active",
-                    "vm": "docker-runtime-lv3",
+                    "vm": "docker-runtime",
                     "vmid": 120,
                     "internal_url": "http://10.10.10.20:8083",
-                    "public_url": "https://api.lv3.org",
-                    "subdomain": "api.lv3.org",
+                    "public_url": "https://api.example.com",
+                    "subdomain": "api.example.com",
                     "exposure": "edge-published",
                     "health_probe_id": "api_gateway",
                     "environments": {
                         "production": {
                             "status": "active",
-                            "url": "https://api.lv3.org",
-                            "subdomain": "api.lv3.org",
+                            "url": "https://api.example.com",
+                            "subdomain": "api.example.com",
                         }
                     },
                 },
@@ -48,7 +48,7 @@ def build_repo(tmp_path: Path) -> Path:
                     "description": "database",
                     "category": "data",
                     "lifecycle_status": "active",
-                    "vm": "postgres-lv3",
+                    "vm": "postgres",
                     "vmid": 150,
                     "internal_url": "postgres://10.10.10.50:5432",
                     "exposure": "private-only",
@@ -93,15 +93,15 @@ def build_repo(tmp_path: Path) -> Path:
 platform_service_topology:
   api_gateway:
     service_name: api-gateway
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
     private_ip: 10.10.10.20
-    public_hostname: api.lv3.org
+    public_hostname: api.example.com
     urls:
-      public: https://api.lv3.org
+      public: https://api.example.com
       internal: http://10.10.10.20:8083
   postgres:
     service_name: postgres
-    owning_vm: postgres-lv3
+    owning_vm: postgres
     private_ip: 10.10.10.50
     urls:
       internal: postgres://10.10.10.50:5432
@@ -118,10 +118,10 @@ observed_state:
   guests:
     instances:
       - vmid: 120
-        name: docker-runtime-lv3
+        name: docker-runtime
         running: true
       - vmid: 150
-        name: postgres-lv3
+        name: postgres
         running: true
 """.lstrip(),
     )
@@ -129,22 +129,22 @@ observed_state:
         tmp_path / "receipts" / "live-applies" / "2026-03-28-api-gateway-live-apply.json",
         {
             "receipt_id": "2026-03-28-api-gateway-live-apply",
-            "summary": "Replayed api_gateway on docker-runtime-lv3.",
+            "summary": "Replayed api_gateway on docker-runtime.",
             "workflow_id": "adr-0092-platform-api-gateway-live-apply",
             "recorded_on": "2026-03-28",
             "applied_on": "2026-03-28",
-            "targets": [{"kind": "guest", "name": "docker-runtime-lv3"}],
+            "targets": [{"kind": "guest", "name": "docker-runtime"}],
         },
     )
     write_json(
         tmp_path / "receipts" / "live-applies" / "2026-03-28-postgres-live-apply.json",
         {
             "receipt_id": "2026-03-28-postgres-live-apply",
-            "summary": "Replayed postgres-lv3 runtime verification.",
+            "summary": "Replayed postgres runtime verification.",
             "workflow_id": "adr-0026-postgres-vm-live-apply",
             "recorded_on": "2026-03-28",
             "applied_on": "2026-03-28",
-            "targets": [{"kind": "guest", "name": "postgres-lv3"}],
+            "targets": [{"kind": "guest", "name": "postgres"}],
         },
     )
     return tmp_path

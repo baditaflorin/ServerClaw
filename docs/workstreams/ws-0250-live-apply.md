@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0250-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0250-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0250-live-apply`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0052-loki-logs`,
   `adr-0097-alerting-routing`, `adr-0244-runtime-assurance-matrix`
@@ -28,7 +28,7 @@
 
 ## Scope
 
-- add a repo-managed Loki Canary runtime to `monitoring-lv3`
+- add a repo-managed Loki Canary runtime to `monitoring`
 - scrape Loki Canary metrics in Prometheus, render an operator dashboard in
   Grafana, and alert on missing or non-queryable canary entries
 - document the operational procedure and record verified live evidence from the
@@ -42,13 +42,13 @@
 - `uv run --with pytest python -m pytest tests/test_monitoring_vm_role.py tests/test_alertmanager_runtime_role.py tests/test_validate_alert_rules.py -q`
 - `make syntax-check-monitoring`
 - `UV_PROJECT_ENVIRONMENT=/tmp/proxmox-ws0250-validate ./scripts/validate_repo.sh alert-rules agent-standards yaml json role-argument-specs workstream-surfaces`
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
 - host verification over the Proxmox jump path to `ops@10.10.10.40`:
   `systemctl is-active loki-canary lv3-prometheus grafana-server prometheus-alertmanager`,
   `curl http://127.0.0.1:3500/metrics`, `curl http://127.0.0.1:9090/api/v1/query`,
   `curl http://127.0.0.1:9090/api/v1/rules`, `curl http://127.0.0.1:3100/loki/api/v1/query_range`,
   `curl -u admin:... http://127.0.0.1:3000/api/dashboards/uid/lv3-log-canary-overview`,
-  and `curl -I https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview`
+  and `curl -I https://grafana.example.com/d/lv3-log-canary-overview/lv3-log-canary-overview`
 
 ## Live Apply Outcome
 
@@ -56,10 +56,10 @@
   `uv run --with pytest python -m pytest tests/test_monitoring_vm_role.py tests/test_alertmanager_runtime_role.py tests/test_validate_alert_rules.py -q` returned `13 passed in 0.91s`,
   `make syntax-check-monitoring` passed, and
   `UV_PROJECT_ENVIRONMENT=/tmp/proxmox-ws0250-validate ./scripts/validate_repo.sh alert-rules agent-standards yaml json role-argument-specs workstream-surfaces` completed successfully
-- the guarded replay from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0250-main-integration-v2`
-  completed successfully with recap `monitoring-lv3 : ok=191 changed=8 failed=0`
+- the guarded replay from `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0250-main-integration-v2`
+  completed successfully with recap `monitoring : ok=191 changed=8 failed=0`
 - the replay used the documented ADR 0191 narrow in-place mutation exception for
-  reversible monitoring-stack changes on `monitoring-lv3`
+  reversible monitoring-stack changes on `monitoring`
 - `loki-canary`, `lv3-prometheus`, `grafana-server`, and the managed
   `prometheus-alertmanager.service` were all active after the replay, with
   Alertmanager `/-/healthy` and `/-/ready` both returning `OK`

@@ -8,7 +8,7 @@
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0288-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-candidate`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0288-main-candidate`
 - Owner: codex
 - Depends On: `ws-0288-live-apply`
 
@@ -28,7 +28,7 @@ source, and publish the canonical mainline receipt that preserves the settled
 - `docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md`
 - `docs/adr/.index.yaml`
 - `docs/runbooks/configure-flagsmith.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
@@ -106,10 +106,10 @@ source, and publish the canonical mainline receipt that preserves the settled
   recorded in
   `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-live-apply-service-0.177.109.txt`,
   with final recaps
-  `docker-runtime-lv3 : ok=171 changed=3 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`,
+  `docker-runtime : ok=171 changed=3 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`,
   `localhost : ok=23 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`,
-  `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
-  and `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`;
+  `nginx-edge : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
+  and `postgres : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`;
   the public health probe retried once before settling.
 - Public and guest-local runtime proofs were captured in
   `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-public-health-0.177.109.html`,
@@ -154,7 +154,7 @@ source, and publish the canonical mainline receipt that preserves the settled
   mainline baseline of `0.177.109 / 0.130.72`.
 - The authoritative committed replay from
   `0b32e585bbf2f0445f9eddd153923f93c221dba2` refreshed the repo-managed
-  Flagsmith runtime plus the authenticated public `flags.lv3.org` edge route
+  Flagsmith runtime plus the authenticated public `flags.example.com` edge route
   on the live server, and the integrated canonical truth preserves that
   verified release and platform baseline while adding the Flagsmith mainline
   receipt.

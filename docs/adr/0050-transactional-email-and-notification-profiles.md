@@ -53,7 +53,7 @@ Steady-state rules:
 
 ## Implementation Notes
 
-- The mail platform now provisions three managed notification profiles on `docker-runtime-lv3`: `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org`.
+- The mail platform now provisions three managed notification profiles on `docker-runtime`: `alerts@example.com`, `platform@example.com`, and `agents@example.com`.
 - Each profile has a dedicated Stalwart mailbox identity plus a scoped mail-gateway API key mirrored under `.local/mail-platform/profiles/` on the controller and `/etc/lv3/mail-platform/profiles/` on the runtime VM.
 - The mail gateway now requires profile selection for the admin API key, binds profile-scoped keys to one sender identity, and records per-profile request and delivery counters in `state.json`.
 - Live verification proved that scoped credentials reject cross-profile sends and that all three profiles can deliver through Brevo with their intended sender addresses.

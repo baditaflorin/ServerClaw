@@ -117,7 +117,7 @@ PY
 After publishing through the shared edge:
 
 ```bash
-curl -Ik https://changelog.lv3.org/
+curl -Ik https://changelog.example.com/
 ```
 
 Expected result: `HTTP/2 302` to `/oauth2/sign_in` for an unauthenticated request.
@@ -125,10 +125,10 @@ Expected result: `HTTP/2 302` to `/oauth2/sign_in` for an unauthenticated reques
 The shared edge publication lane also refreshes `build/docs-portal/`, so `make deploy-changelog-portal` remains self-contained even when the docs portal build directory is absent locally.
 
 For deployed artifact parity, compare the generated file with the edge copy on
-`nginx-lv3`:
+`nginx-edge`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.10 \
   'sha256sum /var/www/lv3-generated/changelog-portal/index.html'
 sha256sum build/changelog-portal/index.html
@@ -138,6 +138,6 @@ Both digests should match after a clean publication replay.
 
 ## Deployment Boundary
 
-This workstream implements the generated site, the governed history query tool, and edge publication wiring for `changelog.lv3.org`.
+This workstream implements the generated site, the governed history query tool, and edge publication wiring for `changelog.example.com`.
 
-`changelog.lv3.org` is live on platform version `0.40.0`; from platform version `0.114.7` onward it is also protected by the shared Keycloak portal auth gate defined in ADR 0133.
+`changelog.example.com` is live on platform version `0.40.0`; from platform version `0.114.7` onward it is also protected by the shared Keycloak portal auth gate defined in ADR 0133.

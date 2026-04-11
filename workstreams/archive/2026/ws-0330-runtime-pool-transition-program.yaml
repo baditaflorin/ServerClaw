@@ -34,7 +34,7 @@ shared_surfaces:
   - scripts/validate_repository_data_models.py
   - inventory/hosts.yml
   - inventory/group_vars/all.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - config/execution-lanes.yaml
   - config/ansible-execution-scopes.yaml
@@ -217,7 +217,7 @@ ownership_manifest:
       paths:
         - inventory/hosts.yml
         - inventory/group_vars/all.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - config/execution-lanes.yaml
         - config/ansible-execution-scopes.yaml
         - config/health-probe-catalog.json
@@ -245,7 +245,7 @@ ownership_manifest:
       paths:
         - inventory/hosts.yml
         - inventory/group_vars/all.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - config/execution-lanes.yaml
         - config/ansible-execution-scopes.yaml

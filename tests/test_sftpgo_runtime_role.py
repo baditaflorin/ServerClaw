@@ -22,13 +22,13 @@ def test_defaults_define_controller_publication_and_local_artifacts() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
     assert (
         defaults["sftpgo_service_topology"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | service_topology_get('sftpgo') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | service_topology_get('sftpgo') }}"
     )
     assert defaults["sftpgo_public_base_url"] == "https://{{ sftpgo_service_topology.public_hostname }}"
-    assert defaults["sftpgo_controller_url"] == "{{ hostvars['proxmox_florin'].sftpgo_controller_url }}"
+    assert defaults["sftpgo_controller_url"] == "{{ hostvars['proxmox-host'].sftpgo_controller_url }}"
     assert (
         defaults["sftpgo_database_host"]
-        == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+        == "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
     )
     assert defaults["sftpgo_keycloak_client_id"] == "sftpgo"
     assert defaults["sftpgo_api_key_name"] == "lv3-sftpgo-rest-provisioner"

@@ -183,7 +183,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0152` | Triage failing Homepage services and restore safe runtime health | `live_applied` | [ws-0332-homepage-triage.md](../../workstreams/ws-0332-homepage-triage.md) |
 | `0319` | Fail closed before runtime-pool retirement or shared-runtime recovery can take down legacy services | `merged` | [ws-0333-service-uptime-recovery.md](../../workstreams/ws-0333-service-uptime-recovery.md) |
 | `0300` | ADR 0300 live apply from latest origin/main | `merged` | [ws-0300-live-apply.md](../../workstreams/ws-0300-live-apply.md) |
-| `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](../../adr/0340-dedicated-coolify-apps-vm-separation.md) |
+| `0340` | Dedicated Coolify Apps VM Separation — introduce coolify-apps as the Coolify deployment server | `merged` | [0340-dedicated-coolify-apps-vm-separation.md](../../adr/0340-dedicated-coolify-apps-vm-separation.md) |
 | `0289` | Live apply ADR 0289 Label Studio from latest origin/main | `live_applied` | [ws-0289-label-studio-live-apply.md](../../workstreams/ws-0289-label-studio-live-apply.md) |
 | `0299` | Live apply ntfy as the self-hosted push notification channel from latest origin/main | `merged` | [ws-0299-live-apply.md](../../workstreams/ws-0299-live-apply.md) |
 | `0281` | Live apply the GlitchTip application error tracking stack from latest origin/main | `live_applied` | [ws-0281-live-apply.md](../../workstreams/ws-0281-live-apply.md) |

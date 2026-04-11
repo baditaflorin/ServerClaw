@@ -4,7 +4,7 @@
 - Title: Resolve Gitea release bundle retention and Renovate PR validation checkout drift
 - Status: live-applied
 - Branch: `codex/ws-0315-gitea-followups`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-gitea-followups`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0315-gitea-followups`
 - Owner: codex
 - Depends On: `ws-0297-main-merge`
 - Conflicts With: none

@@ -41,7 +41,7 @@ The manifest will record:
 
 ## Implementation Notes
 
-- The controller-local secret contract now lives in [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json).
-- The standard preflight checker is implemented in [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/preflight_controller_local.py) and validates both the manifest structure and workflow prerequisites.
-- Common workflow entry points in [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now run the preflight automatically before long converges, and `make database-dns` brings the PostgreSQL DNS publication path under the same contract.
-- Operator usage and the `.local/` operating contract are documented in [docs/runbooks/controller-local-secrets-and-preflight.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md).
+- The controller-local secret contract now lives in [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/controller-local-secrets.json).
+- The standard preflight checker is implemented in [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/preflight_controller_local.py) and validates both the manifest structure and workflow prerequisites.
+- Common workflow entry points in [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile) now run the preflight automatically before long converges, and `make database-dns` brings the PostgreSQL DNS publication path under the same contract.
+- Operator usage and the `.local/` operating contract are documented in [docs/runbooks/controller-local-secrets-and-preflight.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/controller-local-secrets-and-preflight.md).

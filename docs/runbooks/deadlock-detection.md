@@ -6,12 +6,12 @@ This runbook covers ADR 0162: the repository-managed deadlock detector that scan
 
 ## Canonical Sources
 
-- ADR: [docs/adr/0162-distributed-deadlock-detection-and-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0162-distributed-deadlock-detection-and-resolution.md)
-- lock registry: [platform/locking/registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/locking/registry.py)
-- detector: [platform/locking/deadlock_detector.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/locking/deadlock_detector.py)
-- coordination map: [platform/coordination/map.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/coordination/map.py)
-- intent queue: [platform/intent_queue/store.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/intent_queue/store.py)
-- Windmill wrapper: [config/windmill/scripts/detect-deadlocks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/detect-deadlocks.py)
+- ADR: [docs/adr/0162-distributed-deadlock-detection-and-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0162-distributed-deadlock-detection-and-resolution.md)
+- lock registry: [platform/locking/registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/locking/registry.py)
+- detector: [platform/locking/deadlock_detector.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/locking/deadlock_detector.py)
+- coordination map: [platform/coordination/map.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/coordination/map.py)
+- intent queue: [platform/intent_queue/store.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/intent_queue/store.py)
+- Windmill wrapper: [config/windmill/scripts/detect-deadlocks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/detect-deadlocks.py)
 
 ## Runtime State
 

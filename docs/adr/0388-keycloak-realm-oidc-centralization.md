@@ -71,7 +71,7 @@ Add to `inventory/group_vars/all/identity.yml`:
 keycloak_realm_name: "{{ platform_domain | split('.') | first }}"
 ```
 
-This derives the realm name from the domain (`lv3.org` → `lv3`), matching
+This derives the realm name from the domain (`example.com` → `lv3`), matching
 the existing convention. Fork operators who set `platform_domain: acme.io`
 automatically get `keycloak_realm_name: acme`.
 
@@ -157,11 +157,11 @@ grep -r "realms/lv3" \
 # Expected: 0
 
 # Central variables resolve correctly
-ansible -m debug -a "var=keycloak_realm_name" proxmox_florin
+ansible -m debug -a "var=keycloak_realm_name" proxmox-host
 # Expected: lv3
 
-ansible -m debug -a "var=keycloak_oidc_issuer_url" proxmox_florin
-# Expected: https://sso.lv3.org/realms/lv3
+ansible -m debug -a "var=keycloak_oidc_issuer_url" proxmox-host
+# Expected: https://sso.example.com/realms/lv3
 ```
 
 ---

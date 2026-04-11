@@ -12,7 +12,7 @@ ROLE_ROOT = (
 def test_defaults_define_checkout_timer_and_low_privilege_gitea_identity() -> None:
     defaults = (ROLE_ROOT / "defaults" / "main.yml").read_text(encoding="utf-8")
 
-    assert "server_resident_reconciliation_checkout_path: /srv/proxmox_florin_server" in defaults
+    assert "server_resident_reconciliation_checkout_path: /srv/proxmox-host_server" in defaults
     assert "server_resident_reconciliation_gitea_username: lv3-reconcile" in defaults
     assert "read:repository" in defaults
     assert 'server_resident_reconciliation_on_calendar: "*:0/30"' in defaults

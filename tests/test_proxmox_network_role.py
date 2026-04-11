@@ -18,7 +18,7 @@ ROLE_TASKS = (
 DEFAULTS_PATH = REPO_ROOT / "roles" / "proxmox_network" / "defaults" / "main.yml"
 META_PATH = REPO_ROOT / "roles" / "proxmox_network" / "meta" / "argument_specs.yml"
 TEMPLATE_PATH = REPO_ROOT / "roles" / "proxmox_network" / "templates" / "nftables.conf.j2"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 def test_proxmox_network_renders_vm_firewall_from_active_role_path() -> None:

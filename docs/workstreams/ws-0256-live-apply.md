@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0256-mainline-refresh`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0256-mainline-refresh`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0256-mainline-refresh`
 - Owner: codex
 - Depends On: `ws-0255-live-apply`, `adr-0023-docker-runtime-vm-baseline`, `adr-0026-dedicated-postgresql-vm-baseline`, `adr-0077-compose-runtime-secrets-injection`, `adr-0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub`
 - Conflicts With: none
@@ -53,8 +53,8 @@ merged onto the protected mainline surfaces safely.
 
 ## Live Apply Outcome
 
-- the branch-local live apply now converges Synapse plus both repo-managed mautrix bridges end to end on `docker-runtime-lv3`
-- `https://matrix.lv3.org/_matrix/client/versions` returns `HTTP/2 200`, the private controller path `http://100.64.0.1:8015/_matrix/client/versions` returns `HTTP/1.1 200 OK`, and the public smoke helper now receives bridge replies from both `@discordbot:matrix.lv3.org` and `@whatsappbot:matrix.lv3.org`
+- the branch-local live apply now converges Synapse plus both repo-managed mautrix bridges end to end on `docker-runtime`
+- `https://matrix.example.com/_matrix/client/versions` returns `HTTP/2 200`, the private controller path `http://100.64.0.1:8015/_matrix/client/versions` returns `HTTP/1.1 200 OK`, and the public smoke helper now receives bridge replies from both `@discordbot:matrix.example.com` and `@whatsappbot:matrix.example.com`
 - the live replay exposed and fixed four real defects before the successful converge: stale Docker network recovery on the shared runtime guest, bridge registration file permissions for Synapse, unreliable admin bootstrap handling when `register_new_matrix_user --exists-ok` returned non-zero for an existing user, and public verification helper bugs around the Matrix versions endpoint plus login-rate-limit handling
 - the authoritative exact-main replay now passed from repo release `0.177.98`, so the Matrix bridge rollout is canonical on `main` and the platform version advances to `0.130.65`
 

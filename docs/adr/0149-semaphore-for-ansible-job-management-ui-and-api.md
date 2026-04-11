@@ -21,15 +21,15 @@ Windmill already covers broader workflow orchestration, but it is not optimized 
 
 ## Decision
 
-We will deploy Semaphore privately on `docker-runtime-lv3` with a PostgreSQL backend on `postgres-lv3` and a Tailscale-only host proxy on the Proxmox node.
+We will deploy Semaphore privately on `docker-runtime` with a PostgreSQL backend on `postgres` and a Tailscale-only host proxy on the Proxmox node.
 
 Initial implementation scope:
 
-1. the runtime is deployed through repo-managed Ansible under [playbooks/semaphore.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/semaphore.yml)
+1. the runtime is deployed through repo-managed Ansible under [playbooks/semaphore.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/semaphore.yml)
 2. runtime secrets are injected through the existing OpenBao agent Compose pattern
 3. controller-local bootstrap artifacts are mirrored under `.local/semaphore/`
 4. a repo-managed `LV3 Semaphore` project is seeded automatically with a local-repository checkout, a localhost inventory, and a `Semaphore Self-Test` Ansible template
-5. governed machine access is exposed through [scripts/semaphore_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semaphore_tool.py), not through broad undocumented API use
+5. governed machine access is exposed through [scripts/semaphore_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/semaphore_tool.py), not through broad undocumented API use
 
 ## Consequences
 
@@ -52,9 +52,9 @@ Initial implementation scope:
 
 ## Implementation Notes
 
-- The live implementation will use [roles/semaphore_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_postgres) and [roles/semaphore_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_runtime).
-- Project, inventory, template, and API-token bootstrap are handled through [platform/ansible/semaphore.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ansible/semaphore.py) and [scripts/semaphore_bootstrap.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semaphore_bootstrap.py).
-- The initial seeded verification path is the repo-managed [playbooks/semaphore-self.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/semaphore-self.yml) template, which proves UI/API task execution without silently expanding infrastructure credential scope.
+- The live implementation will use [roles/semaphore_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/semaphore_postgres) and [roles/semaphore_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/semaphore_runtime).
+- Project, inventory, template, and API-token bootstrap are handled through [platform/ansible/semaphore.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/ansible/semaphore.py) and [scripts/semaphore_bootstrap.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/semaphore_bootstrap.py).
+- The initial seeded verification path is the repo-managed [playbooks/semaphore-self.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/semaphore-self.yml) template, which proves UI/API task execution without silently expanding infrastructure credential scope.
 - Repo implementation landed in repository release `0.158.0` after rebasing onto current `main`, hardening the bootstrap and runtime idempotency paths, and passing the Semaphore-specific validation stack.
 - The integrated mainline live apply for repository release `0.158.0` completed on 2026-03-25: `make converge-semaphore` succeeded from the clean integration worktree, the private Tailscale proxy answered on `http://100.64.0.1:8020/api/ping`, and the seeded `Semaphore Self-Test` template completed successfully through the Semaphore task runner.
 - The mainline live apply advances platform version `0.130.7` and includes the durable clean-worktree credential recovery path for future Semaphore bootstrap reruns.

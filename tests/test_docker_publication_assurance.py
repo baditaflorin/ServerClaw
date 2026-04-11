@@ -209,7 +209,7 @@ def test_assure_docker_publication_restarts_docker_and_recreates_compose() -> No
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -273,7 +273,7 @@ def test_assure_docker_publication_allows_listener_warmup_after_partial_compose_
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -488,7 +488,7 @@ def test_assure_docker_publication_recovers_when_compose_recreate_drops_docker_c
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -584,7 +584,7 @@ def test_assure_docker_publication_rejects_host_config_only_port_bindings_after_
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -698,7 +698,7 @@ def test_assure_docker_publication_resets_stale_compose_networks_before_retry() 
         },
         "readiness": {
             "kind": "http",
-            "url": "https://agents.lv3.org/healthz",
+            "url": "https://agents.example.com/healthz",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -800,7 +800,7 @@ def test_assure_docker_publication_waits_for_live_bindings_after_recreate() -> N
         },
         "readiness": {
             "kind": "http",
-            "url": "https://agents.lv3.org/healthz",
+            "url": "https://agents.example.com/healthz",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -910,7 +910,7 @@ def test_assure_docker_publication_restarts_docker_after_compose_eof_when_bindin
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -1048,7 +1048,7 @@ def test_assure_docker_publication_resets_project_after_compose_eof_when_retry_r
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -1200,7 +1200,7 @@ def test_assure_docker_publication_resets_stale_project_containers_after_zombie_
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {
@@ -1348,7 +1348,7 @@ def test_assure_docker_publication_resets_project_after_restarting_container_con
         },
         "readiness": {
             "kind": "http",
-            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "url": "https://registry.example.com/api/v2.0/ping",
             "method": "GET",
             "timeout_seconds": 10,
             "docker_publication": {

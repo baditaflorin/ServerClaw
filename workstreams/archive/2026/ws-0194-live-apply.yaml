@@ -13,7 +13,7 @@ depends_on:
   - adr-0176-inventory-sharding
 conflicts_with: []
 shared_surfaces:
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/hosts.yml
   - inventory/group_vars/all.yml
   - config/service-capability-catalog.json
@@ -100,7 +100,7 @@ ownership_manifest:
       contract: service-capability-catalog-v1
     - id: topology_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/hosts.yml
         - inventory/group_vars/all.yml
         - inventory/group_vars/platform.yml

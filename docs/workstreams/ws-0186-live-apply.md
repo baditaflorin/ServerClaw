@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0186-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0186-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0186-live-apply`
 - Owner: codex
 - Depends On: `adr-0088-ephemeral-fixtures`, `adr-0105-capacity-model`, `adr-0106-ephemeral-lifecycle`, `adr-0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity`
 - Conflicts With: none

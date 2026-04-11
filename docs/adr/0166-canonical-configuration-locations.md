@@ -244,7 +244,7 @@ service_configuration:
     deployment: Copied to service at deploy time via Ansible
 
   docker/docker-compose.yml:
-    purpose: Docker Compose reference for services running on docker-runtime-lv3
+    purpose: Docker Compose reference for services running on docker-runtime
     owner: human (template)
     format: Docker Compose YAML
     use_for: Understanding service dependencies and networking
@@ -304,7 +304,7 @@ validation_and_ci:
     owner: human
     format: GitHub Actions-compatible YAML
     use_for: Local CI for validation and testing
-    runs_on: self-hosted runner on docker-build-lv3
+    runs_on: self-hosted runner on docker-build
     validation: Gitea syntax checking
 
 agent_quick_reference:

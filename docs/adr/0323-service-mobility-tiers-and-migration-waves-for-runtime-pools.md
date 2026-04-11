@@ -9,7 +9,7 @@
 
 ## Context
 
-Not every service currently living on `docker-runtime-lv3` should be moved or
+Not every service currently living on `docker-runtime` should be moved or
 scaled the same way.
 
 Treating all of them as equally movable would create avoidable risk:

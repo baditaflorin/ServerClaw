@@ -1,20 +1,20 @@
 # Workstream ADR 0040: Docker Runtime Container Telemetry
 
-- ADR: [ADR 0040](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md)
+- ADR: [ADR 0040](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md)
 - Title: Docker runtime container telemetry
 - Status: live_applied
 - Branch: `codex/adr-0040-runtime-container-telemetry`
-- Worktree: `../proxmox_florin_server-runtime-container-telemetry`
+- Worktree: `../proxmox-host_server-runtime-container-telemetry`
 - Owner: codex
 - Depends On: ADR 0011
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `playbooks/monitoring-stack.yml`, `roles/docker_runtime_observability`, managed Grafana dashboards
+- Shared Surfaces: `docker-runtime`, `playbooks/monitoring-stack.yml`, `roles/docker_runtime_observability`, managed Grafana dashboards
 
 ## Scope
 
-- collect Docker container metrics from `docker-runtime-lv3` through Telegraf's Docker input plugin
-- ship container telemetry into the existing InfluxDB bucket on `monitoring-lv3`
-- extend the managed `LV3 docker-runtime-lv3 Detail` dashboard with container-level panels and a runtime snapshot
+- collect Docker container metrics from `docker-runtime` through Telegraf's Docker input plugin
+- ship container telemetry into the existing InfluxDB bucket on `monitoring`
+- extend the managed `LV3 docker-runtime Detail` dashboard with container-level panels and a runtime snapshot
 - document the convergence and verification path for operators
 
 ## Non-Goals
@@ -30,7 +30,7 @@
 - `roles/docker_runtime_observability/`
 - `roles/monitoring_vm/templates/_grafana_dashboard_macros.j2`
 - `roles/monitoring_vm/templates/lv3-vm-detail.json.j2`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `docs/runbooks/monitoring-stack.md`
 - `docs/repository-map.md`
 - `docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md`
@@ -38,15 +38,15 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` runs `telegraf` with Docker socket access
-- InfluxDB receives `docker_container_*` measurements from `docker-runtime-lv3`
-- `LV3 docker-runtime-lv3 Detail` shows container-level runtime data
+- `docker-runtime` runs `telegraf` with Docker socket access
+- InfluxDB receives `docker_container_*` measurements from `docker-runtime`
+- `LV3 docker-runtime Detail` shows container-level runtime data
 
 ## Verification
 
 - `make syntax-check-monitoring`
-- `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'systemctl is-active telegraf && id -nG telegraf' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r.host == "docker-runtime-lv3" and (r._measurement == "docker_container_status" or r._measurement == "docker_container_cpu" or r._measurement == "docker_container_mem" or r._measurement == "docker_container_net" or r._measurement == "docker_container_health")) |> limit(n: 20)'\'''`
+- `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml docker-runtime -m shell -a 'systemctl is-active telegraf && id -nG telegraf' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r.host == "docker-runtime" and (r._measurement == "docker_container_status" or r._measurement == "docker_container_cpu" or r._measurement == "docker_container_mem" or r._measurement == "docker_container_net" or r._measurement == "docker_container_health")) |> limit(n: 20)'\'''`
 
 ## Merge Criteria
 
@@ -58,5 +58,5 @@
 ## Notes For The Next Assistant
 
 - Live apply completed on `2026-03-22` through `make converge-monitoring`.
-- Verification confirmed `telegraf` is active on `docker-runtime-lv3`, InfluxDB is receiving `docker_container_*` rows for `uptime-kuma`, and the runtime detail dashboard now contains `16` panels.
+- Verification confirmed `telegraf` is active on `docker-runtime`, InfluxDB is receiving `docker_container_*` rows for `uptime-kuma`, and the runtime detail dashboard now contains `16` panels.
 - The first live rerun failed because `roles/monitoring_vm/tasks/main.yml` mixed `Restart Grafana` and `restart grafana`; commit `aad25fe` fixed the handler names before the final idempotent rerun.

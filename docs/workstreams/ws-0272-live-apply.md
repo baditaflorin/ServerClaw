@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/adr-0272-restore-readiness-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0272-restore-readiness`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0272-restore-readiness`
 - Owner: codex
 - Depends On: `adr-0099-backup-restore-verification`, `adr-0190-synthetic-transaction-replay`, `adr-0246-startup-readiness-liveness-and-degraded-state-semantics`
 - Conflicts With: none
@@ -29,7 +29,7 @@
   completed from the refreshed latest-main worktree, exited non-zero because
   the live restore health is still degraded, and wrote the canonical exact-main
   receipt `receipts/restore-verifications/2026-03-29.json`.
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 'sudo qm list | egrep "VMID| 900 | 901 | 902 " || true'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 'sudo qm list | egrep "VMID| 900 | 901 | 902 " || true'`
   returned only the table header after the replay, confirming the temporary
   restore VMIDs were cleaned up.
 - `python3 -m py_compile scripts/restore_verification.py scripts/synthetic_transaction_replay.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py`
@@ -52,8 +52,8 @@
   and whether synthetic replay was eligible instead of collapsing each target
   into a single binary smoke-test result.
 - the latest exact-main restore receipt shows the new semantics working as
-  intended on live infrastructure: `postgres-lv3`, `docker-runtime-lv3`, and
-  `backup-lv3` all stop at `restore_completed`, with the failure cause now
+  intended on live infrastructure: `postgres`, `docker-runtime`, and
+  `backup` all stop at `restore_completed`, with the failure cause now
   preserved explicitly per target instead of being hidden behind a generic
   restore-verification failure.
 - `receipts/live-applies/2026-03-29-adr-0272-restore-readiness-mainline-live-apply.json`
@@ -61,10 +61,10 @@
 
 ## Remaining For Platform Completion
 
-- repair the `postgres-lv3` PBS restore failure so the workflow can progress
+- repair the `postgres` PBS restore failure so the workflow can progress
   beyond the `restore_completed` stage on the primary stateful database path
-- repair the `docker-runtime-lv3` `pbs-restore` failure, which now prevents the
+- repair the `docker-runtime` `pbs-restore` failure, which now prevents the
   control-plane recovery path from reaching any later readiness stage on the
   newest mainline baseline
-- restore eligible PBS snapshot coverage for `backup-lv3`, which currently has
+- restore eligible PBS snapshot coverage for `backup`, which currently has
   no backup artifact available for the governed selection window

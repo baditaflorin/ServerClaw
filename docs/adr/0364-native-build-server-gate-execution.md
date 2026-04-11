@@ -10,7 +10,7 @@
 ## Context
 
 The pre-push validation gate runs each check inside an amd64 Docker container pulled from
-`registry.lv3.org/check-runner/*`. On the remote build server (10.10.10.30, x86_64, up to 24 CPUs)
+`registry.example.com/check-runner/*`. On the remote build server (10.10.10.30, x86_64, up to 24 CPUs)
 each check pays per-check Docker overhead: image pull on cold cache, container start/teardown,
 and emulation when the operator's controller machine is arm64 (Apple Silicon Mac).
 
@@ -66,7 +66,7 @@ background task timeout.
   `LV3_NATIVE_EXECUTION` env var support.
 - `config/build-server.json` — `LV3_NATIVE_EXECUTION=1` in `pre-push-gate` command.
 - `playbooks/services/build-server-gate-tools.yml` — installs ansible-lint, yamllint,
-  semgrep, trivy, tofu, packer, python3 packages on `docker-build-lv3`.
+  semgrep, trivy, tofu, packer, python3 packages on `docker-build`.
 
 ## Related ADRs
 

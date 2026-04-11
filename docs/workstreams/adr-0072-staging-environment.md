@@ -4,10 +4,10 @@
 - Title: Define a disposable staging environment mirroring production topology on a separate internal bridge
 - Status: ready
 - Branch: `codex/adr-0072-staging-environment`
-- Worktree: `../proxmox_florin_server-staging-environment`
+- Worktree: `../proxmox-host_server-staging-environment`
 - Owner: codex
 - Depends On: `adr-0063-platform-vars-library`, `adr-0042-step-ca`, `adr-0043-openbao`
-- Conflicts With: any workstream that hardcodes `10.10.10.*` IPs or `lv3.org` hostnames in a role without env-variable resolution
+- Conflicts With: any workstream that hardcodes `10.10.10.*` IPs or `example.com` hostnames in a role without env-variable resolution
 - Shared Surfaces: `versions/stack.yaml`, `inventory/group_vars/platform.yml`, Proxmox network config (`vmbr20`), inventory files
 
 ## Scope
@@ -26,7 +26,7 @@
 
 - persistent staging data (staging state is disposable and recreatable)
 - staging VM high availability or storage replication
-- public DNS entries for `*.staging.lv3.org` (internal-only resolution)
+- public DNS entries for `*.staging.example.com` (internal-only resolution)
 
 ## Expected Repo Surfaces
 
@@ -42,7 +42,7 @@
 ## Expected Live Surfaces
 
 - `vmbr20` bridge on Proxmox host
-- staging VMs: `docker-runtime-staging-lv3` (VMID 220), `monitoring-staging-lv3` (VMID 240) as minimum viable staging set
+- staging VMs: `docker-runtime` (VMID 220), `monitoring` (VMID 240) as minimum viable staging set
 - staging step-ca intermediate issuer
 - staging OpenBao mount `staging/`
 

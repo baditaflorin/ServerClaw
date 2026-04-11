@@ -1,4 +1,4 @@
-# ADR 0015: lv3.org DNS And Subdomain Model
+# ADR 0015: example.com DNS And Subdomain Model
 
 - Status: Accepted
 - Implementation Status: Accepted
@@ -9,7 +9,7 @@
 
 ## Context
 
-This platform will use `lv3.org` as its public DNS zone.
+This platform will use `example.com` as its public DNS zone.
 
 The platform design already assumes multiple named entry points for services such as:
 
@@ -26,25 +26,25 @@ The DNS model needs to support two realities:
 
 At the time of writing:
 
-- the zone `lv3.org` already exists in Hetzner DNS
-- the root `A` record points to `65.108.75.123`
+- the zone `example.com` already exists in Hetzner DNS
+- the root `A` record points to `203.0.113.1`
 - the existing root and `www` `AAAA` records do not match the current server IPv6 and should be treated as drift until explicitly corrected
 
 ## Decision
 
-We will use named subdomains under `lv3.org` for platform entry points.
+We will use named subdomains under `example.com` for platform entry points.
 
 Initial records to create now:
 
-- `proxmox.lv3.org`
-- `grafana.lv3.org`
-- `nginx.lv3.org`
-- `docker.lv3.org`
-- `build.lv3.org`
+- `proxmox.example.com`
+- `grafana.example.com`
+- `nginx.example.com`
+- `docker.example.com`
+- `build.example.com`
 
 Initial record type policy:
 
-- create `A` records to the Proxmox host public IPv4 `65.108.75.123`
+- create `A` records to the Proxmox host public IPv4 `203.0.113.1`
 - do not create new `AAAA` records until IPv6 routing and service exposure are intentionally validated
 
 Traffic intent:

@@ -28,7 +28,7 @@ through One-API:
 - **ServerClaw** referenced One-API in its bootstrap config but uses direct
   Ollama or external API keys in practice — the dependency was through Open
   WebUI's provider configuration, not a live runtime dependency.
-- **Containers are already stopped** on docker-runtime-lv3 (confirmed
+- **Containers are already stopped** on docker-runtime (confirmed
   pre-removal: `docker compose ps` returned empty).
 - No active Dify workflows, agents, or platform services are documented as
   routing through One-API's endpoint (`http://100.64.0.1:8018/v1`).
@@ -103,7 +103,7 @@ grep -rli --include="*.yml" --include="*.yaml" --include="*.json" \
 - Removes a dormant service with no active consumers
 - Eliminates 4 secrets from the secret catalog
 - Simplifies the LLM access path: consumers use Ollama directly or external APIs
-- Reduces docker-runtime-lv3 resource footprint
+- Reduces docker-runtime resource footprint
 
 **Negative / Trade-offs:**
 - If a future service needs a unified LLM proxy, One-API would need to be

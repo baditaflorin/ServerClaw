@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/preview-environment-profiles.schema.json",
+  "$id": "https://example.com/schema/preview-environment-profiles.schema.json",
   "title": "Preview environment profiles",
   "type": "object",
   "additionalProperties": false,

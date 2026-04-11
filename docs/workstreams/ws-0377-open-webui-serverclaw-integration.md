@@ -2,7 +2,7 @@
 
 ## Goal
 
-Transform `chat.lv3.org` from a generic chatbot into a platform-aware assistant
+Transform `chat.example.com` from a generic chatbot into a platform-aware assistant
 that knows what LV3 is, what services are deployed, and can query live state
 through governed tools.
 

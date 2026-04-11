@@ -11,7 +11,7 @@
 
 ADR 0011 established the monitoring VM, InfluxDB bucket, and managed Grafana dashboards, but the Docker build guest is still only visible at the VM resource level.
 
-That is not enough for build operations. For `docker-build-lv3`, we also need direct answers to basic operator questions:
+That is not enough for build operations. For `docker-build`, we also need direct answers to basic operator questions:
 
 - how many Docker builds were actually started on the build VM
 - how long those builds took
@@ -20,24 +20,24 @@ This count should be gathered without inventing a parallel monitoring stack, wit
 
 ## Decision
 
-We will count Docker builds on `docker-build-lv3` by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring telemetry path.
+We will count Docker builds on `docker-build` by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring telemetry path.
 
 The implementation is:
 
-1. Install a repo-managed `docker` wrapper on `docker-build-lv3`.
+1. Install a repo-managed `docker` wrapper on `docker-build`.
    - place the wrapper at `/usr/local/bin/docker`
    - delegate real CLI execution to `/usr/bin/docker`
    - record build start time, end time, exit code, and duration
    - emit a single local telemetry event after every `docker build`, `docker buildx build`, `docker buildx bake`, or `docker compose build`
-2. Install Telegraf on `docker-build-lv3`.
+2. Install Telegraf on `docker-build`.
    - listen for local UDP line protocol events on loopback
-   - write the resulting `docker_builds` measurement into the existing InfluxDB bucket on `monitoring-lv3`
+   - write the resulting `docker_builds` measurement into the existing InfluxDB bucket on `monitoring`
 3. Reuse the existing guest-writer token lifecycle from the monitoring stack.
    - the token is still created on the monitoring VM
    - the token is mirrored locally on the control machine and copied to the build VM during convergence
 4. Extend the managed Grafana dashboards.
    - add build-count panels to the platform overview
-   - add build-duration panels to the platform overview and the `LV3 docker-build-lv3 Detail` dashboard
+   - add build-duration panels to the platform overview and the `LV3 docker-build Detail` dashboard
 
 The first tracked event schema is:
 

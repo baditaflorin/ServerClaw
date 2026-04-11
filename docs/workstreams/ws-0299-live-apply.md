@@ -12,15 +12,15 @@
 - Exact-Main Replay Baseline: repo `0.177.151`, platform `0.130.94`
 - Workstream Branch: `codex/ws-0299-live-apply`
 - Integrated Branch: `main`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0299-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0299-live-apply`
 - Owner: codex
 - Depends On: `adr-0043-openbao-for-platform-secrets-and-dynamic-credentials`, `adr-0068-container-image-publication-and-pinning-policy`, `adr-0077-compose-runtime-secret-injection`, `adr-0087-repository-validation-gate`, `adr-0095-edge-ingress-and-publication-model`, `adr-0172-watchdog-escalation-and-stale-job-self-healing`, `adr-0204-self-correcting-automation-loops`, `adr-0276-nats-jetstream-as-the-platform-event-bus`, `adr-0280-changedetection-io-for-external-content-and-api-change-monitoring`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0299-live-apply.md`, `docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md`, `docs/runbooks/configure-ntfy.md`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `scripts/ntfy_publish.py`, `scripts/restic_config_backup.py`, `tests/test_ntfy_publish.py`, `tests/test_restic_config_backup.py`, `receipts/live-applies/2026-04-03-adr-0299-ntfy-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-03-adr-0299-*`, `receipts/live-applies/evidence/2026-04-03-ws-0299-*`, `receipts/restic-backups/20260403T080214Z.json`, `receipts/restic-snapshots-latest.json`, `receipts/sbom/host-docker-runtime-lv3-2026-04-03.cdx.json`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0299-live-apply.md`, `docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md`, `docs/runbooks/configure-ntfy.md`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `scripts/ntfy_publish.py`, `scripts/restic_config_backup.py`, `tests/test_ntfy_publish.py`, `tests/test_restic_config_backup.py`, `receipts/live-applies/2026-04-03-adr-0299-ntfy-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-03-adr-0299-*`, `receipts/live-applies/evidence/2026-04-03-ws-0299-*`, `receipts/restic-backups/20260403T080214Z.json`, `receipts/restic-snapshots-latest.json`, `receipts/sbom/host-docker-runtime-2026-04-03.cdx.json`
 
 ## Scope
 
-- promote ntfy from the private paging gateway into the governed public `ntfy.lv3.org` push surface described by ADR 0299
+- promote ntfy from the private paging gateway into the governed public `ntfy.example.com` push surface described by ADR 0299
 - wire the topic registry, credential contracts, edge publication, OpenBao seeding, and downstream publishers onto the governed ntfy contract
 - prove both the direct ntfy converge path and the generic `live-apply-service` path from the latest realistic `origin/main`
 - leave exact-main receipts, validation evidence, and merge-safe metadata behind for the canonical repository history
@@ -40,9 +40,9 @@
 
 ## Branch-Local Verification
 
-- `make converge-ntfy env=production` completed successfully from the rebased latest-main worktree and the controller-side `https://ntfy.lv3.org/v1/health` verification passed
+- `make converge-ntfy env=production` completed successfully from the rebased latest-main worktree and the controller-side `https://ntfy.example.com/v1/health` verification passed
 - the live host config at `/opt/ntfy/server.yml` confirmed the governed auth contract, including the expected users, bearer tokens, and ACLs for the Ansible, Gitea Actions, and Windmill publishers
-- the governed public publish path accepted a direct POST to `https://ntfy.lv3.org/platform-ansible-info` with the Ansible token
+- the governed public publish path accepted a direct POST to `https://ntfy.example.com/platform-ansible-info` with the Ansible token
 - `uv run python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info ... --sequence-id ws-0299:latest-main:verify ...` succeeded end to end after normalizing logical sequence IDs into ntfy-safe values, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0299-branch-verification.txt`
 
 ## Exact-Main Verification
@@ -52,8 +52,8 @@
 - `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r1-0.177.152.txt` records the intentional exact-main guardrail: `make live-apply-service service=ntfy env=production` stopped at the immutable-guest policy because `ntfy` is classified as `edge_and_stateful`
 - `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r2-0.177.152.txt` records the next exact-main failure after the in-place mutation exception: the ntfy converge and public health checks passed, but the shared post-run restic hook failed because the runtime credential payload was missing `ntfy_token`
 - this workstream then narrowed the restic contract so `scripts/restic_config_backup.py` still requires `ntfy_token` for scheduled backup runs but does not fail `--live-apply-trigger` backups before any ntfy notification path is even reachable; the focused guardrail tests are preserved in `tests/test_restic_config_backup.py`
-- `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r3-0.177.152.txt` is the final exact-main green replay: `docker-runtime-lv3 : ok=110 changed=2 failed=0`, `localhost : ok=19 changed=0 failed=0`, `nginx-lv3 : ok=49 changed=5 failed=0`, the public `https://ntfy.lv3.org/v1/health` probe passed, and the post-run restic hook returned `status: ok`
-- the successful exact-main wrapper synced `receipts/restic-backups/20260403T080214Z.json` and refreshed `receipts/restic-snapshots-latest.json`, with the live-apply-trigger backup protecting the governed `config` and `versions_stack` sources while explicitly keeping `falco_overrides` inactive because that optional source is not present on `docker-runtime-lv3`
+- `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r3-0.177.152.txt` is the final exact-main green replay: `docker-runtime : ok=110 changed=2 failed=0`, `localhost : ok=19 changed=0 failed=0`, `nginx-edge : ok=49 changed=5 failed=0`, the public `https://ntfy.example.com/v1/health` probe passed, and the post-run restic hook returned `status: ok`
+- the successful exact-main wrapper synced `receipts/restic-backups/20260403T080214Z.json` and refreshed `receipts/restic-snapshots-latest.json`, with the live-apply-trigger backup protecting the governed `config` and `versions_stack` sources while explicitly keeping `falco_overrides` inactive because that optional source is not present on `docker-runtime`
 
 ## Exact-Main Validation
 

@@ -102,7 +102,7 @@ def test_structured_log_callback_emits_required_fields() -> None:
                 "playbook_name": "api-gateway",
             },
         )
-        result = FakeResult(task, FakeHost("docker-runtime-lv3"), {"changed": True})
+        result = FakeResult(task, FakeHost("docker-runtime"), {"changed": True})
 
         callback.v2_runner_on_ok(result)
 
@@ -111,6 +111,6 @@ def test_structured_log_callback_emits_required_fields() -> None:
         assert payload["component"] == "ansible.task", plugin_path
         assert payload["trace_id"] == "trace-123", plugin_path
         assert payload["intent_id"] == "intent-123", plugin_path
-        assert payload["vm"] == "docker-runtime-lv3", plugin_path
+        assert payload["vm"] == "docker-runtime", plugin_path
         assert payload["task_status"] == "ok", plugin_path
         assert payload["changed"] is True, plugin_path

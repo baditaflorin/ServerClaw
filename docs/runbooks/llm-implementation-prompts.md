@@ -10,7 +10,7 @@ Do **not** skip ahead — each prompt's work is a dependency for the next.
 > **Lane A · Step 1 · No dependencies**
 
 ```
-You are implementing ADR 0082 in the proxmox_florin_server repo.
+You are implementing ADR 0082 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0082-remote-build-execution-gateway.md   (the full spec)
@@ -22,7 +22,7 @@ Create exactly these files:
 
 1. scripts/remote_exec.sh
    - Accepts a command label as $1 and optional --local-fallback flag
-   - rsyncs only changed files to build-lv3:/opt/builds/proxmox_florin_server/
+   - rsyncs only changed files to build-lv3:/opt/builds/proxmox-host_server/
      using: rsync --checksum --delete --exclude-from=.rsync-exclude
    - reads config/build-server.json to get host, ssh key, workspace root
    - runs the command on the build server inside the correct Docker container
@@ -79,7 +79,7 @@ Mark ADR status as: Proposed → Accepted (update the Status line in the ADR fil
 > **Lane A · Step 2 · Requires PROMPT 1 merged**
 
 ```
-You are implementing ADR 0083 in the proxmox_florin_server repo.
+You are implementing ADR 0083 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0083-docker-based-check-runner.md
@@ -112,7 +112,7 @@ Create exactly these files:
    - Keys: lint-ansible, lint-yaml, validate-schemas, type-check,
            security-scan, tofu-validate, packer-validate
    - Each entry: image, command, working_dir (/workspace), timeout_seconds
-   - Image names follow: registry.lv3.org/check-runner/<name>:<version>
+   - Image names follow: registry.example.com/check-runner/<name>:<version>
 
 6. scripts/parallel_check.py
    - Reads config/check-runner-manifest.json
@@ -127,12 +127,12 @@ Create exactly these files:
 7. Append to Makefile:
    ## Docker check runners (ADR 0083)
    - build-check-runners   (builds all 4 images locally)
-   - push-check-runners    (pushes to registry.lv3.org)
+   - push-check-runners    (pushes to registry.example.com)
    - run-checks            (accepts CHECKS= for specific labels, or runs all)
 
 8. config/windmill/scripts/check-runner-rebuild.py
    - Windmill script that: builds all 4 images with BuildKit inline cache,
-     pushes to registry.lv3.org, reads new digests, writes them back to
+     pushes to registry.example.com, reads new digests, writes them back to
      config/check-runner-manifest.json, commits the manifest update
 
 Verification before committing:
@@ -151,7 +151,7 @@ Then commit to branch codex/adr-0083-docker-check-runner:
 > **Lane A · Step 3 · Requires PROMPTS 1 and 2 merged**
 
 ```
-You are implementing ADR 0089 in the proxmox_florin_server repo.
+You are implementing ADR 0089 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0089-build-artifact-cache.md
@@ -178,7 +178,7 @@ Create or modify exactly these files:
    - packer_plugin_cache: /opt/builds/.packer.d
    - ansible_collection_cache: /opt/builds/.ansible/collections
    - pip_cache_volume: pip-cache
-   - build_workspace: /opt/builds/proxmox_florin_server
+   - build_workspace: /opt/builds/proxmox-host_server
 
 3. Update scripts/remote_exec.sh  (edit the existing file)
    - Add -v pip-cache:/root/.cache/pip to all Python container invocations
@@ -225,7 +225,7 @@ Commit to codex/adr-0089-build-cache:
 > **Lane C · Requires PROMPTS 1, 2, 3 merged · Can run in parallel with PROMPT 5**
 
 ```
-You are implementing ADR 0087 in the proxmox_florin_server repo.
+You are implementing ADR 0087 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0087-repository-validation-gate.md
@@ -301,7 +301,7 @@ Commit to codex/adr-0087-validation-gate:
 > **Lane C · Requires PROMPTS 1, 2, 3 merged · Largest effort — coordinate with any open branches touching roles/**
 
 ```
-You are implementing ADR 0086 in the proxmox_florin_server repo.
+You are implementing ADR 0086 in the proxmox-host_server repo.
 
 IMPORTANT: This is a structural migration. Make ZERO functional changes.
 All you are doing is moving files and updating import paths.
@@ -386,13 +386,13 @@ STEP G — Update ansible.cfg
 STEP H — Galaxy server stub
 13. Create config/windmill/scripts/collection-publish.py
     - Windmill script: runs ansible-galaxy collection build in
-      collections/lv3/platform/, then pushes to galaxy.lv3.org
+      collections/lv3/platform/, then pushes to galaxy.example.com
       (use the galaxy_server_url from config/build-server.json)
 
 14. Append to Makefile:
     ## Ansible collection (ADR 0086)
     - collection-build     (ansible-galaxy collection build collections/lv3/platform/)
-    - collection-publish   (builds then pushes to galaxy.lv3.org)
+    - collection-publish   (builds then pushes to galaxy.example.com)
     - collection-install   (ansible-galaxy collection install lv3.platform:<ver>)
 
 Verification before committing:
@@ -417,7 +417,7 @@ List in the commit message body:
 > **Lane B · Step 1 · Requires PROMPTS 1, 2, 3 merged · Can run in parallel with PROMPTS 4 and 5**
 
 ```
-You are implementing ADR 0084 in the proxmox_florin_server repo.
+You are implementing ADR 0084 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0084-packer-vm-template-pipeline.md
@@ -514,7 +514,7 @@ Commit to codex/adr-0084-packer-pipeline:
 > **Lane B · Step 2 · Requires PROMPT 6 merged**
 
 ```
-You are implementing ADR 0085 in the proxmox_florin_server repo.
+You are implementing ADR 0085 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0085-opentofu-vm-lifecycle.md
@@ -542,7 +542,7 @@ Create exactly these files:
 4. tofu/environments/production/backend.tf
    - terraform { backend "s3" { ... } } pointing to MinIO:
      bucket = "tofu-state", key = "production/terraform.tfstate",
-     endpoint = "https://minio.lv3.org" (comment: update with real endpoint)
+     endpoint = "https://minio.example.com" (comment: update with real endpoint)
      region = "us-east-1", skip_credentials_validation = true
 
 5. tofu/environments/production/main.tf
@@ -600,7 +600,7 @@ Note in the commit body: list every VM declared in production/main.tf
 > **Lane D · Requires PROMPT 1 merged and ADR 0075 (service capability catalog) already live**
 
 ```
-You are implementing ADR 0090 in the proxmox_florin_server repo.
+You are implementing ADR 0090 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0090-unified-platform-cli.md
@@ -710,7 +710,7 @@ Commit to codex/adr-0090-platform-cli:
 > **Lane B · Step 3 · Requires PROMPTS 6 and 7 merged**
 
 ```
-You are implementing ADR 0088 in the proxmox_florin_server repo.
+You are implementing ADR 0088 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0088-ephemeral-infrastructure-fixtures.md
@@ -804,7 +804,7 @@ Commit to codex/adr-0088-ephemeral-fixtures:
 > **Lane D · Final · Requires PROMPTS 7 (OpenTofu), 3 (NATS via ADR 0058), and ADR 0074 (ops portal) merged**
 
 ```
-You are implementing ADR 0091 in the proxmox_florin_server repo.
+You are implementing ADR 0091 in the proxmox-host_server repo.
 
 Read these files before writing anything:
 - docs/adr/0091-continuous-drift-detection.md

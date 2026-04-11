@@ -178,7 +178,7 @@ adrs:
     implemented_in_platform_version: 0.9.0
     implemented_on: '2026-03-21'
   - adr: '0015'
-    title: lv3.org DNS And Subdomain Model
+    title: example.com DNS And Subdomain Model
     status: Accepted
     implementation_status: Accepted
     date: '2026-03-21'
@@ -189,7 +189,7 @@ adrs:
       - dns
       - subdomain
       - model
-    summary: We will use named subdomains under lv3.org for platform entry points.
+    summary: We will use named subdomains under example.com for platform entry points.
     filename: 0015-lv3-org-dns-and-subdomain-model.md
     path: docs/adr/0015-lv3-org-dns-and-subdomain-model.md
     implemented_in_platform_version: 0.5.0
@@ -390,7 +390,7 @@ adrs:
       - runtime
       - workload
       - split
-    summary: Split docker-runtime-lv3 into three purpose-scoped VMs aligned to workload
+    summary: Split docker-runtime into three purpose-scoped VMs aligned to workload
     filename: 0347-docker-runtime-workload-split.md
     path: docs/adr/0347-docker-runtime-workload-split.md
     implemented_in_repo_version: 0.179.0

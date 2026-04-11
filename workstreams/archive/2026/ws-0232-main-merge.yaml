@@ -29,7 +29,7 @@ shared_surfaces:
   - config/controller-local-secrets.json
   - config/dependency-graph.json
   - config/workflow-catalog.json
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
   - tests/test_nomad_playbook.py
@@ -102,7 +102,7 @@ ownership_manifest:
         - config/controller-local-secrets.json
         - config/dependency-graph.json
         - config/workflow-catalog.json
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - tests/test_nomad_playbook.py

@@ -36,14 +36,14 @@ Workflow classes are matched through catalog tags:
 `lv3 run` now accepts:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/lv3_cli.py run deploy netbox --actor-id operator:lv3-cli
 ```
 
 To simulate or run unattended agent mode:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/lv3_cli.py run validate --actor-id agent/triage-loop --autonomous
 ```
 

@@ -1,14 +1,14 @@
 # Workstream ADR 0145: Ollama for Local LLM Inference API
 
 - ADR: [ADR 0145](../adr/0145-ollama-for-local-llm-inference.md)
-- Title: Private local LLM inference on docker-runtime-lv3, a shared platform LLM client, and bounded goal-compiler fallback routing
+- Title: Private local LLM inference on docker-runtime, a shared platform LLM client, and bounded goal-compiler fallback routing
 - Status: live_applied
 - Branch: `codex/adr-0145-ollama`
-- Worktree: `../proxmox_florin_server-ollama`
+- Worktree: `../proxmox-host_server-ollama`
 - Owner: codex
 - Depends On: `adr-0060-open-webui-workbench`, `adr-0112-goal-compiler`, `adr-0115-mutation-ledger`
 - Conflicts With: none
-- Shared Surfaces: `roles/ollama_runtime`, `config/ollama-models.yaml`, `platform/llm/`, `platform/goal_compiler/compiler.py`, `inventory/host_vars/proxmox_florin.yml`, `config/workflow-catalog.json`
+- Shared Surfaces: `roles/ollama_runtime`, `config/ollama-models.yaml`, `platform/llm/`, `platform/goal_compiler/compiler.py`, `inventory/host_vars/proxmox-host.yml`, `config/workflow-catalog.json`
 
 ## Scope
 
@@ -41,8 +41,8 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` serves `http://127.0.0.1:11434/api/version`
-- `docker exec ollama ollama show llama3.2:3b` succeeds on `docker-runtime-lv3`
+- `docker-runtime` serves `http://127.0.0.1:11434/api/version`
+- `docker exec ollama ollama show llama3.2:3b` succeeds on `docker-runtime`
 - Open WebUI retains successful bootstrap-admin sign-in with the local Ollama connector enabled
 - a three-run probe through `scripts/ollama_probe.py` reports stable local inference latency for the startup model
 

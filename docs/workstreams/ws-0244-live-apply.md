@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0244-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0244-live-apply`
 - Owner: codex
 - Depends On: `adr-0064-health-probes`, `adr-0075-service-capability-catalog`, `adr-0092-api-gateway`, `adr-0093-interactive-ops-portal`, `adr-0113-world-state-materializer`, `adr-0123-uptime-contracts`, `adr-0133-portal-auth-default`, `adr-0142-public-surface-scan`, `adr-0169-structured-logs`, `adr-0190-synthetic-replay`, `adr-0214-prod-staging-cells`, `ws-0244-runtime-assurance-adrs`
 - Conflicts With: none
@@ -56,7 +56,7 @@
 
 ## Expected Live Surfaces
 
-- the runtime assurance matrix is available from the repo-managed platform control surface on `docker-runtime-lv3`
+- the runtime assurance matrix is available from the repo-managed platform control surface on `docker-runtime`
 - the live ops portal exposes the new runtime assurance rollup without requiring ad hoc operator data assembly
 - a fresh live-apply receipt records the evidence sources and post-apply verification for ADR 0244 from the latest `origin/main` baseline
 
@@ -81,9 +81,9 @@
 - The exact-main replay from `codex/ws-0244-main-merge-r3` succeeded on `2026-03-29`: both `make converge-api-gateway` and `make converge-ops-portal` completed with `failed=0` after the gateway receipt-sync hang and verify-token fallback defects were fixed in repo-managed automation.
 - Internal verification on `2026-03-29` confirmed `http://127.0.0.1:8083/healthz` returned `{"status":"ok"}`, the live guest file and the running `api-gateway` container both matched branch hash `ce9f9ff50a64f2edbad20eced497f25efa5d5baffc2d181169c7025841b35853` for `api_gateway/main.py`, and the authenticated `GET /v1/platform/runtime-assurance` call returned `HTTP 200` with `45` bindings (`8` pass / `37` degraded / `0` failed / `0` unknown).
 - Portal verification on `2026-03-29` confirmed `http://127.0.0.1:8092/health` returned `{"status":"ok"}`, the live guest file and the running `ops-portal` container both matched branch hash `b340da9477044e486d0a66ef9b02b8c054592a13639e7eb066959d9778033661` for `ops_portal/app.py`, and `http://127.0.0.1:8092/partials/runtime-assurance` rendered the same governed summary with `HTTP 200`, explicit bindings, and no degraded-data banner.
-- Public edge verification on `2026-03-29` confirmed `https://ops.lv3.org/` still returned `HTTP 302` to `/oauth2/sign_in` with the expected hardening headers after the live replay.
+- Public edge verification on `2026-03-29` confirmed `https://ops.example.com/` still returned `HTTP 302` to `/oauth2/sign_in` with the expected hardening headers after the live replay.
 - The strengthened gateway verify caught real concurrent drift during the replay window: another worktree briefly restored an older `api_gateway/main.py` that no longer exposed `/v1/platform/runtime-assurance`, the exact-main verify failed closed on `HTTP 404`, and the exact-main replay corrected the guest back to the branch hash.
-- `docker-runtime-lv3` hit root filesystem exhaustion during the replay window. After `apt`, journal, and Docker cache cleanup documented in `docs/runbooks/docker-runtime-disk-pressure.md`, free space recovered from about `57M` to about `24G`, `apt-get update` succeeded again, and the repo-managed converges were re-run successfully instead of leaving a manual guest-only repair behind.
+- `docker-runtime` hit root filesystem exhaustion during the replay window. After `apt`, journal, and Docker cache cleanup documented in `docs/runbooks/docker-runtime-disk-pressure.md`, free space recovered from about `57M` to about `24G`, `apt-get update` succeeded again, and the repo-managed converges were re-run successfully instead of leaving a manual guest-only repair behind.
 
 ## Mainline Integration
 
@@ -100,4 +100,4 @@
 - The portal now ignores unreadable `._*.json` and `.DS_Store` receipt sidecars instead of crashing while enumerating live-apply or drift evidence.
 - The API gateway runtime role now has to ship `scripts/runtime_assurance.py`, avoid the duplicate recursive receipts sync, and fall back to the legacy platform-context bearer token when the preferred Keycloak client-credentials exchange fails during verify.
 - If `/v1/platform/runtime-assurance` returns `404` during a replay window, verify the live guest and container hashes before assuming the branch is wrong; the strengthened verify caught a real concurrent worktree drift during the 2026-03-29 exact-main replay.
-- If `docker-runtime-lv3` runs out of space during apply, follow `docs/runbooks/docker-runtime-disk-pressure.md` and then replay the managed converge instead of patching the live service trees by hand.
+- If `docker-runtime` runs out of space during apply, follow `docs/runbooks/docker-runtime-disk-pressure.md` and then replay the managed converge instead of patching the live service trees by hand.

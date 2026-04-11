@@ -41,7 +41,7 @@ def test_ntfy_playbook_orders_dns_runtime_and_edge_publication() -> None:
     ]
     assert edge_play["vars_files"] == ["{{ playbook_dir }}/../inventory/group_vars/platform.yml"]
     verify_task = public_verify_play["tasks"][0]
-    assert verify_task["ansible.builtin.uri"]["url"] == "https://ntfy.lv3.org/v1/health"
+    assert verify_task["ansible.builtin.uri"]["url"] == "https://ntfy.example.com/v1/health"
     assert verify_task["retries"] == 12
 
 
@@ -86,7 +86,7 @@ def test_ntfy_workflow_command_and_scope_catalog_entries_exist() -> None:
             "vm:120",
             "vm:120/service:ntfy",
             "config/subdomain-catalog.json",
-            "inventory/host_vars/proxmox_florin.yml",
+            "inventory/host_vars/proxmox-host.yml",
         ],
     }
 
@@ -131,7 +131,7 @@ def test_ntfy_dependency_wave_metadata_locks_the_runtime_vm_and_shared_edge() ->
 def test_ntfy_public_hostname_is_present_in_the_certificate_catalog() -> None:
     certificates = json.loads(CERTIFICATE_CATALOG_PATH.read_text())["certificates"]
     ntfy_certificate = next(
-        certificate for certificate in certificates if certificate["endpoint"]["host"] == "ntfy.lv3.org"
+        certificate for certificate in certificates if certificate["endpoint"]["host"] == "ntfy.example.com"
     )
 
     assert ntfy_certificate["id"] == "ntfy-edge"

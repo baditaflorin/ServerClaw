@@ -66,7 +66,7 @@ Some controller-local files are created by repo automation and are not required 
 - `.local/proxmox-api/lv3-automation-primary.json`
 - `.local/monitoring/proxmox-writer.token`
 - `.local/monitoring/guest-writer.token`
-- `.local/proxmox-backup/backup-lv3-token.json`
+- `.local/proxmox-backup/backup-token.json`
 - `.local/tfa/proxmox-ops-pam-totp.json`
 
 The preflight command reports these as generated outputs for the relevant workflow instead of failing on them up front.

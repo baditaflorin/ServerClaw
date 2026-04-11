@@ -16,12 +16,12 @@
 ## Scope Delivered
 
 - moved the governed ephemeral VM pool from the older fixture-local 9100-9199 range to `910-979`
-- extended [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py) so `create/up` stamps owner, purpose, policy, and expiry tags onto every repo-managed ephemeral VM
-- added capacity enforcement against [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json) before a new ephemeral VM is allocated
+- extended [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/fixture_manager.py) so `create/up` stamps owner, purpose, policy, and expiry tags onto every repo-managed ephemeral VM
+- added capacity enforcement against [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/capacity-model.json) before a new ephemeral VM is allocated
 - made `fixture list` cluster-aware so it shows current ephemeral VMs by VMID, owner, purpose, remaining lifetime, and health
 - added direct destroy support by VMID for ephemeral VMs that exist in the governed range even when no active receipt remains
 - upgraded the reaper path to a cluster-aware sweep that retags unowned VMs in the ephemeral range with a one-hour grace period and destroys expired VMs
-- added the repo guard [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_ephemeral_vmid.py) and wired the capacity-model check into [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py)
+- added the repo guard [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_ephemeral_vmid.py) and wired the capacity-model check into [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repository_data_models.py)
 - exposed the new lifecycle surface through `lv3 fixture create|destroy|list` and added a static ops-portal panel for active repo-managed ephemeral VMs
 
 ## Non-Goals Still Out Of Scope
@@ -31,29 +31,29 @@
 
 ## Expected Repo Surfaces
 
-- [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py)
-- [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_ephemeral_vmid.py)
-- [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
-- [scripts/generate_ops_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_ops_portal.py)
-- [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json)
-- [config/windmill/scripts/ephemeral-vm-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/ephemeral-vm-reaper.py)
-- [docs/runbooks/ephemeral-fixtures.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ephemeral-fixtures.md)
-- [docs/runbooks/scaffold-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
+- [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/fixture_manager.py)
+- [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_ephemeral_vmid.py)
+- [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py)
+- [scripts/generate_ops_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/generate_ops_portal.py)
+- [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/capacity-model.json)
+- [config/windmill/scripts/ephemeral-vm-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/ephemeral-vm-reaper.py)
+- [docs/runbooks/ephemeral-fixtures.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/ephemeral-fixtures.md)
+- [docs/runbooks/scaffold-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/scaffold-new-service.md)
 
 ## Expected Live Surfaces
 
 - Windmill workspace `lv3` contains the script `f/lv3/ephemeral_vm_reaper`
 - Windmill schedule `f/lv3/ephemeral_vm_reaper_every_30m` is present and enabled
-- the mounted worker checkout carries `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json`
-- a manual `run_wait_result` execution writes a `.local/fixtures/reaper-runs/reaper-run-*.json` summary on `docker-runtime-lv3`
+- the mounted worker checkout carries `/srv/proxmox-host_server/.local/proxmox-api/lv3-automation-primary.json`
+- a manual `run_wait_result` execution writes a `.local/fixtures/reaper-runs/reaper-run-*.json` summary on `docker-runtime`
 
 ## Verification
 
 - `uv run --with pytest --with pyyaml python -m pytest tests/test_fixture_manager.py tests/test_ephemeral_vm_reaper.py tests/test_fixture_expiry_reaper.py tests/test_ephemeral_lifecycle_repo_surfaces.py tests/test_deadlock_repo_surfaces.py -q`
 - `make syntax-check-windmill`
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
-- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper`
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'python3 - <<\"PY\"\nfrom pathlib import Path\nimport json\npayload = Path(\"/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json\")\nlatest = sorted(Path(\"/srv/proxmox_florin_server/.local/fixtures/reaper-runs\").glob(\"reaper-run-*.json\"))[-1]\nprint(json.dumps({\"payload_exists\": payload.exists(), \"latest_receipt\": latest.name, \"latest_receipt_body\": json.loads(latest.read_text())}, indent=2, sort_keys=True))\nPY' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime -m shell -a 'python3 - <<\"PY\"\nfrom pathlib import Path\nimport json\npayload = Path(\"/srv/proxmox-host_server/.local/proxmox-api/lv3-automation-primary.json\")\nlatest = sorted(Path(\"/srv/proxmox-host_server/.local/fixtures/reaper-runs\").glob(\"reaper-run-*.json\"))[-1]\nprint(json.dumps({\"payload_exists\": payload.exists(), \"latest_receipt\": latest.name, \"latest_receipt_body\": json.loads(latest.read_text())}, indent=2, sort_keys=True))\nPY' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 
 ## Live Apply Result
 

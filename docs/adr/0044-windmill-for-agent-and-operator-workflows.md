@@ -32,8 +32,8 @@ Initial responsibilities:
 
 Initial placement:
 
-- host: `docker-runtime-lv3`
-- database: `postgres-lv3`
+- host: `docker-runtime`
+- database: `postgres`
 - exposure: private-only at first, with operator access over private networks and a Tailscale TCP proxy on the Proxmox host
 
 ## Replaceability Scorecard
@@ -79,8 +79,8 @@ Initial placement:
 
 ## Implementation Notes
 
-- The repo now defines a dedicated Windmill automation surface through [playbooks/windmill.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/windmill.yml), [roles/windmill_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/windmill_postgres), [roles/windmill_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/windmill_runtime), and the seeded script under [config/windmill](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill).
-- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now exposes `converge-windmill` as the canonical entry point with explicit preflight, validation, and verification metadata.
-- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the controller-local Windmill bootstrap artifacts consumed by the workflow.
-- Operator usage is documented in [docs/runbooks/configure-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-windmill.md).
+- The repo now defines a dedicated Windmill automation surface through [playbooks/windmill.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/windmill.yml), [roles/windmill_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/windmill_postgres), [roles/windmill_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/windmill_runtime), and the seeded script under [config/windmill](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill).
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json) now exposes `converge-windmill` as the canonical entry point with explicit preflight, validation, and verification metadata.
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/controller-local-secrets.json) now records the controller-local Windmill bootstrap artifacts consumed by the workflow.
+- Operator usage is documented in [docs/runbooks/configure-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/configure-windmill.md).
 - Live application is now verified from `main` through the private Tailscale proxy at `http://100.118.189.95:8005`, with the repo-managed `lv3` workspace and healthcheck script synced and executed successfully.

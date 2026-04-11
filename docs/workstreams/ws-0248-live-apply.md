@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0248-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0248-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0248-live-apply`
 - Owner: codex
 - Depends On: `adr-0056-keycloak-for-operator-and-agent-sso`, `adr-0133-portal-authentication-by-default`, `adr-0199-outline-living-knowledge-wiki`, `adr-0247-authenticated-browser-journey-verification-via-playwright`
 - Conflicts With: none
@@ -52,7 +52,7 @@
 ## Expected Live Surfaces
 
 - edge-protected services expose a repo-managed shared logout entrypoint that clears the shared oauth2-proxy cookie and completes Keycloak logout without an interactive confirmation page
-- `ops.lv3.org` serves both a repo-managed proxy-cleanup path and a logged-out landing path for post-logout return
+- `ops.example.com` serves both a repo-managed proxy-cleanup path and a logged-out landing path for post-logout return
 - Grafana local logout hands off to Keycloak first and then to the shared proxy-cleanup path so both the app-local session and shared edge cookie are cleared
 - Outline local logout hands off to Keycloak with the same shared proxy-cleanup return path so app-local and shared-edge logout semantics stay aligned
 - revisiting a protected surface after logout yields the expected unauthenticated redirect or challenge path instead of silent re-entry
@@ -87,30 +87,30 @@
   Keycloak admin API. A direct API check immediately after showed the
   `outline.automation` user and its expected groups were present, and the
   second replay completed successfully with
-  `docker-runtime-lv3 : ok=153 changed=3 failed=0`, plus the expected
-  `monitoring-lv3`, `nginx-lv3`, `postgres-lv3`, and `proxmox_florin` recaps.
+  `docker-runtime : ok=153 changed=3 failed=0`, plus the expected
+  `monitoring`, `nginx-edge`, `postgres`, and `proxmox-host` recaps.
 - The scoped `playbooks/outline.yml` replay completed successfully from the
   isolated worktree with
-  `docker-runtime-lv3 : ok=209 changed=5 failed=0`,
-  `nginx-lv3 : ok=38 changed=2 failed=0`,
-  `postgres-lv3 : ok=47 changed=0 failed=0`, and
+  `docker-runtime : ok=209 changed=5 failed=0`,
+  `nginx-edge : ok=38 changed=2 failed=0`,
+  `postgres : ok=47 changed=0 failed=0`, and
   `localhost : ok=25 changed=1 failed=0`.
 - `make configure-edge-publication env=production` completed successfully with
-  `nginx-lv3 : ok=63 changed=5 failed=0`, reloading both oauth2-proxy and
-  NGINX after the shared logout and `wiki.lv3.org` publication changes.
+  `nginx-edge : ok=63 changed=5 failed=0`, reloading both oauth2-proxy and
+  NGINX after the shared logout and `wiki.example.com` publication changes.
 - Live HTTP probes confirmed:
-  `https://home.lv3.org/.well-known/lv3/session/logout -> 302` to the shared
+  `https://home.example.com/.well-known/lv3/session/logout -> 302` to the shared
   oauth2-proxy sign-out path,
-  `https://ops.lv3.org/.well-known/lv3/session/proxy-logout -> 302` to the
+  `https://ops.example.com/.well-known/lv3/session/proxy-logout -> 302` to the
   logged-out landing page,
-  `https://ops.lv3.org/.well-known/lv3/session/logged-out -> 200` with
-  `Cache-Control: no-store`, and `https://wiki.lv3.org/` served the expected
+  `https://ops.example.com/.well-known/lv3/session/logged-out -> 200` with
+  `Cache-Control: no-store`, and `https://wiki.example.com/` served the expected
   Outline-compatible CSP override.
 - `uv run --with playwright python scripts/session_logout_verify.py --password-file .local/keycloak/outline.automation-password.txt`
   now passes end to end and verified both the shared edge logout path and the
   real Outline UI logout path. Outline still reaches the Keycloak confirmation
   page because it cannot provide `id_token_hint`; the verifier now submits that
-  live confirmation form and proves both `home.lv3.org` and `wiki.lv3.org`
+  live confirmation form and proves both `home.example.com` and `wiki.example.com`
   require fresh Keycloak login afterward.
 - `./scripts/validate_repo.sh data-models`, `uv run --with pyyaml --with jsonschema python scripts/generate_diagrams.py --check`,
   and `./scripts/validate_repo.sh agent-standards` all passed after the receipt
@@ -129,7 +129,7 @@
   `receipts/live-applies/2026-03-28-adr-0248-session-logout-authority-live-apply.json`
 - live source commit: `7b0bd0230482ef077c17714ad224364badf3171b`
 - live verifier command:
-  `uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt`
+  `uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/outline.automation-password.txt`
 
 ## Mainline Integration Outcome
 

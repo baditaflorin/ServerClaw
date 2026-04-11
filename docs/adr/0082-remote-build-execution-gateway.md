@@ -33,7 +33,7 @@ We will implement a **Remote Build Execution Gateway** consisting of:
 ```
 
 The wrapper:
-- rsyncs only changed files (using `rsync --checksum --delete`) to `build-lv3:/opt/builds/proxmox_florin_server/`
+- rsyncs only changed files (using `rsync --checksum --delete`) to `build-lv3:/opt/builds/proxmox-host_server/`
 - runs the requested command on the build server inside a project-pinned Docker container (see ADR 0083)
 - streams output back over the same SSH pipe (`ssh build-lv3 "..."`)
 - forwards the remote exit code so `make` targets honour it correctly
@@ -65,7 +65,7 @@ build_server:
 
 ### 4. Rsync workspace conventions
 
-- remote workspace root: `/opt/builds/proxmox_florin_server/`
+- remote workspace root: `/opt/builds/proxmox-host_server/`
 - secrets (`.local/`, `*.vault`, `.env`) are **never** synced; `.rsync-exclude` lists them explicitly
 - the remote workspace is treated as ephemeral; the build server is never the source of truth
 
@@ -90,8 +90,8 @@ Records what the build server can run, pinned tool versions, and available Docke
 
 - Repository implementation landed in `0.80.0` and the first verified live gateway path completed on `2026-03-23` for platform version `0.38.0`.
 - The current live route is controller -> `ops@100.118.189.95` -> `ops@10.10.10.30` rather than a directly reachable build-VM Tailscale address.
-- The verified remote workspace root is `/home/ops/builds/proxmox_florin_server` so the `ops` account can manage the synced checkout without extra privilege escalation.
-- `docker-build-lv3` now includes `rsync` in the canonical guest package baseline so `make check-build-server` can verify SSH plus rsync health end to end.
+- The verified remote workspace root is `/home/ops/builds/proxmox-host_server` so the `ops` account can manage the synced checkout without extra privilege escalation.
+- `docker-build` now includes `rsync` in the canonical guest package baseline so `make check-build-server` can verify SSH plus rsync health end to end.
 
 ## Alternatives Considered
 

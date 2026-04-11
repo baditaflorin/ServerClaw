@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Sanitize the private `proxmox_florin_server` repo and push a clean copy to
+Sanitize the private `proxmox-host_server` repo and push a clean copy to
 the public `github.com/baditaflorin/ServerClaw` repo. All operator PII,
 real IPs, deployment-specific VM names, and secrets are replaced with
 placeholders before publishing.
@@ -52,19 +52,19 @@ Four deployment-specific files are replaced entirely with fork-ready templates:
 | `inventory/group_vars/all/identity.yml` | `publication/templates/identity.yml` |
 | `inventory/hosts.yml` | `publication/templates/hosts.yml` |
 | `config/operators.yaml` | `publication/templates/operators.yaml` |
-| `inventory/host_vars/proxmox_florin.yml` | `publication/templates/proxmox_florin.yml` |
+| `inventory/host_vars/proxmox-host.yml` | `publication/templates/proxmox-host.yml` |
 
 ### Tier C: Regex string replacement
 
 Applied to all text files not in Tier A. Patterns defined in
 `config/publication-sanitization.yaml`:
 
-- Domain: `lv3.org` -> `example.com`
+- Domain: `example.com` -> `example.com`
 - VM names: `*-lv3` / `*-staging-lv3` -> generic names
 - Public IPs: Hetzner IPs -> RFC 5737 documentation IPs (203.0.113.x)
 - IPv6: Real addresses -> documentation prefix (2001:db8::)
 - PII: Operator names and emails -> `Platform Operator` / `operator@example.com`
-- Host identity: `proxmox_florin` -> `proxmox-host`
+- Host identity: `proxmox-host` -> `proxmox-host`
 
 ### Leak check
 

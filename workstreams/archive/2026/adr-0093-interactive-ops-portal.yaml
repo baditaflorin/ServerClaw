@@ -18,7 +18,7 @@ conflicts_with:
   - adr-0074-ops-portal
 shared_surfaces:
   - scripts/generate_ops_portal.py
-  - nginx edge ops.lv3.org vhost
+  - nginx edge ops.example.com vhost
   - config/service-capability-catalog.json
 ready_to_merge: false
 live_applied: true

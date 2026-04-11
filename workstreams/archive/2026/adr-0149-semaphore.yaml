@@ -18,7 +18,7 @@ shared_surfaces:
   - playbooks/semaphore.yml
   - scripts/semaphore_bootstrap.py
   - scripts/semaphore_tool.py
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/workflow-catalog.json
   - config/command-catalog.json
   - config/dependency-graph.json
@@ -44,7 +44,7 @@ ownership_manifest:
       mode: exclusive
     - id: proxmox_host_vars_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
       mode: shared_contract
       contract: proxmox-host-vars-v1
     - id: workflow_catalog_contract

@@ -24,11 +24,13 @@ def test_docs_href_for_source_path_maps_to_published_portal_routes() -> None:
     )
 
     assert module.docs_href_for_source_path("docs/runbooks/operator-onboarding.md") == (
-        "https://docs.lv3.org/runbooks/operator-onboarding/"
+        "https://docs.example.com/runbooks/operator-onboarding/"
     )
     assert module.docs_href_for_source_path(
         "docs/adr/0311-global-command-palette-and-universal-open-dialog-via-cmdk.md"
-    ) == ("https://docs.lv3.org/architecture/decisions/0311-global-command-palette-and-universal-open-dialog-via-cmdk/")
+    ) == (
+        "https://docs.example.com/architecture/decisions/0311-global-command-palette-and-universal-open-dialog-via-cmdk/"
+    )
 
 
 def test_main_queries_runbooks_and_adrs_from_search_fabric(tmp_path: Path) -> None:
@@ -58,4 +60,4 @@ def test_main_queries_runbooks_and_adrs_from_search_fabric(tmp_path: Path) -> No
     first = payload["results"][0]
     assert first["kind"] in {"runbook", "adr"}
     assert first["lane"] in {"learn", "recover"}
-    assert first["href"].startswith("https://docs.lv3.org/")
+    assert first["href"].startswith("https://docs.example.com/")

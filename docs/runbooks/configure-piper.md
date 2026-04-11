@@ -7,7 +7,7 @@ and verifies the guest-network `/api/tts` WAV synthesis contract end to end.
 
 ## Result
 
-- `docker-runtime-lv3` runs Piper from `/opt/piper`
+- `docker-runtime` runs Piper from `/opt/piper`
 - Piper listens privately on `10.10.10.20:8100`
 - the repo-managed default voice is downloaded into the named Docker volume `piper-models`
 - callers can POST plain text to `/api/tts` and receive `audio/wav` without publishing a public hostname
@@ -17,30 +17,30 @@ and verifies the guest-network `/api/tts` WAV synthesis contract end to end.
 Syntax-check the Piper workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-piper
 ```
 
 Converge the Piper runtime directly:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-piper env=production
 ```
 
 Run the governed live-apply wrapper:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=piper env=production
 ```
 
 ## Verification
 
-Verify the private Piper health endpoint on `docker-runtime-lv3`:
+Verify the private Piper health endpoint on `docker-runtime`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -50,7 +50,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Verify the declared voice list:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -60,7 +60,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Verify Piper synthesizes WAV audio from the ADR contract:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \

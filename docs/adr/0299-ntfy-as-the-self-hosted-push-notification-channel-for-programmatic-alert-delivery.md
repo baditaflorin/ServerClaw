@@ -43,13 +43,13 @@ to it.
 
 ### Deployment rules
 
-- ntfy runs as a Docker Compose service on the `docker-runtime-lv3` VM
+- ntfy runs as a Docker Compose service on the `docker-runtime` VM
 - the `config/ntfy/server.yml` file is the canonical runtime configuration and is
-  managed by the Ansible role for `docker-runtime-lv3`
+  managed by the Ansible role for `docker-runtime`
 - the Docker image is pulled through Harbor (ADR 0068) and pinned to a specific
   SHA digest
 - ntfy is published internally at `ntfy.lv3.internal` on the guest network and
-  through the NGINX edge (ADR 0095) at `ntfy.lv3.org` behind authentication
+  through the NGINX edge (ADR 0095) at `ntfy.example.com` behind authentication
 - access tokens are stored in OpenBao (ADR 0043) and are injected at runtime;
   no long-lived tokens are committed to the repository
 

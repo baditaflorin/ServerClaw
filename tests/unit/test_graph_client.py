@@ -46,7 +46,7 @@ def prepare_graph_db(path: Path) -> Path:
             ("service:windmill", "service", "Windmill", 2, '{"service_id":"windmill"}'),
             ("service:api_gateway", "service", "Platform API Gateway", 3, '{"service_id":"api_gateway"}'),
             ("service:ops_portal", "service", "Ops Portal", 4, '{"service_id":"ops_portal"}'),
-            ("host:docker-runtime-lv3", "host", "docker-runtime-lv3", None, "{}"),
+            ("host:docker-runtime", "host", "docker-runtime", None, "{}"),
         ],
     )
     connection.executemany(
@@ -56,7 +56,7 @@ def prepare_graph_db(path: Path) -> Path:
             ("service:windmill", "service:postgres", "depends_on", '{"source":"test"}'),
             ("service:api_gateway", "service:keycloak", "depends_on", '{"source":"test"}'),
             ("service:ops_portal", "service:api_gateway", "depends_on", '{"source":"test"}'),
-            ("service:keycloak", "host:docker-runtime-lv3", "hosted_on", '{"source":"test"}'),
+            ("service:keycloak", "host:docker-runtime", "hosted_on", '{"source":"test"}'),
         ],
     )
     connection.commit()
@@ -130,7 +130,7 @@ def test_descendants_and_ancestors_follow_dependency_direction(graph_client: Dep
     assert graph_client.ancestors("service:ops_portal") == [
         "service:api_gateway",
         "service:keycloak",
-        "host:docker-runtime-lv3",
+        "host:docker-runtime",
         "service:postgres",
     ]
 
@@ -146,7 +146,7 @@ def test_path_and_neighbourhood_queries(graph_client: DependencyGraphClient) -> 
         "service:postgres",
         "service:api_gateway",
         "service:ops_portal",
-        "host:docker-runtime-lv3",
+        "host:docker-runtime",
     }
 
 

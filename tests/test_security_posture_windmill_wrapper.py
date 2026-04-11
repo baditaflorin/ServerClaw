@@ -31,7 +31,7 @@ def test_wrapper_accepts_warn_status_when_report_json_is_present(monkeypatch, tm
     (repo_root / "inventory" / "group_vars").mkdir(parents=True)
     (repo_root / "playbooks" / "tasks").mkdir(parents=True)
     (repo_root / "scripts" / "security_posture_report.py").write_text("", encoding="utf-8")
-    (repo_root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text("", encoding="utf-8")
+    (repo_root / "inventory" / "host_vars" / "proxmox-host.yml").write_text("", encoding="utf-8")
     (repo_root / "inventory" / "group_vars" / "all.yml").write_text("", encoding="utf-8")
     (repo_root / "playbooks" / "tasks" / "security-scan.yml").write_text("", encoding="utf-8")
 
@@ -54,7 +54,7 @@ def test_wrapper_rejects_cli_errors_without_report_json(monkeypatch, tmp_path: P
     (repo_root / "inventory" / "group_vars").mkdir(parents=True)
     (repo_root / "playbooks" / "tasks").mkdir(parents=True)
     (repo_root / "scripts" / "security_posture_report.py").write_text("", encoding="utf-8")
-    (repo_root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text("", encoding="utf-8")
+    (repo_root / "inventory" / "host_vars" / "proxmox-host.yml").write_text("", encoding="utf-8")
     (repo_root / "inventory" / "group_vars" / "all.yml").write_text("", encoding="utf-8")
     (repo_root / "playbooks" / "tasks" / "security-scan.yml").write_text("", encoding="utf-8")
 

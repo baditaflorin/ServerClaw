@@ -31,7 +31,7 @@ shared_surfaces:
 - docs/diagrams/agent-coordination-map.excalidraw
 - docs/site-generated/architecture/dependency-graph.md
 - build/platform-manifest.json
-- inventory/host_vars/proxmox_florin.yml
+- inventory/host_vars/proxmox-host.yml
 - inventory/group_vars/postgres_guests.yml
 - inventory/group_vars/platform.yml
 - scripts/topology-snapshot.json
@@ -113,8 +113,8 @@ shared_surfaces:
 - receipts/ops-portal-snapshot.html
 - receipts/restic-snapshots-latest.json
 - receipts/restic-backups/*.json
-- receipts/sbom/host-docker-runtime-lv3-*.cdx.json
-- receipts/sbom/host-runtime-control-lv3-*.cdx.json
+- receipts/sbom/host-docker-runtime-*.cdx.json
+- receipts/sbom/host-runtime-control-*.cdx.json
 - receipts/live-applies/*adr-0314-*.json
 - receipts/live-applies/evidence/*ws-0314*
 ownership_manifest:
@@ -135,7 +135,7 @@ ownership_manifest:
     mode: exclusive
   - id: ws0314_resumable_task_contract
     paths:
-    - inventory/host_vars/proxmox_florin.yml
+    - inventory/host_vars/proxmox-host.yml
     - inventory/group_vars/postgres_guests.yml
     - scripts/topology-snapshot.json
     - docs/runbooks/configure-runtime-ai-pool.md
@@ -212,8 +212,8 @@ ownership_manifest:
     - tests/test_runtime_general_pool_playbook.py
     - tests/test_step_ca_runtime_role.py
     - tests/test_typesense_runtime_role.py
-    - receipts/sbom/host-docker-runtime-lv3-*.cdx.json
-    - receipts/sbom/host-runtime-control-lv3-*.cdx.json
+    - receipts/sbom/host-docker-runtime-*.cdx.json
+    - receipts/sbom/host-runtime-control-*.cdx.json
     mode: shared_contract
     contract: ws0314-resumable-task-surface-v1
   - id: ws0314_adr_index

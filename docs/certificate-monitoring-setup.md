@@ -42,15 +42,15 @@ This comprehensive certificate monitoring system provides:
 python3 scripts/certificate_validator.py --check-all
 
 # Check a specific domain
-python3 scripts/certificate_validator.py --fqdn ci.lv3.org
+python3 scripts/certificate_validator.py --fqdn ci.example.com
 
 # Get JSON output for automation
 python3 scripts/certificate_validator.py --check-all --json
 ```
 
-### 2. Fix ci.lv3.org Certificate Issue
+### 2. Fix ci.example.com Certificate Issue
 
-The validator will show: **ci.lv3.org has certificate hostname mismatch**
+The validator will show: **ci.example.com has certificate hostname mismatch**
 
 **Quick Fix:**
 ```bash
@@ -66,17 +66,17 @@ ansible-playbook playbooks/fix-edge-certificate.yml
 ### 3. Set Up Automatic Monitoring in Uptime Kuma
 
 ```bash
-# Get your API key from https://uptime.lv3.org/settings/api-keys
+# Get your API key from https://uptime.example.com/settings/api-keys
 
 # Create monitors for all domains (requires API key)
 python3 scripts/add-certificate-monitors-to-uptime-kuma.py \
-    --base-url https://uptime.lv3.org \
+    --base-url https://uptime.example.com \
     --api-key <your-api-key> \
     --config config/subdomain-catalog.json
 
 # Dry-run first to see what would be created
 python3 scripts/add-certificate-monitors-to-uptime-kuma.py \
-    --base-url https://uptime.lv3.org \
+    --base-url https://uptime.example.com \
     --api-key <your-api-key> \
     --dry-run
 ```
@@ -108,14 +108,14 @@ Total Domains: 53
 ISSUES FOUND:
 ----------------
 
-[CERT_MISMATCH] ci.lv3.org (woodpecker)
+[CERT_MISMATCH] ci.example.com (woodpecker)
   Target: 203.0.113.1:443
   CN: lv3-edge
-  SANs: *.lv3.org, lv3.org, ...
-  Error: Certificate CN=lv3-edge, SANs=[...], but domain is ci.lv3.org
+  SANs: *.example.com, example.com, ...
+  Error: Certificate CN=lv3-edge, SANs=[...], but domain is ci.example.com
 
   REMEDIATION:
-  - The certificate for ci.lv3.org does not match.
+  - The certificate for ci.example.com does not match.
   - Check that all subdomains are included in the certificate request.
   - Run: make converge-nginx-edge env=production
 ```
@@ -203,7 +203,7 @@ Then re-test.
 
 Domain might be unreachable or firewalled. You can timeout:
 ```bash
-python3 scripts/certificate_validator.py --timeout 5 --fqdn domain.lv3.org
+python3 scripts/certificate_validator.py --timeout 5 --fqdn domain.example.com
 ```
 
 ## Real-World Scenarios
@@ -223,14 +223,14 @@ python3 scripts/certificate_validator.py --check-all
 ### Scenario 2: Certificate About to Expire in 7 Days
 
 ```bash
-# 1. See warning: "analytics.lv3.org expires in 7 days"
+# 1. See warning: "analytics.example.com expires in 7 days"
 python3 scripts/certificate_validator.py --check-all
 
 # 2. Trigger renewal immediately
 make converge-nginx-edge env=production
 
 # 3. Verify renewal succeeded
-python3 scripts/certificate_validator.py --fqdn analytics.lv3.org
+python3 scripts/certificate_validator.py --fqdn analytics.example.com
 # Should show: "✓ Valid" instead of "⚠ Expiring Soon"
 ```
 
@@ -239,7 +239,7 @@ python3 scripts/certificate_validator.py --fqdn analytics.lv3.org
 ```bash
 # 1. Add to subdomain-catalog.json
 # {
-#   "fqdn": "my-service.lv3.org",
+#   "fqdn": "my-service.example.com",
 #   "service_id": "my-service",
 #   "exposure": "edge-published",
 #   "target": "203.0.113.1",
@@ -254,7 +254,7 @@ make converge-<service> env=production
 make converge-nginx-edge env=production
 
 # 4. Verify the certificate includes the new domain
-python3 scripts/certificate_validator.py --fqdn my-service.lv3.org
+python3 scripts/certificate_validator.py --fqdn my-service.example.com
 # Should show: "✓ Valid"
 ```
 
@@ -262,7 +262,7 @@ python3 scripts/certificate_validator.py --fqdn my-service.lv3.org
 
 Once monitors are added to Uptime Kuma:
 
-1. Visit https://uptime.lv3.org
+1. Visit https://uptime.example.com
 2. Look for monitors tagged `ssl-certificate`
 3. Each shows:
    - Current response time

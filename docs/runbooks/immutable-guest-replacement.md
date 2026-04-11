@@ -27,7 +27,7 @@ make immutable-guest-replacement-plan service=grafana
 Inspect one guest directly:
 
 ```bash
-make immutable-guest-replacement-plan guest=monitoring-lv3
+make immutable-guest-replacement-plan guest=monitoring
 ```
 
 The planner shows:

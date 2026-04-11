@@ -15,7 +15,7 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
   - tofu/environments/production/
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - collections/ansible_collections/lv3/platform/roles/postgres_ha/
   - inventory/
   - config/service-capability-catalog.json

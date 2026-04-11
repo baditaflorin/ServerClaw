@@ -28,7 +28,7 @@ shared_surfaces:
   - docs/site-generated/architecture/dependency-graph.md
   - playbooks/grist.yml
   - playbooks/services/grist.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
   - collections/ansible_collections/lv3/platform/roles/grist_runtime/
@@ -113,7 +113,7 @@ ownership_manifest:
         - docs/site-generated/architecture/dependency-graph.md
         - playbooks/grist.yml
         - playbooks/services/grist.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
         - collections/ansible_collections/lv3/platform/roles/grist_runtime/**
@@ -175,14 +175,14 @@ ownership_manifest:
       contract: adr-0279-main-merge-v1
 blockers:
   - service-specific Docker restart rescue paths still exist on
-    docker-runtime-lv3 and need follow-up hardening beyond the shared
+    docker-runtime and need follow-up hardening beyond the shared
     bridge-chain helper
 ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: implements ADR 0279 by carrying the repo-managed Grist
     spreadsheet runtime onto main, reconverging Keycloak-backed login and
-    shared-edge publication for grist.lv3.org, and preserving the Docker plus
+    shared-edge publication for grist.example.com, and preserving the Docker plus
     Restic recovery hardening needed for the exact-main replay on the shared
     docker-runtime guest
   release_bump: patch

@@ -81,28 +81,28 @@ def compiler_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                     {
                         "id": "grafana",
                         "name": "Grafana",
-                        "vm": "monitoring-lv3",
+                        "vm": "monitoring",
                         "category": "observability",
                         "lifecycle_status": "active",
                     },
                     {
                         "id": "loki",
                         "name": "Loki",
-                        "vm": "monitoring-lv3",
+                        "vm": "monitoring",
                         "category": "observability",
                         "lifecycle_status": "active",
                     },
                     {
                         "id": "prometheus",
                         "name": "Prometheus",
-                        "vm": "monitoring-lv3",
+                        "vm": "monitoring",
                         "category": "observability",
                         "lifecycle_status": "active",
                     },
                     {
                         "id": "openbao",
                         "name": "OpenBao",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "category": "security",
                         "lifecycle_status": "active",
                     },
@@ -309,7 +309,7 @@ groups:
       - prometheus
     workflow_id: converge-monitoring
     hosts:
-      - monitoring-lv3
+      - monitoring
 """.strip()
         + "\n",
     )
@@ -442,7 +442,7 @@ def test_compile_alias_group_uses_group_workflow_id(compiler_repo: Path) -> None
 def test_compile_alias_group_includes_declared_hosts(compiler_repo: Path) -> None:
     compiler = GoalCompiler(compiler_repo)
     intent = compiler.compile("deploy the monitoring stack")
-    assert "monitoring-lv3" in intent.scope.allowed_hosts
+    assert "monitoring" in intent.scope.allowed_hosts
 
 
 # ---------------------------------------------------------------------------
@@ -562,7 +562,7 @@ def test_resolve_target_expands_alias_group(compiler_repo: Path) -> None:
         "monitoring stack": {
             "services": ["grafana", "loki", "prometheus"],
             "workflow_id": "converge-monitoring",
-            "hosts": ["monitoring-lv3"],
+            "hosts": ["monitoring"],
         }
     }
     target = resolve_target(
@@ -574,7 +574,7 @@ def test_resolve_target_expands_alias_group(compiler_repo: Path) -> None:
     )
     assert target.kind == "service_group"
     assert set(target.services) == {"grafana", "loki", "prometheus"}
-    assert "monitoring-lv3" in target.hosts
+    assert "monitoring" in target.hosts
 
 
 def test_resolve_target_workflow_kind(compiler_repo: Path) -> None:
@@ -602,12 +602,12 @@ def test_resolve_scope_merges_rule_defaults_and_target(compiler_repo: Path) -> N
 
 
 def test_resolve_scope_deduplicates_hosts(compiler_repo: Path) -> None:
-    target = IntentTarget(kind="service", name="grafana", services=["grafana"], hosts=["monitoring-lv3"])
+    target = IntentTarget(kind="service", name="grafana", services=["grafana"], hosts=["monitoring"])
     scope = resolve_scope(
-        rule_scope_defaults={"allowed_hosts": ["monitoring-lv3"], "allowed_services": [], "allowed_vmids": []},
+        rule_scope_defaults={"allowed_hosts": ["monitoring"], "allowed_services": [], "allowed_vmids": []},
         target=target,
     )
-    assert scope.allowed_hosts.count("monitoring-lv3") == 1
+    assert scope.allowed_hosts.count("monitoring") == 1
 
 
 def test_resolve_workflow_id_prefers_group_alias(compiler_repo: Path) -> None:

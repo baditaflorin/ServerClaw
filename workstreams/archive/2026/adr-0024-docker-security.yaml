@@ -9,8 +9,8 @@ doc: docs/workstreams/adr-0024-docker-security.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
-  - docker-build-lv3
+  - docker-runtime
+  - docker-build
   - playbooks/docker-security.yml
   - roles/docker_guest_security
 ready_to_merge: true

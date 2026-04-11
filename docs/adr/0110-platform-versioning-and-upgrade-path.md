@@ -84,9 +84,9 @@ Released: 2026-06-01
 None.
 
 ### New Capabilities
-- **Unified Platform API Gateway** (ADR 0092): All platform services accessible via api.lv3.org
+- **Unified Platform API Gateway** (ADR 0092): All platform services accessible via api.example.com
 - **Interactive Ops Portal** (ADR 0093): Browser-native platform operations
-- **Public Status Page** (ADR 0109): status.lv3.org for external visibility
+- **Public Status Page** (ADR 0109): status.example.com for external visibility
 - **Postgres HA** (ADR 0098): Automatic failover for the database tier
 
 ### SLO Commitments
@@ -123,9 +123,9 @@ Version `1.0.0` is defined as the state where all of the following are true:
 - ADRs 0001–0111 are all in status `Implemented` or `Accepted`
 - All edge-published services have an active SLO with > 99% error budget remaining
 - The automated backup restore verification (ADR 0099) has passed at least two consecutive weekly runs
-- The ops portal (ADR 0093) is deployed and accessible at `ops.lv3.org`
-- The public status page (ADR 0109) is live at `status.lv3.org`
-- The docs site (ADR 0094) is published at `docs.lv3.org`
+- The ops portal (ADR 0093) is deployed and accessible at `ops.example.com`
+- The public status page (ADR 0109) is live at `status.example.com`
+- The docs site (ADR 0094) is published at `docs.example.com`
 - The disaster recovery playbook (ADR 0100) has been table-top reviewed
 
 This defines "finished product" in machine-checkable terms.

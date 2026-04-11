@@ -259,27 +259,27 @@ class TestNoHardcodedPaths:
             )
 
     def test_no_hardcoded_hostname_in_role_defaults(self):
-        """Role defaults must use {{ platform_topology_host }}, not 'proxmox_florin'."""
-        hostname_pattern = re.compile(r"\bproxmox_florin\b")
+        """Role defaults must use {{ platform_topology_host }}, not 'proxmox-host'."""
+        hostname_pattern = re.compile(r"\bproxmox-host\b")
         violations = self._scan_for_pattern(
             hostname_pattern,
             ["collections/ansible_collections/lv3/platform/roles/*/defaults/main.yml"],
         )
         if violations:
             pytest.fail(
-                f"Found {len(violations)} hardcoded 'proxmox_florin' hostname(s) in role defaults.\n"
+                f"Found {len(violations)} hardcoded 'proxmox-host' hostname(s) in role defaults.\n"
                 "Use '{{ platform_topology_host }}' instead:\n" + "\n".join(violations[:20])
             )
 
     def test_no_hardcoded_repo_checkout_path_in_role_defaults(self):
-        """Role defaults must use {{ platform_repo_checkout_path }}, not '/srv/proxmox_florin_server'."""
-        pattern = re.compile(r"/srv/proxmox_florin_server\b")
+        """Role defaults must use {{ platform_repo_checkout_path }}, not '/srv/proxmox-host_server'."""
+        pattern = re.compile(r"/srv/proxmox-host_server\b")
         violations = self._scan_for_pattern(
             pattern,
             ["collections/ansible_collections/lv3/platform/roles/*/defaults/main.yml"],
         )
         if violations:
             pytest.fail(
-                f"Found {len(violations)} hardcoded '/srv/proxmox_florin_server' path(s) in role defaults.\n"
+                f"Found {len(violations)} hardcoded '/srv/proxmox-host_server' path(s) in role defaults.\n"
                 "Use '{{ platform_repo_checkout_path }}' instead:\n" + "\n".join(violations[:20])
             )

@@ -46,12 +46,12 @@ def test_update_application_accepts_live_patch_status_200(monkeypatch, tmp_path:
         assert request.method == "PATCH"
         assert request.full_url == "http://127.0.0.1:8000/api/v1/applications/app-123"
         body = json.loads(request.data.decode("utf-8"))
-        assert body == {"domains": "http://repo-smoke.apps.lv3.org"}
+        assert body == {"domains": "http://repo-smoke.apps.example.com"}
         return DummyResponse(200, {"uuid": "app-123"})
 
     monkeypatch.setattr(tool.urllib.request, "urlopen", fake_urlopen)
 
-    client.update_application("app-123", {"domains": "http://repo-smoke.apps.lv3.org"})
+    client.update_application("app-123", {"domains": "http://repo-smoke.apps.example.com"})
 
 
 def test_ensure_application_omits_domains_for_dockercompose(monkeypatch, tmp_path: Path) -> None:
@@ -87,7 +87,7 @@ def test_ensure_application_omits_domains_for_dockercompose(monkeypatch, tmp_pat
         source="private-deploy-key",
         private_key_uuid="key-1",
         docker_compose_location="/compose.yaml",
-        docker_compose_domains=[{"name": "catalog-web", "domain": "https://education-wemeshup.apps.lv3.org"}],
+        docker_compose_domains=[{"name": "catalog-web", "domain": "https://education-wemeshup.apps.example.com"}],
     )
 
     assert application["uuid"] == "app-123"
@@ -122,7 +122,7 @@ def test_ensure_application_omits_private_key_uuid_on_update(monkeypatch, tmp_pa
         source="private-deploy-key",
         private_key_uuid="key-1",
         docker_compose_location="/compose.yaml",
-        docker_compose_domains=[{"name": "catalog-web", "domain": "https://education-wemeshup.apps.lv3.org"}],
+        docker_compose_domains=[{"name": "catalog-web", "domain": "https://education-wemeshup.apps.example.com"}],
     )
 
     assert application["uuid"] == "app-123"
@@ -160,7 +160,7 @@ def test_command_deploy_repo_uses_subdomain_when_domain_not_set(monkeypatch, tmp
         def resolve_server(self, server_uuid: str | None) -> dict[str, Any]:
             return {
                 "uuid": "server-1",
-                "name": "coolify-lv3",
+                "name": "coolify",
                 "destinations": [{"uuid": "dest-1"}],
             }
 
@@ -202,10 +202,10 @@ def test_command_deploy_repo_uses_subdomain_when_domain_not_set(monkeypatch, tmp
 
     output = json.loads(capsys.readouterr().out)
     assert exit_code == 0
-    assert captured["domains"] == ["http://repo-smoke.apps.lv3.org"]
+    assert captured["domains"] == ["http://repo-smoke.apps.example.com"]
     assert captured["deploy_application"] == {"application_uuid": "app-1", "force": False}
     assert captured["repo"] == "coollabsio/coolify-examples"
-    assert output["domains"] == ["http://repo-smoke.apps.lv3.org"]
+    assert output["domains"] == ["http://repo-smoke.apps.example.com"]
     assert output["status"] == "finished"
 
 
@@ -233,9 +233,9 @@ def test_private_repo_url_converts_github_https_to_ssh() -> None:
 
 
 def test_parse_compose_domain_mapping_normalizes_domain() -> None:
-    assert tool.parse_compose_domain_mapping("catalog-web=education-wemeshup.apps.lv3.org") == {
+    assert tool.parse_compose_domain_mapping("catalog-web=education-wemeshup.apps.example.com") == {
         "name": "catalog-web",
-        "domain": "https://education-wemeshup.apps.lv3.org",
+        "domain": "https://education-wemeshup.apps.example.com",
     }
 
 
@@ -372,7 +372,7 @@ def test_command_deploy_repo_bootstraps_private_deploy_key(monkeypatch, tmp_path
             return {"uuid": "env-1", "name": environment_name}
 
         def resolve_server(self, server_uuid: str | None) -> dict[str, Any]:
-            return {"uuid": "server-1", "name": "coolify-lv3"}
+            return {"uuid": "server-1", "name": "coolify"}
 
         def ensure_private_key(self, *, name: str, description: str, private_key: str) -> dict[str, Any]:
             captured["coolify_private_key_request"] = {
@@ -431,7 +431,7 @@ def test_command_deploy_repo_bootstraps_private_deploy_key(monkeypatch, tmp_path
             "--docker-compose-location",
             "compose.yaml",
             "--compose-domain",
-            "catalog-web=education-wemeshup.apps.lv3.org",
+            "catalog-web=education-wemeshup.apps.example.com",
             "--wait",
             "--timeout",
             "60",
@@ -450,13 +450,15 @@ def test_command_deploy_repo_bootstraps_private_deploy_key(monkeypatch, tmp_path
     assert captured["private_key_uuid"] == "key-1"
     assert captured["docker_compose_location"] == "/compose.yaml"
     assert captured["docker_compose_domains"] == [
-        {"name": "catalog-web", "domain": "https://education-wemeshup.apps.lv3.org"}
+        {"name": "catalog-web", "domain": "https://education-wemeshup.apps.example.com"}
     ]
     assert captured["domains"] == []
     assert output["source"] == "private-deploy-key"
     assert output["repository"] == "git@github.com:baditaflorin/education_wemeshup.git"
-    assert output["domains"] == ["https://education-wemeshup.apps.lv3.org"]
-    assert output["compose_domains"] == [{"name": "catalog-web", "domain": "https://education-wemeshup.apps.lv3.org"}]
+    assert output["domains"] == ["https://education-wemeshup.apps.example.com"]
+    assert output["compose_domains"] == [
+        {"name": "catalog-web", "domain": "https://education-wemeshup.apps.example.com"}
+    ]
     assert output["github_deploy_key"]["title"] == "coolify-baditaflorin-education-wemeshup"
     assert output["coolify_private_key"]["uuid"] == "key-1"
 
@@ -488,7 +490,7 @@ def test_command_deploy_repo_retries_transient_failures(monkeypatch, tmp_path: P
             return {"uuid": "env-1", "name": environment_name}
 
         def resolve_server(self, server_uuid: str | None) -> dict[str, Any]:
-            return {"uuid": "server-1", "name": "coolify-lv3"}
+            return {"uuid": "server-1", "name": "coolify"}
 
         def ensure_application(self, **kwargs: Any) -> dict[str, Any]:
             return {"uuid": "app-1", "name": kwargs["app_name"]}
@@ -588,7 +590,7 @@ def test_command_deploy_repo_cancels_active_deployments_before_redeploy(monkeypa
             return {"uuid": "env-1", "name": environment_name}
 
         def resolve_server(self, server_uuid: str | None) -> dict[str, Any]:
-            return {"uuid": "server-1", "name": "coolify-lv3"}
+            return {"uuid": "server-1", "name": "coolify"}
 
         def ensure_application(self, **kwargs: Any) -> dict[str, Any]:
             return {"uuid": "app-1", "name": kwargs["app_name"]}
@@ -630,7 +632,7 @@ def test_command_deploy_repo_cancels_active_deployments_before_redeploy(monkeypa
             "--docker-compose-location",
             "compose.yaml",
             "--compose-domain",
-            "catalog-web=education-wemeshup.apps.lv3.org",
+            "catalog-web=education-wemeshup.apps.example.com",
             "--private-key-uuid",
             "key-1",
             "--wait",
@@ -672,9 +674,9 @@ def test_register_deployment_server_creates_new_server(monkeypatch, tmp_path: Pa
         if path == "/api/v1/security/keys" and method == "GET":
             return [{"uuid": "key-1", "name": "default"}]
         if path == "/api/v1/servers" and method == "POST":
-            assert payload["name"] == "coolify-apps-lv3"
+            assert payload["name"] == "coolify-apps"
             assert payload["ip"] == "10.10.10.71"
-            return {"uuid": "srv-new", "name": "coolify-apps-lv3"}
+            return {"uuid": "srv-new", "name": "coolify-apps"}
         raise AssertionError(f"unexpected {method} {path}")
 
     monkeypatch.setattr(tool.CoolifyClient, "_request", fake_request)
@@ -685,7 +687,7 @@ def test_register_deployment_server_creates_new_server(monkeypatch, tmp_path: Pa
             str(auth_file),
             "register-deployment-server",
             "--host",
-            "coolify-apps-lv3",
+            "coolify-apps",
             "--ip",
             "10.10.10.71",
         ]
@@ -704,7 +706,7 @@ def test_register_deployment_server_is_idempotent(monkeypatch, tmp_path: Path, c
 
     def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         if path == "/api/v1/servers" and method == "GET":
-            return [{"uuid": "srv-existing", "name": "coolify-apps-lv3", "ip": "10.10.10.71"}]
+            return [{"uuid": "srv-existing", "name": "coolify-apps", "ip": "10.10.10.71"}]
         if method == "POST":
             post_called["count"] += 1
         return {}
@@ -717,7 +719,7 @@ def test_register_deployment_server_is_idempotent(monkeypatch, tmp_path: Path, c
             str(auth_file),
             "register-deployment-server",
             "--host",
-            "coolify-apps-lv3",
+            "coolify-apps",
             "--ip",
             "10.10.10.71",
         ]
@@ -737,8 +739,8 @@ def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsy
     def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         if path == "/api/v1/servers" and method == "GET":
             return [
-                {"uuid": "src-uuid", "name": "coolify-lv3"},
-                {"uuid": "dst-uuid", "name": "coolify-apps-lv3"},
+                {"uuid": "src-uuid", "name": "coolify"},
+                {"uuid": "dst-uuid", "name": "coolify-apps"},
             ]
         if path == "/api/v1/applications" and method == "GET":
             return [
@@ -758,9 +760,9 @@ def test_migrate_deployment_server_moves_apps(monkeypatch, tmp_path: Path, capsy
             str(auth_file),
             "migrate-deployment-server",
             "--from",
-            "coolify-lv3",
+            "coolify",
             "--to",
-            "coolify-apps-lv3",
+            "coolify-apps",
         ]
     )
     out = json.loads(capsys.readouterr().out)
@@ -780,8 +782,8 @@ def test_migrate_deployment_server_returns_2_when_nothing_to_migrate(monkeypatch
     def fake_request(self, method: str, path: str, payload=None, **kwargs):  # type: ignore
         if path == "/api/v1/servers" and method == "GET":
             return [
-                {"uuid": "src-uuid", "name": "coolify-lv3"},
-                {"uuid": "dst-uuid", "name": "coolify-apps-lv3"},
+                {"uuid": "src-uuid", "name": "coolify"},
+                {"uuid": "dst-uuid", "name": "coolify-apps"},
             ]
         if path == "/api/v1/applications" and method == "GET":
             return [{"uuid": "app-1", "name": "already-moved", "server": {"uuid": "dst-uuid"}}]
@@ -795,9 +797,9 @@ def test_migrate_deployment_server_returns_2_when_nothing_to_migrate(monkeypatch
             str(auth_file),
             "migrate-deployment-server",
             "--from",
-            "coolify-lv3",
+            "coolify",
             "--to",
-            "coolify-apps-lv3",
+            "coolify-apps",
         ]
     )
     assert exit_code == 2
@@ -808,11 +810,11 @@ def test_default_deployment_server_reads_from_stack_yaml(tmp_path: Path, monkeyp
     stack_yaml = tmp_path / "versions" / "stack.yaml"
     stack_yaml.parent.mkdir(parents=True)
     stack_yaml.write_text(
-        "observed_state:\n  coolify:\n    deployment_server_name: coolify-apps-lv3\n",
+        "observed_state:\n  coolify:\n    deployment_server_name: coolify-apps\n",
         encoding="utf-8",
     )
     monkeypatch.setattr(tool, "_STACK_YAML", stack_yaml)
-    assert tool._default_deployment_server() == "coolify-apps-lv3"
+    assert tool._default_deployment_server() == "coolify-apps"
 
 
 # ---------------------------------------------------------------------------
@@ -820,7 +822,7 @@ def test_default_deployment_server_reads_from_stack_yaml(tmp_path: Path, monkeyp
 # ---------------------------------------------------------------------------
 
 _PROXMOX_AUTH = {
-    "api_url": "https://proxmox.lv3.org:8006/api2/json",
+    "api_url": "https://proxmox.example.com:8006/api2/json",
     "full_token_id": "lv3-automation@pve!primary",
     "value": "test-secret",
     "authorization_header": "PVEAPIToken=lv3-automation@pve!primary=test-secret",
@@ -1030,9 +1032,9 @@ def test_command_migrate_apps_success(
             "--vmid",
             "170",
             "--from",
-            "coolify-lv3",
+            "coolify",
             "--to",
-            "coolify-apps-lv3",
+            "coolify-apps",
         ]
     )
     out = json.loads(capsys.readouterr().out)
@@ -1077,9 +1079,9 @@ def test_command_migrate_apps_noop(
             "--vmid",
             "170",
             "--from",
-            "coolify-lv3",
+            "coolify",
             "--to",
-            "coolify-apps-lv3",
+            "coolify-apps",
         ]
     )
     out = json.loads(capsys.readouterr().out)

@@ -13,7 +13,7 @@ detected_markers:
 - marker_type: git-commit
   adr_number: '0361'
   location: git:87836e215
-  evidence: 87836e215 [chore] Add scheduler.lv3.org to subdomain catalog (ADR 0361)
+  evidence: 87836e215 [chore] Add scheduler.example.com to subdomain catalog (ADR 0361)
   confidence: 1.0
   detected_on: '2026-04-07T07:55:40.496124'
 inferred_implementation_status: Possibly Implemented

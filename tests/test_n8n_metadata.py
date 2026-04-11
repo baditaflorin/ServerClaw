@@ -31,7 +31,7 @@ def test_workflow_and_command_catalog_preserve_n8n_adapter_boundary() -> None:
     assert "ServerClaw adapters" in workflow["description"]
     assert "thin ServerClaw adapters" in workflow["outputs"][0]
     assert any(
-        "https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke" in command_text
+        "https://n8n.example.com/webhook-test/serverclaw-connector-smoke" in command_text
         for command_text in workflow["verification_commands"]
     )
 

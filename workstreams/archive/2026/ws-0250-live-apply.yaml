@@ -62,7 +62,7 @@ ready_to_merge: false
 live_applied: true
 canonical_truth:
   changelog_entry: implemented ADR 0250 by adding repo-managed Loki Canary
-    ingestion and queryability assurance on monitoring-lv3, scraping its metrics
+    ingestion and queryability assurance on monitoring, scraping its metrics
     in Prometheus, surfacing the signal in Grafana, and alerting on missing or
     non-queryable canary entries
   release_bump: patch

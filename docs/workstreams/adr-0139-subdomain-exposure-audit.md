@@ -1,7 +1,7 @@
 # Workstream ADR 0139: Subdomain Exposure Audit And Registry
 
 - ADR: [ADR 0139](../adr/0139-subdomain-exposure-audit-and-registry.md)
-- Title: Deterministic subdomain exposure registry plus live DNS and edge-auth audit for all tracked `lv3.org` hostnames
+- Title: Deterministic subdomain exposure registry plus live DNS and edge-auth audit for all tracked `example.com` hostnames
 - Status: merged
 - Branch: `codex/adr-0139-subdomain-exposure-audit`
 - Worktree: `.worktrees/adr-0139`
@@ -45,7 +45,7 @@
 
 - One audit receipt can be produced from a worker checkout with `make subdomain-exposure-audit`
 - Production hostnames that already resolve publicly are no longer tracked as `planned` in the catalog
-- Edge OIDC enforcement for `ops.lv3.org` is represented explicitly in both the catalog and the derived registry
+- Edge OIDC enforcement for `ops.example.com` is represented explicitly in both the catalog and the derived registry
 
 ## Verification
 

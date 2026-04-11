@@ -4,7 +4,7 @@
 - Title: Deliver task-oriented navigation lanes across the live ops portal, launcher, and supporting catalogs from the latest mainline baseline
 - Status: live_applied
 - Branch: `codex/ws-0309-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0309-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0309-live-apply`
 - Owner: codex
 - Depends On: `adr-0093-interactive-ops-portal`, `adr-0152-homepage-for-unified-service-dashboard`, `adr-0234-shared-human-app-shell-and-navigation-via-patternfly`, `adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher`, `adr-0239-browser-local-search-experience-via-pagefind`, `adr-0313-contextual-help-glossary-and-escalation-drawer`
 - Conflicts With: none
@@ -86,13 +86,13 @@ and `Recover` instead of relying on product-first launcher taxonomy alone.
 
 ## Verification Outcome
 
-- guest-local verification on `docker-runtime-lv3` confirmed
+- guest-local verification on `docker-runtime` confirmed
   `{"status":"ok"}`, the task-lane/help markers, the deployed
   `workbench_information_architecture.py` helper, the synced
   `workbench-information-architecture.json` catalog, and a healthy
   `ops-portal` container
 - internal edge publication still returns the expected `302` to
-  `https://ops.lv3.org/oauth2/sign_in?...` for unauthenticated requests
+  `https://ops.example.com/oauth2/sign_in?...` for unauthenticated requests
 - the post-apply restic trigger initially failed because the local OpenBao API
   was sealed; a narrow repo-managed unseal replay recovered that state and the
   follow-on backup succeeded with receipt `receipts/restic-backups/20260403T001854Z.json`

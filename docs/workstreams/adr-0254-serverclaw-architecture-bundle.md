@@ -8,7 +8,7 @@
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0254-serverclaw-adrs`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-serverclaw-adrs`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0254-serverclaw-adrs`
 - Owner: codex
 - Depends On: `adr-0060-open-webui-workbench`,
   `adr-0069-agent-tool-registry`, `adr-0145-local-ollama`,

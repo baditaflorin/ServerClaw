@@ -50,9 +50,9 @@ Default rule:
 
 ## Implementation Notes
 
-- [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json) is now the canonical machine-readable catalog for the three publication tiers plus the currently classified Proxmox, `step-ca`, OpenBao, Windmill, mail-gateway, and webhook surfaces.
-- [scripts/api_publication.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/api_publication.py) validates the publication catalog, verifies that every governed API or event HTTP surface is classified, and exposes inspection commands for operators and assistants.
-- [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json) now includes the live OpenBao and Windmill APIs so the governed lane inventory matches the current private control-plane reality.
-- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) now fails validation if a governed API or webhook surface is missing an ADR 0049 publication tier.
-- [docs/runbooks/private-first-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md) records the operating procedure for inspecting and extending the publication model.
-- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) now renders the publication tiers and classified HTTP surfaces from canonical repo state.
+- [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/api-publication.json) is now the canonical machine-readable catalog for the three publication tiers plus the currently classified Proxmox, `step-ca`, OpenBao, Windmill, mail-gateway, and webhook surfaces.
+- [scripts/api_publication.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/api_publication.py) validates the publication catalog, verifies that every governed API or event HTTP surface is classified, and exposes inspection commands for operators and assistants.
+- [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/control-plane-lanes.json) now includes the live OpenBao and Windmill APIs so the governed lane inventory matches the current private control-plane reality.
+- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repository_data_models.py) now fails validation if a governed API or webhook surface is missing an ADR 0049 publication tier.
+- [docs/runbooks/private-first-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/private-first-api-publication.md) records the operating procedure for inspecting and extending the publication model.
+- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/README.md) now renders the publication tiers and classified HTTP surfaces from canonical repo state.

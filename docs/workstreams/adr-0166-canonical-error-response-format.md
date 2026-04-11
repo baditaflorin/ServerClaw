@@ -38,7 +38,7 @@
 
 ## Expected Live Surfaces
 
-- `https://api.lv3.org/v1/health` rejects anonymous callers with canonical code `AUTH_TOKEN_MISSING`
+- `https://api.example.com/v1/health` rejects anonymous callers with canonical code `AUTH_TOKEN_MISSING`
 - gateway validation and dependency failures return registry-backed envelopes with `trace_id`
 - platform-context protected endpoints return canonical auth and validation failures
 - the deployed runtime bundles `config/error-codes.yaml` and `scripts/canonical_errors.py`
@@ -62,10 +62,10 @@
 
 - Repo implementation completed for release `0.162.0` on `2026-03-26`.
 - Unit and integration-focused repository tests passed for the canonical error helpers, API gateway, and platform-context service.
-- The 2026-03-26 live replay from `main` now applies ADR 0166 on both production HTTP surfaces: `https://api.lv3.org/v1/health` returns the canonical `AUTH_TOKEN_MISSING` envelope publicly, and `http://100.64.0.1:8010/v1/platform-summary` returns the same canonical envelope on the private platform-context path.
+- The 2026-03-26 live replay from `main` now applies ADR 0166 on both production HTTP surfaces: `https://api.example.com/v1/health` returns the canonical `AUTH_TOKEN_MISSING` envelope publicly, and `http://100.64.0.1:8010/v1/platform-summary` returns the same canonical envelope on the private platform-context path.
 - The final platform-context recovery required a direct guest-side rebuild because the Tailscale-routed Ansible converge stalled mid corpus sync before `config/error-codes.yaml` reached `/opt/platform-context/corpus/config/`; after copying the missing registry file and rebuilding the container, authenticated rebuild and query verification succeeded with `2550` indexed chunks.
 
 ## Notes For The Next Assistant
 
-- If the public host SSH path to `65.108.75.123:22` remains unstable, prefer the steady-state Tailscale host path (`ops@100.64.0.1`) plus the governed Proxmox guest jump when replaying `docker-runtime-lv3` services.
+- If the public host SSH path to `203.0.113.1:22` remains unstable, prefer the steady-state Tailscale host path (`ops@100.64.0.1`) plus the governed Proxmox guest jump when replaying `docker-runtime` services.
 - The live-apply receipt records the manual recovery used to finish this rollout; future replays should come back to the full repo-managed `rag-context` converge once the intermittent guest copy stall is understood.

@@ -18,7 +18,7 @@ def test_collect_drift_detects_mismatched_digest(monkeypatch) -> None:
             {
                 "image_id": "windmill_runtime",
                 "service_id": "windmill",
-                "runtime_host": "docker-runtime-lv3",
+                "runtime_host": "docker-runtime",
                 "container_name": "windmill-server",
                 "expected_digest": "sha256:expected",
                 "expected_reference": "ghcr.io/windmill/windmill:1@sha256:expected",
@@ -51,7 +51,7 @@ def test_collect_drift_skips_matching_digest(monkeypatch) -> None:
             {
                 "image_id": "netbox_runtime",
                 "service_id": "netbox",
-                "runtime_host": "docker-runtime-lv3",
+                "runtime_host": "docker-runtime",
                 "container_name": "netbox",
                 "expected_digest": "sha256:expected",
                 "expected_reference": "docker.io/netboxcommunity/netbox:main@sha256:expected",

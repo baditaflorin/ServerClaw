@@ -23,7 +23,7 @@ operations. The infrastructure exists; what is missing is the governed tool
 surface.
 
 The immediate pain point: agents cannot create a blocking task (e.g. "Hetzner
-DNS brownout blocks scheduler.lv3.org deployment") without human intervention.
+DNS brownout blocks scheduler.example.com deployment") without human intervention.
 
 ## Decision
 

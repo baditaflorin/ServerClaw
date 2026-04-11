@@ -23,7 +23,7 @@ def test_flagsmith_dns_stage_converges_only_the_flags_subdomain_record() -> None
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "flags.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "flags.example.com"
     assert dns_play["vars"]["subdomain_catalog_path"] == "{{ playbook_dir }}/../config/subdomain-catalog.json"
     assert dns_play["vars"]["inventory_defaults_path"] == "{{ playbook_dir }}/../inventory/group_vars/all.yml"
 

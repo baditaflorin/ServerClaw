@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.40
 - Release Date: 2026-03-28
 - Branch: `codex/ws-0231-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0231-main-merge`
 - Owner: codex
 - Depends On: `ws-0231-live-apply`
 
@@ -60,7 +60,7 @@ worktree before pushing `main`.
 ## Verification
 
 - the branch first replayed the ADR 0231 release cut on older `origin/main` snapshots, then refreshed once onto the ADR 0207 `0.177.42` / `0.130.39` mainline, and finally refreshed again onto the ADR 0225 `0.177.43` / `0.130.40` mainline before the final recut
-- `git merge --no-edit origin/main` raised one real content conflict in [`platform/ansible/plane.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-main-merge/platform/ansible/plane.py); the final merge kept the richer ADR 0231 HTTP or timeout retry diagnostics and restored the `time` import required by the newer Plane client tests on `main`
+- `git merge --no-edit origin/main` raised one real content conflict in [`platform/ansible/plane.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0231-main-merge/platform/ansible/plane.py); the final merge kept the richer ADR 0231 HTTP or timeout retry diagnostics and restored the `time` import required by the newer Plane client tests on `main`
 - the second refresh merged the ADR 0225 mainline cleanly, and the stash replay only conflicted in the protected release surfaces (`README.md`, `RELEASE.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, and `versions/stack.yaml`) because `origin/main` already owned repository version `0.177.43`
 - `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "no live platform version bump; this release records the merged ADR 0231 host-native OpenBao Agent plus systemd-credentials replay already verified on platform 0.130.38 while the current main baseline remains 0.130.40" --dry-run` reported `Current version: 0.177.43`, `Next version: 0.177.44`, and one unreleased note after the workstream was temporarily marked `merged` because the release manager ignores branch-owner `ready` workstreams
 - `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "no live platform version bump; this release records the merged ADR 0231 host-native OpenBao Agent plus systemd-credentials replay already verified on platform 0.130.38 while the current main baseline remains 0.130.40"` prepared release `0.177.44`

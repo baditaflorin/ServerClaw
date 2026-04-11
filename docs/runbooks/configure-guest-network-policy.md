@@ -15,10 +15,10 @@ This runbook converges ADR 0067 by enforcing the canonical guest network policy 
 
 ## Preconditions
 
-1. The controller SSH key exists at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`.
+1. The controller SSH key exists at `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519`.
 2. The Proxmox host is reachable at `100.118.189.95`.
 3. Every managed guest is reachable through the Proxmox jump path.
-4. The canonical allow matrix in `inventory/host_vars/proxmox_florin.yml` has been reviewed before apply.
+4. The canonical allow matrix in `inventory/host_vars/proxmox-host.yml` has been reviewed before apply.
 
 ## What The Workflow Changes
 
@@ -31,18 +31,18 @@ This runbook converges ADR 0067 by enforcing the canonical guest network policy 
 
 ## Canonical Policy Source
 
-- policy source: [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
-- flow reference: [docs/runbooks/network-policy-reference.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
-- playbook: [playbooks/guest-network-policy.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/guest-network-policy.yml)
+- policy source: [inventory/host_vars/proxmox-host.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/host_vars/proxmox-host.yml)
+- flow reference: [docs/runbooks/network-policy-reference.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/network-policy-reference.md)
+- playbook: [playbooks/guest-network-policy.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/guest-network-policy.yml)
 
 ## Verification
 
 Run these checks after converge:
 
 1. `make syntax-check-guest-network-policy`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'`
-3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'`
-4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8080'`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'`
+3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'`
+4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8080'`
 
 ## Notes
 

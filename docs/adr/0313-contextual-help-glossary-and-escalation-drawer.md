@@ -75,14 +75,14 @@ When a page includes a risky or failure-prone task, the help drawer must say:
 
 - The branch-local live apply on 2026-04-02 replayed the shared drawer from
   `codex/ws-0313-live-apply` source commit `154564f3c2433d5dd0b295a64c34272fd3b7f956`,
-  converged the interactive `ops_portal` runtime on `docker-runtime-lv3`,
-  republished the generated docs and changelog portals through `nginx-lv3`, and
+  converged the interactive `ops_portal` runtime on `docker-runtime`,
+  republished the generated docs and changelog portals through `nginx-edge`, and
   recorded the proof in
   `receipts/live-applies/2026-04-02-adr-0313-contextual-help-live-apply.json`.
 - Earlier direct replay attempts remain preserved in
   `receipts/live-applies/evidence/` because they exposed two real defects on the
   latest lineage: Docker bridge chains could disappear after nftables
-  evaluation on `docker-runtime-lv3`, and the mirrored runtime tree imported
+  evaluation on `docker-runtime`, and the mirrored runtime tree imported
   `platform.datetime_compat` even though the isolated image layout does not ship
   the repo `platform` package.
 - After `origin/main` advanced to repository version `0.177.138` during the
@@ -90,9 +90,9 @@ When a page includes a risky or failure-prone task, the help drawer must say:
   `codex/ws-0313-main-integration` source commit
   `ab0d29de49bee1a9ac0c17c17afd4fc5491d8927` cut repository version
   `0.177.139`, converged the interactive `ops_portal` runtime on
-  `docker-runtime-lv3` with final recap
+  `docker-runtime` with final recap
   `ok=189 changed=14 unreachable=0 failed=0 skipped=36`, republished the
-  generated docs and changelog portals through `nginx-lv3`, and recorded the
+  generated docs and changelog portals through `nginx-edge`, and recorded the
   canonical proof in
   `receipts/live-applies/2026-04-02-adr-0313-contextual-help-mainline-live-apply.json`.
 

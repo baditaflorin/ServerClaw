@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0268-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0268-live-apply`
 - Owner: codex
 - Depends On: `adr-0034-controller-local-secret-manifest-and-preflight`, `adr-0035-workflow-catalog-and-machine-readable-execution-contracts`, `adr-0079-playbook-decomposition-and-shared-execution-model`, `adr-0167-agent-handoff-and-context-preservation`, `adr-0211-shared-policy-packs-and-rule-registries`
 - Conflicts With: none
@@ -54,7 +54,7 @@
 
 ## Expected Live Surfaces
 
-- `nginx-lv3` shared edge publication replayed from this isolated worktree after bootstrap preflight materializes the required generated portal artifacts
+- `nginx-edge` shared edge publication replayed from this isolated worktree after bootstrap preflight materializes the required generated portal artifacts
 
 ## Ownership Notes
 
@@ -75,12 +75,12 @@
 
 - the isolated worktree started with `build/ops-portal/`, `build/changelog-portal/`, and `build/docs-portal/` all missing
 - `make live-apply-service service=public-edge env=staging EXTRA_ARGS=--syntax-check` rebuilt all three generated portals through the new bootstrap preflight and then stopped at `check-canonical-truth`, which is expected on this branch because the protected `README.md` integration summary is intentionally deferred
-- `make configure-edge-publication env=production` completed successfully after the repaired bootstrap path, with `nginx-lv3 ok=61 changed=4 failed=0`
-- `curl -I https://grafana.lv3.org`, `curl -I https://nginx.lv3.org`, `curl -I https://docs.lv3.org`, and `curl -I https://changelog.lv3.org` all returned healthy responses after the replay
+- `make configure-edge-publication env=production` completed successfully after the repaired bootstrap path, with `nginx-edge ok=61 changed=4 failed=0`
+- `curl -I https://grafana.example.com`, `curl -I https://nginx.example.com`, `curl -I https://docs.example.com`, and `curl -I https://changelog.example.com` all returned healthy responses after the replay
 - the branch-local live-apply evidence is recorded in `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json`
 - the integrated release cut on the latest available `origin/main` advanced the repository version to `0.177.83`
 - after `origin/main` advanced to `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea`, the final exact-main replay from commit `813f0a4f6859360ec25a873be45390087c62c836` preserved the execution-scope alias for `public-edge` to canonical service `nginx_edge` and re-verified the documented `ALLOW_IN_PLACE_MUTATION=true` ADR 0191 narrow exception for `nginx_edge`
-- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production` rebuilt the missing portal directories from a clean worktree and completed successfully with `nginx-lv3 ok=61 changed=4 failed=0`
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production` rebuilt the missing portal directories from a clean worktree and completed successfully with `nginx-edge ok=61 changed=4 failed=0`
 - the canonical mainline evidence is recorded in `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json`, and platform version `0.130.57` is the first integrated platform version that records ADR 0268 as verified from the latest synchronized mainline
 
 ## Merge Criteria

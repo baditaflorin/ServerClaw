@@ -7,7 +7,7 @@
 
 ## Context
 
-`runtime-control-lv3` (VMID 192, `10.10.10.92`) currently hosts twelve services:
+`runtime-control` (VMID 192, `10.10.10.92`) currently hosts twelve services:
 
 | Service | Role | Critical? |
 |---|---|---|
@@ -38,9 +38,9 @@ This has happened repeatedly. It needs to stop.
 
 ## Decision
 
-### 1. Strip `runtime-control-lv3` to identity-core only
+### 1. Strip `runtime-control` to identity-core only
 
-`runtime-control-lv3` retains only the four identity-core services:
+`runtime-control` retains only the four identity-core services:
 
 | Service | Port | Health Endpoint |
 |---|---|---|
@@ -54,22 +54,22 @@ workstream (not gated on this ADR):
 
 | Service | Target VM | Rationale |
 |---|---|---|
-| Gitea | `docker-runtime-lv3` | Developer tooling, not identity |
-| Harbor | `docker-runtime-lv3` | Container registry, not identity |
-| Mail Platform | `runtime-general-lv3` | Communication, not identity |
-| OpenFGA | `runtime-apps-lv3` | Authorization engine, app-tier |
-| Temporal | `runtime-apps-lv3` | Workflow orchestration |
-| Semaphore | `docker-build-lv3` | CI/CD belongs with build infra |
-| Vaultwarden | `runtime-general-lv3` | User-facing password manager |
-| Windmill | `runtime-apps-lv3` | Workflow automation, app-tier |
+| Gitea | `docker-runtime` | Developer tooling, not identity |
+| Harbor | `docker-runtime` | Container registry, not identity |
+| Mail Platform | `runtime-general` | Communication, not identity |
+| OpenFGA | `runtime-apps` | Authorization engine, app-tier |
+| Temporal | `runtime-apps` | Workflow orchestration |
+| Semaphore | `docker-build` | CI/CD belongs with build infra |
+| Vaultwarden | `runtime-general` | User-facing password manager |
+| Windmill | `runtime-apps` | Workflow automation, app-tier |
 
 The eviction workstream is tracked separately. This ADR focuses on the watchdog
-that protects whatever is currently running on `runtime-control-lv3`.
+that protects whatever is currently running on `runtime-control`.
 
 ### 2. Deploy an aggressive identity-core health watchdog
 
 A new Ansible role `identity_core_watchdog` installs a systemd timer on
-`runtime-control-lv3` that runs every **15 seconds** and:
+`runtime-control` that runs every **15 seconds** and:
 
 1. **Probes** each identity service health endpoint.
 2. **Auto-restarts** any service whose health check fails via
@@ -128,7 +128,7 @@ from 60s to 15s.
 ### 4. New playbook: `playbooks/services/identity-core-watchdog.yml`
 
 **What:** Playbook that converges the `identity_core_watchdog` role on
-`runtime-control-lv3`.
+`runtime-control`.
 
 ### 5. `config/ntfy/topic-registry.json`
 
@@ -162,6 +162,6 @@ from 60s to 15s.
 - ADR 0101: Certificate lifecycle management (Step-CA)
 - ADR 0204: Correction-loop policy
 - ADR 0226: Systemd as host-resident supervisor
-- ADR 0331: Runtime pool workload split (created runtime-control-lv3)
+- ADR 0331: Runtime pool workload split (created runtime-control)
 - ADR 0340: Dedicated Coolify apps VM separation (template for this pattern)
 - ADR 0347: Docker runtime workload split

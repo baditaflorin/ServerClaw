@@ -66,4 +66,4 @@
 
 - 2026-03-26 live apply completed from rebased `origin/main` by reconciling the live `PLATFORM_EVENTS` JetStream stream with `make apply-nats-streams`.
 - The live runtime lacked the committed stream definition before the apply, and the first smoke publish exposed an additional auth gap.
-- Because the NATS server auth file is not yet repo-managed, the live apply required a manual server-side change on `docker-runtime-lv3`: add `platform.>` to the `jetstream-admin` publish allow-list in `/opt/nats-jetstream/config/nats-server.conf`, then restart `lv3-nats-jetstream`.
+- Because the NATS server auth file is not yet repo-managed, the live apply required a manual server-side change on `docker-runtime`: add `platform.>` to the `jetstream-admin` publish allow-list in `/opt/nats-jetstream/config/nats-server.conf`, then restart `lv3-nats-jetstream`.

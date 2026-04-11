@@ -1,14 +1,14 @@
 # Workstream ADR 0053: OpenTelemetry Traces And Service Maps With Grafana Tempo
 
-- ADR: [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md)
+- ADR: [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md)
 - Title: Distributed tracing and service maps for internal apps and workflows
 - Status: live_applied
 - Branch: `codex/adr-0053-tempo-traces`
-- Worktree: `../proxmox_florin_server-tempo-traces`
+- Worktree: `../proxmox-host_server-tempo-traces`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0052-loki-logs`
 - Conflicts With: none
-- Shared Surfaces: `monitoring-lv3`, Grafana, internal APIs, workflow execution
+- Shared Surfaces: `monitoring`, Grafana, internal APIs, workflow execution
 
 ## Scope
 
@@ -34,9 +34,9 @@
 
 ## Expected Live Surfaces
 
-- Tempo, Prometheus, and a shared OTLP collector integrated into `monitoring-lv3`
+- Tempo, Prometheus, and a shared OTLP collector integrated into `monitoring`
 - Grafana Tempo and Prometheus datasources provisioned on the monitoring plane
-- mail gateway traces flowing from `docker-runtime-lv3` into Tempo with searchable service names plus Prometheus-backed service-graph and span-metric series for the first traced API edge
+- mail gateway traces flowing from `docker-runtime` into Tempo with searchable service names plus Prometheus-backed service-graph and span-metric series for the first traced API edge
 
 ## Verification
 
@@ -44,10 +44,10 @@
 - `make syntax-check-mail-platform`
 - `make converge-monitoring`
 - `HETZNER_DNS_API_TOKEN=... make converge-mail-platform`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active grafana-server influxdb tempo otelcol-contrib lv3-prometheus'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_service_graph_request_total'\'' http://127.0.0.1:9090/api/v1/query'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active grafana-server influxdb tempo otelcol-contrib lv3-prometheus'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_service_graph_request_total'\'' http://127.0.0.1:9090/api/v1/query'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'`
 
 ## Merge Criteria
 
@@ -56,5 +56,5 @@
 
 ## Notes For The Next Assistant
 
-- add more instrumented internal paths by pointing them at the shared OTLP endpoint on `monitoring-lv3`
+- add more instrumented internal paths by pointing them at the shared OTLP endpoint on `monitoring`
 - Live apply completed on `2026-03-22` from `main` at repo version `0.57.0` and platform version `0.31.0`, with verified `mail-gateway` service names in Tempo and `traces_service_graph_request_total` present in Prometheus.

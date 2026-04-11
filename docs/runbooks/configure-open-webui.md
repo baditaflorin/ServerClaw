@@ -6,7 +6,7 @@ This runbook converges the private Open WebUI operator-and-agent workbench defin
 
 ## Result
 
-- `docker-runtime-lv3` runs Open WebUI from `/opt/open-webui`
+- `docker-runtime` runs Open WebUI from `/opt/open-webui`
 - the Proxmox host publishes an operator-only Tailscale TCP proxy at `http://100.64.0.1:8008`
 - controller-local bootstrap secrets are mirrored under `.local/open-webui/`
 - the dedicated Open WebUI Keycloak client secret is mirrored under `.local/keycloak/open-webui-client-secret.txt`
@@ -33,39 +33,39 @@ Generated automatically on first converge:
 Syntax-check the Open WebUI workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-open-webui
 ```
 
 Converge the private runtime and host-side Tailscale proxy:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-open-webui
 ```
 
 That converge surface now also reconciles the dedicated Open WebUI Keycloak
-client on `docker-runtime-lv3` before deploying the runtime there.
+client on `docker-runtime` before deploying the runtime there.
 
 Bootstrap or refresh the shared model-routing contract before converging Open WebUI on a fresh controller checkout:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-one-api
 ```
 
 ## Verification
 
-Verify the runtime container and local files on `docker-runtime-lv3`:
+Verify the runtime container and local files on `docker-runtime`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'docker compose --file /opt/open-webui/docker-compose.yml ps && sudo ls -ld /opt/open-webui /opt/open-webui/data /etc/lv3/open-webui /opt/open-webui/openbao /run/lv3-secrets/open-webui && sudo test ! -e /opt/open-webui/open-webui.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml docker-runtime -m shell -a 'docker compose --file /opt/open-webui/docker-compose.yml ps && sudo ls -ld /opt/open-webui /opt/open-webui/data /etc/lv3/open-webui /opt/open-webui/openbao /run/lv3-secrets/open-webui && sudo test ! -e /opt/open-webui/open-webui.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the rendered environment enables the repo-managed One-API connector:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a "sudo grep -E '^(ENABLE_OPENAI_API|ENABLE_OLLAMA_API|OPENAI_API_BASE_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /run/lv3-secrets/open-webui/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml docker-runtime -m shell -a "sudo grep -E '^(ENABLE_OPENAI_API|ENABLE_OLLAMA_API|OPENAI_API_BASE_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /run/lv3-secrets/open-webui/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the private operator entrypoint is reachable:
@@ -85,7 +85,7 @@ Verify the bootstrap admin can sign in:
 ```bash
 curl -s -X POST http://100.64.0.1:8008/api/v1/auths/signin \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"ops@lv3.org\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"}"
+  -d "{\"email\":\"ops@example.com\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/open-webui/admin-password.txt)\"}"
 ```
 
 ## Operating Notes
@@ -93,7 +93,7 @@ curl -s -X POST http://100.64.0.1:8008/api/v1/auths/signin \
 - Keep `ENABLE_PERSISTENT_CONFIG=False` so repo-managed environment values remain authoritative across restarts.
 - Treat `.local/open-webui/` as sensitive controller-only material.
 - Treat `.local/keycloak/open-webui-client-secret.txt` as Keycloak recovery material; the Open WebUI playbook now mirrors it automatically and operators should not hand-create a separate Open WebUI OIDC secret file.
-- The Open WebUI Keycloak client reconcile step uses the controller-local bootstrap admin mirror at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt`. If Keycloak recovery happened on `docker-runtime-lv3` and the Open WebUI client step fails unexpectedly, resync that local file from `/etc/lv3/keycloak/bootstrap-admin-password` before rerunning `make converge-open-webui`.
+- The Open WebUI Keycloak client reconcile step uses the controller-local bootstrap admin mirror at `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/bootstrap-admin-password.txt`. If Keycloak recovery happened on `docker-runtime` and the Open WebUI client step fails unexpectedly, resync that local file from `/etc/lv3/keycloak/bootstrap-admin-password` before rerunning `make converge-open-webui`.
 - Do not enable arbitrary outbound connectors in the UI. The provider env file is regenerated by `make converge-one-api`; change the routed provider contract there instead of editing the UI.
 - Use Keycloak OIDC for routine access. Keep the local bootstrap admin only for controlled break-glass recovery and repo-managed smoke verification.
 - The first rollout is intentionally read-heavy. Governed tool registration and repo-grounded RAG belong to ADR 0069 and ADR 0070 instead of being hidden inside this runtime.

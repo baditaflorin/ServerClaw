@@ -43,7 +43,7 @@ def test_write_bundle_archive_embeds_manifest_and_selected_files(tmp_path: Path,
         commit="0123456789abcdef0123456789abcdef01234567",
     )
     manifest = release_bundle.build_manifest(
-        repository="ops/proxmox_florin_server",
+        repository="ops/proxmox-host_server",
         ref_name="main",
         ref_type="branch",
         commit="0123456789abcdef0123456789abcdef01234567",
@@ -180,9 +180,9 @@ def test_verify_bundle_prefers_sigstore_bundle_when_present(tmp_path: Path, monk
 
 
 def test_normalize_asset_url_reuses_explicit_gitea_host() -> None:
-    asset_url = "http://git.lv3.org:3009/api/v1/repos/ops/proxmox_florin_server/releases/1/assets/2"
+    asset_url = "http://git.example.com:3009/api/v1/repos/ops/proxmox-host_server/releases/1/assets/2"
     normalized = release_bundle.normalize_asset_url(asset_url, gitea_url="http://100.64.0.1:3009")
-    assert normalized == "http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/releases/1/assets/2"
+    assert normalized == "http://100.64.0.1:3009/api/v1/repos/ops/proxmox-host_server/releases/1/assets/2"
 
 
 def test_download_asset_retries_transient_http_404(tmp_path: Path, monkeypatch) -> None:
@@ -222,7 +222,7 @@ def test_download_asset_candidates_falls_back_to_secondary_url(tmp_path: Path, m
     release_bundle.download_asset_candidates(
         [
             "http://10.10.10.20:3003/attachments/19",
-            "http://10.10.10.20:3003/ops/proxmox_florin_server/releases/download/tag/bundle.tar.gz",
+            "http://10.10.10.20:3003/ops/proxmox-host_server/releases/download/tag/bundle.tar.gz",
         ],
         token="token",
         destination=destination,
@@ -231,7 +231,7 @@ def test_download_asset_candidates_falls_back_to_secondary_url(tmp_path: Path, m
     assert destination.read_bytes() == b"bundle-bytes"
     assert observed_urls == [
         "http://10.10.10.20:3003/attachments/19",
-        "http://10.10.10.20:3003/ops/proxmox_florin_server/releases/download/tag/bundle.tar.gz",
+        "http://10.10.10.20:3003/ops/proxmox-host_server/releases/download/tag/bundle.tar.gz",
     ]
 
 
@@ -244,17 +244,17 @@ def test_fetch_release_assets_prefers_attachment_detail_download_urls_with_relea
             {
                 "id": 19,
                 "name": "bundle.tar.gz",
-                "browser_download_url": "http://git.lv3.org:3009/releases/download/bad",
+                "browser_download_url": "http://git.example.com:3009/releases/download/bad",
             },
             {
                 "id": 20,
                 "name": "bundle.tar.gz.sigstore.json",
-                "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sigstore",
+                "browser_download_url": "http://git.example.com:3009/releases/download/bad-sigstore",
             },
             {
                 "id": 21,
                 "name": "bundle.tar.gz.sha256",
-                "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sha",
+                "browser_download_url": "http://git.example.com:3009/releases/download/bad-sha",
             },
         ],
     }
@@ -265,7 +265,7 @@ def test_fetch_release_assets_prefers_attachment_detail_download_urls_with_relea
         release_bundle,
         "fetch_release_asset_detail",
         lambda **kwargs: {
-            "browser_download_url": f"http://git.lv3.org:3009/attachments/{kwargs['attachment_id']}",
+            "browser_download_url": f"http://git.example.com:3009/attachments/{kwargs['attachment_id']}",
         },
     )
 
@@ -277,7 +277,7 @@ def test_fetch_release_assets_prefers_attachment_detail_download_urls_with_relea
 
     release_bundle.fetch_release_assets_by_tag(
         gitea_url="http://10.10.10.20:3003",
-        repository="ops/proxmox_florin_server",
+        repository="ops/proxmox-host_server",
         token="token",
         release_tag="bundle-branch-main-0123456789ab",
         destination_dir=tmp_path,

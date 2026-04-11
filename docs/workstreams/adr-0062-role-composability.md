@@ -1,10 +1,10 @@
 # Workstream ADR 0062: Ansible Role Composability And DRY Defaults
 
-- ADR: [ADR 0062](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0062-ansible-role-composability-and-dry-defaults.md)
+- ADR: [ADR 0062](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0062-ansible-role-composability-and-dry-defaults.md)
 - Title: Eliminate copy-paste across Ansible roles with a shared task library and argument specs
 - Status: merged
 - Branch: `codex/adr-0062-role-composability`
-- Worktree: `../proxmox_florin_server-role-composability`
+- Worktree: `../proxmox-host_server-role-composability`
 - Owner: codex
 - Depends On: none
 - Conflicts With: any workstream that adds a new role before the template exists
@@ -43,8 +43,8 @@
 ## Verification
 
 - `make validate` passes with the new lint rule active
-- `test -d /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/common/tasks`
-- `test -d /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/_template`
+- `test -d /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/common/tasks`
+- `test -d /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/_template`
 
 ## Merge Criteria
 

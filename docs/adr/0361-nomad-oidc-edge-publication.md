@@ -18,21 +18,21 @@ inspecting jobs via the browser and prevented agents from being aware of Nomad.
 
 ## Decision
 
-### Edge publication at scheduler.lv3.org
+### Edge publication at scheduler.example.com
 
-Publish the Nomad UI on the public edge at `scheduler.lv3.org` without
+Publish the Nomad UI on the public edge at `scheduler.example.com` without
 oauth2-proxy, using Nomad's native OIDC auth method instead.
 
 Nomad requires its own ACL tokens for every API call — oauth2-proxy cannot
 provide these. Wrapping the UI in both oauth2-proxy and Nomad OIDC would force a
-double-login UX. This is the same pattern as `sso.lv3.org` (Keycloak), which is
+double-login UX. This is the same pattern as `sso.example.com` (Keycloak), which is
 edge-published but handles its own authentication.
 
 ### Keycloak OIDC client
 
 A confidential Keycloak client `nomad` provides the OIDC integration:
 - Standard flow with group membership mapper
-- Redirect URIs: `https://scheduler.lv3.org/ui/settings/tokens`, `http://localhost:4649/oidc/callback`
+- Redirect URIs: `https://scheduler.example.com/ui/settings/tokens`, `http://localhost:4649/oidc/callback`
 
 ### Nomad ACL configuration
 
@@ -60,7 +60,7 @@ aware of the Nomad scheduler.
 
 - Platform operators can sign into Nomad via Keycloak with a single click
 - Agents can list and dispatch Nomad jobs through the tool registry
-- Job status is visible in a browser at `scheduler.lv3.org`
+- Job status is visible in a browser at `scheduler.example.com`
 - OIDC auth provides user-level audit trail in Nomad's ACL logs
 
 ### Negative / Trade-offs

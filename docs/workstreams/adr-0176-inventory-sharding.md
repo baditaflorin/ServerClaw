@@ -1,6 +1,6 @@
 # Workstream ADR 0176: Inventory Sharding And Host-Scoped Ansible Execution
 
-- ADR: [ADR 0176](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md)
+- ADR: [ADR 0176](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md)
 - Title: Repo-managed Ansible execution scopes, shard inventories, and host-limited live apply
 - Status: live_applied
 - Branch: `codex/adr-0176-inventory-sharding`
@@ -62,8 +62,8 @@
 
 - repository implementation merged on `main` in repo release `0.177.0`
 - the first fully synchronized `main` replay advanced platform version to `0.130.25` on 2026-03-27 from origin/main commit `f076a89c`
-- `make live-apply-service service=ollama env=production` completed with `docker-runtime-lv3 : ok=90 changed=1 unreachable=0 failed=0 skipped=19`
-- the final scope plan for run `e78ee2968d0140deba22cec891c50baf` rendered `.ansible/shards/e78ee2968d0140deba22cec891c50baf/ollama-production.json` with `limit_expression` `docker-runtime-lv3`
+- `make live-apply-service service=ollama env=production` completed with `docker-runtime : ok=90 changed=1 unreachable=0 failed=0 skipped=19`
+- the final scope plan for run `e78ee2968d0140deba22cec891c50baf` rendered `.ansible/shards/e78ee2968d0140deba22cec891c50baf/ollama-production.json` with `limit_expression` `docker-runtime`
 - the post-apply verification returned `{"version":"0.18.2"}` and showed `0.0.0.0:11434->11434/tcp, [::]:11434->11434/tcp` published for the `ollama` container
 
 ## Notes For The Next Assistant

@@ -22,7 +22,7 @@ def test_build_plan_splits_managed_and_unmanaged_entries(monkeypatch) -> None:
                 "renewal": {
                     "agent": "systemd-step-issue",
                     "managed_by_repo": True,
-                    "host": "docker-runtime-lv3",
+                    "host": "docker-runtime",
                     "unit_name": "lv3-openbao-cert-renew",
                     "on_calendar": "*:0/15",
                     "randomized_delay_seconds": 60,

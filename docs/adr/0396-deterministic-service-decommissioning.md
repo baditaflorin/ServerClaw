@@ -306,7 +306,7 @@ instead of at pre-commit time.
 Add to CATALOG_REGISTRY:
 
 ```python
-{"path": "inventory/host_vars/proxmox_florin.yml",
+{"path": "inventory/host_vars/proxmox-host.yml",
  "type": "yaml_topology_block",
  "list_key": "lv3_service_topology"}
 ```

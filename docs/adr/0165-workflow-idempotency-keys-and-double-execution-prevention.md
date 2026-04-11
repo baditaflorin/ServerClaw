@@ -25,7 +25,7 @@ The first implementation in `0.153.0` adds four concrete surfaces:
 
 1. `platform.idempotency.keys.compute_idempotency_key()` for deterministic workflow submission keys.
 2. `platform.idempotency.IdempotencyStore` with a shared git-common-dir file fallback and a Postgres-backed `platform.idempotency_records` table for live runtimes.
-3. Scheduler integration in [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py), which checks the idempotency store before conflict handling or Windmill submission, returns cached results for completed hits, and returns `in_flight` for duplicate active submissions.
+3. Scheduler integration in [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py), which checks the idempotency store before conflict handling or Windmill submission, returns cached results for completed hits, and returns `in_flight` for duplicate active submissions.
 4. Operator visibility through `lv3 intent status <intent_id>` plus the new ledger event type `execution.idempotent_hit`.
 
 ## Implementation
@@ -52,7 +52,7 @@ The store keeps one record per key with `in_flight`, `completed`, `failed`, `abo
 
 For local development and parallel worktrees, the default store lives in the git common directory so the protection applies across worktrees, not just inside one checkout.
 
-For live runtime deployments, the canonical schema is [`migrations/0016_idempotency_store.sql`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0016_idempotency_store.sql).
+For live runtime deployments, the canonical schema is [`migrations/0016_idempotency_store.sql`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/migrations/0016_idempotency_store.sql).
 
 ### Scheduler and closure-loop integration
 

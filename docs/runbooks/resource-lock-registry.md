@@ -6,11 +6,11 @@ Operate and verify the ADR 0153 resource lock registry that coordinates concurre
 
 ## Canonical Sources
 
-- [platform/locking/registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/locking/registry.py)
-- [platform/locking/schema.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/locking/schema.py)
-- [scripts/resource_lock_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/resource_lock_tool.py)
-- [docs/adr/0153-distributed-resource-lock-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0153-distributed-resource-lock-registry.md)
-- [docs/workstreams/adr-0153-distributed-resource-lock-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md)
+- [platform/locking/registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/locking/registry.py)
+- [platform/locking/schema.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/locking/schema.py)
+- [scripts/resource_lock_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/resource_lock_tool.py)
+- [docs/adr/0153-distributed-resource-lock-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0153-distributed-resource-lock-registry.md)
+- [docs/workstreams/adr-0153-distributed-resource-lock-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md)
 
 ## Current Implementation
 

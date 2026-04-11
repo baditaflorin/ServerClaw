@@ -74,8 +74,8 @@ Windmill seeds the same payload builder at `f/lv3/weekly_capacity_report` so ope
 ## Live Metrics Path
 
 - the report reads the committed model from `config/capacity-model.json`
-- when live metrics are enabled it SSHes to `monitoring-lv3` through the Proxmox jump host
-- on `monitoring-lv3` it runs `influx query` against the local InfluxDB API
+- when live metrics are enabled it SSHes to `monitoring` through the Proxmox jump host
+- on `monitoring` it runs `influx query` against the local InfluxDB API
 - memory uses the 7-day mean of `mem.used`
 - CPU uses the 7-day p95 of `cpu.usage_active` for `cpu-total`
 - disk currently uses the latest `disk.used` sample for `/`
@@ -99,7 +99,7 @@ If the monitoring path is unavailable, the report still renders using the commit
 For the ADR 0105 monitoring rollout from a parallel worktree, apply the Grafana service bundle directly:
 
 ```bash
-BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'
 ```
 
@@ -108,15 +108,15 @@ Verify the dashboard and reports after converge:
 ```bash
 make capacity-report
 make weekly-capacity-report
-curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 \
-  https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview
+curl -Ik --resolve grafana.example.com:443:203.0.113.1 \
+  https://grafana.example.com/d/lv3-capacity-overview/lv3-capacity-overview
 ```
 
-For a guest-local Grafana check through the Proxmox jump path, query `http://127.0.0.1:3000/api/dashboards/uid/lv3-capacity-overview` on `monitoring-lv3`.
+For a guest-local Grafana check through the Proxmox jump path, query `http://127.0.0.1:3000/api/dashboards/uid/lv3-capacity-overview` on `monitoring`.
 
 ## Notes
 
-- `postgres-replica-lv3` is modeled as planned capacity until the VM exists live
+- `postgres-replica` is modeled as planned capacity until the VM exists live
 - the `ephemeral-pool` reservation protects ADR 0106 fixture headroom even when no ephemeral VMs are active
 - a standby can be backed either by a dedicated guest already declared in the capacity model or by an explicit `standby` reservation entry when the standby consumes host headroom without its own guest allocation
 - `make live-apply-service service=<id> env=production` now runs the standby-capacity guard before Ansible

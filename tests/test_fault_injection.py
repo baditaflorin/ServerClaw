@@ -63,7 +63,7 @@ def test_load_scenario_catalog_resolves_known_scenarios() -> None:
     assert openbao.fault.kind == "service_pause"
     assert keycloak.before_probes[0].url == "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration"
     assert keycloak.before_probes[0].execution_context == "host_network_helper"
-    assert keycloak.before_probes[1].headers == (("Host", "sso.lv3.org"),)
+    assert keycloak.before_probes[1].headers == (("Host", "sso.example.com"),)
     assert keycloak.during_probes[0].expect == "unreachable"
 
 
@@ -159,7 +159,7 @@ def test_fault_injector_runs_host_network_http_probe_via_helper_container() -> N
                 "-t",
                 "1",
                 "--no-check-certificate",
-                "--header=Host: sso.lv3.org",
+                "--header=Host: sso.example.com",
                 "https://10.10.10.10/realms/lv3/.well-known/openid-configuration",
             ],
         )

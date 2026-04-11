@@ -4,7 +4,7 @@
 - Title: Define programmatic sharding patterns for oversized service, ADR, workstream, discovery, and summary surfaces
 - Status: merged
 - Branch: `codex/ws-0324-programmatic-doc-shards`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-programmatic-doc-shards`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0324-programmatic-doc-shards`
 - Owner: codex
 - Depends On: `ADR 0038`, `ADR 0163`, `ADR 0164`, `ADR 0174`
 - Conflicts With: none

@@ -24,26 +24,26 @@ This runbook documents the ADR 0071 observation loop that checks live drift agai
 
 Required:
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519`
 
 Optional routing hooks:
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/platform-findings-webhook-url.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/platform-findings-event-url.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/mattermost/platform-findings-webhook-url.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/glitchtip/platform-findings-event-url.txt`
 
 ## Commands
 
 Run the full observation loop:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 uvx --from pyyaml python scripts/platform_observation_tool.py
 ```
 
 Run a subset while iterating:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 uvx --from pyyaml python scripts/platform_observation_tool.py \
   --checks check-vm-state check-service-health check-backup-recency
 ```
@@ -51,18 +51,18 @@ uvx --from pyyaml python scripts/platform_observation_tool.py \
 Publish findings to NATS in addition to the local artifacts:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 uvx --from pyyaml python scripts/platform_observation_tool.py --publish-nats
 ```
 
 ## What Each Check Does
 
 1. `check-vm-state`
-   compares the managed guest fleet in `inventory/host_vars/proxmox_florin.yml` with live Proxmox guest state through the governed host SSH path
+   compares the managed guest fleet in `inventory/host_vars/proxmox-host.yml` with live Proxmox guest state through the governed host SSH path
 2. `check-service-health`
    executes the machine-readable probe contract in `config/health-probe-catalog.json`
 3. `check-image-freshness`
-   compares running container image references on `docker-runtime-lv3` with `config/image-catalog.json` and flags unpinned images
+   compares running container image references on `docker-runtime` with `config/image-catalog.json` and flags unpinned images
 4. `check-secret-ages`
    checks tracked controller-local secrets against `config/secret-catalog.json`
 5. `check-certificate-expiry`
@@ -87,7 +87,7 @@ When ADR 0080 suppression is active, a finding may be emitted with:
 
 ## Routing Notes
 
-- NATS publication uses the live `lv3-nats-jetstream` runtime on `docker-runtime-lv3` and emits one canonical event per finding on `platform.findings.observation`.
+- NATS publication uses the live `lv3-nats-jetstream` runtime on `docker-runtime` and emits one canonical event per finding on `platform.findings.observation`.
 - Mattermost and GlitchTip routing stay local-secret-driven so the repo does not commit chat or issue-tracker credentials.
 - Active maintenance windows are read from the private `maintenance-windows` NATS KV bucket unless `LV3_MAINTENANCE_WINDOWS_FILE` is set for test or offline use.
 - The current Open WebUI integration is file-based: operators can review the digest artifact from the existing private workbench until a richer governed tool path lands.

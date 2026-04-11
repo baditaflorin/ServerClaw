@@ -22,18 +22,18 @@ def test_resolve_targets_prefers_active_environment(monkeypatch, tmp_path: Path)
             "services": [
                 {
                     "id": "api_gateway",
-                    "public_url": "https://api.lv3.org",
+                    "public_url": "https://api.example.com",
                     "environments": {
-                        "production": {"status": "active", "url": "https://api.lv3.org"},
-                        "staging": {"status": "active", "url": "https://api.staging.lv3.org"},
+                        "production": {"status": "active", "url": "https://api.example.com"},
+                        "staging": {"status": "active", "url": "https://api.staging.example.com"},
                     },
                 },
                 {
                     "id": "keycloak",
-                    "public_url": "https://sso.lv3.org",
+                    "public_url": "https://sso.example.com",
                     "environments": {
-                        "production": {"status": "active", "url": "https://sso.lv3.org"},
-                        "staging": {"status": "active", "url": "https://sso.staging.lv3.org"},
+                        "production": {"status": "active", "url": "https://sso.example.com"},
+                        "staging": {"status": "active", "url": "https://sso.staging.example.com"},
                     },
                 },
                 {
@@ -50,8 +50,8 @@ def test_resolve_targets_prefers_active_environment(monkeypatch, tmp_path: Path)
 
     targets = integration_suite.resolve_targets(tmp_path, "staging")
 
-    assert targets.gateway_url == "https://api.staging.lv3.org"
-    assert targets.keycloak_url == "https://sso.staging.lv3.org"
+    assert targets.gateway_url == "https://api.staging.example.com"
+    assert targets.keycloak_url == "https://sso.staging.example.com"
     assert targets.windmill_url is None
 
 
@@ -127,8 +127,8 @@ def test_run_suite_invokes_pytest_when_targets_exist(monkeypatch, tmp_path: Path
             "services": [
                 {
                     "id": "keycloak",
-                    "public_url": "https://sso.lv3.org",
-                    "environments": {"staging": {"status": "active", "url": "https://sso.staging.lv3.org"}},
+                    "public_url": "https://sso.example.com",
+                    "environments": {"staging": {"status": "active", "url": "https://sso.staging.example.com"}},
                 }
             ]
         },

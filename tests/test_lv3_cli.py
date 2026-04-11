@@ -90,11 +90,11 @@ all:
   children:
     lv3_guests:
       hosts:
-        monitoring-lv3:
+        monitoring:
           ansible_host: 10.10.10.40
-        docker-runtime-lv3:
+        docker-runtime:
           ansible_host: 10.10.10.20
-        nginx-lv3:
+        nginx-edge:
           ansible_host: 10.10.10.10
         netbox-lv3:
           ansible_host: 10.10.10.30
@@ -108,7 +108,7 @@ all:
                     {
                         "id": "grafana",
                         "name": "Grafana",
-                        "vm": "monitoring-lv3",
+                        "vm": "monitoring",
                         "lifecycle_status": "active",
                         "internal_url": "http://127.0.0.1:18080/health",
                         "health_probe_id": "grafana",
@@ -117,7 +117,7 @@ all:
                     {
                         "id": "windmill",
                         "name": "Windmill",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "lifecycle_status": "active",
                         "internal_url": "http://127.0.0.1:18081",
                         "health_probe_id": "windmill",
@@ -126,10 +126,10 @@ all:
                     {
                         "id": "ops_portal",
                         "name": "Ops Portal",
-                        "vm": "nginx-lv3",
+                        "vm": "nginx-edge",
                         "lifecycle_status": "planned",
-                        "public_url": "https://ops.lv3.org",
-                        "environments": {"production": {"status": "planned", "url": "https://ops.lv3.org"}},
+                        "public_url": "https://ops.example.com",
+                        "environments": {"production": {"status": "planned", "url": "https://ops.example.com"}},
                     },
                     {
                         "id": "netbox",
@@ -168,21 +168,21 @@ all:
                         "id": "grafana",
                         "service": "grafana",
                         "name": "Grafana",
-                        "vm": "monitoring-lv3",
+                        "vm": "monitoring",
                         "tier": 1,
                     },
                     {
                         "id": "windmill",
                         "service": "windmill",
                         "name": "Windmill",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "tier": 2,
                     },
                     {
                         "id": "ops_portal",
                         "service": "ops_portal",
                         "name": "Ops Portal",
-                        "vm": "nginx-lv3",
+                        "vm": "nginx-edge",
                         "tier": 1,
                     },
                     {
@@ -340,7 +340,7 @@ all:
                         "compose_domains": [
                             {
                                 "service": "catalog-web",
-                                "domain": "education-wemeshup.apps.lv3.org",
+                                "domain": "education-wemeshup.apps.example.com",
                             }
                         ],
                     }
@@ -533,7 +533,7 @@ def test_deploy_repo_dry_run_prints_private_compose_bootstrap_args(
             "--docker-compose-location",
             "/compose.yaml",
             "--compose-domain",
-            "catalog-web=education-wemeshup.apps.lv3.org",
+            "catalog-web=education-wemeshup.apps.example.com",
             "--deploy-key-name",
             "coolify-baditaflorin-education-wemeshup",
             "--wait",
@@ -544,7 +544,7 @@ def test_deploy_repo_dry_run_prints_private_compose_bootstrap_args(
     assert exit_code == 0
     assert "--source private-deploy-key" in captured.out
     assert "--docker-compose-location /compose.yaml" in captured.out
-    assert "--compose-domain catalog-web=education-wemeshup.apps.lv3.org" in captured.out
+    assert "--compose-domain catalog-web=education-wemeshup.apps.example.com" in captured.out
     assert "--deploy-key-name coolify-baditaflorin-education-wemeshup" in captured.out
 
 
@@ -614,7 +614,7 @@ def test_open_dry_run_uses_catalog_url(capsys: pytest.CaptureFixture[str], minim
     exit_code = lv3_cli.main(["open", "ops_portal", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "https://ops.lv3.org" in captured.out
+    assert "https://ops.example.com" in captured.out
 
 
 def test_windmill_url_prefers_runtime_environment_override(minimal_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -976,7 +976,7 @@ def test_load_secret_file_maps_controller_style_path_into_repo_local(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     controller_style_path = (
-        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt"
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt"
     )
     repo_local_secret = minimal_repo / ".local" / "windmill" / "superadmin-secret.txt"
     repo_local_secret.parent.mkdir(parents=True, exist_ok=True)
@@ -1017,7 +1017,7 @@ def test_vm_list_uses_inventory(capsys: pytest.CaptureFixture[str], minimal_repo
     exit_code = lv3_cli.main(["vm", "list"])
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "monitoring-lv3" in captured.out
+    assert "monitoring" in captured.out
     assert "10.10.10.40" in captured.out
 
 
@@ -1162,7 +1162,7 @@ def test_manifest_show_json_reads_existing_artifact(
     manifest_path.write_text(
         json.dumps(
             {
-                "identity": {"platform_name": "lv3.org"},
+                "identity": {"platform_name": "example.com"},
                 "repo_version": "0.96.0",
                 "platform_version": "0.40.0",
                 "health": {"summary": "healthy", "services": {}},
@@ -1185,7 +1185,7 @@ def test_manifest_show_json_reads_existing_artifact(
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert '"platform_name": "lv3.org"' in captured.out
+    assert '"platform_name": "example.com"' in captured.out
 
 
 def test_manifest_refresh_runs_local_generator(

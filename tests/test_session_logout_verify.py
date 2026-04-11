@@ -23,16 +23,16 @@ def test_discover_local_root_prefers_shared_repo_root_for_worktrees(tmp_path: Pa
 
 
 def test_normalize_url_ignores_trailing_slashes_and_queries() -> None:
-    assert session_logout_verify.normalize_url("https://ops.lv3.org/.well-known/lv3/session/logged-out/?next=1") == (
-        "https://ops.lv3.org/.well-known/lv3/session/logged-out"
-    )
+    assert session_logout_verify.normalize_url(
+        "https://ops.example.com/.well-known/lv3/session/logged-out/?next=1"
+    ) == ("https://ops.example.com/.well-known/lv3/session/logged-out")
 
 
 def test_assert_protected_redirect_accepts_relative_oauth2_proxy_challenges() -> None:
     snapshot = session_logout_verify.ResponseSnapshot(
         status_code=302,
-        final_url="https://home.lv3.org/",
-        headers={"location": "/oauth2/sign_in?rd=https%3A%2F%2Fhome.lv3.org%2F"},
+        final_url="https://home.example.com/",
+        headers={"location": "/oauth2/sign_in?rd=https%3A%2F%2Fhome.example.com%2F"},
         body="",
     )
 
@@ -41,14 +41,14 @@ def test_assert_protected_redirect_accepts_relative_oauth2_proxy_challenges() ->
 
 def test_keycloak_logout_confirmation_present_matches_prompt_page() -> None:
     assert session_logout_verify.keycloak_logout_confirmation_present(
-        "https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout?client_id=outline",
+        "https://sso.example.com/realms/lv3/protocol/openid-connect/logout?client_id=outline",
         "LV3 CONTROL PLANE\nDo you want to log out?\n",
     )
 
 
 def test_keycloak_logout_confirmation_present_rejects_non_prompt_pages() -> None:
     assert not session_logout_verify.keycloak_logout_confirmation_present(
-        "https://ops.lv3.org/.well-known/lv3/session/logged-out",
+        "https://ops.example.com/.well-known/lv3/session/logged-out",
         "You are logged out",
     )
 
@@ -62,7 +62,7 @@ def test_find_cookie_value_filters_by_name_and_domain() -> None:
             value="outline-session",
             port=None,
             port_specified=False,
-            domain="wiki.lv3.org",
+            domain="wiki.example.com",
             domain_specified=True,
             domain_initial_dot=False,
             path="/",
@@ -79,9 +79,10 @@ def test_find_cookie_value_filters_by_name_and_domain() -> None:
 
     assert session_logout_verify.find_cookie_value(jar, "accessToken") == "outline-session"
     assert (
-        session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="wiki.lv3.org") == "outline-session"
+        session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="wiki.example.com")
+        == "outline-session"
     )
-    assert session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="home.lv3.org") is None
+    assert session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="home.example.com") is None
 
 
 def test_cookie_to_playwright_cookie_preserves_security_attributes() -> None:
@@ -91,7 +92,7 @@ def test_cookie_to_playwright_cookie_preserves_security_attributes() -> None:
         value="proxy-session",
         port=None,
         port_specified=False,
-        domain=".lv3.org",
+        domain=".example.com",
         domain_specified=True,
         domain_initial_dot=True,
         path="/",
@@ -108,7 +109,7 @@ def test_cookie_to_playwright_cookie_preserves_security_attributes() -> None:
     assert session_logout_verify.cookie_to_playwright_cookie(cookie) == {
         "name": "_lv3_ops_portal_proxy",
         "value": "proxy-session",
-        "domain": ".lv3.org",
+        "domain": ".example.com",
         "path": "/",
         "secure": True,
         "expires": 1_900_000_000,
@@ -122,7 +123,7 @@ def test_playwright_cookie_to_cookie_preserves_security_attributes() -> None:
         {
             "name": "_lv3_ops_portal_proxy",
             "value": "proxy-session",
-            "domain": ".lv3.org",
+            "domain": ".example.com",
             "path": "/",
             "secure": True,
             "expires": 1_900_000_000,
@@ -133,7 +134,7 @@ def test_playwright_cookie_to_cookie_preserves_security_attributes() -> None:
 
     assert cookie.name == "_lv3_ops_portal_proxy"
     assert cookie.value == "proxy-session"
-    assert cookie.domain == ".lv3.org"
+    assert cookie.domain == ".example.com"
     assert cookie.path == "/"
     assert cookie.secure is True
     assert cookie.expires == 1_900_000_000
@@ -146,7 +147,7 @@ def test_assert_page_requires_keycloak_login_raises_when_form_never_appears() ->
         pass
 
     class FakePage:
-        url = "https://home.lv3.org/"
+        url = "https://home.example.com/"
 
         def wait_for_selector(self, selector: str, timeout: int) -> None:
             raise FakeTimeoutError(f"{selector} missing after {timeout}")
@@ -161,12 +162,12 @@ def test_assert_page_requires_keycloak_login_raises_when_form_never_appears() ->
 
 
 def test_wait_for_logged_out_destination_confirms_keycloak_prompt() -> None:
-    expected_url = "https://ops.lv3.org/.well-known/lv3/session/logged-out"
+    expected_url = "https://ops.example.com/.well-known/lv3/session/logged-out"
     calls: list[int] = []
 
     class FakePage:
         def __init__(self) -> None:
-            self.url = "https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout?client_id=outline"
+            self.url = "https://sso.example.com/realms/lv3/protocol/openid-connect/logout?client_id=outline"
 
         def locator(self, selector: str):  # noqa: ANN201
             assert selector == "body"
@@ -218,7 +219,7 @@ def test_wait_for_logged_out_destination_confirms_keycloak_prompt() -> None:
 def test_authenticate_keycloak_session_accepts_existing_sso_session(monkeypatch: pytest.MonkeyPatch) -> None:
     expected = session_logout_verify.ResponseSnapshot(
         status_code=200,
-        final_url="https://wiki.lv3.org/collection/architecture/recent",
+        final_url="https://wiki.example.com/collection/architecture/recent",
         headers={},
         body="<html><title>Outline</title></html>",
     )
@@ -232,7 +233,7 @@ def test_authenticate_keycloak_session_accepts_existing_sso_session(monkeypatch:
 
     actual = session_logout_verify.authenticate_keycloak_session(
         object(),  # type: ignore[arg-type]
-        start_url="https://wiki.lv3.org/auth/oidc",
+        start_url="https://wiki.example.com/auth/oidc",
         username="outline.automation",
         password="secret",
         timeout_seconds=60,
@@ -247,7 +248,7 @@ def test_authenticate_keycloak_session_raises_for_unparseable_keycloak_form(
 ) -> None:
     login_page = session_logout_verify.ResponseSnapshot(
         status_code=200,
-        final_url="https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth",
+        final_url="https://sso.example.com/realms/lv3/protocol/openid-connect/auth",
         headers={},
         body='<html><form id="kc-form-login"></form></html>',
     )
@@ -257,7 +258,7 @@ def test_authenticate_keycloak_session_raises_for_unparseable_keycloak_form(
     with pytest.raises(session_logout_verify.VerificationError, match="unable to parse the Keycloak login form"):
         session_logout_verify.authenticate_keycloak_session(
             object(),  # type: ignore[arg-type]
-            start_url="https://wiki.lv3.org/auth/oidc",
+            start_url="https://wiki.example.com/auth/oidc",
             username="outline.automation",
             password="secret",
             timeout_seconds=60,

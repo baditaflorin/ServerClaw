@@ -19,7 +19,7 @@
 One-API (ADR 0393) and Open WebUI (ADR 0390) were fully removed from the
 platform on 2026-04-10. Their entries were deleted from
 `service-capability-catalog.json` and `subdomain-catalog.json`. However,
-the live homepage at home.lv3.org still displays tiles for both services
+the live homepage at home.example.com still displays tiles for both services
 because:
 
 1. `generate_homepage_config.py` was not re-run after the catalog changes.
@@ -32,14 +32,14 @@ but it also reveals gaps in the homepage's own fidelity contract.
 
 ### Open WebUI replaced by LibreChat
 
-Open WebUI at `chat.lv3.org` has been replaced by LibreChat. The subdomain
+Open WebUI at `chat.example.com` has been replaced by LibreChat. The subdomain
 catalog should reflect this. The homepage generator already handles this
 correctly (it reads from the catalog), but only if the catalog is accurate
 and the generator is re-run.
 
 ### Text not selectable in browser
 
-Users report that text on home.lv3.org cannot be selected or copied. The
+Users report that text on home.example.com cannot be selected or copied. The
 gethomepage/homepage application uses CSS that prevents text selection on
 service cards and other elements. This is a UX regression — operators need
 to copy service URLs, descriptions, and status information from the dashboard.
@@ -113,7 +113,7 @@ The homepage generator MUST:
   browser-usable URL.
 - **Exclude** every service with `lifecycle_status` != `"active"` (removed,
   deprecated, decommissioned).
-- **Reflect** the current `public_url` from the catalog (e.g., `chat.lv3.org`
+- **Reflect** the current `public_url` from the catalog (e.g., `chat.example.com`
   now points to LibreChat, not Open WebUI).
 
 The existing `include_service()` function in `generate_homepage_config.py`

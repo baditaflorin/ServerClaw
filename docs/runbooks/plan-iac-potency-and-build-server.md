@@ -205,7 +205,7 @@ Before starting Lane A, verify the build server meets requirements:
 - [ ] `/etc/buildkit/buildkitd.toml` configured with 50 GB GC policy
 - [ ] `apt-cacher-ng` is installed and listening on `build-lv3:3142`
 - [ ] Proxmox API token for Packer/OpenTofu is in OpenBao at `secret/build-server/proxmox-api-token`
-- [ ] `registry.lv3.org` is reachable from `build-lv3` (pull + push confirmed)
+- [ ] `registry.example.com` is reachable from `build-lv3` (pull + push confirmed)
 
 Run `make check-build-server` after ADR 0082 is live to verify all of the above automatically.
 
@@ -233,7 +233,7 @@ All ten ADRs are considered delivered when:
 5. `lv3 diff --env production` shows no actionable drift
 6. `git push` is blocked by a deliberate `ansible-lint` violation (gate is live)
 7. A fixture VM is provisioned, verified, and destroyed by `make fixture-up/down FIXTURE=docker-host`
-8. `lv3.platform:1.0.0` is installable from `galaxy.lv3.org`
+8. `lv3.platform:1.0.0` is installable from `galaxy.example.com`
 9. The Grafana platform overview dashboard has a green `Drift Status` panel
 10. The laptop's fans do not spin up during a `make lint` run
 

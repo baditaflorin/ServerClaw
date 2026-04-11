@@ -2,7 +2,7 @@
 """
 Neko Timeout Hierarchy Compliance Test
 
-Verifies NGINX proxy_read_timeout for browser.lv3.org is explicitly set
+Verifies NGINX proxy_read_timeout for browser.example.com is explicitly set
 to 3600s (1 hour) for long-lived WebRTC streams.
 
 Background (ADR 0170):
@@ -44,16 +44,16 @@ def read_file(path: str) -> Optional[str]:
 
 def find_nginx_site_config() -> Optional[str]:
     """
-    Find browser.lv3.org NGINX site configuration.
+    Find browser.example.com NGINX site configuration.
 
     Checks multiple possible locations:
-    - /etc/nginx/sites-enabled/browser.lv3.org.conf
-    - /etc/nginx/sites-available/browser.lv3.org.conf
+    - /etc/nginx/sites-enabled/browser.example.com.conf
+    - /etc/nginx/sites-available/browser.example.com.conf
     - Local playbook template path
     """
     paths = [
-        "/etc/nginx/sites-enabled/browser.lv3.org.conf",
-        "/etc/nginx/sites-available/browser.lv3.org.conf",
+        "/etc/nginx/sites-enabled/browser.example.com.conf",
+        "/etc/nginx/sites-available/browser.example.com.conf",
         "collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2",
     ]
 
@@ -95,10 +95,10 @@ def test_neko_nginx_timeout_is_explicit():
 
     nginx_config = find_nginx_site_config()
     if not nginx_config:
-        print("✗ FAILED: Could not find browser.lv3.org NGINX configuration")
+        print("✗ FAILED: Could not find browser.example.com NGINX configuration")
         print("  Check paths:")
-        print("    - /etc/nginx/sites-enabled/browser.lv3.org.conf")
-        print("    - /etc/nginx/sites-available/browser.lv3.org.conf")
+        print("    - /etc/nginx/sites-enabled/browser.example.com.conf")
+        print("    - /etc/nginx/sites-available/browser.example.com.conf")
         print("    - collections/.../templates/nginx-site-neko.conf.j2")
         return False
 

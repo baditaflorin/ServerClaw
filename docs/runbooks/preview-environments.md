@@ -6,11 +6,11 @@ This runbook documents the repo-managed path for creating, validating, and destr
 
 Use a preview environment when a branch needs a realistic live Proxmox target without mutating production or the long-lived staging lane.
 
-The current implementation builds previews from the current branch manifest plus the profile catalog in [config/preview-environment-profiles.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/config/preview-environment-profiles.json).
+The current implementation builds previews from the current branch manifest plus the profile catalog in [config/preview-environment-profiles.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/config/preview-environment-profiles.json).
 
 ## Current Model
 
-- base domain: `preview.lv3.org`
+- base domain: `preview.example.com`
 - current profile catalog: `runtime-smoke`
 - TTL enforcement: ADR 0106 governed ephemeral VM tags plus the existing preview/fixture reaper path
 - preview network boundary: shared `vmbr20` pool on `10.20.10.0/24`
@@ -46,12 +46,12 @@ make preview-create WORKSTREAM=ws-0185-live-apply PROFILE=runtime-smoke BRANCH=c
 
 Expected result:
 
-- a preview domain like `ws-0185-live-apply.preview.lv3.org`
+- a preview domain like `ws-0185-live-apply.preview.example.com`
 - one or more ephemeral VMs provisioned on `vmbr20`
 - local active state under `.local/preview-environments/active/`
 - member-level governed receipts under `receipts/fixtures/` while the preview is active
 
-If guest package downloads stall during converge, first verify the Proxmox host still forwards and masquerades `10.20.10.0/24` through `vmbr0`. The supported repair path is the staging bridge replay documented in [staging-environment.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/runbooks/staging-environment.md).
+If guest package downloads stall during converge, first verify the Proxmox host still forwards and masquerades `10.20.10.0/24` through `vmbr0`. The supported repair path is the staging bridge replay documented in [staging-environment.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/docs/runbooks/staging-environment.md).
 
 ## Validate
 

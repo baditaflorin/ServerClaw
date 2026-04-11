@@ -11,13 +11,13 @@
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime`, `adr-0052-loki-logs`, `adr-0133-portal-auth-by-default`
 - Conflicts With: none
-- Shared Surfaces: `roles/dozzle_runtime`, `roles/nginx_edge_publication`, `inventory/host_vars/proxmox_florin.yml`, `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, `config/api-gateway-catalog.json`
+- Shared Surfaces: `roles/dozzle_runtime`, `roles/nginx_edge_publication`, `inventory/host_vars/proxmox-host.yml`, `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, `config/api-gateway-catalog.json`
 
 ## Scope
 
-- add a repo-managed `dozzle_runtime` role that runs a Dozzle hub on `docker-runtime-lv3`
-- run Dozzle agents on `docker-runtime-lv3`, `docker-build-lv3`, and `monitoring-lv3`
-- publish `logs.lv3.org` through the shared NGINX edge with the existing oauth2-proxy and Keycloak gate
+- add a repo-managed `dozzle_runtime` role that runs a Dozzle hub on `docker-runtime`
+- run Dozzle agents on `docker-runtime`, `docker-build`, and `monitoring`
+- publish `logs.example.com` through the shared NGINX edge with the existing oauth2-proxy and Keycloak gate
 - wire the service through image, workflow, command, health, dependency, SLO, data, alerting, and subdomain catalogs
 - document the converge and verification path in `docs/runbooks/configure-dozzle.md`
 
@@ -43,10 +43,10 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` serves the Dozzle hub on `http://127.0.0.1:8089/healthcheck`
-- `docker-runtime-lv3`, `docker-build-lv3`, and `monitoring-lv3` each serve a Dozzle agent on `:7007`
-- `sudo docker exec dozzle /dozzle agent-test 10.10.10.30:7007` succeeds on `docker-runtime-lv3`
-- `https://logs.lv3.org/` redirects unauthenticated browsers to `/oauth2/sign_in`
+- `docker-runtime` serves the Dozzle hub on `http://127.0.0.1:8089/healthcheck`
+- `docker-runtime`, `docker-build`, and `monitoring` each serve a Dozzle agent on `:7007`
+- `sudo docker exec dozzle /dozzle agent-test 10.10.10.30:7007` succeeds on `docker-runtime`
+- `https://logs.example.com/` redirects unauthenticated browsers to `/oauth2/sign_in`
 
 ## Verification
 
@@ -58,7 +58,7 @@
 ## Merge Criteria
 
 - the Dozzle hub and per-host agents converge repeatably from the repo
-- `logs.lv3.org` is published on the shared edge with oauth2-proxy protection
+- `logs.example.com` is published on the shared edge with oauth2-proxy protection
 - the hub can reach the local and remote agents without ad hoc firewall changes
 - the runtime image is digest-pinned and scanned before the live apply evidence is recorded
 
@@ -68,4 +68,4 @@
 - the production rollout is recorded in `receipts/live-applies/2026-03-26-adr-0150-dozzle-live-apply.json`
 - `uv run --with pytest python -m pytest tests/test_dozzle_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_post_verify_tasks.py tests/test_dozzle_playbook.py -q` passed with `18 passed`
 - `make syntax-check-dozzle`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh health-probes`, and `./scripts/validate_repo.sh alert-rules` all passed
-- live verification confirmed the private hub healthcheck, remote agent reachability for `docker-build-lv3` and `monitoring-lv3`, and the public `logs.lv3.org` OIDC redirect path
+- live verification confirmed the private hub healthcheck, remote agent reachability for `docker-build` and `monitoring`, and the public `logs.example.com` OIDC redirect path

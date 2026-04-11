@@ -7,7 +7,7 @@
 - Implemented In Platform Version: not applicable (repository-only)
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0208-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0208-live-apply`
 - Owner: codex
 - Depends On: `adr-0204-architecture-governance`, `adr-0206-ports-and-adapters-for-external-integrations`
 - Conflicts With: none
@@ -95,7 +95,7 @@
 
 ## Verification
 
-- `python3 scripts/validate_dependency_direction.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-live-apply`
+- `python3 scripts/validate_dependency_direction.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0208-live-apply`
 - `make validate-dependency-direction`
 - `./scripts/validate_repo.sh dependency-direction agent-standards`
 - `UV_CACHE_DIR=/tmp/uv-cache uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_validate_dependency_direction.py tests/test_dependency_direction_gate.py tests/test_correction_loops.py tests/test_runbook_executor.py tests/test_api_gateway.py tests/test_run_namespace.py tests/test_session_workspace.py tests/test_parse_ansible_drift.py tests/test_slo_tracking.py tests/unit/test_closure_loop.py tests/test_health_composite.py tests/test_world_state_workers.py tests/test_lv3_cli.py tests/test_ansible_execution_scopes.py tests/test_interface_contracts.py tests/test_platform_llm_client.py tests/unit/test_diff_engine.py tests/unit/test_goal_compiler.py -q`

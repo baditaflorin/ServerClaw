@@ -11,11 +11,11 @@
 
 The platform makes synchronous calls to several external and internal services on the critical path of agent execution:
 
-- **Keycloak** (`sso.lv3.org`): JWT validation on every API gateway request; JWKS refresh every 300 seconds.
+- **Keycloak** (`sso.example.com`): JWT validation on every API gateway request; JWKS refresh every 300 seconds.
 - **OpenBao** (Proxmox host, Tailscale-only): Secret reads at workflow start and during rotation.
-- **Windmill** (`docker-runtime-lv3`): Job submission and status polling for every intent execution.
+- **Windmill** (`docker-runtime`): Job submission and status polling for every intent execution.
 - **Hetzner DNS API** (external): DNS record updates during subdomain provisioning.
-- **NATS** (`docker-runtime-lv3`): Every platform event publication.
+- **NATS** (`docker-runtime`): Every platform event publication.
 - **Anthropic/Ollama API**: Every LLM inference call in agent workflows.
 
 The current error handling model from ADR 0163 handles transient failures with retries and backoff. It does not handle dependency outages well: when a dependency is fully unavailable, each caller burns the same timeout and retry budget before independently discovering the outage.

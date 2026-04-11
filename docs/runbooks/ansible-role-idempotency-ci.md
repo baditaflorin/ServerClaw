@@ -4,7 +4,7 @@
 
 This runbook describes the repo-managed idempotency coverage gate for Ansible roles.
 
-The policy file at [config/ansible-role-idempotency.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ansible-role-idempotency.yml) is the source of truth for every role under [collections/ansible_collections/lv3/platform/roles/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles).
+The policy file at [config/ansible-role-idempotency.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/ansible-role-idempotency.yml) is the source of truth for every role under [collections/ansible_collections/lv3/platform/roles/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles).
 
 ## Policy States
 
@@ -41,7 +41,7 @@ uv run --with pyyaml python scripts/ansible_role_idempotency.py --manifest-only
 
 ## Promote A Role To Enforced
 
-1. Add a CI-safe playbook under [tests/idempotency/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/idempotency).
+1. Add a CI-safe playbook under [tests/idempotency/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/tests/idempotency).
 2. If the scenario needs a deterministic local HTTP dependency, declare it in `scenario.http_fixture`.
 3. Change the role policy in `config/ansible-role-idempotency.yml` from `tracked` to `enforced`.
 4. Run `make validate-ansible-idempotency`.

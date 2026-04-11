@@ -24,7 +24,7 @@ All repo-managed platform HTTP errors now return:
     "trace_id": "8d441eb8-2f7a-4517-a927-e7d0742d60cf",
     "retry_advice": "none",
     "retry_after": null,
-    "docs_url": "https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md",
+    "docs_url": "https://github.com/baditaflorin/proxmox-host_server/blob/main/docs/runbooks/platform-api-error-codes.md",
     "occurred_at": "2026-03-25T10:00:00+00:00",
     "context": {
       "workflow_id": "deploy-foo"

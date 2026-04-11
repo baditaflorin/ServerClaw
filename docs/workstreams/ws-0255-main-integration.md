@@ -8,7 +8,7 @@
 - Release Date: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0255-main-integration-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0255-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0255-main-integration`
 - Owner: codex
 - Depends On: `ws-0255-live-apply`
 
@@ -53,34 +53,34 @@ receipt.
 - The exact-main source commit
   `169d7e6549e539747d140497acd8a01e9049c330` preserved the Matrix runtime
   rollout and corrected the public HTTPS assurance path so
-  `monitoring-lv3` now probes the internal edge target
+  `monitoring` now probes the internal edge target
   `https://10.10.10.10:443/_matrix/client/versions` while still validating
-  host and TLS identity as `matrix.lv3.org`.
+  host and TLS identity as `matrix.example.com`.
 - `make converge-matrix-synapse` succeeded from the exact-main release tree
-  with final recap `docker-runtime-lv3 ok=131 changed=5 failed=0 skipped=26`,
-  `localhost ok=18 changed=0 failed=0 skipped=3`, `nginx-lv3 ok=38 changed=3
-  failed=0 skipped=7`, `postgres-lv3 ok=51 changed=0 failed=0 skipped=11`,
-  and `proxmox_florin ok=31 changed=4 failed=0 skipped=21`.
+  with final recap `docker-runtime ok=131 changed=5 failed=0 skipped=26`,
+  `localhost ok=18 changed=0 failed=0 skipped=3`, `nginx-edge ok=38 changed=3
+  failed=0 skipped=7`, `postgres ok=51 changed=0 failed=0 skipped=11`,
+  and `proxmox-host ok=31 changed=4 failed=0 skipped=21`.
 - `make converge-monitoring` succeeded after the assurance-path correction
-  with final recap `monitoring-lv3 ok=397 changed=2 failed=0 skipped=76`,
-  `nginx-lv3 ok=150 changed=3 failed=0 skipped=34`,
-  `docker-runtime-lv3 ok=72 changed=2 failed=0 skipped=14`,
-  `postgres-lv3 ok=38 changed=0 failed=0 skipped=16`,
-  `proxmox_florin ok=100 changed=0 failed=0 skipped=47`,
-  `backup-lv3 ok=14 changed=0 failed=0 skipped=2`,
-  `coolify-lv3 ok=14 changed=0 failed=0 skipped=2`,
-  and `docker-build-lv3 ok=46 changed=0 failed=0 skipped=4`.
+  with final recap `monitoring ok=397 changed=2 failed=0 skipped=76`,
+  `nginx-edge ok=150 changed=3 failed=0 skipped=34`,
+  `docker-runtime ok=72 changed=2 failed=0 skipped=14`,
+  `postgres ok=38 changed=0 failed=0 skipped=16`,
+  `proxmox-host ok=100 changed=0 failed=0 skipped=47`,
+  `backup ok=14 changed=0 failed=0 skipped=2`,
+  `coolify ok=14 changed=0 failed=0 skipped=2`,
+  and `docker-build ok=46 changed=0 failed=0 skipped=4`.
 - Public verification returned `status 200` from
-  `https://matrix.lv3.org/_matrix/client/versions` and successful login for
-  `@ops:matrix.lv3.org` from
-  `https://matrix.lv3.org/_matrix/client/v3/login`, while the governed
+  `https://matrix.example.com/_matrix/client/versions` and successful login for
+  `@ops:matrix.example.com` from
+  `https://matrix.example.com/_matrix/client/v3/login`, while the governed
   controller listener on `http://100.64.0.1:8015` returned the same account
   and homeserver identity after the exact-main replay.
-- Prometheus verification on `monitoring-lv3` reported
+- Prometheus verification on `monitoring` reported
   `matrix_https_probe_success=1`, `matrix_readiness_up=1`, and
   `matrix_liveness_up=1`, and the live file-SD target now records
-  `display_url=https://matrix.lv3.org:443/_matrix/client/versions` with
-  `probe_hostname=matrix.lv3.org` and internal edge connect target
+  `display_url=https://matrix.example.com:443/_matrix/client/versions` with
+  `probe_hostname=matrix.example.com` and internal edge connect target
   `https://10.10.10.10:443/_matrix/client/versions`.
 - `uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_edge_publication_makefile.py tests/test_matrix_synapse_runtime_role.py tests/test_matrix_synapse_postgres_role.py tests/test_matrix_synapse_playbook.py tests/test_generate_platform_vars.py`
   passed with `42 passed in 2.59s`.

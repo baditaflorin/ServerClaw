@@ -26,7 +26,7 @@ The platform already contains legitimate long-running workflows up to `7200` sec
 
 ## Decision
 
-We will define a repository-managed timeout hierarchy in [`config/timeout-hierarchy.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/timeout-hierarchy.yaml) and use it as the canonical source for:
+We will define a repository-managed timeout hierarchy in [`config/timeout-hierarchy.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/timeout-hierarchy.yaml) and use it as the canonical source for:
 
 - maximum timeout ceilings per layer
 - default timeout budgets when callers do not request an override
@@ -88,11 +88,11 @@ layers:
     inner_layers: []
 ```
 
-Each parent layer must have a `timeout_s` strictly greater than the sum of its direct child `timeout_s` values. That rule is enforced by [`scripts/validate_timeout_hierarchy.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_timeout_hierarchy.py).
+Each parent layer must have a `timeout_s` strictly greater than the sum of its direct child `timeout_s` values. That rule is enforced by [`scripts/validate_timeout_hierarchy.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_timeout_hierarchy.py).
 
 ### Deadline propagation
 
-Critical call paths use [`platform.timeouts.TimeoutContext`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/timeouts/context.py) to derive child timeouts from the remaining parent budget:
+Critical call paths use [`platform.timeouts.TimeoutContext`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/timeouts/context.py) to derive child timeouts from the remaining parent budget:
 
 - API gateway webhook and upstream proxy requests
 - NetBox synchronization retries
@@ -104,11 +104,11 @@ That keeps each child operation bounded by both its layer ceiling and the remain
 
 The first implementation covers the current high-value paths:
 
-- [`scripts/api_gateway/main.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/api_gateway/main.py)
-- [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py)
-- [`platform/world_state/workers.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/world_state/workers.py)
-- [`scripts/drift_lib.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/drift_lib.py)
-- [`scripts/netbox_inventory_sync.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py)
+- [`scripts/api_gateway/main.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/api_gateway/main.py)
+- [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py)
+- [`platform/world_state/workers.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/world_state/workers.py)
+- [`scripts/drift_lib.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/drift_lib.py)
+- [`scripts/netbox_inventory_sync.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/netbox_inventory_sync.py)
 
 The live scheduler watchdog seeding remains owned by ADR 0172. ADR 0170 depends on that path and aligns the timeout budgets used around it.
 
@@ -128,12 +128,12 @@ The live scheduler watchdog seeding remains owned by ADR 0172. ADR 0170 depends 
 
 ## Implementation Notes
 
-- Repository validation now runs both [`scripts/validate_timeout_hierarchy.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_timeout_hierarchy.py) and [`scripts/check_hardcoded_timeouts.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/check_hardcoded_timeouts.py) through [`scripts/validate_repo.sh`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh).
+- Repository validation now runs both [`scripts/validate_timeout_hierarchy.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_timeout_hierarchy.py) and [`scripts/check_hardcoded_timeouts.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/check_hardcoded_timeouts.py) through [`scripts/validate_repo.sh`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repo.sh).
 - The API gateway runtime now bundles `config/timeout-hierarchy.yaml` into `/config/timeout-hierarchy.yaml` and exports `LV3_TIMEOUT_HIERARCHY_PATH` so the live container reads the same hierarchy as the repo.
 - Windmill worker checkout already syncs the `windmill/` tree from ADR 0172; ADR 0170 reuses that live path rather than introducing a second watchdog entrypoint.
 - Repository implementation first landed in repository release `0.157.0`.
 - The integrated mainline live apply for repository release `0.159.0` completed on 2026-03-25: `make converge-api-gateway` succeeded after the runtime tree-sync and config-bind hardening, and `make converge-windmill` succeeded after the shared OpenBao compose-env helper learned to unseal the local API before runtime secret injection.
-- The mainline live apply advances platform version `0.130.8`; `make converge-openbao` still ended with `postgres-replica-lv3` unreachable in the prep play, but the active OpenBao runtime verification on `docker-runtime-lv3` passed end to end and the live-apply receipt records that remaining replica issue separately.
+- The mainline live apply advances platform version `0.130.8`; `make converge-openbao` still ended with `postgres-replica` unreachable in the prep play, but the active OpenBao runtime verification on `docker-runtime` passed end to end and the live-apply receipt records that remaining replica issue separately.
 
 ## Boundaries
 

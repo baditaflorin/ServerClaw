@@ -9,7 +9,7 @@
 
 ## Context
 
-ADR 0089 established host-local build caches on `docker-build-lv3`, and ADR
+ADR 0089 established host-local build caches on `docker-build`, and ADR
 0274 codified cache-first base-image mirrors for governed repo deployments, but
 the current platform still pulls many routine images directly from external
 registries at the moment they are needed.
@@ -20,7 +20,7 @@ The current image inventory already spans several upstream registries:
 - `ghcr.io` for Homepage
 - `artifacts.plane.so` for Plane
 - `docker.n8n.io` for n8n
-- `registry.lv3.org` for internal check-runner and platform-built images
+- `registry.example.com` for internal check-runner and platform-built images
 
 That means a simple converge, validation run, or recovery action can still fail
 because of upstream throttling, transient network errors, or a slow cold pull

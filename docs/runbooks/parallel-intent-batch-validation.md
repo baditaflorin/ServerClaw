@@ -6,11 +6,11 @@ This runbook covers ADR 0160: compile multiple instructions into one batch, fan 
 
 ## Canonical Sources
 
-- ADR: [docs/adr/0160-parallel-dry-run-fan-out-for-intent-batch-validation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0160-parallel-dry-run-fan-out-for-intent-batch-validation.md)
-- batch planner: [platform/goal_compiler/batch.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/batch.py)
-- compiler entry point: [platform/goal_compiler/compiler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/compiler.py)
-- CLI surface: [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
-- ledger event registry: [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ledger-event-types.yaml)
+- ADR: [docs/adr/0160-parallel-dry-run-fan-out-for-intent-batch-validation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0160-parallel-dry-run-fan-out-for-intent-batch-validation.md)
+- batch planner: [platform/goal_compiler/batch.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/goal_compiler/batch.py)
+- compiler entry point: [platform/goal_compiler/compiler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/goal_compiler/compiler.py)
+- CLI surface: [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py)
+- ledger event registry: [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/ledger-event-types.yaml)
 
 ## Preview A Batch
 

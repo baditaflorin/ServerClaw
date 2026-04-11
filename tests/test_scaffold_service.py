@@ -59,15 +59,15 @@ class ScaffoldServiceTests(unittest.TestCase):
                 sort_keys=False,
             )
         )
-        (root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text(
+        (root / "inventory" / "host_vars" / "proxmox-host.yml").write_text(
             yaml.safe_dump(
                 {
-                    "management_ipv4": "65.108.75.123",
+                    "management_ipv4": "203.0.113.1",
                     "management_tailscale_ipv4": "100.118.189.95",
                     "proxmox_guests": [
                         {
                             "vmid": 120,
-                            "name": "docker-runtime-lv3",
+                            "name": "docker-runtime",
                             "role": "docker-runtime",
                             "template_key": "lv3-ops-base",
                             "ipv4": "10.10.10.20",
@@ -76,8 +76,8 @@ class ScaffoldServiceTests(unittest.TestCase):
                     "lv3_service_topology": {
                         "docker_runtime": {
                             "service_name": "docker-runtime",
-                            "owning_vm": "docker-runtime-lv3",
-                            "private_ip": "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}",
+                            "owning_vm": "docker-runtime",
+                            "private_ip": "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}",
                             "exposure_model": "informational-only",
                             "observability": {
                                 "guest_dashboard": True,
@@ -101,7 +101,7 @@ class ScaffoldServiceTests(unittest.TestCase):
                             "description": "Runtime VM.",
                             "category": "infrastructure",
                             "lifecycle_status": "active",
-                            "vm": "docker-runtime-lv3",
+                            "vm": "docker-runtime",
                             "vmid": 120,
                             "internal_url": "ssh://ops@10.10.10.20",
                             "exposure": "informational-only",
@@ -142,7 +142,7 @@ class ScaffoldServiceTests(unittest.TestCase):
                     "services": {
                         "docker_runtime": {
                             "service_name": "docker-runtime",
-                            "owning_vm": "docker-runtime-lv3",
+                            "owning_vm": "docker-runtime",
                             "role": "docker_runtime",
                             "verify_file": "roles/docker_runtime/tasks/verify.yml",
                             "liveness": {
@@ -286,11 +286,11 @@ class ScaffoldServiceTests(unittest.TestCase):
                     "--category",
                     "automation",
                     "--vm",
-                    "docker-runtime-lv3",
+                    "docker-runtime",
                     "--port",
                     "8181",
                     "--subdomain",
-                    "test-echo.lv3.org",
+                    "test-echo.example.com",
                     "--exposure",
                     "private-only",
                     "--image",
@@ -336,7 +336,7 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertIn("TODO", service_entry["notes"])
 
             subdomains = json.loads((root / "config" / "subdomain-catalog.json").read_text())["subdomains"]
-            subdomain_entry = next(item for item in subdomains if item["fqdn"] == "test-echo.lv3.org")
+            subdomain_entry = next(item for item in subdomains if item["fqdn"] == "test-echo.example.com")
             self.assertEqual(subdomain_entry["target"], "100.118.189.95")
             self.assertEqual(subdomain_entry["target_port"], 8181)
 
@@ -345,7 +345,7 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertFalse(health_catalog["services"]["test_echo"]["uptime_kuma"]["enabled"])
             self.assertIn("TODO", health_catalog["services"]["test_echo"]["uptime_kuma"]["reason"])
 
-            host_vars_text = (root / "inventory" / "host_vars" / "proxmox_florin.yml").read_text()
+            host_vars_text = (root / "inventory" / "host_vars" / "proxmox-host.yml").read_text()
             self.assertIn("test_echo:", host_vars_text)
             self.assertIn("service_name: test-echo", host_vars_text)
 
@@ -385,7 +385,7 @@ class ScaffoldServiceTests(unittest.TestCase):
                     "--name",
                     "ops-dashboard",
                     "--subdomain",
-                    "ops.lv3.org",
+                    "ops.example.com",
                     "--today",
                     "2026-03-23",
                 ]

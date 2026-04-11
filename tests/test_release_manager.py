@@ -51,11 +51,11 @@ release_tracks:
 
 ## Latest Release
 
-- [0.1.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.1.0.md)
+- [0.1.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-notes/0.1.0.md)
 
 ## Previous Releases
 
-- [0.0.9 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.0.9.md)
+- [0.0.9 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-notes/0.0.9.md)
 """,
     )
     write(
@@ -64,7 +64,7 @@ release_tracks:
 
 ## Releases
 
-- [0.1.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.1.0.md)
+- [0.1.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-notes/0.1.0.md)
 """,
     )
     write(tmp_path / "docs" / "upgrade" / "v1.md", "# Upgrade Guide\n")
@@ -194,7 +194,7 @@ workstreams:
     monkeypatch.setattr(release_manager, "VERSION_SEMANTICS_PATH", tmp_path / "config" / "version-semantics.json")
     monkeypatch.setattr(release_manager, "OUTLINE_SYNC_SCRIPT", tmp_path / "scripts" / "sync_docs_to_outline.py")
     monkeypatch.setattr(release_manager, "OUTLINE_API_TOKEN_PATH", tmp_path / ".local" / "outline" / "api-token.txt")
-    monkeypatch.setattr(release_manager, "OUTLINE_BASE_URL", "https://wiki.lv3.org")
+    monkeypatch.setattr(release_manager, "OUTLINE_BASE_URL", "https://wiki.example.com")
     monkeypatch.setattr(release_manager, "CHANGELOG_PATH", tmp_path / "changelog.md")
     monkeypatch.setattr(release_manager, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
     monkeypatch.setattr(gate_bypass_waivers, "REPO_ROOT", tmp_path)
@@ -426,7 +426,7 @@ def test_release_cut_syncs_outline_when_bootstrap_artifacts_exist(
             "--repo-root",
             str(release_repo),
             "--base-url",
-            "https://wiki.lv3.org",
+            "https://wiki.example.com",
             "--api-token-file",
             str(release_manager.OUTLINE_API_TOKEN_PATH),
         ]

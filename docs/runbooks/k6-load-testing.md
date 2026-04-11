@@ -41,8 +41,8 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
 ## Live-Apply Notes
 
 - Prometheus remote-write must be reachable on the private monitoring address
-  from `docker-build-lv3` and `docker-runtime-lv3`.
-- On `monitoring-lv3`, Prometheus must listen on the guest-reachable private
+  from `docker-build` and `docker-runtime`.
+- On `monitoring`, Prometheus must listen on the guest-reachable private
   interface (`0.0.0.0:9090` for the current unit) rather than `127.0.0.1:9090`
   or the build-host smoke/load path will time out even when the local service
   is healthy.
@@ -51,7 +51,7 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
   `http://100.64.0.1:8014` controller proxy is Tailscale-bound and is only for
   controller-local bootstrap and verification.
 - If the public Keycloak smoke probe fails, check
-  `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` directly
+  `https://sso.example.com/realms/lv3/.well-known/openid-configuration` directly
   before treating the result as a repo regression. The 2026-03-31 latest-main
   replay returned `502 Bad Gateway` from that exact URL, which confirmed a live
   edge/runtime failure rather than a k6-runner contract break.
@@ -59,7 +59,7 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
   `http://10.10.10.20:8091/health/ready` check both time out or fail, preserve
   the k6 receipts and outage evidence as live-service degradation; do not
   rewrite the run into a repository-only failure.
-- During `docker-runtime-lv3` redeploys, OpenFGA health can flap briefly while
+- During `docker-runtime` redeploys, OpenFGA health can flap briefly while
   the container restarts; if the first k6 smoke run hits connection refusals,
   re-check `http://10.10.10.20:8098/healthz` from the build host before
   concluding the repo change regressed the service.

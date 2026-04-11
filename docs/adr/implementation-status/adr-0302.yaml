@@ -28,7 +28,7 @@ detected_markers:
   evidence: 'da96216a1 [backup] Complete ADR 0302 live apply\n\nPurpose: Finish the
     ADR 0302 Restic backup rollout, live verification, and merge-ready evidence set.\nScope:
     Finalize runner fixes, shared-role hardening, backup ledger compatibility, receipts,
-    and workstream metadata.\nStatus: Live applied on docker-runtime-lv3 and ready
+    and workstream metadata.\nStatus: Live applied on docker-runtime and ready
     to merge onto main.\nNext: Merge to main, bump VERSION and versions/stack.yaml,
     update ADR metadata, and publish the mainline live-apply receipt.\nSee also: ADR
     0302'

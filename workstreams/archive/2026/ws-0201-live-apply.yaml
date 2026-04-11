@@ -21,7 +21,7 @@ shared_surfaces:
   - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
   - collections/ansible_collections/lv3/platform/roles/docker_runtime/
   - inventory/group_vars/platform.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - playbooks/harbor.yml
   - playbooks/services/harbor.yml
   - Makefile
@@ -52,7 +52,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: implemented ADR 0201 by converging Harbor with Trivy
     scanning, Keycloak-backed operator login, and a repo-managed check-runner
-    publication path through registry.lv3.org
+    publication path through registry.example.com
   release_bump: patch
   included_in_repo_version: 0.177.65
   latest_receipts:

@@ -4,7 +4,7 @@
 - Title: repository-managed host capacity model with reporting, validation, and promotion gate integration
 - Status: merged
 - Branch: `codex/ws-0105-live-apply`
-- Worktree: `../proxmox_florin_server-ws-0105-live-apply`
+- Worktree: `../proxmox-host_server-ws-0105-live-apply`
 - Owner: codex
 - Depends On: `adr-0010-vm-topology`, `adr-0073-promotion-gate`, `adr-0085-opentofu-vm-lifecycle`, `adr-0097-alerting-routing`, `adr-0098-postgres-ha`
 - Conflicts With: none
@@ -12,7 +12,7 @@
 
 ## Delivered Scope
 
-- added `config/capacity-model.json` with live-validated allocations for active VMs plus planned `postgres-replica-lv3`
+- added `config/capacity-model.json` with live-validated allocations for active VMs plus planned `postgres-replica`
 - added `docs/schema/capacity-model.schema.json`
 - implemented `scripts/capacity_report.py`
 - added `make capacity-report` and `lv3 capacity`
@@ -27,7 +27,7 @@
 
 ## Notes
 
-- live utilisation is collected from InfluxDB on `monitoring-lv3`, not Prometheus
+- live utilisation is collected from InfluxDB on `monitoring`, not Prometheus
 - the backup datastore disk is modeled in committed capacity, but live datastore usage is not yet queried separately
 - the dashboard and alert bundle are now verified live on production monitoring and recorded in the canonical mainline receipt/state
 
@@ -44,8 +44,8 @@
 - `make weekly-capacity-report NO_LIVE_METRICS=true`
 - `make weekly-capacity-report`
 - `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100`
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
-- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `curl -Ik --resolve grafana.example.com:443:203.0.113.1 https://grafana.example.com/d/lv3-capacity-overview/lv3-capacity-overview`
 
 ## Merge Outcome
 
@@ -57,4 +57,4 @@
 - the immediate branch replay completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
 - the current-mainline replay from source commit `2907637daca87ee2bb739c0dd821eee0834aa319` completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
 - the current-mainline replay also verified the fresh-worktree live-apply path after shortening per-run Ansible control-socket directories under `/tmp`
-- the dashboard uid `lv3-capacity-overview` is published behind `https://grafana.lv3.org/` and both `make capacity-report` and `make weekly-capacity-report` render with live `ssh+influx` metrics
+- the dashboard uid `lv3-capacity-overview` is published behind `https://grafana.example.com/` and both `make capacity-report` and `make weekly-capacity-report` render with live `ssh+influx` metrics

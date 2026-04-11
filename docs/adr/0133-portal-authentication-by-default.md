@@ -11,10 +11,10 @@
 
 The platform publishes several browser-facing portals whose content is operationally sensitive even when the surfaces are read-only:
 
-- `ops.lv3.org` exposes live platform state and operator workflows
-- `changelog.lv3.org` exposes deployment history, actors, and promotion cadence
-- `docs.lv3.org` exposes ADRs, runbooks, topology, and service reference material
-- `grafana.lv3.org` exposes service names, health, capacity, and infrastructure telemetry
+- `ops.example.com` exposes live platform state and operator workflows
+- `changelog.example.com` exposes deployment history, actors, and promotion cadence
+- `docs.example.com` exposes ADRs, runbooks, topology, and service reference material
+- `grafana.example.com` exposes service names, health, capacity, and infrastructure telemetry
 
 Treating these portals as public because they are "read-only" leaks operational context that an attacker can use for reconnaissance. The correct default is that portal access requires authentication unless a surface is deliberately carved out as public.
 
@@ -24,10 +24,10 @@ We will enforce authentication by default for portal services.
 
 ### Portal policy
 
-- `ops.lv3.org` requires Keycloak OIDC through the shared edge `oauth2-proxy`.
-- `changelog.lv3.org` requires Keycloak OIDC through the shared edge `oauth2-proxy`.
-- `docs.lv3.org` requires Keycloak OIDC through the shared edge `oauth2-proxy`, with read-only access for authenticated operators.
-- `grafana.lv3.org` requires Keycloak-backed login and must not allow anonymous viewers.
+- `ops.example.com` requires Keycloak OIDC through the shared edge `oauth2-proxy`.
+- `changelog.example.com` requires Keycloak OIDC through the shared edge `oauth2-proxy`.
+- `docs.example.com` requires Keycloak OIDC through the shared edge `oauth2-proxy`, with read-only access for authenticated operators.
+- `grafana.example.com` requires Keycloak-backed login and must not allow anonymous viewers.
 
 ### Repository contract
 
@@ -41,7 +41,7 @@ The repository validates this contract with:
 
 ### Edge implementation
 
-The shared edge `oauth2-proxy` now issues a cookie for `.lv3.org`, allowing one Keycloak-backed browser session to protect `ops`, `docs`, and `changelog` through the common NGINX `auth_request` pattern already used for the operations portal.
+The shared edge `oauth2-proxy` now issues a cookie for `.example.com`, allowing one Keycloak-backed browser session to protect `ops`, `docs`, and `changelog` through the common NGINX `auth_request` pattern already used for the operations portal.
 
 ## Consequences
 
@@ -60,10 +60,10 @@ The shared edge `oauth2-proxy` now issues a cookie for `.lv3.org`, allowing one 
 
 Repository validation must pass and the live platform must reject unauthenticated access:
 
-- `https://ops.lv3.org/` returns a redirect to `/oauth2/sign_in`
-- `https://changelog.lv3.org/` returns a redirect to `/oauth2/sign_in`
-- `https://docs.lv3.org/` returns a redirect to `/oauth2/sign_in`
-- `https://grafana.lv3.org/` does not serve dashboards anonymously
+- `https://ops.example.com/` returns a redirect to `/oauth2/sign_in`
+- `https://changelog.example.com/` returns a redirect to `/oauth2/sign_in`
+- `https://docs.example.com/` returns a redirect to `/oauth2/sign_in`
+- `https://grafana.example.com/` does not serve dashboards anonymously
 
 ## Related ADRs
 

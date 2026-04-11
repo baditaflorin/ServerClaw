@@ -36,7 +36,7 @@ shared_surfaces:
   - docs/runbooks/configure-ollama.md
   - inventory/group_vars/all.yml
   - inventory/group_vars/postgres_guests.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
   - scripts/vulnerability_budget.py
@@ -135,7 +135,7 @@ ownership_manifest:
         - inventory/group_vars/all.yml
         - inventory/group_vars/postgres_guests.yml
         - inventory/group_vars/platform.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - playbooks/one-api.yml
         - playbooks/services/one-api.yml
         - playbooks/services/guest-log-shipping.yml

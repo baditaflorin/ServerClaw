@@ -1,14 +1,14 @@
 # Workstream ADR 0068: Container Image Policy And Supply Chain Integrity
 
-- ADR: [ADR 0068](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0068-container-image-policy-and-supply-chain-integrity.md)
+- ADR: [ADR 0068](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0068-container-image-policy-and-supply-chain-integrity.md)
 - Title: Digest-pinned images, scan receipts, and an upgrade workflow for supply-chain safety
 - Status: merged
 - Branch: `codex/adr-0068-container-image-policy`
-- Worktree: `../proxmox_florin_server-container-image-policy`
+- Worktree: `../proxmox-host_server-container-image-policy`
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime`, `adr-0025-docker-compose-stacks`, `adr-0044-windmill`
 - Conflicts With: none
-- Shared Surfaces: all Docker Compose files, `config/`, Windmill workflows, `docker-build-lv3` role
+- Shared Surfaces: all Docker Compose files, `config/`, Windmill workflows, `docker-build` role
 
 ## Scope
 

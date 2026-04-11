@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0231-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0231-live-apply`
 - Owner: codex
 - Depends On: `adr-0043-openbao`, `adr-0051-control-plane-backup-recovery-and-break-glass`, `adr-0077-compose-runtime-secrets-injection`, `adr-0224-server-resident-operations-as-the-default-control-model`
 - Conflicts With: none
@@ -17,7 +17,7 @@
 ## Scope
 
 - add a reusable repo-managed helper that delivers host-native secrets through an OpenBao Agent supervised by systemd
-- migrate the live `lv3-control-plane-backup` unit on `docker-runtime-lv3` away from a guest-local OpenBao token file and a plaintext DSN baked into the script
+- migrate the live `lv3-control-plane-backup` unit on `docker-runtime` away from a guest-local OpenBao token file and a plaintext DSN baked into the script
 - verify the new systemd credential path end to end on the live platform from the latest `origin/main`
 - record branch-local evidence, receipts, and merge notes without mutating protected release truth until the final integration step
 
@@ -40,10 +40,10 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` runs `lv3-control-plane-backup-openbao-agent.service` as the host-native credential delivery path for `lv3-control-plane-backup.service`
+- `docker-runtime` runs `lv3-control-plane-backup-openbao-agent.service` as the host-native credential delivery path for `lv3-control-plane-backup.service`
 - `/run/lv3-systemd-credentials/control-plane-backup/` contains only the runtime credential sources needed by systemd for the backup unit
 - `/etc/lv3/control-plane-recovery/openbao-backup-token.json` is absent after convergence
-- starting `lv3-control-plane-backup.service` succeeds with the new credential delivery path and produces a fresh backup generation on `backup-lv3`
+- starting `lv3-control-plane-backup.service` succeeds with the new credential delivery path and produces a fresh backup generation on `backup`
 
 ## Verification
 
@@ -53,13 +53,13 @@
 - `./scripts/validate_repo.sh workstream-surfaces`
 - `make validate`
 - `make converge-control-plane-recovery`
-- live checks on `docker-runtime-lv3` for `lv3-control-plane-backup-openbao-agent.service`, `lv3-control-plane-backup.service`, `/run/lv3-systemd-credentials/control-plane-backup/`, and the absence of `/etc/lv3/control-plane-recovery/openbao-backup-token.json`
+- live checks on `docker-runtime` for `lv3-control-plane-backup-openbao-agent.service`, `lv3-control-plane-backup.service`, `/run/lv3-systemd-credentials/control-plane-backup/`, and the absence of `/etc/lv3/control-plane-recovery/openbao-backup-token.json`
 
 ## Outcome
 
-- the repo now includes a reusable host-native secret helper at [`collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml) that provisions OpenBao AppRole bootstrap material, renders agent configuration and templates, and supervises the agent under systemd with a direct `/bin/vault` entrypoint inside the pinned OpenBao image
-- `docker-runtime-lv3` now runs [`lv3-control-plane-backup-openbao-agent.service`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply/collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2) as the host-native credential source for [`lv3-control-plane-backup.service`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply/collections/ansible_collections/lv3/platform/roles/control_plane_recovery/templates/lv3-control-plane-backup.service.j2), with `/run/lv3-systemd-credentials/control-plane-backup/openbao-token` and `/run/lv3-systemd-credentials/control-plane-backup/windmill-db-dsn` present at mode `0600`
-- the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is absent on `docker-runtime-lv3`, the immediate backup replay completed successfully at `2026-03-28 16:44:35 UTC`, `backup-lv3` now holds fresh generation `20260328T164431Z`, and the restore drill re-passed at `2026-03-28T16:45:06Z`
+- the repo now includes a reusable host-native secret helper at [`collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0231-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml) that provisions OpenBao AppRole bootstrap material, renders agent configuration and templates, and supervises the agent under systemd with a direct `/bin/vault` entrypoint inside the pinned OpenBao image
+- `docker-runtime` now runs [`lv3-control-plane-backup-openbao-agent.service`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0231-live-apply/collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2) as the host-native credential source for [`lv3-control-plane-backup.service`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0231-live-apply/collections/ansible_collections/lv3/platform/roles/control_plane_recovery/templates/lv3-control-plane-backup.service.j2), with `/run/lv3-systemd-credentials/control-plane-backup/openbao-token` and `/run/lv3-systemd-credentials/control-plane-backup/windmill-db-dsn` present at mode `0600`
+- the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is absent on `docker-runtime`, the immediate backup replay completed successfully at `2026-03-28 16:44:35 UTC`, `backup` now holds fresh generation `20260328T164431Z`, and the restore drill re-passed at `2026-03-28T16:45:06Z`
 - repository version `0.177.44` integrated the workstream into `main` without a platform-version bump because the live replay was already verified on platform version `0.130.38`
 
 ## Mainline Integration

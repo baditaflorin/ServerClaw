@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/repo-deploy-base-image-profiles.schema.json",
+  "$id": "https://example.com/schema/repo-deploy-base-image-profiles.schema.json",
   "title": "Repo deploy base image profiles",
   "type": "object",
   "additionalProperties": false,

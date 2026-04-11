@@ -14,7 +14,7 @@ def test_n8n_dns_stage_converges_only_the_n8n_subdomain_record() -> None:
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "n8n.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "n8n.example.com"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the n8n subdomain entry")
     assert (

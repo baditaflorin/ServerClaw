@@ -285,7 +285,7 @@ def test_grype_scan_sbom_uses_native_grype_on_linux(monkeypatch, tmp_path: Path)
     scanner.grype_scan_sbom(
         image_id="example",
         image_ref="ghcr.io/example/service:1.0.0@sha256:deadbeef",
-        runtime_host="docker-runtime-lv3",
+        runtime_host="docker-runtime",
         sbom_path=sbom_path,
         cve_path=cve_path,
         scanned_at=scanner.now_utc(),
@@ -333,7 +333,7 @@ def test_grype_scan_sbom_falls_back_to_container_when_native_grype_missing(monke
     scanner.grype_scan_sbom(
         image_id="example",
         image_ref="ghcr.io/example/service:1.0.0@sha256:deadbeef",
-        runtime_host="docker-runtime-lv3",
+        runtime_host="docker-runtime",
         sbom_path=sbom_path,
         cve_path=cve_path,
         scanned_at=scanner.now_utc(),

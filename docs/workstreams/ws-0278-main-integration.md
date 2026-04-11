@@ -7,7 +7,7 @@
 - Platform Version Before Exact-Main Replay: `0.130.60`
 - Live Applied In Platform Version: `0.130.61`
 - Branch: `codex/ws-0278-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0278-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0278-main-integration`
 - Owner: codex
 - Depends On: `ws-0278-live-apply`
 
@@ -28,7 +28,7 @@ platform-version bump.
 - `docs/adr/.index.yaml`
 - `docs/site-generated/architecture/dependency-graph.md`
 - `docs/runbooks/configure-gotenberg.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
@@ -85,7 +85,7 @@ platform-version bump.
   rules are applied live without reloading the full nftables ruleset, and the
   focused Docker runtime plus Gotenberg pytest slice covers that behavior
 - the authoritative merged-main replay from commit `e1b0ceb64` succeeded with
-  recap `docker-runtime-lv3 : ok=259 changed=112 unreachable=0 failed=0 skipped=29 rescued=0 ignored=0`, captured in
+  recap `docker-runtime : ok=259 changed=112 unreachable=0 failed=0 skipped=29 rescued=0 ignored=0`, captured in
   `receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-live-apply-r2.txt`
 - fresh merged-main checks succeeded for guest-local health, guest-local
   Chromium and LibreOffice conversion, authenticated gateway health, and

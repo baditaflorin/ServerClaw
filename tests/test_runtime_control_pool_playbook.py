@@ -23,7 +23,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     ]
 
     assert playbook[1]["name"] == "Converge the dedicated runtime-control guest substrate"
-    assert playbook[1]["hosts"] == "runtime-control-lv3"
+    assert playbook[1]["hosts"] == "runtime-control"
     assert playbook[1]["vars"]["runtime_pool_substrate_pool_id"] == "runtime-control"
     pre_task_names = [task["name"] for task in playbook[1]["pre_tasks"]]
     assert "Detect whether Docker is already active before the managed runtime converge" not in pre_task_names
@@ -59,7 +59,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert playbook[1]["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
 
     assert playbook[3]["name"] == "Ensure the runtime-control Nomad namespace exists"
-    assert playbook[3]["hosts"] == "monitoring-lv3"
+    assert playbook[3]["hosts"] == "monitoring"
     assert [role["role"] for role in playbook[3]["roles"]] == ["lv3.platform.nomad_namespace"]
 
     import_playbooks = [entry["import_playbook"] for entry in playbook[4:17]]
@@ -85,7 +85,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert "vars" not in openbao_import
 
     assert playbook[17]["name"] == "Verify the runtime-control substrate routes after the control-plane migration"
-    assert playbook[17]["hosts"] == "runtime-control-lv3"
+    assert playbook[17]["hosts"] == "runtime-control"
     route_urls = [task["ansible.builtin.uri"]["url"] for task in playbook[17]["tasks"] if "ansible.builtin.uri" in task]
     assert "http://127.0.0.1:9080/api-gateway/healthz" in route_urls
     assert "http://127.0.0.1:9080/openfga/healthz" in route_urls
@@ -106,8 +106,8 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert readiness_task["delegate_to"] == "localhost"
     assert readiness_task["delegate_facts"] is True
 
-    assert playbook[18]["name"] == "Retire the legacy control-plane copies from docker-runtime-lv3"
-    assert playbook[18]["hosts"] == "docker-runtime-lv3"
+    assert playbook[18]["name"] == "Retire the legacy control-plane copies from docker-runtime"
+    assert playbook[18]["hosts"] == "docker-runtime"
     retirement_assert = next(
         task
         for task in playbook[18]["pre_tasks"]
@@ -119,7 +119,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     down_task = next(
         task
         for task in playbook[18]["tasks"]
-        if task["name"] == "Stop the legacy control-plane compose stacks on docker-runtime-lv3"
+        if task["name"] == "Stop the legacy control-plane compose stacks on docker-runtime"
     )
     assert down_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
 

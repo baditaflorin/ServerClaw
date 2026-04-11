@@ -30,7 +30,7 @@ class DocsSiteTests(unittest.TestCase):
             api_md = (temp_dir / "api" / "index.md").read_text(encoding="utf-8")
 
             self.assertIn("LV3 Platform Docs", index_md)
-            self.assertIn("https://sso.lv3.org", keycloak_md)
+            self.assertIn("https://sso.example.com", keycloak_md)
             self.assertIn("ADR 0056", keycloak_md)
             self.assertIn(
                 "../architecture/decisions/0274-minio-as-the-s3-compatible-object-storage-layer.md",
@@ -41,7 +41,7 @@ class DocsSiteTests(unittest.TestCase):
                 minio_md,
             )
             self.assertIn("18080", ports_md)
-            self.assertIn("docs.lv3.org", ports_md)
+            self.assertIn("docs.example.com", ports_md)
             self.assertIn("OpenAPI browser", api_md)
             self.assertIn("sensitivity: INTERNAL", keycloak_md)
             self.assertIn("sensitivity: PUBLIC", api_md)

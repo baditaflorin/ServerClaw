@@ -21,7 +21,7 @@ What is missing is a single, browsable, human-readable dashboard that answers fo
 
 ## Decision
 
-We will deploy a **Platform Operations Portal** (`ops.lv3.org`) as a lightweight static web application served from the NGINX edge.
+We will deploy a **Platform Operations Portal** (`ops.example.com`) as a lightweight static web application served from the NGINX edge.
 
 ### Design principles
 
@@ -77,7 +77,7 @@ Inputs:
 Output:
 - `build/ops-portal/` — static HTML site
 
-The generation script runs as part of the `make generate-status` target and during the CI validate pipeline. The resulting `build/ops-portal/` directory is served by the NGINX edge at `ops.lv3.org`.
+The generation script runs as part of the `make generate-status` target and during the CI validate pipeline. The resulting `build/ops-portal/` directory is served by the NGINX edge at `ops.example.com`.
 
 ### Authentication
 
@@ -88,20 +88,20 @@ The portal is served behind NGINX auth via Keycloak (ADR 0056) using the `operat
 - Operators gain a single entry point for navigating the platform instead of consulting multiple files and runbooks.
 - The portal is always in sync with the canonical state files because it is generated on merge; there is no risk of it drifting from reality.
 - The generation script must be updated whenever a new catalog field is added; this is a lightweight maintenance cost.
-- Serving via NGINX means the portal is only reachable when the nginx-lv3 VM is running; the portal itself does not require any additional VM or container.
+- Serving via NGINX means the portal is only reachable when the nginx-edge VM is running; the portal itself does not require any additional VM or container.
 
 ## Boundaries
 
 - The portal is a read surface. Initiating workflows, approving commands, or mutating platform state is handled by Windmill (ADR 0044), the command catalog (ADR 0048), and the agent tool registry (ADR 0069) respectively.
 - The portal does not replace Grafana dashboards for metrics, Loki for logs, or GlitchTip for error tracking. It links to all of these.
-- The staging environment has its own portal instance at `ops.staging.lv3.org` generated from the staging service catalog.
+- The staging environment has its own portal instance at `ops.staging.example.com` generated from the staging service catalog.
 
 ## Implementation Notes
 
 - The first repository implementation renders six static pages under `build/ops-portal/` through `scripts/generate_ops_portal.py` and validates them in `make validate`.
 - Health rendering accepts a generation-time snapshot file and falls back to direct URL or TCP probes so CI and local validation stay deterministic without requiring a client-side runtime.
 - Repo links in the generated portal resolve to GitHub when the repository remote is available, with filesystem-path fallback for local inspection.
-- Repository automation now includes generated-static publication support in `roles/nginx_edge_publication` plus a dedicated `public_edge_oidc_auth` role that runs `oauth2-proxy` on `nginx-lv3` and delegates browser login to Keycloak through the repo-managed `ops-portal-oauth` client.
-- Internal edge verification now confirms that `ops.lv3.org` returns a redirect to `/oauth2/sign_in` when accessed without a session, proving that the portal static content is no longer anonymously served on the VM itself.
-- Public internet reachability for `ops.lv3.org` was verified end to end on `2026-03-23` after changing `nginx-lv3` to rely on its in-guest nftables policy instead of the Proxmox `fwbr*` bridge path; the guest inventory now records this as `proxmox_firewall_enabled: false`, which converges VM `110` to `net0 ... firewall=0`.
-- The auth flow also depends on `docker-runtime-lv3` allowing TCP `8091` from `nginx-lv3` in both the Proxmox VM firewall and the guest nftables policy so `sso.lv3.org` and the edge `oauth2-proxy` can reach Keycloak.
+- Repository automation now includes generated-static publication support in `roles/nginx_edge_publication` plus a dedicated `public_edge_oidc_auth` role that runs `oauth2-proxy` on `nginx-edge` and delegates browser login to Keycloak through the repo-managed `ops-portal-oauth` client.
+- Internal edge verification now confirms that `ops.example.com` returns a redirect to `/oauth2/sign_in` when accessed without a session, proving that the portal static content is no longer anonymously served on the VM itself.
+- Public internet reachability for `ops.example.com` was verified end to end on `2026-03-23` after changing `nginx-edge` to rely on its in-guest nftables policy instead of the Proxmox `fwbr*` bridge path; the guest inventory now records this as `proxmox_firewall_enabled: false`, which converges VM `110` to `net0 ... firewall=0`.
+- The auth flow also depends on `docker-runtime` allowing TCP `8091` from `nginx-edge` in both the Proxmox VM firewall and the guest nftables policy so `sso.example.com` and the edge `oauth2-proxy` can reach Keycloak.

@@ -13,7 +13,7 @@ The repository has 17+ playbooks. As new ADRs are implemented, the count will ex
 
 - **monolithic plays** — `site.yml` imports all playbooks sequentially, giving no way to run a logical group (e.g. "all security services") without knowing which playbook files to list
 - **duplicated pre_tasks blocks** — every playbook repeats the same preflight assertions (validate secrets, check SSH connectivity, assert environment variable), copy-pasted with minor variations
-- **no environment-awareness** — playbooks hardcode `hosts: docker-runtime-lv3` without considering the staging topology (ADR 0072); running against staging requires manual `--limit` flags
+- **no environment-awareness** — playbooks hardcode `hosts: docker-runtime` without considering the staging topology (ADR 0072); running against staging requires manual `--limit` flags
 - **no play-level tagging** — there is no consistent tagging strategy; operators cannot run `make live-apply tags=observability` to touch only monitoring-related services
 - **no import graph** — it is unclear which playbooks must run before others; dependencies are implicit in the role ordering rather than declared
 

@@ -1,10 +1,10 @@
 # Workstream ADR 0014: Tailscale Private Access Rollout
 
-- ADR: [ADR 0014](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0014-operator-access-to-private-guest-network.md)
+- ADR: [ADR 0014](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0014-operator-access-to-private-guest-network.md)
 - Title: Tailscale private guest access
 - Status: merged
 - Branch: `codex/adr-0014-tailscale`
-- Worktree: `../proxmox_florin_server-tailscale`
+- Worktree: `../proxmox-host_server-tailscale`
 - Owner: codex
 - Depends On: none
 - Conflicts With: none

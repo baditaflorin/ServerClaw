@@ -6,10 +6,10 @@ Use this runbook when validating or reapplying ADR 0170 timeout controls across 
 
 ## Canonical Inputs
 
-- hierarchy: [`config/timeout-hierarchy.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/timeout-hierarchy.yaml)
-- runtime helpers: [`platform/timeouts/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/timeouts)
-- validator: [`scripts/validate_timeout_hierarchy.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_timeout_hierarchy.py)
-- scanner: [`scripts/check_hardcoded_timeouts.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/check_hardcoded_timeouts.py)
+- hierarchy: [`config/timeout-hierarchy.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/timeout-hierarchy.yaml)
+- runtime helpers: [`platform/timeouts/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/timeouts)
+- validator: [`scripts/validate_timeout_hierarchy.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_timeout_hierarchy.py)
+- scanner: [`scripts/check_hardcoded_timeouts.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/check_hardcoded_timeouts.py)
 
 ## Validate
 
@@ -33,9 +33,9 @@ ansible-playbook -i inventory/hosts.yml -e proxmox_guest_ssh_connection_mode=pro
 From the controller:
 
 ```bash
-curl -sf https://api.lv3.org/healthz
+curl -sf https://api.example.com/healthz
 ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'test -f /opt/api-gateway/config/timeout-hierarchy.yaml && grep -n LV3_TIMEOUT_HIERARCHY_PATH /opt/api-gateway/api-gateway.env'
-ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 /srv/proxmox_florin_server/windmill/scheduler/watchdog-loop.py --repo-path /srv/proxmox_florin_server'
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 /srv/proxmox-host_server/windmill/scheduler/watchdog-loop.py --repo-path /srv/proxmox-host_server'
 ```
 
 From Windmill:
@@ -47,5 +47,5 @@ From Windmill:
 
 - API gateway service timeouts are uniformly `30` seconds in `config/api-gateway-catalog.json`.
 - API gateway runtime bundle contains `/config/timeout-hierarchy.yaml`.
-- Windmill worker checkout on `docker-runtime-lv3` includes the `windmill/` tree from ADR 0172.
+- Windmill worker checkout on `docker-runtime` includes the `windmill/` tree from ADR 0172.
 - The scheduler watchdog loop runs every 10 seconds with `no_flow_overlap=true`.

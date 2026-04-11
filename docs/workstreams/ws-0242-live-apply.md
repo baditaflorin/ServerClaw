@@ -9,7 +9,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0242-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0242-live-apply`
 - Owner: codex
 - Depends On: `adr-0108-operator-onboarding-and-offboarding`,
   `adr-0122-windmill-operator-access-admin`,
@@ -81,9 +81,9 @@
   `shepherd.js` successfully after `npm ci`, proving the same runtime image used
   by `make converge-windmill` can now build the app from the committed lockfile.
 - `make converge-windmill` completed successfully from this worktree with final
-  recap `docker-runtime-lv3 ok=232 changed=42 failed=0`,
-  `postgres-lv3 ok=63 changed=1 failed=0`, and
-  `proxmox_florin ok=37 changed=7 failed=0`.
+  recap `docker-runtime ok=232 changed=42 failed=0`,
+  `postgres ok=63 changed=1 failed=0`, and
+  `proxmox-host ok=37 changed=7 failed=0`.
 - `curl -s http://100.64.0.1:8005/api/version` returned `CE v1.662.0`,
   `curl -s -H "Authorization: Bearer <secret>" http://100.64.0.1:8005/api/users/whoami`
   returned the managed bootstrap identity, and

@@ -12,8 +12,8 @@ depends_on:
   - adr-0023-docker-runtime
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
-  - monitoring-lv3
+  - docker-runtime
+  - monitoring
   - mail transport and DNS
   - Stalwart management API
   - Grafana mail dashboards

@@ -10,7 +10,7 @@
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0298-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0298-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0068`, `adr-0087`, `adr-0102`, `adr-0165`, `adr-0295`
 - Conflicts With: none
@@ -26,15 +26,15 @@ SBOM generation part of the governed converge and security-scan paths.
 - The final live apply was replayed from the exact `origin/main`
   baseline `5c7e07235f7b0da1f756148e145397f0ac6ceb10` using the isolated
   mainline worktree
-  `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-final-r4`.
+  `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0298-main-final-r4`.
 - `make converge-windmill` corrected the shared
-  `/srv/proxmox_florin_server` mirror on `docker-runtime-lv3`, restoring the
+  `/srv/proxmox-host_server` mirror on `docker-runtime`, restoring the
   committed `config/windmill/scripts/sbom-refresh.py` wrapper and the patched
   `scripts/sbom_scanner.py` native-tooling logic.
 - The governed replay recap was
-  `docker-runtime-lv3 : ok=330 changed=50 failed=0 skipped=70`,
-  `postgres-lv3 : ok=76 changed=5 failed=0 skipped=20`, and
-  `proxmox_florin : ok=41 changed=4 failed=0 skipped=16`.
+  `docker-runtime : ok=330 changed=50 failed=0 skipped=70`,
+  `postgres : ok=76 changed=5 failed=0 skipped=20`, and
+  `proxmox-host : ok=41 changed=4 failed=0 skipped=16`.
 - The live native worker now exposes `/usr/local/bin/syft` `1.41.2` and
   `/usr/local/bin/grype` `0.110.0`, and the scanner writes extraction scratch
   data under the repo-local `.local/syft-tmp` contract.
@@ -49,7 +49,7 @@ SBOM generation part of the governed converge and security-scan paths.
   records a clean `python3 -m py_compile` pass for `scripts/sbom_scanner.py`.
 - `receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-converge-windmill-r2.txt`
   records the governed Windmill replay that refreshed the worker checkout and
-  runtime compose surfaces on `docker-runtime-lv3`.
+  runtime compose surfaces on `docker-runtime`.
 - `receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-live-checkout-r3.txt`
   confirms the live worker mirror contains `DEFAULT_SYFT_TMP_DIR`,
   `LV3_SYFT_TMP_DIR`, and `find_native_grype_binary()`.
@@ -68,7 +68,7 @@ SBOM generation part of the governed converge and security-scan paths.
   checkout drift.
 - The exact-main live apply supersedes that blocked result by proving the
   current `main` checkout can reconverge the worker mirror and complete the full
-  catalog refresh from `docker-runtime-lv3`.
+  catalog refresh from `docker-runtime`.
 
 ## Mainline Notes
 

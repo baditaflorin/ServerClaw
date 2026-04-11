@@ -13,7 +13,7 @@ LLM workflows in Windmill are written as Python code. There is no way for a huma
 
 ## Decision
 
-Deploy Dify on `docker-runtime-lv3` at `agents.lv3.org` behind the shared Keycloak-backed edge authentication flow. Connect Dify to:
+Deploy Dify on `docker-runtime` at `agents.example.com` behind the shared Keycloak-backed edge authentication flow. Connect Dify to:
 
 - Ollama for local model inference on the private runtime network
 - external LLM APIs through controller-managed credentials mirrored into the Dify runtime
@@ -42,13 +42,13 @@ The platform's named tools are published from `config/agent-tool-registry.json` 
 
 - Dify is the visual authoring surface; Windmill remains the production execution runtime.
 - Infrastructure-touching workflows must be promoted into Windmill before production use.
-- This workstream deploys a Dify-local Qdrant sidecar only; the shared `vectors.lv3.org` surface remains ADR 0198 work.
+- This workstream deploys a Dify-local Qdrant sidecar only; the shared `vectors.example.com` surface remains ADR 0198 work.
 
 ## Live Apply Notes
 
-- The branch-local live apply converged Dify on `docker-runtime-lv3` and moved the internal listener to `8094` because `8093` was already occupied by the existing Plane proxy on the same guest.
-- Internal verification was completed through an SSH tunnel to `docker-runtime-lv3`, where `/healthz`, `/console/api/setup`, and the bootstrap flow all succeeded and the smoke workflow export was written to `platform/dify-workflows/lv3-dify-smoke.yml`.
-- The rebased current-main replay from `codex/ws-0197-main-finish` re-ran `make converge-dify` and `make converge-api-gateway`, after which `https://agents.lv3.org/healthz` returned `HTTP/2 200`, `https://api.lv3.org/v1/health` returned the expected canonical `HTTP/2 401` auth envelope, and `POST https://api.lv3.org/v1/dify-tools/get-platform-status` returned `HTTP/2 200` again with the governed platform-status payload.
+- The branch-local live apply converged Dify on `docker-runtime` and moved the internal listener to `8094` because `8093` was already occupied by the existing Plane proxy on the same guest.
+- Internal verification was completed through an SSH tunnel to `docker-runtime`, where `/healthz`, `/console/api/setup`, and the bootstrap flow all succeeded and the smoke workflow export was written to `platform/dify-workflows/lv3-dify-smoke.yml`.
+- The rebased current-main replay from `codex/ws-0197-main-finish` re-ran `make converge-dify` and `make converge-api-gateway`, after which `https://agents.example.com/healthz` returned `HTTP/2 200`, `https://api.example.com/v1/health` returned the expected canonical `HTTP/2 401` auth envelope, and `POST https://api.example.com/v1/dify-tools/get-platform-status` returned `HTTP/2 200` again with the governed platform-status payload.
 - The linked-worktree smoke verification now succeeds without a shared-repo override: `scripts/dify_smoke.py` automatically falls back to the common repository `.local/langfuse/` directory, completed with `tool_count: 11`, and re-verified `trace_configured: true` from the isolated worktree.
 - The integrated `main` release is `0.177.48`, which records the public Dify edge replay, the mainline receipt `2026-03-28-adr-0197-dify-mainline-live-apply`, and the packaged API gateway runbook compatibility repair directly in canonical repository state.
 

@@ -71,7 +71,7 @@ def test_directus_workflow_command_and_scope_catalog_entries_exist() -> None:
         "mutation_scope": "platform",
         "shared_surfaces": [
             "service:directus",
-            "inventory/host_vars/proxmox_florin.yml",
+            "inventory/host_vars/proxmox-host.yml",
         ],
     }
     assert workflow_catalog["workflows"]["converge-directus"]["preflight"]["bootstrap_manifest_ids"] == [

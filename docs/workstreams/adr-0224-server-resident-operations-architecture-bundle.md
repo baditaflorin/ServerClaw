@@ -8,7 +8,7 @@
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0224-server-resident-ops-adrs-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-server-resident-ops-adrs-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0224-server-resident-ops-adrs-r2`
 - Owner: codex
 - Depends On: `adr-0043-openbao`, `adr-0044-windmill`, `adr-0048-command-catalog`,
   `adr-0143-gitea`, `adr-0214-ha-replication-bundle`

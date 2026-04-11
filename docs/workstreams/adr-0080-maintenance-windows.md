@@ -4,7 +4,7 @@
 - Title: NATS KV-backed maintenance windows with multi-surface suppression for planned outages
 - Status: merged
 - Branch: `codex/adr-0080-maintenance-windows`
-- Worktree: `../proxmox_florin_server-maintenance-windows`
+- Worktree: `../proxmox-host_server-maintenance-windows`
 - Owner: codex
 - Depends On: `adr-0058-nats-event-bus`, `adr-0057-mattermost-chatops`, `adr-0044-windmill`, `adr-0071-agent-observation-loop`, `adr-0027-uptime-kuma`
 - Conflicts With: none

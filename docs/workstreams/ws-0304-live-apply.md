@@ -29,13 +29,13 @@
 
 - `make converge-step-ca env=production`
   Evidence: `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-step-ca-r6-0.177.142.txt`
-  Result: the latest realistic live-baseline Step-CA replay passed with final recap `docker-runtime-lv3 : ok=124 changed=1 failed=0`, `proxmox_florin : ok=54 changed=4 failed=0`, and no failed hosts across the remaining guests.
+  Result: the latest realistic live-baseline Step-CA replay passed with final recap `docker-runtime : ok=124 changed=1 failed=0`, `proxmox-host : ok=54 changed=4 failed=0`, and no failed hosts across the remaining guests.
 - `make converge-openbao env=production`
   Evidence: `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-openbao-r4-0.177.142.txt`
-  Result: the integrated-main OpenBao replay passed with final recap `docker-runtime-lv3 : ok=381 changed=8 failed=0` and `postgres-lv3 : ok=75 changed=1 failed=0`.
+  Result: the integrated-main OpenBao replay passed with final recap `docker-runtime : ok=381 changed=8 failed=0` and `postgres : ok=75 changed=1 failed=0`.
 - `make converge-windmill env=production`
   Evidence: `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-converge-windmill-r7-0.177.142.txt`
-  Result: the integrated-main Windmill replay finished cleanly with final recap `docker-runtime-lv3 : ok=363 changed=48 failed=0`, `postgres-lv3 : ok=92 changed=1 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`.
+  Result: the integrated-main Windmill replay finished cleanly with final recap `docker-runtime : ok=363 changed=48 failed=0`, `postgres : ok=92 changed=1 failed=0`, and `proxmox-host : ok=41 changed=4 failed=0`.
 - Repo Atlas automation path
   Evidence:
   - `receipts/live-applies/evidence/2026-04-02-ws-0304-mainline-atlas-refresh-snapshots-r5-0.177.142.txt`

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook converges the repo-managed `nextcloud` runtime on `docker-runtime-lv3`, provisions its PostgreSQL backend on `postgres-lv3`, and publishes `cloud.lv3.org` through the shared NGINX edge with the DAV redirect and large-upload settings required by ADR 0260.
+This runbook converges the repo-managed `nextcloud` runtime on `docker-runtime`, provisions its PostgreSQL backend on `postgres`, and publishes `cloud.example.com` through the shared NGINX edge with the DAV redirect and large-upload settings required by ADR 0260.
 
 ## Managed Surfaces
 
@@ -10,8 +10,8 @@ This runbook converges the repo-managed `nextcloud` runtime on `docker-runtime-l
 - database role: `roles/nextcloud_postgres`
 - playbook: `playbooks/nextcloud.yml`
 - live-apply wrapper: `playbooks/services/nextcloud.yml`
-- public hostname: `https://cloud.lv3.org`
-- controller-local artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/`
+- public hostname: `https://cloud.example.com`
+- controller-local artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nextcloud/`
 
 ## Preconditions
 
@@ -38,33 +38,33 @@ HETZNER_DNS_API_TOKEN=... make converge-nextcloud
 
 This workflow:
 
-- ensures Hetzner DNS contains `cloud.lv3.org`
+- ensures Hetzner DNS contains `cloud.example.com`
 - provisions the `nextcloud` PostgreSQL role and database
 - generates the database password, bootstrap admin password, and Redis password if missing
 - stores runtime secrets through the shared OpenBao compose-env path
-- starts or updates the Nextcloud, Redis, cron, and OpenBao-agent compose stack on `docker-runtime-lv3`
-- re-renders the shared edge config so `cloud.lv3.org` is published with DAV well-known redirects and large-upload handling
+- starts or updates the Nextcloud, Redis, cron, and OpenBao-agent compose stack on `docker-runtime`
+- re-renders the shared edge config so `cloud.example.com` is published with DAV well-known redirects and large-upload handling
 
 ## Verification
 
 Public status:
 
 ```bash
-curl -fsS https://cloud.lv3.org/status.php
+curl -fsS https://cloud.example.com/status.php
 ```
 
 DAV redirects:
 
 ```bash
-curl -fsSI https://cloud.lv3.org/.well-known/caldav
-curl -fsSI https://cloud.lv3.org/.well-known/carddav
+curl -fsSI https://cloud.example.com/.well-known/caldav
+curl -fsSI https://cloud.example.com/.well-known/carddav
 ```
 
 Guest-local status:
 
 ```bash
-ansible docker-runtime-lv3 \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ansible docker-runtime \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
   -m shell \
   -a 'curl -fsS http://10.10.10.20:8084/status.php'
@@ -73,8 +73,8 @@ ansible docker-runtime-lv3 \
 Guest-local cron mode:
 
 ```bash
-ansible docker-runtime-lv3 \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ansible docker-runtime \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
   -m shell \
   -a 'docker exec --user www-data nextcloud-app php occ config:app:get core backgroundjobs_mode'
@@ -83,8 +83,8 @@ ansible docker-runtime-lv3 \
 Guest-local bootstrap admin query:
 
 ```bash
-ansible docker-runtime-lv3 \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ansible docker-runtime \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
   -m shell \
   -a 'docker exec --user www-data nextcloud-app php occ user:info ops --output=json'
@@ -92,15 +92,15 @@ ansible docker-runtime-lv3 \
 
 ## Access Model
 
-- `cloud.lv3.org` is intentionally app-authenticated, not edge-authenticated.
+- `cloud.example.com` is intentionally app-authenticated, not edge-authenticated.
 - The shared edge only publishes the route, large-upload policy, and DAV redirects.
 - Routine login and session policy remain inside Nextcloud itself.
 
 ## Controller-Local Artifacts
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/database-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/admin-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/redis-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nextcloud/database-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nextcloud/admin-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nextcloud/redis-password.txt`
 
 These files are generated and mirrored by the repo-managed roles. They are not committed.
 

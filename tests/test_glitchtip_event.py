@@ -109,12 +109,12 @@ def test_glitchtip_event_smoke_load_json_response_uses_configured_timeout(monkey
     monkeypatch.setattr(glitchtip_event_smoke.urllib.request, "urlopen", fake_urlopen)
 
     result = glitchtip_event_smoke.load_json_response(
-        "https://errors.lv3.org/api/0/organizations/lv3/issues/",
+        "https://errors.example.com/api/0/organizations/lv3/issues/",
         token="token-123",
         timeout_seconds=42,
     )
 
     assert result == []
-    assert observed["url"] == "https://errors.lv3.org/api/0/organizations/lv3/issues/"
+    assert observed["url"] == "https://errors.example.com/api/0/organizations/lv3/issues/"
     assert observed["headers"]["Authorization"] == "Bearer token-123"
     assert observed["timeout"] == 42

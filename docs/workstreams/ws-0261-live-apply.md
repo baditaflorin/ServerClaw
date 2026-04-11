@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0261-main-finish`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0261-main-finish`
 - Owner: codex
 - Depends On: `adr-0069-agent-tool-registry`, `adr-0197-dify-canvas`, `adr-0247-authenticated-browser-journey-verification-via-playwright`
 - Conflicts With: none
@@ -17,7 +17,7 @@
 ## Purpose
 
 Implement ADR 0261 by publishing the private `browser_runner` runtime on
-`docker-runtime-lv3`, exposing the governed operator route at
+`docker-runtime`, exposing the governed operator route at
 `/v1/browser-runner/*`, and proving the governed Dify-compatible
 `browser-run-session` tool end to end with receipt-backed artifacts.
 
@@ -46,7 +46,7 @@ Implement ADR 0261 by publishing the private `browser_runner` runtime on
 - `uv run --with pytest pytest -q tests/test_api_gateway_runtime_role.py`
   passed with `5 passed`
 - the governed Dify smoke POST to
-  `https://api.lv3.org/v1/dify-tools/browser-run-session` returned HTTP `200`
+  `https://api.example.com/v1/dify-tools/browser-run-session` returned HTTP `200`
   with the expected heading `LV3 Browser Runner Smoke`, result
   `BROWSER RUNNER`, screenshot artifact, and PDF artifact
 - the guest-side cleanup check returned `COUNT=0` for `find

@@ -601,7 +601,7 @@ def test_validation_gate_manifest_declares_atlas_lint() -> None:
     atlas_lint = manifest["atlas-lint"]
 
     assert atlas_lint["severity"] == "error"
-    assert atlas_lint["image"] == "registry.lv3.org/check-runner/python:3.12.10"
+    assert atlas_lint["image"] == "registry.example.com/check-runner/python:3.12.10"
     assert "scripts/atlas_schema.py lint" in atlas_lint["command"]
     assert "run_python_with_packages.sh docker pyyaml" in atlas_lint["command"]
     assert atlas_lint["cache_mounts"] == ["docker_socket"]

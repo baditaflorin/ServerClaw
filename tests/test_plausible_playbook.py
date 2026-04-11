@@ -18,7 +18,7 @@ def test_plausible_dns_stage_converges_only_the_analytics_subdomain_record() -> 
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "analytics.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "analytics.example.com"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Plausible subdomain entry")
     assert (

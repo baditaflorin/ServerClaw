@@ -1,10 +1,10 @@
 # Workstream ADR 0059: ntopng For Private Network Flow Visibility
 
-- ADR: [ADR 0059](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0059-ntopng-for-private-network-flow-visibility.md)
+- ADR: [ADR 0059](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0059-ntopng-for-private-network-flow-visibility.md)
 - Title: Visual network-flow analysis for the private guest network
 - Status: live_applied
 - Branch: `codex/adr-0059-ntopng`
-- Worktree: `../proxmox_florin_server-ntopng`
+- Worktree: `../proxmox-host_server-ntopng`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0012-proxmox-host-bridge-and-nat-network`, `adr-0049-private-api-publication`
 - Conflicts With: none
@@ -30,7 +30,7 @@
 - `playbooks/ntopng.yml`
 - `roles/proxmox_ntopng/`
 - `inventory/group_vars/all.yml`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `config/workflow-catalog.json`
 - `config/command-catalog.json`
 - `workstreams.yaml`
@@ -45,8 +45,8 @@
 
 - `make syntax-check-ntopng`
 - `make converge-ntopng`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo systemctl is-active redis-server ntopng'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo systemctl is-active redis-server ntopng'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua'`
 
 ## Merge Criteria
 

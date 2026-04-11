@@ -12,7 +12,7 @@ depends_on:
   - adr-0109-public-status-page
 conflicts_with: []
 shared_surfaces:
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
   - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
   - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/

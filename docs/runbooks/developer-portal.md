@@ -3,7 +3,7 @@
 - Sensitivity: INTERNAL
 - Portal Summary: Build, publish, and verify the generated developer portal, including page-level sensitivity tagging.
 
-This runbook covers the generated documentation site published at `docs.lv3.org`.
+This runbook covers the generated documentation site published at `docs.example.com`.
 
 ## Contextual Help
 
@@ -20,7 +20,7 @@ The MkDocs theme override renders that metadata as:
 - an **Escalation Path** section for risky or failure-prone tasks
 
 The docs generator also now publishes a dedicated glossary reference page at
-`docs.lv3.org/reference/glossary/`, sourced from the same glossary registry used
+`docs.example.com/reference/glossary/`, sourced from the same glossary registry used
 by the other first-party portal surfaces.
 
 ## Build
@@ -69,7 +69,7 @@ The deploy target refreshes both shared edge static directories before publicati
 - `docs/site-generated/services/keycloak.md` includes `contextual_help:`
 - `build/docs-portal/services/keycloak/index.html` contains `Contextual Help`
   and `Escalation Path`
-- unauthenticated `curl -Ik https://docs.lv3.org/` returns `302` to `/oauth2/sign_in`
+- unauthenticated `curl -Ik https://docs.example.com/` returns `302` to `/oauth2/sign_in`
 - the rendered site carries `<meta name="robots" content="noindex, nofollow">`
 - the published site returns `X-Robots-Tag: noindex, nofollow`
 

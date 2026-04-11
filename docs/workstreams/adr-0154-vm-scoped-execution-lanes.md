@@ -71,4 +71,4 @@
 - repository implementation completed in `0.155.0`
 - first platform version: `0.130.5`
 - production Windmill now exposes `f/lv3/lane_scheduler` and `f/lv3/scheduler_watchdog`, with `f/lv3/lane_scheduler_every_2s` and `f/lv3/scheduler_watchdog_every_30s` enabled through the private control path at `http://100.64.0.1:8005`
-- this session had to repair pre-existing OpenBao loopback drift on `docker-runtime-lv3`, align the runtime to the winning `windmill_admin` PostgreSQL password on `postgres-lv3`, grant `CREATEROLE` so Windmill could manage `custom_instance_user`, and force the schedule `enabled` flags to the repo-declared state before the ADR 0154 surfaces could be verified live
+- this session had to repair pre-existing OpenBao loopback drift on `docker-runtime`, align the runtime to the winning `windmill_admin` PostgreSQL password on `postgres`, grant `CREATEROLE` so Windmill could manage `custom_instance_user`, and force the schedule `enabled` flags to the repo-declared state before the ADR 0154 surfaces could be verified live

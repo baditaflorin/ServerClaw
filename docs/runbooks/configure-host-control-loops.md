@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook converges ADR 0226 on `proxmox_florin` by installing the
+This runbook converges ADR 0226 on `proxmox-host` by installing the
 repository-managed `systemd` service, timer, and path units that form the
 canonical host-resident control-loop baseline.
 
@@ -14,13 +14,13 @@ automation.
 ## Automation Surface
 
 - make target: `make configure-host-control-loops`
-- playbook: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/proxmox-install.yml`
-- role: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_host_control_loops/tasks/main.yml`
+- playbook: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/proxmox-install.yml`
+- role: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/proxmox_host_control_loops/tasks/main.yml`
 
 ## Apply
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make configure-host-control-loops
 ```
 
@@ -41,31 +41,31 @@ make configure-host-control-loops
 Seed or refresh the latest status artifact with an explicit one-shot reconcile:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl start lv3-host-control-loop-reconcile.service && sudo cat /var/lib/lv3-host-control-loops/status/latest.json'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl start lv3-host-control-loop-reconcile.service && sudo cat /var/lib/lv3-host-control-loops/status/latest.json'
 ```
 
 Check that the timer is active and scheduled:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.timer --no-pager'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.timer --no-pager'
 ```
 
 Check that the path unit is watching for manual trigger files:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.path --no-pager'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.path --no-pager'
 ```
 
 Read the latest recorded loop state again without replaying the service:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo cat /var/lib/lv3-host-control-loops/status/latest.json'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo cat /var/lib/lv3-host-control-loops/status/latest.json'
 ```
 
 Inspect the journal for the last five reconcile runs:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo journalctl -u lv3-host-control-loop-reconcile.service -n 5 --no-pager'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo journalctl -u lv3-host-control-loop-reconcile.service -n 5 --no-pager'
 ```
 
 ## Manual Trigger
@@ -73,13 +73,13 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Request an immediate path-triggered reconcile pass:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "printf '%s\n' '{\"reason\":\"manual-check\"}' | sudo tee /var/lib/lv3-host-control-loops/requests/reconcile.request >/dev/null"
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "printf '%s\n' '{\"reason\":\"manual-check\"}' | sudo tee /var/lib/lv3-host-control-loops/requests/reconcile.request >/dev/null"
 ```
 
 Then confirm the request file was consumed and a new journal entry appeared:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo test ! -e /var/lib/lv3-host-control-loops/requests/reconcile.request && sudo journalctl -u lv3-host-control-loop-reconcile.service -n 1 --no-pager'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo test ! -e /var/lib/lv3-host-control-loops/requests/reconcile.request && sudo journalctl -u lv3-host-control-loop-reconcile.service -n 1 --no-pager'
 ```
 
 ## Notes

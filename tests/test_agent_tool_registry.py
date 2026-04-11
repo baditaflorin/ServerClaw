@@ -338,7 +338,7 @@ class AgentToolRegistryTests(unittest.TestCase):
             self.assertEqual(structured["command_id"], "network-impairment-matrix")
             self.assertTrue(structured["approved"])
             self.assertFalse(structured["executed"])
-            self.assertEqual(structured["runtime_host"], "docker-runtime-lv3")
+            self.assertEqual(structured["runtime_host"], "docker-runtime")
             self.assertTrue(structured["unit_name"].startswith("lv3-governed-network-impairment-matrix-"))
             self.assertEqual(
                 structured["parameters"],

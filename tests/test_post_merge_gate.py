@@ -35,7 +35,7 @@ def test_runner_image_pull_failed_detects_registry_runner_errors() -> None:
         "docker: Error response from daemon: unsupported manifest media type and no default available: text/html",
     )
     assert module._runner_image_pull_failed(
-        "Unable to find image 'registry.lv3.org/check-runner/python:3.12.10' locally",
+        "Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally",
         "",
     )
     assert not module._runner_image_pull_failed("normal stdout", "normal stderr")
@@ -83,7 +83,7 @@ def test_post_merge_gate_falls_back_to_validate_repo_when_runner_images_fail(tmp
         if len(command) > 1 and command[0] == "python3" and command[1].endswith("run_gate.py"):
             return FakeCompletedProcess(
                 returncode=1,
-                stdout="Unable to find image 'registry.lv3.org/check-runner/python:3.12.10' locally",
+                stdout="Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally",
                 stderr="docker: Error response from daemon: unsupported manifest media type and no default available: text/html",
             )
         return FakeCompletedProcess(returncode=0, stdout="fallback ok", stderr="")
@@ -140,7 +140,7 @@ def test_post_merge_gate_keeps_git_dependent_checks_when_git_checkout_exists(tmp
         if len(command) > 1 and command[0] == "python3" and command[1].endswith("run_gate.py"):
             return FakeCompletedProcess(
                 returncode=1,
-                stdout="Unable to find image 'registry.lv3.org/check-runner/python:3.12.10' locally",
+                stdout="Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally",
                 stderr="docker: Error response from daemon: unsupported manifest media type and no default available: text/html",
             )
         return FakeCompletedProcess(returncode=0, stdout="fallback ok", stderr="")

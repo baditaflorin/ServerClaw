@@ -56,7 +56,7 @@ uv run --with pyyaml python scripts/https_tls_assurance.py --env production --ti
 2. Generates the Prometheus blackbox target set and expiry/failure alert rules
    from that shared discovery path.
 3. Lets the monitoring stack scrape the HTTPS surfaces continuously from
-   `monitoring-lv3`.
+   `monitoring`.
 4. Runs `testssl.sh` against the same surface set for periodic protocol,
    cipher, and certificate-regression checks.
 5. Writes a receipt under `receipts/https-tls-assurance/`.
@@ -86,11 +86,11 @@ uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targ
 
 After `make converge-monitoring`, confirm:
 
-- `/etc/prometheus/file_sd/https-tls-targets.yml` exists on `monitoring-lv3`
-- `/etc/prometheus/rules/https-tls-alerts.yml` exists on `monitoring-lv3`
+- `/etc/prometheus/file_sd/https-tls-targets.yml` exists on `monitoring`
+- `/etc/prometheus/rules/https-tls-alerts.yml` exists on `monitoring`
 - Prometheus reports the `https-tls-blackbox` job as healthy
 - the latest mainline replay still shows the current 33-target / 99-rule set on
-  `monitoring-lv3`
+  `monitoring`
 - the newest receipt under `receipts/https-tls-assurance/` matches the current
   discovered target set
 
@@ -98,5 +98,5 @@ If `ssh -J` is unreliable from a clean controller checkout, the same guest
 verification can use an explicit proxy hop instead:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -W %h:%p ops@100.64.0.1' ops@10.10.10.40 'curl -fsS http://127.0.0.1:9090/api/v1/rules | jq -e ".data.groups[] | select(.name == \"https_tls_assurance\")" >/dev/null'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -W %h:%p ops@100.64.0.1' ops@10.10.10.40 'curl -fsS http://127.0.0.1:9090/api/v1/rules | jq -e ".data.groups[] | select(.name == \"https_tls_assurance\")" >/dev/null'
 ```

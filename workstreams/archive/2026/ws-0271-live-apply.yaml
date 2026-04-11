@@ -41,8 +41,8 @@ ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: implemented ADR 0271 by adding a receipt-backed backup
-    coverage ledger, extending nightly PBS protection to coolify-lv3 on VM 170,
-    and surfacing the remaining backup-lv3 off-site gap explicitly in disaster
+    coverage ledger, extending nightly PBS protection to coolify on VM 170,
+    and surfacing the remaining backup off-site gap explicitly in disaster
     recovery readiness
   release_bump: patch
   included_in_repo_version: 0.177.75

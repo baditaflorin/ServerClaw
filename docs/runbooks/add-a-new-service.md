@@ -16,7 +16,7 @@ ADR 0107 makes new-service integration an explicit repository contract rather th
 make scaffold-service \
   NAME=my-service \
   TYPE=compose \
-  VM=docker-runtime-lv3 \
+  VM=docker-runtime \
   DEPENDS_ON=postgres,keycloak \
   OIDC=true
 ```

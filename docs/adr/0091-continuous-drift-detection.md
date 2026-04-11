@@ -85,7 +85,7 @@ Expected drift is suppressed by checking the active workstreams from `workstream
 {
   "event": "platform.drift.warn",
   "source": "ansible-check-mode",
-  "host": "docker-runtime-lv3",
+  "host": "docker-runtime",
   "service": "openbao",
   "role": "openbao_runtime",
   "task": "ensure openbao config file",

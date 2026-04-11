@@ -16,7 +16,7 @@ shared_surfaces:
   - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
   - docs/workstreams/ws-0255-live-apply.md
   - docs/runbooks/configure-matrix-synapse.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - config/service-capability-catalog.json
   - config/certificate-catalog.json
@@ -76,7 +76,7 @@ ownership_manifest:
       mode: exclusive
     - id: matrix_synapse_platform_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - tests/test_generate_platform_vars.py
@@ -137,7 +137,7 @@ canonical_truth:
   changelog_entry: implemented ADR 0255 by adding repo-managed Matrix Synapse as
     the canonical ServerClaw conversation hub with postgres-backed persistence,
     a Tailscale-only controller proxy, public edge publication at
-    matrix.lv3.org, and exact-main verified live-apply evidence for the runtime,
+    matrix.example.com, and exact-main verified live-apply evidence for the runtime,
     login, and monitoring paths
   release_bump: patch
   included_in_repo_version: 0.177.85

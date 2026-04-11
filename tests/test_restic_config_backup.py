@@ -141,7 +141,7 @@ def test_summarize_latest_snapshots_keeps_event_driven_sources_protected(tmp_pat
                 {
                     "id": "snap-config",
                     "time": "2026-03-29T08:00:00Z",
-                    "hostname": "docker-runtime-lv3",
+                    "hostname": "docker-runtime",
                     "paths": [str(repo_root / "config")],
                     "tags": ["source:config", "source-label:config"],
                     "summary": {"total_files_processed": 1},
@@ -192,7 +192,7 @@ def test_summarize_latest_snapshots_clamps_negative_interval_age(tmp_path: Path)
                 {
                     "id": "snap-receipts",
                     "time": "2026-03-30T12:00:01Z",
-                    "hostname": "docker-runtime-lv3",
+                    "hostname": "docker-runtime",
                     "paths": [str(repo_root / "receipts")],
                     "tags": ["source:receipts", "source-label:receipts"],
                     "summary": {"total_files_processed": 1},
@@ -299,7 +299,7 @@ def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(t
                 "latest_snapshot": {
                     "snapshot_id": "receipts-old",
                     "recorded_at": "2026-03-31T06:01:31Z",
-                    "host": "docker-runtime-lv3",
+                    "host": "docker-runtime",
                     "paths": ["receipts"],
                     "files": 10,
                 },
@@ -318,7 +318,7 @@ def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(t
                 "latest_snapshot": {
                     "snapshot_id": "config-old",
                     "recorded_at": "2026-03-31T05:53:48Z",
-                    "host": "docker-runtime-lv3",
+                    "host": "docker-runtime",
                     "paths": ["config"],
                     "files": 230,
                 },
@@ -339,7 +339,7 @@ def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(t
                 "latest_snapshot": {
                     "snapshot_id": "versions-old",
                     "recorded_at": "2026-03-31T05:53:49Z",
-                    "host": "docker-runtime-lv3",
+                    "host": "docker-runtime",
                     "paths": ["versions/stack.yaml"],
                     "files": 1,
                 },
@@ -360,7 +360,7 @@ def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(t
         ],
         repo_root=repo_root,
         endpoint="http://10.200.35.3:9000",
-        host_name="docker-runtime-lv3",
+        host_name="docker-runtime",
         generated_at=datetime(2026, 3, 31, 10, 47, 15, tzinfo=UTC),
         bucket="restic-config-backup",
     )
@@ -429,7 +429,7 @@ def test_build_live_apply_latest_snapshot_receipt_without_cache_only_reports_liv
         ],
         repo_root=repo_root,
         endpoint="http://10.200.35.3:9000",
-        host_name="docker-runtime-lv3",
+        host_name="docker-runtime",
         generated_at=datetime(2026, 3, 31, 10, 47, 15, tzinfo=UTC),
         bucket="restic-config-backup",
     )
@@ -883,7 +883,7 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
     command = trigger.build_remote_command(
         mode="backup",
         triggered_by="manual",
-        repo_root="/srv/proxmox_florin_server",
+        repo_root="/srv/proxmox-host_server",
         credential_file="/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
         live_apply_trigger=True,
     )
@@ -895,16 +895,16 @@ def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_
     command = trigger.build_remote_command(
         mode="backup",
         triggered_by="manual",
-        repo_root="/srv/proxmox_florin_server",
+        repo_root="/srv/proxmox-host_server",
         credential_file="/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
         live_apply_trigger=False,
     )
 
     assert "/opt/api-gateway/service/scripts/restic_config_backup.py" in command
-    assert "/srv/proxmox_florin_server/config/restic-file-backup-catalog.json" in command
+    assert "/srv/proxmox-host_server/config/restic-file-backup-catalog.json" in command
     assert "/etc/lv3/restic-config-backup/restic-file-backup-catalog.json" in command
-    assert "/srv/proxmox_florin_server/receipts/restic-backups" in command
-    assert "/srv/proxmox_florin_server/receipts/restic-restore-verifications" in command
+    assert "/srv/proxmox-host_server/receipts/restic-backups" in command
+    assert "/srv/proxmox-host_server/receipts/restic-restore-verifications" in command
 
 
 def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: Path, monkeypatch) -> None:
@@ -932,23 +932,20 @@ def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: P
     monkeypatch.setattr(trigger, "build_guest_ssh_command", fake_build_guest_ssh_command)
     monkeypatch.setattr(trigger.subprocess, "run", fake_run)
 
-    trigger.ensure_remote_runtime_support_files({"controller": "context"}, repo_root="/srv/proxmox_florin_server")
+    trigger.ensure_remote_runtime_support_files({"controller": "context"}, repo_root="/srv/proxmox-host_server")
 
     remote_commands = [entry for entry in captured if entry[0] != "stdin"]
     stdin_payloads = [entry[1] for entry in captured if entry[0] == "stdin"]
 
     assert len(remote_commands) == 4
     assert len(stdin_payloads) == 4
+    assert any("/srv/proxmox-host_server/scripts/restic_config_backup.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox-host_server/scripts/script_bootstrap.py" in command for _, command in remote_commands)
     assert any(
-        "/srv/proxmox_florin_server/scripts/restic_config_backup.py" in command for _, command in remote_commands
-    )
-    assert any("/srv/proxmox_florin_server/scripts/script_bootstrap.py" in command for _, command in remote_commands)
-    assert any(
-        "/srv/proxmox_florin_server/scripts/controller_automation_toolkit.py" in command
-        for _, command in remote_commands
+        "/srv/proxmox-host_server/scripts/controller_automation_toolkit.py" in command for _, command in remote_commands
     )
     assert any(
-        "/srv/proxmox_florin_server/config/restic-file-backup-catalog.json" in command for _, command in remote_commands
+        "/srv/proxmox-host_server/config/restic-file-backup-catalog.json" in command for _, command in remote_commands
     )
     assert all("sudo tee" in command for _, command in remote_commands)
     assert stdin_payloads[0].startswith("#!/usr/bin/env python3")
@@ -966,8 +963,8 @@ def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path
 
     synced = trigger.sync_reported_receipt_artifacts(
         {"controller": "context"},
-        target="docker-runtime-lv3",
-        repo_root="/srv/proxmox_florin_server",
+        target="docker-runtime",
+        repo_root="/srv/proxmox-host_server",
         report={
             "receipt_path": "receipts/restic-backups/20260401T112837Z.json",
             "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
@@ -982,13 +979,13 @@ def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path
         (tmp_path / "receipts" / "restic-backups" / "20260401T112837Z.json").read_text(encoding="utf-8")
     ) == {
         "path": "receipts/restic-backups/20260401T112837Z.json",
-        "repo_root": "/srv/proxmox_florin_server",
-        "target": "docker-runtime-lv3",
+        "repo_root": "/srv/proxmox-host_server",
+        "target": "docker-runtime",
     }
     assert json.loads((tmp_path / "receipts" / "restic-snapshots-latest.json").read_text(encoding="utf-8")) == {
         "path": "receipts/restic-snapshots-latest.json",
-        "repo_root": "/srv/proxmox_florin_server",
-        "target": "docker-runtime-lv3",
+        "repo_root": "/srv/proxmox-host_server",
+        "target": "docker-runtime",
     }
 
 
@@ -1045,14 +1042,14 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
     monkeypatch.setattr(
         trigger,
         "ensure_remote_runtime_support_files",
-        lambda context, repo_root, target="docker-runtime-lv3": captured.update(
+        lambda context, repo_root, target="docker-runtime": captured.update(
             {"context": context, "repo_root": repo_root, "target": target}
         ),
     )
     monkeypatch.setattr(
         trigger,
         "ensure_remote_runtime_credentials",
-        lambda context, env, credential_file, target="docker-runtime-lv3": captured.update(
+        lambda context, env, credential_file, target="docker-runtime": captured.update(
             {
                 "credential_context": context,
                 "credential_env": env,
@@ -1095,22 +1092,22 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
                 "--mode",
                 "backup",
                 "--repo-root",
-                "/srv/proxmox_florin_server",
+                "/srv/proxmox-host_server",
             ]
         )
         == 0
     )
     assert captured == {
         "context": {"controller": "context"},
-        "repo_root": "/srv/proxmox_florin_server",
-        "target": "docker-runtime-lv3",
+        "repo_root": "/srv/proxmox-host_server",
+        "target": "docker-runtime",
         "credential_context": {"controller": "context"},
         "credential_env": "production",
         "credential_file": "/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
-        "credential_target": "docker-runtime-lv3",
+        "credential_target": "docker-runtime",
         "sync_context": {"controller": "context"},
-        "sync_target": "docker-runtime-lv3",
-        "sync_repo_root": "/srv/proxmox_florin_server",
+        "sync_target": "docker-runtime",
+        "sync_repo_root": "/srv/proxmox-host_server",
         "sync_report": {"summary": {"protected": 1}},
     }
 

@@ -81,14 +81,14 @@ stale
 """,
     )
     write(
-        tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml",
+        tmp_path / "inventory" / "host_vars" / "proxmox-host.yml",
         """
 lv3_service_topology:
   api:
-    public_hostname: api.lv3.org
+    public_hostname: api.example.com
     service_name: api_gateway
     exposure_model: public
-    owning_vm: docker-runtime-lv3
+    owning_vm: docker-runtime
 """.strip()
         + "\n",
     )

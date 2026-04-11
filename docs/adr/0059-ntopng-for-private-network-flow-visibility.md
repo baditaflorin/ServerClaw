@@ -24,7 +24,7 @@ We will add `ntopng` as the visual network-flow analysis surface for the private
 
 Initial design:
 
-1. `ntopng` runs directly on `proxmox_florin`, where it can observe `vmbr10` and `vmbr0` without adding `nProbe` or a separate mirror fabric.
+1. `ntopng` runs directly on `proxmox-host`, where it can observe `vmbr10` and `vmbr0` without adding `nProbe` or a separate mirror fabric.
 2. The first focus is the internal `10.10.10.0/24` guest network plus edge-adjacent ingress and guest-egress context.
 3. Access is operator-only over the Proxmox host Tailscale path, not through the public edge.
 4. Historical state remains host-local for triage and recent-history review, with no day-one long-term external flow export.

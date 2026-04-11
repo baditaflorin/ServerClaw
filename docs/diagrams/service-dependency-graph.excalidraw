@@ -1,7 +1,7 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://draw.lv3.org",
+  "source": "https://draw.example.com",
   "elements": [
     {
       "id": "206dbd804eae39dc",
@@ -60,14 +60,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Excalidraw\ndocker-runtime-lv3",
+      "text": "Excalidraw\ndocker-runtime",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Excalidraw\ndocker-runtime-lv3",
+      "originalText": "Excalidraw\ndocker-runtime",
       "lineHeight": 1.25
     },
     {
@@ -127,14 +127,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Docker Runtime VM\ndocker-runtime-lv3",
+      "text": "Docker Runtime VM\ndocker-runtime",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Docker Runtime VM\ndocker-runtime-lv3",
+      "originalText": "Docker Runtime VM\ndocker-runtime",
       "lineHeight": 1.25
     },
     {
@@ -194,14 +194,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Keycloak\ndocker-runtime-lv3",
+      "text": "Keycloak\ndocker-runtime",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Keycloak\ndocker-runtime-lv3",
+      "originalText": "Keycloak\ndocker-runtime",
       "lineHeight": 1.25
     },
     {
@@ -261,14 +261,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "NGINX Edge\nnginx-lv3",
+      "text": "NGINX Edge\nnginx-edge",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "NGINX Edge\nnginx-lv3",
+      "originalText": "NGINX Edge\nnginx-edge",
       "lineHeight": 1.25
     },
     {

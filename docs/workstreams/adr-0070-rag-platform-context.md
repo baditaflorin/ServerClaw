@@ -1,10 +1,10 @@
 # Workstream ADR 0070: Retrieval-Augmented Context For Platform Queries
 
-- ADR: [ADR 0070](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0070-rag-context-for-platform-queries.md)
+- ADR: [ADR 0070](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0070-rag-context-for-platform-queries.md)
 - Title: Vector-indexed platform corpus for grounded agent and operator queries
 - Status: live_applied
 - Branch: `codex/adr-0070-rag-platform-context`
-- Worktree: `../proxmox_florin_server-rag-platform-context`
+- Worktree: `../proxmox-host_server-rag-platform-context`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0049-private-api-publication`, `adr-0060-open-webui-workbench`, `adr-0069-agent-tool-registry`
 - Conflicts With: none
@@ -12,7 +12,7 @@
 
 ## Scope
 
-- deploy Qdrant on `docker-runtime-lv3` as the vector database
+- deploy Qdrant on `docker-runtime` as the vector database
 - write `scripts/build_rag_index.py` to chunk, embed, and upload corpus documents
 - create Windmill workflow `rebuild-rag-index` triggered on main merges
 - expose `query-platform-context` as a tool in the agent tool registry (ADR 0069)
@@ -36,7 +36,7 @@
 
 ## Expected Live Surfaces
 
-- Qdrant running on `docker-runtime-lv3` with indexed platform corpus
+- Qdrant running on `docker-runtime` with indexed platform corpus
 - Windmill workflow scheduled to rebuild on merge
 - `query-platform-context` callable from Open WebUI and MCP-compatible agents
 

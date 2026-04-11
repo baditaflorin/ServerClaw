@@ -7,10 +7,10 @@ This runbook documents the shared playbook execution model introduced by ADR 007
 The model adds:
 
 - environment-aware host selection via `env=<production|staging>`
-- shared preflight checks in [playbooks/tasks/preflight.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/tasks/preflight.yml)
-- shared post-apply verification in [playbooks/tasks/post-verify.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/tasks/post-verify.yml)
-- group entry points under [playbooks/groups/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/groups)
-- service entry points under [playbooks/services/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/services)
+- shared preflight checks in [playbooks/tasks/preflight.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/tasks/preflight.yml)
+- shared post-apply verification in [playbooks/tasks/post-verify.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/tasks/post-verify.yml)
+- group entry points under [playbooks/groups/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/groups)
+- service entry points under [playbooks/services/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/services)
 
 ## Entry Points
 
@@ -29,9 +29,9 @@ Before the generic `live-apply-group`, `live-apply-service`, `live-apply-site`, 
 For `live-apply-service`, the vulnerability-budget, standby-capacity,
 service-redundancy, and immutable-guest-replacement gates apply only when the
 requested `service=<id>` resolves to an entry in
-[config/service-capability-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/service-capability-catalog.json).
+[config/service-capability-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/service-capability-catalog.json).
 Repo-managed infrastructure playbooks under
-[playbooks/services/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/services)
+[playbooks/services/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/services)
 that are intentionally not product-catalog services still run through
 preflight, canonical-truth, interface-contract, Ansible, and live-backup
 trigger checks, but they skip those product-service-only gates.
@@ -45,14 +45,14 @@ Supported values:
 - `production`
 - `staging`
 
-The active host patterns live in [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/all.yml) under `playbook_execution_host_patterns`. Inventory contains staged host placeholders so the playbooks remain syntax-checkable and targetable before the staging topology is live.
+The active host patterns live in [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/group_vars/all.yml) under `playbook_execution_host_patterns`. Inventory contains staged host placeholders so the playbooks remain syntax-checkable and targetable before the staging topology is live.
 
 ## Shared Preflight
 
 `playbooks/tasks/preflight.yml` performs these checks:
 
 - validates that `env` is one of the allowed environment ids
-- validates that referenced controller-local secret ids exist in [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json)
+- validates that referenced controller-local secret ids exist in [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/controller-local-secrets.json)
 - validates that required inventory hosts exist
 - verifies SSH reachability for declared required hosts
 - asserts Debian targets when requested by the caller
@@ -60,7 +60,7 @@ The active host patterns live in [inventory/group_vars/all.yml](/Users/live/Docu
 
 ## Shared Post-Verify
 
-`playbooks/tasks/post-verify.yml` loads [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json), executes the declared liveness probe, optionally repairs any declared Docker publication contract, and then runs the readiness probe for the service being converged.
+`playbooks/tasks/post-verify.yml` loads [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/health-probe-catalog.json), executes the declared liveness probe, optionally repairs any declared Docker publication contract, and then runs the readiness probe for the service being converged.
 
 Current probe kinds:
 

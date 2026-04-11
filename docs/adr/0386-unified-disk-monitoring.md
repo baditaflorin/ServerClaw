@@ -12,7 +12,7 @@
 
 Disk space monitoring was fragmented:
 
-- Only `nginx-lv3` collected disk metrics via Telegraf `[[inputs.disk]]`.
+- Only `nginx-edge` collected disk metrics via Telegraf `[[inputs.disk]]`.
   All other VMs had Telegraf installed (via `guest_observability`) but
   lacked disk collection.
 - Three consumers needed disk data (agent tools, platform-context API,
@@ -43,7 +43,7 @@ were removed from `nginx_observability`'s template.
 
 1. Reads `config/capacity-model.json` for VM enumeration (name, VMID,
    metrics_host, budget, allocated disk).
-2. SSH-tunnels to monitoring-lv3 and runs InfluxDB Flux queries for
+2. SSH-tunnels to monitoring and runs InfluxDB Flux queries for
    `disk.used` and `disk.total` per host per path.
 3. Compares actual usage against capacity budgets.
 4. Returns a structured `DiskReport` with per-VM, per-mount metrics.
@@ -80,7 +80,7 @@ consumers on the next query.
 - **Consistent data**: All consumers see the same InfluxDB data through
   the same Flux queries.
 - **Existing monitoring enhanced**: Every VM now reports system-level
-  metrics (not just nginx-lv3).
+  metrics (not just nginx-edge).
 
 ## Files
 

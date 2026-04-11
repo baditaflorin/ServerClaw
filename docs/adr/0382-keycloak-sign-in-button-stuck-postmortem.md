@@ -8,13 +8,13 @@
 
 ## Symptom
 
-When a user navigates to any `*.lv3.org` service protected by oauth2-proxy
-(e.g. `ops.lv3.org`, `tasks.lv3.org`), they are redirected to the Keycloak
-login page at `sso.lv3.org`. **Clicking the "Sign In" button does nothing.**
+When a user navigates to any `*.example.com` service protected by oauth2-proxy
+(e.g. `ops.example.com`, `tasks.example.com`), they are redirected to the Keycloak
+login page at `sso.example.com`. **Clicking the "Sign In" button does nothing.**
 The page remains stuck. Opening a new tab and navigating to the same URL
 works — the user is auto-logged in via SSO.
 
-Additionally, the Keycloak admin console at `sso.lv3.org/admin/master/console/`
+Additionally, the Keycloak admin console at `sso.example.com/admin/master/console/`
 intermittently shows:
 
 > **Danger alert: Something went wrong**
@@ -31,15 +31,15 @@ intermittently shows:
 
 | Time (UTC) | Event |
 |------------|-------|
-| ~18:00 | User reports ops.lv3.org returning 500 errors and redirect loops |
+| ~18:00 | User reports ops.example.com returning 500 errors and redirect loops |
 | ~18:30 | Root cause #1 found: `platform_service_topology` for keycloak pointed to wrong VM (`10.10.10.92` instead of `10.10.10.20`). oauth2-proxy `redeem_url`, `profile_url`, `validate_url`, `oidc_jwks_url` all hit wrong endpoint |
 | ~19:00 | Hotfix: corrected `redeem_url` on live server. Login starts working in new tabs |
 | ~19:30 | User reports Sign In button still stuck on the Keycloak login page |
 | ~20:00 | Investigated `approval_prompt=force` parameter — confirmed Keycloak ignores it (non-standard, Google-specific) |
 | ~20:30 | All four URLs hotfixed on live server to `10.10.10.20`. Topology fix committed to IaC |
 | ~21:10 | Converge #1: deployed IaC fix for all oauth2-proxy URLs |
-| ~22:00 | Root cause #2 found: NGINX sending `X-Frame-Options: DENY` and `frame-ancestors 'none'` for `sso.lv3.org`, blocking Keycloak's `authChecker.js` session-checking iframe |
-| ~22:07 | Fix committed: changed sso.lv3.org overrides to `SAMEORIGIN` / `frame-ancestors 'self'` |
+| ~22:00 | Root cause #2 found: NGINX sending `X-Frame-Options: DENY` and `frame-ancestors 'none'` for `sso.example.com`, blocking Keycloak's `authChecker.js` session-checking iframe |
+| ~22:07 | Fix committed: changed sso.example.com overrides to `SAMEORIGIN` / `frame-ancestors 'self'` |
 | ~22:10 | Converge #2: deployed iframe header fix. Verified headers correct on wire |
 | ~22:15 | Admin console login page loads without iframe timeout error in automated test |
 | ~22:20 | **User reports Sign In button STILL stuck** |
@@ -50,14 +50,14 @@ intermittently shows:
 
 `platform_service_topology.keycloak` in `inventory/group_vars/platform.yml`
 had `private_ip: 10.10.10.92` and `internal: http://10.10.10.92:8091`.
-Keycloak actually runs on `docker-runtime-lv3` at `10.10.10.20`.
+Keycloak actually runs on `docker-runtime` at `10.10.10.20`.
 
 This caused oauth2-proxy to send token exchange requests to the wrong
 endpoint, producing "Code not valid" errors on every login callback.
 
 **Fix:** Changed to `10.10.10.20`. Committed as `e864e7054`.
 
-### 2. NGINX iframe blocking headers for sso.lv3.org (FIXED but insufficient)
+### 2. NGINX iframe blocking headers for sso.example.com (FIXED but insufficient)
 
 NGINX edge config sent:
 - `X-Frame-Options: DENY`
@@ -69,7 +69,7 @@ Keycloak uses same-origin iframes for:
 
 These iframes were blocked, causing timeouts.
 
-**Fix:** Override sso.lv3.org headers to `SAMEORIGIN` / `frame-ancestors 'self'`.
+**Fix:** Override sso.example.com headers to `SAMEORIGIN` / `frame-ancestors 'self'`.
 Committed as `e154e7970`. Deployed via converge.
 
 **Verification:** Response headers confirmed correct (`SAMEORIGIN`, `frame-ancestors 'self'`).
@@ -85,7 +85,7 @@ The user's browser may have cached the old `frame-ancestors 'none'` CSP.
 Until the cache expires or is manually cleared, the iframe will still be
 blocked client-side.
 
-**Test:** User clears browser cache and cookies for `*.lv3.org`, then retries.
+**Test:** User clears browser cache and cookies for `*.example.com`, then retries.
 
 ### H2: Keycloak `authChecker.js` race condition
 
@@ -112,7 +112,7 @@ Compare with clicking after waiting 5+ minutes.
 ### H4: `form-action 'self'` CSP blocking the POST
 
 The CSP includes `form-action 'self'`. The form POSTs to
-`https://sso.lv3.org/realms/lv3/login-actions/authenticate?...` which is
+`https://sso.example.com/realms/lv3/login-actions/authenticate?...` which is
 same-origin and should be allowed. However, if Keycloak redirects the POST
 response to a different origin, `form-action` may block it.
 
@@ -125,7 +125,7 @@ The container might be under memory pressure or have a degraded thread pool,
 causing slow or failed iframe responses even when headers are correct.
 
 **Test:** `curl http://10.10.10.20:8091/health/ready` and
-`curl http://10.10.10.20:8091/health/live` from docker-runtime-lv3.
+`curl http://10.10.10.20:8091/health/live` from docker-runtime.
 
 ### H6: `approval_prompt=force` interaction with Keycloak theme JS
 
@@ -139,7 +139,7 @@ and test whether Sign In works.
 
 ## What Works
 
-- **New tab navigation:** Going to `ops.lv3.org` in a new tab works. SSO
+- **New tab navigation:** Going to `ops.example.com` in a new tab works. SSO
   auto-login via Keycloak session redirect is functional.
 - **Token exchange:** oauth2-proxy correctly exchanges authorization codes
   for tokens (redeem_url now points to correct Keycloak instance).
@@ -160,13 +160,13 @@ and test whether Sign In works.
 ## User Workaround
 
 1. If stuck on the Keycloak login page, open a new browser tab
-2. Navigate to the desired URL (e.g. `ops.lv3.org`)
+2. Navigate to the desired URL (e.g. `ops.example.com`)
 3. SSO auto-login will work in the new tab
 
 ## Next Steps
 
 1. **User verification:** Ask user to hard-refresh (`Cmd+Shift+R`) or clear
-   browser cache/cookies for `*.lv3.org` and retry
+   browser cache/cookies for `*.example.com` and retry
 2. **Browser console inspection:** Check for JS errors on the Keycloak login
    page when Sign In is clicked
 3. **Network tab analysis:** Capture the full request/response cycle when
@@ -183,7 +183,7 @@ and test whether Sign In works.
 |------|--------|
 | `inventory/group_vars/platform.yml` | Fixed keycloak service topology IP from `10.10.10.92` to `10.10.10.20` |
 | `roles/public_edge_oidc_auth/templates/oauth2-proxy.cfg.j2` | Added comment about `approval_prompt=force` being harmless |
-| `roles/nginx_edge_publication/defaults/main.yml` | Changed sso.lv3.org `x_frame_options` to `SAMEORIGIN`, `frame-ancestors` to `'self'` |
+| `roles/nginx_edge_publication/defaults/main.yml` | Changed sso.example.com `x_frame_options` to `SAMEORIGIN`, `frame-ancestors` to `'self'` |
 | `docs/adr/0381-login-service-contracts-and-session-recovery-automation.md` | Login service contracts documentation |
 
 ## Commits

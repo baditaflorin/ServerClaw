@@ -61,7 +61,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["public_edge_certbot_plugin_path"],
             "{{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages",
         )
-        self.assertEqual(self.defaults["public_edge_apex_hostname"], "lv3.org")
+        self.assertEqual(self.defaults["public_edge_apex_hostname"], "example.com")
         self.assertEqual(
             self.defaults["public_edge_additional_certificate_domains"], ["{{ public_edge_apex_hostname }}"]
         )
@@ -87,33 +87,33 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         extra_hostnames = [site["hostname"] for site in self.defaults["public_edge_extra_sites"]]
         protected_sites = self.defaults["public_edge_authenticated_sites"]
 
-        self.assertNotIn("ops.lv3.org", extra_hostnames)
+        self.assertNotIn("ops.example.com", extra_hostnames)
         self.assertEqual(
             sorted(protected_sites),
             [
-                "agents.lv3.org",
-                "analytics.lv3.org",
-                "annotate.lv3.org",
-                "billing.lv3.org",
-                "changelog.lv3.org",
-                "coolify.lv3.org",
-                "docs.lv3.org",
-                "draw.lv3.org",
-                "flags.lv3.org",
-                "home.lv3.org",
-                "langfuse.lv3.org",
-                "logs.lv3.org",
-                "minio-console.lv3.org",
-                "n8n.lv3.org",
-                "ops.lv3.org",
-                "tasks.lv3.org",
+                "agents.example.com",
+                "analytics.example.com",
+                "annotate.example.com",
+                "billing.example.com",
+                "changelog.example.com",
+                "coolify.example.com",
+                "docs.example.com",
+                "draw.example.com",
+                "flags.example.com",
+                "home.example.com",
+                "langfuse.example.com",
+                "logs.example.com",
+                "minio-console.example.com",
+                "n8n.example.com",
+                "ops.example.com",
+                "tasks.example.com",
             ],
         )
-        self.assertEqual(protected_sites["analytics.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertEqual(protected_sites["annotate.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertNotIn("unauthenticated_paths", protected_sites["annotate.lv3.org"])
+        self.assertEqual(protected_sites["analytics.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(protected_sites["annotate.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertNotIn("unauthenticated_paths", protected_sites["annotate.example.com"])
         self.assertEqual(
-            protected_sites["analytics.lv3.org"]["unauthenticated_paths"],
+            protected_sites["analytics.example.com"]["unauthenticated_paths"],
             [
                 "/api/error",
                 "/api/event",
@@ -123,35 +123,35 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            protected_sites["analytics.lv3.org"]["unauthenticated_prefix_paths"],
+            protected_sites["analytics.example.com"]["unauthenticated_prefix_paths"],
             ["/js/"],
         )
-        self.assertEqual(protected_sites["flags.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertEqual(protected_sites["flags.lv3.org"]["unauthenticated_paths"], ["/health"])
+        self.assertEqual(protected_sites["flags.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(protected_sites["flags.example.com"]["unauthenticated_paths"], ["/health"])
         self.assertEqual(
-            protected_sites["billing.lv3.org"]["unauthenticated_proxy_routes"],
+            protected_sites["billing.example.com"]["unauthenticated_proxy_routes"],
             [
                 {"path": "/api/health", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/health"},
                 {"path": "/api/v1/events", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/events"},
             ],
         )
-        self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])
-        self.assertEqual(protected_sites["agents.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["draw.lv3.org"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["minio-console.lv3.org"])
-        self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
+        self.assertEqual(protected_sites["agents.example.com"]["unauthenticated_paths"], ["/healthz"])
+        self.assertEqual(protected_sites["agents.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertNotIn("unauthenticated_paths", protected_sites["coolify.example.com"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["draw.example.com"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.example.com"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["minio-console.example.com"])
+        self.assertEqual(protected_sites["n8n.example.com"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
-            protected_sites["n8n.lv3.org"]["unauthenticated_prefix_paths"],
+            protected_sites["n8n.example.com"]["unauthenticated_prefix_paths"],
             ["/webhook/", "/webhook-test/", "/webhook-waiting/"],
         )
-        self.assertEqual(protected_sites["ops.lv3.org"]["unauthenticated_paths"], ["/health"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["docs.lv3.org"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["changelog.lv3.org"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["logs.lv3.org"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["home.lv3.org"])
-        self.assertEqual(protected_sites["tasks.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(protected_sites["ops.example.com"]["unauthenticated_paths"], ["/health"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["docs.example.com"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["changelog.example.com"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["logs.example.com"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["home.example.com"])
+        self.assertEqual(protected_sites["tasks.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
@@ -223,7 +223,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_defaults_include_public_docs_site(self) -> None:
         docs_site = next(
-            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "docs.lv3.org"
+            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "docs.example.com"
         )
         self.assertEqual(docs_site["source_dir"], "docs-portal")
         self.assertNotIn("noindex", docs_site)
@@ -239,31 +239,33 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(security_defaults["cross_origin_resource_policy"], "same-origin")
         self.assertEqual(security_defaults["x_content_type_options"], "nosniff")
         self.assertIn("frame-ancestors 'none'", security_defaults["content_security_policy"])
-        self.assertIn("annotate.lv3.org", security_overrides)
-        self.assertIn("coolify.lv3.org", security_overrides)
-        self.assertIn("draw.lv3.org", security_overrides)
-        self.assertIn("grafana.lv3.org", security_overrides)
-        self.assertIn("logs.lv3.org", security_overrides)
-        self.assertIn("tasks.lv3.org", security_overrides)
-        self.assertIn("https://annotate.lv3.org", security_overrides["annotate.lv3.org"]["content_security_policy"])
-        self.assertIn("'unsafe-eval'", security_overrides["coolify.lv3.org"]["content_security_policy"])
-        self.assertIn("wss://draw.lv3.org", security_overrides["draw.lv3.org"]["content_security_policy"])
-        self.assertIn("'unsafe-eval'", security_overrides["grafana.lv3.org"]["content_security_policy"])
-        self.assertIn("wss://n8n.lv3.org", security_overrides["n8n.lv3.org"]["content_security_policy"])
-        self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
-        self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.lv3.org"]["content_security_policy"])
-        self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+        self.assertIn("annotate.example.com", security_overrides)
+        self.assertIn("coolify.example.com", security_overrides)
+        self.assertIn("draw.example.com", security_overrides)
+        self.assertIn("grafana.example.com", security_overrides)
+        self.assertIn("logs.example.com", security_overrides)
+        self.assertIn("tasks.example.com", security_overrides)
+        self.assertIn(
+            "https://annotate.example.com", security_overrides["annotate.example.com"]["content_security_policy"]
+        )
+        self.assertIn("'unsafe-eval'", security_overrides["coolify.example.com"]["content_security_policy"])
+        self.assertIn("wss://draw.example.com", security_overrides["draw.example.com"]["content_security_policy"])
+        self.assertIn("'unsafe-eval'", security_overrides["grafana.example.com"]["content_security_policy"])
+        self.assertIn("wss://n8n.example.com", security_overrides["n8n.example.com"]["content_security_policy"])
+        self.assertIn("https://fonts.googleapis.com", security_overrides["docs.example.com"]["content_security_policy"])
+        self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.example.com"]["content_security_policy"])
+        self.assertIn("https://unpkg.com", security_overrides["ops.example.com"]["content_security_policy"])
         self.assertIn(
             "style-src 'self' 'unsafe-inline' https://unpkg.com",
-            security_overrides["ops.lv3.org"]["content_security_policy"],
+            security_overrides["ops.example.com"]["content_security_policy"],
         )
         self.assertIn(
-            "font-src 'self' data: https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"]
+            "font-src 'self' data: https://unpkg.com", security_overrides["ops.example.com"]["content_security_policy"]
         )
-        self.assertIn("wiki.lv3.org", security_overrides)
-        self.assertIn("'unsafe-inline'", security_overrides["wiki.lv3.org"]["content_security_policy"])
-        self.assertIn("https://wiki.lv3.org", security_overrides["wiki.lv3.org"]["content_security_policy"])
-        self.assertIn("wss://tasks.lv3.org", security_overrides["tasks.lv3.org"]["content_security_policy"])
+        self.assertIn("wiki.example.com", security_overrides)
+        self.assertIn("'unsafe-inline'", security_overrides["wiki.example.com"]["content_security_policy"])
+        self.assertIn("https://wiki.example.com", security_overrides["wiki.example.com"]["content_security_policy"])
+        self.assertIn("wss://tasks.example.com", security_overrides["tasks.example.com"]["content_security_policy"])
 
     def test_template_supports_root_proxy_path_override(self) -> None:
         self.assertIn("site.root_proxy_path is defined", self.template)
@@ -279,14 +281,16 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
     def test_certificate_domain_expression_includes_additional_domains(self) -> None:
         certificate_domains_expr = self.defaults["public_edge_certificate_domains"]
         self.assertIn("public_edge_additional_certificate_domains", certificate_domains_expr)
-        self.assertNotIn("registry.lv3.org", [site["hostname"] for site in self.defaults["public_edge_extra_sites"]])
+        self.assertNotIn(
+            "registry.example.com", [site["hostname"] for site in self.defaults["public_edge_extra_sites"]]
+        )
 
     def test_static_pages_include_robots_meta_tag(self) -> None:
         self.assertIn('<meta name="robots" content="{{ public_edge_robots_meta_content }}">', self.static_template)
 
     def test_minio_console_is_published_with_large_upload_and_header_passthrough_overrides(self) -> None:
         minio_console = next(
-            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "minio-console.lv3.org"
+            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "minio-console.example.com"
         )
 
         self.assertEqual(

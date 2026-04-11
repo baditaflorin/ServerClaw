@@ -75,7 +75,7 @@ Initial integration targets:
 
 ## Implementation Notes
 
-- Keycloak runs on `runtime-control-lv3` (10.10.10.92) with a managed PostgreSQL backend on `postgres-lv3` and is published through the shared NGINX edge at `https://sso.lv3.org`. It was initially placed on `docker-runtime-lv3` and migrated to `runtime-control-lv3` as part of the platform service separation work.
+- Keycloak runs on `runtime-control` (10.10.10.92) with a managed PostgreSQL backend on `postgres` and is published through the shared NGINX edge at `https://sso.example.com`. It was initially placed on `docker-runtime` and migrated to `runtime-control` as part of the platform service separation work.
 - The initial live realm is `lv3` with the groups `lv3-platform-admins`, `grafana-admins`, `grafana-viewers`, and `approved-agent-clients`.
 - The named human operator `florin.badita` is provisioned with a bootstrap password and the required action `CONFIGURE_TOTP`, while the master-realm bootstrap admin remains a break-glass recovery path only.
 - The confidential clients `grafana-oauth` and `lv3-agent-hub` are provisioned and their controller-local secrets are mirrored under `.local/keycloak/`; the agent client-credentials flow is verified live.

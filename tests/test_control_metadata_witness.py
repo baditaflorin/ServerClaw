@@ -46,7 +46,7 @@ def build_repo(tmp_path: Path) -> tuple[Path, Path]:
     write(repo_root / "docs" / "workstreams" / "adr-0181.md", "# WS\n")
     write(repo_root / "inventory" / "hosts.yml", "all: {}\n")
     write(repo_root / "inventory" / "group_vars" / "all.yml", "control: true\n")
-    write(repo_root / "inventory" / "host_vars" / "proxmox_florin.yml", "host: true\n")
+    write(repo_root / "inventory" / "host_vars" / "proxmox-host.yml", "host: true\n")
     write(repo_root / "versions" / "stack.yaml", "repo_version: 0.176.0\n")
     write(
         repo_root / "receipts" / "live-applies" / "example.json", json.dumps({"receipt_id": "example"}, indent=2) + "\n"

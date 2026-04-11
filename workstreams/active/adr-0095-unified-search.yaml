@@ -15,7 +15,7 @@ conflicts_with: []
 shared_surfaces:
 - config/agent-tool-registry.json
 - config/api-gateway-catalog.json
-- Compose stack docker-runtime-lv3
+- Compose stack docker-runtime
 ownership_manifest:
   owned_surfaces:
   - id: workstream_registry

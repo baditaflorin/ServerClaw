@@ -166,7 +166,7 @@ class FakeGatewayClient:
                     "profile_title": "Edge Browser Surface",
                     "overall_status": "pass",
                     "summary": {"required": 5, "best_effort": 2, "unknown": 0},
-                    "primary_url": "https://grafana.lv3.org",
+                    "primary_url": "https://grafana.example.com",
                     "runbook": "docs/runbooks/monitoring-stack.md",
                     "adr": "0011",
                     "dimensions": [],
@@ -179,7 +179,7 @@ class FakeGatewayClient:
                     "profile_title": "Edge Browser Surface",
                     "overall_status": "degraded",
                     "summary": {"required": 5, "best_effort": 2, "unknown": 0},
-                    "primary_url": "https://ops.lv3.org",
+                    "primary_url": "https://ops.example.com",
                     "runbook": "docs/runbooks/ops-portal-down.md",
                     "adr": "0093",
                     "dimensions": [
@@ -389,8 +389,8 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Metrics and dashboards.",
                         "category": "observability",
                         "lifecycle_status": "active",
-                        "public_url": "https://grafana.lv3.org",
-                        "dashboard_url": "https://grafana.lv3.org/d/platform",
+                        "public_url": "https://grafana.example.com",
+                        "dashboard_url": "https://grafana.example.com/d/platform",
                         "runbook": "docs/runbooks/monitoring-stack.md",
                         "adr": "0011",
                     },
@@ -400,7 +400,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Identity provider.",
                         "category": "access",
                         "lifecycle_status": "active",
-                        "public_url": "https://sso.lv3.org",
+                        "public_url": "https://sso.example.com",
                         "runbook": "docs/runbooks/configure-keycloak.md",
                         "adr": "0056",
                     },
@@ -410,7 +410,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Interactive control surface.",
                         "category": "access",
                         "lifecycle_status": "active",
-                        "public_url": "https://ops.lv3.org",
+                        "public_url": "https://ops.example.com",
                         "internal_url": "http://10.10.10.20:8092",
                         "runbook": "docs/runbooks/ops-portal-down.md",
                         "adr": "0093",
@@ -421,7 +421,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Shared service discovery and status landing page.",
                         "category": "experience",
                         "lifecycle_status": "active",
-                        "public_url": "https://home.lv3.org",
+                        "public_url": "https://home.example.com",
                         "runbook": "docs/runbooks/configure-homepage.md",
                         "adr": "0152",
                     },
@@ -431,7 +431,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Reference portal for ADRs and runbooks.",
                         "category": "knowledge",
                         "lifecycle_status": "active",
-                        "public_url": "https://docs.lv3.org",
+                        "public_url": "https://docs.example.com",
                         "runbook": "docs/runbooks/developer-portal.md",
                         "adr": "0094",
                     },
@@ -441,7 +441,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "description": "Recent releases, live applies, and deployment history.",
                         "category": "knowledge",
                         "lifecycle_status": "active",
-                        "public_url": "https://changelog.lv3.org",
+                        "public_url": "https://changelog.example.com",
                         "runbook": "docs/runbooks/deployment-history-portal.md",
                         "adr": "0134",
                     },
@@ -456,10 +456,10 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         json.dumps(
             {
                 "schema_version": "2.0.0",
-                "zone_name": "lv3.org",
+                "zone_name": "example.com",
                 "publications": [
                     {
-                        "fqdn": "grafana.lv3.org",
+                        "fqdn": "grafana.example.com",
                         "service_id": "grafana",
                         "environment": "production",
                         "status": "active",
@@ -470,7 +470,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                             "audience": "public",
                         },
                         "adapter": {
-                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "dns": {"target": "203.0.113.1", "target_port": 443, "record_type": "A"},
                             "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
                             "edge_auth": {
                                 "provider": "none",
@@ -489,7 +489,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "notes": "Published through the shared edge.",
                     },
                     {
-                        "fqdn": "ops.lv3.org",
+                        "fqdn": "ops.example.com",
                         "service_id": "ops_portal",
                         "environment": "production",
                         "status": "active",
@@ -500,7 +500,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                             "audience": "operator",
                         },
                         "adapter": {
-                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "dns": {"target": "203.0.113.1", "target_port": 443, "record_type": "A"},
                             "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
                             "edge_auth": {
                                 "provider": "oauth2_proxy",
@@ -645,25 +645,25 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
                         "id": "ops_portal",
                         "service": "ops_portal",
                         "name": "Ops Portal",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "tier": 4,
                     },
                     {
                         "id": "api_gateway",
                         "service": "api_gateway",
                         "name": "API Gateway",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "tier": 3,
                     },
                     {
                         "id": "keycloak",
                         "service": "keycloak",
                         "name": "Keycloak",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "tier": 2,
                     },
-                    {"id": "nginx_edge", "service": "nginx_edge", "name": "NGINX Edge", "vm": "nginx-lv3", "tier": 1},
-                    {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
+                    {"id": "nginx_edge", "service": "nginx_edge", "name": "NGINX Edge", "vm": "nginx-edge", "tier": 1},
+                    {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres", "tier": 1},
                 ],
                 "edges": [
                     {
@@ -1115,8 +1115,8 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         drift_receipts_dir=data_root / "receipts" / "drift-reports",
         attention_state_path=tmp_path / "state" / "attention-state.json",
         maintenance_windows_path=None,
-        docs_base_url="https://docs.lv3.org",
-        grafana_logs_url="https://grafana.lv3.org/explore?service={service}",
+        docs_base_url="https://docs.example.com",
+        grafana_logs_url="https://grafana.example.com/explore?service={service}",
     )
     gateway = FakeGatewayClient()
     app = create_app(settings, gateway_client=gateway)
@@ -1192,7 +1192,7 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Drift Status" in response.text
     assert "Recent Activity" in response.text
     assert "shared-edge / platform-sso" in response.text
-    assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
+    assert "ops.example.com · operator · shared-edge · platform-sso" in response.text
     assert "Capability Contracts" in response.text
     assert "Identity Provider" in response.text
     assert "Keycloak" in response.text
@@ -1305,18 +1305,18 @@ def test_build_dependency_focus_chart_follows_ops_portal_dependencies() -> None:
                     "id": "ops_portal",
                     "service": "ops_portal",
                     "name": "Ops Portal",
-                    "vm": "docker-runtime-lv3",
+                    "vm": "docker-runtime",
                     "tier": 4,
                 },
                 {
                     "id": "api_gateway",
                     "service": "api_gateway",
                     "name": "API Gateway",
-                    "vm": "docker-runtime-lv3",
+                    "vm": "docker-runtime",
                     "tier": 3,
                 },
-                {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime-lv3", "tier": 2},
-                {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
+                {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime", "tier": 2},
+                {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres", "tier": 1},
             ],
             "edges": [
                 {"from": "ops_portal", "to": "api_gateway", "type": "hard", "description": "Portal uses the gateway."},
@@ -1568,12 +1568,12 @@ def test_entry_redirects_to_safe_next_url(portal_client: tuple[TestClient, FakeG
 
     response = client.get(
         "/entry",
-        params={"next": "https://docs.lv3.org/runbooks/platform-operations-portal/"},
+        params={"next": "https://docs.example.com/runbooks/platform-operations-portal/"},
         follow_redirects=False,
     )
 
     assert response.status_code == 303
-    assert response.headers["location"] == "https://docs.lv3.org/runbooks/platform-operations-portal/"
+    assert response.headers["location"] == "https://docs.example.com/runbooks/platform-operations-portal/"
 
 
 def test_entry_invalid_next_url_stays_on_start_surface_even_after_activation(
@@ -1643,7 +1643,7 @@ def test_saved_home_selection_overrides_role_default(portal_client: tuple[TestCl
 
     routed = client.get("/entry", headers=operator_headers, follow_redirects=False)
     assert routed.status_code == 303
-    assert routed.headers["location"] == "https://docs.lv3.org"
+    assert routed.headers["location"] == "https://docs.example.com"
 
 
 def test_clear_saved_home_restores_role_default(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -2104,8 +2104,8 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
         drift_receipts_dir=drift_receipts_dir,
         attention_state_path=tmp_path / "state" / "attention-state.json",
         maintenance_windows_path=None,
-        docs_base_url="https://docs.lv3.org",
-        grafana_logs_url="https://grafana.lv3.org/explore?service={service}",
+        docs_base_url="https://docs.example.com",
+        grafana_logs_url="https://grafana.example.com/explore?service={service}",
     )
 
     repository = PortalRepository(settings)
@@ -2115,7 +2115,7 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
                 "id": "ops_portal",
                 "name": "Platform Operations Portal",
                 "internal_url": "http://10.10.10.20:8092",
-                "public_url": "https://ops.lv3.org",
+                "public_url": "https://ops.example.com",
             }
         ]
     )

@@ -20,7 +20,7 @@ make converge-ntopng
 ## What the playbook does
 
 1. Adds the official ntop APT repository for Debian 13.
-2. Installs `redis-server` and `ntopng` on `proxmox_florin`.
+2. Installs `redis-server` and `ntopng` on `proxmox-host`.
 3. Renders repo-managed ntopng config under `/etc/ntopng/ntopng.conf.d/90-lv3.conf`.
 4. Defines local networks for `10.10.10.0/24` and the Tailscale management range.
 5. Generates and stores a managed ntopng admin password at `/etc/lv3/ntopng/admin-password`.
@@ -40,7 +40,7 @@ The steady-state operator path is the host Tailscale address:
 Retrieve the password:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo cat /etc/lv3/ntopng/admin-password'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo cat /etc/lv3/ntopng/admin-password'
 ```
 
 There is intentionally no public hostname for ntopng.
@@ -56,25 +56,25 @@ make syntax-check-ntopng
 Verify the runtime services on the host:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo systemctl is-active redis-server ntopng'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo systemctl is-active redis-server ntopng'
 ```
 
 Verify the operator-only proxied interface list:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua'
 ```
 
 Generate a small amount of private-bridge traffic and verify interface counters:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ping -c 3 10.10.10.10 >/dev/null; PASS=$(sudo cat /etc/lv3/ntopng/admin-password); IFID=$(curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua | jq -r '\''.rsp[] | select(.ifname=="vmbr10") | .ifid'\''); curl -fsS -u admin:${PASS} "http://100.118.189.95:3001/lua/rest/v2/get/interface/data.lua?ifid=${IFID}"'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ping -c 3 10.10.10.10 >/dev/null; PASS=$(sudo cat /etc/lv3/ntopng/admin-password); IFID=$(curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua | jq -r '\''.rsp[] | select(.ifname=="vmbr10") | .ifid'\''); curl -fsS -u admin:${PASS} "http://100.118.189.95:3001/lua/rest/v2/get/interface/data.lua?ifid=${IFID}"'
 ```
 
 Inspect the top hosts on the private bridge:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); IFID=$(curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua | jq -r '\''.rsp[] | select(.ifname=="vmbr10") | .ifid'\''); curl -fsS -u admin:${PASS} "http://100.118.189.95:3001/lua/rest/v2/get/interface/top/hosts.lua?ifid=${IFID}"'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); IFID=$(curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua | jq -r '\''.rsp[] | select(.ifname=="vmbr10") | .ifid'\''); curl -fsS -u admin:${PASS} "http://100.118.189.95:3001/lua/rest/v2/get/interface/top/hosts.lua?ifid=${IFID}"'
 ```
 
 Expected result:

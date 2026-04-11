@@ -1,10 +1,10 @@
 # Workstream ADR 0063: Centralised Vars And Computed Facts Library
 
-- ADR: [ADR 0063](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0063-centralised-vars-and-computed-facts-library.md)
+- ADR: [ADR 0063](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0063-centralised-vars-and-computed-facts-library.md)
 - Title: Single source of truth for platform facts with agent-queryable output
 - Status: merged
 - Branch: `codex/adr-0063-platform-vars-library`
-- Worktree: `../proxmox_florin_server-platform-vars-library`
+- Worktree: `../proxmox-host_server-platform-vars-library`
 - Owner: codex
 - Depends On: `adr-0062-role-composability`
 - Conflicts With: any workstream that adds new host_vars or group_vars without the new schema

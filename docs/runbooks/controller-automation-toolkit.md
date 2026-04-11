@@ -6,7 +6,7 @@ This runbook describes the shared controller-side Python helpers used by repo-lo
 
 ## Toolkit Boundary
 
-The shared toolkit lives in [scripts/controller_automation_toolkit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/controller_automation_toolkit.py).
+The shared toolkit lives in [scripts/controller_automation_toolkit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/controller_automation_toolkit.py).
 
 It provides small reusable primitives for:
 
@@ -22,14 +22,14 @@ It is intentionally not an orchestration framework. Workflow-specific logic shou
 
 The toolkit is used by repo-local controller scripts including:
 
-- [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/command_catalog.py)
-- [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/workflow_catalog.py)
-- [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/preflight_controller_local.py)
-- [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/live_apply_receipts.py)
-- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py)
-- [scripts/generate_status_docs.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py)
-- [scripts/uptime_kuma_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/uptime_kuma_tool.py)
-- [scripts/totp_provision.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/totp_provision.py)
+- [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/command_catalog.py)
+- [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/workflow_catalog.py)
+- [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/preflight_controller_local.py)
+- [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/live_apply_receipts.py)
+- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repository_data_models.py)
+- [scripts/generate_status_docs.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/generate_status_docs.py)
+- [scripts/uptime_kuma_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/uptime_kuma_tool.py)
+- [scripts/totp_provision.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/totp_provision.py)
 
 ## Change Rules
 

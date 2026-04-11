@@ -1,10 +1,10 @@
 # Workstream ADR 0071: Agent Observation Loop And Autonomous Drift Detection
 
-- ADR: [ADR 0071](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md)
+- ADR: [ADR 0071](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md)
 - Title: Scheduled proactive drift detection with structured findings and governed self-healing
 - Status: merged
 - Branch: `codex/adr-0071-agent-observation-loop`
-- Worktree: `../proxmox_florin_server-agent-observation-loop`
+- Worktree: `../proxmox-host_server-agent-observation-loop`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0057-mattermost-chatops`, `adr-0058-nats-event-bus`, `adr-0061-glitchtip-failure-signals`, `adr-0064-health-probe-contracts`, `adr-0065-secret-rotation-automation`, `adr-0068-container-image-policy`
 - Conflicts With: none
@@ -47,7 +47,7 @@
 - `python3 -m py_compile scripts/platform_observation_tool.py tests/test_platform_observation_tool.py scripts/control_plane_lanes.py scripts/validate_repository_data_models.py`
 - `uvx --from pytest --with pyyaml python -m pytest tests/test_platform_observation_tool.py -q`
 - `uvx --from pyyaml python scripts/validate_repository_data_models.py --validate`
-- `ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check`
+- `ANSIBLE_LOCAL_TEMP=/tmp/proxmox-host_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check`
 - `uvx --from pyyaml python scripts/platform_observation_tool.py`
 
 ## Merge Criteria

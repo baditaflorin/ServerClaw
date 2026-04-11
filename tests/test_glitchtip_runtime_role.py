@@ -26,7 +26,7 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
     defaults = load_yaml(ROLE_DEFAULTS)
 
     assert defaults["glitchtip_service_topology"] == (
-        "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('glitchtip') }}"
+        "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('glitchtip') }}"
     )
     assert (
         defaults["glitchtip_internal_port"]
@@ -47,7 +47,7 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
         "/.local/keycloak/glitchtip-client-secret.txt"
     )
     assert defaults["glitchtip_mail_submission_password_local_file"] == (
-        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt"
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/mail-platform/server-mailbox-password.txt"
     )
     assert [project["slug"] for project in defaults["glitchtip_bootstrap_projects"]] == [
         "mail-gateway",
@@ -210,10 +210,10 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     quiet_command = quiet_task["ansible.builtin.command"]
     retry_quiet_command = retry_quiet_task["ansible.builtin.command"]
     quiet_hosts_expression = quiet_hosts_task["ansible.builtin.set_fact"]["glitchtip_publication_quiet_hosts"]
-    assert "docker-runtime-staging-lv3" in quiet_hosts_expression
-    assert "docker-runtime-lv3" in quiet_hosts_expression
-    assert "nginx-staging-lv3" in quiet_hosts_expression
-    assert "nginx-lv3" in quiet_hosts_expression
+    assert "docker-runtime" in quiet_hosts_expression
+    assert "docker-runtime" in quiet_hosts_expression
+    assert "nginx-edge" in quiet_hosts_expression
+    assert "nginx-edge" in quiet_hosts_expression
     assert "python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py" in quiet_command
     assert "python3 {{ inventory_dir }}/../scripts/await_ansible_quiet.py" in retry_quiet_command
     assert "--quiet-seconds 30" in quiet_command

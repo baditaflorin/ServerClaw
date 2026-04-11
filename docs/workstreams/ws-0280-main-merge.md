@@ -8,7 +8,7 @@
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0280-main-merge-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0280-main-merge`
 - Owner: codex
 - Depends On: `ws-0280-live-apply`
 
@@ -29,7 +29,7 @@ runtime plus its authenticated `/v1/changedetection` gateway contract on
 - `docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md`
 - `docs/adr/.index.yaml`
 - `docs/runbooks/configure-changedetection.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
@@ -110,18 +110,18 @@ runtime plus its authenticated `/v1/changedetection` gateway contract on
   `65305c70c7049bcb177f59b5a44ab0d031a8a10c` succeeded in
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-0.177.100.txt`
   with final recap
-  `docker-runtime-lv3 : ok=312 changed=115 unreachable=0 failed=0 skipped=32 rescued=0 ignored=0`.
+  `docker-runtime : ok=312 changed=115 unreachable=0 failed=0 skipped=32 rescued=0 ignored=0`.
 - Fresh post-commit proofs from that replay confirmed the current server still
-  reports `Debian-trixie-latest-amd64-base`,
+  reports `proxmox-host`,
   `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and
-  `sudo qm status 120 => status: running`, while `docker-runtime-lv3` serves a
+  `sudo qm status 120 => status: running`, while `docker-runtime` serves a
   healthy Changedetection `0.54.7` runtime with `watch_count == 9`,
   `tag_count == 4`, and a drift-free sync report, preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-host-state-r1-0.177.100.txt`
   and
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-changedetection-runtime-state-r1-0.177.100.txt`.
 - A fresh authenticated controller-side probe of
-  `https://api.lv3.org/v1/changedetection/` returned the live Changedetection
+  `https://api.example.com/v1/changedetection/` returned the live Changedetection
   UI HTML for version `0.54.7`, preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-gateway-route-r1-0.177.100.html`.
 - `receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json`

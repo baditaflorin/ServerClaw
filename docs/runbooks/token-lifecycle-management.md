@@ -35,7 +35,7 @@ uv run --with pyyaml python scripts/token_lifecycle.py audit --execute-remediati
 The Windmill wrapper for the same flow is:
 
 ```bash
-python3 config/windmill/scripts/audit-token-inventory.py --repo-path /srv/proxmox_florin_server --dry-run
+python3 config/windmill/scripts/audit-token-inventory.py --repo-path /srv/proxmox-host_server --dry-run
 ```
 
 ## Planned rotation

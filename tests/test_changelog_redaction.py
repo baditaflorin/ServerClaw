@@ -37,11 +37,11 @@ def test_query_deployment_history_redacts_secret_and_pii_fields(tmp_path: Path) 
             "workflow_id": "converge-windmill",
             "adr": "0134",
             "summary": (
-                "Applied Windmill on docker-runtime-lv3 for ops.contractor@example.com "
+                "Applied Windmill on docker-runtime for ops.contractor@example.com "
                 "using db_password=swordfish and token test-openbao-token at 10.10.10.20."
             ),
             "targets": [
-                {"kind": "vm", "name": "docker-runtime-lv3", "address": "10.10.10.20"},
+                {"kind": "vm", "name": "docker-runtime", "address": "10.10.10.20"},
                 {"kind": "internal_hostname", "name": "netbox-vm.lv3.internal"},
             ],
             "verification": [
@@ -91,7 +91,7 @@ def test_query_deployment_history_redacts_secret_and_pii_fields(tmp_path: Path) 
     assert "ops.contractor@example.com" not in receipt_entry["summary"]
     assert "swordfish" not in receipt_entry["summary"]
     assert "10.10.10.20" not in receipt_entry["summary"]
-    assert "docker-runtime-lv3" not in receipt_entry["summary"]
+    assert "docker-runtime" not in receipt_entry["summary"]
     assert "docker-runtime" in receipt_entry["summary"]
     assert receipt_entry["targets"] == ["vm:docker-runtime", "internal_hostname:netbox"]
 
@@ -121,10 +121,10 @@ def test_render_portal_omits_raw_secret_and_pii_content(tmp_path: Path) -> None:
             "workflow_id": "converge-netbox",
             "adr": "0134",
             "summary": (
-                "Applied NetBox on docker-runtime-lv3 with password=plaintext "
+                "Applied NetBox on docker-runtime with password=plaintext "
                 "and contacted alice@example.com via 10.10.10.20."
             ),
-            "targets": [{"kind": "vm", "name": "docker-runtime-lv3", "address": "10.10.10.20"}],
+            "targets": [{"kind": "vm", "name": "docker-runtime", "address": "10.10.10.20"}],
             "verification": [],
             "evidence_refs": ["docs/runbooks/netbox.md"],
             "notes": [],
@@ -159,7 +159,7 @@ def test_render_portal_omits_raw_secret_and_pii_content(tmp_path: Path) -> None:
     assert "alice@example.com" not in index_html
     assert "password=plaintext" not in index_html
     assert "10.10.10.20" not in index_html
-    assert "docker-runtime-lv3" not in index_html
+    assert "docker-runtime" not in index_html
     assert "netbox-vm.lv3.internal" not in index_html
     assert "ops.contractor" in index_html
     assert "[redacted]" in index_html

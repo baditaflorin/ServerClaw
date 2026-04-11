@@ -4,7 +4,7 @@
 - Title: production replay of separated capacity classes for standby, recovery, and preview automation
 - Status: live_applied
 - Branch: `codex/ws-0192-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0192-live-apply`
 - Owner: codex
 - Included In Repo Version: `0.177.15`
 - Depends On: `adr-0105-capacity-model`, `adr-0180-standby-capacity`, `adr-0183-auxiliary-cloud-failure-domain`, `adr-0186-prewarmed-fixture-pools`

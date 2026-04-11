@@ -61,7 +61,7 @@ shared_surfaces:
   - receipts/live-applies/evidence/2026-04-02-ws-0313-*
   - receipts/restic-backups/20260402T024215Z.json
   - receipts/restic-snapshots-latest.json
-  - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+  - receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
 ownership_manifest:
   owned_surfaces:
     - id: workstream_registry
@@ -147,7 +147,7 @@ ownership_manifest:
         - receipts/live-applies/evidence/2026-04-02-ws-0313-*
         - receipts/restic-backups/20260402T024215Z.json
         - receipts/restic-snapshots-latest.json
-        - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
       mode: shared_contract
       contract: live-apply-receipts-v1
 canonical_truth:

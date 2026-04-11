@@ -30,6 +30,6 @@ ownership_manifest:
       mode: exclusive
 description: |
   Extract repo-intake from ops_portal as a first-class service with its own
-  subdomain (repo-intake.lv3.org). Mirrors the ops_portal architectural pattern
+  subdomain (repo-intake.example.com). Mirrors the ops_portal architectural pattern
   but focuses on self-service repo deployment workflows. Updates navigation in
   homepage and ops_portal to link to the new surface.

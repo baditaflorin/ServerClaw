@@ -9,7 +9,7 @@
 
 ## Context
 
-`docker-runtime-lv3` currently carries a broad mix of control-plane, operator,
+`docker-runtime` currently carries a broad mix of control-plane, operator,
 AI, and application services on one 24 GiB runtime allocation. That makes
 memory pressure both common and ambiguous:
 

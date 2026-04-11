@@ -46,14 +46,14 @@ The existing purpose-built browser app from ADR 0122 remains part of the same Wi
 Look up script metadata:
 
 ```bash
-curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
   http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fweekly_capacity_report
 ```
 
 Run a script through the repo helper:
 
 ```bash
-WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
   python3 scripts/windmill_run_wait_result.py \
     --base-url http://100.64.0.1:8005 \
     --workspace lv3 \
@@ -96,24 +96,24 @@ make syntax-check-windmill
 Representative live checks:
 
 ```bash
-curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
   http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fpost_merge_gate | jq '{path, summary}'
 
-WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
   python3 scripts/windmill_run_wait_result.py \
     --base-url http://100.64.0.1:8005 \
     --workspace lv3 \
     --path f/lv3/serverclaw_skills \
     --payload-json '{"workspace_id":"ops"}'
 
-WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
   python3 scripts/windmill_run_wait_result.py \
     --base-url http://100.64.0.1:8005 \
     --workspace lv3 \
     --path f/lv3/weekly_capacity_report \
     --payload-json '{"no_live_metrics":true}'
 
-WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
   python3 scripts/windmill_run_wait_result.py \
     --base-url http://100.64.0.1:8005 \
     --workspace lv3 \
@@ -125,7 +125,7 @@ WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_flo
 
 - Scheduled enablement remains owned by each workflow’s safety contract; ADR 0228 makes the Windmill execution surface present by default, not every schedule automatically enabled.
 - Some wrappers are intentionally powerful. The repo-managed wrapper, workflow budget, runbook, and secret contracts remain the governing safety boundary; seeding the script does not bypass those controls.
-- The mirrored worker checkout under `/srv/proxmox_florin_server` is a file mirror rather than a git clone. The Windmill runtime now prunes stale empty directories from that mirror so the worker-safe post-merge fallback does not trip on removed role paths.
-- The live `f/lv3/post_merge_gate` result currently goes green through the documented worker-local fallback whenever the worker cannot pull `registry.lv3.org/check-runner/*` images and Docker returns `502 Bad Gateway`.
+- The mirrored worker checkout under `/srv/proxmox-host_server` is a file mirror rather than a git clone. The Windmill runtime now prunes stale empty directories from that mirror so the worker-safe post-merge fallback does not trip on removed role paths.
+- The live `f/lv3/post_merge_gate` result currently goes green through the documented worker-local fallback whenever the worker cannot pull `registry.example.com/check-runner/*` images and Docker returns `502 Bad Gateway`.
 - Because that fallback keeps `generated-portals` enabled, worker-safe portal helpers such as `scripts/generate_ops_portal.py` must stay compatible with the worker's Python `3.11` interpreter.
 - `f/lv3/maintenance_window` is part of the default surface, but the current live NATS publish authorization gap in `docs/runbooks/maintenance-windows.md` still applies.

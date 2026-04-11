@@ -8,7 +8,7 @@
 - Release Date: 2026-04-01
 - Live Applied On: 2026-04-01
 - Branch: `codex/ws-0279-main-publish-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0279-main-publish-r1`
 - Owner: codex
 - Depends On: `ws-0279-live-apply`
 
@@ -53,7 +53,7 @@ the now-hardened Grist runtime plus its login-gated public surface on `main`.
 - `docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md`
 - `docs/adr/.index.yaml`
 - `docs/runbooks/configure-grist.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `playbooks/grist.yml`
 - `playbooks/services/grist.yml`
@@ -129,18 +129,18 @@ the now-hardened Grist runtime plus its login-gated public surface on `main`.
 - The final governed replay in
   `receipts/live-applies/evidence/2026-04-01-ws-0279-grist-mainline-live-apply-r4-0.177.134.txt`
   ended with final recap
-  `docker-runtime-lv3 : ok=309 changed=2 unreachable=0 failed=0 skipped=129`,
-  `nginx-lv3 : ok=46 changed=4 unreachable=0 failed=0 skipped=7`, and
+  `docker-runtime : ok=309 changed=2 unreachable=0 failed=0 skipped=129`,
+  `nginx-edge : ok=46 changed=4 unreachable=0 failed=0 skipped=7`, and
   `localhost : ok=24 changed=0 unreachable=0 failed=0 skipped=7`.
 - That replay records the shared-edge discovery gate succeeding before Grist
   startup, the local blocked-login probe detecting the OIDC bootstrap gap, the
   targeted `grist` force-recreate after rediscovery, and both the local plus
   public login-gating assertions passing afterward.
 - Fresh post-success proofs on 2026-04-01 reconfirm
-  `https://grist.lv3.org/status` returning the canonical alive string,
-  `https://grist.lv3.org/o/docs/` returning `HTTP/2 302` into the Keycloak
+  `https://grist.example.com/status` returning the canonical alive string,
+  `https://grist.example.com/o/docs/` returning `HTTP/2 302` into the Keycloak
   auth flow, and the runtime logs advertising
-  `OIDCConfig: initialized with issuer https://sso.lv3.org/realms/lv3` plus
+  `OIDCConfig: initialized with issuer https://sso.example.com/realms/lv3` plus
   `loginMiddlewareComment: oidc`.
 - `receipts/live-applies/2026-04-01-adr-0279-grist-mainline-live-apply.json`
   now records the canonical latest-main receipt for ADR 0279, while the March

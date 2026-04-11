@@ -13,7 +13,7 @@ COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "changedetection_runtime" / "templates"
 WATCH_CATALOG_TEMPLATE = REPO_ROOT / "roles" / "changedetection_runtime" / "templates" / "watch-catalog.json.j2"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "changedetection.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "changedetection.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
@@ -32,7 +32,7 @@ def test_defaults_pin_private_runtime_and_watch_catalogue() -> None:
     assert defaults["changedetection_runtime_container_name"] == "changedetection"
     assert defaults["changedetection_runtime_volume_name"] == "changedetection-datastore"
     assert defaults["changedetection_runtime_port"] == (
-        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('changedetection', 'internal') }}"
+        "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('changedetection', 'internal') }}"
     )
     assert defaults["changedetection_runtime_recheck_minimum_seconds"] == 3600
     assert len(defaults["changedetection_runtime_watch_groups"]) == 4
@@ -104,7 +104,7 @@ def test_playbook_converges_runtime_and_api_gateway_route() -> None:
 
     assert len(playbook) == 1
     play = playbook[0]
-    assert play["hosts"] == "docker-runtime-lv3"
+    assert play["hosts"] == "docker-runtime"
     roles = [role["role"] for role in play["roles"]]
     assert roles == [
         "lv3.platform.linux_guest_firewall",
@@ -123,7 +123,7 @@ def test_inventory_exposes_changedetection_to_host_monitoring_and_local_docker_c
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
 
     assert host_vars["platform_port_assignments"]["changedetection_port"] == 5000
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     assert 5000 in host_rule["ports"]
     docker_rule = next(
@@ -131,7 +131,7 @@ def test_inventory_exposes_changedetection_to_host_monitoring_and_local_docker_c
     )
     assert 5000 in docker_rule["ports"]
     monitoring_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 5000 in rule["ports"]
+        rule for rule in docker_runtime_rules if rule["source"] == "monitoring" and 5000 in rule["ports"]
     )
     assert 5000 in monitoring_rule["ports"]
 

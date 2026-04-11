@@ -9,7 +9,7 @@
 
 ## Context
 
-The platform has a backup VM (`backup-lv3`, VMID 160) running Proxmox Backup Server (PBS) that takes nightly VM snapshots of all managed guests (ADR 0020). Snapshots are verified at the block-device level by PBS itself (chunk integrity). However, block-device integrity is not the same as application-level recoverability. A backup that is block-intact may still be unrestorable if:
+The platform has a backup VM (`backup`, VMID 160) running Proxmox Backup Server (PBS) that takes nightly VM snapshots of all managed guests (ADR 0020). Snapshots are verified at the block-device level by PBS itself (chunk integrity). However, block-device integrity is not the same as application-level recoverability. A backup that is block-intact may still be unrestorable if:
 
 - The filesystem inside the snapshot is corrupted
 - The Postgres cluster has an unclean shutdown state that requires manual recovery
@@ -30,9 +30,9 @@ The three most critical VMs are selected for weekly restore testing:
 
 | VM | Why critical | Smoke test |
 |---|---|---|
-| `postgres-lv3` | Backing store for 5 services; most complex recovery | Postgres starts; all five databases are accessible; pg_dump of each DB succeeds |
-| `docker-runtime-lv3` | Runs all platform control plane services | Keycloak, OpenBao, Windmill, NetBox containers start; health probes return 200 |
-| `backup-lv3` | PBS itself; backing up the backup server is essential | PBS starts; the most recent job list is queryable |
+| `postgres` | Backing store for 5 services; most complex recovery | Postgres starts; all five databases are accessible; pg_dump of each DB succeeds |
+| `docker-runtime` | Runs all platform control plane services | Keycloak, OpenBao, Windmill, NetBox containers start; health probes return 200 |
+| `backup` | PBS itself; backing up the backup server is essential | PBS starts; the most recent job list is queryable |
 
 The nginx VM and monitoring VM are lower priority for restore testing since they are stateless (configuration is fully reproducible from the repo) and do not hold user data.
 
@@ -60,7 +60,7 @@ The verification workflow runs as a Windmill scheduled flow every Sunday at 02:0
 
 ### Smoke tests
 
-**postgres-lv3 smoke tests** (run via `psql` from the build server against the restored VM's IP):
+**postgres smoke tests** (run via `psql` from the build server against the restored VM's IP):
 
 ```python
 def smoke_test_postgres(restored_ip: str) -> list[TestResult]:
@@ -78,7 +78,7 @@ def smoke_test_postgres(restored_ip: str) -> list[TestResult]:
     return results
 ```
 
-**docker-runtime-lv3 smoke tests** (health probes against the restored VM's container ports):
+**docker-runtime smoke tests** (health probes against the restored VM's container ports):
 
 ```python
 SERVICES_TO_CHECK = [
@@ -116,7 +116,7 @@ finally:
   "triggered_by": "windmill-schedule",
   "results": [
     {
-      "vm": "postgres-lv3",
+      "vm": "postgres",
       "source_vmid": 150,
       "backup_date": "2026-03-27",
       "restore_duration_seconds": 187,
@@ -147,9 +147,9 @@ The monitoring dashboard includes a **Backup Health** panel showing:
 
 ```
 ✅ Restore verification completed (2026-03-29)
-• postgres-lv3: PASS (backup from 2026-03-27, restore: 3m7s)
-• docker-runtime-lv3: PASS (backup from 2026-03-26, restore: 5m12s)
-• backup-lv3: PASS (backup from 2026-03-28, restore: 1m43s)
+• postgres: PASS (backup from 2026-03-27, restore: 3m7s)
+• docker-runtime: PASS (backup from 2026-03-26, restore: 5m12s)
+• backup: PASS (backup from 2026-03-28, restore: 1m43s)
 All backups are verified restorable. Receipt: receipts/restore-verifications/2026-03-29.json
 ```
 
@@ -183,7 +183,7 @@ A test failure means the backup is not reliably restorable. The response is:
 ## Related ADRs
 
 - ADR 0020: Storage and backup model (PBS backups are the source for this workflow)
-- ADR 0029: Backup VM baseline (PBS runs on `backup-lv3`)
+- ADR 0029: Backup VM baseline (PBS runs on `backup`)
 - ADR 0057: Mattermost (restore verification summary destination)
 - ADR 0066: Mutation audit log (verification results are recorded here)
 - ADR 0088: Ephemeral infrastructure fixtures (restored VMs use this mechanism)

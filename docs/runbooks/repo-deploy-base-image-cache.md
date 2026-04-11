@@ -3,7 +3,7 @@
 ## Purpose
 
 ADR 0274 governs the approved base-image path for repo-backed application
-deployments. The current live implementation lands on `coolify-lv3` and adds:
+deployments. The current live implementation lands on `coolify` and adds:
 
 - a repo-managed base-image profile catalog for approved deployment lanes
 - a guest-local warm plan under `/opt/repo-deploy-image-cache/seed-plan.json`
@@ -28,7 +28,7 @@ Replay the governed Coolify service wrapper:
 make live-apply-service service=coolify env=production
 ```
 
-Expected outcomes on `coolify-lv3`:
+Expected outcomes on `coolify`:
 
 - `/opt/repo-deploy-image-cache/catalog.json` matches the committed profile catalog
 - `/opt/repo-deploy-image-cache/seed-plan.json` exists and lists the approved warm set
@@ -53,10 +53,10 @@ python3 scripts/repo_deploy_image_cache.py validate \
 
 ## Verify The Guest Runtime
 
-Check the timer, plan, and receipt on `coolify-lv3`:
+Check the timer, plan, and receipt on `coolify`:
 
 ```bash
-ansible -i inventory/hosts.yml coolify-lv3 -m shell \
+ansible -i inventory/hosts.yml coolify -m shell \
   -a 'systemctl is-active lv3-repo-deploy-image-cache.timer && sudo python3 /usr/local/bin/lv3-repo-deploy-image-cache.py verify --plan-file /opt/repo-deploy-image-cache/seed-plan.json --receipt-file /opt/repo-deploy-image-cache/warm-status.json --required --max-age-seconds 86400' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
@@ -64,7 +64,7 @@ ansible -i inventory/hosts.yml coolify-lv3 -m shell \
 Inspect the current guest-local receipt:
 
 ```bash
-ansible -i inventory/hosts.yml coolify-lv3 -m shell \
+ansible -i inventory/hosts.yml coolify -m shell \
   -a 'sudo cat /opt/repo-deploy-image-cache/warm-status.json' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```

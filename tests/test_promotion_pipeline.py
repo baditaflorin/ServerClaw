@@ -50,8 +50,8 @@ def make_service(service_id: str, name: str, vm: str) -> dict:
         "name": name,
         "vm": vm,
         "environments": {
-            "production": {"status": "active", "url": f"https://{service_id}.lv3.org"},
-            "staging": {"status": "active", "url": f"https://{service_id}.staging.lv3.org"},
+            "production": {"status": "active", "url": f"https://{service_id}.example.com"},
+            "staging": {"status": "active", "url": f"https://{service_id}.staging.example.com"},
         },
     }
 
@@ -61,11 +61,11 @@ class PromotionPipelineTests(unittest.TestCase):
         self.stage_ready_service = {
             "id": "grafana",
             "name": "Grafana",
-            "vm": "monitoring-lv3",
+            "vm": "monitoring",
             "environments": {
                 "staging": {
                     "status": "active",
-                    "url": "https://grafana.staging.lv3.org",
+                    "url": "https://grafana.staging.example.com",
                     "stage_ready": True,
                     "smoke_suite_ids": ["staging-grafana-primary-path"],
                 }
@@ -84,7 +84,7 @@ class PromotionPipelineTests(unittest.TestCase):
             "workflow_id": "deploy-and-promote",
             "adr": "0073",
             "summary": "Staged grafana.",
-            "targets": [{"kind": "guest", "name": "monitoring-lv3"}],
+            "targets": [{"kind": "guest", "name": "monitoring"}],
             "verification": [
                 {
                     "check": "Grafana smoke",
@@ -452,7 +452,7 @@ class PromotionPipelineTests(unittest.TestCase):
                 patch.object(
                     promotion_pipeline,
                     "load_service_index",
-                    return_value={"postgres": make_service("postgres", "PostgreSQL", "postgres-lv3")},
+                    return_value={"postgres": make_service("postgres", "PostgreSQL", "postgres")},
                 ),
                 patch.object(promotion_pipeline, "load_receipt", return_value=self.stage_receipt),
                 patch.object(promotion_pipeline, "validate_receipt", return_value=None),
@@ -644,7 +644,7 @@ class PromotionPipelineTests(unittest.TestCase):
                 patch.object(
                     promotion_pipeline,
                     "load_service_index",
-                    return_value={"windmill": {"id": "windmill", "name": "Windmill", "vm": "docker-runtime-lv3"}},
+                    return_value={"windmill": {"id": "windmill", "name": "Windmill", "vm": "docker-runtime"}},
                 ),
                 patch.object(promotion_pipeline, "load_receipt", return_value=self.stage_receipt),
                 patch.object(promotion_pipeline, "validate_receipt", return_value=None),

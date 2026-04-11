@@ -12,7 +12,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0267-mainline-final`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0267-mainline-final`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0267-mainline-final`
 - Owner: codex
 - Depends On: `adr-0087-validation-gate`, `adr-0168-automated-validation`, `adr-0228-windmill-default-operations-surface`, `adr-0230-policy-decisions-via-open-policy-agent-and-conftest`
 - Conflicts With: none
@@ -27,10 +27,10 @@
 
 - The exact-main regression slice in `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-targeted-checks-r3-0.177.104.txt` passed with `100 passed in 5.59s`, covering the governed waiver helpers, Windmill validation-gate wiring, repo-surface merge logic, the Docker runtime nftables repair, Docker publication helper replay checks, and the OpenBao helper regression surface.
 - `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-syntax-check-r3-0.177.104.txt` confirmed `make syntax-check-windmill` still succeeds from the exact `0.177.104` tree.
-- `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-converge-windmill-r3-0.177.104.txt` captured the authoritative latest-main replay with final recap `docker-runtime-lv3 : ok=295 changed=46 unreachable=0 failed=0 skipped=61`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`.
+- `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-converge-windmill-r3-0.177.104.txt` captured the authoritative latest-main replay with final recap `docker-runtime : ok=295 changed=46 unreachable=0 failed=0 skipped=61`, `postgres : ok=68 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`.
 - `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-gate-status-r2-0.177.104.txt` confirmed the live governed waiver summary remains `0 open, 63 legacy, 0 warnings, 0 release blockers`.
 - `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-release-status-r2-0.177.104.txt` confirmed the current repo baseline `0.177.104`, platform baseline `0.130.69`, and that no other workstreams remain in progress on the exact-main tree before the protected merge step.
-- `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-host-runtime-r2-0.177.104.txt` reconfirmed hostname `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, active `pveproxy` plus `tailscaled`, listeners on `2222`, `8005`, and `8006`, `sudo qm status 120` returning `status: running`, and Windmill answering `CE v1.662.0`.
+- `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-host-runtime-r2-0.177.104.txt` reconfirmed hostname `proxmox-host`, kernel `6.17.13-2-pve`, active `pveproxy` plus `tailscaled`, listeners on `2222`, `8005`, and `8006`, `sudo qm status 120` returning `status: running`, and Windmill answering `CE v1.662.0`.
 - `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-generate-adr-index-r2-0.177.104.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-validate-repo-r4-0.177.104.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-git-diff-check-r4-0.177.104.txt`, and `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-live-apply-receipts-validate-r3-0.177.104.txt` confirm the ADR index refresh, agent/workstream/data-model validation, clean diff state, and receipt-schema validation all pass with the refreshed branch-local receipt and nftables repair in place.
 - `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-release-dry-run-r1-0.177.105.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-release-write-r1-0.177.105.txt` confirm the protected mainline integration step saw one unreleased ADR 0267 note on top of `0.177.104`, then cut repository release `0.177.105` with the expected platform-impact summary.
 - `receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-canonical-truth-write-r3-0.177.105.txt` confirms the final integration tree refreshed canonical truth after the mainline receipt was recorded, advancing `versions/stack.yaml` to platform version `0.130.70` and replacing `live_apply_evidence.latest_receipts.validation_gate` with the ADR 0267 canonical receipt.

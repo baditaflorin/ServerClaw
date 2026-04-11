@@ -1,6 +1,6 @@
 # Synthetic Transaction Replay
 
-ADR 0190 adds a privacy-safe replay harness for capacity, recovery, and failover validation. The first live target is the restored `docker-runtime-lv3` rehearsal path used by ADR 0099.
+ADR 0190 adds a privacy-safe replay harness for capacity, recovery, and failover validation. The first live target is the restored `docker-runtime` rehearsal path used by ADR 0099.
 
 ## Entry Points
 
@@ -27,7 +27,7 @@ Each scenario runs multiple times so the report captures request success rate an
 
 ## Recovery Integration
 
-`scripts/restore_verification.py` now runs this replay automatically for the restored `docker-runtime-lv3` guest after the smoke suite passes SSH readiness and warm-up.
+`scripts/restore_verification.py` now runs this replay automatically for the restored `docker-runtime` guest after the smoke suite passes SSH readiness and warm-up.
 
 The restore-verification receipt records:
 

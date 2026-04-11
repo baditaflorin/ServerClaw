@@ -26,7 +26,7 @@ shared_surfaces:
   - docs/runbooks/configure-plane.md
   - receipts/live-applies/2026-03-28-adr-0193-plane-mainline-live-apply.json
   - receipts/ops-portal-snapshot.html
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - config/ansible-execution-scopes.yaml
   - config/command-catalog.json
@@ -112,7 +112,7 @@ ownership_manifest:
     - id: plane_contract_surfaces
       paths:
         - Makefile
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - config/ansible-execution-scopes.yaml
         - config/command-catalog.json
@@ -173,7 +173,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: replayed ADR 0193 from the latest `origin/main`, hardened the
     Plane controller defaults against topology drift, and re-verified the
-    private controller lane plus authenticated `tasks.lv3.org` publication on
+    private controller lane plus authenticated `tasks.example.com` publication on
     merged main
   release_bump: patch
   included_in_repo_version: 0.177.32

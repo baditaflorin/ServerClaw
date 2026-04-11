@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.48
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0235-main-merge-r3`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-main-merge-r3`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0235-main-merge-r3`
 - Owner: codex
 - Depends On: `ws-0235-live-apply`
 
@@ -51,14 +51,14 @@ without rewriting the earlier isolated-worktree live-apply evidence.
 - `git fetch origin main --prune` confirmed this integration worktree stayed
   aligned with `origin/main` commit
   `414c0b27f424a95bba790963d59cd7a7442ab833` before the protected release cut.
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.48 after the exact-main ADR 0235 replay re-verifies the PatternFly-style cross-application launcher and session-scoped favorites on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.47 baseline" --released-on 2026-03-29 --dry-run`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.48 after the exact-main ADR 0235 replay re-verifies the PatternFly-style cross-application launcher and session-scoped favorites on ops.example.com while preserving the authenticated edge contract on top of the 0.130.47 baseline" --released-on 2026-03-29 --dry-run`
   reported `Current version: 0.177.69`, `Next version: 0.177.70`, and
   `Unreleased notes: 1`.
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.48 after the exact-main ADR 0235 replay re-verifies the PatternFly-style cross-application launcher and session-scoped favorites on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.47 baseline" --released-on 2026-03-29`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.48 after the exact-main ADR 0235 replay re-verifies the PatternFly-style cross-application launcher and session-scoped favorites on ops.example.com while preserving the authenticated edge contract on top of the 0.130.47 baseline" --released-on 2026-03-29`
   prepared release `0.177.70`.
-- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-main-merge-r3'`
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0235-main-merge-r3'`
   completed successfully with final recap
-  `docker-runtime-lv3 ok=129 changed=15 failed=0 skipped=14`.
+  `docker-runtime ok=129 changed=15 failed=0 skipped=14`.
 - Fresh mainline evidence was captured in
   `receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-internal-endpoints.txt`,
   `receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-launcher-session-check.txt`,

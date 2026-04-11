@@ -81,7 +81,7 @@ adrs:
       - langfuse
       - agent
       - observability
-    summary: We will deploy self-hosted Langfuse on docker-runtime-lv3 and publish it at https://langfuse.lv3.org.
+    summary: We will deploy self-hosted Langfuse on docker-runtime and publish it at https://langfuse.example.com.
     filename: 0146-langfuse-for-agent-observability.md
     path: docs/adr/0146-langfuse-for-agent-observability.md
     implemented_in_repo_version: 0.163.0

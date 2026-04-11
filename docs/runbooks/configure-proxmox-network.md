@@ -4,7 +4,7 @@
 
 This runbook captures the executable path used to convert the host from the Hetzner installimage NIC configuration into a Proxmox bridge layout.
 
-Public ingress forwarding is documented separately in [configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md).
+Public ingress forwarding is documented separately in [configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/configure-public-ingress.md).
 
 ## Resulting topology
 

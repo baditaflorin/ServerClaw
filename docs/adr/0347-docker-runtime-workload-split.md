@@ -9,7 +9,7 @@
 
 ## Context
 
-`docker-runtime-lv3` (VMID 120, `10.10.10.20`, 4 vCPU, 24 GB RAM, 160 GB disk)
+`docker-runtime` (VMID 120, `10.10.10.20`, 4 vCPU, 24 GB RAM, 160 GB disk)
 currently runs approximately 80 services covering everything from real-time
 communications (Mattermost, Matrix-Synapse, LiveKit, Redpanda) to collaborative
 productivity tools (Nextcloud, Outline, Woodpecker CI) to analytics and
@@ -19,11 +19,11 @@ Three VM separations have already been carved out from this VM:
 
 | VM | VMID | IP | Workload |
 |---|---|---|---|
-| `runtime-ai-lv3` | 190 | 10.10.10.90 | AI/ML inference (Ollama, Piper) |
-| `runtime-general-lv3` | 191 | 10.10.10.91 | Uptime Kuma, Homepage, Mailpit |
-| `runtime-control-lv3` | 192 | 10.10.10.92 | Keycloak, OpenBao, Step-CA, Gitea, Harbor, Windmill, API Gateway, Mail Platform |
+| `runtime-ai` | 190 | 10.10.10.90 | AI/ML inference (Ollama, Piper) |
+| `runtime-general` | 191 | 10.10.10.91 | Uptime Kuma, Homepage, Mailpit |
+| `runtime-control` | 192 | 10.10.10.92 | Keycloak, OpenBao, Step-CA, Gitea, Harbor, Windmill, API Gateway, Mail Platform |
 
-Despite those separations, `docker-runtime-lv3` retains roughly 80 services and
+Despite those separations, `docker-runtime` retains roughly 80 services and
 continues to exhibit the following recurring problems:
 
 ### Problem 1: I/O and CPU competition between fundamentally different workload classes
@@ -37,7 +37,7 @@ Docker daemon.
 
 ### Problem 2: Blast radius — Docker daemon restart takes down 80 services
 
-When the Docker daemon on `docker-runtime-lv3` must be restarted — for example
+When the Docker daemon on `docker-runtime` must be restarted — for example
 due to `iptables`/`nftables` nat chain corruption (observed in the incident
 that motivated ADR 0329) — all 80 services stop simultaneously. Operators must
 choose between leaving the platform partially broken (nat chain issue causes
@@ -68,7 +68,7 @@ large reduces available memory for all other services. With 80 services sharing
 ### Current topology (before this ADR)
 
 ```
-docker-runtime-lv3 (VMID 120, 10.10.10.20)
+docker-runtime (VMID 120, 10.10.10.20)
 4 vCPU / 24 GB RAM / 160 GB disk
 │
 ├── Communications (real-time, persistent connections)
@@ -117,14 +117,14 @@ docker-runtime-lv3 (VMID 120, 10.10.10.20)
 
 ## Decision
 
-Split `docker-runtime-lv3` into three purpose-scoped VMs aligned to workload
+Split `docker-runtime` into three purpose-scoped VMs aligned to workload
 class. The VMID and IP of the original VM are retained so that routing changes
 are minimised.
 
 ### New topology (after this ADR)
 
 ```
-runtime-comms-lv3 (NEW, VMID 121, 10.10.10.21)
+runtime-comms (NEW, VMID 121, 10.10.10.21)
 8 vCPU / 24 GB RAM / 256 GB disk
 │
 ├── Mattermost          (ChatOps + message attachments)
@@ -134,7 +134,7 @@ runtime-comms-lv3 (NEW, VMID 121, 10.10.10.21)
 ├── LiveKit             (WebRTC video/audio)
 └── Redpanda            (Kafka broker)
 
-runtime-apps-lv3 (NEW, VMID 122, 10.10.10.22)
+runtime-apps (NEW, VMID 122, 10.10.10.22)
 8 vCPU / 16 GB RAM / 192 GB disk
 │
 ├── Nextcloud           (file sync/share)
@@ -157,7 +157,7 @@ runtime-apps-lv3 (NEW, VMID 122, 10.10.10.22)
 ├── Portainer           (Docker management UI)
 └── Dozzle              (Docker log viewer)
 
-docker-runtime-lv3 → repurposed as runtime-data-lv3 (KEEP, VMID 120, 10.10.10.20)
+docker-runtime → repurposed as runtime-data-lv3 (KEEP, VMID 120, 10.10.10.20)
 4 vCPU / 12 GB RAM / 128 GB disk  (downsized after migration)
 │
 ├── Langfuse            (LLM observability)
@@ -174,9 +174,9 @@ docker-runtime-lv3 → repurposed as runtime-data-lv3 (KEEP, VMID 120, 10.10.10.
 └── Vaultwarden         (password manager)
 
 (Unchanged)
-runtime-ai-lv3      (VMID 190, 10.10.10.90)  — Ollama, Piper, AI inference
-runtime-general-lv3 (VMID 191, 10.10.10.91)  — Uptime Kuma, Homepage, Mailpit
-runtime-control-lv3 (VMID 192, 10.10.10.92)  — Keycloak, OpenBao, Step-CA,
+runtime-ai      (VMID 190, 10.10.10.90)  — Ollama, Piper, AI inference
+runtime-general (VMID 191, 10.10.10.91)  — Uptime Kuma, Homepage, Mailpit
+runtime-control (VMID 192, 10.10.10.92)  — Keycloak, OpenBao, Step-CA,
                                                  OpenFGA, Gitea, Harbor,
                                                  Semaphore, Temporal, Windmill,
                                                  API Gateway, Mail Platform
@@ -186,58 +186,58 @@ runtime-control-lv3 (VMID 192, 10.10.10.92)  — Keycloak, OpenBao, Step-CA,
 
 | VM | VMID | IP | vCPU | RAM | Disk | Role |
 |---|---|---|---|---|---|---|
-| `runtime-comms-lv3` | 121 | 10.10.10.21 | 8 | 24 GB | 256 GB | Real-time communications |
-| `runtime-apps-lv3` | 122 | 10.10.10.22 | 8 | 16 GB | 192 GB | Collaborative apps + CI/CD |
-| `docker-runtime-lv3` (→ `runtime-data`) | 120 | 10.10.10.20 | 4 | 12 GB | 128 GB | Analytics + observability + data |
-| `runtime-ai-lv3` | 190 | 10.10.10.90 | — | 16 GB | — | AI/ML inference (unchanged) |
-| `runtime-general-lv3` | 191 | 10.10.10.91 | — | 12 GB | — | General utilities (unchanged) |
-| `runtime-control-lv3` | 192 | 10.10.10.92 | — | 12 GB | — | Control plane (unchanged) |
+| `runtime-comms` | 121 | 10.10.10.21 | 8 | 24 GB | 256 GB | Real-time communications |
+| `runtime-apps` | 122 | 10.10.10.22 | 8 | 16 GB | 192 GB | Collaborative apps + CI/CD |
+| `docker-runtime` (→ `runtime-data`) | 120 | 10.10.10.20 | 4 | 12 GB | 128 GB | Analytics + observability + data |
+| `runtime-ai` | 190 | 10.10.10.90 | — | 16 GB | — | AI/ML inference (unchanged) |
+| `runtime-general` | 191 | 10.10.10.91 | — | 12 GB | — | General utilities (unchanged) |
+| `runtime-control` | 192 | 10.10.10.92 | — | 12 GB | — | Control plane (unchanged) |
 
 ### Service-to-VM assignment table
 
 | Service | Current VM | New VM | Rationale |
 |---|---|---|---|
-| Mattermost | docker-runtime-lv3 (120) | runtime-comms-lv3 (121) | Real-time messaging, large attachment store |
-| Matrix-Synapse | docker-runtime-lv3 (120) | runtime-comms-lv3 (121) | Federated IM, persistent WebSocket |
-| mautrix-discord | docker-runtime-lv3 (120) | runtime-comms-lv3 (121) | Bridge for Mattermost/Matrix |
-| mautrix-whatsapp | docker-runtime-lv3 (120) | runtime-comms-lv3 (121) | Bridge for Mattermost/Matrix |
-| LiveKit | docker-runtime-lv3 (120) | runtime-comms-lv3 (121) | WebRTC, kernel-level network pressure |
-| Redpanda | docker-runtime-lv3 (120) | runtime-comms-lv3 (121) | Kafka broker, sequential I/O intensive |
-| Nextcloud | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | File sync, shares MinIO storage |
-| MinIO | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Object storage, co-located with consumers |
-| Outline | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Wiki, moderate bursty workload |
-| Plane | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Project management |
-| Vikunja | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Task management |
-| N8N | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Workflow automation |
-| NetBox | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | IPAM/DCIM |
-| Directus | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | CMS/API |
-| Label Studio | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | ML annotation |
-| Paperless | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Document management |
-| Gotenberg | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | PDF generation |
-| Tika | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Content extraction |
-| Browser-Runner | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Headless browser |
-| Searxng | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Meta search |
-| Excalidraw | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Collaborative drawing |
-| ChangeDetection | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Website monitoring |
-| Woodpecker CI | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | CI/CD — CPU spikes isolated here |
-| Portainer | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Docker management UI |
-| Dozzle | docker-runtime-lv3 (120) | runtime-apps-lv3 (122) | Docker log viewer |
-| Langfuse | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | LLM observability — stays |
-| Flagsmith | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | Feature flags — stays |
-| Plausible | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | Analytics — stays |
-| Lago | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | Billing — stays |
-| Glitchtip | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | Error tracking — stays |
-| Dify | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | LLM orchestration — stays |
-| Superset | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | BI — stays |
-| Grist | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | Spreadsheets — stays |
-| Typesense | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | Search engine — stays |
-| One-API | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | OpenAI proxy — stays |
-| Open-WebUI | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | LLM chat UI — stays |
-| Vaultwarden | docker-runtime-lv3 (120) | docker-runtime-lv3 (120) | Password manager — stays |
+| Mattermost | docker-runtime (120) | runtime-comms (121) | Real-time messaging, large attachment store |
+| Matrix-Synapse | docker-runtime (120) | runtime-comms (121) | Federated IM, persistent WebSocket |
+| mautrix-discord | docker-runtime (120) | runtime-comms (121) | Bridge for Mattermost/Matrix |
+| mautrix-whatsapp | docker-runtime (120) | runtime-comms (121) | Bridge for Mattermost/Matrix |
+| LiveKit | docker-runtime (120) | runtime-comms (121) | WebRTC, kernel-level network pressure |
+| Redpanda | docker-runtime (120) | runtime-comms (121) | Kafka broker, sequential I/O intensive |
+| Nextcloud | docker-runtime (120) | runtime-apps (122) | File sync, shares MinIO storage |
+| MinIO | docker-runtime (120) | runtime-apps (122) | Object storage, co-located with consumers |
+| Outline | docker-runtime (120) | runtime-apps (122) | Wiki, moderate bursty workload |
+| Plane | docker-runtime (120) | runtime-apps (122) | Project management |
+| Vikunja | docker-runtime (120) | runtime-apps (122) | Task management |
+| N8N | docker-runtime (120) | runtime-apps (122) | Workflow automation |
+| NetBox | docker-runtime (120) | runtime-apps (122) | IPAM/DCIM |
+| Directus | docker-runtime (120) | runtime-apps (122) | CMS/API |
+| Label Studio | docker-runtime (120) | runtime-apps (122) | ML annotation |
+| Paperless | docker-runtime (120) | runtime-apps (122) | Document management |
+| Gotenberg | docker-runtime (120) | runtime-apps (122) | PDF generation |
+| Tika | docker-runtime (120) | runtime-apps (122) | Content extraction |
+| Browser-Runner | docker-runtime (120) | runtime-apps (122) | Headless browser |
+| Searxng | docker-runtime (120) | runtime-apps (122) | Meta search |
+| Excalidraw | docker-runtime (120) | runtime-apps (122) | Collaborative drawing |
+| ChangeDetection | docker-runtime (120) | runtime-apps (122) | Website monitoring |
+| Woodpecker CI | docker-runtime (120) | runtime-apps (122) | CI/CD — CPU spikes isolated here |
+| Portainer | docker-runtime (120) | runtime-apps (122) | Docker management UI |
+| Dozzle | docker-runtime (120) | runtime-apps (122) | Docker log viewer |
+| Langfuse | docker-runtime (120) | docker-runtime (120) | LLM observability — stays |
+| Flagsmith | docker-runtime (120) | docker-runtime (120) | Feature flags — stays |
+| Plausible | docker-runtime (120) | docker-runtime (120) | Analytics — stays |
+| Lago | docker-runtime (120) | docker-runtime (120) | Billing — stays |
+| Glitchtip | docker-runtime (120) | docker-runtime (120) | Error tracking — stays |
+| Dify | docker-runtime (120) | docker-runtime (120) | LLM orchestration — stays |
+| Superset | docker-runtime (120) | docker-runtime (120) | BI — stays |
+| Grist | docker-runtime (120) | docker-runtime (120) | Spreadsheets — stays |
+| Typesense | docker-runtime (120) | docker-runtime (120) | Search engine — stays |
+| One-API | docker-runtime (120) | docker-runtime (120) | OpenAI proxy — stays |
+| Open-WebUI | docker-runtime (120) | docker-runtime (120) | LLM chat UI — stays |
+| Vaultwarden | docker-runtime (120) | docker-runtime (120) | Password manager — stays |
 
 ### Grouping rationale
 
-**`runtime-comms-lv3` — real-time communication backbone**
+**`runtime-comms` — real-time communication backbone**
 
 Mattermost, Matrix-Synapse, LiveKit, and Redpanda share three characteristics
 that make them a natural isolation boundary:
@@ -256,7 +256,7 @@ The 256 GB disk is sized to accommodate Mattermost attachment growth (estimated
 >20 GB/year at current usage) and Redpanda partition log retention without
 competing for the overlay2 storage used by CI build layers.
 
-**`runtime-apps-lv3` — collaborative productivity and CI/CD**
+**`runtime-apps` — collaborative productivity and CI/CD**
 
 This group contains services with moderate, bursty workloads that are tolerant
 of CPU competition with each other (they are not latency-sensitive at the
@@ -264,11 +264,11 @@ millisecond level). Grouping MinIO with Nextcloud, Directus, and Paperless is
 intentional: all four consume MinIO for object storage, and keeping them on the
 same VM reduces cross-VM traffic for presigned URL flows.
 
-Woodpecker CI is placed here rather than on `runtime-control-lv3` because its
+Woodpecker CI is placed here rather than on `runtime-control` because its
 resource spikes are appropriate to share with batch-oriented productivity tools
 rather than the latency-sensitive control plane (Keycloak, OpenBao).
 
-**`docker-runtime-lv3` repurposed as `runtime-data`**
+**`docker-runtime` repurposed as `runtime-data`**
 
 The remaining services — analytics, observability pipelines, LLM orchestration,
 and billing — share bulk-write patterns (Plausible ingests event streams;
@@ -287,25 +287,25 @@ service that uses a hardcoded IP for a data-tier service.
 
 ### 1. `inventory/hosts.yml`
 
-**What:** Add `runtime-comms-lv3` and `runtime-apps-lv3` to the `lv3_guests`
+**What:** Add `runtime-comms` and `runtime-apps` to the `lv3_guests`
 group. Add new host groups `runtime_comms` and `runtime_apps`.
 
 ```yaml
 # Under lv3_guests:
-runtime-comms-lv3:
+runtime-comms:
   ansible_host: 10.10.10.21
 
-runtime-apps-lv3:
+runtime-apps:
   ansible_host: 10.10.10.22
 
 # New groups:
 runtime_comms:
   hosts:
-    runtime-comms-lv3: {}
+    runtime-comms: {}
 
 runtime_apps:
   hosts:
-    runtime-apps-lv3: {}
+    runtime-apps: {}
 ```
 
 **Why:** Ansible cannot target the new VMs without hosts entries. The group
@@ -313,17 +313,17 @@ names are used by service playbooks to scope execution.
 
 ---
 
-### 2. `inventory/host_vars/proxmox_florin.yml`
+### 2. `inventory/host_vars/proxmox-host.yml`
 
 **What:**
 
-a. **Add VM definitions** for `runtime-comms-lv3` (VMID 121) and
-`runtime-apps-lv3` (VMID 122) to the `proxmox_guests` list, following
+a. **Add VM definitions** for `runtime-comms` (VMID 121) and
+`runtime-apps` (VMID 122) to the `proxmox_guests` list, following
 the same spec shape as existing runtime VMs:
 
 ```yaml
 - vmid: 121
-  name: runtime-comms-lv3
+  name: runtime-comms
   role: runtime-comms
   template_key: lv3-debian-base
   ipv4: 10.10.10.21
@@ -339,7 +339,7 @@ the same spec shape as existing runtime VMs:
     - lv3
 
 - vmid: 122
-  name: runtime-apps-lv3
+  name: runtime-apps
   role: runtime-apps
   template_key: lv3-debian-base
   ipv4: 10.10.10.22
@@ -359,7 +359,7 @@ b. **Add Tailscale TCP proxy entries** for both new VMs so `service_health_tool.
 and operator tools can reach management ports over Tailscale without going through
 the public edge.
 
-c. **Update `docker-runtime-lv3`** VM spec: after migration is validated, reduce
+c. **Update `docker-runtime`** VM spec: after migration is validated, reduce
 `memory_mb` to 12288 and `disk_gb` to 128.
 
 ---
@@ -375,7 +375,7 @@ rather than hardcoded addresses:
 
 ```yaml
 private_ip: >-
-  {{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms-lv3')
+  {{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms')
       | map(attribute='ipv4') | first) }}
 ```
 
@@ -445,8 +445,8 @@ the dual-maintenance risk documented in ADR 0340 DRY-5.
 
 ### 8. `config/health-probe-catalog.json`
 
-**What:** Add health probe entries for `runtime-comms-lv3` (VMID 121,
-`10.10.10.21`) and `runtime-apps-lv3` (VMID 122, `10.10.10.22`), including
+**What:** Add health probe entries for `runtime-comms` (VMID 121,
+`10.10.10.21`) and `runtime-apps` (VMID 122, `10.10.10.22`), including
 per-service probes for each migrated service on its new host.
 
 ---
@@ -467,7 +467,7 @@ both new VMs.
 
 ### 11. Backup scope
 
-**What:** Add `runtime-comms-lv3` and `runtime-apps-lv3` to the Proxmox Backup
+**What:** Add `runtime-comms` and `runtime-apps` to the Proxmox Backup
 Server (PBS) schedule. The Mattermost attachment store and Nextcloud data volumes
 require file-level backup coverage via Restic in addition to VM-level snapshots.
 
@@ -493,9 +493,9 @@ the implementation branch.
 **What:**
 
 - `tests/test_runtime_comms_playbook.py` — assert play structure, guest spec
-  presence in `host_vars/proxmox_florin.yml`, service role inclusion, and
+  presence in `host_vars/proxmox-host.yml`, service role inclusion, and
   firewall role presence.
-- `tests/test_runtime_apps_playbook.py` — same pattern for `runtime-apps-lv3`.
+- `tests/test_runtime_apps_playbook.py` — same pattern for `runtime-apps`.
 - `tests/test_docker_runtime_playbook.py` — assert that services migrated to
   new VMs are NOT present in the `docker-runtime.yml` play after migration.
 - `tests/test_nginx_edge_publication_role.py` — assert upstream IPs for
@@ -505,14 +505,14 @@ the implementation branch.
 
 ### Positive
 
-**Blast radius reduction.** A Docker daemon restart on `runtime-comms-lv3`
-affects 6 services. The same event on the current `docker-runtime-lv3` affects
+**Blast radius reduction.** A Docker daemon restart on `runtime-comms`
+affects 6 services. The same event on the current `docker-runtime` affects
 approximately 80 services. Maximum single-VM blast radius drops from ~80 to ~25
 (the apps VM, the largest group).
 
 **Workload isolation.** Redpanda partition rebalancing and LiveKit media
 processing no longer impose latency on Nextcloud file sync or Langfuse query
-dashboards. Woodpecker CI build spikes affect only `runtime-apps-lv3`.
+dashboards. Woodpecker CI build spikes affect only `runtime-apps`.
 
 **Independent resource tuning.** Each VM can be sized for its actual workload.
 The comms VM can grow its disk independently of the apps VM's build layer
@@ -552,7 +552,7 @@ These dependencies cross VM boundaries today and will continue to do so after
 the split, but the network path changes from loopback to inter-VM routed. Latency
 impact is negligible on the private /24 but operators should be aware.
 
-**MinIO co-location assumption.** This ADR places MinIO on `runtime-apps-lv3`
+**MinIO co-location assumption.** This ADR places MinIO on `runtime-apps`
 alongside its primary consumers (Nextcloud, Directus, Paperless). If a service
 on a different VM needs MinIO access in the future (e.g., a comms service storing
 voice message attachments), that traffic crosses a VM boundary. This is acceptable
@@ -561,35 +561,35 @@ platform-wide shared primitive.
 
 ## Implementation Order
 
-1. **Provision `runtime-comms-lv3`** (VMID 121, 10.10.10.21) via `proxmox_guests`.
-2. **Install Docker runtime** on `runtime-comms-lv3` via `lv3.platform.docker_runtime`.
-3. **Migrate communications services** to `runtime-comms-lv3`:
+1. **Provision `runtime-comms`** (VMID 121, 10.10.10.21) via `proxmox_guests`.
+2. **Install Docker runtime** on `runtime-comms` via `lv3.platform.docker_runtime`.
+3. **Migrate communications services** to `runtime-comms`:
    - Schedule maintenance window; notify operators via Mattermost (pre-migration).
    - Rsync Mattermost data volumes and Matrix-Synapse media store to new VM.
-   - Start services on `runtime-comms-lv3`; verify health probes pass.
-   - Stop services on `docker-runtime-lv3` (120).
+   - Start services on `runtime-comms`; verify health probes pass.
+   - Stop services on `docker-runtime` (120).
 4. **Update NGINX upstreams** for comms services (Mattermost, Matrix-Synapse,
    LiveKit, Redpanda Console).
 5. **Verify comms services** end-to-end via public subdomains and Uptime Kuma probes.
-6. **Provision `runtime-apps-lv3`** (VMID 122, 10.10.10.22) via `proxmox_guests`.
-7. **Install Docker runtime** on `runtime-apps-lv3`.
-8. **Migrate apps services** to `runtime-apps-lv3`:
+6. **Provision `runtime-apps`** (VMID 122, 10.10.10.22) via `proxmox_guests`.
+7. **Install Docker runtime** on `runtime-apps`.
+8. **Migrate apps services** to `runtime-apps`:
    - Nextcloud and MinIO data volumes require rsync with a brief service stop.
    - Other stateless or DB-backed services (Woodpecker, Outline, Plane) can be
      migrated with minimal downtime (start on new VM, drain old, remove from old).
-   - Start services on `runtime-apps-lv3`; verify health probes pass.
-   - Stop services on `docker-runtime-lv3` (120).
+   - Start services on `runtime-apps`; verify health probes pass.
+   - Stop services on `docker-runtime` (120).
 9. **Update NGINX upstreams** for apps services (Nextcloud, MinIO, Woodpecker CI,
    Outline, and all remaining moved services).
 10. **Verify apps services** end-to-end.
-11. **Remove migrated services** from `docker-runtime-lv3` Compose configurations.
-12. **Downsize `docker-runtime-lv3`** resources (RAM 24 GB → 12 GB, disk 160 GB → 128 GB)
+11. **Remove migrated services** from `docker-runtime` Compose configurations.
+12. **Downsize `docker-runtime`** resources (RAM 24 GB → 12 GB, disk 160 GB → 128 GB)
     after at least 72 hours of validated steady-state operation.
 13. **Update `versions/stack.yaml`** and cut live-apply receipts for all three VMs.
 
 ## Related ADRs
 
-- ADR 0023: Docker Runtime VM Baseline (original `docker-runtime-lv3` design)
+- ADR 0023: Docker Runtime VM Baseline (original `docker-runtime` design)
 - ADR 0025: Compose-managed Runtime Stacks
 - ADR 0029: Dedicated Backup VM (backup coverage implications)
 - ADR 0067: Guest Network Policy Enforcement (firewall policies for new VMs)

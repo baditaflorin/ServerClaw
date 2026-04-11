@@ -6,14 +6,14 @@ high
 
 ## Symptoms
 
-- Users intermittently hit `502 Bad Gateway` or `503` on any `*.lv3.org` subdomain
-- Login redirects to `sso.lv3.org` briefly fail then succeed on retry
+- Users intermittently hit `502 Bad Gateway` or `503` on any `*.example.com` subdomain
+- Login redirects to `sso.example.com` briefly fail then succeed on retry
 - `journalctl -u lv3-ops-portal-oauth2-proxy-watchdog.service` shows repeated:
   ```
   WARN  oauth2-proxy probe failed (status=000, failures=1/2)
   ERROR Restarting lv3-ops-portal-oauth2-proxy.service
   ```
-  every ~60s on nginx-lv3
+  every ~60s on nginx-edge
 
 ## Root Cause History
 
@@ -25,12 +25,12 @@ proxy look failed. Fixed: remove `-f` from the probe curl command.
 ## Diagnosis
 
 ```bash
-# On nginx-lv3 — check if watchdog is restarting a healthy proxy
+# On nginx-edge — check if watchdog is restarting a healthy proxy
 journalctl -u lv3-ops-portal-oauth2-proxy-watchdog.service -n 20 --no-pager
 
 # What status code is the probe actually getting?
 curl -s -o /dev/null -w "%{http_code}" -m 5 \
-  -H "Host: ops.lv3.org" -H "X-Forwarded-Proto: https" \
+  -H "Host: ops.example.com" -H "X-Forwarded-Proto: https" \
   http://127.0.0.1:4180/oauth2/auth
 # Expected: 401 (healthy)
 # If 000: proxy is not listening — real failure
@@ -47,7 +47,7 @@ ss -tlnp | grep 4180
 ## Stop an Active Restart Loop
 
 ```bash
-# On nginx-lv3
+# On nginx-edge
 # 1. Reset the failure counter immediately
 echo 0 | sudo tee /run/lv3-oauth2-proxy-watchdog/failures
 

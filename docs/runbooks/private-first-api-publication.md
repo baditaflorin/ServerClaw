@@ -12,11 +12,11 @@ Use it when you need to:
 
 ## Canonical Sources
 
-- publication catalog: [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
-- publication CLI and validator: [scripts/api_publication.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/api_publication.py)
-- lane catalog cross-checks: [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
-- service inventory cross-checks: [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
-- architecture decision: [docs/adr/0049-private-first-api-publication-model.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0049-private-first-api-publication-model.md)
+- publication catalog: [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/api-publication.json)
+- publication CLI and validator: [scripts/api_publication.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/api_publication.py)
+- lane catalog cross-checks: [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/control-plane-lanes.json)
+- service inventory cross-checks: [inventory/host_vars/proxmox-host.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/host_vars/proxmox-host.yml)
+- architecture decision: [docs/adr/0049-private-first-api-publication-model.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0049-private-first-api-publication-model.md)
 
 ## Tier Summary
 
@@ -42,8 +42,8 @@ Use it when you need to:
 
 When adding or changing an API or webhook surface:
 
-1. register the HTTP surface in [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json) if it is part of the governed control plane
-2. classify the surface in [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
+1. register the HTTP surface in [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/control-plane-lanes.json) if it is part of the governed control plane
+2. classify the surface in [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/api-publication.json)
 3. keep the default tier as `internal-only` unless there is a clear operator-only or public-edge reason
 4. if the surface is `public-edge`, declare the intended public hostname and capture the approval path in the relevant ADR or workstream
 5. update the owning runbook, workflow metadata, or service docs if the operational path changed

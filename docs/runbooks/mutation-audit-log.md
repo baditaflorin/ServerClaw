@@ -4,7 +4,7 @@
 
 This runbook defines the structured mutation audit trail introduced by ADR 0066.
 
-ADR 0115 supersedes ADR 0066 in the repository by adding the Postgres-backed mutation ledger. Use this runbook for the legacy JSONL/Loki event contract and the current dual-write bridge; use [docs/runbooks/mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/docs/runbooks/mutation-ledger.md) for the ledger schema, replay API, and audit-log migration workflow.
+ADR 0115 supersedes ADR 0066 in the repository by adding the Postgres-backed mutation ledger. Use this runbook for the legacy JSONL/Loki event contract and the current dual-write bridge; use [docs/runbooks/mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server-mutation-ledger/docs/runbooks/mutation-ledger.md) for the ledger schema, replay API, and audit-log migration workflow.
 
 It covers:
 
@@ -16,11 +16,11 @@ It covers:
 
 ## Canonical Sources
 
-- schema: [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/mutation-audit-event.json)
-- controller emitter: [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py)
-- Ansible callback: [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/callback_plugins/mutation_audit.py)
-- Windmill helper: [config/windmill/scripts/lv3-mutation-audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/lv3-mutation-audit.py)
-- approval gate surface: [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/command_catalog.py)
+- schema: [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/mutation-audit-event.json)
+- controller emitter: [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/mutation_audit.py)
+- Ansible callback: [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/callback_plugins/mutation_audit.py)
+- Windmill helper: [config/windmill/scripts/lv3-mutation-audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/lv3-mutation-audit.py)
+- approval gate surface: [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/command_catalog.py)
 
 ## Event Contract
 
@@ -50,7 +50,7 @@ The current workstream branch implements these emission paths:
 The default local sink on the controller is:
 
 ```bash
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/state/mutation-audit/mutation-audit.jsonl
+/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/state/mutation-audit/mutation-audit.jsonl
 ```
 
 Live host-side sinks now exist at:
@@ -61,8 +61,8 @@ Live host-side sinks now exist at:
 
 on:
 
-- `proxmox_florin`
-- `docker-runtime-lv3`
+- `proxmox-host`
+- `docker-runtime`
 
 ADR 0052 ships both host files into Loki under `{job="mutation-audit"}`. The controller-side emitter remains repo-local by default.
 
@@ -81,7 +81,7 @@ scripts/mutation_audit.py \
   --actor-id ops \
   --surface manual \
   --action document.manual_change \
-  --target proxmox_florin \
+  --target proxmox-host \
   --outcome success \
   --evidence-ref docs/runbooks/mutation-audit-log.md
 ```
@@ -103,7 +103,7 @@ scripts/command_catalog.py \
 
 ## Ansible Usage
 
-The repository enables the `mutation_audit` callback globally in [ansible.cfg](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/ansible.cfg). A task emits only when:
+The repository enables the `mutation_audit` callback globally in [ansible.cfg](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/ansible.cfg). A task emits only when:
 
 1. it carries the `mutation` tag
 2. it changes live state or fails while attempting a mutation

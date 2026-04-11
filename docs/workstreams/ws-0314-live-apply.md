@@ -5,7 +5,7 @@
 - Status: live_applied
 - Mainline Receipt: `receipts/live-applies/2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply.json`
 - Branch: `codex/ws-0314-mainline-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0314-live-apply`
 - Owner: codex
 - Depends On: `adr-0093`, `adr-0129`, `adr-0209`, `adr-0234`
 - Conflicts With: none
@@ -45,7 +45,7 @@
 - `docs/runbooks/configure-runtime-general-pool.md`
 - `docs/runbooks/configure-keycloak.md`
 - `docs/runbooks/identity-taxonomy-and-managed-principals.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/postgres_guests.yml`
 - `playbooks/ops-portal.yml`
 - `playbooks/openbao.yml`
@@ -109,15 +109,15 @@
 - `receipts/ops-portal-snapshot.html`
 - `receipts/restic-snapshots-latest.json`
 - `receipts/restic-backups/*.json`
-- `receipts/sbom/host-docker-runtime-lv3-*.cdx.json`
-- `receipts/sbom/host-runtime-control-lv3-*.cdx.json`
+- `receipts/sbom/host-docker-runtime-*.cdx.json`
+- `receipts/sbom/host-runtime-control-*.cdx.json`
 - `receipts/live-applies/`
 - `receipts/live-applies/evidence/`
 
 ## Expected Live Surfaces
 
-- `http://127.0.0.1:8083/v1/platform/runbook-tasks*` (or equivalent task-aware runbook gateway routes) respond on `docker-runtime-lv3`
-- `https://ops.lv3.org` exposes a return-to-task entry on the home surface and a deep-linkable resumable-task detail page
+- `http://127.0.0.1:8083/v1/platform/runbook-tasks*` (or equivalent task-aware runbook gateway routes) respond on `docker-runtime`
+- `https://ops.example.com` exposes a return-to-task entry on the home surface and a deep-linkable resumable-task detail page
 - escalated runbook executions preserve their resume summary and can be resumed through the live portal without re-entering draft data from scratch
 
 ## Verification Plan

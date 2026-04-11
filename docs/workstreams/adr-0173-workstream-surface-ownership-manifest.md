@@ -1,6 +1,6 @@
 # Workstream ADR 0173: Workstream Surface Ownership Manifest
 
-- ADR: [ADR 0173](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0173-workstream-surface-ownership-manifest.md)
+- ADR: [ADR 0173](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0173-workstream-surface-ownership-manifest.md)
 - Title: Add machine-readable ownership manifests for active workstreams and enforce branch edits against them
 - Status: live_applied
 - Implemented In Repo Version: 0.176.6

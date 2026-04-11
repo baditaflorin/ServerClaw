@@ -11,7 +11,7 @@
 ## Context
 
 The platform still runs a large share of its repo-managed services on the
-shared `docker-runtime-lv3` guest.
+shared `docker-runtime` guest.
 
 On 2026-04-01, a live apply replay for Grist preserved direct evidence that the
 shared Docker bridge-chain preflight escalated a missing `DOCKER` /
@@ -21,7 +21,7 @@ shared Docker bridge-chain preflight escalated a missing `DOCKER` /
   shows `lv3.platform.common : Restart Docker when required bridge chains are
   missing` at `2026-04-01T16:21:17Z`
 - the same replay ran through `linux_guest_firewall` and the shared
-  `docker_runtime` prerequisites on `docker-runtime-lv3` just before that
+  `docker_runtime` prerequisites on `docker-runtime` just before that
   restart
 - later direct inspection from workstream `ws-0325` found many unrelated
   containers exited or restarting, plus follow-on failures in backup,
@@ -56,7 +56,7 @@ Shared Docker bridge-chain preflight checks on a shared runtime pool must
   recovery over daemon-wide restarts
 - operator-facing runbooks must explain how to confirm bridge-chain loss and
   when a manual Docker restart is justified
-- remaining service-specific Docker restart paths on `docker-runtime-lv3`
+- remaining service-specific Docker restart paths on `docker-runtime`
   should be treated as follow-up hardening work until they respect the same
   blast-radius rule
 
@@ -81,7 +81,7 @@ Shared Docker bridge-chain preflight checks on a shared runtime pool must
 ## Boundaries
 
 - This ADR governs shared Docker bridge-chain preflight behavior on shared
-  runtime pools such as `docker-runtime-lv3`.
+  runtime pools such as `docker-runtime`.
 - It does not ban every Docker restart everywhere; host rebuilds, daemon
   configuration changes, and explicitly approved emergency maintenance windows
   remain valid.

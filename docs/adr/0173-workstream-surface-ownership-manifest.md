@@ -11,7 +11,7 @@
 
 The repository already supports parallel workstreams through `workstreams.yaml`, branch-per-workstream conventions, and explicit protection of integration-only files in `AGENTS.md`. That is a strong start, but it is still too easy for two agents to edit the same operational surface at the same time:
 
-- one workstream updates `inventory/host_vars/proxmox_florin.yml`
+- one workstream updates `inventory/host_vars/proxmox-host.yml`
 - another changes a role default consumed by the same host
 - a third edits a shared generated config under `config/`
 

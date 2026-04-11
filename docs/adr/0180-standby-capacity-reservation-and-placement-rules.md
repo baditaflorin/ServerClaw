@@ -31,7 +31,7 @@ For every `R2` service, the platform must reserve enough spare resources to brin
 - primary and standby may not share the same compose project or container namespace
 - when possible, primary and standby should not share the same guest VM
 - standby data paths must be distinct from primary data paths
-- backup-lv3 may host passive control-plane standbys only if the role does not compromise backup integrity
+- backup may host passive control-plane standbys only if the role does not compromise backup integrity
 
 ### Failure-domain honesty
 

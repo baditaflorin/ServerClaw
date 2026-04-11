@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0270-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0270-main-integration`
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime-vm-baseline`, `adr-0036-live-apply-receipts-and-verification-evidence`, `adr-0246-startup-readiness-liveness-and-degraded-state-semantics`
 - Conflicts With: none
@@ -23,8 +23,8 @@
   contracts declare their expected bridge networks, bind addresses, and port
   programming explicitly
 - enforce the contract in both shared playbook post-verify and the observation
-  loop, then replay the automation live on `docker-runtime-lv3` and
-  `coolify-lv3`
+  loop, then replay the automation live on `docker-runtime` and
+  `coolify`
 
 ## Expected Repo Surfaces
 
@@ -68,7 +68,7 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` and `coolify-lv3` install
+- `docker-runtime` and `coolify` install
   `/usr/local/bin/lv3-docker-publication-assurance`
 - managed Docker services with declared contracts fail closed when bridge
   networks, host-side bind addresses, or Docker publication chains are missing
@@ -83,7 +83,7 @@
 - replay `make converge-docker-publication-assurance env=production` from this
   isolated latest-main worktree
 - verify the installed helper and direct publication checks on
-  `docker-runtime-lv3` and `coolify-lv3`
+  `docker-runtime` and `coolify`
 - update the protected integration surfaces on the synchronized mainline
   integration worktree and capture the canonical exact-main receipt
 
@@ -97,9 +97,9 @@
 - The synchronized exact-main replay from commit
   `6bbe13b66c382d5521cc7b85cc070355558fc326` succeeded via
   `make converge-docker-publication-assurance env=production`, with final recap
-  `coolify-lv3 : ok=69 changed=5 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`
+  `coolify : ok=69 changed=5 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`
   and
-  `docker-runtime-lv3 : ok=115 changed=3 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
+  `docker-runtime : ok=115 changed=3 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
   captured in
   `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-docker-publication-assurance-rerun-7.txt`.
 - Post-replay diagnostics still caught Harbor in the stale-publication signature
@@ -107,9 +107,9 @@
   live `8095` listener did not. A governed follow-up
   `make converge-harbor env=production` repaired that state on the same head
   with final recap
-  `docker-runtime-lv3 : ok=134 changed=7 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`
+  `docker-runtime : ok=134 changed=7 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`
   and
-  `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0`,
+  `nginx-edge : ok=39 changed=3 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0`,
   captured in
   `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-converge-harbor-r2.txt`.
 - The final merged-main targeted regression slice returned `101 passed in
@@ -125,8 +125,8 @@
 - Final steady-state verification after the Harbor repair is captured in
   `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-direct-and-public-verification-r2.txt`,
   which shows `harbor_public=Pong`, `harbor_local=Pong`,
-  `keycloak_public_issuer=https://sso.lv3.org/realms/lv3`,
-  `keycloak_local_issuer=https://sso.lv3.org/realms/lv3`,
+  `keycloak_public_issuer=https://sso.example.com/realms/lv3`,
+  `keycloak_local_issuer=https://sso.example.com/realms/lv3`,
   OpenBao unsealed on loopback, Outline healthy locally and publicly, and
   Langfuse health plus sign-in reachability returning success.
 

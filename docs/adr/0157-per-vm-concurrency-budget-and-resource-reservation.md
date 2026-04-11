@@ -141,7 +141,7 @@ class ConcurrencyBudget:
 
 ### Dynamic budget adjustment
 
-For `monitoring-lv3`, the concurrency budget must automatically reduce during a Grafana query spike (when Grafana itself is consuming more than usual). A periodic Windmill workflow `refresh-vm-budgets` queries the Proxmox API for each VM's actual CPU/memory usage and adjusts the available budget dynamically:
+For `monitoring`, the concurrency budget must automatically reduce during a Grafana query spike (when Grafana itself is consuming more than usual). A periodic Windmill workflow `refresh-vm-budgets` queries the Proxmox API for each VM's actual CPU/memory usage and adjusts the available budget dynamically:
 
 ```python
 # Actual CPU usage from Proxmox API
@@ -189,7 +189,7 @@ lane:postgres        [████████████] CPU: 100% HARD CAP |
 **Negative / Trade-offs**
 
 - Resource reservation values in `workflow-catalog.yaml` are estimates, not measurements. If a workflow actually uses 4x its declared CPU reservation, the budget model is inaccurate. Reservations must be calibrated from historical data (Prometheus metrics for CPU/memory usage during each workflow type).
-- The dynamic budget adjustment requires the Windmill workflow runner itself to be on `docker-runtime-lv3`, which is in the budget pool. If the budget manager workflow is CPU-intensive, it consumes budget it is supposed to track.
+- The dynamic budget adjustment requires the Windmill workflow runner itself to be on `docker-runtime`, which is in the budget pool. If the budget manager workflow is CPU-intensive, it consumes budget it is supposed to track.
 
 ## Boundaries
 

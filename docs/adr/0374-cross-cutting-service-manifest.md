@@ -50,7 +50,7 @@ platform_service_registry:
     # --- Core identity (ADR 0373) ---
     image_catalog_key: directus_runtime
     internal_port: 8055
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     needs_openbao: true
     needs_postgres: true
 
@@ -59,9 +59,9 @@ platform_service_registry:
       # Declares the Hetzner DNS A records this service needs.
       # Generator ensures these exist in subdomain-catalog.json and converges them.
       records:
-        - fqdn: data.lv3.org
+        - fqdn: data.example.com
           type: A
-          target_host: nginx-lv3     # Resolved to IP via platform_guest_catalog
+          target_host: nginx-edge     # Resolved to IP via platform_guest_catalog
           ttl: 60
 
     proxy:
@@ -69,8 +69,8 @@ platform_service_registry:
       # Generator produces an nginx server block for nginx_edge_publication.
       enabled: true
       upstream_port: 8055            # Port on the Docker runtime VM
-      upstream_host: docker-runtime-lv3  # Resolved to IP
-      public_fqdn: data.lv3.org
+      upstream_host: docker-runtime  # Resolved to IP
+      public_fqdn: data.example.com
       # Optional:
       websocket: false               # Default: false. Adds Upgrade headers if true.
       max_body_size: 100m            # Default: 10m
@@ -81,7 +81,7 @@ platform_service_registry:
       # Declares TLS certificate requirements.
       # Generator ensures these domains exist in certificate-catalog.json.
       domains:
-        - data.lv3.org
+        - data.example.com
 
     sso:
       # Declares Keycloak OIDC client requirements.
@@ -89,11 +89,11 @@ platform_service_registry:
       enabled: true
       client_id: directus
       redirect_uris:
-        - "https://data.lv3.org/auth/login/keycloak/callback"
+        - "https://data.example.com/auth/login/keycloak/callback"
       # Optional:
       client_secret_local_file: "{{ platform_local_artifact_dir }}/keycloak/directus-client-secret.txt"
       post_logout_redirect_uris:
-        - "https://data.lv3.org"
+        - "https://data.example.com"
       default_scopes:
         - openid
         - email
@@ -103,8 +103,8 @@ platform_service_registry:
       # Declares that this service needs internal name resolution entries
       # in other services' compose files (via the hairpin_hosts() macro from ADR 0368).
       publish:
-        - hostname: data.lv3.org
-          address_host: nginx-lv3    # Resolved to IP via platform_guest_catalog
+        - hostname: data.example.com
+          address_host: nginx-edge    # Resolved to IP via platform_guest_catalog
 ```
 
 ### Generator: `scripts/generate_cross_cutting_artifacts.py`
@@ -167,9 +167,9 @@ python scripts/generate_cross_cutting_artifacts.py --write --only hairpin
    # GENERATED — do not edit. Source: platform_service_registry hairpin declarations.
    # Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only hairpin
    platform_hairpin_nat_hosts:
-     - hostname: data.lv3.org
+     - hostname: data.example.com
        address: 10.10.10.92
-     - hostname: agents.lv3.org
+     - hostname: agents.example.com
        address: 10.10.10.92
      # ... all published hostnames
    ```

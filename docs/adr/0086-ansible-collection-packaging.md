@@ -14,7 +14,7 @@ The repository currently contains 40+ Ansible roles under `roles/`. These roles 
 1. **Duplicated task fragments**: preflight tasks (check OS version, assert required variables, verify connectivity) are copy-pasted across 15+ roles with minor variations
 2. **Duplicated handler blocks**: `systemd daemon-reload`, `restart docker`, `restart nginx` appear in 8+ roles with identical content
 3. **Inconsistent variable namespacing**: some roles use `role_name_var`, others use flat names; no enforced convention
-4. **No versioned distribution**: roles are consumed only by playbooks in this same repo; there is no mechanism to share a stable role version between multiple repos (e.g., a future `proxmox_florin_apps` repo) without copy-paste
+4. **No versioned distribution**: roles are consumed only by playbooks in this same repo; there is no mechanism to share a stable role version between multiple repos (e.g., a future `proxmox-host_apps` repo) without copy-paste
 5. **No collection-level tests**: individual roles have no `molecule` or equivalent; the only test is the full-stack playbook run
 
 The Ansible Collections format solves all of these by providing:
@@ -25,7 +25,7 @@ The Ansible Collections format solves all of these by providing:
 
 ## Decision
 
-We will restructure the `roles/` directory into a proper **Ansible Collection** `lv3.platform` and publish it to the internal Ansible Galaxy server (`galaxy.lv3.org`).
+We will restructure the `roles/` directory into a proper **Ansible Collection** `lv3.platform` and publish it to the internal Ansible Galaxy server (`galaxy.example.com`).
 
 ### Collection namespace and name
 
@@ -83,15 +83,15 @@ This eliminates the copy-pasted boilerplate without any runtime overhead.
 
 ### Internal Galaxy server
 
-`galaxy.lv3.org` is a lightweight [Pulp](https://pulpproject.org/) instance (or `ansible-galaxy-api` minimal server) hosted on `docker-runtime-lv3`. Roles are installed from it by adding to `ansible.cfg`:
+`galaxy.example.com` is a lightweight [Pulp](https://pulpproject.org/) instance (or `ansible-galaxy-api` minimal server) hosted on `docker-runtime`. Roles are installed from it by adding to `ansible.cfg`:
 
 ```ini
 [galaxy]
 server_list = internal_galaxy
 
 [galaxy_server.internal_galaxy]
-url = https://galaxy.lv3.org/
-auth_url = https://keycloak.lv3.org/realms/lv3/protocol/openid-connect/token
+url = https://galaxy.example.com/
+auth_url = https://keycloak.example.com/realms/lv3/protocol/openid-connect/token
 token = <fetched from OpenBao at install time>
 ```
 
@@ -99,7 +99,7 @@ token = <fetched from OpenBao at install time>
 
 ```bash
 make collection-build       # ansible-galaxy collection build → build/collections/lv3-platform-<version>.tar.gz
-make collection-publish     # push to galaxy.lv3.org
+make collection-publish     # push to galaxy.example.com
 make collection-install     # install from the built tarball (or server when requested)
 ```
 

@@ -1,18 +1,18 @@
 # Workstream ADR 0149: Semaphore For Ansible Job Management UI And API
 
-- ADR: [ADR 0149](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md)
+- ADR: [ADR 0149](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md)
 - Title: Private Semaphore runtime for bounded Ansible job execution
 - Status: merged
 - Branch: `codex/adr-0149-semaphore`
-- Worktree: `../proxmox_florin_server-adr-0149`
+- Worktree: `../proxmox-host_server-adr-0149`
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime`, `adr-0026-postgres-vm`, `adr-0048-command-catalog`, `adr-0077-compose-runtime-secrets-injection`
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `postgres-lv3`, Proxmox host Tailscale proxy, controller-local auth artifacts
+- Shared Surfaces: `docker-runtime`, `postgres`, Proxmox host Tailscale proxy, controller-local auth artifacts
 
 ## Scope
 
-- deploy Semaphore privately on `docker-runtime-lv3` with a PostgreSQL backend on `postgres-lv3`
+- deploy Semaphore privately on `docker-runtime` with a PostgreSQL backend on `postgres`
 - publish the UI and API only on the management tailnet
 - seed a repo-managed project, inventory, and self-test template so jobs can be launched through the UI and API on day one
 - expose a governed controller wrapper for project listing, template runs, and task-output retrieval
@@ -39,14 +39,14 @@
 
 ## Expected Live Surfaces
 
-- a private Semaphore UI and API on `docker-runtime-lv3`
+- a private Semaphore UI and API on `docker-runtime`
 - a Proxmox-host Tailscale proxy entrypoint at `http://100.64.0.1:8020`
 - controller-local Semaphore auth artifacts under `.local/semaphore/`
 - a seeded `LV3 Semaphore` project with the `Semaphore Self-Test` template
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
+- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
 - `make syntax-check-semaphore`
 - `python3 -m py_compile platform/ansible/semaphore.py scripts/semaphore_bootstrap.py scripts/semaphore_tool.py`
 - `pytest -q tests/test_semaphore_client.py`

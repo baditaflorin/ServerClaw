@@ -8,17 +8,17 @@
       "description": "Metrics dashboards and alerting for the platform.",
       "category": "observability",
       "lifecycle_status": "active",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "vmid": 140,
       "internal_url": "http://10.10.10.40:3000",
-      "public_url": "https://grafana.lv3.org",
-      "subdomain": "grafana.lv3.org",
+      "public_url": "https://grafana.example.com",
+      "subdomain": "grafana.example.com",
       "exposure": "edge-published",
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://grafana.lv3.org",
-          "subdomain": "grafana.lv3.org"
+          "url": "https://grafana.example.com",
+          "subdomain": "grafana.example.com"
         }
       },
       "uptime_monitor_name": "Grafana Public",

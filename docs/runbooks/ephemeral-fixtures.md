@@ -6,15 +6,15 @@ ADR 0088 adds disposable Proxmox VMs for integration tests, real-role Molecule r
 
 ## Repo Surfaces
 
-- fixture definitions: [tests/fixtures/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/fixtures)
-- lifecycle manager: [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py)
-- governed pool seed: [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json)
-- lease and warm-pool catalog: [config/ephemeral-capacity-pools.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ephemeral-capacity-pools.json)
-- VMID allocator: [scripts/vmid_allocator.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/vmid_allocator.py)
-- OpenTofu wrapper module: [tofu/modules/proxmox-fixture/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tofu/modules/proxmox-fixture)
-- Molecule driver: [molecule/drivers/proxmox-fixture/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/molecule/drivers/proxmox-fixture)
-- Windmill expiry reaper: [config/windmill/scripts/ephemeral-vm-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/ephemeral-vm-reaper.py)
-- VMID range guard: [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_ephemeral_vmid.py)
+- fixture definitions: [tests/fixtures/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/tests/fixtures)
+- lifecycle manager: [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/fixture_manager.py)
+- governed pool seed: [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/capacity-model.json)
+- lease and warm-pool catalog: [config/ephemeral-capacity-pools.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/ephemeral-capacity-pools.json)
+- VMID allocator: [scripts/vmid_allocator.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/vmid_allocator.py)
+- OpenTofu wrapper module: [tofu/modules/proxmox-fixture/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/tofu/modules/proxmox-fixture)
+- Molecule driver: [molecule/drivers/proxmox-fixture/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/molecule/drivers/proxmox-fixture)
+- Windmill expiry reaper: [config/windmill/scripts/ephemeral-vm-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/ephemeral-vm-reaper.py)
+- VMID range guard: [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_ephemeral_vmid.py)
 
 ## Commands
 
@@ -48,7 +48,7 @@ lv3 fixture destroy --vmid 910 --dry-run
 
 `fixture-pool-reconcile` will:
 
-1. Read [config/ephemeral-capacity-pools.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ephemeral-capacity-pools.json)
+1. Read [config/ephemeral-capacity-pools.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/ephemeral-capacity-pools.json)
 2. Check the declared warm target per pool
 3. Create any missing warm members as repo-managed stopped fixtures with dedicated pool-local addresses
 4. Return an explicit spillover decision if local capacity is exhausted instead of silently consuming standby reservations
@@ -75,15 +75,15 @@ LV3_PROXMOX_HOST_ADDR=100.64.0.1
 - Reaper receipts: `.local/fixtures/reaper-runs/reaper-run-*.json`
 - Ignored local state and history: `.local/fixtures/`
 
-The tracked repository keeps only [receipts/fixtures/.gitkeep](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/fixtures/.gitkeep) plus [receipts/fixtures/.gitignore](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/fixtures/.gitignore) so fixture runs do not dirty the git tree.
+The tracked repository keeps only [receipts/fixtures/.gitkeep](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/fixtures/.gitkeep) plus [receipts/fixtures/.gitignore](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/fixtures/.gitignore) so fixture runs do not dirty the git tree.
 
 The warm-pool reconciler writes branch-local and worker-local runtime evidence under `.local/fixtures/` so prewarming and refill activity stays auditable without polluting tracked truth.
 
 ## Molecule
 
-The delegated driver is defined under [molecule/drivers/proxmox-fixture/create.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/molecule/drivers/proxmox-fixture/create.yml) and [molecule/drivers/proxmox-fixture/destroy.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/molecule/drivers/proxmox-fixture/destroy.yml).
+The delegated driver is defined under [molecule/drivers/proxmox-fixture/create.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/molecule/drivers/proxmox-fixture/create.yml) and [molecule/drivers/proxmox-fixture/destroy.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/molecule/drivers/proxmox-fixture/destroy.yml).
 
-The demo scenario lives under [collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/molecule.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/molecule.yml).
+The demo scenario lives under [collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/molecule.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/docker_runtime/molecule/default/molecule.yml).
 
 The driver writes:
 
@@ -100,13 +100,13 @@ python3 config/windmill/scripts/ephemeral-vm-reaper.py
 
 It scans the governed `910-979` pool, destroys expired ephemeral VMs, adds a one-hour grace expiry tag to unowned VMs found in that range, and writes a `reaper-run-<timestamp>.json` summary receipt under `.local/fixtures/reaper-runs/`.
 
-The live Windmill worker path uses the mounted repo checkout at `/srv/proxmox_florin_server`. The reaper now prefers a repo-local Proxmox API token payload mirrored to `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json` because the sandboxed Windmill job environment does not reliably inherit the runtime env contract during `run_wait_result` execution.
+The live Windmill worker path uses the mounted repo checkout at `/srv/proxmox-host_server`. The reaper now prefers a repo-local Proxmox API token payload mirrored to `/srv/proxmox-host_server/.local/proxmox-api/lv3-automation-primary.json` because the sandboxed Windmill job environment does not reliably inherit the runtime env contract during `run_wait_result` execution.
 
 ## Warm Pools
 
 ADR 0186 adds lease-based warm pools for `ops-base`, `docker-host`, and `postgres-host`.
 
-- The canonical declaration lives in [config/ephemeral-capacity-pools.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ephemeral-capacity-pools.json).
+- The canonical declaration lives in [config/ephemeral-capacity-pools.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/ephemeral-capacity-pools.json).
 - Each pool owns its warm count, refill target, local address set, maximum concurrent leases, protected capacity class, and auxiliary spillover domain.
 - Warm members are created as normal governed fixtures, verified once, then stopped and tagged as `prewarmed`.
 - Lease handoff updates the same receipt with the real owner, lease purpose, detailed purpose, and expiry. Returned fixtures are destroyed rather than put back into the pool so no mutated state leaks into the next consumer.
@@ -115,8 +115,8 @@ ADR 0186 adds lease-based warm pools for `ops-base`, `docker-host`, and `postgre
 ## Live Rollout Notes
 
 - Repository automation shipped in repo version `0.97.0`; the first verified production live apply completed on `2026-03-26` in platform version `0.130.20`.
-- Windmill schedule `f/lv3/ephemeral_vm_reaper_every_30m` is now enabled on `docker-runtime-lv3`.
-- Manual API verification from the controller returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}` and the latest integrated mainline verification wrote `/srv/proxmox_florin_server/.local/fixtures/reaper-runs/reaper-run-20260326T170554Z.json`.
-- The 2026-03-26 live path required committed runtime changes in the Windmill role plus two host-side operating details that are now documented here: mirroring the Proxmox token payload into the mounted worker checkout and keeping `/srv/proxmox_florin_server/.local/fixtures/reaper-runs/` writable for worker-generated reaper receipts.
+- Windmill schedule `f/lv3/ephemeral_vm_reaper_every_30m` is now enabled on `docker-runtime`.
+- Manual API verification from the controller returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}` and the latest integrated mainline verification wrote `/srv/proxmox-host_server/.local/fixtures/reaper-runs/reaper-run-20260326T170554Z.json`.
+- The 2026-03-26 live path required committed runtime changes in the Windmill role plus two host-side operating details that are now documented here: mirroring the Proxmox token payload into the mounted worker checkout and keeping `/srv/proxmox-host_server/.local/fixtures/reaper-runs/` writable for worker-generated reaper receipts.
 - ADR 0186 adds the worker script `f/lv3/ephemeral_pool_reconciler` plus schedule `f/lv3/ephemeral_pool_reconciler_every_15m`; the branch-local live replay details are recorded in the ADR, workstream, and receipt after verification completes.
 - The 2026-03-28 ADR 0186 live verification confirmed that controller-side fixture checks should prefer `management_tailscale_ipv4` for the Proxmox jump host and `TF_VAR_proxmox_endpoint=https://100.64.0.1:8006/api2/json` for direct Proxmox API access, because the public host path was slower and less reliable for fixture SSH handoff during the replay.

@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0232-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0232-live-apply`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0179-service-redundancy-tier-matrix`, `adr-0184-failure-domain-labels-and-anti-affinity-policy`, `adr-0224-server-resident-operations-as-the-default-control-model`
 - Conflicts With: none
@@ -33,8 +33,8 @@
 - `make live-apply-service service=nomad env=production ALLOW_IN_PLACE_MUTATION=true`
 - controller-side `curl --cacert ... https://100.64.0.1:8013/v1/{status/leader,nodes}`
 - guest-side `systemctl is-active lv3-nomad`, smoke service verification on
-  `docker-build-lv3`, and durable batch marker verification on
-  `docker-runtime-lv3`
+  `docker-build`, and durable batch marker verification on
+  `docker-runtime`
 
 ## Live Apply Outcome
 
@@ -45,13 +45,13 @@
 - the final exact-main replay from the rebased `0.177.63` worktree first
   failed closed at the immutable guest replacement guard, then succeeded with
   `ALLOW_IN_PLACE_MUTATION=true` as the documented ADR 0191 narrow exception
-- the final exact-main recap was `docker-build-lv3 ok=83 changed=5 failed=0`,
-  `docker-runtime-lv3 ok=95 changed=5 failed=0`,
+- the final exact-main recap was `docker-build ok=83 changed=5 failed=0`,
+  `docker-runtime ok=95 changed=5 failed=0`,
   `localhost ok=12 changed=0 failed=0`,
-  `monitoring-lv3 ok=98 changed=2 failed=0`, and
-  `proxmox_florin ok=51 changed=4 failed=0`
+  `monitoring ok=98 changed=2 failed=0`, and
+  `proxmox-host ok=51 changed=4 failed=0`
 - post-replay verification re-confirmed leader `"10.10.10.40:4647"`, nodes
-  `docker-runtime-lv3 ready runtime` and `docker-build-lv3 ready build`, the
+  `docker-runtime ready runtime` and `docker-build ready build`, the
   smoke service deployment as `successful`, and the durable batch marker
   timestamp `2026-03-29T02:19:07+00:00`
 
@@ -71,9 +71,9 @@
 - canonical mainline receipt:
   `receipts/live-applies/2026-03-29-adr-0232-nomad-mainline-live-apply.json`
 - controller-local Nomad trust root:
-  `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem`
+  `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nomad/tls/nomad-agent-ca.pem`
 - controller-local management token:
-  `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token`
+  `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nomad/tokens/bootstrap-management.token`
 
 ## Notes For The Next Assistant
 

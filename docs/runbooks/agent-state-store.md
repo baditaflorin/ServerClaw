@@ -13,11 +13,11 @@ It is the repo-side reference for:
 
 ## Canonical Sources
 
-- ADR: [docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md)
-- schema migration: [migrations/0015_agent_state_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0015_agent_state_schema.sql)
-- Python client: [platform/agent/state.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/agent/state.py)
-- CLI surface: [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
-- client tests: [tests/test_agent_state_client.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_agent_state_client.py)
+- ADR: [docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md)
+- schema migration: [migrations/0015_agent_state_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/migrations/0015_agent_state_schema.sql)
+- Python client: [platform/agent/state.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/agent/state.py)
+- CLI surface: [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py)
+- client tests: [tests/test_agent_state_client.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/tests/test_agent_state_client.py)
 
 ## Provision The Schema
 

@@ -20,7 +20,7 @@ def test_extract_report_json_reads_last_report_line() -> None:
 
 def test_build_command_includes_mode_and_live_apply_flag() -> None:
     command = restic_config_backup_windmill.build_command(
-        Path("/srv/proxmox_florin_server"),
+        Path("/srv/proxmox-host_server"),
         mode="restore-verify",
         triggered_by="windmill-monthly-restore-verify",
         live_apply_trigger=True,

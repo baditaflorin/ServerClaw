@@ -58,11 +58,11 @@ Agents can query the Loki label for audit events without SSH access to reconstru
 
 ## Implementation Notes
 
-- This workstream branch adds the canonical schema at [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/mutation-audit-event.json), a shared controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py), and the Ansible callback at [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/callback_plugins/mutation_audit.py).
-- Repo automation ships the canonical schema at [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/mutation-audit-event.json), the shared controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py), and the Ansible callback at [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/callback_plugins/mutation_audit.py).
+- This workstream branch adds the canonical schema at [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/mutation-audit-event.json), a shared controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/mutation_audit.py), and the Ansible callback at [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/callback_plugins/mutation_audit.py).
+- Repo automation ships the canonical schema at [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/mutation-audit-event.json), the shared controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/mutation_audit.py), and the Ansible callback at [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/callback_plugins/mutation_audit.py).
 - Command-catalog approval checks emit structured events, and the Windmill converge now seeds and verifies the reusable `f/lv3/mutation_audit_emit` helper in the managed workspace.
-- Host-local JSONL sinks at `/var/log/platform/mutation-audit.jsonl` are verified live on both `proxmox_florin` and `docker-runtime-lv3`, and ADR 0052 ships those files into Loki under the `mutation-audit` job.
-- OpenBao's native audit-device file remains its own raw feed at `/opt/openbao/logs/audit.log`, but ADR 0052 now scrapes that file through the same mutation-audit log-shipping path on `docker-runtime-lv3`.
+- Host-local JSONL sinks at `/var/log/platform/mutation-audit.jsonl` are verified live on both `proxmox-host` and `docker-runtime`, and ADR 0052 ships those files into Loki under the `mutation-audit` job.
+- OpenBao's native audit-device file remains its own raw feed at `/opt/openbao/logs/audit.log`, but ADR 0052 now scrapes that file through the same mutation-audit log-shipping path on `docker-runtime`.
 
 ## Boundaries
 

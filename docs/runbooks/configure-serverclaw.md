@@ -6,11 +6,11 @@ This runbook converges the first live ServerClaw surface defined by ADR 0254.
 
 ## Result
 
-- `coolify-lv3` runs a dedicated Open WebUI-based ServerClaw runtime from `/opt/serverclaw`
-- `chat.lv3.org` is published through the shared NGINX edge with in-app Keycloak OIDC enabled
+- `coolify` runs a dedicated Open WebUI-based ServerClaw runtime from `/opt/serverclaw`
+- `chat.example.com` is published through the shared NGINX edge with in-app Keycloak OIDC enabled
 - controller-local bootstrap secrets are mirrored under `.local/serverclaw/`
 - the dedicated Keycloak client secret is mirrored under `.local/keycloak/serverclaw-client-secret.txt`
-- the runtime uses the existing One-API and SearXNG services on `docker-runtime-lv3`
+- the runtime uses the existing One-API and SearXNG services on `docker-runtime`
 
 ## Controller-Local Inputs
 
@@ -32,7 +32,7 @@ Optional local-only input:
 Syntax-check the ServerClaw workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-serverclaw
 ```
 
@@ -40,62 +40,62 @@ Converge the live ServerClaw Proxmox guest firewall lane, runtime, OIDC client,
 and public edge publication:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-serverclaw
 ```
 
 Bootstrap or refresh the shared model-routing contract before converging ServerClaw on a fresh controller checkout:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-one-api
 ```
 
 ## Verification
 
-Verify the runtime container and generated files on `coolify-lv3`:
+Verify the runtime container and generated files on `coolify`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps && sudo ls -ld /opt/serverclaw /opt/serverclaw/data /etc/lv3/serverclaw && sudo test -s /etc/lv3/serverclaw/runtime.env && sudo test ! -e /opt/serverclaw/serverclaw.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml coolify -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps && sudo ls -ld /opt/serverclaw /opt/serverclaw/data /etc/lv3/serverclaw && sudo test -s /etc/lv3/serverclaw/runtime.env && sudo test ! -e /opt/serverclaw/serverclaw.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the rendered runtime env enables Keycloak, One-API, and web search:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a "sudo grep -E '^(WEBUI_URL|WEBUI_NAME|ENABLE_OAUTH_SIGNUP|OAUTH_CLIENT_ID|OPENID_PROVIDER_URL|ENABLE_OPENAI_API|ENABLE_OLLAMA_API|OPENAI_API_BASE_URL|SEARXNG_QUERY_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /etc/lv3/serverclaw/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml coolify -m shell -a "sudo grep -E '^(WEBUI_URL|WEBUI_NAME|ENABLE_OAUTH_SIGNUP|OAUTH_CLIENT_ID|OPENID_PROVIDER_URL|ENABLE_OPENAI_API|ENABLE_OLLAMA_API|OPENAI_API_BASE_URL|SEARXNG_QUERY_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /etc/lv3/serverclaw/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the Proxmox VM firewall exposes the upstream proxy lane from
-`nginx-lv3` to `coolify-lv3:8096`:
+`nginx-edge` to `coolify:8096`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml proxmox_florin -m shell -a "grep -n '10.10.10.10/32 -p tcp -dport 8096' /etc/pve/firewall/170.fw" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml proxmox-host -m shell -a "grep -n '10.10.10.10/32 -p tcp -dport 8096' /etc/pve/firewall/170.fw" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519
 ```
 
 Verify the public edge responds:
 
 ```bash
-curl -I https://chat.lv3.org/
+curl -I https://chat.example.com/
 ```
 
 Verify the bootstrap admin can still sign in through the local runtime path:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a "curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\"'\"}'" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml coolify -m shell -a "curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\"email\":\"ops@example.com\",\"password\":\"'\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\"'\"}'" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 ## Drift Recovery
 
-If `curl -I https://chat.lv3.org/` returns a redirect to
-`https://nginx.lv3.org/` or `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3`
-times out while `curl http://127.0.0.1:8096/` on `coolify-lv3` still returns
+If `curl -I https://chat.example.com/` returns a redirect to
+`https://nginx.example.com/` or `nc -vz -w 5 10.10.10.70 8096` from `nginx-edge`
+times out while `curl http://127.0.0.1:8096/` on `coolify` still returns
 `HTTP/1.1 200 OK`, the ServerClaw runtime is healthy but the shared edge path
 has drifted.
 
-Check the current guest-firewall allowlist on `coolify-lv3`:
+Check the current guest-firewall allowlist on `coolify`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -b -m shell -a 'nft list ruleset | grep -n "10.10.10.10.*dport"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml coolify -b -m shell -a 'nft list ruleset | grep -n "10.10.10.10.*dport"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Durable repair:
@@ -114,9 +114,9 @@ uvx --from pyyaml python scripts/ansible_scope_runner.py run \
   --playbook playbooks/serverclaw.yml \
   --env production \
   -- \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
-  --limit coolify-lv3
+  --limit coolify
 
 uvx --from pyyaml python scripts/ansible_scope_runner.py run \
   --inventory inventory/hosts.yml \
@@ -124,19 +124,19 @@ uvx --from pyyaml python scripts/ansible_scope_runner.py run \
   --playbook playbooks/serverclaw.yml \
   --env production \
   -- \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
-  --limit nginx-lv3
+  --limit nginx-edge
 ```
 
-After either repair path, re-run the internal `nc` check from `nginx-lv3` and
-the public `curl -I https://chat.lv3.org/` probe to confirm the dedicated chat
+After either repair path, re-run the internal `nc` check from `nginx-edge` and
+the public `curl -I https://chat.example.com/` probe to confirm the dedicated chat
 surface is back in place.
 
 ## Operating Notes
 
-- Keep `WEBUI_URL=https://chat.lv3.org` aligned with the live hostname before changing the OIDC client contract.
+- Keep `WEBUI_URL=https://chat.example.com` aligned with the live hostname before changing the OIDC client contract.
 - Treat `.local/serverclaw/` and `.local/keycloak/serverclaw-client-secret.txt` as sensitive controller-only material.
-- ServerClaw renders `/etc/lv3/serverclaw/runtime.env` directly during converge instead of running the shared OpenBao sidecar, because the managed OpenBao automation listener remains host-local to `docker-runtime-lv3`. The persistent path under `/etc/lv3/` ensures the env file survives host reboots without requiring the sidecar.
+- ServerClaw renders `/etc/lv3/serverclaw/runtime.env` directly during converge instead of running the shared OpenBao sidecar, because the managed OpenBao automation listener remains host-local to `docker-runtime`. The persistent path under `/etc/lv3/` ensures the env file survives host reboots without requiring the sidecar.
 - ServerClaw intentionally reuses the existing One-API and SearXNG backends instead of standing up a separate model or search tier for ADR 0254.
 - Matrix, channel bridges, delegated OpenFGA authorization, and the richer memory plane remain follow-on work for the adjacent ServerClaw ADRs.

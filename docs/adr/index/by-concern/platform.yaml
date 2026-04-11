@@ -36,7 +36,7 @@ adrs:
       - compose-managed
       - runtime
       - stacks
-    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
+    summary: Long-running workloads on docker-runtime will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
     implemented_in_platform_version: 0.23.0
@@ -133,7 +133,7 @@ adrs:
       - telemetry
       - telegraf
       - input
-    summary: We will collect container runtime telemetry on docker-runtime-lv3 by reusing the shared guest observability framework
+    summary: We will collect container runtime telemetry on docker-runtime by reusing the shared guest observability framework
       and Telegraf's Docker input plugin.
     filename: 0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md
     path: docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md
@@ -324,7 +324,7 @@ adrs:
       - build
       - server
     summary: We will maintain a set of platform check runner images defined in docker/check-runners/ and published to the
-      internal registry (registry.lv3.org).
+      internal registry (registry.example.com).
     filename: 0083-docker-based-check-runner.md
     path: docs/adr/0083-docker-based-check-runner.md
     implemented_in_repo_version: 0.87.0
@@ -411,7 +411,7 @@ adrs:
       - availability
       - automated
       - failover
-    summary: We will provision a second PostgreSQL VM (postgres-replica-lv3, VMID 151) and implement Patroni-managed streaming
+    summary: We will provision a second PostgreSQL VM (postgres-replica, VMID 151) and implement Patroni-managed streaming
       replication with automatic failover, keeping p
     filename: 0098-postgres-high-availability.md
     path: docs/adr/0098-postgres-high-availability.md
@@ -505,7 +505,7 @@ adrs:
       - public
       - status
       - page
-    summary: We will publish a repo-managed public status page at status.lv3.org, backed by Uptime Kuma and supplemented by
+    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented by
       an independent Uptime Robot probe set.
     filename: 0109-public-status-page.md
     path: docs/adr/0109-public-status-page.md
@@ -727,7 +727,7 @@ adrs:
       - unified
       - service
       - dashboard
-    summary: We run Homepage on docker-runtime-lv3 as the unified LV3 service dashboard and generate its repo-managed configuration
+    summary: We run Homepage on docker-runtime as the unified LV3 service dashboard and generate its repo-managed configuration
       directly from the canonical service and s
     filename: 0152-homepage-for-unified-service-dashboard.md
     path: docs/adr/0152-homepage-for-unified-service-dashboard.md
@@ -988,7 +988,7 @@ adrs:
       - kanban
       - task
       - board
-    summary: We will run a self-hosted Plane task board on docker-runtime-lv3 and treat it as a repo-managed service.
+    summary: We will run a self-hosted Plane task board on docker-runtime and treat it as a repo-managed service.
     filename: 0193-plane-kanban-task-board.md
     path: docs/adr/0193-plane-kanban-task-board.md
     implemented_in_repo_version: 0.177.27
@@ -1006,7 +1006,7 @@ adrs:
       - deploy
       - from
       - repo
-    summary: 'We introduce Coolify as a dedicated repo-managed PaaS guest at coolify-lv3 and expose it through two repo-managed
+    summary: 'We introduce Coolify as a dedicated repo-managed PaaS guest at coolify and expose it through two repo-managed
       ingress lanes:'
     filename: 0194-coolify-paas-deploy-from-repo.md
     path: docs/adr/0194-coolify-paas-deploy-from-repo.md
@@ -1024,7 +1024,7 @@ adrs:
       - living
       - knowledge
       - wiki
-    summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
+    summary: We will deploy Outline on docker-runtime and publish it at https://wiki.example.com.
     filename: 0199-outline-living-knowledge-wiki.md
     path: docs/adr/0199-outline-living-knowledge-wiki.md
     implemented_in_repo_version: 0.177.19
@@ -1041,7 +1041,7 @@ adrs:
       - vulnerability-scanning
       - container
       - registry
-    summary: 'Migrate registry.lv3.org from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
+    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
       vulnerability scanning on every push integ'
     filename: 0201-harbor-container-registry-with-cve-scanning.md
     path: docs/adr/0201-harbor-container-registry-with-cve-scanning.md
@@ -1060,7 +1060,7 @@ adrs:
       - generated
       - architecture
       - diagrams
-    summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
+    summary: We will add a repo-managed Excalidraw publication at draw.example.com and commit a
     filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
     path: docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md
     implemented_in_repo_version: 0.177.16
@@ -2430,7 +2430,7 @@ adrs:
     filename: 0378-serverclaw-tool-surface-in-open-webui.md
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
   - adr: 0385
-    title: MemPalace Integration with chat.lv3.org
+    title: MemPalace Integration with chat.example.com
     status: Proposed
     implementation_status: Proposed
     date: '2026-03-21'
@@ -2441,8 +2441,8 @@ adrs:
       - chat
       - lv3
       - org
-    summary: Implement unified cross-interface memory by connecting chat.lv3.org to MemPalace, enabling both Claude Code and
-      chat.lv3.org users to access a shared memory poo
+    summary: Implement unified cross-interface memory by connecting chat.example.com to MemPalace, enabling both Claude Code and
+      chat.example.com users to access a shared memory poo
     filename: 0385-mempalace-chat-lv3-integration.md
     path: docs/adr/0385-mempalace-chat-lv3-integration.md
   - adr: 0387

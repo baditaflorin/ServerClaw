@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/governed-tool-call-audit-event.json",
+  "$id": "https://example.com/schema/governed-tool-call-audit-event.json",
   "title": "LV3 Governed Tool Call Audit Event",
   "type": "object",
   "additionalProperties": false,

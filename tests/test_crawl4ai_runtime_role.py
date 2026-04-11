@@ -13,7 +13,7 @@ COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "crawl4ai_runtime" / "templates" / "doc
 CONFIG_TEMPLATE = REPO_ROOT / "roles" / "crawl4ai_runtime" / "templates" / "config.yml.j2"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "crawl4ai.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "crawl4ai.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
@@ -221,7 +221,7 @@ def test_playbook_converges_runtime_without_api_gateway_route() -> None:
 
     assert len(playbook) == 1
     play = playbook[0]
-    assert play["hosts"] == "docker-runtime-lv3"
+    assert play["hosts"] == "docker-runtime"
     roles = [role["role"] for role in play["roles"]]
     assert roles == [
         "lv3.platform.linux_guest_firewall",
@@ -239,7 +239,7 @@ def test_inventory_opens_the_private_crawl_port_to_guest_and_docker_callers() ->
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
 
     assert host_vars["platform_port_assignments"]["crawl4ai_port"] == 11235
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     guest_rule = next(
         rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 11235 in rule["ports"]
     )

@@ -6,18 +6,18 @@ This runbook covers the repo-managed Outline deployment introduced by [ADR 0199]
 
 The Outline workflow converges:
 
-- the PostgreSQL backend on `postgres-lv3`
-- the Outline runtime, Redis cache, and MinIO attachment store on `docker-runtime-lv3`
-- the public hostname `wiki.lv3.org` on the shared NGINX edge
+- the PostgreSQL backend on `postgres`
+- the Outline runtime, Redis cache, and MinIO attachment store on `docker-runtime`
+- the public hostname `wiki.example.com` on the shared NGINX edge
 - the dedicated Keycloak OIDC client used by the Outline sign-in flow
-- the shared logout handoff from Outline to Keycloak and then to the shared `oauth2-proxy` cookie-cleanup endpoint on `ops.lv3.org`
+- the shared logout handoff from Outline to Keycloak and then to the shared `oauth2-proxy` cookie-cleanup endpoint on `ops.example.com`
 - the controller-local Outline API token and the initial living knowledge collections
 
 ## Preconditions
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
-- Keycloak is already deployed and healthy on `sso.lv3.org`
+- Keycloak is already deployed and healthy on `sso.example.com`
 - the automation password file exists at `.local/keycloak/outline.automation-password.txt`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
@@ -42,7 +42,7 @@ On a workstream branch where protected integration files must remain untouched, 
 ```bash
 HETZNER_DNS_API_TOKEN=... \
 ANSIBLE_HOST_KEY_CHECKING=False \
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local \
+ANSIBLE_LOCAL_TEMP=/tmp/proxmox-host_server-ansible-local \
 ANSIBLE_REMOTE_TEMP=/tmp \
 ./scripts/run_with_namespace.sh uvx --from pyyaml python \
   ./scripts/ansible_scope_runner.py run \
@@ -71,33 +71,33 @@ The Keycloak client secret is mirrored under `.local/keycloak/outline-client-sec
 
 The role performs the first Outline admin bootstrap without browser interaction by:
 
-1. following the normal `wiki.lv3.org -> Keycloak -> wiki.lv3.org` OIDC browser flow with the repo-managed `outline.automation` account
+1. following the normal `wiki.example.com -> Keycloak -> wiki.example.com` OIDC browser flow with the repo-managed `outline.automation` account
 2. extracting the resulting Outline app token
 3. minting the long-lived Outline API token stored under `.local/outline/api-token.txt`
 4. pruning the default `Welcome` collection after bootstrap
 5. syncing the living collection landing pages and indexes while deleting duplicate managed landing docs if they drift in
 
-Outline logout remains app-local first, but the repo-managed `OIDC_LOGOUT_URI` now hands the browser to Keycloak with a declared post-logout return path through `https://ops.lv3.org/.well-known/lv3/session/proxy-logout` so shared edge cookies are cleared before the final logged-out landing page.
+Outline logout remains app-local first, but the repo-managed `OIDC_LOGOUT_URI` now hands the browser to Keycloak with a declared post-logout return path through `https://ops.example.com/.well-known/lv3/session/proxy-logout` so shared edge cookies are cleared before the final logged-out landing page.
 
 The real live logout path should be verified through the authenticated UI
 account menu, not by assuming `GET /logout` fully exercises the browser flow.
 Today Outline still lands on the Keycloak confirmation page because it cannot
 provide `id_token_hint`; after that confirmation, the browser is returned
-through the shared proxy-cleanup path and both `home.lv3.org` and
-`wiki.lv3.org` must require fresh Keycloak login.
+through the shared proxy-cleanup path and both `home.example.com` and
+`wiki.example.com` must require fresh Keycloak login.
 
 ## Syncing knowledge surfaces
 
 To refresh the living knowledge docs on demand:
 
 ```bash
-python3 scripts/sync_docs_to_outline.py sync --base-url https://wiki.lv3.org
+python3 scripts/sync_docs_to_outline.py sync --base-url https://wiki.example.com
 ```
 
 To verify the managed collections and landing pages:
 
 ```bash
-python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.lv3.org
+python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.example.com
 ```
 
 ## Verification
@@ -118,10 +118,10 @@ uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --ch
 Runtime verification:
 
 ```bash
-curl -fsS https://wiki.lv3.org/_health
-python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.lv3.org
+curl -fsS https://wiki.example.com/_health
+python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.example.com
 uv run --with playwright python scripts/session_logout_verify.py \
-  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
+  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/outline.automation-password.txt
 ```
 
 The verify command asserts that the required collections exist and that the repo-managed landing docs were published successfully. A successful sync keeps the top-level collection set at `ADRs`, `Runbooks`, `Incident Postmortems`, `Agent Findings`, and `Architecture`.
@@ -129,4 +129,4 @@ The verify command asserts that the required collections exist and that the repo
 ## Mainline replay notes
 
 - The authenticated Keycloak admin API is warmed immediately after restart so the first realm-management query does not race the container startup path.
-- The merged-main replay may retry the public `https://wiki.lv3.org/_health` probe briefly after the edge certificate expands to include `wiki.lv3.org`; a short retry window is expected during the NGINX reload.
+- The merged-main replay may retry the public `https://wiki.example.com/_health` probe briefly after the edge certificate expands to include `wiki.example.com`; a short retry window is expected during the NGINX reload.

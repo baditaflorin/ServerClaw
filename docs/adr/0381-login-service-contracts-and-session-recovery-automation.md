@@ -8,7 +8,7 @@
 
 ## Context
 
-On 2026-04-07, `ops.lv3.org` became completely inaccessible to all operators. Every login attempt returned HTTP 500 at `/oauth2/callback`. Clearing cookies manually in the browser was the only workaround, but operators do not know to do this and should never have to.
+On 2026-04-07, `ops.example.com` became completely inaccessible to all operators. Every login attempt returned HTTP 500 at `/oauth2/callback`. Clearing cookies manually in the browser was the only workaround, but operators do not know to do this and should never have to.
 
 The root cause was a three-layer failure cascade across Keycloak, oauth2-proxy, and NGINX that no single service could detect or recover from independently:
 
@@ -34,7 +34,7 @@ This ADR codifies the contracts, automations, and verification procedures that p
 
 ### Contract 1: Cookie Naming and Ownership
 
-The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to `.lv3.org`.
+The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to `.example.com`.
 
 | Cookie | Owner | Purpose | PKCE Role |
 |--------|-------|---------|-----------|
@@ -63,9 +63,9 @@ Step 2: NGINX expires _lv3_ops_portal_proxy     (Max-Age=0)
         NGINX expires _lv3_ops_portal_proxy_csrf (Max-Age=0)
         ↓
 Step 3: NGINX redirects to Keycloak logout endpoint
-        (kills the Keycloak server-side session + clears sso.lv3.org cookies)
+        (kills the Keycloak server-side session + clears sso.example.com cookies)
         ↓
-Step 4: Keycloak redirects to post_logout_redirect_uri (ops.lv3.org/)
+Step 4: Keycloak redirects to post_logout_redirect_uri (ops.example.com/)
         oauth2-proxy sees no cookies → starts fresh OIDC/PKCE flow
         User lands on Keycloak login page with clean state
 ```
@@ -111,12 +111,12 @@ Every `post_logout_redirect_uri` used in NGINX templates MUST be pre-registered 
 
 ```yaml
 keycloak_ops_portal_post_logout_redirect_uris:
-  - "{{ keycloak_ops_portal_root_url }}/"       # ops.lv3.org/
-  - "{{ keycloak_ops_portal_root_url }}"        # ops.lv3.org
-  - "{{ keycloak_session_authority.shared_logged_out_url }}"  # ops.lv3.org/.well-known/lv3/session/logged-out
+  - "{{ keycloak_ops_portal_root_url }}/"       # ops.example.com/
+  - "{{ keycloak_ops_portal_root_url }}"        # ops.example.com
+  - "{{ keycloak_session_authority.shared_logged_out_url }}"  # ops.example.com/.well-known/lv3/session/logged-out
 ```
 
-**Rule:** The stale session recovery automaton (Contract 2) MUST redirect to a URI that is in this list. Currently that is `ops.lv3.org/`. If the redirect target changes, the Keycloak client registration MUST be updated first, and the Keycloak configuration reconverged before the NGINX template change goes live.
+**Rule:** The stale session recovery automaton (Contract 2) MUST redirect to a URI that is in this list. Currently that is `ops.example.com/`. If the redirect target changes, the Keycloak client registration MUST be updated first, and the Keycloak configuration reconverged before the NGINX template change goes live.
 
 **Deployment ordering constraint:**
 
@@ -139,9 +139,9 @@ The platform uses PKCE (Proof Key for Code Exchange) with `S256` for all browser
 | `cookie_expire` | `8h` | Same |
 | `cookie_refresh` | `1h` | Same |
 | `cookie_name` | `_lv3_ops_portal_proxy` | Same |
-| `cookie_domain` | `.lv3.org` | Same |
-| `redirect_url` | `https://ops.lv3.org/oauth2/callback` | Same |
-| `oidc_issuer_url` | `https://sso.lv3.org/realms/lv3` | Same |
+| `cookie_domain` | `.example.com` | Same |
+| `redirect_url` | `https://ops.example.com/oauth2/callback` | Same |
+| `oidc_issuer_url` | `https://sso.example.com/realms/lv3` | Same |
 | Scopes | `openid profile email` | Same |
 | Allowed groups | `/lv3-platform-admins` | Same |
 
@@ -164,7 +164,7 @@ The platform MUST verify login health after any change to Keycloak, oauth2-proxy
 
 The `lv3-ops-portal-oauth2-proxy-watchdog` systemd timer runs every 30 seconds and:
 
-1. Performs an OIDC simulation probe against `https://ops.lv3.org`
+1. Performs an OIDC simulation probe against `https://ops.example.com`
 2. Verifies the redirect chain: NGINX → oauth2-proxy → Keycloak authorize endpoint
 3. On failure: restarts oauth2-proxy, sends ntfy alert to `platform-identity-critical` topic
 4. Failure threshold: 2 consecutive failures before escalation
@@ -173,24 +173,24 @@ The `lv3-ops-portal-oauth2-proxy-watchdog` systemd timer runs every 30 seconds a
 
 ```bash
 # Verify the redirect chain works end-to-end
-curl -sI https://ops.lv3.org/ | grep -E 'HTTP|Location'
+curl -sI https://ops.example.com/ | grep -E 'HTTP|Location'
 # Expected: 302 → /oauth2/sign_in?rd=...
 
-curl -sI 'https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/' | grep Location
-# Expected: 302 → https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?...
+curl -sI 'https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/' | grep Location
+# Expected: 302 → https://sso.example.com/realms/lv3/protocol/openid-connect/auth?...
 
 # Verify the stale session reset block exists and has both cookies
-ssh nginx-lv3 'grep -c _lv3_ops_portal_proxy_csrf /etc/nginx/sites-available/lv3-edge.conf'
+ssh nginx-edge 'grep -c _lv3_ops_portal_proxy_csrf /etc/nginx/sites-available/lv3-edge.conf'
 # Expected: 17 (one per protected server block)
 
 # Verify no /oauth2/sign_in in stale session redirect targets
-ssh nginx-lv3 'grep "oauth2/sign_in&client_id" /etc/nginx/sites-available/lv3-edge.conf | wc -l'
+ssh nginx-edge 'grep "oauth2/sign_in&client_id" /etc/nginx/sites-available/lv3-edge.conf | wc -l'
 # Expected: 0
 ```
 
 ### Contract 6: Keycloak Availability Requirements
 
-Keycloak (`sso.lv3.org`) is a single point of failure for all protected browser surfaces. When Keycloak is down:
+Keycloak (`sso.example.com`) is a single point of failure for all protected browser surfaces. When Keycloak is down:
 
 - No new logins are possible across all protected sites
 - Existing sessions continue working until their 8h cookie expires
@@ -202,7 +202,7 @@ Keycloak (`sso.lv3.org`) is a single point of failure for all protected browser 
 - `KC_CACHE=local`: avoids distributed cache overhead for single-node deployment
 - OpenBao sidecar provides database credentials and TLS materials
 
-**When Keycloak is unresponsive, the admin console (`sso.lv3.org/admin/`) shows:**
+**When Keycloak is unresponsive, the admin console (`sso.example.com/admin/`) shows:**
 
 > "Timeout when waiting for 3rd party check iframe message."
 
@@ -247,11 +247,11 @@ Any change touching authentication MUST follow this converge order:
 
 | Time (UTC) | Event |
 |------------|-------|
-| ~18:00 | Users report 500 at `ops.lv3.org` |
+| ~18:00 | Users report 500 at `ops.example.com` |
 | 18:15 | Root cause identified: `invalid_grant: Code not valid` in oauth2-proxy logs |
 | 18:30 | First fix deployed: expire session cookie, redirect to `/oauth2/sign_in` |
 | 18:35 | New failure: Keycloak rejects `/oauth2/sign_in` as invalid redirect URI |
-| 18:40 | Second fix: change redirect to `ops.lv3.org/` (registered URI) |
+| 18:40 | Second fix: change redirect to `ops.example.com/` (registered URI) |
 | 18:45 | New failure: Keycloak logout confirmation page creates redirect loop |
 | 18:50 | Root cause deepened: stale CSRF cookie holds wrong PKCE `code_verifier` |
 | 19:00 | Third fix: expire CSRF cookie in addition to session cookie |
@@ -275,12 +275,12 @@ Any change touching authentication MUST follow this converge order:
 
 ## Verification Checklist (Post-Auth-Change)
 
-- [ ] `curl -sI https://ops.lv3.org/` returns 302 to `/oauth2/sign_in`
-- [ ] `curl -sI https://ops.lv3.org/oauth2/sign_in` returns 302 to `sso.lv3.org`
+- [ ] `curl -sI https://ops.example.com/` returns 302 to `/oauth2/sign_in`
+- [ ] `curl -sI https://ops.example.com/oauth2/sign_in` returns 302 to `sso.example.com`
 - [ ] `grep -c _lv3_ops_portal_proxy_csrf /etc/nginx/sites-available/lv3-edge.conf` returns 17
 - [ ] `grep "oauth2/sign_in&client_id" /etc/nginx/sites-available/lv3-edge.conf` returns empty
-- [ ] Browser test: open incognito window, navigate to `ops.lv3.org`, complete Keycloak login, verify dashboard loads
-- [ ] Browser test: navigate to `tasks.lv3.org`, verify login works (same shared session)
+- [ ] Browser test: open incognito window, navigate to `ops.example.com`, complete Keycloak login, verify dashboard loads
+- [ ] Browser test: navigate to `tasks.example.com`, verify login works (same shared session)
 - [ ] Watchdog is active: `systemctl is-active lv3-ops-portal-oauth2-proxy-watchdog.timer`
 
 ## Related ADRs

@@ -40,14 +40,14 @@ integrate with existing logging and event-routing systems.
 
 We will deploy **Falco** as a systemd service on each selected production VM,
 using the upstream `modern_ebpf` runtime path and a private bridge on
-`docker-runtime-lv3` that fans WARNING+ events into the platform's Loki, NATS,
+`docker-runtime` that fans WARNING+ events into the platform's Loki, NATS,
 ntfy, and legacy mutation-audit pipelines.
 
 ### Deployment rules
 
 - Falco is installed as a systemd service on each VM managed by the
-  `docker-runtime-lv3`, `docker-build-lv3`, `monitoring-lv3`, and
-  `postgres-lv3` hosts; the Ansible role for each VM manages Falco installation,
+  `docker-runtime`, `docker-build`, `monitoring`, and
+  `postgres` hosts; the Ansible role for each VM manages Falco installation,
   version, and rules
 - Falco uses the upstream `modern_ebpf` service path (`falco-modern-bpf`); it
   does not require a kernel module build, DKMS, or a host-local kernel-header
@@ -75,7 +75,7 @@ ntfy, and legacy mutation-audit pipelines.
   each VM) tails the Falco journald unit and ships structured log events to Loki
   with label `job="falco"`
 - a Falco HTTP output is also configured to POST events to a private bridge on
-  `docker-runtime-lv3`; that bridge:
+  `docker-runtime`; that bridge:
   1. publishes `priority >= WARNING` events to the NATS
      `platform.security.falco` subject (ADR 0276)
   2. publishes `priority >= CRITICAL` events to ntfy topic
@@ -118,7 +118,7 @@ ntfy, and legacy mutation-audit pipelines.
 - the initial rule tuning period will produce false positives until
   platform-specific suppressions are calibrated; this requires active operator
   review during the first two weeks post-deployment
-- a private bridge on `docker-runtime-lv3` becomes part of the Falco signal path;
+- a private bridge on `docker-runtime` becomes part of the Falco signal path;
   if that bridge is degraded then WARNING+/CRITICAL event fan-out is degraded
   even though local Falco detection and Loki journald capture remain available
 - Falco's CPU overhead per container increases with event volume; high-syscall

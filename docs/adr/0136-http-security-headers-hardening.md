@@ -42,12 +42,12 @@ The shared edge now adds the following headers on every published hostname:
 
 The edge keeps one default CSP and uses explicit per-host overrides for public applications that need broader browser capabilities:
 
-- `docs.lv3.org`: allows inline bootstrap scripts plus Google Fonts
-- `grafana.lv3.org`: allows inline scripts, `unsafe-eval`, and blob workers required by Grafana
-- `ops.lv3.org`: allows the external `unpkg.com` htmx asset plus inline bootstrap code
-- `sso.lv3.org`: allows inline Keycloak login scripts and styles
-- `uptime.lv3.org` and `status.lv3.org`: allow inline bootstrap code and WebSocket connectivity
-- `api.lv3.org`: uses a locked-down `default-src 'none'` policy because it serves API responses, not an application UI
+- `docs.example.com`: allows inline bootstrap scripts plus Google Fonts
+- `grafana.example.com`: allows inline scripts, `unsafe-eval`, and blob workers required by Grafana
+- `ops.example.com`: allows the external `unpkg.com` htmx asset plus inline bootstrap code
+- `sso.example.com`: allows inline Keycloak login scripts and styles
+- `uptime.example.com` and `status.example.com`: allow inline bootstrap code and WebSocket connectivity
+- `api.example.com`: uses a locked-down `default-src 'none'` policy because it serves API responses, not an application UI
 
 All CSP relaxations are declared in repo-managed role defaults so they can be audited and reviewed alongside the edge template.
 
@@ -71,7 +71,7 @@ The repository now ships `scripts/security_headers_audit.py` and `make security-
 **Negative / Trade-offs**
 
 - some public applications still require weaker CSP directives such as `unsafe-inline` or `unsafe-eval`
-- HSTS `preload` is a deliberate long-lived commitment for `lv3.org`
+- HSTS `preload` is a deliberate long-lived commitment for `example.com`
 - `X-Frame-Options: DENY` will block future iframe embeddings unless they are deliberately re-scoped
 
 ## Boundaries

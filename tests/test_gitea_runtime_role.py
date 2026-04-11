@@ -65,7 +65,7 @@ def test_runner_defaults_use_mirrored_registration_token() -> None:
     defaults = RUNNER_DEFAULTS.read_text()
     assert "gitea_runner_compose_bin: docker" in defaults
     assert ".local/gitea/runner-registration-token.txt" in defaults
-    assert "docker-build-lv3" in defaults
+    assert "docker-build" in defaults
     assert "service_topology_get('openbao')" in defaults
     assert "service_topology_get('gitea')" in defaults
     assert "platform_service_topology.gitea" in defaults

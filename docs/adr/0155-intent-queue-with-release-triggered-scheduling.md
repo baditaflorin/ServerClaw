@@ -25,7 +25,7 @@ The correct architecture is a **durable intent queue** with **release-triggered 
 
 We will implement a **durable intent queue** with priority scheduling and release-triggered dispatch as a platform service.
 
-The first repository implementation lands in [`platform/intent_queue/scheduler_store.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/intent_queue/scheduler_store.py), [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py), [`scripts/intent_queue_dispatcher.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/intent_queue_dispatcher.py), and the Windmill runtime defaults. It keeps the existing ADR 0162 queue state intact while adding a scheduler-owned queue for workflow-busy and conflict-rejected intents, release-triggered dispatcher spawning, a repo-managed Windmill safety schedule, and CLI/operator surfaces.
+The first repository implementation lands in [`platform/intent_queue/scheduler_store.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/intent_queue/scheduler_store.py), [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py), [`scripts/intent_queue_dispatcher.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/intent_queue_dispatcher.py), and the Windmill runtime defaults. It keeps the existing ADR 0162 queue state intact while adding a scheduler-owned queue for workflow-busy and conflict-rejected intents, release-triggered dispatcher spawning, a repo-managed Windmill safety schedule, and CLI/operator surfaces.
 
 ### Queue table schema
 

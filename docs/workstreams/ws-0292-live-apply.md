@@ -1,7 +1,7 @@
 # Workstream ws-0292-live-apply: Live Apply ADR 0292 From Latest `origin/main`
 
 - ADR: [ADR 0292](../adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md)
-- Title: Deploy Lago as the repo-managed usage metering and billing API layer, publish `billing.lv3.org`, and verify metered ingestion end to end
+- Title: Deploy Lago as the repo-managed usage metering and billing API layer, publish `billing.example.com`, and verify metered ingestion end to end
 - Status: merged
 - Included In Repo Version: 0.177.128
 - Canonical Mainline Receipt: `receipts/live-applies/2026-04-01-adr-0292-lago-mainline-live-apply.json`
@@ -11,11 +11,11 @@
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-04-01
 - Branch: `codex/ws-0292-main-integration-r1`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0292-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secret-injection-pattern`, `adr-0086-backup-and-recovery`, `adr-0276-nats-jetstream-as-the-platform-event-bus`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `Makefile`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/adr/0292`, `docs/workstreams/ws-0292-live-apply.md`, `docs/runbooks/configure-lago.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, `docs/site-generated/architecture/dependency-graph.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/lago.yml`, `playbooks/services/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml`, `collections/ansible_collections/lv3/platform/playbooks/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/services/lago.yml`, `roles/lago_postgres/`, `roles/lago_runtime/`, `roles/api_gateway_runtime/`, `roles/nginx_edge_publication/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`, `scripts/api_gateway/main.py`, `scripts/generate_platform_vars.py`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/uptime-kuma/monitors.json`, `receipts/image-scans/`, `receipts/live-applies/`, `receipts/live-applies/evidence/`, `receipts/ops-portal-snapshot.html`, `receipts/sbom/**`, `tests/`
+- Shared Surfaces: `workstreams.yaml`, `Makefile`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/adr/0292`, `docs/workstreams/ws-0292-live-apply.md`, `docs/runbooks/configure-lago.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, `docs/site-generated/architecture/dependency-graph.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `playbooks/lago.yml`, `playbooks/services/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml`, `collections/ansible_collections/lv3/platform/playbooks/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/services/lago.yml`, `roles/lago_postgres/`, `roles/lago_runtime/`, `roles/api_gateway_runtime/`, `roles/nginx_edge_publication/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`, `scripts/api_gateway/main.py`, `scripts/generate_platform_vars.py`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/uptime-kuma/monitors.json`, `receipts/image-scans/`, `receipts/live-applies/`, `receipts/live-applies/evidence/`, `receipts/ops-portal-snapshot.html`, `receipts/sbom/**`, `tests/`
 
 ## Scope
 
@@ -49,7 +49,7 @@
 - `collections/ansible_collections/lv3/platform/roles/lago_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`
 - `receipts/live-applies/2026-03-31-adr-0292-lago-mainline-live-apply.json`
-- `receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json`
+- `receipts/sbom/host-docker-runtime-2026-04-01.cdx.json`
 - `receipts/live-applies/evidence/2026-03-31-ws-0292-*`
 
 ## Verification
@@ -79,16 +79,16 @@
 - The successful latest-main replay evidence is
   `receipts/live-applies/evidence/2026-04-01-ws-0292-mainline-r31-converge-0.177.126.txt`.
   `make converge-lago env=production` completed with clean recap
-  `docker-runtime-lv3 ok=447 changed=150 failed=0`,
-  `nginx-lv3 ok=45 changed=4 failed=0`,
-  `postgres-lv3 ok=74 changed=0 failed=0`,
+  `docker-runtime ok=447 changed=150 failed=0`,
+  `nginx-edge ok=45 changed=4 failed=0`,
+  `postgres ok=74 changed=0 failed=0`,
   `localhost ok=18 changed=0 failed=0`.
 - Public proof before and after the replay is captured in
   `receipts/live-applies/evidence/2026-04-01-ws-0292-main-pre-apply-public-baseline-r2-0.177.126.txt`
   and
   `receipts/live-applies/evidence/2026-04-01-ws-0292-main-post-apply-public-verification-r1-0.177.126.txt`.
   Before the replay, both `/` and `/api/health` were misrouted through
-  `nginx.lv3.org` as `HTTP/2 308` redirects. After the replay, `/` returned
+  `nginx.example.com` as `HTTP/2 308` redirects. After the replay, `/` returned
   the expected shared oauth2 sign-in redirect and `/api/health` returned the
   expected canonical `401` gateway rejection for anonymous callers.
 - The converged playbook also re-verified the public smoke event path through
@@ -102,7 +102,7 @@
   final closeout rebased onto `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1`.
 - The historical 2026-03-31 concurrency-tainted evidence remains in the branch
   as audit context, but the April 1 `r31` replay supersedes it as the durable
-  latest-main proof for `billing.lv3.org`.
+  latest-main proof for `billing.example.com`.
 - The final integration step promotes this replay into repository version
   `0.177.128` and platform version `0.130.81`, with
   `receipts/live-applies/2026-04-01-adr-0292-lago-mainline-live-apply.json`

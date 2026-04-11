@@ -24,7 +24,7 @@ records the most recent successful restore-verification receipt when one exists.
    - `proxmox_offsite_vm_<vmid>`
 2. Collect every governed ADR 0302 Restic file-level source from
    `config/restic-file-backup-catalog.json`.
-3. Resolve the VM-scoped source IDs to the live VM inventory on `proxmox_florin`.
+3. Resolve the VM-scoped source IDs to the live VM inventory on `proxmox-host`.
 4. Query live Proxmox backup jobs through `pvesh get /cluster/backup`.
 5. Query live backup artifacts through `pvesm list` on:
    - `lv3-backup-pbs`
@@ -66,6 +66,6 @@ uv run --with pyyaml python scripts/backup_coverage_ledger.py --format json
   `scripts/restic_config_backup.py`; if those assets show as uncovered, rerun
   the ADR 0302 backup workflow first and then refresh the ledger.
 - The current backup-of-backup contract is the off-site Proxmox copy of VM
-  `160` (`backup-lv3`). Until `lv3-backup-offsite` exists live, ADR 0271 should
-  continue to report `backup-lv3` as uncovered rather than pretending host-loss
+  `160` (`backup`). Until `lv3-backup-offsite` exists live, ADR 0271 should
+  continue to report `backup` as uncovered rather than pretending host-loss
   recovery is complete.

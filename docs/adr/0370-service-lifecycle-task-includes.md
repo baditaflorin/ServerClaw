@@ -499,10 +499,10 @@ Rewrite `directus_runtime/tasks/main.yml` to use the shared includes. The result
 
 ```bash
 # Before migration — capture verbose output:
-ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime-lv3 --check -vvv 2>&1 | tee /tmp/directus-before.log
+ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime --check -vvv 2>&1 | tee /tmp/directus-before.log
 
 # After migration — compare:
-ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime-lv3 --check -vvv 2>&1 | tee /tmp/directus-after.log
+ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime --check -vvv 2>&1 | tee /tmp/directus-after.log
 
 diff /tmp/directus-before.log /tmp/directus-after.log
 ```

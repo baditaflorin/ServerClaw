@@ -13,7 +13,7 @@ ROLE_META = REPO_ROOT / "roles" / "paperless_runtime" / "meta" / "argument_specs
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "paperless_runtime" / "templates" / "docker-compose.yml.j2"
 ENV_TEMPLATE = REPO_ROOT / "roles" / "paperless_runtime" / "templates" / "paperless.env.j2"
 ENV_CTEMPLATE = REPO_ROOT / "roles" / "paperless_runtime" / "templates" / "paperless.env.ctmpl.j2"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
@@ -34,12 +34,12 @@ def test_defaults_define_public_oidc_runtime_and_taxonomy_contract() -> None:
     )
     assert (
         defaults["paperless_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology.keycloak.public_hostname }}"
     )
     assert defaults["paperless_internal_port"] == "{{ paperless_service_topology.ports.internal }}"
     assert defaults["paperless_internal_base_url"] == "http://127.0.0.1:{{ paperless_internal_port }}"
     assert defaults["paperless_keycloak_client_id"] == "paperless"
-    assert defaults["paperless_keycloak_issuer"] == "https://sso.lv3.org/realms/lv3"
+    assert defaults["paperless_keycloak_issuer"] == "https://sso.example.com/realms/lv3"
     assert defaults["paperless_ocr_language"] == "eng"
     assert defaults["paperless_image_pull_retries"] == 5
     assert defaults["paperless_image_pull_delay_seconds"] == 5
@@ -229,15 +229,15 @@ def test_inventory_exposes_paperless_to_edge_monitoring_and_private_callers() ->
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
 
     assert host_vars["platform_port_assignments"]["paperless_port"] == 8018
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     assert 8018 in host_rule["ports"]
-    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-lv3" and 8018 in rule["ports"])
+    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-edge" and 8018 in rule["ports"])
     assert 8018 in nginx_rule["ports"]
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 8018 in rule["ports"])
     assert 8018 in guest_rule["ports"]
     monitoring_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 8018 in rule["ports"]
+        rule for rule in docker_runtime_rules if rule["source"] == "monitoring" and 8018 in rule["ports"]
     )
     assert 8018 in monitoring_rule["ports"]
 

@@ -49,7 +49,7 @@
 
 - `python3 -m py_compile scripts/network_impairment_matrix.py config/windmill/scripts/network-impairment-matrix.py platform/faults/network_impairment_matrix.py`
 - `uv run --with pytest --with pyyaml python -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q`
-- `uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server --validate`
+- `uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server --validate`
 - `make syntax-check-windmill`
 - `uv run --with pyyaml python scripts/workflow_catalog.py --validate`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
@@ -61,9 +61,9 @@
 - The workstream started from `origin/main` commit `73121fc9e2ac3272e59706a01f090535e32cbed9` in repo release context `0.177.12`.
 - The final `main` integration shipped in repo version `0.177.22`; the merge recorded the release metadata and canonical receipt mapping without forcing an extra platform-version bump because the live proof was already captured on `2026-03-27`.
 - The ADR 0189 repo surface now ships the matrix catalog, report renderer, Windmill wrapper, validation hooks, and focused tests from the isolated `codex/ws-0189-live-apply` worktree.
-- The initial governed live run exposed a shared Windmill worker regression where stale `/srv/proxmox_florin_server/pyproject.toml` and `lv3_platform_cli.egg-info` forced `uv` editable-build startup failures; the Windmill runtime role now prunes that stale packaging metadata during checkout refresh and the seeded matrix wrapper falls back to `uv` when the native worker environment lacks `PyYAML`.
-- `GET /api/w/lv3/scripts/get/p/f%2Flv3%2Fnetwork-impairment-matrix` returned the live repo-managed script with hash `65063c8a80599a06`, and `POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix` returned `status: planned`, `entry_count: 4`, `target_class: staging`, and `report_file: /srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json`.
-- The guest-local report at `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` exists on `docker-runtime-lv3` and records the same `planned` staging slice with four entries.
+- The initial governed live run exposed a shared Windmill worker regression where stale `/srv/proxmox-host_server/pyproject.toml` and `lv3_platform_cli.egg-info` forced `uv` editable-build startup failures; the Windmill runtime role now prunes that stale packaging metadata during checkout refresh and the seeded matrix wrapper falls back to `uv` when the native worker environment lacks `PyYAML`.
+- `GET /api/w/lv3/scripts/get/p/f%2Flv3%2Fnetwork-impairment-matrix` returned the live repo-managed script with hash `65063c8a80599a06`, and `POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix` returned `status: planned`, `entry_count: 4`, `target_class: staging`, and `report_file: /srv/proxmox-host_server/.local/network-impairment-matrix/latest.json`.
+- The guest-local report at `/srv/proxmox-host_server/.local/network-impairment-matrix/latest.json` exists on `docker-runtime` and records the same `planned` staging slice with four entries.
 - The shared Windmill runtime repair was validated by replaying the older `fault-injection` script through the same API path in `dry_run` mode; it returned `status: planned` again after the worker-checkout cleanup.
 - Focused validation passed with `python3 -m py_compile`, `11` focused pytest cases, `make syntax-check-windmill`, `uv run --with pyyaml python scripts/workflow_catalog.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `make pre-push-gate`; local `make validate` still stops on unrelated pre-existing `ansible-lint` warnings outside the ADR 0189 surface.
 - The structured live evidence is recorded in `receipts/live-applies/2026-03-27-adr-0189-network-impairment-matrix-live-apply.json`.

@@ -32,7 +32,7 @@ shared_surfaces:
   - docs/diagrams/service-dependency-graph.excalidraw
   - receipts/ops-portal-snapshot.html
   - inventory/group_vars/platform.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - scripts/generate_platform_vars.py
   - scripts/container_image_policy.py
   - scripts/live_apply_receipts.py
@@ -153,7 +153,7 @@ ownership_manifest:
     - id: adr_0292_shared_platform_contract
       paths:
         - inventory/group_vars/platform.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - scripts/generate_platform_vars.py
         - scripts/container_image_policy.py
         - scripts/live_apply_receipts.py
@@ -212,7 +212,7 @@ ownership_manifest:
       mode: exclusive
 canonical_truth:
   changelog_entry: implements ADR 0292 by adding Apache Superset as the
-    SQL-first BI layer, publishing bi.lv3.org through the shared edge,
+    SQL-first BI layer, publishing bi.example.com through the shared edge,
     reconciling repo-managed PostgreSQL and Plausible datasources plus the
     landing dashboard, and recording the first verified exact-main promotion as
     repository version 0.177.129 and platform version 0.130.82

@@ -4,7 +4,7 @@
 - Title: Persistent Docker layer, pip, apt, and Ansible collection caches on the build server for sub-20-second check runs
 - Status: merged
 - Branch: `codex/adr-0089-build-cache`
-- Worktree: `../proxmox_florin_server-build-cache`
+- Worktree: `../proxmox-host_server-build-cache`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`
 - Conflicts With: none
@@ -26,7 +26,7 @@
 ## Non-Goals
 
 - build-server NVMe provisioning or RAID configuration (hardware; done outside IaC)
-- caching for production service Docker images (those use `registry.lv3.org` pull-through cache, which is a separate ADR)
+- caching for production service Docker images (those use `registry.example.com` pull-through cache, which is a separate ADR)
 
 ## Expected Repo Surfaces
 
@@ -56,7 +56,7 @@
 
 - run `make remote-lint` twice; second run completes at least 4× faster than first (cache effectiveness)
 - `make cache-status` shows non-zero cache sizes for all four cache components
-- `config/build-cache-manifest.json` contains current image digests matching `registry.lv3.org`
+- `config/build-cache-manifest.json` contains current image digests matching `registry.example.com`
 - simulate cold cache (stop BuildKit daemon, clear pip-cache volume); first run completes within 10 min; second run < 18 s
 
 ## Merge Criteria
@@ -69,4 +69,4 @@
 
 - apt-cacher-ng requires the Packer provisioner scripts to inject the proxy config before any `apt-get install`; verify this is in `base-hardening.sh` before running a Packer build
 - The repo-side implementation is complete on `main`, including the `remote_exec.sh`, runner-manifest, and `validate_repo.sh` cache hooks that were previously deferred.
-- Remaining work is the live-apply step only: apply the cache host from `main`, measure warm-cache timings on `docker-build-lv3`, and enable the seeded Windmill schedules once the host is verified.
+- Remaining work is the live-apply step only: apply the cache host from `main`, measure warm-cache timings on `docker-build`, and enable the seeded Windmill schedules once the host is verified.

@@ -19,7 +19,7 @@ That left several public-surface regressions easy to miss:
 - the edge could begin accepting weak TLS protocol or cipher combinations
 - a redirect flow could pick up an open redirect weakness
 
-The existing ADR 0102 security-posture workflow covers host hardening drift and runtime image CVEs. It does not test what an unauthenticated external user can actually observe on `lv3.org` and the published subdomains.
+The existing ADR 0102 security-posture workflow covers host hardening drift and runtime image CVEs. It does not test what an unauthenticated external user can actually observe on `example.com` and the published subdomains.
 
 ## Decision
 
@@ -49,7 +49,7 @@ The workflow now combines five scan classes:
 2. an in-repo HTTP header probe for the required external security headers
 3. an unauthenticated auth-bypass probe for OIDC-protected public surfaces
 4. a version-disclosure probe for response headers such as `X-Powered-By`, `X-*-Version`, and versioned `Server` values
-5. `nuclei` redirect or misconfiguration templates against `https://lv3.org`
+5. `nuclei` redirect or misconfiguration templates against `https://example.com`
 
 ### Execution model
 

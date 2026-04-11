@@ -24,9 +24,9 @@ The current target shape is:
 - `10.10.10.20` Docker runtime
 - `10.10.10.30` Docker build
 - `10.10.10.40` monitoring
-- `lv3.org` as the public DNS zone
+- `example.com` as the public DNS zone
 
-The authoritative machine-readable state is [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml).
+The authoritative machine-readable state is [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml).
 
 ## Default Operating Model
 
@@ -41,16 +41,16 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 - reach guests directly over the Tailscale-routed `10.10.10.0/24` path once ADR 0014 is applied
 - if the tailnet path is unavailable, use the Proxmox host jump path only as break-glass
 
-The canonical identity classification and metadata contract lives in [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md) and [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml).
+The canonical identity classification and metadata contract lives in [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/identity-taxonomy-and-managed-principals.md) and [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml).
 
 ## What To Read Before Making Changes
 
-1. [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
-2. [AGENTS.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/AGENTS.md)
-3. [docs/repository-map.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/repository-map.md)
-4. [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
-5. relevant ADRs in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr)
-6. relevant runbooks in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks)
+1. [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/README.md)
+2. [AGENTS.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/AGENTS.md)
+3. [docs/repository-map.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/repository-map.md)
+4. [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml)
+5. relevant ADRs in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr)
+6. relevant runbooks in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks)
 
 ## How To Make A Safe Change
 
@@ -68,19 +68,19 @@ The canonical identity classification and metadata contract lives in [docs/runbo
 
 At minimum, review whether these files need updates:
 
-- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
-- [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
-- a workstream file in [docs/workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams)
-- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) only during integration to `main`
-- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) only during integration to `main`
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) only for merged truth or verified live state
-- a runbook in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks)
-- an ADR in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr)
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) if an identity inventory, owner, scope boundary, or credential-storage contract changed
+- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/README.md)
+- [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml)
+- a workstream file in [docs/workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/workstreams)
+- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/VERSION) only during integration to `main`
+- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/changelog.md) only during integration to `main`
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml) only for merged truth or verified live state
+- a runbook in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks)
+- an ADR in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr)
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml) if an identity inventory, owner, scope boundary, or credential-storage contract changed
 
 ## Commands To Prefer
 
-Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) instead of rebuilding long commands from memory:
+Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile) instead of rebuilding long commands from memory:
 
 - `make start-workstream WORKSTREAM=adr-0011-monitoring`
 - `make workflows`

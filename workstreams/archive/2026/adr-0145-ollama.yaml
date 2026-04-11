@@ -16,7 +16,7 @@ shared_surfaces:
   - config/ollama-models.yaml
   - platform/llm
   - platform/goal_compiler/compiler.py
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/workflow-catalog.json
   - config/dependency-graph.json
 ready_to_merge: false

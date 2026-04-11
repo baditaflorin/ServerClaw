@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0211-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0211-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0211-live-apply`
 - Owner: codex
 - Depends On: `adr-0179-service-redundancy-tier-matrix`, `adr-0180-standby-capacity-reservation-and-placement-rules`, `adr-0184-failure-domain-labels-and-anti-affinity-policy`, `adr-0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads`
 - Conflicts With: none
@@ -63,18 +63,18 @@
 - `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service headscale`
 - `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service headscale`
 - `python3 scripts/promotion_pipeline.py --emit-bypass-event --service headscale --actor-id "${USER:-unknown}" --correlation-id "break-glass:service:headscale:$(date -u +%Y%m%dT%H%M%SZ)"`
-- `ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=ws0211headscale2 scripts/run_with_namespace.sh uvx --from pyyaml python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --playbook playbooks/services/headscale.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e bypass_promotion=true`
-- `curl -fsS -o /dev/null -w '%{http_code}\n' https://headscale.lv3.org/health`
-- `curl -Ik https://headscale.lv3.org/health`
+- `ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox-host_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=ws0211headscale2 scripts/run_with_namespace.sh uvx --from pyyaml python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --playbook playbooks/services/headscale.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e bypass_promotion=true`
+- `curl -fsS -o /dev/null -w '%{http_code}\n' https://headscale.example.com/health`
+- `curl -Ik https://headscale.example.com/health`
 
 ## Outcome
 
 - The canonical policy registry now lives in `config/shared-policy-packs.json`, with `docs/schema/shared-policy-packs.schema.json` and `scripts/shared_policy_packs.py` defining the machine-checked contract consumed by the affected validators and reports.
 - The duplicated redundancy, capacity-class, and placement enums were removed from the affected schemas and docs in favor of the shared registry, so `service_redundancy.py`, `standby_capacity.py`, `capacity_report.py`, `failure_domain_policy.py`, `environment_topology.py`, and `validate_repository_data_models.py` all resolve policy from the same source.
 - The focused regression suite passed with `27 passed in 0.40s`, and repository data-model validation passed after the refactor.
-- The initial fresh-worktree `headscale` replay exposed one real automation gap: `lv3.platform.nginx_edge_publication` expects `build/changelog-portal/` and `build/docs-portal/` to exist even in a brand-new worktree. Running `make generate-ops-portal generate-changelog-portal docs` populated those artifacts from committed automation, and the immediate replay then completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-lv3 ok=72 changed=5 failed=0`, and `proxmox_florin ok=42 changed=0 failed=0`.
-- After absorbing the concurrent ADR 0209 `0.177.38` mainline integration, ADR 0211 was recut as release `0.177.39`, replayed the same governed `headscale` path from `codex/ws-0211-main-merge`, and completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-lv3 ok=71 changed=3 failed=0`, and `proxmox_florin ok=42 changed=0 failed=0`.
-- The final edge verification passed with `https://headscale.lv3.org/health` returning `HTTP 200` from both the branch-local and merged-main replays, confirming the shared policy registry changes did not regress the governed live-apply path or the public edge publication for the selected safe service target.
+- The initial fresh-worktree `headscale` replay exposed one real automation gap: `lv3.platform.nginx_edge_publication` expects `build/changelog-portal/` and `build/docs-portal/` to exist even in a brand-new worktree. Running `make generate-ops-portal generate-changelog-portal docs` populated those artifacts from committed automation, and the immediate replay then completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-edge ok=72 changed=5 failed=0`, and `proxmox-host ok=42 changed=0 failed=0`.
+- After absorbing the concurrent ADR 0209 `0.177.38` mainline integration, ADR 0211 was recut as release `0.177.39`, replayed the same governed `headscale` path from `codex/ws-0211-main-merge`, and completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-edge ok=71 changed=3 failed=0`, and `proxmox-host ok=42 changed=0 failed=0`.
+- The final edge verification passed with `https://headscale.example.com/health` returning `HTTP 200` from both the branch-local and merged-main replays, confirming the shared policy registry changes did not regress the governed live-apply path or the public edge publication for the selected safe service target.
 - The final integrated validation bundle passed end to end: `./scripts/validate_repo.sh data-models generated-docs generated-portals agent-standards`, `git diff --check`, and the expanded regression slice covering the shared policy registry plus dependency-graph generation contract (`33 passed in 1.48s` on the rebased `0.177.39` candidate).
 - During that final verification, the repository automation was tightened so `scripts/generate_dependency_diagram.py` and `scripts/generate_docs_site.py` now share the same dependency-graph page format, `docs/diagrams/agent-coordination-map.excalidraw` was refreshed to keep generated-doc validation deterministic, and `docs/runbooks/platform-operations-portal.md` now references `docs/runbooks/validation-gate-status.yaml` without a broken MkDocs-only link so `mkdocs --strict` passes on the integrated latest-main candidate.
 - The canonical platform versions for ADR 0211 are now `0.177.39` in-repo and `0.130.38` on-platform, with the merged-main receipt `receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json` as the source of truth for the final integration state.

@@ -143,14 +143,14 @@ def prepare_graph_db(path: Path) -> str:
         [
             ("service:postgres", "service", "Postgres", 1, json.dumps({"service_id": "postgres"})),
             ("service:windmill", "service", "Windmill", 2, json.dumps({"service_id": "windmill"})),
-            ("host:docker-runtime-lv3", "host", "docker-runtime-lv3", None, json.dumps({})),
+            ("host:docker-runtime", "host", "docker-runtime", None, json.dumps({})),
         ],
     )
     connection.executemany(
         "INSERT INTO graph_edges (from_node, to_node, edge_kind, metadata) VALUES (?, ?, ?, ?)",
         [
             ("service:windmill", "service:postgres", "depends_on", json.dumps({"source": "test"})),
-            ("service:windmill", "host:docker-runtime-lv3", "hosted_on", json.dumps({"source": "test"})),
+            ("service:windmill", "host:docker-runtime", "hosted_on", json.dumps({"source": "test"})),
         ],
     )
     connection.commit()
@@ -211,11 +211,11 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "description": "Unified platform gateway",
                     "category": "automation",
                     "lifecycle_status": "active",
-                    "vm": "docker-runtime-lv3",
+                    "vm": "docker-runtime",
                     "exposure": "edge-published",
                     "internal_url": "http://10.10.10.20:8083",
-                    "public_url": "https://api.lv3.org",
-                    "subdomain": "api.lv3.org",
+                    "public_url": "https://api.example.com",
+                    "subdomain": "api.example.com",
                     "health_probe_id": "api_gateway",
                     "adr": "0092",
                     "runbook": "docs/runbooks/configure-api-gateway.md",
@@ -240,8 +240,8 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "environments": {
                         "production": {
                             "status": "active",
-                            "url": "https://api.lv3.org",
-                            "subdomain": "api.lv3.org",
+                            "url": "https://api.example.com",
+                            "subdomain": "api.example.com",
                         }
                     },
                 },
@@ -251,7 +251,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "description": "database",
                     "category": "data",
                     "lifecycle_status": "active",
-                    "vm": "postgres-lv3",
+                    "vm": "postgres",
                     "vmid": 150,
                     "exposure": "private-only",
                     "internal_url": "postgres://10.10.10.55:5432",
@@ -267,7 +267,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "description": "workflow runtime",
                     "category": "automation",
                     "lifecycle_status": "active",
-                    "vm": "docker-runtime-lv3",
+                    "vm": "docker-runtime",
                     "exposure": "private-only",
                     "internal_url": upstream_base,
                     "health_probe_id": "windmill",
@@ -322,7 +322,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "id": "production",
                     "name": "Production",
                     "status": "active",
-                    "base_domain": "lv3.org",
+                    "base_domain": "example.com",
                 }
             ],
         },
@@ -333,7 +333,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
             "schema_version": "2.0.0",
             "publications": [
                 {
-                    "fqdn": "api.lv3.org",
+                    "fqdn": "api.example.com",
                     "service_id": "api_gateway",
                     "environment": "production",
                     "status": "active",
@@ -1870,7 +1870,7 @@ def test_gateway_proxy_supports_raw_upstream_auth_headers(tmp_path: Path, monkey
             "description": "search",
             "category": "data",
             "lifecycle_status": "active",
-            "vm": "docker-runtime-lv3",
+            "vm": "docker-runtime",
             "internal_url": "http://100.64.0.1:8016",
             "health_probe_id": "typesense",
             "adr": "0277",

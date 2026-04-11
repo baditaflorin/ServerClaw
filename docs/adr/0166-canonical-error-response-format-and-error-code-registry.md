@@ -125,7 +125,7 @@ error_codes:
     category: authentication
     retry_advice: none
     description: "No Bearer token in Authorization header"
-    docs_url: "https://docs.lv3.org/adr/0056"
+    docs_url: "https://docs.example.com/adr/0056"
 
   GATE_HEALTH_FAIL:
     severity: info
@@ -133,7 +133,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: 60
     description: "Target service health composite score below safe_to_act threshold"
-    docs_url: "https://docs.lv3.org/adr/0128"
+    docs_url: "https://docs.example.com/adr/0128"
     context_fields: [service_id, composite_score, threshold]
 
   GATE_CIRCUIT_OPEN:
@@ -142,7 +142,7 @@ error_codes:
     retry_advice: backoff
     retry_after_s: null   # Populated from circuit's recovery_window_s at runtime
     description: "Circuit breaker is open for the required dependency"
-    docs_url: "https://docs.lv3.org/adr/0164"
+    docs_url: "https://docs.example.com/adr/0164"
     context_fields: [circuit_name, opened_at, recovery_window_s]
 
   EXEC_WORKFLOW_FAILED:
@@ -150,7 +150,7 @@ error_codes:
     category: execution
     retry_advice: manual
     description: "Workflow executed but returned a non-zero exit status"
-    docs_url: "https://docs.lv3.org/runbooks/workflow-failure"
+    docs_url: "https://docs.example.com/runbooks/workflow-failure"
     context_fields: [workflow_id, windmill_job_id, exit_code, stderr_snippet]
 
   INPUT_SCHEMA_INVALID:
@@ -158,7 +158,7 @@ error_codes:
     category: input
     retry_advice: none
     description: "Request payload does not conform to the expected schema"
-    docs_url: "https://docs.lv3.org/api-reference"
+    docs_url: "https://docs.example.com/api-reference"
     context_fields: [field_path, expected_type, received_value]
 ```
 
@@ -177,7 +177,7 @@ raise PlatformHTTPError(
         message="JWT signature verification failed.",
         trace_id=request.state.trace_id,
         retry_advice="none",
-        docs_url="https://docs.lv3.org/adr/0056",
+        docs_url="https://docs.example.com/adr/0056",
     )
 )
 ```
@@ -239,8 +239,8 @@ except PlatformError as e:
 - `scripts/api_gateway/main.py` and `scripts/platform_context_service.py` now return canonical envelopes for authentication failures, request-validation failures, and common not-found or dependency-failure paths.
 - `scripts/validate_repository_data_models.py` now validates the error-code registry as part of the repository data-model gate.
 - `docs/runbooks/platform-api-error-codes.md` documents the current envelope and registry ownership.
-- The 2026-03-26 live rollout from `main` now applies the canonical envelope on both `https://api.lv3.org/v1/health` and the private platform-context endpoint at `http://100.64.0.1:8010/v1/platform-summary`, with the first applied platform version recorded as `0.130.13`.
-- Public SSH reachability to `65.108.75.123:22` remained intermittent during the rollout, so the successful converge used the steady-state Tailscale host path and a manual recovery to finish the `platform-context` container rebuild after the corpus sync stalled before `config/error-codes.yaml` reached the guest.
+- The 2026-03-26 live rollout from `main` now applies the canonical envelope on both `https://api.example.com/v1/health` and the private platform-context endpoint at `http://100.64.0.1:8010/v1/platform-summary`, with the first applied platform version recorded as `0.130.13`.
+- Public SSH reachability to `203.0.113.1:22` remained intermittent during the rollout, so the successful converge used the steady-state Tailscale host path and a manual recovery to finish the `platform-context` container rebuild after the corpus sync stalled before `config/error-codes.yaml` reached the guest.
 
 ## Consequences
 

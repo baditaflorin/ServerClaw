@@ -16,7 +16,7 @@ shared_surfaces:
   - collections/ansible_collections/lv3/platform/roles/netdata_runtime/
   - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
   - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/service-capability-catalog.json
   - config/subdomain-catalog.json
   - config/health-probe-catalog.json
@@ -39,7 +39,7 @@ ownership_manifest:
         - collections/ansible_collections/lv3/platform/roles/netdata_runtime/**
         - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
         - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - config/service-capability-catalog.json
         - config/subdomain-catalog.json
         - config/health-probe-catalog.json
@@ -50,7 +50,7 @@ ready_to_merge: false
 live_applied: true
 canonical_truth:
   changelog_entry: completed the ADR 0196 latest-main live integration so
-    realtime.lv3.org, the Netdata parent-plus-children topology, Prometheus
+    realtime.example.com, the Netdata parent-plus-children topology, Prometheus
     ingestion, and the canonical live-apply receipt are now recorded directly on
     main
   release_bump: patch

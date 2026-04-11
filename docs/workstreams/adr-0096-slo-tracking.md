@@ -46,7 +46,7 @@
 
 ## Expected Live Surfaces
 
-- blackbox exporter and Prometheus rule groups active on `monitoring-lv3`
+- blackbox exporter and Prometheus rule groups active on `monitoring`
 - Grafana `LV3 SLO Overview` dashboard imported and reachable
 - `/v1/platform/slos` returns live error-budget state when the context service can reach Prometheus
 - production promotions reject when any tracked SLO has less than 10% error budget remaining
@@ -68,5 +68,5 @@
 ## Outcome
 
 - repository implementation is complete on `main` in repo release `0.106.0`
-- live apply completed on `2026-03-25` from `b203c2e`, with the monitoring converge passing on `monitoring-lv3` and the public Grafana edge controls re-rendered from repo state on `nginx-lv3`
+- live apply completed on `2026-03-25` from `b203c2e`, with the monitoring converge passing on `monitoring` and the public Grafana edge controls re-rendered from repo state on `nginx-edge`
 - `platform_version` advances to `0.130.3` for the first live claim of ADR 0096

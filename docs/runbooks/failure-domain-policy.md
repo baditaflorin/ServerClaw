@@ -10,7 +10,7 @@ The authoritative placement declarations live in three places:
 
 - `config/shared-policy-packs.json`
   - declares the canonical failure-domain kinds, statuses, placement classes, and reserved-capacity exclusion vocabulary used by the validators
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
   - `platform_failure_domains` declares the currently active and planned failure domains.
   - each `proxmox_guests[]` entry declares `placement.failure_domain`, `placement.placement_class`, `placement.anti_affinity_group`, and `placement.co_location_exceptions`.
 - `config/environment-topology.json`
@@ -55,8 +55,8 @@ python3 scripts/failure_domain_policy.py
 Verify the live Proxmox guest tags on the host:
 
 ```bash
-ssh -i .local/ssh/hetzner_llm_agents_ed25519 ops@65.108.75.123 sudo qm config 151
-ssh -i .local/ssh/hetzner_llm_agents_ed25519 ops@65.108.75.123 sudo qm config 160
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 ops@203.0.113.1 sudo qm config 151
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 ops@203.0.113.1 sudo qm config 160
 ```
 
 The `tags:` line should include the repo-derived failure-domain and anti-affinity labels.

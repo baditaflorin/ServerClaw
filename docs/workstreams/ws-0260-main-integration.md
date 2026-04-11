@@ -8,7 +8,7 @@
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0260-final-main`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-final-main`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0260-final-main`
 - Owner: codex
 - Depends On: `ws-0260-live-apply`
 
@@ -64,16 +64,16 @@ branch-local proof authoritative on `main`.
   concurrent Docker interruptions on the shared host.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production`
   succeeded from that synchronized tree with final recap
-  `docker-runtime-lv3 ok=181 changed=4 failed=0 skipped=109`,
-  `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`,
-  `postgres-lv3 ok=52 changed=0 failed=0 skipped=14`, and
+  `docker-runtime ok=181 changed=4 failed=0 skipped=109`,
+  `nginx-edge ok=39 changed=4 failed=0 skipped=7`,
+  `postgres ok=52 changed=0 failed=0 skipped=14`, and
   `localhost ok=18 changed=0 failed=0 skipped=3`.
 - Public verification returned
   `{"installed":true,"maintenance":false,"needsDbUpgrade":false,"versionstring":"33.0.1"...}`
-  from `https://cloud.lv3.org/status.php`, and both
-  `https://cloud.lv3.org/.well-known/caldav` plus
-  `https://cloud.lv3.org/.well-known/carddav` returned `HTTP/2 301` with
-  `location: https://cloud.lv3.org/remote.php/dav/`.
+  from `https://cloud.example.com/status.php`, and both
+  `https://cloud.example.com/.well-known/caldav` plus
+  `https://cloud.example.com/.well-known/carddav` returned `HTTP/2 301` with
+  `location: https://cloud.example.com/remote.php/dav/`.
 - Guest-local verification through the managed Proxmox jump path returned the
   same `status.php` payload from `http://10.10.10.20:8084/status.php`, showed
   `nextcloud-app` listening on `0.0.0.0:8084->80/tcp`, kept

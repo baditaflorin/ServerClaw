@@ -16,6 +16,6 @@ ROOT_URL bug that broke Keycloak SSO login.
 
 - `scripts/generate_platform_vars.py`: gitea public URL fix, keycloak in
   build_service_urls, PORT_KEYS dedup, collision detection
-- `inventory/host_vars/proxmox_florin.yml`: keycloak_internal_http_port added,
+- `inventory/host_vars/proxmox-host.yml`: keycloak_internal_http_port added,
   keycloak topology uses port assignment template
 - 12 role defaults + 1 playbook migrated to registry references

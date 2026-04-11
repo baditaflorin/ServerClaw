@@ -6,7 +6,7 @@
   recovery, and user-flow measurement
 - Status: merged
 - Branch: `codex/ws-0307-app-cohesion-bundle`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0307-app-cohesion-bundle`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0307-app-cohesion-bundle`
 - Owner: codex
 - Depends On: `adr-0093-interactive-ops-portal`,
   `adr-0094-developer-portal`, `adr-0108-operator-onboarding`,

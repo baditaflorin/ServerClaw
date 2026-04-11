@@ -4,7 +4,7 @@
 - Title: production live apply for the capacity dashboard, capacity report entry points, and monitoring verification from the latest `origin/main`
 - Status: merged
 - Branch: `codex/ws-0105-live-apply`
-- Worktree: `../proxmox_florin_server-ws-0105-live-apply`
+- Worktree: `../proxmox-host_server-ws-0105-live-apply`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0097-alerting-routing`, `adr-0105-capacity-model`
 - Conflicts With: none
@@ -30,8 +30,8 @@
 - `make weekly-capacity-report NO_LIVE_METRICS=true`
 - `make weekly-capacity-report`
 - `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100`
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
-- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `curl -Ik --resolve grafana.example.com:443:203.0.113.1 https://grafana.example.com/d/lv3-capacity-overview/lv3-capacity-overview`
 
 ## Outcome
 

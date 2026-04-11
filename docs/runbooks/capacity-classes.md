@@ -7,12 +7,12 @@ The canonical class names, requester aliases, and borrow rules now live in `conf
 
 ## Repo Surfaces
 
-- [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json)
-- [config/shared-policy-packs.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/shared-policy-packs.json)
-- [docs/schema/capacity-model.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/capacity-model.schema.json)
-- [scripts/capacity_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/capacity_report.py)
-- [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py)
-- [scripts/restore_verification.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/restore_verification.py)
+- [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/capacity-model.json)
+- [config/shared-policy-packs.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/shared-policy-packs.json)
+- [docs/schema/capacity-model.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/capacity-model.schema.json)
+- [scripts/capacity_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/capacity_report.py)
+- [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/fixture_manager.py)
+- [scripts/restore_verification.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/restore_verification.py)
 
 ## Classes
 

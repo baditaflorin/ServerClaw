@@ -4,7 +4,7 @@
 - Title: Wire Semgrep SAST into the shared validation gate and verify the CI and build-server paths end to end from latest `origin/main`
 - Status: merged
 - Branch: `codex/ws-0301-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0301-main-integration`
 - Owner: codex
 - Depends On: `adr-0083-docker-based-check-runners`, `adr-0087-repository-validation-gate`, `adr-0229-gitea-actions-runners`, `adr-0264-failure-domain-isolated-validation-lanes`, `adr-0266-validation-runner-capability-contracts`, `adr-0267-expiring-gate-bypass-waivers-with-structured-reason-codes`
 - Conflicts With: none
@@ -64,7 +64,7 @@
 
 ## Expected Live Surfaces
 
-- `semgrep-sast` runs successfully from `registry.lv3.org/check-runner/python:3.12.10` with an in-container install of `semgrep==1.155.0`
+- `semgrep-sast` runs successfully from `registry.example.com/check-runner/python:3.12.10` with an in-container install of `semgrep==1.155.0`
 - the remote pre-push gate succeeds with the new `semgrep-sast` check enabled
 - branch validation on the private Gitea runner executes `.gitea/workflows/validate.yml` and archives the Semgrep SARIF artifact
 
@@ -72,7 +72,7 @@
 
 - `uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_semgrep_gate.py tests/test_parallel_check.py tests/test_validation_lanes.py tests/test_validation_gate_windmill.py tests/test_validation_runner_contracts.py tests/test_validation_gate.py` returned `38 passed in 4.69s`.
 - `./scripts/validate_repo.sh semgrep` passed from the exact-main `0.177.108` tree with `error=0 warning=2 note=0 total=2`.
-- The no-git snapshot replay in `registry.lv3.org/check-runner/python:3.12.10` passed and recorded `baseline comparison: skipped (checkout has no git metadata)` while still scanning real content.
+- The no-git snapshot replay in `registry.example.com/check-runner/python:3.12.10` passed and recorded `baseline comparison: skipped (checkout has no git metadata)` while still scanning real content.
 - `make remote-validate` passed after the release-surface ownership metadata was promoted into `workstreams.yaml`.
 - `make pre-push-gate` passed end to end from the exact-main `0.177.108` tree.
 - `origin/main` was fast-forwarded to commit `9b539fa6fb3e0f26531f461fc71573491da370ab` for the repository merge.

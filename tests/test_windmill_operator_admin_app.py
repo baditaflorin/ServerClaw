@@ -46,15 +46,15 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
     assert defaults["windmill_service_topology"] == (
-        "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
+        "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('windmill') }}"
     )
     assert (
         defaults["windmill_server_port"]
-        == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_server_port }}"
+        == "{{ hostvars['proxmox-host'].platform_port_assignments.windmill_server_port }}"
     )
     assert (
         defaults["windmill_host_proxy_port"]
-        == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
+        == "{{ hostvars['proxmox-host'].platform_port_assignments.windmill_host_proxy_port }}"
     )
     assert (
         defaults["windmill_private_base_url"]
@@ -62,7 +62,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     )
     assert (
         defaults["windmill_base_url"]
-        == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+        == "http://{{ hostvars['proxmox-host'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
     )
     assert defaults["windmill_ntfy_resource_path"] == "f/lv3/ntfy_platform"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
@@ -473,7 +473,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "exitOnEsc: true" in tour_source
     assert "useModalOverlay: true" in tour_source
     assert "canClickTarget: false" in tour_source
-    assert 'const DOCS_BASE_URL = "https://docs.lv3.org";' in tour_source
+    assert 'const DOCS_BASE_URL = "https://docs.example.com";' in tour_source
     assert "const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;" in tour_source
     assert "const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;" in tour_source
     assert "const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;" in tour_source
@@ -526,8 +526,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "scorecardsQuery" in app_source
     assert "JourneyAlertState" in app_source
     assert "JourneyScorecardsReport" in app_source
-    assert 'const PLAUSIBLE_ENDPOINT = "https://analytics.lv3.org/api/event";' in journey_source
-    assert 'const PLAUSIBLE_SITE_DOMAIN = "ops.lv3.org";' in journey_source
+    assert 'const PLAUSIBLE_ENDPOINT = "https://analytics.example.com/api/event";' in journey_source
+    assert 'const PLAUSIBLE_SITE_DOMAIN = "ops.example.com";' in journey_source
     assert 'const JOURNEY_STORAGE_KEY = "lv3.operator_access_admin.journey.v1";' in journey_source
     assert 'mode: "no-cors"' in journey_source
     assert "record_journey_event({ event_json: JSON.stringify(payload) })" in journey_source
@@ -1130,8 +1130,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         defaults["windmill_seed_app_repo_root_local_dir"]
         == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     )
-    assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
-    assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
+    assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox-host_server"
+    assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox-host_server"
     assert "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' \"{{ windmill_env_file }}\"" in tasks
     assert "grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' \"{{ windmill_env_file }}\"" in tasks
     assert "docker exec windmill-windmill_worker-1 sh -lc '" in tasks

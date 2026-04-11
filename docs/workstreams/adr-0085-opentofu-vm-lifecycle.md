@@ -4,7 +4,7 @@
 - Title: Declarative VM provisioning with OpenTofu replacing ad-hoc Ansible VM creation tasks
 - Status: merged
 - Branch: `codex/adr-0085-opentofu-vm-lifecycle`
-- Worktree: `../proxmox_florin_server-opentofu-vm-lifecycle`
+- Worktree: `../proxmox-host_server-opentofu-vm-lifecycle`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`, `adr-0084-packer-pipeline`
 - Conflicts With: roles that contain `community.general.proxmox_kvm` create tasks

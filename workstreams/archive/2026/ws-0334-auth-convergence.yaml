@@ -30,7 +30,7 @@ shared_surfaces:
   - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
   - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
   - inventory/group_vars/platform.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/api-publication.json
   - config/command-catalog.json
   - config/controller-local-secrets.json
@@ -82,7 +82,7 @@ ownership_manifest:
         - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
         - inventory/group_vars/platform.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
       mode: exclusive
     - id: ws0334_open_webui_auth_catalogs
       paths:

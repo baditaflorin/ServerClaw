@@ -113,7 +113,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_service_topology" in defaults
-    assert "hostvars['proxmox_florin'].platform_service_topology.api_gateway" in defaults
+    assert "hostvars['proxmox-host'].platform_service_topology.api_gateway" in defaults
     assert "api_gateway_windmill_service_topology" in defaults
     assert "api_gateway_windmill_base_url" in defaults
     assert "api_gateway_windmill_service_topology.private_ip" in defaults
@@ -129,7 +129,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key" in defaults
     assert "/.local/lago/producer-catalog.json" in defaults
     assert "/.local/lago/org-api-key.txt" in defaults
-    assert "hostvars['proxmox_florin'].platform_service_topology.lago" in defaults
+    assert "hostvars['proxmox-host'].platform_service_topology.lago" in defaults
     assert (
         "api_gateway_billing_api_base_url: \"{{ api_gateway_lago_service_topology.urls.api | default('') }}\""
         in defaults
@@ -397,7 +397,7 @@ def test_api_gateway_role_syncs_the_typesense_platform_catalog() -> None:
     assert "api_gateway_typesense_service_topology" in defaults
     assert "api_gateway_typesense_controller_url" in defaults
     assert "platform_service_topology | service_topology_get('typesense')" in defaults
-    assert "hostvars['proxmox_florin'].typesense_host_proxy_port" in defaults
+    assert "hostvars['proxmox-host'].typesense_host_proxy_port" in defaults
     assert 'api_gateway_typesense_base_url: ""' in defaults
     assert "api_gateway_typesense_collection: platform-services" in defaults
     assert "api_gateway_typesense_api_key_local_file" in defaults

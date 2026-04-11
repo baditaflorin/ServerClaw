@@ -83,8 +83,8 @@ from source commit `c54fe1c579551248792f064e4e281d00aebf6bd0` on top of latest
 proof re-ran `make converge-n8n`, confirmed the protected editor redirect,
 confirmed unauthenticated webhook ingress still reaches n8n without the browser
 auth redirect, verified guest-local readiness and owner-login on
-`docker-runtime-lv3`, and re-confirmed the repo-managed runtime adjustments that
-pin topology lookups to `proxmox_florin`, run `n8n` in host-network mode, and
+`docker-runtime`, and re-confirmed the repo-managed runtime adjustments that
+pin topology lookups to `proxmox-host`, run `n8n` in host-network mode, and
 avoid unrelated shared static-site sync prerequisites in fresh worktrees.
 
 The integrated mainline replay advanced the platform baseline to `0.130.54` and

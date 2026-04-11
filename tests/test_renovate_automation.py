@@ -46,7 +46,7 @@ def test_renovate_config_targets_main_and_custom_repo_surfaces() -> None:
 def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -> None:
     workflow = RENOVATE_WORKFLOW_PATH.read_text(encoding="utf-8")
 
-    assert "registry.lv3.org/check-runner/renovate:" in workflow
+    assert "registry.example.com/check-runner/renovate:" in workflow
     assert "@sha256:" in workflow
     assert "ghcr.io/renovatebot/renovate" not in workflow
     assert "scripts/renovate_runtime_token.py create" in workflow
@@ -80,7 +80,7 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "-e RENOVATE_ONBOARDING \\" in workflow
     assert "RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json" in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
-    assert "RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:" in workflow
+    assert "RENOVATE_HELPER_IMAGE: registry.example.com/check-runner/python:3.12.10@sha256:" in workflow
 
 
 def test_validate_renovate_contract_passes_for_repo_files() -> None:
@@ -97,8 +97,8 @@ def test_renovate_runtime_token_writes_runtime_env(monkeypatch: pytest.MonkeyPat
     monkeypatch.setenv("RENOVATE_GITEA_USERNAME", "renovate-bot")
     monkeypatch.setenv("RENOVATE_GITEA_PASSWORD", "secret")
     monkeypatch.setenv("RENOVATE_GITEA_TOKEN_SCOPES", "write:repository,read:user")
-    monkeypatch.setenv("RENOVATE_REPOSITORY", "ops/proxmox_florin_server")
-    monkeypatch.setenv("RENOVATE_GIT_CLONE_HOST", "git.lv3.org")
+    monkeypatch.setenv("RENOVATE_REPOSITORY", "ops/proxmox-host_server")
+    monkeypatch.setenv("RENOVATE_GIT_CLONE_HOST", "git.example.com")
     monkeypatch.setenv("RENOVATE_GIT_CLONE_HOST_ADDRESS", "127.0.0.1")
     monkeypatch.setenv("RENOVATE_GIT_CLONE_HOST_PORT", "3009")
     monkeypatch.setenv("RENOVATE_GIT_CLONE_TARGET_HOST", "10.10.10.20")
@@ -118,12 +118,12 @@ def test_renovate_runtime_token_writes_runtime_env(monkeypatch: pytest.MonkeyPat
     env_payload = env_file.read_text(encoding="utf-8")
     assert "RENOVATE_PLATFORM=gitea" in env_payload
     assert "RENOVATE_ENDPOINT=http://10.10.10.20:3003/api/v1/" in env_payload
-    assert "RENOVATE_REPOSITORIES=ops/proxmox_florin_server" in env_payload
+    assert "RENOVATE_REPOSITORIES=ops/proxmox-host_server" in env_payload
     assert "RENOVATE_TOKEN=token-value" in env_payload
     assert "RENOVATE_GIT_AUTHOR='Renovate Bot <renovate-bot@lv3.internal>'" in env_payload
     assert "RENOVATE_REQUIRE_CONFIG=optional" in env_payload
     assert "RENOVATE_ONBOARDING=false" in env_payload
-    assert "RENOVATE_GIT_CLONE_HOST=git.lv3.org" in env_payload
+    assert "RENOVATE_GIT_CLONE_HOST=git.example.com" in env_payload
     assert "RENOVATE_GIT_CLONE_HOST_ADDRESS=127.0.0.1" in env_payload
     assert "RENOVATE_GIT_CLONE_HOST_PORT=3009" in env_payload
     assert "RENOVATE_GIT_CLONE_TARGET_HOST=10.10.10.20" in env_payload

@@ -14,7 +14,7 @@ MAIL_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-mail-platform.json.j2"
 VM_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-vm-detail.json.j2"
 LOKI_CANARY_SERVICE_TEMPLATE = ROLE_ROOT / "templates" / "loki-canary.service.j2"
 LOKI_CONFIG_TEMPLATE = ROLE_ROOT / "templates" / "loki-config.yml.j2"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 def load_tasks(path: Path) -> list[dict]:

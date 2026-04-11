@@ -10,14 +10,14 @@ COMPOSE_TEMPLATE_PATH = REPO_ROOT / "roles" / "mail_platform_runtime" / "templat
 STALWART_TEMPLATE_PATH = REPO_ROOT / "roles" / "mail_platform_runtime" / "templates" / "stalwart-config.toml.j2"
 TASKS_PATH = REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "main.yml"
 ROTATE_TASKS_PATH = REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "rotate.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 CONTROL_PLANE_LANES_PATH = REPO_ROOT / "config" / "control-plane-lanes.json"
 
 
 def test_defaults_define_private_submission_port() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     assert defaults["mail_platform_internal_submission_port"] == (
-        "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+        "{{ hostvars['proxmox-host'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
     )
 
 
@@ -46,7 +46,7 @@ def test_compose_template_publishes_private_submission_port_on_vm_ip() -> None:
 
 def test_host_firewall_only_opens_private_submission_for_local_docker_networks() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
+    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control"]["allowed_inbound"]
     relay_rules = [rule for rule in runtime_control_rules if 1587 in rule["ports"]]
     assert {rule["source"] for rule in relay_rules} >= {"172.16.0.0/12", "192.168.0.0/16"}
 
@@ -61,7 +61,7 @@ def test_control_plane_lane_points_at_private_submission_relay() -> None:
 def test_defaults_resolve_mail_gateway_otlp_endpoint_from_canonical_host_topology() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     assert defaults["mail_platform_gateway_trace_otlp_endpoint"] == (
-        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
+        "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
     )
 
 

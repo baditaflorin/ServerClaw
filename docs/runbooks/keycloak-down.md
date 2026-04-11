@@ -10,13 +10,13 @@ critical
 
 ## Immediate Steps
 
-1. Confirm the edge path is failing from `monitoring-lv3` and not just from your workstation.
-2. Check the container state on `docker-runtime-lv3`: `docker ps --filter name=keycloak`.
+1. Confirm the edge path is failing from `monitoring` and not just from your workstation.
+2. Check the container state on `docker-runtime`: `docker ps --filter name=keycloak`.
 3. Review the recent deployment and mutation history for `keycloak`.
 
 ## Diagnosis
 
-- Query recent Keycloak logs in Loki from the `docker-runtime-lv3` dashboard.
+- Query recent Keycloak logs in Loki from the `docker-runtime` dashboard.
 - Verify the OIDC discovery endpoint directly on `10.10.10.20:18080`.
 - Check whether OpenBao-backed runtime secrets or the database connection changed recently.
 

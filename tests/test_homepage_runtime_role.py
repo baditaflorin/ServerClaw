@@ -8,7 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS_PATH = REPO_ROOT / "roles" / "homepage_runtime" / "defaults" / "main.yml"
 TASKS_PATH = REPO_ROOT / "roles" / "homepage_runtime" / "tasks" / "main.yml"
 TEMPLATE_PATH = REPO_ROOT / "roles" / "homepage_runtime" / "templates" / "docker-compose.yml.j2"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 class HomepageRuntimeRoleTests(unittest.TestCase):
@@ -41,10 +41,10 @@ class HomepageRuntimeRoleTests(unittest.TestCase):
     def test_inventory_declares_homepage_topology_and_firewall_access(self) -> None:
         self.assertIn("homepage_port: 3090", self.host_vars_text)
         self.assertIn("service_name: homepage", self.host_vars_text)
-        self.assertIn("owning_vm: runtime-general-lv3", self.host_vars_text)
-        self.assertIn("public_hostname: home.lv3.org", self.host_vars_text)
+        self.assertIn("owning_vm: runtime-general", self.host_vars_text)
+        self.assertIn("public_hostname: home.example.com", self.host_vars_text)
         self.assertIn(
-            "upstream: \"http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:9080\"",
+            "upstream: \"http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:9080\"",
             self.host_vars_text,
         )
         self.assertIn("root_proxy_path: /homepage", self.host_vars_text)

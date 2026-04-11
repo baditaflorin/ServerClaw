@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0257-openclaw-skills-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0257-openclaw-skills`
 - Owner: codex
 - Depends On: `adr-0069-agent-tool-registry`, `adr-0156-agent-session-workspace-isolation`, `adr-0228-windmill-default-operations-surface`, `adr-0254-serverclaw-product-surface`
 - Conflicts With: none
@@ -50,8 +50,8 @@
 
 ## Expected Live Surfaces
 
-- the API gateway Dify tool bridge exposes the new governed `list-serverclaw-skills` tool on `docker-runtime-lv3`
-- the Windmill workspace `lv3` gains the seeded `f/lv3/serverclaw_skills` wrapper on `docker-runtime-lv3`
+- the API gateway Dify tool bridge exposes the new governed `list-serverclaw-skills` tool on `docker-runtime`
+- the Windmill workspace `lv3` gains the seeded `f/lv3/serverclaw_skills` wrapper on `docker-runtime`
 - repo-managed controller validation paths can resolve the same skill-pack catalog without requiring a live shell mutation path
 
 ## Verification
@@ -82,7 +82,7 @@
 - the exact-main replay also captured and fixed one adjacent runtime blocker:
   transient OpenBao `500/502/503` reads during restart windows now retry long
   enough for the rotatable-secret verification path to settle on
-  `docker-runtime-lv3`
+  `docker-runtime`
 
 ## Live Apply Outcome
 
@@ -98,13 +98,13 @@
   dependencies: `step-ca` health returned `{"status":"ok"}` in
   `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-step-ca-health-r2-0.177.116.txt`,
   and the stabilized OpenBao replay completed with recap
-  `docker-runtime-lv3 ok=176 changed=9 failed=0`, `postgres-lv3 ok=49 changed=2 failed=0`
+  `docker-runtime ok=176 changed=9 failed=0`, `postgres ok=49 changed=2 failed=0`
   in
   `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-openbao-r20-0.177.116.txt`.
 - `make converge-windmill` completed cleanly with recap
-  `docker-runtime-lv3 ok=328 changed=54 failed=0`,
-  `postgres-lv3 ok=72 changed=0 failed=0`,
-  `proxmox_florin ok=41 changed=4 failed=0`
+  `docker-runtime ok=328 changed=54 failed=0`,
+  `postgres ok=72 changed=0 failed=0`,
+  `proxmox-host ok=41 changed=4 failed=0`
   in
   `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-windmill-r27-0.177.116.txt`.
 - The seeded Windmill wrapper proof in

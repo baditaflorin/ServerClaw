@@ -11,13 +11,13 @@
 - Owner: codex
 - Depends On: `adr-0026-postgres-vm`, `adr-0042-step-ca`, `adr-0067-guest-network-policy`
 - Conflicts With: none
-- Shared Surfaces: `roles/vaultwarden_runtime`, `roles/vaultwarden_postgres`, `playbooks/vaultwarden.yml`, `inventory/host_vars/proxmox_florin.yml`, `config/service-capability-catalog.json`
+- Shared Surfaces: `roles/vaultwarden_runtime`, `roles/vaultwarden_postgres`, `playbooks/vaultwarden.yml`, `inventory/host_vars/proxmox-host.yml`, `config/service-capability-catalog.json`
 
 ## Scope
 
 - add repo-managed Vaultwarden runtime and PostgreSQL roles
 - pin the Vaultwarden image in `config/image-catalog.json`
-- publish `vault.lv3.org` as a tailnet-only operator entrypoint through the Proxmox host
+- publish `vault.example.com` as a tailnet-only operator entrypoint through the Proxmox host
 - manage the private TLS certificate with `step-ca` and a renewal timer
 - bootstrap the admin token and invite the named operator account
 - document deployment, trust bootstrap, and first-login steps in `docs/runbooks/configure-vaultwarden.md`
@@ -40,10 +40,10 @@
 
 ## Expected Live Surfaces
 
-- `https://vault.lv3.org/alive` returns success over Tailscale with the LV3 internal CA root
-- `docker-runtime-lv3` runs the repo-managed Vaultwarden container from `/opt/vaultwarden/docker-compose.yml`
-- `postgres-lv3` hosts the `vaultwarden` database and login role
-- the Vaultwarden admin API reports the invited `ops@lv3.org` bootstrap user
+- `https://vault.example.com/alive` returns success over Tailscale with the LV3 internal CA root
+- `docker-runtime` runs the repo-managed Vaultwarden container from `/opt/vaultwarden/docker-compose.yml`
+- `postgres` hosts the `vaultwarden` database and login role
+- the Vaultwarden admin API reports the invited `ops@example.com` bootstrap user
 
 ## Verification
 
@@ -63,5 +63,5 @@
 
 - Repo implementation completed in release `0.147.0` on `2026-03-25`.
 - The first successful production live apply completed on `2026-03-26` in platform version `0.130.12`, recorded through receipt `2026-03-26-adr-0153-live-apply`.
-- The successful current-main replay reconverged Vaultwarden on `docker-runtime-lv3`, verified the private controller path at `https://vault.lv3.org/alive`, and preserved the controller-local bootstrap state for `ops@lv3.org`.
+- The successful current-main replay reconverged Vaultwarden on `docker-runtime`, verified the private controller path at `https://vault.example.com/alive`, and preserved the controller-local bootstrap state for `ops@example.com`.
 - The first 2026-03-25 live attempt was blocked by controller-to-host connectivity, and the later successful replay added the TTY-aware admin-token hash generation path plus the Tailscale-bound controller probe fallback now present in the runtime role.

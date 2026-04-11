@@ -20,7 +20,7 @@ def test_langfuse_trace_config_prefers_internal_service_url(tmp_path: Path) -> N
                     "langfuse": {
                         "urls": {
                             "internal": "http://10.10.10.20:3002",
-                            "public": "https://langfuse.lv3.org",
+                            "public": "https://langfuse.example.com",
                         }
                     }
                 }
@@ -69,7 +69,7 @@ def test_langfuse_trace_config_falls_back_to_common_root_for_linked_worktree(tmp
                     "langfuse": {
                         "urls": {
                             "internal": "http://10.10.10.20:3002",
-                            "public": "https://langfuse.lv3.org",
+                            "public": "https://langfuse.example.com",
                         }
                     }
                 }

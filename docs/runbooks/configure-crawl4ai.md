@@ -8,7 +8,7 @@ URLs.
 
 ## Result
 
-- `docker-runtime-lv3` runs the stateless Crawl4AI runtime from
+- `docker-runtime` runs the stateless Crawl4AI runtime from
   `/opt/crawl4ai`
 - the private runtime listens on `10.10.10.20:11235` for guest-network and
   local Docker callers
@@ -22,31 +22,31 @@ URLs.
 Syntax-check the Crawl4AI workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-crawl4ai
 ```
 
 Converge the private runtime:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-crawl4ai
 ```
 
 Refresh the generated platform vars after topology or port changes:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 uv run --with pyyaml python scripts/generate_platform_vars.py --write
 ```
 
 ## Verification
 
-Verify the local health endpoint on `docker-runtime-lv3`:
+Verify the local health endpoint on `docker-runtime`:
 
 ```bash
-PROXY_COMMAND='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p'
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+PROXY_COMMAND='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
@@ -58,7 +58,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Verify the monitoring endpoint reports an active permanent browser pool:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
@@ -70,7 +70,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Verify the markdown endpoint returns cleaned content for `https://example.com/`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
@@ -79,10 +79,10 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   'python3 - <<'\''PY'\''\nimport json, urllib.request\npayload = json.dumps({\"url\": \"https://example.com/\"}).encode()\nrequest = urllib.request.Request(\"http://127.0.0.1:11235/md\", data=payload, headers={\"Content-Type\": \"application/json\"})\nwith urllib.request.urlopen(request, timeout=180) as response:\n    body = json.load(response)\nassert body[\"success\"] is True\nassert \"Example Domain\" in body[\"markdown\"]\nprint(body[\"markdown\"].splitlines()[0])\nPY'
 ```
 
-Verify a guest-network caller can reach the private runtime from `coolify-lv3`:
+Verify a guest-network caller can reach the private runtime from `coolify`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
@@ -95,7 +95,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 - There is no public DNS record and no shared API gateway route for Crawl4AI.
   Access is intentionally limited to the private guest network and local
-  Docker workloads on `docker-runtime-lv3`.
+  Docker workloads on `docker-runtime`.
 - The compose stack uses its own managed bridge network instead of Docker's
   legacy default `bridge`. Keep that isolation in place so the runtime does
   not depend on host-level default-bridge drift.

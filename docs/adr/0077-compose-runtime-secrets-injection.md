@@ -9,7 +9,7 @@
 
 ## Context
 
-Docker Compose stacks on `docker-runtime-lv3` currently source secrets from `.env` files written to disk by Ansible playbooks during provisioning. These files:
+Docker Compose stacks on `docker-runtime` currently source secrets from `.env` files written to disk by Ansible playbooks during provisioning. These files:
 
 - persist on disk in plaintext (readable by any process with access to the compose directory)
 - are not rotated when the secret in OpenBao is rotated (ADR 0065); the `.env` file is stale until the next playbook run
@@ -94,6 +94,6 @@ All secrets for a migrated Compose stack are stored under `kv/data/services/<ser
 
 ## Boundaries
 
-- This model applies to Compose-managed runtimes on `docker-runtime-lv3`. Grafana is not part of the current implementation because ADR 0011 converged it as a package-managed service on `monitoring-lv3`, not a Compose stack.
+- This model applies to Compose-managed runtimes on `docker-runtime`. Grafana is not part of the current implementation because ADR 0011 converged it as a package-managed service on `monitoring`, not a Compose stack.
 - The AppRole credentials (`role_id`, `secret_id`) are intentionally stored on disk — they are low-privilege bootstrap credentials that grant access only to a scoped policy. Their compromise allows reading secrets but not writing them or accessing other stacks.
 - This ADR is implemented on current `main` for Windmill, Keycloak, Mattermost, Open WebUI, NetBox, the private platform-context API, and the mail-platform gateway.

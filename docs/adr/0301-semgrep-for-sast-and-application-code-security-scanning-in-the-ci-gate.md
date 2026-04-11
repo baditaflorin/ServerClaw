@@ -39,7 +39,7 @@ the code; no SaaS dependency is required for self-hosted rule execution.
 
 We will integrate **Semgrep** as a required step in the repo-managed
 validation gate (ADR 0087) and replay the same contract across local
-development, the build-server remote gate on `docker-build-lv3`, GitHub
+development, the build-server remote gate on `docker-build`, GitHub
 Actions, and Gitea Actions.
 
 ### Deployment rules

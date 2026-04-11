@@ -7,7 +7,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "piper.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "piper.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
@@ -22,7 +22,7 @@ def test_playbook_converges_private_piper_runtime() -> None:
 
     assert len(playbook) == 1
     play = playbook[0]
-    assert play["hosts"] == "docker-runtime-lv3"
+    assert play["hosts"] == "docker-runtime"
     roles = [role["role"] for role in play["roles"]]
     assert roles == [
         "lv3.platform.linux_guest_firewall",
@@ -40,7 +40,7 @@ def test_inventory_exposes_private_piper_port_to_guests_docker_and_monitoring() 
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
 
     assert host_vars["platform_port_assignments"]["piper_port"] == 8100
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
 
     management_rule = next(
         rule for rule in docker_runtime_rules if rule["source"] == "management" and 8100 in rule["ports"]
@@ -53,7 +53,7 @@ def test_inventory_exposes_private_piper_port_to_guests_docker_and_monitoring() 
     )
     assert 8100 in docker_rule["ports"]
     monitoring_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 8100 in rule["ports"]
+        rule for rule in docker_runtime_rules if rule["source"] == "monitoring" and 8100 in rule["ports"]
     )
     assert 8100 in monitoring_rule["ports"]
 

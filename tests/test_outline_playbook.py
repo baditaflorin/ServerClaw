@@ -15,7 +15,7 @@ def test_outline_playbook_converges_only_the_outline_dns_record() -> None:
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "wiki.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "wiki.example.com"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Outline subdomain entry")
     assert (

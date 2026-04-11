@@ -2,10 +2,10 @@
 
 ## What It Is
 
-`lv3-identity-watchdog.timer` runs on **runtime-control-lv3** every 30 seconds.
+`lv3-identity-watchdog.timer` runs on **runtime-control** every 30 seconds.
 It probes four identity-core services and auto-restarts any that fail twice in a row.
 
-`lv3-ops-portal-oauth2-proxy-watchdog.timer` runs on **nginx-lv3** every 30 seconds.
+`lv3-ops-portal-oauth2-proxy-watchdog.timer` runs on **nginx-edge** every 30 seconds.
 It probes oauth2-proxy and auto-restarts it on 2 consecutive failures.
 
 Both are part of ADR 0376. Both start on boot and survive reboots.
@@ -14,21 +14,21 @@ Both are part of ADR 0376. Both start on boot and survive reboots.
 
 | Service | Host | Probe | Healthy response |
 |---------|------|-------|-----------------|
-| keycloak | runtime-control-lv3 | `GET /realms/lv3/.well-known/openid-configuration` on port 18080 | HTTP 200 + JSON |
-| step-ca | runtime-control-lv3 | ACME health endpoint | HTTP 200 |
-| openbao | runtime-control-lv3 | vault health endpoint | HTTP 200 |
-| api-gateway | runtime-control-lv3 | health endpoint | HTTP 200 |
-| oauth2-proxy | nginx-lv3 | `GET /oauth2/auth` on port 4180 | HTTP 401 |
+| keycloak | runtime-control | `GET /realms/lv3/.well-known/openid-configuration` on port 18080 | HTTP 200 + JSON |
+| step-ca | runtime-control | ACME health endpoint | HTTP 200 |
+| openbao | runtime-control | vault health endpoint | HTTP 200 |
+| api-gateway | runtime-control | health endpoint | HTTP 200 |
+| oauth2-proxy | nginx-edge | `GET /oauth2/auth` on port 4180 | HTTP 401 |
 
 ## Check Watchdog Status
 
 ```bash
-# On runtime-control-lv3
+# On runtime-control
 systemctl is-active lv3-identity-watchdog.timer
 systemctl list-timers lv3-identity-watchdog.timer
 journalctl -u lv3-identity-watchdog.service -n 30 --no-pager
 
-# On nginx-lv3
+# On nginx-edge
 systemctl is-active lv3-ops-portal-oauth2-proxy-watchdog.timer
 journalctl -u lv3-ops-portal-oauth2-proxy-watchdog.service -n 10 --no-pager
 cat /run/lv3-oauth2-proxy-watchdog/failures
@@ -36,7 +36,7 @@ cat /run/lv3-oauth2-proxy-watchdog/failures
 
 ## Healthy Log Output
 
-On runtime-control-lv3 every 30s:
+On runtime-control every 30s:
 ```
 INFO  keycloak: healthy
 INFO  step-ca: healthy
@@ -45,7 +45,7 @@ INFO  api-gateway: healthy
 INFO  All identity-core services healthy
 ```
 
-On nginx-lv3 — silent when healthy (only logs on failure or recovery).
+On nginx-edge — silent when healthy (only logs on failure or recovery).
 
 ## When a Restart Is Triggered
 
@@ -64,7 +64,7 @@ the watchdog stops restarting and only alerts. Manual intervention is required.
 ## Manually Trigger a Probe Run
 
 ```bash
-# On runtime-control-lv3
+# On runtime-control
 systemctl start lv3-identity-watchdog.service
 journalctl -u lv3-identity-watchdog.service -n 10 --no-pager
 ```

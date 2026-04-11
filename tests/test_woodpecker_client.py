@@ -49,7 +49,7 @@ def test_ensure_gitea_oauth_application_reuses_existing_credentials_when_present
             {
                 "id": 4,
                 "name": "LV3 Woodpecker",
-                "redirect_uris": ["https://ci.lv3.org/authorize"],
+                "redirect_uris": ["https://ci.example.com/authorize"],
                 "confidential_client": True,
                 "skip_secondary_authorization": True,
                 "client_id": "existing-client",
@@ -60,7 +60,7 @@ def test_ensure_gitea_oauth_application_reuses_existing_credentials_when_present
     result = woodpecker.ensure_gitea_oauth_application(
         client,
         name="LV3 Woodpecker",
-        redirect_uri="https://ci.lv3.org/authorize",
+        redirect_uri="https://ci.example.com/authorize",
         existing_client_id="existing-client",
         existing_client_secret="existing-secret",
     )
@@ -92,7 +92,7 @@ def test_ensure_gitea_oauth_application_recreates_when_secret_is_missing() -> No
     result = woodpecker.ensure_gitea_oauth_application(
         client,
         name="LV3 Woodpecker",
-        redirect_uri="https://ci.lv3.org/authorize",
+        redirect_uri="https://ci.example.com/authorize",
     )
 
     assert result["client_id"] == "woodpecker-client"
@@ -103,7 +103,7 @@ def test_ensure_gitea_oauth_application_recreates_when_secret_is_missing() -> No
             4,
             {
                 "name": "LV3 Woodpecker",
-                "redirect_uris": ["https://ci.lv3.org/authorize"],
+                "redirect_uris": ["https://ci.example.com/authorize"],
                 "confidential_client": True,
                 "skip_secondary_authorization": True,
             },
@@ -177,7 +177,7 @@ def test_trigger_pipeline_accepts_no_content_response() -> None:
 
 def test_rewrite_url_if_host_unresolvable_uses_fallback_base_url(monkeypatch) -> None:
     def fake_getaddrinfo(hostname, *args, **kwargs):
-        if hostname == "git.lv3.org":
+        if hostname == "git.example.com":
             raise socket.gaierror("not found")
         return [("family", "socktype", "proto", "canonname", ("127.0.0.1", 0))]
 
@@ -185,7 +185,7 @@ def test_rewrite_url_if_host_unresolvable_uses_fallback_base_url(monkeypatch) ->
 
     assert (
         woodpecker._rewrite_url_if_host_unresolvable(
-            "http://git.lv3.org:3009/user/login?redirect_to=%2F",
+            "http://git.example.com:3009/user/login?redirect_to=%2F",
             "http://100.64.0.1:3009",
         )
         == "http://100.64.0.1:3009/user/login?redirect_to=%2F"
@@ -201,10 +201,10 @@ def test_rewrite_url_if_host_unresolvable_leaves_resolvable_host_unchanged(monke
 
     assert (
         woodpecker._rewrite_url_if_host_unresolvable(
-            "https://ci.lv3.org/authorize",
+            "https://ci.example.com/authorize",
             "http://100.64.0.1:3009",
         )
-        == "https://ci.lv3.org/authorize"
+        == "https://ci.example.com/authorize"
     )
 
 
@@ -214,7 +214,7 @@ def test_pick_oauth_grant_form_prefers_the_positive_submit_button() -> None:
       <input type="hidden" name="_csrf" value="csrf-token">
       <input type="hidden" name="client_id" value="client-id">
       <input type="hidden" name="state" value="state-token">
-      <input type="hidden" name="redirect_uri" value="https://ci.lv3.org/authorize">
+      <input type="hidden" name="redirect_uri" value="https://ci.example.com/authorize">
       <button type="submit" name="granted" value="false">Cancel</button>
       <button type="submit" name="granted" value="true">Authorize Application</button>
     </form>
@@ -230,7 +230,7 @@ def test_pick_oauth_grant_form_prefers_the_positive_submit_button() -> None:
         "_csrf": "csrf-token",
         "client_id": "client-id",
         "state": "state-token",
-        "redirect_uri": "https://ci.lv3.org/authorize",
+        "redirect_uri": "https://ci.example.com/authorize",
         "granted": "true",
     }
 
@@ -246,7 +246,7 @@ def test_parse_woodpecker_csrf_token_reads_web_config_assignment() -> None:
 
 def test_session_login_via_gitea_submits_oauth_grant_after_sign_in(monkeypatch) -> None:
     client = woodpecker.WoodpeckerSessionClient(
-        "https://ci.lv3.org",
+        "https://ci.example.com",
         verify_ssl=False,
         redirect_fallback_base_url="http://100.64.0.1:3009",
     )
@@ -263,7 +263,7 @@ def test_session_login_via_gitea_submits_oauth_grant_after_sign_in(monkeypatch) 
       <input type="hidden" name="_csrf" value="grant-csrf">
       <input type="hidden" name="client_id" value="client-id">
       <input type="hidden" name="state" value="state-token">
-      <input type="hidden" name="redirect_uri" value="https://ci.lv3.org/authorize">
+      <input type="hidden" name="redirect_uri" value="https://ci.example.com/authorize">
       <button type="submit" name="granted" value="true">Authorize</button>
       <button type="submit" name="granted" value="false">Cancel</button>
     </form>
@@ -288,9 +288,9 @@ def test_session_login_via_gitea_submits_oauth_grant_after_sign_in(monkeypatch) 
             assert kwargs["method"] == "POST"
             assert kwargs["form"]["_csrf"] == "grant-csrf"
             assert kwargs["form"]["client_id"] == "client-id"
-            assert kwargs["form"]["redirect_uri"] == "https://ci.lv3.org/authorize"
+            assert kwargs["form"]["redirect_uri"] == "https://ci.example.com/authorize"
             assert kwargs["form"]["granted"] == "true"
-            return 200, "<!DOCTYPE html><html><body>Woodpecker</body></html>", {}, "https://ci.lv3.org/authorize"
+            return 200, "<!DOCTYPE html><html><body>Woodpecker</body></html>", {}, "https://ci.example.com/authorize"
         raise AssertionError(f"Unexpected request: {url_or_path!r}")
 
     monkeypatch.setattr(client, "_request", fake_request)
@@ -305,14 +305,14 @@ def test_session_login_via_gitea_submits_oauth_grant_after_sign_in(monkeypatch) 
 
 
 def test_session_get_user_falls_back_from_html_shell_to_api_json(monkeypatch) -> None:
-    client = woodpecker.WoodpeckerSessionClient("https://ci.lv3.org", verify_ssl=False)
+    client = woodpecker.WoodpeckerSessionClient("https://ci.example.com", verify_ssl=False)
     seen: list[str] = []
 
     def fake_request(path, **kwargs):
         seen.append(path)
         if path == "/user":
             raise json.JSONDecodeError("Expecting value", "<!DOCTYPE html>", 0)
-        return 200, {"login": "ops-gitea"}, {}, "https://ci.lv3.org/api/user"
+        return 200, {"login": "ops-gitea"}, {}, "https://ci.example.com/api/user"
 
     monkeypatch.setattr(client, "_request", fake_request)
 
@@ -321,18 +321,18 @@ def test_session_get_user_falls_back_from_html_shell_to_api_json(monkeypatch) ->
 
 
 def test_session_create_user_token_falls_back_from_html_shell(monkeypatch) -> None:
-    client = woodpecker.WoodpeckerSessionClient("https://ci.lv3.org", verify_ssl=False)
+    client = woodpecker.WoodpeckerSessionClient("https://ci.example.com", verify_ssl=False)
     seen: list[str] = []
 
     def fake_request(path, **kwargs):
         seen.append(path)
         if path == "/web-config.js":
-            return 200, 'window.WOODPECKER_CSRF = "csrf-token";', {}, "https://ci.lv3.org/web-config.js"
+            return 200, 'window.WOODPECKER_CSRF = "csrf-token";', {}, "https://ci.example.com/web-config.js"
         if path == "/user/token":
             assert kwargs["headers"]["X-CSRF-TOKEN"] == "csrf-token"
-            return 200, "<!DOCTYPE html><html><body>Shell</body></html>", {}, "https://ci.lv3.org/user/token"
+            return 200, "<!DOCTYPE html><html><body>Shell</body></html>", {}, "https://ci.example.com/user/token"
         assert kwargs["headers"]["X-CSRF-TOKEN"] == "csrf-token"
-        return 200, '"token-123"', {}, "https://ci.lv3.org/api/user/token"
+        return 200, '"token-123"', {}, "https://ci.example.com/api/user/token"
 
     monkeypatch.setattr(client, "_request", fake_request)
 

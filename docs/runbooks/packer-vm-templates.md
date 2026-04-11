@@ -64,10 +64,10 @@ The helper rebuilds templates in dependency order and writes `build_date`, `vers
 
 ## Consumer Model
 
-Managed guests now declare `template_key` in [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml), and [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml) clones from the corresponding `proxmox_vm_templates` entry instead of creating a Debian cloud template inline.
+Managed guests now declare `template_key` in [inventory/host_vars/proxmox-host.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/host_vars/proxmox-host.yml), and [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml) clones from the corresponding `proxmox_vm_templates` entry instead of creating a Debian cloud template inline.
 
 ## Failure Notes
 
 - If `make validate-packer` fails during `packer init`, clear or inspect the build-worker plugin cache under `/opt/builds/.packer.d`.
-- If `make remote-packer-build` fails before connecting to Proxmox, check that `PKR_VAR_proxmox_api_token_*` variables are present and that `scripts/remote_exec.sh` can SSH to `docker-build-lv3`.
+- If `make remote-packer-build` fails before connecting to Proxmox, check that `PKR_VAR_proxmox_api_token_*` variables are present and that `scripts/remote_exec.sh` can SSH to `docker-build`.
 - If the first `lv3-debian-base` rebuild conflicts with an existing bootstrap template VMID, adjust the bootstrap source before promoting the Packer-managed template into the canonical VMID.

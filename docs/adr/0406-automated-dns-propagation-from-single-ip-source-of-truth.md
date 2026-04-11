@@ -17,14 +17,14 @@
 ### The incident (2026-04-11)
 
 Commit `31d24a6cd` ("Prepare repository for public GitHub release") replaced `management_ipv4` in
-`inventory/host_vars/proxmox_florin.yml` with the RFC 5737 documentation address `203.0.113.1`.
+`inventory/host_vars/proxmox-host.yml` with the RFC 5737 documentation address `203.0.113.1`.
 When `make configure-edge-publication` was subsequently run, the broken IP propagated into:
 
 1. `inventory/group_vars/platform.yml` — all 138 `target:` DNS record values
 2. `config/subdomain-catalog.json` — 50 subdomain entries
 3. Hetzner DNS — 45 live A records
 
-All 45 production subdomains (`wiki.lv3.org`, `sso.lv3.org`, `agents.lv3.org`, etc.) started
+All 45 production subdomains (`wiki.example.com`, `sso.example.com`, `agents.example.com`, etc.) started
 resolving to `203.0.113.1` (unreachable). The platform was completely offline.
 
 ### Why it wasn't caught automatically
@@ -38,7 +38,7 @@ so `platform.yml` was never refreshed from the canonical source before deploymen
 
 A second compounding bug: `generate_platform_vars.py` **failed entirely** when run manually because
 commit `06fb2499d` parameterised hostnames with `{{ platform_domain }}` (from `identity.yml`), but
-the generator only loaded `host_vars/proxmox_florin.yml`. It had no knowledge of `identity.yml` and
+the generator only loaded `host_vars/proxmox-host.yml`. It had no knowledge of `identity.yml` and
 threw `references unknown host var 'platform_domain'`, making the generator broken for months.
 
 ---
@@ -60,7 +60,7 @@ partially-rendered template strings never propagate into the generated output.
 `make configure-edge-publication` now runs:
 
 ```
-generate-platform-vars          # regenerate platform.yml from proxmox_florin.yml + identity.yml
+generate-platform-vars          # regenerate platform.yml from proxmox-host.yml + identity.yml
 subdomain_exposure_audit --write-registry --validate  # refresh catalog + registry, then validate
 generate-changelog-portal docs  # (unchanged)
 public-edge.yml Ansible play    # (unchanged)
@@ -69,13 +69,13 @@ validate-certificates           # (unchanged)
 
 `--write-registry` ensures the subdomain catalog and exposure registry are **always regenerated**
 from the freshly-generated `platform.yml` before validation. An operator changing `management_ipv4`
-in `proxmox_florin.yml` and running `make configure-edge-publication` will have the correct IP flow
+in `proxmox-host.yml` and running `make configure-edge-publication` will have the correct IP flow
 through to Hetzner DNS without any manual intervention.
 
 ### 3. The full automated chain
 
 ```
-proxmox_florin.yml      (single source: real IP)
+proxmox-host.yml      (single source: real IP)
       │
       ▼  generate_platform_vars.py --write
 platform.yml            (derived: resolved DNS targets, guest IPs, topology)
@@ -92,7 +92,7 @@ Certificate validator   (confirms TLS works end-to-end)
 ```
 
 Each step is idempotent. Adding a new service adds it to `platform_services.yml` with
-`target_host: nginx-lv3` — the IP resolves automatically through the chain on the next
+`target_host: nginx-edge` — the IP resolves automatically through the chain on the next
 `make configure-edge-publication` run. No manual DNS management required.
 
 ---
@@ -116,7 +116,7 @@ Each step is idempotent. Adding a new service adds it to `platform_services.yml`
 
 ### Invariants
 
-- `proxmox_florin.yml:management_ipv4` is the **only place** the public IP lives.
+- `proxmox-host.yml:management_ipv4` is the **only place** the public IP lives.
 - `identity.yml:platform_domain` is the **only place** the domain name lives.
 - `platform.yml`, `subdomain-catalog.json`, and `subdomain-exposure-registry.json` are
   **derived** — regenerated on every `configure-edge-publication` run.

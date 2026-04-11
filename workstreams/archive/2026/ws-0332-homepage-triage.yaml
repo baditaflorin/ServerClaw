@@ -67,7 +67,7 @@ canonical_truth:
     path by restoring migrated Uptime Kuma state, aligning Docker guest
     public-edge host alias pinning, teaching the Uptime Kuma role to use the
     Compose plugin contract, and binding Homepage on loopback so Traefik and the
-    shared edge can re-verify home.lv3.org safely
+    shared edge can re-verify home.example.com safely
   release_bump: patch
   included_in_repo_version: 0.178.2
   latest_receipts:

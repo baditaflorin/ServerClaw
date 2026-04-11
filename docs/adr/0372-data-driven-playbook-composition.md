@@ -20,7 +20,7 @@ The platform maintains ~50 top-level playbooks under `collections/ansible_collec
 
 Additionally, **host selector patterns** are copy-pasted with the staging/production conditional:
 ```yaml
-hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+hosts: "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
 ```
 This exact line appears in 30+ playbooks.
 
@@ -87,8 +87,8 @@ This file replaces the 58-line DNS block duplicated across 16 playbooks. It expe
 ---
 # _includes/dns_publication.yml
 # Purpose: Converge a single Hetzner DNS A record from the subdomain catalog.
-# Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.lv3.org")
-# Usage: import_playbook with -e service_dns_fqdn=data.lv3.org, or set in a vars file.
+# Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.example.com")
+# Usage: import_playbook with -e service_dns_fqdn=data.example.com, or set in a vars file.
 
 - name: "Ensure Hetzner DNS publication for {{ service_dns_fqdn }}"
   hosts: localhost
@@ -158,7 +158,7 @@ This file replaces the 58-line DNS block duplicated across 16 playbooks. It expe
 ```yaml
 ---
 - name: "Prepare PostgreSQL for {{ service_postgres_role | regex_replace('lv3\\.platform\\.', '') }}"
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
 
@@ -186,7 +186,7 @@ This file replaces the 58-line DNS block duplicated across 16 playbooks. It expe
 ```yaml
 ---
 - name: "Converge {{ service_audit_name }} on the Docker runtime VM"
-  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  hosts: "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
 
@@ -219,7 +219,7 @@ This file replaces the 58-line DNS block duplicated across 16 playbooks. It expe
 ```yaml
 ---
 - name: "Publish {{ service_audit_name }} through the NGINX edge"
-  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  hosts: "{{ 'nginx-edge' if (env | default('production')) == 'staging' else 'nginx-edge' }}"
   become: true
   gather_facts: true
   vars_files:
@@ -246,7 +246,7 @@ Each service declares its composition needs in `playbooks/vars/<service>.yml`:
 ---
 # playbooks/vars/directus.yml
 service_audit_name: directus
-service_dns_fqdn: data.lv3.org
+service_dns_fqdn: data.example.com
 service_postgres_role: lv3.platform.directus_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
@@ -288,7 +288,7 @@ After migration, the directus playbook becomes a thin orchestrator:
 # --- Directus-specific plays ---
 
 - name: Seed the Directus access model in PostgreSQL
-  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  hosts: "{{ 'postgres' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
   pre_tasks:

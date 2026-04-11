@@ -61,7 +61,7 @@ def test_openfga_runtime_defaults_use_private_controller_url() -> None:
     assert defaults["openfga_image"] == "{{ container_image_catalog.images.openfga_runtime.ref }}"
     assert "| urlencode" in defaults["openfga_datastore_uri"]
     assert defaults["openfga_controller_url"].startswith(
-        "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}"
+        "http://{{ hostvars['proxmox-host'].management_tailscale_ipv4 }}"
     )
     assert "openfga_host_proxy_port" in defaults["openfga_controller_url"]
     assert defaults["openfga_preshared_key_local_file"].endswith("/.local/openfga/preshared-key.txt")
@@ -229,5 +229,5 @@ def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
         "(not (openfga_bootstrap.stdout | from_json).verification_passed)"
     )
     assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_url"] == (
-        "{{ hostvars['proxmox_florin'].platform_service_topology.keycloak.urls.public }}"
+        "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.urls.public }}"
     )

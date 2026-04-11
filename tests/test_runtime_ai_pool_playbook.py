@@ -21,8 +21,8 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
         "Converge the dedicated runtime-ai guest substrate",
         "Refresh monitoring guest firewall policy after the runtime-ai peer catalog changes",
         "Ensure the runtime-ai Nomad namespace exists",
-        "Converge the document-extraction services on runtime-ai-lv3",
-        "Retire the legacy document-extraction copies from docker-runtime-lv3",
+        "Converge the document-extraction services on runtime-ai",
+        "Retire the legacy document-extraction copies from docker-runtime",
         "Refresh the shared API gateway after the Gotenberg move",
     ]
 
@@ -33,7 +33,7 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     ]
 
     substrate_roles = [role["role"] for role in playbook[1]["roles"]]
-    assert playbook[1]["hosts"] == "runtime-ai-lv3"
+    assert playbook[1]["hosts"] == "runtime-ai"
     pre_task_names = [task["name"] for task in playbook[1]["pre_tasks"]]
     assert "Detect whether Docker is already active before the managed runtime converge" not in pre_task_names
     assert "Stop any preexisting Docker daemon before firewall evaluation" not in pre_task_names
@@ -47,16 +47,16 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     assert playbook[1]["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
 
     peer_firewall_roles = [role["role"] for role in playbook[2]["roles"]]
-    assert playbook[2]["hosts"] == "monitoring-lv3"
+    assert playbook[2]["hosts"] == "monitoring"
     assert peer_firewall_roles == ["lv3.platform.linux_guest_firewall"]
     assert playbook[2]["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
 
     namespace_roles = [role["role"] for role in playbook[3]["roles"]]
-    assert playbook[3]["hosts"] == "monitoring-lv3"
+    assert playbook[3]["hosts"] == "monitoring"
     assert namespace_roles == ["lv3.platform.nomad_namespace"]
 
     service_roles = [role["role"] for role in playbook[4]["roles"]]
-    assert playbook[4]["hosts"] == "runtime-ai-lv3"
+    assert playbook[4]["hosts"] == "runtime-ai"
     assert service_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
@@ -87,7 +87,7 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     assert readiness_task["delegate_to"] == "localhost"
     assert readiness_task["delegate_facts"] is True
 
-    assert playbook[5]["hosts"] == "docker-runtime-lv3"
+    assert playbook[5]["hosts"] == "docker-runtime"
     assert "roles" not in playbook[5]
     retirement_assert = next(
         task
@@ -100,11 +100,11 @@ def test_runtime_ai_pool_playbook_covers_provisioning_substrate_namespace_migrat
     down_task = next(
         task
         for task in playbook[5]["tasks"]
-        if task["name"] == "Stop the legacy document-extraction compose stacks on docker-runtime-lv3"
+        if task["name"] == "Stop the legacy document-extraction compose stacks on docker-runtime"
     )
     assert down_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
 
-    assert playbook[6]["hosts"] == "docker-runtime-lv3"
+    assert playbook[6]["hosts"] == "docker-runtime"
     assert [role["role"] for role in playbook[6]["roles"]] == ["lv3.platform.api_gateway_runtime"]
 
 

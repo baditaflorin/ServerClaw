@@ -14,7 +14,7 @@ def test_matrix_synapse_dns_stage_converges_only_the_matrix_subdomain_record() -
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "matrix.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "matrix.example.com"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Matrix Synapse subdomain entry")
     assert (

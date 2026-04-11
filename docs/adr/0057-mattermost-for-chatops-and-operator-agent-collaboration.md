@@ -32,8 +32,8 @@ Initial responsibilities:
 
 Initial placement:
 
-- host: `docker-runtime-lv3`
-- database: `postgres-lv3`
+- host: `docker-runtime`
+- database: `postgres`
 - exposure: private-only at first, with operator access through the Proxmox host Tailscale proxy on `http://100.118.189.95:8066`
 
 Initial integrations:
@@ -58,7 +58,7 @@ Initial integrations:
 
 ## Implementation Notes
 
-- The repo now converges Mattermost through [playbooks/mattermost.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mattermost.yml), [roles/mattermost_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/mattermost_postgres), [roles/mattermost_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/mattermost_runtime), and [roles/monitoring_mattermost_notifications](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_mattermost_notifications).
-- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json), [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json), [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json), and [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json) now record the supported Mattermost workflow, local artifacts, API lane, and webhook lane.
+- The repo now converges Mattermost through [playbooks/mattermost.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/mattermost.yml), [roles/mattermost_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/mattermost_postgres), [roles/mattermost_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/mattermost_runtime), and [roles/monitoring_mattermost_notifications](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/monitoring_mattermost_notifications).
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json), [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/controller-local-secrets.json), [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/control-plane-lanes.json), and [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json) now record the supported Mattermost workflow, local artifacts, API lane, and webhook lane.
 - The initial live rollout is private-first and webhook-driven: the repo seeds the `lv3` team, the managed collaboration channels, the incoming webhook manifest under `.local/mattermost/`, and the Grafana contact point for `platform-alerts`.
 - Shared SSO remains follow-on work under ADR 0056 and does not block the private ChatOps surface.

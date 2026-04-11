@@ -25,14 +25,14 @@ editing when operators need to annotate or iterate on a design.
 
 ## Decision
 
-We will add a repo-managed Excalidraw publication at `draw.lv3.org` and commit a
+We will add a repo-managed Excalidraw publication at `draw.example.com` and commit a
 generated set of `.excalidraw` architecture scenes under `docs/diagrams/`.
 
 ### Runtime model
 
-- The Excalidraw frontend runs on `docker-runtime-lv3`.
+- The Excalidraw frontend runs on `docker-runtime`.
 - The official collaboration room runs beside it on a separate local port.
-- The shared NGINX edge publishes `draw.lv3.org` behind the existing
+- The shared NGINX edge publishes `draw.example.com` behind the existing
   oauth2-proxy gate.
 - The edge routes `/socket.io/` to the collaboration room while routing all
   other requests to the frontend.

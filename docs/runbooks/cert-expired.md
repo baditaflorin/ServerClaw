@@ -4,13 +4,13 @@
 
 This runbook recovers a certificate-managed endpoint when the automated renewal path fails or a certificate has already expired.
 
-The certificate inventory for the platform lives in [config/certificate-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-certificate-lifecycle/config/certificate-catalog.json).
+The certificate inventory for the platform lives in [config/certificate-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server-certificate-lifecycle/config/certificate-catalog.json).
 
 ## OpenBao Emergency Rotation
 
 Use this when `openbao-proxy` is expired or close enough to expiry that the scheduled timer no longer has time to recover cleanly.
 
-1. SSH to `docker-runtime-lv3` as `ops`.
+1. SSH to `docker-runtime` as `ops`.
 2. Reissue the certificate from step-ca.
 
 ```bash

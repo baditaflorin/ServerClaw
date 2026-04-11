@@ -41,12 +41,12 @@ def make_repo(tmp_path: Path) -> Path:
     )
     write(
         tmp_path / "config" / "service-capability-catalog.json",
-        json.dumps({"services": [{"id": "netbox", "name": "NetBox", "vm": "docker-runtime-lv3"}]}, indent=2) + "\n",
+        json.dumps({"services": [{"id": "netbox", "name": "NetBox", "vm": "docker-runtime"}]}, indent=2) + "\n",
     )
     write(
         tmp_path / "config" / "dependency-graph.json",
         json.dumps(
-            {"nodes": [{"id": "netbox", "service": "netbox", "name": "NetBox", "vm": "docker-runtime-lv3", "tier": 1}]},
+            {"nodes": [{"id": "netbox", "service": "netbox", "name": "NetBox", "vm": "docker-runtime", "tier": 1}]},
             indent=2,
         )
         + "\n",

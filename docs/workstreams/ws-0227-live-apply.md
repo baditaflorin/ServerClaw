@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0227-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0227-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0227-live-apply`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0170-platform-wide-timeout-hierarchy`, `adr-0224-server-resident-operations-as-the-default-control-model`, `adr-0226-systemd-units-timers-and-paths-for-host-resident-control-loops`
 - Conflicts With: none
@@ -19,7 +19,7 @@
 - move governed command execution from inline controller-shell `subprocess.run(...)` calls into bounded transient units started with `systemd-run`
 - keep the command catalog as the execution contract source by adding explicit runtime execution profiles and per-command timeout declarations
 - stage controller-local file secrets into repo-local runtime paths so server-resident commands can keep using repo-managed Make targets and worker-local `.local/` surfaces
-- live-apply the bounded execution path onto `docker-runtime-lv3`, verify it with a governed command end to end, and leave protected shared integration files for the main merge step
+- live-apply the bounded execution path onto `docker-runtime`, verify it with a governed command end to end, and leave protected shared integration files for the main merge step
 
 ## Expected Repo Surfaces
 
@@ -44,7 +44,7 @@
 
 ## Expected Live Surfaces
 
-- the `docker-runtime-lv3` repo checkout gains the compatibility symlink, writable governed-command log and receipt directories, and writable worker output directories required for `ops`-scoped execution
+- the `docker-runtime` repo checkout gains the compatibility symlink, writable governed-command log and receipt directories, and writable worker output directories required for `ops`-scoped execution
 - approved governed commands run as transient `systemd-run` units owned by `ops`, not inline in the initiating controller shell
 - live verification captures the transient unit name, receipt path, and stdout/stderr log paths from a real governed command replay
 
@@ -60,23 +60,23 @@
 ## Live Apply Outcome
 
 - branch-local live apply succeeded on 2026-03-28 from the isolated worktree, and governed `network-impairment-matrix` execution now runs as transient `systemd-run` units with durable stdout, stderr, and receipt capture under `.local/governed-command/`
-- the successful end-to-end replay returned unit `lv3-governed-network-impairment-matrix-79b10a86f237`, receipt `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`, and report `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` with `status: planned` and `entry_count: 4`
-- the first replay exposed pre-existing root-owned execution-lane registry files on `docker-runtime-lv3`; the branch fixed the role contract to manage those files as mutable runtime surfaces, and the live guest required one one-time repair `sudo chmod 0666 /srv/proxmox_florin_server/.local/state/execution-lanes/registry.json /srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock` before the final successful governed replay
+- the successful end-to-end replay returned unit `lv3-governed-network-impairment-matrix-79b10a86f237`, receipt `/srv/proxmox-host_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`, and report `/srv/proxmox-host_server/.local/network-impairment-matrix/latest.json` with `status: planned` and `entry_count: 4`
+- the first replay exposed pre-existing root-owned execution-lane registry files on `docker-runtime`; the branch fixed the role contract to manage those files as mutable runtime surfaces, and the live guest required one one-time repair `sudo chmod 0666 /srv/proxmox-host_server/.local/state/execution-lanes/registry.json /srv/proxmox-host_server/.local/state/execution-lanes/registry.lock` before the final successful governed replay
 
 ## Mainline Integration Outcome
 
 - merged to `main` in repository version `0.177.46`
 - bumped the live platform version to `0.130.41` after replaying `make converge-windmill` from the rebased merged-main-equivalent candidate and re-verifying the governed `network-impairment-matrix` path
-- the merged-main governed replay returned unit `lv3-governed-network-impairment-matrix-9dbb73e9a6e9`, receipt `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-9dbb73e9a6e9.json`, and report `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` with `status: planned` and `entry_count: 4`
+- the merged-main governed replay returned unit `lv3-governed-network-impairment-matrix-9dbb73e9a6e9`, receipt `/srv/proxmox-host_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-9dbb73e9a6e9.json`, and report `/srv/proxmox-host_server/.local/network-impairment-matrix/latest.json` with `status: planned` and `entry_count: 4`
 - the rebased mainline candidate also repaired the shared YAML fallback regression introduced by the `platform.repo` helper refactor so controller automation still treats `tag:platform-operator` and `https://...` list entries as scalars
 
 ## Live Evidence
 
 - branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json`
 - merged-main-equivalent live-apply receipt: `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply.json`
-- successful runtime receipt on `docker-runtime-lv3`: `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`
-- successful runtime stdout log: `/srv/proxmox_florin_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stdout.log`
-- successful runtime stderr log: `/srv/proxmox_florin_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stderr.log`
+- successful runtime receipt on `docker-runtime`: `/srv/proxmox-host_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`
+- successful runtime stdout log: `/srv/proxmox-host_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stdout.log`
+- successful runtime stderr log: `/srv/proxmox-host_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stderr.log`
 
 ## Merge-To-Main Notes
 

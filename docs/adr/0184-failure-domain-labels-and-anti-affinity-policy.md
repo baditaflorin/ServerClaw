@@ -25,7 +25,7 @@ We will require **failure-domain labels** and **anti-affinity declarations** for
 
 Each relevant object must declare:
 
-- `failure_domain`: for example `host:proxmox_florin`, `cloud:hetzner-fsn1`
+- `failure_domain`: for example `host:proxmox-host`, `cloud:hetzner-fsn1`
 - `placement_class`: `primary`, `standby`, `recovery`, `preview`, or `fixture`
 - `anti_affinity_group`: logical grouping that must not be co-located when alternatives exist
 - `co_location_exceptions`: explicit waivers with rationale
@@ -59,7 +59,7 @@ Placement decisions become reviewable repository truth. Every redundancy claim, 
 - This ADR defines placement metadata and policy, not the allocator implementation.
 - Anti-affinity is only as strong as the declared failure domains; dishonest labels still produce dishonest outcomes.
 
-The repository integration for this ADR landed on `main` in repo version `0.177.18` on 2026-03-28. `versions/stack.yaml` keeps platform version `0.130.31` because the live verification happened from the ADR workstream branch rather than from a fresh post-merge `main` replay, and the pre-existing missing `postgres-replica-lv3` (`151`) standby remains documented live drift rather than a newly introduced regression.
+The repository integration for this ADR landed on `main` in repo version `0.177.18` on 2026-03-28. `versions/stack.yaml` keeps platform version `0.130.31` because the live verification happened from the ADR workstream branch rather than from a fresh post-merge `main` replay, and the pre-existing missing `postgres-replica` (`151`) standby remains documented live drift rather than a newly introduced regression.
 
 ## Related ADRs
 

@@ -9,12 +9,12 @@
 
 ## Context
 
-The shared NGINX edge already publishes multiple `lv3.org` hostnames, but crawl controls were inconsistent:
+The shared NGINX edge already publishes multiple `example.com` hostnames, but crawl controls were inconsistent:
 
 - `robots.txt` was not served on the published edge hostnames.
 - `X-Robots-Tag` was only applied to selected static surfaces instead of being global.
 - repository-generated HTML surfaces did not consistently emit a robots meta tag.
-- the `lv3.org` apex already resolved to the shared public IP, but the edge certificate did not cover the apex hostname.
+- the `example.com` apex already resolved to the shared public IP, but the edge certificate did not cover the apex hostname.
 
 That combination allowed search engines and passive indexing systems to discover login pages, informational landing pages, and URL structure that are not intended to appear in public search results.
 
@@ -22,10 +22,10 @@ That combination allowed search engines and passive indexing systems to discover
 
 The platform will apply one crawl policy across the entire public edge:
 
-- serve the same `robots.txt` on `lv3.org` and every edge-published `*.lv3.org` hostname
+- serve the same `robots.txt` on `example.com` and every edge-published `*.example.com` hostname
 - send `X-Robots-Tag: noindex, nofollow` on every NGINX edge response
 - emit `<meta name="robots" content="noindex, nofollow">` on repository-generated HTML surfaces that the edge serves directly
-- include `lv3.org` in the shared edge certificate set so the apex crawl-policy endpoint is valid over HTTPS
+- include `example.com` in the shared edge certificate set so the apex crawl-policy endpoint is valid over HTTPS
 
 The shared `robots.txt` body is:
 
@@ -41,7 +41,7 @@ Disallow: /
 
 The repository implementation is carried by:
 
-- `roles/nginx_edge_publication/` and the mirrored collection role copy, which now render the shared `robots.txt`, add the global `X-Robots-Tag`, publish an explicit `lv3.org` vhost, and verify the header and content locally on the edge VM
+- `roles/nginx_edge_publication/` and the mirrored collection role copy, which now render the shared `robots.txt`, add the global `X-Robots-Tag`, publish an explicit `example.com` vhost, and verify the header and content locally on the edge VM
 - `inventory/group_vars/platform.yml`, which now manages the apex `A` record alongside the published subdomains
 - `config/certificate-catalog.json`, which now inventories the apex edge certificate endpoint
 - `scripts/portal_utils.py`, `mkdocs.yml`, and the theme override under `docs/theme-overrides/`, which now add robots meta tags to generated HTML portals
@@ -68,9 +68,9 @@ The first verified live evidence is the shared public-edge rollout recorded in `
 
 Current live verification also confirms the full ADR 0137 contract:
 
-- `https://lv3.org/robots.txt` returns the shared disallow-all body
-- `https://nginx.lv3.org/` returns `X-Robots-Tag: noindex, nofollow`
-- the live `https://nginx.lv3.org/` landing page includes `<meta name="robots" content="noindex, nofollow">`
+- `https://example.com/robots.txt` returns the shared disallow-all body
+- `https://nginx.example.com/` returns `X-Robots-Tag: noindex, nofollow`
+- the live `https://nginx.example.com/` landing page includes `<meta name="robots" content="noindex, nofollow">`
 
 ## Boundaries
 
@@ -80,7 +80,7 @@ Current live verification also confirms the full ADR 0137 contract:
 
 ## Related ADRs
 
-- ADR 0015: lv3.org DNS and subdomain model
+- ADR 0015: example.com DNS and subdomain model
 - ADR 0021: Shared NGINX edge publication
 - ADR 0076: Subdomain governance and DNS lifecycle
 - ADR 0101: Automated certificate lifecycle management

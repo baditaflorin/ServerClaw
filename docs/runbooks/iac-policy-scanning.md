@@ -26,9 +26,9 @@ uv run --with checkov==3.2.469 --with pyyaml python scripts/iac_policy_scan.py
 
 The authoritative ADR 0306 inputs are:
 
-- [config/checkov/policy-gate.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/checkov/policy-gate.yaml)
-- [config/checkov/skip-checks.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/checkov/skip-checks.yaml)
-- [scripts/iac_policy_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/iac_policy_scan.py)
+- [config/checkov/policy-gate.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/checkov/policy-gate.yaml)
+- [config/checkov/skip-checks.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/checkov/skip-checks.yaml)
+- [scripts/iac_policy_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/iac_policy_scan.py)
 
 `policy-gate.yaml` defines:
 

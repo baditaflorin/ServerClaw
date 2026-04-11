@@ -34,11 +34,11 @@ This repository now supports parallel ADR implementation. That requires a clear 
 
 These files are owned by the integration step on `main`, not by normal workstream branches:
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/`
-- canonical observed-state and release-track sections in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml`
-- top-level integrated status summaries in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/VERSION`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/changelog.md`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-notes/`
+- canonical observed-state and release-track sections in `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml`
+- top-level integrated status summaries in `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/README.md`
 
 Workstream branches should usually change:
 
@@ -89,6 +89,6 @@ make start-workstream WORKSTREAM=adr-0014-tailscale
 Equivalent raw git commands:
 
 ```bash
-git worktree add ../proxmox_florin_server-monitoring -b codex/adr-0011-monitoring
-git worktree add ../proxmox_florin_server-tailscale -b codex/adr-0014-tailscale
+git worktree add ../proxmox-host_server-monitoring -b codex/adr-0011-monitoring
+git worktree add ../proxmox-host_server-tailscale -b codex/adr-0014-tailscale
 ```

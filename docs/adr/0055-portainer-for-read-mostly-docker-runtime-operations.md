@@ -31,7 +31,7 @@ Steady-state expectations:
 
 Initial scope:
 
-- `docker-runtime-lv3`
+- `docker-runtime`
 - repo-managed Compose stacks
 - container logs and restart history
 - emergency restart and pause operations for approved identities
@@ -57,7 +57,7 @@ Initial scope:
 
 ## Implementation Notes
 
-- Portainer CE is now deployed privately on `docker-runtime-lv3` through [playbooks/portainer.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/portainer.yml) and [roles/portainer_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/portainer_runtime).
+- Portainer CE is now deployed privately on `docker-runtime` through [playbooks/portainer.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/portainer.yml) and [roles/portainer_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/portainer_runtime).
 - The Proxmox host now publishes the Portainer UI and API only on the Tailscale path `https://100.118.189.95:9444` through the repo-managed host TCP proxy surface.
-- Controller-local bootstrap material is now mirrored under `.local/portainer/` and consumed by the governed wrapper in [scripts/portainer_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/portainer_tool.py).
+- Controller-local bootstrap material is now mirrored under `.local/portainer/` and consumed by the governed wrapper in [scripts/portainer_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/portainer_tool.py).
 - Read-mostly inspection and bounded restart actions are now verified through the repo-managed wrapper and command catalog rather than by handing agents unrestricted Docker shell access.

@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0072-staging-production-topology`, `adr-0073-promotion-pipeline`, `adr-0079-playbook-decomposition`, `adr-0182-live-apply-merge-train`
 - Conflicts With: none
-- Shared Surfaces: `config/environment-topology.json`, `inventory/host_vars/proxmox_florin.yml`, `roles/proxmox_network/`, `playbooks/proxmox-staging-bridge.yml`, `scripts/environment_*.py`, `scripts/lv3_cli.py`, `docs/runbooks/staging-environment.md`
+- Shared Surfaces: `config/environment-topology.json`, `inventory/host_vars/proxmox-host.yml`, `roles/proxmox_network/`, `playbooks/proxmox-staging-bridge.yml`, `scripts/environment_*.py`, `scripts/lv3_cli.py`, `docs/runbooks/staging-environment.md`
 
 ## Scope
 
@@ -36,7 +36,7 @@
 - `docs/schema/environment-topology.schema.json`
 - `scripts/environment_catalog.py`
 - `scripts/environment_topology.py`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `roles/proxmox_network/`
 - `playbooks/proxmox-staging-bridge.yml`
 - `Makefile`
@@ -51,7 +51,7 @@
 
 - `python3 scripts/environment_topology.py --validate`
 - `python3 scripts/live_apply_receipts.py list`
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/services/grafana.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=staging -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/services/grafana.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=staging -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check`
 - `python3 scripts/integration_suite.py --mode gate --environment staging`
 
 ## Notes For The Next Assistant
@@ -59,5 +59,5 @@
 - the staging lane is now live on `vmbr20` with VMIDs `220` and `240`, and both staged guests are reachable over SSH through the Proxmox jump
 - keep promotion logic explicitly `staging -> production` even if general environment selection becomes catalog-driven elsewhere
 - if a future `development` lane is added, prefer a narrow fixture-backed or controller-local model first instead of another long-lived VM fleet
-- `make remote-tofu-apply ENV=staging` still hit the build-server session-runtime ownership bug during the first live activation; the successful replay repaired ownership on the session-scoped plan directory and executed `scripts/tofu_exec.sh apply staging` directly on `docker-build-lv3`
+- `make remote-tofu-apply ENV=staging` still hit the build-server session-runtime ownership bug during the first live activation; the successful replay repaired ownership on the session-scoped plan directory and executed `scripts/tofu_exec.sh apply staging` directly on `docker-build`
 - repository version `0.177.12` codifies `network_firewall = false` for the staged VM declarations because the cluster-wide Proxmox firewall default-drop blocked first-boot reachability before staged guest-network-policy automation existed

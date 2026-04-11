@@ -6,7 +6,7 @@
 
 ## Context
 
-ADR 0377 gives the chatbot at `chat.lv3.org` knowledge about the platform
+ADR 0377 gives the chatbot at `chat.example.com` knowledge about the platform
 (it can *answer* questions). This ADR addresses the second half: making the
 chatbot able to *act* — query live state, look up containers, check
 deployment history, and eventually execute governed operations.
@@ -106,7 +106,7 @@ Different conversations may need different capabilities:
 ### Tool Server Architecture
 
 ```
-chat.lv3.org (Open WebUI)
+chat.example.com (Open WebUI)
     │
     ├── RAG queries ──► Qdrant (platform_context)
     │
@@ -119,7 +119,7 @@ chat.lv3.org (Open WebUI)
 
 The tool server:
 
-- Runs on `runtime-control-lv3` alongside the existing controller services
+- Runs on `runtime-control` alongside the existing controller services
 - Exposes an OpenAPI spec auto-generated from `agent-tool-registry.json`
 - Authenticates Open WebUI requests via a service token stored in OpenBao
 - Logs all invocations to Langfuse for observability

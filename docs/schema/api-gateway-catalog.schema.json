@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/api-gateway-catalog.schema.json",
+  "$id": "https://example.com/schema/api-gateway-catalog.schema.json",
   "title": "LV3 API Gateway Catalog",
   "type": "object",
   "additionalProperties": false,

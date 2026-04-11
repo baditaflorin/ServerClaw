@@ -20,7 +20,7 @@ Use this when a temporary account expires or an operator leaves.
 ## Offboarding Steps
 
 ### 1. Keycloak — Disable Account
-- [ ] Log in to https://sso.lv3.org/admin/master/console/#/lv3/users
+- [ ] Log in to https://sso.example.com/admin/master/console/#/lv3/users
 - [ ] Find user by username
 - [ ] Set `Enabled` = OFF
 - [ ] Terminate all active sessions
@@ -28,18 +28,18 @@ Use this when a temporary account expires or an operator leaves.
 Or via API:
 ```bash
 # Get token
-TOKEN=$(curl -sk https://sso.lv3.org/realms/master/protocol/openid-connect/token \
+TOKEN=$(curl -sk https://sso.example.com/realms/master/protocol/openid-connect/token \
   -d "client_id=admin-cli&grant_type=password&username=lv3-bootstrap-admin&password=$(cat .local/keycloak/bootstrap-admin-password.txt)" \
   | jq -r .access_token)
 
 # Get user ID
 USER_ID=$(curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/users?username=<USERNAME>&exact=true" \
+  "https://sso.example.com/admin/realms/lv3/users?username=<USERNAME>&exact=true" \
   | jq -r '.[0].id')
 
 # Disable user
 curl -sk -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-  "https://sso.lv3.org/admin/realms/lv3/users/$USER_ID" \
+  "https://sso.example.com/admin/realms/lv3/users/$USER_ID" \
   -d '{"enabled": false}'
 ```
 

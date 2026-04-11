@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0206-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0206-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0206-live-apply`
 - Owner: codex
 - Depends On: `adr-0108-operator-onboarding-and-offboarding`, `adr-0122-windmill-operator-access-admin`, `adr-0208-dependency-direction-and-composition-roots`
 - Conflicts With: none

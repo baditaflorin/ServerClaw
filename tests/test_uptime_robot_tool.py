@@ -16,7 +16,7 @@ def test_normalize_monitor_expands_alert_contact_ids():
         {
             "friendly_name": "lv3 Public Status Page",
             "type": 1,
-            "url": "https://status.lv3.org",
+            "url": "https://status.example.com",
             "interval": 300,
             "alert_contacts": ["ops-email", "ops-webhook"],
         },

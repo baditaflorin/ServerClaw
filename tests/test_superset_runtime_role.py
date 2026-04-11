@@ -38,7 +38,7 @@ def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract()
 
     assert (
         defaults["superset_service_topology"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('superset') }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('superset') }}"
     )
     assert defaults["superset_site_dir"] == "/opt/superset"
     assert defaults["superset_build_dir"] == "{{ superset_site_dir }}/build"
@@ -49,7 +49,7 @@ def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract()
     assert defaults["superset_public_base_url"] == "https://{{ superset_service_topology.public_hostname }}"
     assert defaults["superset_image_name"] == "lv3/superset"
     assert (
-        defaults["superset_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.superset_port }}"
+        defaults["superset_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.superset_port }}"
     )
     assert (
         defaults["superset_controller_bootstrap_script_local_path"]

@@ -41,9 +41,9 @@ Steady-state rules:
 
 ## Implementation Notes
 
-- The canonical command-contract catalog now lives in [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json).
-- [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/command_catalog.py) validates the catalog, renders one contract, and evaluates approval gates against workflow lifecycle, requester class, approvals, preflight, validation, and receipt-planning inputs.
-- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make commands` and `make command-info COMMAND=<id>` so operators and assistants can inspect mutating command contracts without reconstructing them from prose.
+- The canonical command-contract catalog now lives in [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json).
+- [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/command_catalog.py) validates the catalog, renders one contract, and evaluates approval gates against workflow lifecycle, requester class, approvals, preflight, validation, and receipt-planning inputs.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile) now exposes `make commands` and `make command-info COMMAND=<id>` so operators and assistants can inspect mutating command contracts without reconstructing them from prose.
 - Repository data-model validation now cross-checks the command catalog alongside the workflow catalog, receipts, control-plane lanes, and canonical stack state.
-- Operator usage is documented in [docs/runbooks/command-catalog-and-approval-gates.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md).
+- Operator usage is documented in [docs/runbooks/command-catalog-and-approval-gates.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/command-catalog-and-approval-gates.md).
 - Live verification from `main` on 2026-03-22 validated the command catalog and exercised the approval gate for `configure-network` as the representative recurring host mutation contract.

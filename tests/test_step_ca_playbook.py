@@ -5,7 +5,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "step-ca.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 def test_step_ca_playbook_converges_runtime_control_locally_before_guest_trust_wave() -> None:
@@ -14,9 +14,9 @@ def test_step_ca_playbook_converges_runtime_control_locally_before_guest_trust_w
     runtime_play = playbook[1]
     managed_guests_play = playbook[3]
 
-    assert runtime_play["name"] == "Converge the private step-ca runtime on runtime-control-lv3"
+    assert runtime_play["name"] == "Converge the private step-ca runtime on runtime-control"
     assert runtime_play["hosts"] == (
-        "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+        "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-control' }}"
     )
     assert runtime_play["gather_facts"] is False
     assert [role["role"] for role in runtime_play["roles"]] == [
@@ -36,7 +36,7 @@ def test_step_ca_playbook_converges_runtime_control_locally_before_guest_trust_w
 
     assert managed_guests_play["name"] == "Converge SSH CA trust on managed guests"
     assert managed_guests_play["hosts"] == (
-        "{{ 'lv3_guests:&staging:!docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'lv3_guests:&production:!runtime-control-lv3' }}"
+        "{{ 'lv3_guests:&staging:!docker-runtime' if (env | default('production')) == 'staging' else 'lv3_guests:&production:!runtime-control' }}"
     )
     assert managed_guests_play["gather_facts"] is False
     assert [task["name"] for task in managed_guests_play["pre_tasks"][:3]] == [
@@ -52,7 +52,7 @@ def test_step_ca_playbook_converges_runtime_control_locally_before_guest_trust_w
 
 def test_runtime_control_firewall_allows_private_step_ca_api_callers() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
-    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
+    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control"]["allowed_inbound"]
 
     all_guests_rule = next(rule for rule in runtime_control_rules if rule["source"] == "all_guests")
     docker_172_rule = next(rule for rule in runtime_control_rules if rule["source"] == "172.16.0.0/12")

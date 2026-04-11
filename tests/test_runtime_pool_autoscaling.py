@@ -34,8 +34,8 @@ all:
   children:
     proxmox_hosts:
       hosts:
-        proxmox_florin:
-          ansible_host: 65.108.75.123
+        proxmox-host:
+          ansible_host: 203.0.113.1
     lv3_guests:
       hosts: {}
 """.strip()
@@ -85,9 +85,9 @@ lanes:
                 "$schema": "docs/schema/capacity-model.schema.json",
                 "schema_version": "1.0.0",
                 "host": {
-                    "id": "proxmox_florin",
+                    "id": "proxmox-host",
                     "name": "florin",
-                    "metrics_host": "proxmox_florin",
+                    "metrics_host": "proxmox-host",
                     "physical": {"ram_gb": 128, "vcpu": 32, "disk_gb": 1000},
                     "target_utilisation": {
                         "ram_percent": 80,

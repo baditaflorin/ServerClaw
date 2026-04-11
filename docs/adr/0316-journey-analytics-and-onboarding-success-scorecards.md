@@ -103,9 +103,9 @@ Journey scorecards should combine:
   DSN-style secret and normalizes DSNs into the Sentry-compatible
   `/api/.../store/` endpoint at runtime.
 - Live failure-signal delivery remains constrained by the shared ADR 0281 gap:
-  `errors.lv3.org` currently presents the wrong TLS certificate and the
+  `errors.example.com` currently presents the wrong TLS certificate and the
   `glitchtip_default` Docker network has no attached containers on
-  `docker-runtime-lv3`, so `glitchtip_events` truthfully stays at `0` until
+  `docker-runtime`, so `glitchtip_events` truthfully stays at `0` until
   that shared Glitchtip publication/runtime surface is implemented.
 
 ## References

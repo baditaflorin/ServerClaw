@@ -55,26 +55,26 @@ Current topology with:
 #### Production Topology Summary
 | Role | Count | Nodes | Status |
 |------|-------|-------|--------|
-| bootstrap | 1 | proxmox_florin | OK |
-| control | 1 | runtime-control-lv3 | OK |
-| state | 4 | postgres-lv3, postgres-replica, postgres-apps, postgres-data | OK (1 no-replica debt) |
-| edge | 1 | nginx-lv3 | **SPOF: No HA** |
+| bootstrap | 1 | proxmox-host | OK |
+| control | 1 | runtime-control | OK |
+| state | 4 | postgres, postgres-replica, postgres-apps, postgres-data | OK (1 no-replica debt) |
+| edge | 1 | nginx-edge | **SPOF: No HA** |
 | workload | 6 | runtime-general, runtime-ai, runtime-comms, runtime-apps, coolify, coolify-apps | OK |
-| observability | 1 | monitoring-lv3 | **SPOF: No HA** |
-| recovery | 1 | backup-lv3 | **No geo-redundancy** |
-| build | 1 | docker-build-lv3 | **Bottleneck: No parallel runners** |
+| observability | 1 | monitoring | **SPOF: No HA** |
+| recovery | 1 | backup | **No geo-redundancy** |
+| build | 1 | docker-build | **Bottleneck: No parallel runners** |
 
 #### Staging Topology Summary
 | Role | Count | Nodes | Notes |
 |------|-------|-------|-------|
-| bootstrap | 1 | proxmox_florin | Shared with production |
+| bootstrap | 1 | proxmox-host | Shared with production |
 | control | 0 | (combined with workload) | Cost optimization |
-| state | 1 | postgres-staging-lv3 | No separate analytics DB |
-| edge | 1 | nginx-staging-lv3 | OK |
-| workload | 1 | docker-runtime-staging-lv3 | **Combines control + observability** |
+| state | 1 | postgres | No separate analytics DB |
+| edge | 1 | nginx-edge | OK |
+| workload | 1 | docker-runtime | **Combines control + observability** |
 | observability | 0 | (combined with workload) | Cost optimization |
-| recovery | 1 | backup-staging-lv3 | OK (reduced retention) |
-| build | 1 | docker-build-staging-lv3 | OK |
+| recovery | 1 | backup | OK (reduced retention) |
+| build | 1 | docker-build | OK |
 
 ### 3. docs/workstreams/ws-0215-node-role-taxonomy.md
 This document — implementation summary, decisions, and identified constraints.
@@ -93,10 +93,10 @@ This document — implementation summary, decisions, and identified constraints.
 
 #### High Priority
 1. **DEBT-PROD-001: Edge SPOF**
-   - Single nginx-lv3; no HA secondary
+   - Single nginx-edge; no HA secondary
    - Impact: Total platform unavailability if Nginx node fails
    - Target: 2026-06-30
-   - Solution: Deploy nginx-lv3-secondary + keepalived VRRP
+   - Solution: Deploy nginx-edge-secondary + keepalived VRRP
 
 2. **DEBT-PROD-002: Backup storage not geographically redundant**
    - Local storage only; no off-site replication
@@ -105,7 +105,7 @@ This document — implementation summary, decisions, and identified constraints.
    - Solution: S3 replication or secondary site backup (ADR 0216-0219)
 
 #### Medium Priority
-3. **DEBT-PROD-003: postgres-apps-lv3 no read replica**
+3. **DEBT-PROD-003: postgres-apps no read replica**
    - No HA failover or read scaling
    - Target: 2026-06-30
 
@@ -119,7 +119,7 @@ This document — implementation summary, decisions, and identified constraints.
 
 ### Staging Considerations
 - **Role collapse acceptable** for non-critical environment
-- **docker-runtime-staging-lv3** combines control + observability + workload
+- **docker-runtime** combines control + observability + workload
 - **Targeted for separation** by 2026-12-31 as platform scales
 - **Separate postgres-staging database** (no analytics separation, acceptable for staging)
 
@@ -143,7 +143,7 @@ This document — implementation summary, decisions, and identified constraints.
 
 **Implication**: A single workload node may contain 10+ containerized services; the node's role reflects its operational function, not the service count.
 
-**Example**: runtime-apps-lv3 is assigned to the "workload" role, but contains multiple service containers (Plane, LabelStudio, etc.).
+**Example**: runtime-apps is assigned to the "workload" role, but contains multiple service containers (Plane, LabelStudio, etc.).
 
 ### 3. Environment-Aware Assignment
 **Decision**: Production and staging use different assignment strategies.
@@ -162,7 +162,7 @@ This document — implementation summary, decisions, and identified constraints.
 **Benefit**: Provides a roadmap for infrastructure hardening without blocking initial platform completion.
 
 ### 5. Non-Taxonomy Services
-**Decision**: Services that don't fit standard roles (artifact-cache-lv3) are listed separately as "cross-cutting."
+**Decision**: Services that don't fit standard roles (artifact-cache) are listed separately as "cross-cutting."
 
 **Rationale**: Artifact caching is a support service; not assigned to a primary role, but tracked in the matrix.
 
@@ -199,10 +199,10 @@ This document — implementation summary, decisions, and identified constraints.
 ## Relationship to Other ADRs and Workstreams
 
 ### ADR 0350: Nginx Fragments
-WS-0215 identifies nginx-lv3 as an edge SPOF. ADR 0350 proposes architectural patterns for splitting Nginx configuration; WS-0350 will implement secondary edge node HA.
+WS-0215 identifies nginx-edge as an edge SPOF. ADR 0350 proposes architectural patterns for splitting Nginx configuration; WS-0350 will implement secondary edge node HA.
 
 ### ADR 0216-0219: Data Replication (WS-0216-0219)
-WS-0215 identifies backup-lv3 as lacking geographic redundancy. ADR 0216-0219 specifies multi-site replication patterns; WS-0216-0219 will implement off-site backup replication.
+WS-0215 identifies backup as lacking geographic redundancy. ADR 0216-0219 specifies multi-site replication patterns; WS-0216-0219 will implement off-site backup replication.
 
 ### ADR 0346: Centralized Port Registry
 Role assignment implicitly defines port allocation requirements. Port mappings per role are tracked in the centralized registry.

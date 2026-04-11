@@ -4,7 +4,7 @@
 - Title: Machine-readable index of every platform service with URLs, ownership, health probes, and runbook links
 - Status: merged
 - Branch: `codex/adr-0075-service-capability-catalog`
-- Worktree: `../proxmox_florin_server-service-capability-catalog`
+- Worktree: `../proxmox-host_server-service-capability-catalog`
 - Owner: codex
 - Depends On: `adr-0064-health-probe-contracts`, `adr-0068-container-image-policy`, `adr-0065-secret-rotation-automation`
 - Conflicts With: none

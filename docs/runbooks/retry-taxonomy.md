@@ -6,10 +6,10 @@ Use the shared retry taxonomy when platform code calls a networked dependency an
 
 ## Canonical Sources
 
-- policy config: [config/retry-policies.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/retry-policies.yaml)
-- implementation: [platform/retry/classification.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/retry/classification.py)
-- implementation: [platform/retry/policy.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/retry/policy.py)
-- validation guard: [scripts/check_ad_hoc_retry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/check_ad_hoc_retry.py)
+- policy config: [config/retry-policies.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/retry-policies.yaml)
+- implementation: [platform/retry/classification.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/retry/classification.py)
+- implementation: [platform/retry/policy.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/retry/policy.py)
+- validation guard: [scripts/check_ad_hoc_retry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/check_ad_hoc_retry.py)
 
 ## Retry Classes
 

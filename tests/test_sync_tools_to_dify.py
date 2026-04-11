@@ -27,9 +27,9 @@ def test_build_openapi_spec_creates_one_path_per_governed_tool() -> None:
         ]
     }
 
-    spec = build_openapi_spec(registry, gateway_base_url="https://api.lv3.org")
+    spec = build_openapi_spec(registry, gateway_base_url="https://api.example.com")
 
-    assert spec["servers"] == [{"url": "https://api.lv3.org"}]
+    assert spec["servers"] == [{"url": "https://api.example.com"}]
     assert "/v1/dify-tools/get-platform-status" in spec["paths"]
     assert "/v1/dify-tools/list-recent-receipts" in spec["paths"]
     assert spec["paths"]["/v1/dify-tools/list-recent-receipts"]["post"]["operationId"] == "list-recent-receipts"

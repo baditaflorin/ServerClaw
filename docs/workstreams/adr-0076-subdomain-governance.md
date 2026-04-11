@@ -1,7 +1,7 @@
 # Workstream ADR 0076: Subdomain Governance And DNS Lifecycle
 
 - ADR: [ADR 0076](../adr/0076-subdomain-governance-and-dns-lifecycle.md)
-- Title: Catalog-backed subdomain naming, TLS provisioning, and lifecycle management for lv3.org
+- Title: Catalog-backed subdomain naming, TLS provisioning, and lifecycle management for example.com
 - Status: merged
 - Branch: `codex/adr-0076-subdomain-governance`
 - Worktree: `.worktrees/adr-0076`
@@ -23,7 +23,7 @@
 
 - DNSSEC configuration (security hardening, separate runbook item)
 - CAA record management (separate security hardening item)
-- multi-domain support for domains other than `lv3.org`
+- multi-domain support for domains other than `example.com`
 
 ## Expected Repo Surfaces
 
@@ -48,7 +48,7 @@
 - `uvx --from pyyaml python scripts/subdomain_catalog.py --validate`
 - `uv run --with pyyaml --with jsonschema python -m unittest tests/test_subdomain_catalog.py`
 - `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/provision-subdomain.yml --syntax-check`
-- `uvx --from pyyaml python scripts/subdomain_catalog.py --fqdn ops.lv3.org --provision-check`
+- `uvx --from pyyaml python scripts/subdomain_catalog.py --fqdn ops.example.com --provision-check`
 - `make validate`
 
 ## Merge Criteria

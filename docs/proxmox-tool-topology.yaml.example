@@ -53,15 +53,15 @@
 # ---------------------------------------------------------------------------
 
 prod:
-  node: Debian-trixie-latest-amd64-base  # Proxmox node name (qm list shows the node)
-  coolify_vmid: 170               # VMID of coolify-lv3 (Coolify control plane)
-  coolify_apps_vmid: 171          # VMID of coolify-apps-lv3 (apps runtime)
+  node: proxmox-host  # Proxmox node name (qm list shows the node)
+  coolify_vmid: 170               # VMID of coolify (Coolify control plane)
+  coolify_apps_vmid: 171          # VMID of coolify-apps (apps runtime)
   coolify_db_container: coolify-db
   coolify_db_user: coolify
   coolify_container: coolify      # Coolify app container (for cache clear)
 
 staging:
-  node: Debian-trixie-latest-amd64-base
+  node: proxmox-host
   coolify_vmid: 180               # Adjust to actual staging VMIDs
   coolify_apps_vmid: 181
   coolify_db_container: coolify-db
@@ -69,7 +69,7 @@ staging:
   coolify_container: coolify
 
 dev:
-  node: Debian-trixie-latest-amd64-base
+  node: proxmox-host
   coolify_vmid: 190               # Adjust to actual dev VMIDs
   coolify_apps_vmid: 191
   coolify_db_container: coolify-db

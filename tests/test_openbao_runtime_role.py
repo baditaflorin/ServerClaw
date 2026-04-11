@@ -153,7 +153,7 @@ def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
     primary_guest = next(guest for guest in host_vars["proxmox_guests"] if guest["name"] == primary_inventory_host)
 
     assert platform_vars["openbao_postgres_host"] == primary_guest["ipv4"]
-    assert platform_vars["platform_postgres_host"] == "database.lv3.org"
+    assert platform_vars["platform_postgres_host"] == "database.example.com"
 
 
 def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
@@ -180,7 +180,7 @@ def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
         / "main.yml"
     ).read_text(encoding="utf-8")
 
-    expected = "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+    expected = "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
 
     assert f'mattermost_database_host: "{expected}"' in mattermost_defaults
     assert f'netbox_database_host: "{expected}"' in netbox_defaults
@@ -245,8 +245,8 @@ def test_openbao_runtime_restores_legacy_runtime_control_state_when_local_init_e
     tasks = TASKS_PATH.read_text(encoding="utf-8")
 
     assert "openbao_legacy_restore_enabled: true" in defaults
-    assert "openbao_legacy_restore_target_host: runtime-control-lv3" in defaults
-    assert "openbao_legacy_restore_source_host: docker-runtime-lv3" in defaults
+    assert "openbao_legacy_restore_target_host: runtime-control" in defaults
+    assert "openbao_legacy_restore_source_host: docker-runtime" in defaults
     assert "Determine whether legacy OpenBao state restore is required" in tasks
     assert "Read the legacy OpenBao initialization status from the source host" in tasks
     assert "Capture the legacy OpenBao raft snapshot from the source host" in tasks

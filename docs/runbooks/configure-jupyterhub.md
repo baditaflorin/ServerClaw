@@ -7,8 +7,8 @@ This runbook covers the repo-managed JupyterHub deployment introduced by
 
 The JupyterHub workflow converges:
 
-- the public hostname `notebooks.lv3.org` on the shared NGINX edge
-- the JupyterHub hub runtime on `docker-runtime-lv3`
+- the public hostname `notebooks.example.com` on the shared NGINX edge
+- the JupyterHub hub runtime on `docker-runtime`
 - the dedicated Keycloak OIDC client used by the browser login flow
 - the DockerSpawner-backed single-user notebook contract
 - the service-local `jupyterhub-shared` MinIO bucket used for shared notebook
@@ -35,7 +35,7 @@ future shared global MinIO, raw Qdrant, or LiteLLM contracts are already live.
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload already exists under `.local/openbao/init.json`
-- Keycloak is already deployed and healthy on `sso.lv3.org`
+- Keycloak is already deployed and healthy on `sso.example.com`
 - Hetzner DNS API credentials are available when the edge certificate or DNS
   records need expansion
 
@@ -66,7 +66,7 @@ If you need to run the playbook directly instead of the make target:
 ```bash
 HETZNER_DNS_API_TOKEN=... \
 ANSIBLE_HOST_KEY_CHECKING=False \
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local \
+ANSIBLE_LOCAL_TEMP=/tmp/proxmox-host_server-ansible-local \
 ANSIBLE_REMOTE_TEMP=/tmp \
 ./scripts/run_with_namespace.sh uvx --from pyyaml python \
   ./scripts/ansible_scope_runner.py run \
@@ -108,8 +108,8 @@ uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py va
 Runtime verification:
 
 ```bash
-curl -fsS https://notebooks.lv3.org/hub/health
-curl -I https://notebooks.lv3.org/hub/oauth_login
+curl -fsS https://notebooks.example.com/hub/health
+curl -I https://notebooks.example.com/hub/oauth_login
 ```
 
 The role-level verification also exercises a repo-managed smoke user through the

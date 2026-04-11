@@ -18,15 +18,15 @@ def test_defaults_use_private_service_topology_and_local_bootstrap_artifacts() -
     defaults = load_yaml(DEFAULTS_PATH)
     assert (
         defaults["vaultwarden_https_port"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('vaultwarden', 'internal') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('vaultwarden', 'internal') }}"
     )
     assert (
         defaults["vaultwarden_controller_url"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('vaultwarden', 'controller') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('vaultwarden', 'controller') }}"
     )
     assert (
         defaults["vaultwarden_database_inventory_host"]
-        == "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+        == "{{ 'postgres' if (env | default('production')) == 'staging' else 'postgres' }}"
     )
     assert defaults["vaultwarden_database_host"] == "{{ hostvars[vaultwarden_database_inventory_host].ansible_host }}"
     assert defaults["vaultwarden_local_health_url"] == "{{ vaultwarden_internal_base_url }}"
@@ -37,7 +37,7 @@ def test_defaults_use_private_service_topology_and_local_bootstrap_artifacts() -
     )
     assert (
         defaults["vaultwarden_tls_server_sans"][1]
-        == "{{ hostvars['proxmox_florin'].platform_host.management.tailscale_ipv4 }}"
+        == "{{ hostvars['proxmox-host'].platform_host.management.tailscale_ipv4 }}"
     )
 
 

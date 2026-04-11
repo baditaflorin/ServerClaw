@@ -47,8 +47,8 @@ The catalog will describe, at minimum:
 
 ## Implementation Notes
 
-- The canonical workflow execution catalog now lives in [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json).
-- [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/workflow_catalog.py) validates the catalog against the Makefile, runbook paths, implementation references, and controller-local secret ids.
-- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make workflows` and `make workflow-info WORKFLOW=<id>` for machine-readable workflow discovery, plus managed wrappers for PostgreSQL convergence and Uptime Kuma repo-local management.
-- [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/preflight_controller_local.py) now reads workflow metadata from the workflow catalog instead of maintaining a second workflow registry in the secret manifest.
-- Operator usage is documented in [docs/runbooks/workflow-catalog-and-execution-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md).
+- The canonical workflow execution catalog now lives in [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json).
+- [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/workflow_catalog.py) validates the catalog against the Makefile, runbook paths, implementation references, and controller-local secret ids.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile) now exposes `make workflows` and `make workflow-info WORKFLOW=<id>` for machine-readable workflow discovery, plus managed wrappers for PostgreSQL convergence and Uptime Kuma repo-local management.
+- [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/preflight_controller_local.py) now reads workflow metadata from the workflow catalog instead of maintaining a second workflow registry in the secret manifest.
+- Operator usage is documented in [docs/runbooks/workflow-catalog-and-execution-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/workflow-catalog-and-execution-contracts.md).

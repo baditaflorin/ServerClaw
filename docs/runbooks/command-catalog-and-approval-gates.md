@@ -6,12 +6,12 @@ This runbook defines the canonical mutating command-contract catalog and the app
 
 ## Canonical Sources
 
-- command catalog: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
-- catalog CLI: [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/command_catalog.py)
-- shared approval policy: [policy/decisions/command_approval.rego](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/policy/decisions/command_approval.rego)
-- shared policy validator: [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/policy_checks.py)
-- workflow catalog dependency: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-- receipt model: [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
+- command catalog: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json)
+- catalog CLI: [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/command_catalog.py)
+- shared approval policy: [policy/decisions/command_approval.rego](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/policy/decisions/command_approval.rego)
+- shared policy validator: [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/policy_checks.py)
+- workflow catalog dependency: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+- receipt model: [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 
 The command catalog is the source of truth for:
 
@@ -99,8 +99,8 @@ python3 scripts/governed_command.py \
 
 Before a recurring live mutation is executed:
 
-1. confirm the workflow entry point through [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-2. confirm the approval policy, operator inputs, and rollback guidance through [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
+1. confirm the workflow entry point through [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+2. confirm the approval policy, operator inputs, and rollback guidance through [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json)
 3. confirm the command execution profile, timeout, working directory, and effective user through the command catalog execution block
 4. run the controller-local preflight when the workflow requires it
 5. run `python3 scripts/policy_checks.py --validate` and then `make validate` against the repo state that will be applied

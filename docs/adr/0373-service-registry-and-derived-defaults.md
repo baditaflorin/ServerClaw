@@ -26,7 +26,7 @@ directus_openbao_policy_name: lv3-service-directus-runtime
 directus_openbao_approle_name: directus-runtime
 directus_container_name: directus
 directus_image: "{{ container_image_catalog.images.directus_runtime.ref }}"
-directus_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus
+directus_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/directus
 ```
 
 This pattern repeats identically across all ~50 runtime roles — **646+ lines** of variable definitions that differ only in the service name prefix. Additionally, **284+ lines** of identical argument spec definitions validate these same variables.
@@ -61,7 +61,7 @@ platform_service_registry:
     # === Required fields ===
     image_catalog_key: directus_runtime        # Key in container_image_catalog.images
     internal_port: 8055
-    host_group: docker-runtime-lv3             # Ansible host/group this service runs on
+    host_group: docker-runtime             # Ansible host/group this service runs on
 
     # === Optional fields (defaults shown) ===
     site_dir: /opt/directus                    # Default: /opt/{{ service_name }}
@@ -74,14 +74,14 @@ platform_service_registry:
 
     # === Service-specific overrides (not conventional) ===
     extra_defaults:
-      directus_admin_email: admin@lv3.org
+      directus_admin_email: admin@example.com
       directus_health_path: /server/health
       directus_ping_path: /server/ping
 
   flagsmith:
     image_catalog_key: flagsmith_runtime
     internal_port: 8000
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     needs_openbao: true
     needs_redis: false
     needs_postgres: true
@@ -91,7 +91,7 @@ platform_service_registry:
   gitea:
     image_catalog_key: gitea_runtime
     internal_port: 3000
-    host_group: docker-runtime-lv3
+    host_group: docker-runtime
     needs_openbao: true
     needs_redis: false
     needs_postgres: true
@@ -229,12 +229,12 @@ After migration, a role's `defaults/main.yml` contains **only** service-specific
 # are derived from platform_service_registry by common/tasks/derive_service_defaults.
 # Only non-conventional, service-specific defaults remain here.
 
-directus_admin_email: admin@lv3.org
+directus_admin_email: admin@example.com
 directus_health_path: /server/health
 directus_ping_path: /server/ping
 directus_openapi_path: /server/specs/oas
 directus_bootstrap_collection_name: platform_registry
-directus_bootstrap_public_hostname: data.lv3.org
+directus_bootstrap_public_hostname: data.example.com
 directus_bootstrap_internal_url: "http://127.0.0.1:8055"
 ```
 

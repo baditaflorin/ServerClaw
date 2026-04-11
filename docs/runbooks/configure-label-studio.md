@@ -1,9 +1,9 @@
 # Configure Label Studio
 
 Label Studio is the repo-managed human-in-the-loop data annotation platform
-published at `https://annotate.lv3.org`. The runtime lives on
-`docker-runtime-lv3`, stores its state in the dedicated PostgreSQL database
-`label_studio` on `postgres-lv3`, and uses the shared edge oauth2-proxy plus
+published at `https://annotate.example.com`. The runtime lives on
+`docker-runtime`, stores its state in the dedicated PostgreSQL database
+`label_studio` on `postgres`, and uses the shared edge oauth2-proxy plus
 Keycloak browser-auth boundary while preserving app-local admin and token auth
 for Community Edition-compatible automation and break-glass recovery.
 
@@ -60,16 +60,16 @@ make converge-label-studio env=production
 
 - `BOOTSTRAP_KEY` or the default controller SSH key path
 - `HETZNER_DNS_API_TOKEN` in the environment so the playbook can publish
-  `annotate.lv3.org`
+  `annotate.example.com`
 
 The playbook performs these steps:
 
-1. Ensures the `annotate.lv3.org` Hetzner DNS record exists.
+1. Ensures the `annotate.example.com` Hetzner DNS record exists.
 2. Creates or reconciles the PostgreSQL role and dedicated `label_studio`
-   database on `postgres-lv3`.
+   database on `postgres`.
 3. Creates the runtime secrets, compose env, project catalog, and Label Studio
-   runtime on `docker-runtime-lv3`.
-4. Reconciles the shared Typesense runtime on `docker-runtime-lv3` before the
+   runtime on `docker-runtime`.
+4. Reconciles the shared Typesense runtime on `docker-runtime` before the
    API gateway structured-search catalog refresh runs.
 5. Reconciles the repo-managed project catalog through the private Label Studio
    admin token.
@@ -81,7 +81,7 @@ The playbook performs these steps:
 Guest-local runtime verification:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -91,7 +91,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Guest-local private API verification with the repo-managed admin token:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -101,18 +101,18 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Public shared-edge verification:
 
 ```bash
-curl -I https://annotate.lv3.org/
-curl -I https://annotate.lv3.org/api/projects
+curl -I https://annotate.example.com/
+curl -I https://annotate.example.com/api/projects
 ```
 
 Project-catalog verification directly through the helper on the guest:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
-  'sudo python3 /srv/proxmox_florin_server/scripts/label_studio_sync.py verify \
+  'sudo python3 /srv/proxmox-host_server/scripts/label_studio_sync.py verify \
     --base-url http://127.0.0.1:8110 \
     --token-file /etc/lv3/label-studio/admin-token.txt \
     --project-catalog /opt/label-studio/project-catalog.json \
@@ -129,9 +129,9 @@ The verification helper checks:
 ## Recovery Notes
 
 - Re-run `make converge-label-studio` for drift correction or after rebuilding
-  `docker-runtime-lv3`, `postgres-lv3`, or the shared edge configuration.
+  `docker-runtime`, `postgres`, or the shared edge configuration.
 - `make converge-label-studio` now also replays the shared Typesense runtime on
-  `docker-runtime-lv3`, so it is the preferred recovery path when a Docker
+  `docker-runtime`, so it is the preferred recovery path when a Docker
   daemon restart or firewall reconciliation leaves the API gateway structured
   search dependency unavailable.
 - If the public UI or API stops redirecting through oauth2-proxy, reconverge
@@ -139,7 +139,7 @@ The verification helper checks:
   `make converge-label-studio`. The shared auth boundary can drift even when
   the Label Studio private runtime itself is healthy.
 - If the private API works but the public redirect fails, inspect the Label
-  Studio `annotate.lv3.org` edge publication and oauth2-proxy routing before
+  Studio `annotate.example.com` edge publication and oauth2-proxy routing before
   changing in-app auth.
 - If project sync fails after a Label Studio upgrade, inspect
   `/opt/label-studio/project-catalog.json`, rerun the private token-backed

@@ -12,11 +12,11 @@
 The build server (ADR 0082) and Docker check runner (ADR 0083) provide fast remote execution — but only if the required Docker images and build dependencies are already present on the build server. Without a cache strategy, every check run that requires a freshly-pulled image adds 2–8 minutes of network fetch time, negating the speed benefit of running remotely.
 
 The current state:
-- Docker images are pulled on demand from Docker Hub, GitHub Container Registry, and `registry.lv3.org`; no layer caching is configured
+- Docker images are pulled on demand from Docker Hub, GitHub Container Registry, and `registry.example.com`; no layer caching is configured
 - `pip install` in Python check containers re-downloads packages every run because no pip cache is mounted
 - Packer downloads its plugins from `releases.hashicorp.com` on every build
 - `apt-get install` in Packer provisioner scripts pulls from Debian mirrors every template build
-- `ansible-galaxy collection install` downloads collection dependencies from `galaxy.lv3.org` (or the public Galaxy) on every CI run
+- `ansible-galaxy collection install` downloads collection dependencies from `galaxy.example.com` (or the public Galaxy) on every CI run
 
 The cumulative effect: a full check run on a cold build server takes 6–12 minutes instead of 15–18 seconds.
 
@@ -30,9 +30,9 @@ All check runner image builds (`docker/check-runners/*/Dockerfile`) use BuildKit
 
 ```bash
 docker buildx build \
-  --cache-from type=registry,ref=registry.lv3.org/check-runner/ansible:cache \
-  --cache-to   type=registry,ref=registry.lv3.org/check-runner/ansible:cache,mode=max \
-  -t registry.lv3.org/check-runner/ansible:2.17 \
+  --cache-from type=registry,ref=registry.example.com/check-runner/ansible:cache \
+  --cache-to   type=registry,ref=registry.example.com/check-runner/ansible:cache,mode=max \
+  -t registry.example.com/check-runner/ansible:2.17 \
   docker/check-runners/ansible/
 ```
 
@@ -45,8 +45,8 @@ All Python containers mount a shared pip cache volume:
 ```bash
 docker run --rm \
   -v pip-cache:/root/.cache/pip \
-  -v /opt/builds/proxmox_florin_server:/workspace:ro \
-  registry.lv3.org/check-runner/python:3.12 \
+  -v /opt/builds/proxmox-host_server:/workspace:ro \
+  registry.example.com/check-runner/python:3.12 \
   pip install -r requirements.txt
 ```
 
@@ -59,7 +59,7 @@ docker run --rm \
 ```bash
 docker run --rm \
   -v /opt/builds/.packer.d:/root/.packer.d \
-  registry.lv3.org/check-runner/infra:latest \
+  registry.example.com/check-runner/infra:latest \
   packer build templates/lv3-debian-base.pkr.hcl
 ```
 
@@ -90,7 +90,7 @@ Tracks the expected cache state for each component:
 {
   "docker_images": [
     {
-      "image": "registry.lv3.org/check-runner/ansible:2.17",
+      "image": "registry.example.com/check-runner/ansible:2.17",
       "digest": "sha256:...",
       "last_pulled": "2026-03-22T10:00:00Z",
       "size_mb": 380
@@ -138,7 +138,7 @@ The workflow pulls all images, runs a no-op `pip install`, pre-downloads Packer 
 
 - This workstream branch now adds the repo-managed `build_server` role, a dedicated cache converge playbook, the cache manifest skeleton, the Windmill `warm-build-cache` and weekly cache-maintenance helpers, and the operator runbook for the cache host.
 - The branch also wires the cache hooks into `scripts/remote_exec.sh`, `config/check-runner-manifest.json`, `scripts/validate_repo.sh`, and the user-facing `Makefile` targets so the shared pip, Packer, and Ansible cache surfaces are available to the build-server execution path.
-- Live verification of warm-cache timing and the scheduled Windmill jobs still depends on applying the build-server role from `main` to `docker-build-lv3`.
+- Live verification of warm-cache timing and the scheduled Windmill jobs still depends on applying the build-server role from `main` to `docker-build`.
 
 ## Alternatives Considered
 

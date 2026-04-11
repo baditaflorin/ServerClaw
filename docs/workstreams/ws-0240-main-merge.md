@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.46
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0240-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0240-main-merge`
 - Owner: codex
 - Depends On: `ws-0240-live-apply`
 
@@ -16,7 +16,7 @@
 Carry the verified ADR 0240 Apache ECharts rollout onto the latest
 `origin/main` after Harbor advanced the mainline to `0.177.63`, cut release
 `0.177.64`, re-apply the exact integrated
-interactive ops portal payload on `docker-runtime-lv3`, and refresh the
+interactive ops portal payload on `docker-runtime`, and refresh the
 protected canonical-truth surfaces once the public edge is re-verified.
 
 ## Shared Surfaces
@@ -46,10 +46,10 @@ protected canonical-truth surfaces once the public edge is re-verified.
 - `git merge --no-ff origin/main` refreshed this worktree onto the latest main
   baseline after `origin/main` advanced with ADR 0239 post-merge replay and the
   generated dependency-graph refresh
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.45 baseline" --dry-run`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.example.com while preserving the authenticated edge contract on top of the 0.130.45 baseline" --dry-run`
   reported `Current version: 0.177.63`, `Next version: 0.177.64`, and
   `Unreleased notes: 1`
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.45 baseline"`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.example.com while preserving the authenticated edge contract on top of the 0.130.45 baseline"`
   prepared release `0.177.64`
 - `make syntax-check-ops-portal`, `make preflight WORKFLOW=converge-ops-portal`,
   `make validate-data-models`, `./scripts/validate_repo.sh agent-standards`,
@@ -61,7 +61,7 @@ protected canonical-truth surfaces once the public edge is re-verified.
   output, so that controller-local limitation was recorded instead of treating
   it as guest failure
 - the exact `0.177.63` mainline payload was staged under
-  `/tmp/ops-portal-mainline` on `docker-runtime-lv3`, promoted into
+  `/tmp/ops-portal-mainline` on `docker-runtime`, promoted into
   `/opt/ops-portal/service` and `/opt/ops-portal/data`, and rebuilt with
   `docker compose up -d --build --remove-orphans`
 - guest-local verification confirmed the running service hashes for
@@ -69,9 +69,9 @@ protected canonical-truth surfaces once the public edge is re-verified.
   the repository, `curl -fsS http://10.10.10.20:8092/health` returned
   `{"status":"ok"}`, and both `/` plus `/partials/overview` exposed the
   expected ECharts mount points
-- `curl -ks https://ops.lv3.org/health` returned `{"status":"ok"}` and
-  `curl -k -I https://ops.lv3.org` returned `HTTP/2 302` to
-  `/oauth2/sign_in?rd=https://ops.lv3.org/` while preserving the CSP allowance
+- `curl -ks https://ops.example.com/health` returned `{"status":"ok"}` and
+  `curl -k -I https://ops.example.com` returned `HTTP/2 302` to
+  `/oauth2/sign_in?rd=https://ops.example.com/` while preserving the CSP allowance
   for `https://unpkg.com`
 
 ## Outcome

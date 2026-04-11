@@ -22,7 +22,7 @@ The repository also changed shape after the original ADR draft:
 
 - roles now live under `collections/ansible_collections/lv3/platform/roles/`
 - `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, and `config/health-probe-catalog.json` already enforce stronger cross-references
-- `inventory/host_vars/proxmox_florin.yml.lv3_service_topology` is part of the canonical service contract
+- `inventory/host_vars/proxmox-host.yml.lv3_service_topology` is part of the canonical service contract
 - controller-local secret storage and image scan receipts are explicit catalog surfaces
 
 So the scaffold generator has to target the current collection layout and those stricter data models, not the older root-role layout.
@@ -38,9 +38,9 @@ make scaffold-service \
   NAME=my-service \
   DESCRIPTION="One-line description" \
   CATEGORY=automation \
-  VM=docker-runtime-lv3 \
+  VM=docker-runtime \
   PORT=8080 \
-  SUBDOMAIN=my-service.lv3.org \
+  SUBDOMAIN=my-service.example.com \
   EXPOSURE=private-only \
   IMAGE=docker.io/vendor/image:latest
 ```
@@ -57,7 +57,7 @@ The current implementation writes all of the repo surfaces required for a servic
 - `collections/ansible_collections/lv3/platform/roles/<name>_runtime/`
 - `playbooks/<name>.yml`
 - `playbooks/services/<name>.yml`
-- `inventory/host_vars/proxmox_florin.yml` service-topology entry
+- `inventory/host_vars/proxmox-host.yml` service-topology entry
 - `config/service-capability-catalog.json`
 - `config/subdomain-catalog.json` when a scaffolded hostname is declared
 - `config/health-probe-catalog.json`

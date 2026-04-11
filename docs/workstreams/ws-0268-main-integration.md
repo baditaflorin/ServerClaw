@@ -8,7 +8,7 @@
 - Release Date: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0268-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0268-main-integration`
 - Owner: codex
 - Depends On: `ws-0268-live-apply`
 
@@ -73,7 +73,7 @@ canonical mainline evidence.
   `config/ansible-execution-scopes.yaml`, refreshed the generated ops-portal
   snapshot, and preserved a clean latest-main replay source.
 - `make immutable-guest-replacement-plan service=public-edge` confirmed the
-  documented ADR 0191 narrow exception rule for `nginx_edge` on `nginx-lv3`,
+  documented ADR 0191 narrow exception rule for `nginx_edge` on `nginx-edge`,
   including the `inactive_edge_peer` validation mode and the `120m` rollback
   window.
 - `scripts/canonical_truth.py` was updated so capability receipt precedence now
@@ -83,10 +83,10 @@ canonical mainline evidence.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production`
   rebuilt the missing `build/ops-portal/`, `build/changelog-portal/`, and
   `build/docs-portal/` directories from a clean worktree and completed
-  successfully with final recap `nginx-lv3 : ok=61 changed=4 failed=0`.
-- `curl -I --max-time 20 https://grafana.lv3.org` returned `HTTP/2 302` to
-  `/login`, `curl -I --max-time 20 https://nginx.lv3.org` returned `HTTP/2 200`,
-  and both `https://docs.lv3.org` and `https://changelog.lv3.org` returned
+  successfully with final recap `nginx-edge : ok=61 changed=4 failed=0`.
+- `curl -I --max-time 20 https://grafana.example.com` returned `HTTP/2 302` to
+  `/login`, `curl -I --max-time 20 https://nginx.example.com` returned `HTTP/2 200`,
+  and both `https://docs.example.com` and `https://changelog.example.com` returned
   `HTTP/2 302` to their expected `oauth2/sign_in` paths afterward.
 
 ## Outcome

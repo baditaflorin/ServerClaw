@@ -24,14 +24,14 @@ The next phase in the infrastructure plan explicitly calls out ingress, security
 
 ## Decision
 
-We run `n8n` as a repo-managed compose service on `docker-runtime-lv3`, backed by PostgreSQL on `postgres-lv3`, and published at `https://n8n.lv3.org`.
+We run `n8n` as a repo-managed compose service on `docker-runtime`, backed by PostgreSQL on `postgres`, and published at `https://n8n.example.com`.
 
 ### Runtime shape
 
 - service id: `n8n`
-- runtime host: `docker-runtime-lv3`
-- database backend: PostgreSQL on `postgres-lv3`
-- public hostname: `n8n.lv3.org`
+- runtime host: `docker-runtime`
+- database backend: PostgreSQL on `postgres`
+- public hostname: `n8n.example.com`
 - pinned image: `docker.n8n.io/n8nio/n8n:2.2.6@sha256:1ecc41c012acc5a425e43ff4b87193d8c08d00832876df367656eb7e5ee7fc5b`
 - internal listen port: `5678`
 - persistent application data: `/opt/n8n/data`
@@ -40,7 +40,7 @@ The runtime is converged through `roles/n8n_postgres`, `roles/n8n_runtime`, and 
 
 ### Access boundary
 
-The editor and management surface at `n8n.lv3.org` are protected by the shared repo-managed oauth2-proxy and Keycloak edge flow.
+The editor and management surface at `n8n.example.com` are protected by the shared repo-managed oauth2-proxy and Keycloak edge flow.
 
 Because webhook callers are machine clients, the edge route deliberately leaves the following paths unauthenticated:
 
@@ -99,14 +99,14 @@ Live verification from `main` completed successfully on 2026-03-26.
 
 The first live apply attempt from `main` on 2026-03-25 did not complete.
 
-- Hetzner DNS write calls for the new `n8n.lv3.org` record returned the provider brownout response during the documented `11:00` to `13:00` UTC weekday shutdown window.
-- During the same window, the Proxmox host was unreachable from the controller on both `100.118.189.95:22` and `65.108.75.123:22`, and `https://proxmox.lv3.org:8006/api2/json` timed out.
+- Hetzner DNS write calls for the new `n8n.example.com` record returned the provider brownout response during the documented `11:00` to `13:00` UTC weekday shutdown window.
+- During the same window, the Proxmox host was unreachable from the controller on both `100.118.189.95:22` and `203.0.113.1:22`, and `https://proxmox.example.com:8006/api2/json` timed out.
 
-The successful rerun from current `main` completed on 2026-03-26 after narrowing the service playbook to the n8n-specific DNS record, pinning the runtime database host to the PostgreSQL primary guest address, recovering Docker bridge-chain startup failures on `docker-runtime-lv3`, and regenerating the repo-managed static portal artifacts expected by shared edge publication.
+The successful rerun from current `main` completed on 2026-03-26 after narrowing the service playbook to the n8n-specific DNS record, pinning the runtime database host to the PostgreSQL primary guest address, recovering Docker bridge-chain startup failures on `docker-runtime`, and regenerating the repo-managed static portal artifacts expected by shared edge publication.
 
-- `docker-runtime-lv3` rendered `DB_POSTGRESDB_HOST=10.10.10.50` in `/run/lv3-secrets/n8n/runtime.env`.
+- `docker-runtime` rendered `DB_POSTGRESDB_HOST=10.10.10.50` in `/run/lv3-secrets/n8n/runtime.env`.
 - Local `http://127.0.0.1:5678/healthz` and `http://127.0.0.1:5678/healthz/readiness` both returned `{"status":"ok"}`.
-- Public `https://n8n.lv3.org/healthz` returned `HTTP 200` through the shared NGINX edge.
+- Public `https://n8n.example.com/healthz` returned `HTTP 200` through the shared NGINX edge.
 
 ## Related ADRs
 

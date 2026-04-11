@@ -23,23 +23,23 @@ class ValidatePortalAuthTests(unittest.TestCase):
 
     def test_docs_portal_must_be_edge_oidc(self) -> None:
         broken = copy.deepcopy(self.catalog)
-        docs_entry = next(entry for entry in broken["subdomains"] if entry["fqdn"] == "docs.lv3.org")
+        docs_entry = next(entry for entry in broken["subdomains"] if entry["fqdn"] == "docs.example.com")
         docs_entry["auth_requirement"] = "none"
 
         with self.assertRaisesRegex(
             ValueError,
-            "portal hostname 'docs.lv3.org' must declare auth_requirement='edge_oidc'",
+            "portal hostname 'docs.example.com' must declare auth_requirement='edge_oidc'",
         ):
             validate_portal_auth.validate_portal_auth(broken, self.public_edge_defaults)
 
     def test_protected_edge_hostname_must_stay_keycloak_gated(self) -> None:
         broken = copy.deepcopy(self.catalog)
-        ops_entry = next(entry for entry in broken["subdomains"] if entry["fqdn"] == "ops.lv3.org")
+        ops_entry = next(entry for entry in broken["subdomains"] if entry["fqdn"] == "ops.example.com")
         ops_entry["auth_requirement"] = "upstream_auth"
 
         with self.assertRaisesRegex(
             ValueError,
-            "portal hostname 'ops.lv3.org' must declare auth_requirement='edge_oidc'",
+            "portal hostname 'ops.example.com' must declare auth_requirement='edge_oidc'",
         ):
             validate_portal_auth.validate_portal_auth(broken, self.public_edge_defaults)
 

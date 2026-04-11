@@ -12,7 +12,7 @@ def test_load_langfuse_config_reads_local_files(tmp_path: Path) -> None:
 
     config = load_langfuse_config(tmp_path)
 
-    assert config.host == "https://langfuse.lv3.org"
+    assert config.host == "https://langfuse.example.com"
     assert config.public_key == "pk-lf-test"
     assert config.secret_key == "sk-lf-test"
     assert config.project_id == "lv3-agent-observability"
@@ -20,6 +20,6 @@ def test_load_langfuse_config_reads_local_files(tmp_path: Path) -> None:
 
 def test_trace_url_uses_project_scoped_path() -> None:
     assert (
-        trace_url("https://langfuse.lv3.org", "lv3-agent-observability", "trace-123")
-        == "https://langfuse.lv3.org/project/lv3-agent-observability/traces/trace-123"
+        trace_url("https://langfuse.example.com", "lv3-agent-observability", "trace-123")
+        == "https://langfuse.example.com/project/lv3-agent-observability/traces/trace-123"
     )

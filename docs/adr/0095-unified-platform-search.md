@@ -22,7 +22,7 @@ The platform stores information about its own state across at least eight differ
 | Windmill workflow history | Past workflow runs and their outputs |
 | Mattermost | Operator and agent chat history, incident discussions |
 
-When investigating an incident or planning a change, an operator must query each of these independently. "What do we know about `postgres-lv3`?" requires: checking NetBox for the IP, Loki for recent logs, the audit log for recent changes, the service catalog for what runs on it, and Mattermost for any recent conversation. This information is not correlated anywhere.
+When investigating an incident or planning a change, an operator must query each of these independently. "What do we know about `postgres`?" requires: checking NetBox for the IP, Loki for recent logs, the audit log for recent changes, the service catalog for what runs on it, and Mattermost for any recent conversation. This information is not correlated anywhere.
 
 Agents (ADR 0046, 0069) face the same problem: an agent answering "what happened to the mail platform last week?" must call multiple tools and synthesise their outputs. This increases agent latency and the chance of incomplete answers.
 
@@ -30,7 +30,7 @@ The platform has Open WebUI (ADR 0060) as an AI workbench and a RAG context laye
 
 ## Decision
 
-We will deploy **Zinc Search** (a lightweight Elasticsearch-compatible search engine) on `docker-runtime-lv3` and build a search indexer that ingests the six primary platform data sources on a schedule. A search endpoint is exposed through the platform API gateway (ADR 0092) at `/v1/platform/search` and integrated into the ops portal (ADR 0093) and the `lv3 search` CLI command.
+We will deploy **Zinc Search** (a lightweight Elasticsearch-compatible search engine) on `docker-runtime` and build a search indexer that ingests the six primary platform data sources on a schedule. A search endpoint is exposed through the platform API gateway (ADR 0092) at `/v1/platform/search` and integrated into the ops portal (ADR 0093) and the `lv3 search` CLI command.
 
 ### Why Zinc Search
 
@@ -63,11 +63,11 @@ All indexed documents share a common envelope:
   "source": "audit",
   "timestamp": "2026-03-23T10:15:00Z",
   "title": "Secret rotated: openbao/platform-db-password",
-  "body": "Operator ops@lv3.org rotated secret openbao/platform-db-password. Affected services: netbox, windmill.",
+  "body": "Operator ops@example.com rotated secret openbao/platform-db-password. Affected services: netbox, windmill.",
   "tags": ["openbao", "secret-rotation", "netbox", "windmill"],
   "url": "/v1/platform/audit/2026-03-23T10:15:00Z:openbao-rotate",
   "related_service": "openbao",
-  "related_vm": "docker-runtime-lv3"
+  "related_vm": "docker-runtime"
 }
 ```
 
@@ -91,7 +91,7 @@ Response:
   "results": [
     {
       "source": "topology",
-      "title": "postgres-lv3 (VMID 150)",
+      "title": "postgres (VMID 150)",
       "body": "PostgreSQL VM at 10.10.10.50. Disk: 80GB. RAM: 4096MB.",
       "timestamp": "2026-03-23T08:00:00Z",
       "tags": ["postgres", "vm", "production"],
@@ -115,9 +115,9 @@ The ops portal (ADR 0093) includes a search bar in the header (`Cmd+K` shortcut)
 
 ```bash
 lv3 search "postgres password"
-# →  [audit] 2026-03-22  Postgres password rotated (ops@lv3.org)
+# →  [audit] 2026-03-22  Postgres password rotated (ops@example.com)
 #    [adr]   ADR 0026     Dedicated PostgreSQL VM baseline
-#    [topo]  postgres-lv3  10.10.10.50, VMID 150
+#    [topo]  postgres  10.10.10.50, VMID 150
 ```
 
 ### Agent tool

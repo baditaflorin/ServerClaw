@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.43
 - Release Date: 2026-03-28
 - Branch: `codex/ws-0226-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0226-main-merge`
 - Owner: codex
 - Depends On: `ws-0226-live-apply`
 
@@ -60,7 +60,7 @@ result to `origin/main`.
 
 - `git checkout origin/main -- workstreams.yaml` restored the current mainline registry before reapplying only the ADR 0226 live-apply plus main-merge entries, avoiding the stale-registry regression that would have dropped newer workstreams from `origin/main`
 - `make workflow-info WORKFLOW=configure-host-control-loops` and `uv run --with pytest pytest -q tests/test_proxmox_host_control_loops_role.py` both passed on the merged-main candidate
-- `make configure-host-control-loops` completed successfully from this worktree with `proxmox_florin ok=33 changed=0 failed=0`
+- `make configure-host-control-loops` completed successfully from this worktree with `proxmox-host ok=33 changed=0 failed=0`
 - host checks after the merged-main replay reported `lv3-host-control-loop-reconcile.service Result=success ActiveState=inactive SubState=dead UnitFileState=static`, the timer as `active/waiting` with `NextElapseUSecRealtime=Sat 2026-03-28 22:30:59 CET` and `LastTriggerUSec=Sat 2026-03-28 22:01:21 CET`, and the path unit as `active/waiting` with `Triggers=lv3-host-control-loop-reconcile.service`
 - a fresh manual start recorded `trigger: scheduled_or_manual` at `2026-03-28T21:24:49Z` with history file `/var/lib/lv3-host-control-loops/runs/20260328T212449Z.json`
 - a fresh path-triggered request `{"reason":"ws-0226-main-merge-20260328T2125Z"}` was consumed immediately, recorded `trigger: path_request` at `2026-03-28T21:25:04Z`, and produced history file `/var/lib/lv3-host-control-loops/runs/20260328T212504Z.json`

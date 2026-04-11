@@ -19,14 +19,14 @@ The missing capability is:
 
 ## Decision
 
-We will deploy **self-hosted Langfuse** on `docker-runtime-lv3` and publish it at `https://langfuse.lv3.org`.
+We will deploy **self-hosted Langfuse** on `docker-runtime` and publish it at `https://langfuse.example.com`.
 
 ### Runtime shape
 
 The repo-managed runtime will use:
 
-- `docker-runtime-lv3` for `langfuse-web`, `langfuse-worker`, ClickHouse, Redis, and MinIO
-- `postgres-lv3` for the PostgreSQL application database
+- `docker-runtime` for `langfuse-web`, `langfuse-worker`, ClickHouse, Redis, and MinIO
+- `postgres` for the PostgreSQL application database
 - the shared NGINX edge for the public web hostname
 
 ### Identity and access
@@ -65,7 +65,7 @@ The implementation must prove:
 
 **Negative / Trade-offs**
 
-- Langfuse introduces new operational state in ClickHouse, Redis, and MinIO on `docker-runtime-lv3`
+- Langfuse introduces new operational state in ClickHouse, Redis, and MinIO on `docker-runtime`
 - media-upload ergonomics remain intentionally conservative because the service is published without a separate public object-store endpoint
 - the Langfuse runtime depends on both Keycloak and PostgreSQL availability for the full operator experience
 

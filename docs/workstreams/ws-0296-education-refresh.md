@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0296-education-refresh`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-education-refresh`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0296-education-refresh`
 - Owner: codex
 - Depends On: `adr-0194-coolify-paas-deploy-from-repo`, `adr-0224-self-service-repo-intake-and-agent-assisted-deployments`, `adr-0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments`
 - Conflicts With: none
@@ -47,7 +47,7 @@
 
 ## Expected Live Surfaces
 
-- `education-wemeshup.apps.lv3.org`
+- `education-wemeshup.apps.example.com`
 - one fresh live-apply receipt for the named profile-driven redeploy
 
 ## Verification Plan
@@ -64,7 +64,7 @@
 - `git ls-remote git@github.com:baditaflorin/education_wemeshup.git HEAD refs/heads/main` confirmed upstream `main` at `4d27ded77559269d1a5e05b3e3aaf9acd198a0ea` before the redeploy.
 - `make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--dry-run --wait'` expanded the catalog entry into the governed Coolify wrapper, and `make coolify-manage ACTION=whoami` confirmed the private controller path and usable deployment server.
 - `make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait --timeout 1800'` finished on attempt `1` with deployment `lwyww144yknn3fe524ou8pq7`.
-- Public verification after the refresh returned `HTTP/2 200` for `https://education-wemeshup.apps.lv3.org/`, and `/api/v1/catalog/taxonomy` returned `catalogVersion: 2.0.0`, `activityCount: 1056`, and `categoryCount: 95`.
+- Public verification after the refresh returned `HTTP/2 200` for `https://education-wemeshup.apps.example.com/`, and `/api/v1/catalog/taxonomy` returned `catalogVersion: 2.0.0`, `activityCount: 1056`, and `categoryCount: 95`.
 
 ## Notes For The Next Assistant
 

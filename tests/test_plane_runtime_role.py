@@ -22,15 +22,15 @@ def test_plane_runtime_defaults_list_trusted_proxies() -> None:
     ]
     assert (
         defaults["plane_internal_port"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('plane', 'internal') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('plane', 'internal') }}"
     )
     assert (
         defaults["plane_internal_base_url"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'internal') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('plane', 'internal') }}"
     )
     assert (
         defaults["plane_controller_url"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'controller') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('plane', 'controller') }}"
     )
 
 

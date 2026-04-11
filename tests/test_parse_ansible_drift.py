@@ -19,7 +19,7 @@ def test_parse_ansible_json_payload_detects_changed_and_unreachable() -> None:
                     {
                         "task": {"name": "openbao_runtime : render config"},
                         "hosts": {
-                            "docker-runtime-lv3": {
+                            "docker-runtime": {
                                 "changed": True,
                                 "diff": [{"before": "old", "after": "new"}],
                             }
@@ -28,7 +28,7 @@ def test_parse_ansible_json_payload_detects_changed_and_unreachable() -> None:
                     {
                         "task": {"name": "wait_for_connection"},
                         "hosts": {
-                            "monitoring-lv3": {
+                            "monitoring": {
                                 "unreachable": True,
                                 "msg": "ssh failed",
                             }
@@ -56,7 +56,7 @@ PLAY [all] *********************************************************************
 TASK [windmill_runtime : render compose] ****************************************
 --- before
 +++ after
-changed: [docker-runtime-lv3]
+changed: [docker-runtime]
 """.strip()
 
     records = parser.parse_ansible_output(payload)
@@ -64,7 +64,7 @@ changed: [docker-runtime-lv3]
     assert len(records) == 1
     assert records[0]["role"] == "windmill_runtime"
     assert records[0]["task"] == "render compose"
-    assert records[0]["host"] == "docker-runtime-lv3"
+    assert records[0]["host"] == "docker-runtime"
 
 
 def test_parse_ansible_output_handles_empty_input() -> None:

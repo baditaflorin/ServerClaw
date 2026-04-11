@@ -9,7 +9,7 @@
 
 ## Context
 
-PostgreSQL on `postgres-lv3` (ADR 0026) is the platform's shared relational
+PostgreSQL on `postgres` (ADR 0026) is the platform's shared relational
 database. It stores application data for Keycloak, Gitea, Langfuse, Plane,
 Outline, n8n, NetBox, Windmill, One-API, Superset, and several other services.
 All of those services share the same PostgreSQL instance with per-service
@@ -18,7 +18,7 @@ databases and roles.
 The current observability for PostgreSQL covers:
 
 - query performance via Prometheus `postgres_exporter` metrics in Grafana
-- replication lag via streaming replica monitoring on `postgres-replica-lv3`
+- replication lag via streaming replica monitoring on `postgres-replica`
 - backup state via PBS and Restic (ADR 0302)
 
 What is not covered is a structured record of **who ran which query or DDL
@@ -36,7 +36,7 @@ pgaudit (`pgaudit/pgaudit`) is the de facto PostgreSQL audit extension. It is
 maintained by the PostgreSQL Audit Extension maintainers and emits structured
 audit log lines through PostgreSQL's existing logging path. Those log lines are
 machine-parseable and ship directly to Loki via the existing Alloy agent on
-`postgres-lv3`.
+`postgres`.
 
 ## Decision
 
@@ -46,7 +46,7 @@ to emit structured session and object audit logs routed to Loki.
 ### Deployment rules
 
 - pgaudit is enabled by adding `shared_preload_libraries = 'pgaudit'` to
-  `postgresql.conf` managed by the Ansible role for `postgres-lv3`
+  `postgresql.conf` managed by the Ansible role for `postgres`
 - the pgaudit package version follows the extension build compatible with the
   deployed PostgreSQL major version
 - enabling pgaudit requires a PostgreSQL restart; this is coordinated as a
@@ -78,7 +78,7 @@ pgaudit is configured at two levels:
 
 - pgaudit log lines follow the format:
   `AUDIT: SESSION,<count>,<count>,<class>,<command>,<object_type>,<object>,<statement>,<param>`
-- the Alloy agent on `postgres-lv3` is configured with a pipeline stage that
+- the Alloy agent on `postgres` is configured with a pipeline stage that
   parses pgaudit-tagged lines into structured Loki labels:
   `{job="postgres-audit", db="<db>", db_role="<role>", command_class="<class>"}`
 - the same pipeline parses `connection authorized:` lines from PostgreSQL's
@@ -86,7 +86,7 @@ pgaudit is configured at two levels:
   by database and role
 - the structured labels enable Loki queries such as "all DDL statements in the
   last 24 hours by the `keycloak` role" without a full-text scan
-- the Prometheus scrape of Alloy on `postgres-lv3` exposes:
+- the Prometheus scrape of Alloy on `postgres` exposes:
   - `postgres_audit_events_total`
   - `postgres_connection_authorized_total`
   - `postgres_unknown_connection_events_total`
@@ -101,7 +101,7 @@ pgaudit is configured at two levels:
   - the `PostgresUnknownRoleConnection` alert
   - an ntfy critical notification (ADR 0299)
   - a NATS `platform.security.pgaudit_unknown_role` event published by a local
-    Alertmanager relay on `monitoring-lv3`
+    Alertmanager relay on `monitoring`
 
 ## Consequences
 
@@ -119,7 +119,7 @@ pgaudit is configured at two levels:
 **Negative / Trade-offs**
 
 - DDL audit logging adds write volume to the PostgreSQL log file and to Loki; the
-  Loki retention policy and disk budget for `monitoring-lv3` must account for the
+  Loki retention policy and disk budget for `monitoring` must account for the
   additional log stream
 - per-parameter logging (`pgaudit.log_parameter = on`) is not enabled by default
   because it logs query parameters in plaintext, which could expose sensitive

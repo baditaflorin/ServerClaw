@@ -63,7 +63,7 @@ ownership_manifest:
     mode: shared_contract
     contract: ws-realtime-dynamic-children-generated-v1
 canonical_truth:
-  changelog_entry: replaces the static Netdata child host list with a dynamic inventory-group expression so all production hosts stream to realtime.lv3.org automatically when new VMs are added to the inventory
+  changelog_entry: replaces the static Netdata child host list with a dynamic inventory-group expression so all production hosts stream to realtime.example.com automatically when new VMs are added to the inventory
   release_bump: patch
   included_in_repo_version: 0.178.59
   latest_receipts: {}

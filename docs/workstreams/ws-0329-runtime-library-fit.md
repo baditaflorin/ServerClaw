@@ -8,7 +8,7 @@
 - Implemented On: pending
 - Live Applied On: N/A
 - Branch: `codex/adr-0319-library-fit-main`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-library-fit/.worktrees/adr-0319-library-fit-main`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0319-library-fit/.worktrees/adr-0319-library-fit-main`
 - Owner: codex
 - Depends On: `adr-0319-runtime-pools-as-the-service-partition-boundary`, `adr-0320-pool-scoped-deployment-surfaces-and-agent-execution-lanes`, `adr-0321-runtime-pool-memory-envelopes-and-reserved-host-headroom`, `adr-0322-memory-pressure-autoscaling-for-elastic-runtime-pools`, `adr-0323-service-mobility-tiers-and-migration-waves-for-runtime-pools`
 - Conflicts With: none

@@ -21,28 +21,28 @@ make install-hooks
 make pre-push-gate
 ```
 
-See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate.md) for the hook installation, bypass, and post-merge workflow details.
+See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/validation-gate.md) for the hook installation, bypass, and post-merge workflow details.
 
 ADR 0229 adds the private Gitea server-side replay of that gate plus the
 runner-backed branch validation workflow:
 
 ```bash
-export GITEA_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)"
+export GITEA_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/admin-token.txt)"
 export GITEA_BASIC_AUTH="$(printf '%s:%s' 'ops-gitea' "${GITEA_TOKEN}" | base64)"
 
 git -c http.extraHeader="Authorization: Basic ${GITEA_BASIC_AUTH}" \
-  push http://100.64.0.1:3009/ops/proxmox_florin_server.git \
+  push http://100.64.0.1:3009/ops/proxmox-host_server.git \
   HEAD:refs/heads/codex/validation-smoke
 
 curl -sS \
   -H "Authorization: token ${GITEA_TOKEN}" \
-  "http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/actions/runs?limit=5" | \
+  "http://100.64.0.1:3009/api/v1/repos/ops/proxmox-host_server/actions/runs?limit=5" | \
   jq '{workflow_runs: [.workflow_runs[] | {id, status, conclusion, head_branch, head_sha}]}'
 ```
 
 That push path only creates the branch ref after the server-side validation gate
 passes. The subsequent workflow run executes `.gitea/workflows/validate.yml` on
-runner `docker-build-lv3`.
+runner `docker-build`.
 
 ## What The Pipeline Checks
 
@@ -83,23 +83,23 @@ runner `docker-build-lv3`.
 - repo-scoped `playbooks/windmill.yml` replays now mirror the active git worktree automatically because the worker-checkout archive dereferences the scoped-runner shard symlinks before upload
 - the build-server `remote-validate` and `remote-pre-push` paths now stage one immutable content-addressed repository snapshot per run and execute from a fresh `.lv3-runs/<run_id>/repo` namespace instead of a mutable remote mirror
 - ADR 0306 runs the IaC policy slice through the `check-runner/security` image so Checkov stays pinned to the same offline version across controller-local, build-server, and workflow replays
-- `make converge-windmill` now pins `/srv/proxmox_florin_server` to the active repo worktree automatically via `windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)`
+- `make converge-windmill` now pins `/srv/proxmox-host_server` to the active repo worktree automatically via `windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)`
 - if a Windmill replay starts from an out-of-tree or temporary playbook path instead of the Makefile wrapper, pass `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` explicitly
 - validation resolves tracked JSON files against the repo root, falls back to `python3` when `jq` is unavailable, and skips rsync-excluded generated JSON artifacts that are intentionally absent from mirrored remote workspaces
 - workstream metadata is authored under `workstreams/` and the validation gate now fails if `workstreams.yaml` was not regenerated from that shard source
-- required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
+- required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`
 - lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate
 - CI runs the same contract through `make validate`
 - `make validate-semgrep` replays the shared Semgrep wrapper directly and produces the same SARIF and summary artifacts used by the remote gate
-- the private Gitea push gate replays the heavier validation contract remotely on `docker-build-lv3` before accepting a pushed ref
-- successful branch pushes to private Gitea trigger `.gitea/workflows/validate.yml` on the same `docker-build-lv3` runner, giving a server-resident confirmation of the repo state that actually crossed the git boundary
+- the private Gitea push gate replays the heavier validation contract remotely on `docker-build` before accepting a pushed ref
+- successful branch pushes to private Gitea trigger `.gitea/workflows/validate.yml` on the same `docker-build` runner, giving a server-resident confirmation of the repo state that actually crossed the git boundary
 
 ADR 0083 adds an alternative containerised execution path for the heavier lint and validation commands:
 
 - `make build-check-runners` builds the pinned runner images under `docker/check-runners/`
-- `make run-checks` executes manifest-backed Docker checks from [config/check-runner-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/check-runner-manifest.json)
-- [docs/runbooks/docker-check-runners.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/docker-check-runners.md) records the image rebuild and publication procedure
+- `make run-checks` executes manifest-backed Docker checks from [config/check-runner-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/check-runner-manifest.json)
+- [docs/runbooks/docker-check-runners.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/docker-check-runners.md) records the image rebuild and publication procedure
 
 ## Optional Stage Commands
 
@@ -148,21 +148,21 @@ instead of receiving those dependencies from a composition root.
 
 `make validate-data-models` validates the canonical machine-readable repository state, including:
 
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
-- [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
-- [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml)
-- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-- [config/correction-loops.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply/config/correction-loops.json)
-- [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
-- [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
-- [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
-- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json)
-- [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json)
-- [config/provider-boundary-catalog.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/provider-boundary-catalog.yaml)
-- [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
-- [config/immutable-guest-replacement-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/immutable-guest-replacement-catalog.json)
-- [config/replaceability-review-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/replaceability-review-catalog.json)
-- [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml)
+- [inventory/host_vars/proxmox-host.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/host_vars/proxmox-host.yml)
+- [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/group_vars/platform.yml)
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+- [config/correction-loops.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0204-live-apply/config/correction-loops.json)
+- [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json)
+- [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/control-plane-lanes.json)
+- [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/api-publication.json)
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/controller-local-secrets.json)
+- [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/health-probe-catalog.json)
+- [config/provider-boundary-catalog.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/provider-boundary-catalog.yaml)
+- [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/uptime-kuma/monitors.json)
+- [config/immutable-guest-replacement-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/immutable-guest-replacement-catalog.json)
+- [config/replaceability-review-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/replaceability-review-catalog.json)
+- [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies)
 
 `make validate-architecture-fitness` currently enforces ADR 0212 by checking that every governed critical product ADR carries the required `Replaceability Scorecard` and `Vendor Exit Plan` sections with non-placeholder values.
 
@@ -175,11 +175,11 @@ python3 scripts/correction_loops.py --validate
 ## Troubleshooting
 
 - if validation fails during collection bootstrap, rerun after confirming network access to Ansible Galaxy and package indexes
-- if validation fails on generated vars, regenerate [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml) from the canonical inputs instead of hand-editing the file
+- if validation fails on generated vars, regenerate [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/group_vars/platform.yml) from the canonical inputs instead of hand-editing the file
 - if CI fails but local validation passes, rerun `make validate` from a clean working tree to catch unstaged or ignored-file drift
 - if a local fallback or login shell picks up an older Python and direct validators fail on `int | None` or similar modern type syntax, export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` and rerun
 - if the build-server immutable snapshot is missing a generated JSON artifact that is intentionally excluded from `.rsync-exclude`, keep the artifact excluded and extend the validation contract only if the remote gate truly needs that file
-- if the build-server gate fails with `No space left on device`, prune stale session workspaces under `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces` (plus `.lv3-runs` and `.lv3-snapshots`) to restore disk capacity before retrying
+- if the build-server gate fails with `No space left on device`, prune stale session workspaces under `/home/ops/builds/proxmox-host_server/.lv3-session-workspaces` (plus `.lv3-runs` and `.lv3-snapshots`) to restore disk capacity before retrying
 - if validation reports a stale workstream registry, rerun `python3 scripts/workstream_registry.py --write` before retrying the broader gate
 - if validation reports stale root summary documents or an ADR 0328 line-budget overflow, rerun `make generate-status-docs` and commit the regenerated `README.md`, changelog, release-note indexes, and history ledgers together
-- if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point
+- if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point

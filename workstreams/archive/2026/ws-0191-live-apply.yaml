@@ -70,7 +70,7 @@ canonical_truth:
   changelog_entry: implemented ADR 0191 immutable guest replacement for stateful
     and edge services, adding the governed planner, fail-closed production
     live-apply guard, and verified Grafana monitoring exception receipt on
-    `monitoring-lv3`
+    `monitoring`
   release_bump: patch
   included_in_repo_version: 0.177.13
   latest_receipts:

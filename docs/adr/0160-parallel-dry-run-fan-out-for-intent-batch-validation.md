@@ -37,10 +37,10 @@ We implement a controller-local **parallel dry-run fan-out** for multi-intent ba
 
 Repository implementation landed in `0.145.0` with the following surfaces:
 
-- `GoalCompiler.compile_batch()` in [platform/goal_compiler/compiler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/compiler.py)
-- `IntentBatchPlanner` and the batch plan dataclasses in [platform/goal_compiler/batch.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/batch.py)
-- operator preview in [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
-- batch-plan ledger event registration in [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ledger-event-types.yaml)
+- `GoalCompiler.compile_batch()` in [platform/goal_compiler/compiler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/goal_compiler/compiler.py)
+- `IntentBatchPlanner` and the batch plan dataclasses in [platform/goal_compiler/batch.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/goal_compiler/batch.py)
+- operator preview in [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py)
+- batch-plan ledger event registration in [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/ledger-event-types.yaml)
 
 ### Batch compilation
 

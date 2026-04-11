@@ -4,7 +4,7 @@
 - Title: Generated deployment history portal synthesising receipts, promotions, and audit events into a human-readable timeline
 - Status: live_applied
 - Branch: `codex/adr-0081-changelog-portal`
-- Worktree: `../proxmox_florin_server-changelog-portal`
+- Worktree: `../proxmox-host_server-changelog-portal`
 - Owner: codex
 - Depends On: `adr-0074-ops-portal`, `adr-0073-promotion-pipeline`, `adr-0066-mutation-audit-log`, `adr-0052-loki-logs`, `adr-0075-service-capability-catalog`
 - Conflicts With: none
@@ -14,7 +14,7 @@
 
 - write `scripts/generate_changelog_portal.py` that reads receipts, promotions, and Loki audit events into a static HTML site at `build/changelog-portal/`
 - implement four portal views: Timeline, Per-service history, Per-environment history, Promotions log
-- add `changelog.lv3.org` NGINX route and subdomain catalog entry
+- add `changelog.example.com` NGINX route and subdomain catalog entry
 - add `get-deployment-history` tool to `config/agent-tool-registry.json`
 - replace the manual detail section of `changelog.md` with a pointer to the portal; preserve the `## Unreleased` scratchpad section
 - add `make generate-changelog-portal` target and hook into `make generate-status`
@@ -31,7 +31,7 @@
 
 - `scripts/generate_changelog_portal.py`
 - `build/changelog-portal/` (gitignored)
-- updated NGINX config for `changelog.lv3.org`
+- updated NGINX config for `changelog.example.com`
 - updated `config/subdomain-catalog.json`
 - updated `config/agent-tool-registry.json` (`get-deployment-history` tool)
 - `docs/release-notes/`
@@ -44,14 +44,14 @@
 
 ## Expected Live Surfaces
 
-- `https://changelog.lv3.org` serving the deployment history portal after a deliberate apply from `main`
+- `https://changelog.example.com` serving the deployment history portal after a deliberate apply from `main`
 - `get-deployment-history` tool callable via agent tool registry
 
 ## Verification
 
 - `make generate-changelog-portal` produces `build/changelog-portal/index.html` with at least 20 entries from existing receipts
 - per-service view for grafana shows all receipts mentioning grafana
-- `changelog.lv3.org` serves the static portal with Keycloak auth gate
+- `changelog.example.com` serves the static portal with Keycloak auth gate
 - `get-deployment-history` tool returns structured JSON for a query of `service_id=grafana, days=30`
 
 ## Merge Criteria
@@ -70,4 +70,4 @@
 ## Outcome
 
 - repository implementation is complete on `main`
-- live publication and TLS verification for `changelog.lv3.org` completed on platform version `0.40.0`
+- live publication and TLS verification for `changelog.example.com` completed on platform version `0.40.0`

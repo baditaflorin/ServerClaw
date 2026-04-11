@@ -3,7 +3,7 @@
 ## Purpose
 
 The operations portal is a repo-managed interactive runtime served at
-`https://ops.lv3.org` from `docker-runtime-lv3`.
+`https://ops.example.com` from `docker-runtime`.
 
 It gives operators one place to answer:
 
@@ -187,7 +187,7 @@ promotion-bypass audit event before running the service playbook.
 
 `ALLOW_IN_PLACE_MUTATION=true` is the documented ADR 0191 narrow exception for
 `ops_portal` because the live service still runs on immutable-replacement-governed
-`docker-runtime-lv3`. The `live-apply-service` target now injects
+`docker-runtime`. The `live-apply-service` target now injects
 `ops_portal_repo_root=$(REPO_ROOT)` automatically for `ops_portal`, so the
 active worktree is the exact checkout mirrored into `/opt/ops-portal/service`
 without needing a second manual override.
@@ -207,7 +207,7 @@ ps -axo pid=,etime=,command= | rg 'ws-.*ops_portal.*playbooks/services/ops_porta
 ```
 
 Do not run two branch-local `ops_portal` production replays at the same time.
-Concurrent applies share `/opt/ops-portal/service` on `docker-runtime-lv3` and
+Concurrent applies share `/opt/ops-portal/service` on `docker-runtime` and
 can clobber each other's uploaded tree, which leaves partial routes such as
 `/partials/launcher` or `/partials/tasks` missing even when the playbook itself
 reached the verify phase. The runtime role now refreshes
@@ -229,7 +229,7 @@ After a live ADR 0313 replay, also confirm the root page contains the help
 drawer strings and the task-lane shell cues from the guest-local runtime:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
   'curl -fsS http://127.0.0.1:8092/ | grep -E "Contextual Help|Live apply|Escalation Path|Journey-Aware Home|Attention Center|Platform Overview|Start|Observe|Change|Learn|Recover"'
 ```
@@ -239,32 +239,32 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 The portal publication path has three repo-managed components:
 
 - `ops_portal_runtime` serves the interactive FastAPI shell on
-  `docker-runtime-lv3`
-- `public_edge_oidc_auth` runs `oauth2-proxy` on `nginx-lv3` and uses the Keycloak client secret mirrored at `.local/keycloak/ops-portal-client-secret.txt`
-- `nginx_edge_publication` forwards authenticated traffic for `ops.lv3.org` to
+  `docker-runtime`
+- `public_edge_oidc_auth` runs `oauth2-proxy` on `nginx-edge` and uses the Keycloak client secret mirrored at `.local/keycloak/ops-portal-client-secret.txt`
+- `nginx_edge_publication` forwards authenticated traffic for `ops.example.com` to
   the interactive runtime instead of serving the old static snapshot directly
 
 Internal verification should show an unauthenticated request redirecting to the sign-in flow:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes ops@100.118.189.95 \
-  'curl -k -I -H "Host: ops.lv3.org" https://10.10.10.10'
+  'curl -k -I -H "Host: ops.example.com" https://10.10.10.10'
 ```
 
-Expected result: `HTTP/2 302` with `Location: https://ops.lv3.org/oauth2/sign_in?...`
+Expected result: `HTTP/2 302` with `Location: https://ops.example.com/oauth2/sign_in?...`
 
 External publication is now verified end to end:
 
-- `https://ops.lv3.org` returns `302` to `/oauth2/sign_in` for unauthenticated requests
-- `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` returns `200`
+- `https://ops.example.com` returns `302` to `/oauth2/sign_in` for unauthenticated requests
+- `https://sso.example.com/realms/lv3/.well-known/openid-configuration` returns `200`
 
 Two network details are now part of the live publication contract:
 
-- `nginx-lv3` sets `proxmox_firewall_enabled: false`, which leaves `net0` at `firewall=0` and avoids the Proxmox `fwbr*` bridge path that was dropping public `80/443` SYNs before the guest kernel saw them
-- `docker-runtime-lv3` must allow TCP `8091` from `nginx-lv3` in both the Proxmox VM firewall and the in-guest nftables policy so `sso.lv3.org` and `oauth2-proxy` can reach Keycloak
+- `nginx-edge` sets `proxmox_firewall_enabled: false`, which leaves `net0` at `firewall=0` and avoids the Proxmox `fwbr*` bridge path that was dropping public `80/443` SYNs before the guest kernel saw them
+- `docker-runtime` must allow TCP `8091` from `nginx-edge` in both the Proxmox VM firewall and the in-guest nftables policy so `sso.example.com` and `oauth2-proxy` can reach Keycloak
 
-If cloud access to `https://ops.lv3.org` regresses, verify those two conditions before changing the portal or Keycloak configuration again.
+If cloud access to `https://ops.example.com` regresses, verify those two conditions before changing the portal or Keycloak configuration again.
 
 ## Application Launcher
 
@@ -284,7 +284,7 @@ Workflow entries only appear when the workflow declares
 
 Operator flow:
 
-1. Open `https://ops.lv3.org` and complete the normal sign-in flow.
+1. Open `https://ops.example.com` and complete the normal sign-in flow.
 2. Select **Application Launcher** in the masthead.
 3. Search for a destination, switch persona if needed, and use the task-lane
    groups to narrow the list.
@@ -317,7 +317,7 @@ not a healthy launcher rollout.
 
 ## Journey-Aware Entry Routing
 
-ADR 0308 adds a dedicated entry route at `https://ops.lv3.org/entry` and the
+ADR 0308 adds a dedicated entry route at `https://ops.example.com/entry` and the
 local neutral view `http://127.0.0.1:8092/entry?neutral=1`.
 
 The entry router now applies this order after sign-in:
@@ -343,12 +343,12 @@ browser cookies:
 
 Pinning a preferred home stays blocked until the activation checklist is
 completed or explicitly skipped. Invalid `next=` URLs fail closed back to the
-neutral start surface; only local paths and `https://*.lv3.org` URLs are
+neutral start surface; only local paths and `https://*.example.com` URLs are
 accepted.
 
 The safest live verification path is:
 
-1. open `https://ops.lv3.org/entry` and confirm the unauthenticated edge still
+1. open `https://ops.example.com/entry` and confirm the unauthenticated edge still
    redirects through `oauth2-proxy`
 2. authenticate and open `/entry?neutral=1`
 3. confirm **Journey-Aware Start Surface** renders with the activation
@@ -362,7 +362,7 @@ The safest live verification path is:
 Guest-local verification should include:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 \
   'curl -fsS http://127.0.0.1:8092/entry?neutral=1 | grep -E "Journey-Aware Start Surface|Pin as home|Skip for now"'
 ```
@@ -379,7 +379,7 @@ Checklist inputs come from repo-managed data:
 
 Portal behavior:
 
-- the checklist renders at `https://ops.lv3.org#activation`
+- the checklist renders at `https://ops.example.com#activation`
 - item progress is persisted in the signed browser session so normal refreshes
   and redirects keep the current first-run state
 - launcher entries with purpose `administer` stay out of the active destination
@@ -390,7 +390,7 @@ Portal behavior:
 
 Operator flow:
 
-1. Open `https://ops.lv3.org` and start at the **First-Run Activation** panel.
+1. Open `https://ops.example.com` and start at the **First-Run Activation** panel.
 2. Mark the required items complete as you review the linked runbooks and portal
    panels.
 3. Use `Validation Gate Status` as the safe first task inside the runbook
@@ -416,7 +416,7 @@ timeline to the interactive portal.
 
 Operator flow:
 
-1. Open `https://ops.lv3.org`.
+1. Open `https://ops.example.com`.
 2. Scroll to **Attention Center**.
 3. Review the active queue for drift, runtime assurance, blocked coordination,
    maintenance, or live-apply follow-up items.
@@ -427,7 +427,7 @@ Operator flow:
    auditable without deleting the underlying source signal.
 
 The current implementation persists attention state under the managed runtime
-path `/opt/ops-portal/state/attention-state.json` on `docker-runtime-lv3`
+path `/opt/ops-portal/state/attention-state.json` on `docker-runtime`
 instead of keeping it only in browser session data.
 
 The safest live verification path is:
@@ -443,7 +443,7 @@ The interactive portal runbook panel now loads its entries from the platform API
 
 Operator flow:
 
-1. Open `https://ops.lv3.org`.
+1. Open `https://ops.example.com`.
 2. Use the **Runbook Launcher** panel.
 3. Pick one runbook that explicitly opts into the `ops_portal` delivery surface.
 4. Submit JSON parameters if the runbook requires them.
@@ -491,7 +491,7 @@ The interactive portal overview now includes the declared-to-live attestation ro
 
 Operator flow:
 
-1. Open `https://ops.lv3.org`.
+1. Open `https://ops.example.com`.
 2. Check the **Attested** summary tile in the overview strip.
 3. Open a service card and read the `Declared-live ...` hint strip for endpoint, route, and receipt witness state.
 4. If the overview banner says declared-to-live data is degraded, verify the upstream gateway payload before changing portal code.
@@ -500,7 +500,7 @@ Internal verification from a trusted network path:
 
 ```bash
 curl -sf http://10.10.10.20:8092/partials/overview | grep -E 'Attested|Declared-live'
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/attestation
 ```
 
 Expected result:

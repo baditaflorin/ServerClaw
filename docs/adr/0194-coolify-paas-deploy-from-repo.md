@@ -21,15 +21,15 @@ The next platform phase explicitly calls for ingress, security, backup, and API 
 
 ## Decision
 
-We introduce Coolify as a dedicated repo-managed PaaS guest at `coolify-lv3` and expose it through two repo-managed ingress lanes:
+We introduce Coolify as a dedicated repo-managed PaaS guest at `coolify` and expose it through two repo-managed ingress lanes:
 
-- `https://coolify.lv3.org` for the dashboard and API, protected by the shared oauth2-proxy and Keycloak edge flow
-- `https://apps.lv3.org` plus `https://*.apps.lv3.org` as the public application hostname space forwarded by the shared NGINX edge into the Coolify deployment proxy on `coolify-lv3`
+- `https://coolify.example.com` for the dashboard and API, protected by the shared oauth2-proxy and Keycloak edge flow
+- `https://apps.example.com` plus `https://*.apps.example.com` as the public application hostname space forwarded by the shared NGINX edge into the Coolify deployment proxy on `coolify`
 
 ### Runtime shape
 
 - service ids: `coolify` and `coolify_apps`
-- runtime host: `coolify-lv3`
+- runtime host: `coolify`
 - VM address: `10.10.10.70`
 - VMID: `170`
 - template: `lv3-docker-host`
@@ -42,12 +42,12 @@ We introduce Coolify as a dedicated repo-managed PaaS guest at `coolify-lv3` and
 - the Coolify VM is provisioned and converged through repo-managed Ansible
 - the role installs Docker, renders the Coolify compose stack, bootstraps the initial root account, enables the API, and mints a durable personal access token
 - a controller-local artifact set stores the generated root password, API token, and server registration SSH key material
-- Coolify registers `coolify-lv3` itself as the managed deployment server so repo-triggered deployments stay isolated from `docker-runtime-lv3`
+- Coolify registers `coolify` itself as the managed deployment server so repo-triggered deployments stay isolated from `docker-runtime`
 
 ### Repo deployment boundary
 
 - the repository adds a governed `lv3 deploy-repo ...` path backed by a Coolify API wrapper
-- the first managed deployment contract targets Git repositories and publishes them into the wildcard `*.apps.lv3.org` edge space
+- the first managed deployment contract targets Git repositories and publishes them into the wildcard `*.apps.example.com` edge space
 - the wrapper creates or reuses the project, deployment server, and application object, then triggers deployment and waits for readiness
 
 ## Consequences
@@ -75,10 +75,10 @@ We introduce Coolify as a dedicated repo-managed PaaS guest at `coolify-lv3` and
 
 Live apply completed first from `codex/ws-0194-live-apply` and then was replayed from merged mainline on `codex/ws-0194-main-merge` commit `093af353` on 2026-03-28.
 
-- `make converge-coolify` completed successfully from the merged-main candidate with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
-- `python3 scripts/coolify_tool.py whoami` confirmed the private controller path at `http://100.64.0.1:8012`, public dashboard URL `https://coolify.lv3.org`, app space `https://apps.lv3.org`, and a reachable plus usable local deployment server `coolify-lv3`.
+- `make converge-coolify` completed successfully from the merged-main candidate with `coolify ok=115 changed=7 failed=0`, `nginx-edge ok=71 changed=5 failed=0`, and `proxmox-host ok=43 changed=5 failed=0`.
+- `python3 scripts/coolify_tool.py whoami` confirmed the private controller path at `http://100.64.0.1:8012`, public dashboard URL `https://coolify.example.com`, app space `https://apps.example.com`, and a reachable plus usable local deployment server `coolify`.
 - `python3 scripts/coolify_tool.py deploy-repo --repo https://github.com/coollabsio/coolify-examples --branch main --base-directory /static --app-name repo-smoke --build-pack static --subdomain repo-smoke --wait --timeout 900` finished successfully on the merged-main replay with deployment `klmsg3ybgvp7xwnk8op3cdlp` for application `r4z9zeqpci7uykiw3bj08hrf`.
-- Direct public-edge verification against `65.108.75.123` showed `https://coolify.lv3.org` returning the expected oauth2-proxy `302` challenge, `https://repo-smoke.apps.lv3.org` returning `200` with the expected example-page content, and `https://apps.lv3.org` returning `404` while no default apex app is assigned.
+- Direct public-edge verification against `203.0.113.1` showed `https://coolify.example.com` returning the expected oauth2-proxy `302` challenge, `https://repo-smoke.apps.example.com` returning `200` with the expected example-page content, and `https://apps.example.com` returning `404` while no default apex app is assigned.
 - The canonical platform-version evidence now lives in `receipts/live-applies/2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply.json`, which supersedes the earlier branch-local receipt while preserving it for workstream history.
 
 ## Related ADRs

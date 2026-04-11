@@ -15,9 +15,9 @@ def write_json(path: Path, payload: object) -> None:
 def test_build_governed_assets_uses_existing_redundancy_sources() -> None:
     host_vars = {
         "proxmox_guests": [
-            {"vmid": 110, "name": "nginx-lv3"},
-            {"vmid": 160, "name": "backup-lv3"},
-            {"vmid": 170, "name": "coolify-lv3"},
+            {"vmid": 110, "name": "nginx-edge"},
+            {"vmid": 160, "name": "backup"},
+            {"vmid": 170, "name": "coolify"},
         ]
     }
     redundancy_catalog = {
@@ -32,16 +32,16 @@ def test_build_governed_assets_uses_existing_redundancy_sources() -> None:
 
     assets = ledger.build_governed_assets(host_vars, redundancy_catalog, dr_targets)
 
-    assert sorted(asset.asset_id for asset in assets) == ["backup-lv3", "coolify-lv3", "nginx-lv3"]
-    backup_asset = next(asset for asset in assets if asset.asset_id == "backup-lv3")
+    assert sorted(asset.asset_id for asset in assets) == ["backup", "coolify", "nginx-edge"]
+    backup_asset = next(asset for asset in assets if asset.asset_id == "backup")
     assert backup_asset.storage_id == "lv3-backup-offsite"
-    coolify_asset = next(asset for asset in assets if asset.asset_id == "coolify-lv3")
+    coolify_asset = next(asset for asset in assets if asset.asset_id == "coolify")
     assert coolify_asset.dependent_services == ["coolify", "coolify_apps"]
 
 
 def test_evaluate_asset_marks_uncovered_when_offsite_storage_is_missing() -> None:
     asset = ledger.GovernedAsset(
-        asset_id="backup-lv3",
+        asset_id="backup",
         vmid=160,
         source_id="proxmox_offsite_vm_160",
         source_kind="offsite",
@@ -107,14 +107,14 @@ def test_load_restore_evidence_prefers_latest_successful_receipt(tmp_path: Path)
 
 
 def test_restic_file_assets_are_covered_from_latest_snapshot_receipt(tmp_path: Path, monkeypatch) -> None:
-    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml"
+    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
     redundancy_catalog_path = tmp_path / "config" / "service-redundancy-catalog.json"
     dr_targets_path = tmp_path / "config" / "disaster-recovery-targets.json"
     restic_catalog_path = tmp_path / "config" / "restic-file-backup-catalog.json"
     restic_latest_path = tmp_path / "receipts" / "restic-snapshots-latest.json"
     restore_dir = tmp_path / "receipts" / "restore-verifications"
 
-    write_json(host_vars_path, {"proxmox_guests": [{"vmid": 110, "name": "nginx-lv3"}]})
+    write_json(host_vars_path, {"proxmox_guests": [{"vmid": 110, "name": "nginx-edge"}]})
     write_json(redundancy_catalog_path, {"services": {"homepage": {"backup_sources": ["pbs_vm_110"]}}})
     write_json(dr_targets_path, {"offsite_backup": {"storage_id": "lv3-backup-offsite", "schedule_utc": "04:00"}})
     write_json(

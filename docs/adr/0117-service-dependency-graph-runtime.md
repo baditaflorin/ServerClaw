@@ -28,7 +28,7 @@ Nodes and edges are stored in two tables in the `graph` Postgres schema:
 
 ```sql
 CREATE TABLE graph.nodes (
-    id          TEXT PRIMARY KEY,           -- e.g. 'service:netbox', 'host:docker-runtime-lv3'
+    id          TEXT PRIMARY KEY,           -- e.g. 'service:netbox', 'host:docker-runtime'
     kind        TEXT NOT NULL,              -- service | host | network | dns | cert | secret | vm
     label       TEXT NOT NULL,
     tier        INTEGER,                    -- criticality tier from ADR 0075
@@ -52,7 +52,7 @@ CREATE INDEX graph_edges_to_idx   ON graph.edges (to_node);
 | Edge kind | Meaning | Example |
 |---|---|---|
 | `depends_on` | Service A requires Service B to function | `service:netbox → service:postgres` |
-| `hosted_on` | Service A runs on Host B | `service:netbox → host:docker-runtime-lv3` |
+| `hosted_on` | Service A runs on Host B | `service:netbox → host:docker-runtime` |
 | `resolved_by` | Service A's DNS name is authoritative on DNS server B | `service:netbox → dns:internal-resolver` |
 | `secured_by` | Service A's TLS certificate is issued by CA B | `service:netbox → cert:step-ca-internal` |
 | `replicates_to` | Node A replicates data to Node B | `host:postgres-primary → host:postgres-replica` |
@@ -82,7 +82,7 @@ downstream = graph.descendants("service:postgres")
 
 # Upstream dependency chain of a node
 upstream = graph.ancestors("service:netbox")
-# Returns: [service:postgres, host:docker-runtime-lv3, cert:step-ca-internal, ...]
+# Returns: [service:postgres, host:docker-runtime, cert:step-ca-internal, ...]
 
 # Shortest dependency path between two nodes
 path = graph.path("service:netbox", "host:proxmox-host-lv3")
@@ -153,8 +153,8 @@ The focused pytest run passed with `29 passed`, both syntax checks succeeded, an
 ADR 0117 was replayed live from the separate `codex/ws-0117-live-apply` worktree branch on 2026-03-26 and verified end to end across Windmill, PostgreSQL, and the platform API gateway.
 
 - `make converge-windmill` completed successfully after repairing the Windmill graph-worker fallback runtime, exporting the graph DSNs into the managed runtime environment, granting `windmill_admin` graph-schema write access, and refreshing `world_state.current_view` after the ADR 0113 schema replay.
-- The live platform now reports `world_state.current_view` as populated, stores graph schedule arguments in Windmill's `schedule.args`, and serves authenticated traversal results from `https://api.lv3.org/v1/graph/*`.
-- Post-apply verification confirmed graph data in PostgreSQL, correct descendants and path results through the gateway, and successful repo-managed graph rebuild execution from the live checkout on `docker-runtime-lv3`.
+- The live platform now reports `world_state.current_view` as populated, stores graph schedule arguments in Windmill's `schedule.args`, and serves authenticated traversal results from `https://api.example.com/v1/graph/*`.
+- Post-apply verification confirmed graph data in PostgreSQL, correct descendants and path results through the gateway, and successful repo-managed graph rebuild execution from the live checkout on `docker-runtime`.
 
 Protected integration files still intentionally wait for merge to `main`: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml`.
 

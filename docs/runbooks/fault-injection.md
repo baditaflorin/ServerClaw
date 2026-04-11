@@ -1,15 +1,15 @@
 # Fault Injection
 
-Use this runbook to execute the ADR 0171 controlled fault-injection suite against the live `docker-runtime-lv3` control-plane services.
+Use this runbook to execute the ADR 0171 controlled fault-injection suite against the live `docker-runtime` control-plane services.
 
 ## Scope
 
-- scenario catalog: [config/fault-scenarios.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/fault-scenarios.yaml)
-- worker wrapper: [config/windmill/scripts/fault-injection.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/fault-injection.py)
-- runner: [scripts/fault_injection.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fault_injection.py)
-- framework: [platform/faults/injector.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/faults/injector.py)
+- scenario catalog: [config/fault-scenarios.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/fault-scenarios.yaml)
+- worker wrapper: [config/windmill/scripts/fault-injection.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/fault-injection.py)
+- runner: [scripts/fault_injection.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/fault_injection.py)
+- framework: [platform/faults/injector.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/faults/injector.py)
 
-The first implementation intentionally targets the local `docker-runtime-lv3` subset only:
+The first implementation intentionally targets the local `docker-runtime` subset only:
 
 - `fault:keycloak-unavailable`
 - `fault:openbao-unavailable`
@@ -33,7 +33,7 @@ make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:keycloak-unavail
 If you need to inspect the worker-side plan without applying a fault:
 
 ```bash
-uv run --with pyyaml python config/windmill/scripts/fault-injection.py --repo-path /srv/proxmox_florin_server --scenario-names fault:keycloak-unavailable --dry-run
+uv run --with pyyaml python config/windmill/scripts/fault-injection.py --repo-path /srv/proxmox-host_server --scenario-names fault:keycloak-unavailable --dry-run
 ```
 
 ## Expected Outputs
@@ -62,5 +62,5 @@ Current scheduled subset:
 
 ## Troubleshooting
 
-- If the Windmill API returns `404` for `f/lv3/fault-injection` after the runtime replay, confirm the guest checkout at `/srv/proxmox_florin_server` contains the released script, seed the script locally through the guest Windmill API from that checkout, and record that manual recovery step in the live-apply receipt before closing the rollout.
+- If the Windmill API returns `404` for `f/lv3/fault-injection` after the runtime replay, confirm the guest checkout at `/srv/proxmox-host_server` contains the released script, seed the script locally through the guest Windmill API from that checkout, and record that manual recovery step in the live-apply receipt before closing the rollout.
 - If the shared `playbooks/windmill.yml` replay fails later in unrelated raw-app sync with `password authentication failed for user "windmill_admin"`, treat that as a separate Windmill admin-surface issue after verifying the fault-injection script and schedule surfaces already landed.

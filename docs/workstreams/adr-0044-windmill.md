@@ -1,14 +1,14 @@
 # Workstream ADR 0044: Windmill For Agent And Operator Workflows
 
-- ADR: [ADR 0044](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0044-windmill-for-agent-and-operator-workflows.md)
+- ADR: [ADR 0044](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0044-windmill-for-agent-and-operator-workflows.md)
 - Title: On-platform workflow runtime for agents and operators
 - Status: live_applied
 - Branch: `codex/adr-0044-windmill`
-- Worktree: `../proxmox_florin_server-windmill`
+- Worktree: `../proxmox-host_server-windmill`
 - Owner: codex
 - Depends On: `adr-0026-postgres-vm`
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `postgres-lv3`, workflow APIs, webhook entry points
+- Shared Surfaces: `docker-runtime`, `postgres`, workflow APIs, webhook entry points
 
 ## Scope
 
@@ -35,8 +35,8 @@
 
 ## Expected Live Surfaces
 
-- private Windmill runtime on `docker-runtime-lv3`
-- PostgreSQL database `windmill` on `postgres-lv3`
+- private Windmill runtime on `docker-runtime`
+- PostgreSQL database `windmill` on `postgres`
 - Tailscale operator entrypoint at `http://100.118.189.95:8005`
 - repo-managed workspace `lv3` with seeded script `f/lv3/windmill_healthcheck`
 
@@ -45,8 +45,8 @@
 - `make syntax-check-windmill`
 - `make converge-windmill`
 - `curl -s http://100.118.189.95:8005/api/version`
-- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.118.189.95:8005/api/users/whoami`
-- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{"probe":"manual-run"}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck`
+- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" http://100.118.189.95:8005/api/users/whoami`
+- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{"probe":"manual-run"}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck`
 
 ## Merge Criteria
 

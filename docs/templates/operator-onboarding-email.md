@@ -8,7 +8,7 @@ Copy and customize this template when sending account credentials manually
 ## Subject Line
 
 ```
-[lv3.org] Platform access — <FIRST_NAME> — expires <EXPIRY_DATE>
+[example.com] Platform access — <FIRST_NAME> — expires <EXPIRY_DATE>
 ```
 
 ## Body (plain text)
@@ -16,30 +16,30 @@ Copy and customize this template when sending account credentials manually
 ```
 Hi <FIRST_NAME>,
 
-Your new temporary <ROLE> account on the lv3.org homelab platform is ready.
+Your new temporary <ROLE> account on the example.com homelab platform is ready.
 Valid until <EXPIRY_ISO8601>.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  YOUR SSO CREDENTIALS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Login portal : https://sso.lv3.org
+  Login portal : https://sso.example.com
   Username     : <KEYCLOAK_USERNAME>
   Password     : <GENERATED_PASSWORD>
   Expires      : <EXPIRY_ISO8601>
 
-Change your password: https://sso.lv3.org/realms/lv3/account/
+Change your password: https://sso.example.com/realms/lv3/account/
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  PLATFORM SERVICES  (all use SSO)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Grafana  (metrics)       https://grafana.lv3.org
-  Gitea    (source code)   https://gitea.lv3.org
-  Outline  (docs/wiki)     https://outline.lv3.org
-  Vikunja  (tasks)         https://vikunja.lv3.org
-  Open WebUI (AI)          https://chat.lv3.org
-  Mattermost (chat)        https://mattermost.lv3.org
-  Harbor (registry)        https://harbor.lv3.org
-  Windmill (workflows)     https://windmill.lv3.org
+  Grafana  (metrics)       https://grafana.example.com
+  Gitea    (source code)   https://gitea.example.com
+  Outline  (docs/wiki)     https://outline.example.com
+  Vikunja  (tasks)         https://vikunja.example.com
+  Open WebUI (AI)          https://chat.example.com
+  Mattermost (chat)        https://mattermost.example.com
+  Harbor (registry)        https://harbor.example.com
+  Windmill (workflows)     https://windmill.example.com
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  VPN ACCESS (Tailscale / Headscale)
@@ -50,7 +50,7 @@ Change your password: https://sso.lv3.org/realms/lv3/account/
 
   # 2. Connect (pre-auth key valid until <EXPIRY_ISO8601>)
   sudo tailscale up \
-    --login-server https://headscale.lv3.org \
+    --login-server https://headscale.example.com \
     --authkey <HEADSCALE_AUTHKEY> \
     --hostname <USERNAME>-laptop
 
@@ -64,7 +64,7 @@ Change your password: https://sso.lv3.org/realms/lv3/account/
 
   # 2. Bootstrap the CA (one-time)
   step ca bootstrap \
-    --ca-url https://ca.lv3.org \
+    --ca-url https://ca.example.com \
     --fingerprint <CA_FINGERPRINT>
 
   # 3. Follow docs/runbooks/operator-onboarding.md for SSH cert setup
@@ -75,15 +75,15 @@ Change your password: https://sso.lv3.org/realms/lv3/account/
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  QUICK CHECKLIST
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  □ Log in at https://sso.lv3.org and change your password
+  □ Log in at https://sso.example.com and change your password
   □ Install Tailscale and connect via Headscale
   □ Bootstrap step-ca for SSH certificates
-  □ Browse https://grafana.lv3.org for platform dashboards
+  □ Browse https://grafana.example.com for platform dashboards
 
 Account expires <EXPIRY_ISO8601>.
 
 Welcome aboard,
-lv3.org platform (provisioned per ADR 0318)
+example.com platform (provisioned per ADR 0318)
 ---
 CC: <REQUESTER_EMAIL> — audit record per ADR 0318.
 ```

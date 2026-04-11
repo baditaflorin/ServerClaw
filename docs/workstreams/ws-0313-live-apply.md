@@ -14,7 +14,7 @@
 - Live Applied On: 2026-04-02
 - Exact-Main Replay Baseline: repo `0.177.138`, platform `0.130.86`
 - Branch: `codex/ws-0313-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0313-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0313-live-apply`
 - Owner: codex
 - Depends On: `adr-0093`, `adr-0094`, `adr-0134`, `adr-0235`, `adr-0242`, `adr-0312`
 - Conflicts With: none
@@ -84,11 +84,11 @@ for a safe exact-main merge.
 
 ## Expected Live Surfaces
 
-- `https://ops.lv3.org` serves the live interactive portal with the contextual
+- `https://ops.example.com` serves the live interactive portal with the contextual
   help drawer on the root page
-- `https://docs.lv3.org` serves generated docs pages with page-scoped help and
+- `https://docs.example.com` serves generated docs pages with page-scoped help and
   a published glossary reference
-- `https://changelog.lv3.org` serves deployment-history pages with the same
+- `https://changelog.example.com` serves deployment-history pages with the same
   glossary and escalation affordance
 - repo-managed verification paths fail closed if the ops portal root page loses
   the help drawer contract during future replays
@@ -105,20 +105,20 @@ for a safe exact-main merge.
   confirms `make syntax-check-ops-portal` passed from this worktree.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-ops-portal-direct-replay-r8.txt`
   captured the authoritative governed replay with final recap
-  `docker-runtime-lv3 : ok=185 changed=12 unreachable=0 failed=0 skipped=36`.
+  `docker-runtime : ok=185 changed=12 unreachable=0 failed=0 skipped=36`.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-ops-portal-guest-runtime-r2.txt`
-  confirms the live `ops-portal` container is healthy on `docker-runtime-lv3`,
+  confirms the live `ops-portal` container is healthy on `docker-runtime`,
   `/health` returns `{"status":"ok"}`, and the running root page contains
   `Contextual Help`, `Escalation Path`, `Live apply`, `Runtime Assurance`, and
   `Application Launcher`.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-deploy-docs-portal-r1.txt`
   captured the shared-edge publication replay with final recap
-  `nginx-lv3 : ok=86 changed=5 unreachable=0 failed=0 skipped=18`.
+  `nginx-edge : ok=86 changed=5 unreachable=0 failed=0 skipped=18`.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-portal-public-verification-r1.txt`
   confirms the generated docs and changelog artifacts still carry the drawer
   markers, the local `index.html` digests match the deployed copies under
-  `/var/www/lv3-generated/`, and public requests to `https://ops.lv3.org/`,
-  `https://docs.lv3.org/`, and `https://changelog.lv3.org/` all return the
+  `/var/www/lv3-generated/`, and public requests to `https://ops.example.com/`,
+  `https://docs.example.com/`, and `https://changelog.example.com/` all return the
   expected unauthenticated `302` redirects.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-adr-index-r1.txt`,
   `receipts/live-applies/evidence/2026-04-02-ws-0313-workstream-surface-validation-r3.txt`,
@@ -149,11 +149,11 @@ for a safe exact-main merge.
   `0.177.139` release bundle.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-mainline-live-apply-r2.txt`
   captured the refreshed exact-main governed replay with final recap
-  `docker-runtime-lv3 : ok=189 changed=14 unreachable=0 failed=0 skipped=36`
+  `docker-runtime : ok=189 changed=14 unreachable=0 failed=0 skipped=36`
   plus the follow-on restic backup trigger.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-mainline-ops-portal-guest-runtime-r6.txt`
   confirms the refreshed live `ops-portal` container is healthy on
-  `docker-runtime-lv3`, `/health` returns `{"status":"ok"}`, and the root page
+  `docker-runtime`, `/health` returns `{"status":"ok"}`, and the root page
   still exposes `Contextual Help`, `Escalation Path`, `Live apply`,
   `Runtime Assurance`, and `Application Launcher`.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-mainline-deploy-docs-portal-r1.txt`
@@ -165,8 +165,8 @@ for a safe exact-main merge.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-mainline-portal-public-verification-r2.txt`
   confirms the generated docs and changelog artifacts carry the drawer markers,
   the local `index.html` digests match the deployed copies under
-  `/var/www/lv3-generated/`, and public requests to `https://ops.lv3.org/`,
-  `https://docs.lv3.org/`, and `https://changelog.lv3.org/` still return the
+  `/var/www/lv3-generated/`, and public requests to `https://ops.example.com/`,
+  `https://docs.example.com/`, and `https://changelog.example.com/` still return the
   expected unauthenticated `302` redirects.
 - `receipts/live-applies/evidence/2026-04-02-ws-0313-mainline-generate-adr-index-r1.txt`,
   `receipts/live-applies/evidence/2026-04-02-ws-0313-mainline-canonical-truth-r1.txt`,
@@ -207,7 +207,7 @@ for a safe exact-main merge.
   `0.130.87`.
 - The branch-local replay surfaced and fixed two real defects that only became
   obvious under the latest live lineage: Docker bridge chains could disappear
-  after nftables evaluation on `docker-runtime-lv3`, and the mirrored runtime
+  after nftables evaluation on `docker-runtime`, and the mirrored runtime
   tree imported `platform.datetime_compat` even though the isolated image layout
   does not ship the repo `platform` package.
 - The runtime receipt mirror is now narrower and more durable: it syncs the

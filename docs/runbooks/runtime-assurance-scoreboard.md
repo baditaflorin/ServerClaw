@@ -9,7 +9,7 @@ Which active services in which environments are safe to trust right now?
 
 ## Entry Surface
 
-- interactive portal: `https://ops.lv3.org`
+- interactive portal: `https://ops.example.com`
 - section: `Platform Overview` -> `Runtime Assurance`
 
 The scoreboard is rendered from the repo-synced service catalog, publication
@@ -53,7 +53,7 @@ The rollup never treats `unknown` as healthy.
 
 ## Operator Workflow
 
-1. Open `ops.lv3.org` and review the `Runtime Assurance` summary counts.
+1. Open `ops.example.com` and review the `Runtime Assurance` summary counts.
 2. Start with rows whose overall state is `failed`, then `degraded`, then
    `unknown`.
 3. Read the per-dimension detail and `Next Action` column for the first red or
@@ -64,7 +64,7 @@ The rollup never treats `unknown` as healthy.
 
 ## Verification
 
-From `docker-runtime-lv3`:
+From `docker-runtime`:
 
 ```bash
 curl -sf http://127.0.0.1:8092/partials/overview | grep -F "Runtime Assurance"

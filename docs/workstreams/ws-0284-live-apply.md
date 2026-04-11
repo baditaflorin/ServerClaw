@@ -11,16 +11,16 @@
 - Live Applied On: 2026-03-31
 - Release Date: 2026-03-31
 - Branch: `codex/ws-0284-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0284-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0284-live-apply`
 - Owner: codex
 - Depends On: `adr-0107`, `adr-0165`, `adr-0293`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0284`, `docs/workstreams/ws-0284-live-apply.md`, `docs/runbooks/configure-piper.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `Makefile`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/dependency-graph.json`, `config/slo-catalog.json`, `config/data-catalog.json`, `config/command-catalog.json`, `config/workflow-catalog.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/rules/slo_rules.yml`, `config/grafana/dashboards/slo-overview.json`, `playbooks/piper.yml`, `playbooks/services/piper.yml`, `collections/ansible_collections/lv3/platform/roles/piper_runtime/`, `tests/test_generate_platform_vars.py`, `tests/test_piper_playbook.py`, `tests/test_piper_runtime_role.py`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `docs/adr/.index.yaml`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0284`, `docs/workstreams/ws-0284-live-apply.md`, `docs/runbooks/configure-piper.md`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `Makefile`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/dependency-graph.json`, `config/slo-catalog.json`, `config/data-catalog.json`, `config/command-catalog.json`, `config/workflow-catalog.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/rules/slo_rules.yml`, `config/grafana/dashboards/slo-overview.json`, `playbooks/piper.yml`, `playbooks/services/piper.yml`, `collections/ansible_collections/lv3/platform/roles/piper_runtime/`, `tests/test_generate_platform_vars.py`, `tests/test_piper_playbook.py`, `tests/test_piper_runtime_role.py`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `docs/adr/.index.yaml`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Purpose
 
 Implement ADR 0284 from the current `origin/main` baseline by delivering the
-private Piper runtime on `docker-runtime-lv3`, correcting the live port
+private Piper runtime on `docker-runtime`, correcting the live port
 assignment after collision with Temporal UI, preserving the recovery hardening
 discovered during the replay, and recording enough branch-local evidence for a
 safe exact-main replay.
@@ -67,7 +67,7 @@ safe exact-main replay.
   plus the direct `ss` and `docker ps` checks captured that `temporal-ui`
   already owned `127.0.0.1:8099`.
 - After correcting Piper to `8100`, the third governed replay succeeded with
-  final recap `docker-runtime-lv3 : ok=124 changed=8 unreachable=0 failed=0 skipped=25 rescued=1 ignored=0`,
+  final recap `docker-runtime : ok=124 changed=8 unreachable=0 failed=0 skipped=25 rescued=1 ignored=0`,
   preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0284-converge-piper-r3.txt`.
 - Direct guest-local verification is preserved in
@@ -92,7 +92,7 @@ safe exact-main replay.
 - The governed exact-main replay from committed source `521597584` is preserved
   in `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-live-apply-r1.txt`
   and completed with final recap
-  `docker-runtime-lv3 : ok=116 changed=3 unreachable=0 failed=0 skipped=9 rescued=0 ignored=0`.
+  `docker-runtime : ok=116 changed=3 unreachable=0 failed=0 skipped=9 rescued=0 ignored=0`.
 - Fresh exact-main guest-local verification is preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-local-http-r1.txt`
   and confirmed both published bindings for `5000/tcp`, the healthy `/healthz`

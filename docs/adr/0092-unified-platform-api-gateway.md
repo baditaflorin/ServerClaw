@@ -23,7 +23,7 @@ The platform has all the building blocks: Keycloak for identity, OpenBao for sec
 
 ## Decision
 
-We will deploy a **platform API gateway** on `docker-runtime-lv3` as a FastAPI-based aggregation and proxy service, exposed on the host at `http://10.10.10.20:8083` and published at `https://api.lv3.org` via the nginx edge (ADR 0021). TLS terminates at the edge; bearer-token authentication is enforced by the gateway itself.
+We will deploy a **platform API gateway** on `docker-runtime` as a FastAPI-based aggregation and proxy service, exposed on the host at `http://10.10.10.20:8083` and published at `https://api.example.com` via the nginx edge (ADR 0021). TLS terminates at the edge; bearer-token authentication is enforced by the gateway itself.
 
 ### Architecture
 
@@ -31,10 +31,10 @@ We will deploy a **platform API gateway** on `docker-runtime-lv3` as a FastAPI-b
 external clients / agents / ops portal
         │
         ▼
-  api.lv3.org:443  (nginx edge, TLS termination only)
+  api.example.com:443  (nginx edge, TLS termination only)
         │
         ▼
-  10.10.10.20:8083  (published api-gateway runtime on docker-runtime-lv3)
+  10.10.10.20:8083  (published api-gateway runtime on docker-runtime)
         │
    ┌────┴──────────────────────────────────┐
    │  FastAPI facade  (routes + OpenAPI)   │
@@ -116,7 +116,7 @@ The FastAPI facade exposes first-class endpoints under `/v1/platform/` that do n
 ```yaml
 services:
   api-gateway:
-    image: registry.lv3.org/platform/api-gateway:latest
+    image: registry.example.com/platform/api-gateway:latest
     ports:
       - "8080:8080"
     environment:
@@ -144,7 +144,7 @@ A dedicated **Platform API** Grafana dashboard tracks:
 
 **Positive**
 - All platform API calls are authenticated at a single chokepoint; no service can be accidentally called without a valid Keycloak JWT
-- Agent tools and the ops portal only need to know `api.lv3.org`; upstream service URLs are entirely internal implementation detail
+- Agent tools and the ops portal only need to know `api.example.com`; upstream service URLs are entirely internal implementation detail
 - The OpenAPI schema at `/v1/openapi.json` is auto-discoverable by agents (ADR 0069) and can drive code generation
 - Cross-service latency and error rates are visible in a single Grafana dashboard
 - Adding a new service to the platform adds one entry to `config/api-gateway-catalog.json` rather than updating every consumer
@@ -156,9 +156,9 @@ A dedicated **Platform API** Grafana dashboard tracks:
 
 ## Implementation Notes
 
-- Live rollout completed on 2026-03-24 in platform version `0.114.2` with receipt [receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json).
+- Live rollout completed on 2026-03-24 in platform version `0.114.2` with receipt [receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json).
 - The live runtime now validates JWTs against Keycloak over the shared Docker network, publishes the gateway on host port `8083`, and verifies an authenticated `/v1/platform/services` request during the Ansible converge.
-- Live verification on 2026-03-24 confirmed `https://api.lv3.org/healthz` returned `200 {"status":"ok"}` and `https://api.lv3.org/v1/platform/services` returned `200` with a valid realm-issued bearer token.
+- Live verification on 2026-03-24 confirmed `https://api.example.com/healthz` returned `200 {"status":"ok"}` and `https://api.example.com/v1/platform/services` returned `200` with a valid realm-issued bearer token.
 - Repo version `0.162.0` extends the gateway with ADR 0166 canonical error envelopes, shared registry-backed error codes, and trace-id-aware failure responses.
 
 ## Alternatives Considered

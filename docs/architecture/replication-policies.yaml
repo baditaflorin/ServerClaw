@@ -64,7 +64,7 @@ data_classes:
     current_platform_state:
       postgres_primary:
         environment: "production"
-        vm: "postgres-vm-lv3"
+        vm: "postgres-vm"
         vmid: 60
         ip: "10.10.10.60"
         role: "Single writer for all relational domains"
@@ -132,7 +132,7 @@ data_classes:
     current_platform_state:
       nats_jetstream:
         environment: "production"
-        vm: "docker-runtime-lv3"
+        vm: "docker-runtime"
         service_id: "nats_jetstream"
         adr: "0155"
         ha_status: "Cluster mode deployed"
@@ -140,7 +140,7 @@ data_classes:
 
       redpanda:
         environment: "production"
-        vm: "docker-runtime-lv3"
+        vm: "docker-runtime"
         service_id: "redpanda"
         adr: "not yet assigned"
         ha_status: "Single-broker; cluster expansion planned"
@@ -194,7 +194,7 @@ data_classes:
     current_platform_state:
       minio:
         environment: "production"
-        vm: "docker-runtime-lv3"
+        vm: "docker-runtime"
         service_id: "minio"
         ha_status: "Single instance; erasure coding not yet configured"
         staging_status: "Separate MinIO instance planned in staging"
@@ -252,7 +252,7 @@ data_classes:
     current_platform_state:
       qdrant:
         environment: "production"
-        vm: "docker-runtime-lv3"
+        vm: "docker-runtime"
         service_id: "qdrant"
         adr: "0198"
         ha_status: "Single instance; cluster not yet deployed"
@@ -263,7 +263,7 @@ data_classes:
 
       typesense:
         environment: "production"
-        vm: "docker-runtime-lv3"
+        vm: "docker-runtime"
         service_id: "typesense"
         ha_status: "Single instance"
         index_sources:
@@ -314,7 +314,7 @@ data_classes:
     current_platform_state:
       redis:
         environment: "both"
-        production_vm: "docker-runtime-lv3"
+        production_vm: "docker-runtime"
         staging_vm: "separate staging cache"
         service_id: "redis (implicit in service deployments)"
         usage:
@@ -373,7 +373,7 @@ data_classes:
     current_platform_state:
       openbao:
         environment: "both"
-        production_vm: "docker-runtime-lv3"
+        production_vm: "docker-runtime"
         production_service_id: "openbao"
         adr: "0263"
         sealed_authorities:
@@ -386,7 +386,7 @@ data_classes:
 
       step_ca:
         environment: "both"
-        production_vm: "runtime-control-lv3"
+        production_vm: "runtime-control"
         production_service_id: "step_ca"
         adr: "0101"
         sealed_authorities:
@@ -455,7 +455,7 @@ data_classes:
     current_platform_state:
       prometheus:
         environment: "production"
-        vm: "monitoring-lv3"
+        vm: "monitoring"
         service_id: "prometheus (implicit in monitoring stack)"
         scrape_interval: 30 seconds
         retention: 30 days
@@ -464,7 +464,7 @@ data_classes:
 
       grafana:
         environment: "both"
-        production_vm: "monitoring-lv3"
+        production_vm: "monitoring"
         production_service_id: "grafana"
         staging_vm: "separate monitoring instance"
         data_sources:
@@ -475,7 +475,7 @@ data_classes:
 
       loki_or_elk:
         environment: "production (planned: staging-visible log aggregation)"
-        vm: "monitoring-lv3 or separate log stack"
+        vm: "monitoring or separate log stack"
         retention: "45 days"
         ha_status: "Single instance (HA planned)"
         log_forwarding: "Planned: filtered logs to central aggregation"

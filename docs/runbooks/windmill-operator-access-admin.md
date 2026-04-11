@@ -32,7 +32,7 @@ The app is private to the Windmill workspace. It is not published anonymously.
 
 - login page: `http://100.64.0.1:8005/user/login`
 - bootstrap email: `superadmin_secret@windmill.dev`
-- bootstrap password source: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt`
+- bootstrap password source: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt`
 
 The current platform path uses the managed Windmill bootstrap admin for browser access. That keeps the app reachable from a fresh machine without requiring a terminal-local cookie jar or manual API token injection.
 
@@ -59,7 +59,7 @@ The `Rich Notes` panel is the first bounded ADR 0241 editing surface.
 - the `Save Notes` action calls `f/lv3/operator_update_notes`, which delegates to `scripts/operator_manager.py update-notes`
 - the worker persists the resulting markdown back into `config/operators.yaml` and records `audit.last_reviewed_at` plus `audit.last_reviewed_by`
 
-This is intentionally bounded knowledge editing, not a replacement for the larger Outline knowledge system at `wiki.lv3.org`.
+This is intentionally bounded knowledge editing, not a replacement for the larger Outline knowledge system at `wiki.example.com`.
 
 ## Runtime Feedback Model
 
@@ -120,7 +120,7 @@ The durable scorecard path stays repo-managed:
 - browser milestones emit only bounded categorical events
 - `f/lv3/operator_journey_event` records those milestones into `.local/state/journey-analytics/`
 - `f/lv3/operator_journey_scorecards` renders the current report and writes the latest JSON snapshot for scheduled review
-- Plausible receives canonical route milestones for `ops.lv3.org`
+- Plausible receives canonical route milestones for `ops.example.com`
 - Glitchtip receives bounded failure signals only when a journey event explicitly requests it
 
 Privacy constraints:
@@ -161,7 +161,7 @@ The Windmill app remains the browser-first provisioning surface, but it is no
 longer expected to carry the entire readiness journey by itself. After the
 access mutation succeeds, the operator should continue in the interactive ops
 portal and complete the ADR 0310 activation checklist at
-`https://ops.lv3.org#activation`.
+`https://ops.example.com#activation`.
 
 ## Command Palette
 
@@ -216,7 +216,7 @@ Run:
 
 ```bash
 docker run --rm \
-  -e WM_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+  -e WM_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
   -v "$PWD/config/windmill/apps:/workspace" \
   ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d \
   sh -lc 'cd /workspace && wmill generate-metadata f/lv3/operator_access_admin.raw_app --base-url http://100.64.0.1:8005 --workspace lv3 --token "$WM_TOKEN" --lock-only --skip-scripts --skip-flows --yes'
@@ -232,14 +232,14 @@ tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/ap
 ## Notes
 
 - The bootstrap password is intentionally shown once in the onboarding result and is not written to git.
-- The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
+- The app depends on the worker checkout being mounted at `/srv/proxmox-host_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
 - The AG Grid roster keeps the browser experience dense, but the actual access mutations still flow only through the repo-governed ADR 0108 scripts.
 - The app now relies on repo-managed frontend dependencies staged during raw-app sync, so new browser libraries must be added to the raw app `package.json` and verified through `make converge-windmill`.
 - ADR 0311 now relies on the repo-managed `f/lv3/command_palette_search` helper for ADR and runbook matches. If the palette starts returning stale or empty docs results, re-run `f/lv3/command_palette_search` directly before assuming the browser bundle is at fault.
-- The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
+- The app is a Windmill-private admin surface; `ops.example.com` remains a separate portal.
 - ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
 - Inline validation mirrors the frontend schema only; the governed backend scripts remain the authoritative enforcement path for live identity mutations.
 - Guided tours are browser-local helpers only; they do not change the governed backend path or replace the runbooks.
 - Repo-managed Windmill raw apps with frontend dependencies should commit `package-lock.json`; the runtime now prefers `npm ci` before raw-app sync and only falls back to `npm install --no-package-lock` when no lockfile exists.
 - Raw-app dependency changes must refresh `config/windmill/apps/wmill-lock.yaml` with `wmill generate-metadata` before the next live Windmill sync, or the remote bundle step can fail with unresolved package imports.
-- The ADR 0316 scorecards intentionally combine browser milestones, worker-side ledger events, Plausible route aggregates, and Glitchtip failure counts. If the panel looks stale, re-run `f/lv3/operator_journey_scorecards` and inspect `.local/state/journey-analytics/operator-access-admin-latest.json` in the worker checkout before assuming the browser bundle is wrong. The mirrored Glitchtip secret can now be a DSN or a direct store URL, but `glitchtip_events` will stay at `0` until `errors.lv3.org` serves a valid TLS endpoint backed by a live Glitchtip runtime.
+- The ADR 0316 scorecards intentionally combine browser milestones, worker-side ledger events, Plausible route aggregates, and Glitchtip failure counts. If the panel looks stale, re-run `f/lv3/operator_journey_scorecards` and inspect `.local/state/journey-analytics/operator-access-admin-latest.json` in the worker checkout before assuming the browser bundle is wrong. The mirrored Glitchtip secret can now be a DSN or a direct store URL, but `glitchtip_events` will stay at `0` until `errors.example.com` serves a valid TLS endpoint backed by a live Glitchtip runtime.

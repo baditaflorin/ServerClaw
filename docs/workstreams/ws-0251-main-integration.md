@@ -8,7 +8,7 @@
 - Release Date: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0251-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0251-live-apply-r2`
 - Owner: codex
 - Depends On: `ws-0251-live-apply`, `ws-0251-live-apply-r2`
 
@@ -51,24 +51,24 @@ ops-portal state on the latest realistic `origin/main` baseline.
   `0.130.59`; this follow-up records the exact-main durable verification on top
   of that latest realistic baseline.
 - SSH verification on 2026-03-29 confirmed the Proxmox host is still
-  `Debian-trixie-latest-amd64-base` with
+  `proxmox-host` with
   `pve-manager/9.1.6/71482d1833ded40a` and kernel `6.17.13-2-pve`.
 - The authenticated runtime-assurance API returned `status 200` at
-  `https://api.lv3.org/v1/platform/runtime-assurance` with
+  `https://api.example.com/v1/platform/runtime-assurance` with
   `generated_at: 2026-03-29T20:35:32Z`, `total: 47`, `pass: 28`,
   `degraded: 19`, `failed: 0`, and `unknown: 0`.
-- Guest-local verification on `docker-runtime-lv3` confirmed
-  `/srv/proxmox_florin_server/scripts/stage_smoke.py` is present, both
+- Guest-local verification on `docker-runtime` confirmed
+  `/srv/proxmox-host_server/scripts/stage_smoke.py` is present, both
   `scripts/promotion_pipeline.py` and
   `scripts/ops_portal/runtime_assurance.py` import it, and
-  `python3 /srv/proxmox_florin_server/config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server`
+  `python3 /srv/proxmox-host_server/config/windmill/scripts/gate-status.py --repo-path /srv/proxmox-host_server`
   returned `status: "ok"` with a passed `post_merge_run` executed at
   `2026-03-29T19:37:24.365664+00:00`.
-- Guest-local ops-portal verification on `docker-runtime-lv3` returned
+- Guest-local ops-portal verification on `docker-runtime` returned
   `status 200` for both `http://127.0.0.1:8092/partials/overview` and
   `http://127.0.0.1:8092/partials/runtime-assurance`, and neither partial
   rendered the degraded runtime-assurance banner.
-- The governed promotion-gate negative-path replay on `docker-runtime-lv3`
+- The governed promotion-gate negative-path replay on `docker-runtime`
   still rejected the stale staged Grafana receipt with return code `1`; the
   current reasons were Prometheus SLO query timeouts, projected vCPU
   commitment `36.0` exceeding target `22.5`, and the receipt age exceeding

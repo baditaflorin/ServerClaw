@@ -3,7 +3,7 @@ adr: '0398'
 title: "Outline Shared S3 Migration"
 description: |
   Migrate Outline from embedded MinIO to shared platform MinIO using the Managed S3 Bucket Consumer Pattern.
-  Fixes wiki.lv3.org asset loading by exposing S3 via public gateway.
+  Fixes wiki.example.com asset loading by exposing S3 via public gateway.
   Establishes reusable pattern for all services needing S3 access.
 status: in_progress
 owner: claude
@@ -46,12 +46,12 @@ notes: |
     * Update S3 env vars to use public gateway URL
     * Reference shared MinIO credentials from controller mirror
   - Phase 3: Configure public S3 gateway in NGINX edge
-    * Add proxy rule for s3.lv3.org → docker-runtime:9000
+    * Add proxy rule for s3.example.com → docker-runtime:9000
     * Enable TLS termination
   - Phase 4: Verify convergence and wiki functionality
     * minio_runtime converges, creates bucket and credentials
     * outline_runtime converges without embedded minio
-    * wiki.lv3.org loads and assets are accessible
+    * wiki.example.com loads and assets are accessible
     * File upload/download in wiki works
 ready_to_merge: false
 live_applied: false

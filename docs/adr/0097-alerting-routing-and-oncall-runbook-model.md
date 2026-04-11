@@ -35,7 +35,7 @@ Every alert rule carries a `severity` label with one of three values:
 
 ### Alertmanager configuration
 
-Alertmanager is deployed as an additional service on `monitoring-lv3` alongside the existing Grafana stack:
+Alertmanager is deployed as an additional service on `monitoring` alongside the existing Grafana stack:
 
 ```yaml
 # alertmanager/alertmanager.yml (Ansible-templated)
@@ -92,7 +92,7 @@ receivers:
 ### Notification channels
 
 **Critical alerts:**
-1. **Ntfy** (self-hosted push notifications) — delivers to operator's phone via the Ntfy Android/iOS app with high-priority notification sound. Ntfy is deployed as a lightweight Compose service on `docker-runtime-lv3`.
+1. **Ntfy** (self-hosted push notifications) — delivers to operator's phone via the Ntfy Android/iOS app with high-priority notification sound. Ntfy is deployed as a lightweight Compose service on `docker-runtime`.
 2. **Mattermost** `#platform-alerts-critical` channel — for context and history.
 
 **Warning alerts:**
@@ -115,8 +115,8 @@ Every Grafana alert rule must include a `runbook_url` annotation pointing to the
   annotations:
     summary: "Keycloak SSO is unreachable"
     description: "Keycloak has been unreachable for {{ $value }} minutes."
-    runbook_url: "https://docs.lv3.org/runbooks/keycloak-down/"
-    dashboard_url: "https://grafana.lv3.org/d/keycloak-overview"
+    runbook_url: "https://docs.example.com/runbooks/keycloak-down/"
+    dashboard_url: "https://grafana.example.com/d/keycloak-overview"
 ```
 
 A validation check in the repository validation gate (ADR 0087) verifies that every alert rule has both a `runbook_url` and a `severity` label before the push is accepted.
@@ -186,7 +186,7 @@ Alertmanager's `group_by: ['alertname', 'service']` ensures that if Keycloak hea
 
 **Negative / Trade-offs**
 - Ntfy must be self-hosted and the operator must have the Ntfy app installed and subscribed to the `platform-alerts` topic; this is a setup step that is easy to forget
-- Alertmanager is a new service on `monitoring-lv3`; it adds a startup dependency and must be included in the backup scope
+- Alertmanager is a new service on `monitoring`; it adds a startup dependency and must be included in the backup scope
 - Writing runbooks for every alert is non-trivial work; the initial set covers the most important cases but will need to grow with the platform
 
 ## Alternatives Considered

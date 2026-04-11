@@ -75,7 +75,7 @@ Extend Semaphore runtime configuration to support **Keycloak OpenID Connect (OID
 semaphore_enable_oidc: true
 semaphore_oidc_provider: keycloak
 semaphore_oidc_client_id: semaphore
-semaphore_oidc_issuer_url: "https://auth.lv3.org/realms/lv3"
+semaphore_oidc_issuer_url: "https://auth.example.com/realms/lv3"
 semaphore_oidc_callback_url: "http://100.64.0.1:8020/auth/oidc/callback"
 semaphore_oidc_scopes: "openid profile email"
 semaphore_oidc_auto_provision_user: true
@@ -154,7 +154,7 @@ User → ops-semaphore / password → Login
    ```
    Users → Create User
    - Username: ops
-   - Email: ops@lv3.org
+   - Email: ops@example.com
    - Password: [set in credentials tab]
    ```
 

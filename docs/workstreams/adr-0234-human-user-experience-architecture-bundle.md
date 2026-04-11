@@ -9,7 +9,7 @@
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0234-human-ux-adrs`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-human-ux-adrs`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0234-human-ux-adrs`
 - Owner: codex
 - Depends On: `adr-0093-interactive-ops-portal`, `adr-0094-developer-portal`,
   `adr-0133-portal-authentication-by-default`, `adr-0152-homepage`,

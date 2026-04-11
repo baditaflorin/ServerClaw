@@ -1,5 +1,5 @@
 {
-  "$id": "https://lv3.org/schema/runtime-assurance-matrix.schema.json",
+  "$id": "https://example.com/schema/runtime-assurance-matrix.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Runtime assurance matrix",
   "type": "object",

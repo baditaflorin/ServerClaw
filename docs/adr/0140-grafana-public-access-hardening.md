@@ -9,7 +9,7 @@
 
 ## Context
 
-Grafana is published at `https://grafana.lv3.org` for operator use, but its public surface needed tighter guardrails than "the dashboard URL redirects to login today".
+Grafana is published at `https://grafana.example.com` for operator use, but its public surface needed tighter guardrails than "the dashboard URL redirects to login today".
 
 The platform already uses Grafana's Keycloak OIDC login flow, yet three specific risks remained:
 
@@ -17,7 +17,7 @@ The platform already uses Grafana's Keycloak OIDC login flow, yet three specific
 - the public edge still exposed `GET /api/health`, which returned Grafana's exact version and commit hash to unauthenticated callers
 - there was no explicit repository verification proving that an unauthenticated caller could not reach a dashboard URL
 
-The intended public status surface for outside observers is `https://status.lv3.org`, not Grafana itself.
+The intended public status surface for outside observers is `https://status.example.com`, not Grafana itself.
 
 ## Decision
 
@@ -36,7 +36,7 @@ Grafana continues to use the repo-managed Keycloak OIDC login flow for authentic
 
 ### Public edge controls
 
-The NGINX edge publication for `grafana.lv3.org` will:
+The NGINX edge publication for `grafana.example.com` will:
 
 - return `404` for `/api/health` so version metadata is not exposed publicly
 - strip `X-Grafana-Version` and `Via` from proxied responses
@@ -48,7 +48,7 @@ The monitoring role verification must prove all of the following:
 
 - the managed dashboard still exists locally through the Grafana admin API
 - an unauthenticated request to `/d/lv3-platform-overview/lv3-platform-overview` receives a redirect to `/login`
-- the public `https://grafana.lv3.org/api/health` endpoint returns `404`
+- the public `https://grafana.example.com/api/health` endpoint returns `404`
 - the public login response headers do not expose `X-Grafana-Version` or `Via`
 
 ## Consequences
@@ -57,12 +57,12 @@ The monitoring role verification must prove all of the following:
 
 - unauthenticated callers cannot inspect dashboard content through the normal dashboard URL path
 - the public edge no longer discloses the live Grafana version through `/api/health`
-- the public status use case stays isolated to `status.lv3.org`
+- the public status use case stays isolated to `status.example.com`
 - the hardening state is now explicit in repo automation instead of relying on current default behavior
 
 ### Negative / Trade-offs
 
-- external tools that depended on `https://grafana.lv3.org/api/health` must switch to an authenticated path or a private health check
+- external tools that depended on `https://grafana.example.com/api/health` must switch to an authenticated path or a private health check
 - public embeds and public dashboard share links are intentionally unsupported
 
 ## Boundaries

@@ -13,7 +13,7 @@ PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "nats-jetstream.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "nats-jetstream.yml"
 SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -93,10 +93,10 @@ def test_playbook_and_service_wrapper_point_to_runtime_role() -> None:
 
 def test_inventory_allows_monitoring_relay_access_to_the_nats_client_listener() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control-lv3"]["allowed_inbound"]
+    runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control"]["allowed_inbound"]
 
     monitoring_rule = next(
-        rule for rule in runtime_control_rules if rule["source"] == "monitoring-lv3" and 4222 in rule["ports"]
+        rule for rule in runtime_control_rules if rule["source"] == "monitoring" and 4222 in rule["ports"]
     )
     assert 4222 in monitoring_rule["ports"]
 

@@ -54,10 +54,10 @@ repairs were folded back into the repo-managed fallback path:
   verified end to end: Keycloak user `florin.badita-tmp-002`, realm role
   `platform-admin`, groups `lv3-platform-admins` and `grafana-admins`,
   Headscale user `florin-badita-tmp-002`, and the requester-CC onboarding
-  email to `baditaflorin+tmp002@gmail.com` and `baditaflorin@gmail.com`.
+  email to `operator@example.com` and `operator@example.com`.
 
-The public `sso.lv3.org` edge was still degraded during the replay, so the live
-apply used the documented ADR 0317 fallback lane through `docker-runtime-lv3`
+The public `sso.example.com` edge was still degraded during the replay, so the live
+apply used the documented ADR 0317 fallback lane through `docker-runtime`
 instead of silently taking over the separate runtime-control migration work.
 
 ## Verification

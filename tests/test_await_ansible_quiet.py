@@ -17,7 +17,7 @@ SPEC.loader.exec_module(MODULE)
 
 def test_parse_process_table_reads_pid_ppid_and_command() -> None:
     entries = MODULE.parse_process_table(
-        "100 1 /opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime-lv3\n"
+        "100 1 /opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime\n"
         "200 100 /usr/bin/python /tmp/ansible-module.py\n"
     )
 
@@ -25,7 +25,7 @@ def test_parse_process_table_reads_pid_ppid_and_command() -> None:
         (
             100,
             1,
-            "/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime-lv3",
+            "/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime",
         ),
         (200, 100, "/usr/bin/python /tmp/ansible-module.py"),
     ]
@@ -46,7 +46,7 @@ def test_find_blocking_processes_ignores_current_ancestors_and_shell_watchers() 
         MODULE.ProcessEntry(
             pid=10,
             ppid=1,
-            command="/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime-lv3,nginx-lv3",
+            command="/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/glitchtip.yml --limit docker-runtime,nginx-edge",
         ),
         MODULE.ProcessEntry(
             pid=20,
@@ -56,23 +56,23 @@ def test_find_blocking_processes_ignores_current_ancestors_and_shell_watchers() 
         MODULE.ProcessEntry(
             pid=30,
             ppid=1,
-            command="/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime-lv3",
+            command="/opt/homebrew/bin/ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime",
         ),
         MODULE.ProcessEntry(
             pid=40,
             ppid=1,
-            command="/bin/zsh -lc while true; do ps -ef | rg 'ansible-playbook .*--limit .*docker-runtime-lv3'; done",
+            command="/bin/zsh -lc while true; do ps -ef | rg 'ansible-playbook .*--limit .*docker-runtime'; done",
         ),
         MODULE.ProcessEntry(
             pid=50,
             ppid=1,
-            command="rg ansible-playbook .*--limit .*docker-runtime-lv3",
+            command="rg ansible-playbook .*--limit .*docker-runtime",
         ),
     ]
 
     blockers = MODULE.find_blocking_processes(
         entries,
-        required_hosts=("docker-runtime-lv3", "nginx-lv3"),
+        required_hosts=("docker-runtime", "nginx-edge"),
         ignored_pids={10, 20},
     )
 

@@ -30,15 +30,15 @@ The builder creates a deterministic local snapshot under `.local/seed-data/snaps
 
 The catalog points at the controller-local salt file declared in `config/controller-local-secrets.json`. The builder creates that file automatically if it does not exist.
 
-## Publish To `backup-lv3`
+## Publish To `backup`
 
 ```bash
-BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm
+BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm
 make seed-snapshot-publish SEED_CLASS=tiny
 python3 scripts/seed_data_snapshots.py verify --seed-class tiny --remote
 ```
 
-Published snapshots land under `/var/lib/lv3/seed-data-snapshots/<class>/<snapshot-id>/` on `backup-lv3`.
+Published snapshots land under `/var/lib/lv3/seed-data-snapshots/<class>/<snapshot-id>/` on `backup`.
 
 ## Use In Fixtures
 

@@ -1,9 +1,9 @@
 # ServerClaw Memory Substrate
 
 This runbook covers ADR 0263 and the private ServerClaw memory substrate hosted
-inside the `rag-context` runtime on `docker-runtime-lv3`.
+inside the `rag-context` runtime on `docker-runtime`.
 
-- ADR: [docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md)
+- ADR: [docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md)
 - Runtime lane: `make live-apply-service service=rag-context env=production`
 - Private API base URL: `http://100.64.0.1:8010`
 - Auth token file: `.local/platform-context/api-token.txt`
@@ -142,7 +142,7 @@ networking` and Docker 29 returns a BuildKit-side `error reading from server:
 EOF`, keep the role-managed host-network classic-builder path in place. ADR
 0263 now forces `DOCKER_BUILDKIT=0` and `COMPOSE_DOCKER_CLI_BUILD=0`, runs
 `docker build --network host` first, and only then starts the compose stack
-with `--no-build` on `docker-runtime-lv3`.
+with `--no-build` on `docker-runtime`.
 
 If Docker restarts drop the `DOCKER` nat chain before the stack start, rerun the
 repo-managed live apply. ADR 0263 now restarts Docker, rechecks the nat chain,

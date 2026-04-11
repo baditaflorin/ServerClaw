@@ -53,7 +53,7 @@
   shared attention center after the bridge-chain recovery repair.
 - `receipts/live-applies/evidence/2026-04-02-ws-0308-journey-mainline-ops-portal-guest-runtime-r8.txt`
   confirms the live `Notification Center` partial from inside
-  `docker-runtime-lv3`.
+  `docker-runtime`.
 
 ## Remaining Shared Follow-Up
 

@@ -13,7 +13,7 @@ Later repository surfaces already talk about `production` and `staging` as if th
 
 - the subdomain catalog already labels hostnames by environment
 - the service capability ADR describes per-environment URL overrides
-- the operations portal ADR assumes a staging portal instance at `ops.staging.lv3.org`
+- the operations portal ADR assumes a staging portal instance at `ops.staging.example.com`
 
 What is missing is the actual topology decision that says:
 
@@ -38,8 +38,8 @@ We will model two named environments for this platform: `production` and `stagin
 
 ### Naming and publication
 
-1. Production public hostnames use the existing `*.lv3.org` pattern.
-2. Staging public hostnames use the `*.staging.lv3.org` pattern.
+1. Production public hostnames use the existing `*.example.com` pattern.
+2. Staging public hostnames use the `*.staging.example.com` pattern.
 3. Bare production hostnames must not be reused for staging traffic.
 4. Staging publication remains `planned` until the owning service ADR applies it live from `main`.
 
@@ -89,7 +89,7 @@ Repository validation must reject:
 
 ## Implementation Notes
 
-- Environment-wide metadata now lives in [config/environment-topology.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/environment-topology.json), validated by [scripts/environment_topology.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/environment_topology.py) and [docs/schema/environment-topology.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/environment-topology.schema.json).
+- Environment-wide metadata now lives in [config/environment-topology.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/environment-topology.json), validated by [scripts/environment_topology.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/environment_topology.py) and [docs/schema/environment-topology.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/environment-topology.schema.json).
 - The service capability catalog now requires an explicit `production` binding for every service and supports `staging` bindings where a staged surface is planned.
-- The subdomain catalog now includes the missing production `sso.lv3.org` entry plus planned staging hostnames under `*.staging.lv3.org`.
+- The subdomain catalog now includes the missing production `sso.example.com` entry plus planned staging hostnames under `*.staging.example.com`.
 - The operations portal generator now renders an Environment Topology view from the canonical environment, service, and subdomain catalogs.

@@ -1,14 +1,14 @@
 # Workstream ADR 0041: Dockerized Mail Platform With API, Grafana Telemetry, And Failover Delivery
 
-- ADR: [ADR 0041](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md)
+- ADR: [ADR 0041](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md)
 - Title: Dockerized mail platform planning and decision record
 - Status: merged
 - Branch: `codex/adr-0040-email-platform`
-- Worktree: `../proxmox_florin_server-email-platform`
+- Worktree: `../proxmox-host_server-email-platform`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0023-docker-runtime`
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `monitoring-lv3`, mail DNS, SMTP publication, Stalwart management API, Grafana dashboards
+- Shared Surfaces: `docker-runtime`, `monitoring`, mail DNS, SMTP publication, Stalwart management API, Grafana dashboards
 
 ## Scope
 
@@ -33,17 +33,17 @@
 
 ## Expected Live Surfaces
 
-- a Stalwart mail stack on `docker-runtime-lv3`
+- a Stalwart mail stack on `docker-runtime`
 - a stable local SMTP relay endpoint for LV3 services
 - a failover relay path for deferred or failed outbound delivery
-- a Grafana mail dashboard on `monitoring-lv3`
+- a Grafana mail dashboard on `monitoring`
 - scoped API credentials for service automation and agent automation
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md`
+- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
+- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md`
+- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/prepare-mail-platform-rollout.md`
 
 ## Merge Criteria
 

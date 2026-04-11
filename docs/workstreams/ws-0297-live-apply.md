@@ -13,16 +13,16 @@
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0297-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0297-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0068`, `adr-0077`, `adr-0083`, `adr-0087`, `adr-0119`, `adr-0143`, `adr-0229`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `docs/runbooks/validate-repository-automation.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/live_apply_receipts.py`, `scripts/parallel_check.py`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `scripts/sbom_scanner.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `tests/test_live_apply_receipts.py`, `tests/test_parallel_check.py`, `tests/test_sbom_scanner.py`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `docs/runbooks/validate-repository-automation.md`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/live_apply_receipts.py`, `scripts/parallel_check.py`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `scripts/sbom_scanner.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `tests/test_live_apply_receipts.py`, `tests/test_parallel_check.py`, `tests/test_sbom_scanner.py`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
 - add a root `renovate.json` contract that manages the currently supported stack image and version surfaces
-- run Renovate as a scheduled/manual Gitea Actions workflow on `docker-build-lv3`
+- run Renovate as a scheduled/manual Gitea Actions workflow on `docker-build`
 - deliver the Renovate bootstrap credential through OpenBao onto the runner host and mint a short-lived scoped Gitea token at workflow runtime
 - pull the Renovate runtime image through Harbor and pin it to a digest in the workflow
 - verify the live path end to end, including repo validation and workflow execution from the latest synchronized `origin/main` base
@@ -44,7 +44,7 @@
 - `docs/runbooks/configure-harbor.md`
 - `docs/runbooks/live-apply-receipts-and-verification-evidence.md`
 - `docs/runbooks/validate-repository-automation.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `.gitea/workflows/renovate.yml`
 - `.gitea/workflows/release-bundle.yml`
@@ -92,18 +92,18 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` publishes the private OpenBao HTTP listener on its guest IP only for `docker-build-lv3`
-- `docker-runtime-lv3` runs the managed Gitea stack with a repo-managed `renovate-bot` identity
-- `docker-build-lv3` runs the managed Gitea runner with a mounted OpenBao-rendered Renovate bootstrap env file
+- `docker-runtime` publishes the private OpenBao HTTP listener on its guest IP only for `docker-build`
+- `docker-runtime` runs the managed Gitea stack with a repo-managed `renovate-bot` identity
+- `docker-build` runs the managed Gitea runner with a mounted OpenBao-rendered Renovate bootstrap env file
 - a manual or scheduled Gitea Actions run executes Renovate successfully from the Harbor-pinned image using a short-lived token minted at job runtime
 
 ## Verification
 
 - The integrated `0.177.112 / 0.130.74` tree passes the direct release-tree validation bundle: `uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_gitea_workflows.py tests/test_renovate_automation.py tests/test_gitea_runtime_role.py` returned `23 passed in 0.81s`, `uv run --with pyyaml python3 scripts/validate_renovate_contract.py` passed, `npx --yes --package renovate@42.76.4 renovate-config-validator renovate.json` reported `Config validated successfully`, `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate` passed, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate` passed after syncing `versions/stack.yaml.release_tracks.platform_versioning.current`, `./scripts/validate_repo.sh agent-standards` passed, and `git diff --check` stayed clean.
 - The focused repo automation slice passed after the final hosted-runtime repairs: `uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_gitea_workflows.py tests/test_renovate_automation.py tests/test_gitea_runtime_role.py` returned `23 passed in 0.83s`, `uv run --with pyyaml python3 scripts/validate_renovate_contract.py` passed, and the pinned runtime validator `npx --yes --package renovate@42.76.4 renovate-config-validator renovate.json` reported `Config validated successfully`.
-- The runner bootstrap and credential path remain live on production: the branch evidence proves `/opt/gitea-runner/credentials/renovate/renovate.env` is rendered on `docker-build-lv3`, the runner container sees `/var/run/lv3/renovate/renovate.env`, and the Gitea admin API returns an active `renovate-bot` identity.
+- The runner bootstrap and credential path remain live on production: the branch evidence proves `/opt/gitea-runner/credentials/renovate/renovate.env` is rendered on `docker-build`, the runner container sees `/var/run/lv3/renovate/renovate.env`, and the Gitea admin API returns an active `renovate-bot` identity.
 - Branch-local hosted validation now succeeds from the latest `origin/main` lineage on the private Gitea branch snapshot: `release-bundle.yml` run `162` and `validate.yml` run `163` both concluded `success` on `codex/ws-0297-live-apply`.
-- Branch-local hosted Renovate is now live end to end: `renovate.yml` run `165` / job `219` concluded `success`, created the `Renovate Dashboard` issue (`#3`), and opened governed PRs `#1` and `#2` against the private `ops/proxmox_florin_server` repo.
+- Branch-local hosted Renovate is now live end to end: `renovate.yml` run `165` / job `219` concluded `success`, created the `Renovate Dashboard` issue (`#3`), and opened governed PRs `#1` and `#2` against the private `ops/proxmox-host_server` repo.
 - The exact-main publication step then replayed the verified source tree onto the private Gitea `main` snapshot and re-verified the hosted mainline paths that matter for ADR 0297: `validate.yml` run `169` concluded `success`, `renovate.yml` run `170` concluded `success`, and the mainline replay kept the Renovate dashboard plus governed update PR creation live after the protected integration step.
 - `make remote-validate` from the released tree passed every selected lane after the `versions/stack.yaml` release-track sync except the intentional `workstream-surfaces` guard, which rejects a branch once its owning workstream is terminal.
 - `make pre-push-gate` from the released tree showed the same repo-content result on its remote primary-branch leg: every lane passed except the intentional `workstream-surfaces` guard. The local fallback then repeated that terminal-branch ownership failure and also timed out `ansible-lint` after `600` seconds on the local arm64 wrapper path.
@@ -114,7 +114,7 @@
 ## Results
 
 - ADR 0297 is now implemented in repository version `0.177.112` and first verified live on platform version `0.130.74`.
-- The private Gitea Actions path on `docker-build-lv3` now runs the Harbor-pinned Renovate runtime with a short-lived scoped token minted at job start from the OpenBao-rendered bootstrap bundle.
+- The private Gitea Actions path on `docker-build` now runs the Harbor-pinned Renovate runtime with a short-lived scoped token minted at job start from the OpenBao-rendered bootstrap bundle.
 - The private Gitea `main` snapshot now has a verified Renovate dashboard plus governed update-PR creation path on top of the exact source tree that settled this ADR's workflow contract.
 - The validation gate now maps SBOM paths through the runner host workspace, restoring grype scan success on pull request workflows.
 - The branch-local receipt remains the pre-integration audit trail, while the canonical mainline receipt records the exact-main hosted verification that backs the protected release and canonical-truth updates.

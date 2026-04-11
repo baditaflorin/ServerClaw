@@ -24,9 +24,9 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
     runtime_repo_root = tmp_path / "runtime"
     monkeypatch.setenv("FAKE_API_TOKEN", "token-123")
     secret_paths = {
-        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519": bootstrap_secret,
-        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt": nats_secret,
-        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt": windmill_secret,
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/bootstrap.id_ed25519": bootstrap_secret,
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nats/jetstream-admin-password.txt": nats_secret,
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt": windmill_secret,
     }
     monkeypatch.setattr(command, "resolve_repo_local_path", lambda value: secret_paths[str(value)])
 
@@ -68,9 +68,9 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
     command_catalog = {
         "execution_profiles": {
             "runtime": {
-                "runtime_host": "docker-runtime-lv3",
+                "runtime_host": "docker-runtime",
                 "runtime_repo_root": str(runtime_repo_root),
-                "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
+                "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server",
                 "effective_user": "ops",
                 "working_directory": str(runtime_repo_root),
                 "env": {
@@ -86,7 +86,7 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
         "secrets": {
             "bootstrap_ssh_private_key": {
                 "kind": "file",
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519",
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/bootstrap.id_ed25519",
             },
             "api_token": {
                 "kind": "env",
@@ -94,11 +94,11 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
             },
             "nats_jetstream_admin_password": {
                 "kind": "file",
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt",
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nats/jetstream-admin-password.txt",
             },
             "windmill_superadmin_secret": {
                 "kind": "file",
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt",
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt",
             },
         }
     }
@@ -116,7 +116,7 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
     runtime_nats_secret = runtime_repo_root / ".local" / "nats" / "jetstream-admin-password.txt"
     runtime_windmill_secret = runtime_repo_root / ".local" / "windmill" / "superadmin-secret.txt"
     assert payload["command"] == ["make", "open-maintenance-window"]
-    assert payload["runtime_host"] == "docker-runtime-lv3"
+    assert payload["runtime_host"] == "docker-runtime"
     assert payload["env"]["BOOTSTRAP_KEY"] == str(runtime_secret)
     assert payload["env"]["LV3_NATS_PASSWORD_FILE"] == str(runtime_nats_secret)
     assert payload["env"]["LV3_WINDMILL_BASE_URL"] == "http://127.0.0.1:8000"
@@ -144,7 +144,7 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
 
 
 def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
-    runtime_root = Path("/srv/proxmox_florin_server")
+    runtime_root = Path("/srv/proxmox-host_server")
     contract = {
         "workflow_id": "network-impairment-matrix",
         "inputs": [
@@ -160,9 +160,9 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
     command_catalog = {
         "execution_profiles": {
             "runtime": {
-                "runtime_host": "docker-runtime-lv3",
+                "runtime_host": "docker-runtime",
                 "runtime_repo_root": str(runtime_root),
-                "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
+                "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server",
                 "effective_user": "ops",
                 "working_directory": str(runtime_root),
                 "env": {
@@ -232,10 +232,10 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
     assert result["approved"] is True
     assert result["executed"] is True
     assert result["returncode"] == 0
-    assert result["runtime_host"] == "docker-runtime-lv3"
+    assert result["runtime_host"] == "docker-runtime"
     assert result["parameters"] == {"NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"}
     assert captured["controller_context"] == {"controller": "context"}
-    assert captured["runtime_host"] == "docker-runtime-lv3"
+    assert captured["runtime_host"] == "docker-runtime"
     payload = captured["payload"]
     assert isinstance(payload, dict)
     assert payload["command"] == ["make", "network-impairment-matrix"]

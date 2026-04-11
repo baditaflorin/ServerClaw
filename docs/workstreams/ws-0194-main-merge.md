@@ -4,7 +4,7 @@
 - Title: Integrate ADR 0194 live apply into `origin/main`
 - Status: merged
 - Branch: `codex/ws-0194-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0194-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0194-main-merge`
 - Owner: codex
 - Depends On: `ws-0194-live-apply`
 - Conflicts With: none
@@ -37,6 +37,6 @@ Carry the verified ADR 0194 Coolify live-apply branch into the latest `origin/ma
 
 ## Result
 
-- Merged-main replay completed from commit `093af353` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
-- Governed verification succeeded end to end: `python3 scripts/coolify_tool.py whoami`, a fresh `deploy-repo` smoke deployment with deployment `klmsg3ybgvp7xwnk8op3cdlp`, and direct edge probes for `coolify.lv3.org`, `repo-smoke.apps.lv3.org`, and `apps.lv3.org`.
+- Merged-main replay completed from commit `093af353` with `coolify ok=115 changed=7 failed=0`, `nginx-edge ok=71 changed=5 failed=0`, and `proxmox-host ok=43 changed=5 failed=0`.
+- Governed verification succeeded end to end: `python3 scripts/coolify_tool.py whoami`, a fresh `deploy-repo` smoke deployment with deployment `klmsg3ybgvp7xwnk8op3cdlp`, and direct edge probes for `coolify.example.com`, `repo-smoke.apps.example.com`, and `apps.example.com`.
 - Mainline validation gates passed after the final evidence refresh, including the focused `98 passed in 2.45s` pytest slice, agent-standards validation, repository data-model validation, generated artifact checks, and `git diff --check`.

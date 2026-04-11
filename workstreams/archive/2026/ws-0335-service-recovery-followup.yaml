@@ -25,7 +25,7 @@ shared_surfaces:
 - config/subdomain-exposure-registry.json
 - docs/site-generated/architecture/dependency-graph.md
 - inventory/group_vars/platform.yml
-- inventory/host_vars/proxmox_florin.yml
+- inventory/host_vars/proxmox-host.yml
 - tests/test_compose_runtime_secret_injection.py
 - tests/test_docker_runtime_role.py
 - tests/test_langfuse_runtime_role.py
@@ -34,7 +34,7 @@ shared_surfaces:
 - tests/test_one_api_runtime_role.py
 - tests/test_openbao_compose_env_helper.py
 - receipts/ops-portal-snapshot.html
-- receipts/sbom/host-docker-runtime-lv3-2026-04-03.cdx.json
+- receipts/sbom/host-docker-runtime-2026-04-03.cdx.json
 - receipts/live-applies/2026-04-04-ws-0335-service-recovery-followup-live-apply.json
 - receipts/live-applies/evidence/2026-04-04-ws-0335-*
 ownership_manifest:
@@ -64,7 +64,7 @@ ownership_manifest:
     - config/subdomain-exposure-registry.json
     - docs/site-generated/architecture/dependency-graph.md
     - inventory/group_vars/platform.yml
-    - inventory/host_vars/proxmox_florin.yml
+    - inventory/host_vars/proxmox-host.yml
     mode: shared_contract
     contract: ws0335-service-recovery-v1
   - id: ws0335_runtime_recovery_tests
@@ -83,13 +83,13 @@ ownership_manifest:
     - receipts/live-applies/2026-04-04-ws-0335-service-recovery-followup-live-apply.json
     - receipts/live-applies/evidence/2026-04-04-ws-0335-*
     - receipts/ops-portal-snapshot.html
-    - receipts/sbom/host-docker-runtime-lv3-2026-04-03.cdx.json
+    - receipts/sbom/host-docker-runtime-2026-04-03.cdx.json
     mode: shared_contract
     contract: live-apply-receipts-v1
 canonical_truth:
   changelog_entry: recovers the remaining degraded public services after the runtime-pool
     stabilization merges by re-materializing OpenBao-backed runtime env files, preventing
-    docker.socket shutdown from restarting a live Docker daemon on runtime-control-lv3,
+    docker.socket shutdown from restarting a live Docker daemon on runtime-control,
     and replaying the Harbor and Vaultwarden recovery paths safely
   release_bump: patch
   included_in_repo_version: 0.178.4

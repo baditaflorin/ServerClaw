@@ -110,7 +110,7 @@ from platform.clients.agent_client import get_agent_client
 client = get_agent_client()  # reads gateway URL + API key from env/OpenBao
 response = client.chat.completions.create(
     model="agent_serverclaw_ops",
-    messages=[{"role": "user", "content": "Check disk usage on postgres-lv3"}],
+    messages=[{"role": "user", "content": "Check disk usage on postgres"}],
     stream=True,
 )
 ```

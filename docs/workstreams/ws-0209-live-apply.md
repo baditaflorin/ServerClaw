@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0209-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0209-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0209-live-apply`
 - Owner: codex
 - Depends On: `adr-0129-runbook-automation-executor`, `adr-0204-architecture-governance`
 - Conflicts With: none
@@ -57,8 +57,8 @@
 
 ## Expected Live Surfaces
 
-- `api.lv3.org` exposes the structured runbook list, execute, status, and approve routes through the API gateway
-- `ops.lv3.org` loads its runbook panel from the shared gateway contract instead of a local workflow-only approximation
+- `api.example.com` exposes the structured runbook list, execute, status, and approve routes through the API gateway
+- `ops.example.com` loads its runbook panel from the shared gateway contract instead of a local workflow-only approximation
 - the API gateway persists structured runbook records under its durable data directory instead of ephemeral container state
 
 ## Verification
@@ -74,7 +74,7 @@
 
 ## Outcome
 
-- the shared runbook orchestration now lives in [`platform/use_cases/runbooks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/use_cases/runbooks.py), with the CLI, Windmill wrapper, API gateway, and ops portal each reduced to thin surface adapters over the same delivery contract
+- the shared runbook orchestration now lives in [`platform/use_cases/runbooks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/use_cases/runbooks.py), with the CLI, Windmill wrapper, API gateway, and ops portal each reduced to thin surface adapters over the same delivery contract
 - the rebased live apply re-converged `api_gateway`, `ops_portal`, and `windmill` from the isolated worktree, and the safe `validation-gate-status` runbook now verifies successfully through all three live paths
 - the workstream also repaired a rebased Windmill topology regression on the branch by switching the runtime defaults back to the host-level port facts actually available in the play context and documenting the guest-local probe endpoints used during verification
 
@@ -89,5 +89,5 @@
 - keep the runbook delivery-surface allowlist explicit; do not implicitly publish every eligible runbook through the portal
 - the safest verification path is the read-only `validation-gate-status` runbook; avoid using mutation-oriented runbooks just to prove adapter wiring
 - `./scripts/validate_repo.sh agent-standards` was re-run while `workstreams.yaml` still marked this branch `ready`; after the final status flip to `live_applied`, that validator is expected to reject the branch because terminal workstreams are no longer considered active branch owners
-- direct SSH verification from `docker-runtime-lv3` should use the guest-local listeners `http://127.0.0.1:8083` for the API gateway and `http://127.0.0.1:8000` for Windmill; `http://100.64.0.1:8005` is the Proxmox-host proxy, not the guest-local bind
+- direct SSH verification from `docker-runtime` should use the guest-local listeners `http://127.0.0.1:8083` for the API gateway and `http://127.0.0.1:8000` for Windmill; `http://100.64.0.1:8005` is the Proxmox-host proxy, not the guest-local bind
 - the successful live replay proved the worker-checkout integrity refresh against the earlier stale Windmill checkout drift, even though long-running unrelated Windmill playbook processes from other workstreams were still visible on the controller during this branch

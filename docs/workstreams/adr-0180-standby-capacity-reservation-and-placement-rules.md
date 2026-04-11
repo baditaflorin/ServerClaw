@@ -31,5 +31,5 @@
 ## Outcome
 
 - repository implementation completed in `0.176.4`
-- PostgreSQL now declares an `R2` warm standby backed by `postgres-replica-lv3`
+- PostgreSQL now declares an `R2` warm standby backed by `postgres-replica`
 - production service live applies now run a standby-capacity guard before Ansible execution

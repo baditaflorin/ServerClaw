@@ -35,11 +35,11 @@ python3 scripts/windmill_run_wait_result.py \
 1. Docker is available on the controller so Atlas lint and schema-inspect runs
    can execute in the pinned Atlas container.
 2. The controller-local OpenBao Atlas AppRole artifact exists at
-   `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/atlas-approle.json`.
+   `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/openbao/atlas-approle.json`.
 3. The controller-local NATS and ntfy secrets exist at:
-   - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt`
-   - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt`
-4. `docker-runtime-lv3`, `postgres-lv3`, and OpenBao are reachable through the
+   - `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/nats/jetstream-admin-password.txt`
+   - `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ntfy/alertmanager-password.txt`
+4. `docker-runtime`, `postgres`, and OpenBao are reachable through the
    Proxmox jump path used by the controller automation.
 5. `make converge-openbao` has already seeded the Atlas AppRole and
    `make converge-windmill` has already seeded the `f/lv3/atlas_drift_check`
@@ -93,8 +93,8 @@ find receipts/atlas-drift -type f -name '*.json' | sort
 Confirm the Atlas AppRole can mint the read-only schema-inspection credential:
 
 ```bash
-role_id="$(jq -r '.role_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/atlas-approle.json)"
-secret_id="$(jq -r '.secret_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/atlas-approle.json)"
+role_id="$(jq -r '.role_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/openbao/atlas-approle.json)"
+secret_id="$(jq -r '.secret_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/openbao/atlas-approle.json)"
 token="$(curl -fsS --request POST --data "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" http://127.0.0.1:8201/v1/auth/approle/login | jq -r '.auth.client_token')"
 curl -fsS --header "X-Vault-Token: $token" http://127.0.0.1:8201/v1/database/creds/postgres-atlas-readonly
 ```

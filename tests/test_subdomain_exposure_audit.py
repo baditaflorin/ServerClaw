@@ -22,27 +22,27 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = audit.build_registry()
         by_fqdn = {entry["fqdn"]: entry for entry in registry["publications"]}
 
-        self.assertEqual(by_fqdn["lv3.org"]["adapter"]["routing"]["source"], "public_edge_apex")
-        self.assertEqual(by_fqdn["lv3.org"]["adapter"]["dns"]["records"], [{"type": "A", "value": "65.108.75.123"}])
-        self.assertEqual(by_fqdn["n8n.lv3.org"]["publication"]["access_model"], "platform-sso")
+        self.assertEqual(by_fqdn["example.com"]["adapter"]["routing"]["source"], "public_edge_apex")
+        self.assertEqual(by_fqdn["example.com"]["adapter"]["dns"]["records"], [{"type": "A", "value": "203.0.113.1"}])
+        self.assertEqual(by_fqdn["n8n.example.com"]["publication"]["access_model"], "platform-sso")
         self.assertEqual(
-            by_fqdn["n8n.lv3.org"]["adapter"]["edge_auth"]["unauthenticated_prefix_paths"],
+            by_fqdn["n8n.example.com"]["adapter"]["edge_auth"]["unauthenticated_prefix_paths"],
             ["/webhook/", "/webhook-test/", "/webhook-waiting/"],
         )
-        self.assertEqual(by_fqdn["ops.lv3.org"]["publication"]["access_model"], "platform-sso")
-        self.assertEqual(by_fqdn["ops.lv3.org"]["adapter"]["edge_auth"]["provider"], "oauth2_proxy")
-        self.assertEqual(by_fqdn["docs.lv3.org"]["adapter"]["routing"]["source"], "public_edge_extra_sites")
-        self.assertEqual(by_fqdn["database.lv3.org"]["publication"]["access_model"], "private-network")
-        self.assertEqual(by_fqdn["vault.lv3.org"]["adapter"]["dns"]["visibility"], "tailnet")
-        self.assertTrue(by_fqdn["vault.lv3.org"]["evidence_plan"]["private_route"])
-        self.assertTrue(by_fqdn["changelog.lv3.org"]["live_tracking_expected"])
+        self.assertEqual(by_fqdn["ops.example.com"]["publication"]["access_model"], "platform-sso")
+        self.assertEqual(by_fqdn["ops.example.com"]["adapter"]["edge_auth"]["provider"], "oauth2_proxy")
+        self.assertEqual(by_fqdn["docs.example.com"]["adapter"]["routing"]["source"], "public_edge_extra_sites")
+        self.assertEqual(by_fqdn["database.example.com"]["publication"]["access_model"], "private-network")
+        self.assertEqual(by_fqdn["vault.example.com"]["adapter"]["dns"]["visibility"], "tailnet")
+        self.assertTrue(by_fqdn["vault.example.com"]["evidence_plan"]["private_route"])
+        self.assertTrue(by_fqdn["changelog.example.com"]["live_tracking_expected"])
         self.assertGreater(registry["summary"]["active_total"], 0)
 
     def test_repo_findings_flag_edge_oidc_mismatch(self) -> None:
         registry = {
             "publications": [
                 {
-                    "fqdn": "ops.lv3.org",
+                    "fqdn": "ops.example.com",
                     "status": "active",
                     "publication": {"access_model": "platform-sso"},
                     "adapter": {"edge_auth": {"provider": "none"}},
@@ -63,7 +63,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "ops.staging.lv3.org",
+                    "fqdn": "ops.staging.example.com",
                     "status": "planned",
                     "publication": {"access_model": "platform-sso"},
                     "adapter": {"edge_auth": {"provider": "none"}},
@@ -81,10 +81,10 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
     def test_repo_findings_flag_missing_certificate_catalog_entry_for_public_hostname(self) -> None:
         registry = {
-            "zone_name": "lv3.org",
+            "zone_name": "example.com",
             "publications": [
                 {
-                    "fqdn": "docs.lv3.org",
+                    "fqdn": "docs.example.com",
                     "service_id": "docs_portal",
                     "status": "active",
                     "environment": "production",
@@ -100,7 +100,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         findings = audit.collect_repo_findings(
             registry,
             certificate_catalog={"certificates": []},
-            edge_certificate_domains={"docs.lv3.org"},
+            edge_certificate_domains={"docs.example.com"},
         )
 
         self.assertEqual(findings[0]["check"], "certificate_plan")
@@ -109,7 +109,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
     def test_repo_findings_flag_public_certificate_catalog_entry_without_catalogued_hostname(self) -> None:
         registry = {
-            "zone_name": "lv3.org",
+            "zone_name": "example.com",
             "publications": [],
         }
 
@@ -121,9 +121,9 @@ class SubdomainExposureAuditTests(unittest.TestCase):
                         "id": "docs-edge",
                         "service_id": "docs_portal",
                         "endpoint": {
-                            "host": "docs.lv3.org",
+                            "host": "docs.example.com",
                             "port": 443,
-                            "server_name": "docs.lv3.org",
+                            "server_name": "docs.example.com",
                         },
                     }
                 ]
@@ -135,10 +135,10 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
     def test_repo_findings_flag_shared_edge_hostname_missing_from_rendered_certificate_domains(self) -> None:
         registry = {
-            "zone_name": "lv3.org",
+            "zone_name": "example.com",
             "publications": [
                 {
-                    "fqdn": "ops.lv3.org",
+                    "fqdn": "ops.example.com",
                     "service_id": "ops_portal",
                     "status": "active",
                     "environment": "production",
@@ -160,9 +160,9 @@ class SubdomainExposureAuditTests(unittest.TestCase):
                         "service_id": "ops_portal",
                         "expected_issuer": "letsencrypt",
                         "endpoint": {
-                            "host": "ops.lv3.org",
+                            "host": "ops.example.com",
                             "port": 443,
-                            "server_name": "ops.lv3.org",
+                            "server_name": "ops.example.com",
                         },
                     }
                 ]
@@ -174,16 +174,16 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
     def test_zone_findings_compare_full_record_sets(self) -> None:
         registry = {
-            "zone_name": "lv3.org",
+            "zone_name": "example.com",
             "publications": [
                 {
-                    "fqdn": "lv3.org",
+                    "fqdn": "example.com",
                     "environment": "production",
                     "status": "active",
                     "publication": {"delivery_model": "informational-edge"},
                     "adapter": {
                         "dns": {
-                            "records": [{"type": "A", "value": "65.108.75.123"}],
+                            "records": [{"type": "A", "value": "203.0.113.1"}],
                             "zone_expected": True,
                         }
                     },
@@ -194,7 +194,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         findings = audit.collect_zone_findings(
             registry,
             [
-                {"name": "@", "type": "A", "value": "65.108.75.123"},
+                {"name": "@", "type": "A", "value": "203.0.113.1"},
                 {"name": "@", "type": "AAAA", "value": "2a01:db8::1"},
             ],
         )
@@ -206,14 +206,14 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "docs.lv3.org",
+                    "fqdn": "docs.example.com",
                     "environment": "production",
                     "status": "planned",
                     "publication": {"delivery_model": "shared-edge"},
                     "adapter": {
                         "dns": {
-                            "target": "65.108.75.123",
-                            "records": [{"type": "A", "value": "65.108.75.123"}],
+                            "target": "203.0.113.1",
+                            "records": [{"type": "A", "value": "203.0.113.1"}],
                             "zone_expected": True,
                         }
                     },
@@ -222,7 +222,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         }
 
         original = audit.resolve_public_records
-        audit.resolve_public_records = lambda fqdn: ["65.108.75.123"]
+        audit.resolve_public_records = lambda fqdn: ["203.0.113.1"]
         try:
             findings = audit.collect_resolution_findings(registry)
         finally:
@@ -235,7 +235,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "ops.lv3.org",
+                    "fqdn": "ops.example.com",
                     "status": "active",
                     "environment": "production",
                     "publication": {"access_model": "platform-sso"},
@@ -244,7 +244,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         }
 
         original = audit.http_probe
-        audit.http_probe = lambda url: (200, "https://ops.lv3.org/", {})
+        audit.http_probe = lambda url: (200, "https://ops.example.com/", {})
         try:
             findings = audit.collect_http_auth_findings(registry)
         finally:
@@ -257,7 +257,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "mail.lv3.org",
+                    "fqdn": "mail.example.com",
                     "status": "active",
                     "environment": "production",
                     "adapter": {
@@ -290,7 +290,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "database.lv3.org",
+                    "fqdn": "database.example.com",
                     "evidence_plan": {"private_route": True},
                     "adapter": {"dns": {"target": "100.64.0.1", "target_port": 5432}},
                 }
@@ -316,7 +316,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "mail.lv3.org",
+                    "fqdn": "mail.example.com",
                     "status": "active",
                     "environment": "production",
                     "adapter": {
@@ -346,7 +346,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "vault.lv3.org",
+                    "fqdn": "vault.example.com",
                     "status": "active",
                     "environment": "production",
                     "adapter": {
@@ -378,7 +378,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = {
             "publications": [
                 {
-                    "fqdn": "vault.lv3.org",
+                    "fqdn": "vault.example.com",
                     "status": "active",
                     "environment": "production",
                     "adapter": {
@@ -418,7 +418,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
             try:
                 with self.assertRaisesRegex(ValueError, "out of date"):
                     audit.check_registry_current(
-                        {"schema_version": "2.0.0", "summary": {}, "publications": [], "zone_name": "lv3.org"}
+                        {"schema_version": "2.0.0", "summary": {}, "publications": [], "zone_name": "example.com"}
                     )
             finally:
                 audit.REGISTRY_PATH = original
@@ -427,11 +427,11 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
     def test_wildcard_edge_alias_matches_catalog_hostname(self) -> None:
         route = {
-            "hostname": "apps.lv3.org",
-            "aliases": ["*.apps.lv3.org"],
+            "hostname": "apps.example.com",
+            "aliases": ["*.apps.example.com"],
         }
 
-        self.assertEqual(audit.resolve_route_for_hostname("repo-smoke.apps.lv3.org", [route]), route)
+        self.assertEqual(audit.resolve_route_for_hostname("repo-smoke.apps.example.com", [route]), route)
 
 
 if __name__ == "__main__":

@@ -18,11 +18,11 @@ def test_build_systemd_run_command_sets_identity_logs_and_env(tmp_path: Path) ->
         "command_id": "network-impairment-matrix",
         "unit_name": "lv3-governed-network-impairment-matrix-1234",
         "effective_user": "ops",
-        "working_directory": "/srv/proxmox_florin_server",
+        "working_directory": "/srv/proxmox-host_server",
         "timeout_seconds": 600,
         "kill_mode": "mixed",
         "env": {
-            "BOOTSTRAP_KEY": "/srv/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519",
+            "BOOTSTRAP_KEY": "/srv/proxmox-host_server/.local/ssh/bootstrap.id_ed25519",
             "NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk",
         },
         "command": ["make", "network-impairment-matrix"],
@@ -38,26 +38,26 @@ def test_build_systemd_run_command_sets_identity_logs_and_env(tmp_path: Path) ->
         "--service-type=exec",
     ]
     assert "--uid=ops" in command
-    assert "--property=WorkingDirectory=/srv/proxmox_florin_server" in command
+    assert "--property=WorkingDirectory=/srv/proxmox-host_server" in command
     assert "--property=RuntimeMaxSec=600s" in command
     assert f"--property=StandardOutput=append:{stdout_log}" in command
     assert f"--property=StandardError=append:{stderr_log}" in command
     assert "--setenv=HOME=/home/ops" in command
     assert "--setenv=USER=ops" in command
     assert "--setenv=LOGNAME=ops" in command
-    assert "--setenv=BOOTSTRAP_KEY=/srv/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519" in command
+    assert "--setenv=BOOTSTRAP_KEY=/srv/proxmox-host_server/.local/ssh/bootstrap.id_ed25519" in command
     assert "--setenv=NETWORK_IMPAIRMENT_MATRIX_ARGS=target_class=staging --approve-risk" in command
     assert command[-2:] == ["make", "network-impairment-matrix"]
 
 
 def test_submit_stages_files_writes_receipt_and_redacts_env(monkeypatch, tmp_path: Path) -> None:
-    runtime_repo_root = tmp_path / "srv" / "proxmox_florin_server"
+    runtime_repo_root = tmp_path / "srv" / "proxmox-host_server"
     runtime_repo_root.mkdir(parents=True)
-    compat_repo_root = tmp_path / "Users" / "live" / "Documents" / "GITHUB_PROJECTS" / "proxmox_florin_server"
+    compat_repo_root = tmp_path / "Users" / "live" / "Documents" / "GITHUB_PROJECTS" / "proxmox-host_server"
     staged_secret = runtime_repo_root / ".local" / "ssh" / "bootstrap.id_ed25519"
     payload = {
         "command_id": "network-impairment-matrix",
-        "runtime_host": "docker-runtime-lv3",
+        "runtime_host": "docker-runtime",
         "runtime_repo_root": str(runtime_repo_root),
         "runtime_compat_repo_root": str(compat_repo_root),
         "effective_user": "ops",

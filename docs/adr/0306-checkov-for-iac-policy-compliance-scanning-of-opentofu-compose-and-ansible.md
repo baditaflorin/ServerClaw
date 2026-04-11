@@ -43,7 +43,7 @@ in its SaaS mode (not used here; self-hosted rule execution is sufficient).
 ## Decision
 
 We will integrate **Checkov** as a required CI gate step for all IaC surfaces in
-the repository, running on `docker-build-lv3` alongside the existing Semgrep step.
+the repository, running on `docker-build` alongside the existing Semgrep step.
 
 ### Deployment rules
 

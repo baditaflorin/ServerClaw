@@ -3,11 +3,11 @@
 ## Purpose
 
 This runbook converges ADR 0286 so scanned-image and image-only documents have
-a shared, private OCR fallback service on `runtime-ai-lv3`.
+a shared, private OCR fallback service on `runtime-ai`.
 
 ## Result
 
-- `runtime-ai-lv3` builds the repo-managed Tesseract OCR image from `/opt/tesseract-ocr/app`
+- `runtime-ai` builds the repo-managed Tesseract OCR image from `/opt/tesseract-ocr/app`
 - the private runtime listens on `10.10.10.90:3008`
 - the service exposes `/healthz` and `/ocr`
 - repo-managed verification confirms the OCR route extracts deterministic text from a known image fixture
@@ -18,31 +18,31 @@ a shared, private OCR fallback service on `runtime-ai-lv3`.
 Syntax-check the Tesseract OCR workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-tesseract-ocr
 ```
 
 Converge the private runtime directly:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-tesseract-ocr env=production
 ```
 
 Run the governed live-apply wrapper:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=tesseract-ocr env=production
 ```
 
 ## Verification
 
-Verify the private Tesseract OCR health endpoint on `runtime-ai-lv3`:
+Verify the private Tesseract OCR health endpoint on `runtime-ai`:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.90 \
@@ -52,14 +52,14 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Verify direct OCR extraction through the `/ocr` endpoint:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.90:3008/ocr
 ```
 
 Verify the Tika-first fallback helper chooses OCR when Tika returns no text:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.90:9998 --tesseract-url http://10.10.10.90:3008
 ```
 

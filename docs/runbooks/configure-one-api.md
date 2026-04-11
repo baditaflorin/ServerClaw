@@ -6,8 +6,8 @@ This runbook converges the private One-API LLM proxy defined by ADR 0294.
 
 ## Result
 
-- `docker-runtime-lv3` runs One-API from `/opt/one-api`
-- `postgres-lv3` stores One-API channels, tokens, quotas, and usage records in the `oneapi` database
+- `docker-runtime` runs One-API from `/opt/one-api`
+- `postgres` stores One-API channels, tokens, quotas, and usage records in the `oneapi` database
 - the Proxmox host publishes an operator-only Tailscale TCP proxy at `http://100.64.0.1:8018`
 - repo-managed bootstrap logic creates the root admin contract, Ollama-backed channel aliases, and consumer tokens
 - controller-local provider env files for Open WebUI and ServerClaw are generated under `.local/open-webui/provider.env` and `.local/serverclaw/provider.env`
@@ -28,23 +28,23 @@ Generated automatically on first converge:
 Syntax-check the One-API workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-one-api
 ```
 
 Converge the private runtime, database, controller proxy, and bootstrap contract:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-one-api
 ```
 
 ## Verification
 
-Verify the runtime container and generated files on `docker-runtime-lv3`:
+Verify the runtime container and generated files on `docker-runtime`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'docker compose --file /opt/one-api/docker-compose.yml ps && sudo ls -ld /opt/one-api /etc/lv3/one-api /opt/one-api/openbao /run/lv3-secrets/one-api && sudo test ! -e /opt/one-api/one-api.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml docker-runtime -m shell -a 'docker compose --file /opt/one-api/docker-compose.yml ps && sudo ls -ld /opt/one-api /etc/lv3/one-api /opt/one-api/openbao /run/lv3-secrets/one-api && sudo test ! -e /opt/one-api/one-api.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the private controller endpoint responds:
@@ -56,7 +56,7 @@ curl -fsS http://100.64.0.1:8018/api/status
 Verify the repo-managed bootstrap contract without mutating it:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/one_api_bootstrap.py verify \
   --config config/one-api/bootstrap.json \
   --one-api-url http://100.64.0.1:8018 \
@@ -67,8 +67,8 @@ python3 scripts/one_api_bootstrap.py verify \
 Verify the generated provider env files still point consumers at One-API:
 
 ```bash
-grep -E '^(OPENAI_API_KEY|OPENAI_API_BASE_URL)=' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/provider.env
-grep -E '^(OPENAI_API_KEY|OPENAI_API_BASE_URL)=' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/provider.env
+grep -E '^(OPENAI_API_KEY|OPENAI_API_BASE_URL)=' /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/open-webui/provider.env
+grep -E '^(OPENAI_API_KEY|OPENAI_API_BASE_URL)=' /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/serverclaw/provider.env
 ```
 
 ## Operating Notes

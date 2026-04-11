@@ -46,7 +46,7 @@ ansible-playbook -i inventory/hosts.yml -e proxmox_guest_ssh_connection_mode=pro
 
 ## Verify
 
-From `docker-runtime-lv3`:
+From `docker-runtime`:
 
 ```bash
 curl -sf http://127.0.0.1:8083/healthz
@@ -56,7 +56,7 @@ curl -sf http://127.0.0.1:8092/health
 From an operator workstation with a valid bearer token:
 
 ```bash
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/agents
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/agents
 ```
 
 Expected result:
@@ -66,7 +66,7 @@ Expected result:
 
 From the browser:
 
-- open `https://ops.lv3.org`
+- open `https://ops.example.com`
 - confirm the `Agent Coordination` section renders
 - verify the panel updates after a new observation-loop or closure-loop run starts
 

@@ -40,11 +40,11 @@ We will define a canonical `config/service-capability-catalog.json` that is the 
       "name": "Grafana",
       "description": "Metrics dashboards and alerting",
       "category": "observability",
-      "vm": "monitoring-lv3",
+      "vm": "monitoring",
       "vmid": 140,
       "internal_url": "http://10.10.10.40:3000",
-      "public_url": "https://grafana.lv3.org",
-      "subdomain": "grafana.lv3.org",
+      "public_url": "https://grafana.example.com",
+      "subdomain": "grafana.example.com",
       "exposure": "edge-published",
       "health_probe_id": "grafana",
       "image_catalog_ids": ["grafana"],
@@ -54,8 +54,8 @@ We will define a canonical `config/service-capability-catalog.json` that is the 
       "grafana_dashboard_uid": "platform-observability",
       "tags": ["monitoring", "metrics", "dashboards"],
       "environments": {
-        "production": { "url": "https://grafana.lv3.org" },
-        "staging": { "url": "https://grafana.staging.lv3.org" }
+        "production": { "url": "https://grafana.example.com" },
+        "staging": { "url": "https://grafana.staging.example.com" }
       }
     }
   ]
@@ -124,6 +124,6 @@ This script runs as part of `make validate`.
 ## Implementation Notes
 
 - The original repository implementation was recorded in `0.69.0`; current-main completion and validation against the now-canonical health-probe, image, and secret catalogs are finalized in `0.72.0`.
-- The current catalog covers all 19 services declared in [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json).
+- The current catalog covers all 19 services declared in [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/health-probe-catalog.json).
 - `make services` and `make show-service SERVICE=<id>` now provide the operator and agent query surface on top of the validated catalog.
-- Validation now resolves [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json), [config/image-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/image-catalog.json), [config/secret-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/secret-catalog.json), [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json), and live topology inputs before merge.
+- Validation now resolves [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/health-probe-catalog.json), [config/image-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/image-catalog.json), [config/secret-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/secret-catalog.json), [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/uptime-kuma/monitors.json), and live topology inputs before merge.

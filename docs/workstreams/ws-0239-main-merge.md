@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.45
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0239-main-merge-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-main-merge-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0239-main-merge-r2`
 - Owner: codex
 - Depends On: `ws-0239-live-apply`
 
@@ -52,10 +52,10 @@ main replay is re-verified.
 
 ## Verification
 
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.45 after the exact-main ADR 0239 replay re-verifies Pagefind-backed browser-local docs search on docs.lv3.org while preserving the authenticated edge contract on top of the 0.130.44 baseline" --dry-run`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.45 after the exact-main ADR 0239 replay re-verifies Pagefind-backed browser-local docs search on docs.example.com while preserving the authenticated edge contract on top of the 0.130.44 baseline" --dry-run`
   reported `Current version: 0.177.61`, `Next version: 0.177.62`, and
   `Unreleased notes: 1`
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.45 after the exact-main ADR 0239 replay re-verifies Pagefind-backed browser-local docs search on docs.lv3.org while preserving the authenticated edge contract on top of the 0.130.44 baseline"`
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.45 after the exact-main ADR 0239 replay re-verifies Pagefind-backed browser-local docs search on docs.example.com while preserving the authenticated edge contract on top of the 0.130.44 baseline"`
   prepared release `0.177.62`
 - `uv run --with pytest --with-requirements requirements/docs.txt pytest -q tests/test_docs_site.py`
   returned `7 passed`
@@ -66,7 +66,7 @@ main replay is re-verified.
   scan for `build/docs-portal`
 - `make deploy-docs-portal` completed successfully from the rebased `0.177.62`
   candidate and re-published both the changelog and docs portal directories on
-  `nginx-lv3`
+  `nginx-edge`
 - a latest-server check after the merge found `/var/www/lv3-generated/docs-portal`
   still serving the older MkDocs search bundle without `pagefind/` or the
   `0.177.62` release page, so `git fetch origin --prune` confirmed merged
@@ -74,11 +74,11 @@ main replay is re-verified.
   `origin/main` before a second exact-main `make deploy-docs-portal` replay
   restored the Pagefind publication with `LV3_RUN_ID=12349b9b76a24ed384af3c6650184963`,
   playbook run id `6e1f04fed42347009d0c9be9f6a1db45`, and recap
-  `nginx-lv3 ok=63 changed=6 failed=0 skipped=12`
-- `curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with
-  `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and
+  `nginx-edge ok=63 changed=6 failed=0 skipped=12`
+- `curl -ksSI https://docs.example.com/` returned `HTTP/2 302` with
+  `location: https://docs.example.com/oauth2/sign_in?rd=https://docs.example.com/` and
   `x-robots-tag: noindex, nofollow`
-- guest-local verification on `nginx-lv3` confirmed the published
+- guest-local verification on `nginx-edge` confirmed the published
   `pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`,
   `pagefind/pagefind-ui.css`, the `0.177.62` release page, the Pagefind search
   modal markup on the home page, and `data-pagefind-filter="section"` on the

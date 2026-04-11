@@ -43,14 +43,14 @@ python3 scripts/stage_smoke_suites.py --service windmill --environment productio
 Nightly Windmill-compatible run:
 
 ```bash
-python3 config/windmill/scripts/nightly-integration-tests.py --repo-path /srv/proxmox_florin_server
+python3 config/windmill/scripts/nightly-integration-tests.py --repo-path /srv/proxmox-host_server
 ```
 
 Windmill seeds the same wrapper at `f/lv3/nightly_integration_tests` for browser-first or API-triggered execution inside the `lv3` workspace.
 
 ## Environment Model
 
-The runner resolves defaults from [config/service-capability-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/service-capability-catalog.json) for these services when the selected environment is `active`:
+The runner resolves defaults from [config/service-capability-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/service-capability-catalog.json) for these services when the selected environment is `active`:
 
 - `api_gateway`
 - `keycloak`

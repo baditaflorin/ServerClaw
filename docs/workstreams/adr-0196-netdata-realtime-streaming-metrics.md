@@ -1,23 +1,23 @@
 # Workstream ADR 0196: Netdata Realtime Streaming Metrics
 
 - ADR: [ADR 0196](../adr/0196-netdata-realtime-streaming-metrics.md)
-- Title: Repo-managed Netdata parent and child streaming metrics with authenticated publication at `realtime.lv3.org`
+- Title: Repo-managed Netdata parent and child streaming metrics with authenticated publication at `realtime.example.com`
 - Status: implemented
 - Implemented In Repo Version: 0.177.25
 - Implemented In Platform Version: 0.130.32
 - Implemented On: 2026-03-27
 - Branch: `codex/ws-0196-main-merge-v2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0196-live-apply`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0071-agent-observation-loop`, `adr-0133-portal-authentication-by-default`
 - Conflicts With: none
-- Shared Surfaces: `roles/netdata_runtime`, `playbooks/realtime.yml`, `inventory/host_vars/proxmox_florin.yml`, `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, `docs/runbooks/`
+- Shared Surfaces: `roles/netdata_runtime`, `playbooks/realtime.yml`, `inventory/host_vars/proxmox-host.yml`, `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, `docs/runbooks/`
 
 ## Scope
 
 - add a repo-managed `netdata_runtime` role for the monitoring parent and child
   agents
-- publish `realtime.lv3.org` through the shared authenticated NGINX edge
+- publish `realtime.example.com` through the shared authenticated NGINX edge
 - register the service in the catalog, health, SLO, dependency, and data
   contracts
 - export the consolidated parent metrics to Prometheus
@@ -44,11 +44,11 @@
 
 ## Expected Live Surfaces
 
-- `monitoring-lv3` serves the Netdata parent on `http://10.10.10.40:19999`
-- `proxmox_florin`, `nginx-lv3`, `docker-runtime-lv3`, and `postgres-lv3`
+- `monitoring` serves the Netdata parent on `http://10.10.10.40:19999`
+- `proxmox-host`, `nginx-edge`, `docker-runtime`, and `postgres`
   stream into the parent
-- `realtime.lv3.org` redirects unauthenticated browsers to `/oauth2/sign_in`
-- Prometheus scrapes the parent exporter on `monitoring-lv3`
+- `realtime.example.com` redirects unauthenticated browsers to `/oauth2/sign_in`
+- Prometheus scrapes the parent exporter on `monitoring`
 
 ## Verification
 
@@ -65,9 +65,9 @@
   completed successfully from the separate worktree after fixing fresh-worktree
   portal generation, Debian 13 Netdata package bootstrap, and Prometheus scrape
   convergence in the realtime path
-- `realtime.lv3.org` resolves publicly, presents the shared edge certificate,
+- `realtime.example.com` resolves publicly, presents the shared edge certificate,
   and redirects unauthenticated browsers to `/oauth2/sign_in`
-- Prometheus on `monitoring-lv3` now ingests consolidated Netdata metrics for
+- Prometheus on `monitoring` now ingests consolidated Netdata metrics for
   the parent plus all expected streamed nodes
 - Uptime Kuma bootstrap and ensure-monitors both succeeded with the generated
   realtime monitor contract from the separate worktree

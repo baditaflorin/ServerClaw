@@ -7,12 +7,12 @@ This runbook covers the repo-managed Lago deployment introduced by
 
 The Lago workflow converges:
 
-- the shared PostgreSQL role and `lago` database on `postgres-lv3`
+- the shared PostgreSQL role and `lago` database on `postgres`
 - the Lago API, front end, worker, clock, Redis, and PDF sidecar on
-  `docker-runtime-lv3`
+  `docker-runtime`
 - the shared API-gateway billing adapter that exposes
-  `billing.lv3.org/api/v1/events` and `billing.lv3.org/api/health`
-- the protected `billing.lv3.org` browser surface on the shared NGINX edge
+  `billing.example.com/api/v1/events` and `billing.example.com/api/health`
+- the protected `billing.example.com` browser surface on the shared NGINX edge
 - the repo-managed smoke billable metric, plan, customer, subscription, and
   public-ingest verification path
 - the controller-local Lago artifacts mirrored under `.local/lago/`
@@ -23,11 +23,11 @@ The current implementation uses these boundaries:
 
 - the Lago browser UI and operator management surface stay behind the shared
   oauth2-proxy and Keycloak edge-auth flow
-- anonymous requests to `billing.lv3.org/api/health` are intentionally rejected
+- anonymous requests to `billing.example.com/api/health` are intentionally rejected
   by the API gateway with the canonical `401` error envelope; use the
   repo-managed playbook verification path or the private guest-local endpoint
   for unauthenticated liveness checks
-- `billing.lv3.org/api/v1/events` is intentionally public, but only through
+- `billing.example.com/api/v1/events` is intentionally public, but only through
   the API-gateway adapter that enforces producer bearer tokens plus
   repo-managed metric and subscription scope
 - rejected or malformed billing payloads are published to
@@ -108,16 +108,16 @@ make syntax-check-lago
 Runtime verification:
 
 ```bash
-curl -skI https://billing.lv3.org/
-curl -skI https://billing.lv3.org/api/health
+curl -skI https://billing.example.com/
+curl -skI https://billing.example.com/api/health
 curl -fsS -X POST \
   -H "Authorization: Bearer $(tr -d '\n' < .local/lago/smoke-producer-token.txt)" \
   -H "Content-Type: application/json" \
   --data '{"event":{"transaction_id":"00000000-0000-4000-8000-000000000001","external_subscription_id":"lv3-billing-smoke-subscription","code":"api_calls"}}' \
-  https://billing.lv3.org/api/v1/events
+  https://billing.example.com/api/v1/events
 ```
 
-The converge playbook also verifies local health on `docker-runtime-lv3` and
+The converge playbook also verifies local health on `docker-runtime` and
 checks current usage for the seeded smoke customer through the local Lago API.
 
 ## Operational Notes
@@ -127,7 +127,7 @@ checks current usage for the seeded smoke customer through the local Lago API.
 - The browser UI is intentionally edge-authenticated rather than app-native
   OIDC. If anonymous browser access reaches `/`, treat that as a rollback-level
   defect.
-- Anonymous `billing.lv3.org/api/health` calls should fail closed with the
+- Anonymous `billing.example.com/api/health` calls should fail closed with the
   canonical gateway `401` response. Treat a public `200` on that route as a
   publication regression unless the contract is intentionally widened in a
   follow-up ADR or workstream.

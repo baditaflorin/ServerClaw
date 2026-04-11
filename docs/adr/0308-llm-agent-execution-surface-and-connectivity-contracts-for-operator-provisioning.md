@@ -33,10 +33,10 @@ The `operator_manager.py onboard` command **must run where OpenBao is reachable 
 There are now two verified ways to satisfy that constraint:
 
 1. **Preferred**: trigger the Windmill worker path `f/lv3/operator_onboard` on VM 120
-   (`docker-runtime-lv3`, LAN IP `10.10.10.20`). The worker runtime sets
+   (`docker-runtime`, LAN IP `10.10.10.20`). The worker runtime sets
    `LV3_OPENBAO_URL=http://lv3-openbao:8201` and runs inside the exact network that can reach the
    required services.
-2. **Fallback**: SSH to `docker-runtime-lv3` and run `scripts/operator_manager.py onboard` from the
+2. **Fallback**: SSH to `docker-runtime` and run `scripts/operator_manager.py onboard` from the
    guest host with `LV3_OPENBAO_URL=http://127.0.0.1:8201`.
 
 Do **not** attempt to run `make operator-onboard` or `scripts/operator_manager.py onboard` from the
@@ -64,7 +64,7 @@ Developer Mac (100.64.0.3 on Tailscale)
 | Service   | Tailscale endpoint          | Docker-internal endpoint    | TLS | Client cert required |
 |-----------|-----------------------------|-----------------------------|-----|----------------------|
 | OpenBao   | `https://100.64.0.1:8200`   | `http://lv3-openbao:8201`   | yes | **yes (mTLS)**       |
-| Keycloak  | `https://sso.lv3.org`       | `http://10.10.10.20:18080`  | yes | no                   |
+| Keycloak  | `https://sso.example.com`       | `http://10.10.10.20:18080`  | yes | no                   |
 | Windmill  | `http://100.64.0.1:8005`    | `http://10.10.10.20:8000`   | no  | no                   |
 | step-ca   | via Tailscale proxy         | Docker-internal             | yes | no                   |
 
@@ -83,7 +83,7 @@ The private key for the `ops` user on the Proxmox host lives at:
 ```
 
 The corresponding public key is authorized on the Proxmox host (`ops@100.64.0.1`).
-The same key is also authorized on `docker-runtime-lv3`. Use:
+The same key is also authorized on `docker-runtime`. Use:
 
 ```bash
 ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
@@ -117,7 +117,7 @@ As of 2026-04-02 that preflight checks:
 
 ```bash
 # 1. Check Keycloak (public discovery contract)
-curl -fsS https://sso.lv3.org/realms/lv3/.well-known/openid-configuration >/dev/null
+curl -fsS https://sso.example.com/realms/lv3/.well-known/openid-configuration >/dev/null
 
 # 2. Check OpenBao (private mTLS listener)
 openssl s_client -connect 100.64.0.1:8200 -CAfile .local/step-ca/certs/root_ca.crt < /dev/null 2>/dev/null | grep -q "Verify return code: 0 (ok)"
@@ -146,12 +146,12 @@ python3 scripts/windmill_run_wait_result.py \
   --workspace lv3 \
   --path f/lv3/operator_onboard \
   --payload-json '{
-    "name": "Florin Badita",
-    "email": "florin@badita.org",
+    "name": "Platform Operator",
+    "email": "operator@example.com",
     "role": "admin",
     "operator_id": "florin-tmp-001",
     "keycloak_username": "florin.badita-tmp",
-    "tailscale_login_email": "florin@badita.org",
+    "tailscale_login_email": "operator@example.com",
     "bootstrap_password": "'"$(cat .local/keycloak/bootstrap-admin-password.txt)"'"
   }'
 ```
@@ -170,11 +170,11 @@ ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
   -o UserKnownHostsFile=/dev/null \
   -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.20 \
-  'cd /srv/proxmox_florin_server && \
+  'cd /srv/proxmox-host_server && \
    LV3_OPENBAO_URL=http://127.0.0.1:8201 \
    uv run --with pyyaml python scripts/operator_manager.py onboard \
-     --name "Florin Badita" \
-     --email "florin@badita.org" \
+     --name "Platform Operator" \
+     --email "operator@example.com" \
      --role admin \
      --id florin-tmp-001 \
      --ssh-key "@/tmp/florin.pub" \
@@ -235,7 +235,7 @@ ssh-keygen -t ed25519 -C "<id>@lv3 (expires <date>)" -f /tmp/<id> -N ""
 - The SSH key location is explicit — no hunt across `.local/` subdirectories
 
 **Negative / Trade-offs**
-- The preferred Windmill path still requires Windmill to be healthy on `docker-runtime-lv3`
+- The preferred Windmill path still requires Windmill to be healthy on `docker-runtime`
 - Controller-local live runs still require an OpenBao loopback override or tunnel because the default service catalog points at the mTLS edge
 - `operator_manager.py` has no client-cert support, making the mTLS endpoint permanently inaccessible from the Mac without code changes
 

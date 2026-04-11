@@ -16,6 +16,6 @@ conflicts_with: []
 shared_surfaces:
   - config/grafana/provisioning/
   - scripts/maintenance_window_tool.py
-  - monitoring-lv3 services
+  - monitoring services
 ready_to_merge: false
 live_applied: false

@@ -4,7 +4,7 @@
 - Title: Two-layer push gate — fast local pre-commit + remote parallel check suite — blocking broken code from reaching main
 - Status: merged
 - Branch: `codex/adr-0087-validation-gate`
-- Worktree: `../proxmox_florin_server-validation-gate`
+- Worktree: `../proxmox-host_server-validation-gate`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`
 - Conflicts With: none

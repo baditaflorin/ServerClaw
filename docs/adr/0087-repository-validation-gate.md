@@ -106,7 +106,7 @@ Machine-readable definition of all checks, their images, commands, and severity:
   "gates": [
     {
       "id": "ansible-lint",
-      "image": "registry.lv3.org/check-runner/ansible:2.17",
+      "image": "registry.example.com/check-runner/ansible:2.17",
       "command": "ansible-lint --profile production .",
       "severity": "error",
       "timeout_seconds": 120

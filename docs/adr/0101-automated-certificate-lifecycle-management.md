@@ -41,7 +41,7 @@ The current repository-managed renewal paths on `main` are OpenBao and Vaultward
 
 For external paths that already renew outside this role:
 
-- the shared NGINX edge bundle remains Certbot-managed on `nginx-lv3`
+- the shared NGINX edge bundle remains Certbot-managed on `nginx-edge`
 - the Proxmox manager certificate remains Proxmox ACME-managed on the host
 - step-ca's own bootstrap certificate is explicitly inventoried as a special case, not silently ignored
 - Portainer and PBS are inventoried and probed even though they still use their own local certificate lifecycle
@@ -109,7 +109,7 @@ This catalog is now the source of truth for:
 
 ### Let's Encrypt certificates (external services)
 
-For `sso.lv3.org`, `grafana.lv3.org`, `ops.lv3.org`, and other edge-published subdomains, certificates are issued by Let's Encrypt via DNS-01 challenge (already implemented per ADR 0021). Certbot is configured with a `--deploy-hook` that reloads nginx on the edge VM when a certificate is renewed. The same TLS probe covers these certificates.
+For `sso.example.com`, `grafana.example.com`, `ops.example.com`, and other edge-published subdomains, certificates are issued by Let's Encrypt via DNS-01 challenge (already implemented per ADR 0021). Certbot is configured with a `--deploy-hook` that reloads nginx on the edge VM when a certificate is renewed. The same TLS probe covers these certificates.
 
 ### Alert routing for certificate events
 

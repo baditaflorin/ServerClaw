@@ -46,7 +46,7 @@ The framework will own:
 
 ## Implementation Notes
 
-- Shared Telegraf and guest-writer token plumbing now lives in [roles/guest_observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/guest_observability).
+- Shared Telegraf and guest-writer token plumbing now lives in [roles/guest_observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/guest_observability).
 - The framework owns InfluxData repository setup, Telegraf installation, mirrored guest-writer token handling, common directory management, and Telegraf enable plus verification.
-- [roles/nginx_observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/nginx_observability) and [roles/docker_build_observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/docker_build_observability) now keep only service-specific configuration, handlers, and verification.
+- [roles/nginx_observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/nginx_observability) and [roles/docker_build_observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/docker_build_observability) now keep only service-specific configuration, handlers, and verification.
 - The monitoring playbook keeps the same live targets and dashboards while using the shared framework under the role boundary.

@@ -9,16 +9,16 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0282-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0282-live-apply`
 - Owner: codex
 - Depends On: `adr-0041`, `adr-0107`, `adr-0165`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0282`, `docs/workstreams/ws-0282-live-apply.md`, `docs/runbooks/configure-mailpit.md`, `docs/runbooks/configure-mail-platform.md`, `inventory/group_vars/all.yml`, `inventory/group_vars/staging.yml`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/mailpit.yml`, `playbooks/services/mailpit.yml`, `collections/ansible_collections/lv3/platform/roles/mailpit_runtime/`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`, `playbooks/mail-platform-verify.yml`, `collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml`, `config/*catalog*.json`, `Makefile`, `scripts/generate_platform_vars.py`, `scripts/validate_repo.sh`, `receipts/image-scans/`, `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0282`, `docs/workstreams/ws-0282-live-apply.md`, `docs/runbooks/configure-mailpit.md`, `docs/runbooks/configure-mail-platform.md`, `inventory/group_vars/all.yml`, `inventory/group_vars/staging.yml`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `playbooks/mailpit.yml`, `playbooks/services/mailpit.yml`, `collections/ansible_collections/lv3/platform/roles/mailpit_runtime/`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`, `playbooks/mail-platform-verify.yml`, `collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml`, `config/*catalog*.json`, `Makefile`, `scripts/generate_platform_vars.py`, `scripts/validate_repo.sh`, `receipts/image-scans/`, `receipts/live-applies/`
 
 ## Purpose
 
 Implement ADR 0282 by making Mailpit the repo-managed private SMTP
-interceptor on `docker-runtime-lv3`, wiring the non-production SMTP contract to
+interceptor on `docker-runtime`, wiring the non-production SMTP contract to
 that service, and preserving enough branch-local state that a later exact-main
 replay can promote the service onto the protected `main` surfaces safely.
 
@@ -48,10 +48,10 @@ replay can promote the service onto the protected `main` surfaces safely.
   surfaces forward with Mailpit.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production`
   completed successfully on that synchronized tree with final recap
-  `docker-runtime-lv3 : ok=115 changed=4 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`.
+  `docker-runtime : ok=115 changed=4 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`.
 - Fresh guest-local verification returned Mailpit info with
   `Version=v1.29.5`, `Messages=1`, and `SMTPAccepted=18`.
-- A fresh probe from `monitoring-lv3` deleted previous Mailpit messages, sent
+- A fresh probe from `monitoring` deleted previous Mailpit messages, sent
   SMTP to `10.10.10.20:1025`, and confirmed exactly one matching captured
   message with subject `LV3 Mailpit exact-main verification` created at
   `2026-03-30T07:25:12.36Z` through

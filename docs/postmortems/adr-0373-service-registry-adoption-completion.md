@@ -34,7 +34,7 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and m
 **Live-Apply Receipt:** `receipts/live-applies/2026-04-09-adr-0373-phase-4-alertmanager-runtime-migration-live-apply`
 
 **Verification:**
-- Convergence test on runtime-control-lv3: 346/346 tasks OK
+- Convergence test on runtime-control: 346/346 tasks OK
 - alertmanager_runtime correctly derived all conventional variables
 - Pre-push gate validation passed (build server reachable)
 - Health check passed: alertmanager API responding at internal endpoint
@@ -141,7 +141,7 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and m
 - Phase 5-6 code is stable on origin/main; next live-apply should use standard `make converge-*` flow
 
 ### Reason 3: Resource Isolation (ADR 0347)
-- docker-runtime-lv3 is already handling heavy workloads (Redpanda, Langfuse, LiveKit)
+- docker-runtime is already handling heavy workloads (Redpanda, Langfuse, LiveKit)
 - Some of the 73 services are resource-intensive (dify, ollama, jupyterhub)
 - Recommendation: Monitor resource utilization during Phase 5-6 convergence before production scheduling
 
@@ -150,7 +150,7 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and m
 ## Test Coverage & Verification Path
 
 ### Phase 4 (Already Verified)
-✅ Convergence test: 346/346 tasks on runtime-control-lv3
+✅ Convergence test: 346/346 tasks on runtime-control
 ✅ Service functionality: alertmanager API responding
 ✅ Derive pattern validation: Conventional variables auto-derived correctly
 ✅ Health check: Prometheus scrape targets healthy
@@ -159,7 +159,7 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and m
 
 **Step 1: Syntax Validation (Quick)**
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make pre-push-gate  # Runs Ansible syntax check on all 73 roles
 ```
 
@@ -223,7 +223,7 @@ live_apply_evidence:
 
 ### Architectural (Beyond ADR 0373 Scope)
 - [ ] ADR 0385 Identity.yml refactor: Extend `identity.yml` to replace all ~250 hardcoded domain/IP values (WIP, partially merged)
-- [ ] ADR 0347 Workload Split: Migrate high-resource services (dify, ollama, jupyterhub) off docker-runtime-lv3
+- [ ] ADR 0347 Workload Split: Migrate high-resource services (dify, ollama, jupyterhub) off docker-runtime
 - [ ] ADR 0380 Neko Multi-Instance: Implement interactive browser access pattern (per user isolation)
 
 ---

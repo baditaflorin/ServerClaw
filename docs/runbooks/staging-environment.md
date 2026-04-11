@@ -16,7 +16,7 @@ Current live state on 2026-03-27:
 
 - `vmbr20` is live on the Proxmox host
 - host nftables currently forwards `10.20.10.0/24` and masquerades it out `vmbr0`, which branch-scoped previews also depend on
-- `docker-runtime-staging-lv3` (`10.20.10.20`) and `monitoring-staging-lv3` (`10.20.10.40`) exist and are reachable over SSH through the Proxmox jump
+- `docker-runtime` (`10.20.10.20`) and `monitoring` (`10.20.10.40`) exist and are reachable over SSH through the Proxmox jump
 - the staged OpenTofu declarations currently keep Proxmox NIC firewall disabled (`firewall=0`) until staged guest-network-policy automation is added
 
 ## Topology
@@ -25,8 +25,8 @@ Current live state on 2026-03-27:
 - gateway: `10.20.10.1/24`
 - subnet: `10.20.10.0/24`
 - current staged VM declarations:
-  - `docker-runtime-staging-lv3` on `10.20.10.20`
-  - `monitoring-staging-lv3` on `10.20.10.40`
+  - `docker-runtime` on `10.20.10.20`
+  - `monitoring` on `10.20.10.40`
 
 The host advertises the staging subnet through Tailscale once the network role is applied from `main`.
 
@@ -60,7 +60,7 @@ Apply only after review:
 make remote-tofu-apply ENV=staging
 ```
 
-If the remote apply wrapper hits the session-runtime ownership bug on the build server, reuse the reviewed `RUN_ID`, repair ownership on the session-scoped plan directory, and replay `scripts/tofu_exec.sh apply staging` directly on `docker-build-lv3`.
+If the remote apply wrapper hits the session-runtime ownership bug on the build server, reuse the reviewed `RUN_ID`, repair ownership on the session-scoped plan directory, and replay `scripts/tofu_exec.sh apply staging` directly on `docker-build`.
 
 ## Safe Checks
 
@@ -68,7 +68,7 @@ Non-destructive checks after the bridge and VMs exist:
 
 ```bash
 python3 scripts/integration_suite.py --mode gate --environment staging
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/services/grafana.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=staging -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/services/grafana.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=staging -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check
 ```
 
 If staging services publish active bindings in `config/service-capability-catalog.json`, the integration suite should switch from a structured `skipped` report to a real gate run automatically.

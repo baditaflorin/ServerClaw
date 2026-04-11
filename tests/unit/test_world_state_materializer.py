@@ -52,7 +52,7 @@ def test_materialize_surface_populates_uninitialized_postgres_view() -> None:
 
     materialize_surface(
         "proxmox_vms",
-        [{"vmid": 110, "name": "nginx-lv3", "status": "running"}],
+        [{"vmid": 110, "name": "nginx-edge", "status": "running"}],
         connection_factory=lambda: connection,
     )
 
@@ -67,7 +67,7 @@ def test_materialize_surface_uses_concurrent_refresh_once_view_is_populated() ->
 
     materialize_surface(
         "proxmox_vms",
-        [{"vmid": 110, "name": "nginx-lv3", "status": "running"}],
+        [{"vmid": 110, "name": "nginx-edge", "status": "running"}],
         connection_factory=lambda: connection,
     )
 

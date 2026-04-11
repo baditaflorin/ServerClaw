@@ -10,8 +10,8 @@ critical
 
 ## Immediate Steps
 
-1. Confirm the TCP readiness probe is failing from `monitoring-lv3`.
-2. Check PostgreSQL service state on `postgres-lv3`: `systemctl status postgresql`.
+1. Confirm the TCP readiness probe is failing from `monitoring`.
+2. Check PostgreSQL service state on `postgres`: `systemctl status postgresql`.
 3. Verify disk pressure and recent restart history before making changes.
 
 ## Diagnosis
@@ -34,4 +34,4 @@ If the service remains unreachable after 15 minutes, halt downstream writes and 
 ## Post-Incident
 
 Document whether the failure was process, host, storage, or network related and record any recovery commands used.
-If the outage involved PostgreSQL audit configuration or log routing, continue with [docs/runbooks/postgres-audit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-audit.md).
+If the outage involved PostgreSQL audit configuration or log routing, continue with [docs/runbooks/postgres-audit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/postgres-audit.md).

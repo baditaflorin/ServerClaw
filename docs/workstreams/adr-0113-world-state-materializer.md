@@ -69,17 +69,17 @@
 
 ## Live Apply Evidence
 
-- 2026-03-26 live replay from latest `origin/main` plus this worktree synced the runtime checkout on `docker-runtime-lv3`, fixed the first-refresh materializer path, and granted `windmill_user` access to `world_state`.
-- Verified live worker refreshes on `docker-runtime-lv3` for `proxmox_vms`, `container_inventory`, `netbox_topology`, `dns_records`, `tls_cert_expiry`, `opentofu_drift`, and `openbao_secret_expiry`.
-- Verified Postgres live state on `postgres-lv3`: `world_state.current_view` is populated and queryable, and direct worker runs succeeded for `maintenance_windows` and `service_health` once the repaired runtime env and worker checkout were present.
+- 2026-03-26 live replay from latest `origin/main` plus this worktree synced the runtime checkout on `docker-runtime`, fixed the first-refresh materializer path, and granted `windmill_user` access to `world_state`.
+- Verified live worker refreshes on `docker-runtime` for `proxmox_vms`, `container_inventory`, `netbox_topology`, `dns_records`, `tls_cert_expiry`, `opentofu_drift`, and `openbao_secret_expiry`.
+- Verified Postgres live state on `postgres`: `world_state.current_view` is populated and queryable, and direct worker runs succeeded for `maintenance_windows` and `service_health` once the repaired runtime env and worker checkout were present.
 - Resolved the repo-side merge blockers in this branch:
   - `service_health` isolates per-probe transport failures instead of aborting the whole surface
   - `maintenance_windows` can use a worker-local direct NATS URL instead of requiring the controller SSH tunnel path
   - the Windmill runtime secret payload and `runtime.env.ctmpl` now carry the combined world-state, NATS, ledger, graph, Proxmox, and test-runner variables
   - the Windmill role no longer overwrites the OpenBao-managed `runtime.env` after calling `openbao_compose_env`
 - Focused repository validation passed with `uv run --with pytest --with pyyaml pytest tests/test_world_state_workers.py tests/test_world_state_repo_surfaces.py tests/test_maintenance_window_tool.py tests/test_compose_runtime_secret_injection.py tests/unit/test_world_state_materializer.py -q`, `python3 -m compileall config/windmill/scripts/world-state platform/world_state scripts/maintenance_window_tool.py`, and `make syntax-check-windmill`.
-- 2026-03-27 latest-main replay from `codex/ws-0113-main-live-apply` completed `make converge-windmill` successfully, installed the managed host dependencies needed for `opentofu_drift` and host-side client checks (`make`, `python3-psycopg`), and verified `psycopg 3.2.6` on `docker-runtime-lv3`.
-- The final tight-window proof on 2026-03-27 refreshed `proxmox_vms`, `container_inventory`, `maintenance_windows`, and `service_health` in sequence, then confirmed `WorldStateClient().list_stale()` returned `[]` on `docker-runtime-lv3` and `world_state.current_view` on `postgres-lv3` showed all nine surfaces with `is_expired = false`.
+- 2026-03-27 latest-main replay from `codex/ws-0113-main-live-apply` completed `make converge-windmill` successfully, installed the managed host dependencies needed for `opentofu_drift` and host-side client checks (`make`, `python3-psycopg`), and verified `psycopg 3.2.6` on `docker-runtime`.
+- The final tight-window proof on 2026-03-27 refreshed `proxmox_vms`, `container_inventory`, `maintenance_windows`, and `service_health` in sequence, then confirmed `WorldStateClient().list_stale()` returned `[]` on `docker-runtime` and `world_state.current_view` on `postgres` showed all nine surfaces with `is_expired = false`.
 
 ## Final Integration State
 
@@ -91,7 +91,7 @@
 ## Merge Criteria
 
 - All 9 refresh workers are seeded and scheduled in Windmill from repo-managed defaults
-- `WorldStateClient` can be imported and used in both a Windmill workflow script and the managed `docker-runtime-lv3` host Python environment
+- `WorldStateClient` can be imported and used in both a Windmill workflow script and the managed `docker-runtime` host Python environment
 - Stale detection is covered by automated SQLite-backed tests and ready for live verification
 - NATS refresh publication is implemented as best-effort and ready for live verification once the worker runtime has NATS credentials
 

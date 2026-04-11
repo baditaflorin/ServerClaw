@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.40
 - Release Date: 2026-03-28
 - Branch: `codex/ws-0229-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0229-main-merge`
 - Owner: codex
 - Depends On: `ws-0229-live-apply`
 - Conflicts With: none
@@ -47,7 +47,7 @@ already-live platform truth aligned with the documented runner verification.
 
 ## Result
 
-- Release `0.177.45` integrates ADR 0229 into `origin/main` by carrying forward the latest-main verification replay, the private Gitea push-gate proof, and workflow run `36` on runner `docker-build-lv3`.
+- Release `0.177.45` integrates ADR 0229 into `origin/main` by carrying forward the latest-main verification replay, the private Gitea push-gate proof, and workflow run `36` on runner `docker-build`.
 - The repository version advances while platform version `0.130.40` stays unchanged because this merge records already-live runner truth rather than introducing a new post-merge live mutation.
 - `versions/stack.yaml`, `README.md`, and release history now align with the refreshed ADR 0229 receipt and workstream metadata on top of the concurrent ADR 0225 mainline release.
 

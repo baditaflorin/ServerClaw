@@ -6,7 +6,7 @@
 
 ## Context
 
-Open WebUI at `chat.lv3.org` currently runs Llama 3.2 3B with no platform
+Open WebUI at `chat.example.com` currently runs Llama 3.2 3B with no platform
 context. Users asking about the LV3 platform, available services, agent tools,
 or operational procedures get generic chatbot answers because the model has
 no knowledge of the environment it is deployed in.
@@ -41,7 +41,7 @@ existing Qdrant `platform_context` collection as a knowledge source.
 **Implementation:**
 
 1. Enable Open WebUI's RAG integration and point it at the Qdrant instance
-   on `docker-runtime-lv3`
+   on `docker-runtime`
 2. Configure the embedding model to use the same `nomic-embed-text` model
    via the local Ollama endpoint (ensuring vector compatibility)
 3. Set the RAG collection to `platform_context` so queries hit the same
@@ -100,7 +100,7 @@ files change.
 
 ### Positive
 
-- Users chatting at `chat.lv3.org` get answers grounded in actual platform
+- Users chatting at `chat.example.com` get answers grounded in actual platform
   documentation instead of hallucinated generic responses
 - No new infrastructure required — reuses existing Qdrant, Ollama, and
   platform context corpus

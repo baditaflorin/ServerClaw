@@ -45,7 +45,7 @@ jobs.
 
 ### Deployment rules
 
-- k6 runs as a Docker Compose `run` step in Gitea Actions on `docker-build-lv3`
+- k6 runs as a Docker Compose `run` step in Gitea Actions on `docker-build`
   and as a Windmill job for scheduled platform-health load probes
 - the k6 Docker image is pulled through Harbor (ADR 0068) and pinned to a SHA
   digest; the version is tracked in `versions/stack.yaml`
@@ -76,7 +76,7 @@ Three k6 test scenario types are defined:
   after every run; this follows the same receipt convention as other platform
   artefacts
 - k6 metrics are pushed to Prometheus via remote-write during every run; the
-  existing Grafana dashboards on `monitoring-lv3` gain a `k6_*` metric namespace
+  existing Grafana dashboards on `monitoring` gain a `k6_*` metric namespace
   showing request rate, error rate, and p95 latency over the test window
 - the CI gate step reads the JSON summary and fails if: error rate > 1% during
   the smoke test, or p95 latency exceeds the service's SLO threshold
@@ -104,7 +104,7 @@ Three k6 test scenario types are defined:
   `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-openfga-r5.txt`,
   and `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-windmill-r4.txt`
 - the authoritative build-server smoke replay passed from
-  `docker-build-lv3`, producing synced receipts
+  `docker-build`, producing synced receipts
   `receipts/k6/smoke-keycloak-20260331T103411Z.json` and
   `receipts/k6/smoke-openfga-20260331T103411Z.json` plus the raw summary
   export, as captured in
@@ -126,8 +126,8 @@ Three k6 test scenario types are defined:
   canonical replay, as recorded in
   `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-candidate-source-commit-r3-0.177.118.txt`
 - the first exact-main smoke attempt exposed live drift rather than a repo
-  regression: `monitoring-lv3` still had Prometheus bound to `127.0.0.1:9090`
-  and `docker-runtime-lv3` was concurrently churning the OpenFGA container;
+  regression: `monitoring` still had Prometheus bound to `127.0.0.1:9090`
+  and `docker-runtime` was concurrently churning the OpenFGA container;
   the repair path is preserved under
   `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-k6-smoke-r5-0.177.118.txt`,
   `receipts/live-applies/evidence/2026-03-31-ws-0305-mainline-converge-monitoring-r8-0.177.118.txt`,
@@ -172,7 +172,7 @@ Three k6 test scenario types are defined:
 - the latest-main smoke replay from committed source
   `6d476f01e75a2ecf31d8ce13df1250bc6aec193e` preserved current live Keycloak
   degradation instead of masking it: direct probing of
-  `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` returned
+  `https://sso.example.com/realms/lv3/.well-known/openid-configuration` returned
   `502 Bad Gateway`, the synced smoke receipt
   `receipts/k6/smoke-keycloak-20260331T145155Z.json` recorded `110` requests
   with `110` failures, and `receipts/k6/smoke-openfga-20260331T145155Z.json`
@@ -213,7 +213,7 @@ Three k6 test scenario types are defined:
   patterns) produce misleading results
 - the implemented live replay proved the dependent telemetry path is itself an
   operational risk surface: during the 2026-03-31 exact-main closeout,
-  Prometheus remote-write calls from the k6 runner to `monitoring-lv3`
+  Prometheus remote-write calls from the k6 runner to `monitoring`
   repeatedly timed out until Prometheus was rebound to the guest-reachable
   address, and the later latest-main `0.177.119` rerun still preserved public
   Keycloak `502 Bad Gateway`, OpenFGA threshold breach, and warning-only

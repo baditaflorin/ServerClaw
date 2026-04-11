@@ -8,7 +8,7 @@ Use this runbook to rebuild the graph from repository metadata, confirm the API 
 
 ## Prerequisites
 
-- Apply [`migrations/0012_graph_schema.sql`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0012_graph_schema.sql) to the shared Postgres database.
+- Apply [`migrations/0012_graph_schema.sql`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/migrations/0012_graph_schema.sql) to the shared Postgres database.
 - Set `LV3_GRAPH_DSN` on the controller and Windmill worker environment.
 - If the worker should enrich the graph from ADR 0113 surfaces, also set `WORLD_STATE_DSN`.
 - If propagated health events should be recorded in the mutation ledger, set `LV3_LEDGER_DSN`.
@@ -20,12 +20,12 @@ Run the repo-managed Windmill worker entrypoints directly when validating from a
 
 ```bash
 python3 config/windmill/scripts/graph/import-from-catalog.py \
-  --repo-path /srv/proxmox_florin_server
+  --repo-path /srv/proxmox-host_server
 ```
 
 ```bash
 python3 config/windmill/scripts/graph/import-from-netbox.py \
-  --repo-path /srv/proxmox_florin_server
+  --repo-path /srv/proxmox-host_server
 ```
 
 Both entrypoints rebuild the full graph from the current repository checkout. The NetBox variant additionally folds in the latest `netbox_topology` and `dns_records` ADR 0113 surfaces when they are available.
@@ -71,8 +71,8 @@ PY
 Or query through the platform API gateway once `LV3_GATEWAY_GRAPH_DSN` is configured:
 
 ```bash
-curl -H "Authorization: Bearer <token>" https://api.lv3.org/v1/graph/nodes/service:postgres/descendants
-curl -H "Authorization: Bearer <token>" "https://api.lv3.org/v1/graph/path?from_node=service:ops_portal&to_node=service:postgres"
+curl -H "Authorization: Bearer <token>" https://api.example.com/v1/graph/nodes/service:postgres/descendants
+curl -H "Authorization: Bearer <token>" "https://api.example.com/v1/graph/path?from_node=service:ops_portal&to_node=service:postgres"
 ```
 
 When validating scheduled Windmill jobs, treat the database-backed `schedule.args` record as authoritative. The Windmill schedules list API can render `args: null` even while the persisted schedule arguments are present and the scheduled executions use them correctly.
@@ -83,7 +83,7 @@ When the `service_health` world-state surface refreshes, run:
 
 ```bash
 python3 config/windmill/scripts/graph/propagate-health.py \
-  --repo-path /srv/proxmox_florin_server
+  --repo-path /srv/proxmox-host_server
 ```
 
 The worker inspects degraded or down upstream services, walks their graph descendants, and emits `derived_health_degraded` events only for dependents whose own probes are still passing. If `LV3_LEDGER_DSN` is configured, it also writes `graph.health_propagated` records into `ledger.events`.

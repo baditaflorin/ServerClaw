@@ -1,7 +1,7 @@
 # Workstream ADR 0148: SearXNG for Agent Web Search
 
 - ADR: [ADR 0148](../adr/0148-searxng-for-agent-web-search.md)
-- Title: Private SearXNG runtime for agent and operator web search on docker-runtime-lv3
+- Title: Private SearXNG runtime for agent and operator web search on docker-runtime
 - Status: merged
 - Implemented In Repo Version: 0.175.0
 - Implemented In Platform Version: 0.130.21
@@ -11,13 +11,13 @@
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime`, `adr-0044-windmill`, `adr-0060-open-webui`, `adr-0068-container-image-policy`
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `collections/ansible_collections/lv3/platform/roles/searxng_runtime`, `roles/open_webui_runtime`, `roles/proxmox_tailscale_proxy`, `platform/web/`, `config/image-catalog.json`, `config/subdomain-catalog.json`
+- Shared Surfaces: `docker-runtime`, `collections/ansible_collections/lv3/platform/roles/searxng_runtime`, `roles/open_webui_runtime`, `roles/proxmox_tailscale_proxy`, `platform/web/`, `config/image-catalog.json`, `config/subdomain-catalog.json`
 
 ## Scope
 
 - add a repo-managed SearXNG runtime role and playbook
 - pin and scan the SearXNG and Valkey images
-- publish the operator entrypoint on the Proxmox host Tailscale IP and at `search.lv3.org`
+- publish the operator entrypoint on the Proxmox host Tailscale IP and at `search.example.com`
 - wire Open WebUI to use the local SearXNG JSON endpoint
 - add a small repo-side web search client for controlled consumers such as incident triage
 - document the rollout and verification path
@@ -43,7 +43,7 @@
 - `config/subdomain-catalog.json`
 - `config/controller-local-secrets.json`
 - `config/secret-catalog.json`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `workstreams.yaml`
 
@@ -51,7 +51,7 @@
 
 - SearXNG responds on `http://10.10.10.20:8881`
 - the Proxmox host Tailscale IP serves SearXNG on `http://100.64.0.1`
-- `search.lv3.org` resolves to the Proxmox host Tailscale IP for tailnet users
+- `search.example.com` resolves to the Proxmox host Tailscale IP for tailnet users
 - Open WebUI renders `ENABLE_WEB_SEARCH=True` with `WEB_SEARCH_ENGINE=searxng`
 - triage reports can attach bounded `web_search_references` when no rule matches
 
@@ -85,8 +85,8 @@
   in mind if you debug another stale-runtime mismatch.
 - the final DNS publication completed on 2026-03-26 after the controller shell
   was rerun with `HETZNER_DNS_API_TOKEN`. Verified from the controller:
-  `dig +short @1.1.1.1 search.lv3.org` returned `100.64.0.1`, and
-  `http://search.lv3.org/search?q=proxmox%20ve&format=json` returned `200`
+  `dig +short @1.1.1.1 search.example.com` returned `100.64.0.1`, and
+  `http://search.example.com/search?q=proxmox%20ve&format=json` returned `200`
   with results.
 - the first DNS publication attempt failed at `12:53 UTC` on 2026-03-26
   because Hetzner's legacy DNS write API was in a scheduled brownout window and

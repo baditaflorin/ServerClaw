@@ -19,7 +19,7 @@ shared_surfaces:
   - config/api-gateway-catalog.json
   - config/service-capability-catalog.json
   - config/agent-tool-registry.json
-  - Compose stack docker-runtime-lv3
+  - Compose stack docker-runtime
   - nginx edge config
 ready_to_merge: false
 live_applied: true

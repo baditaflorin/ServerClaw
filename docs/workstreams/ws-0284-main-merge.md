@@ -8,7 +8,7 @@
 - Release Date: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0284-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0284-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0284-live-apply`
 - Owner: codex
 - Depends On: `ws-0284-live-apply`
 
@@ -29,7 +29,7 @@ without inventing a new platform-version bump after Piper was already live on
 - `docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md`
 - `docs/adr/.index.yaml`
 - `docs/runbooks/configure-piper.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
@@ -88,7 +88,7 @@ without inventing a new platform-version bump after Piper was already live on
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=piper env=production`
   succeeded from committed source `52159758420127966e32ba7ff5c89a4cccaa31a8`
   with final recap
-  `docker-runtime-lv3 : ok=116 changed=3 unreachable=0 failed=0 skipped=9 rescued=0 ignored=0`,
+  `docker-runtime : ok=116 changed=3 unreachable=0 failed=0 skipped=9 rescued=0 ignored=0`,
   preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-live-apply-r1.txt`.
 - Fresh exact-main guest-local verification confirmed both published bindings

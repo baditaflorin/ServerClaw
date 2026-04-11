@@ -120,14 +120,14 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                 "proxmox_snippets_storage_id: local",
                 "proxmox_guest_ci_user: ops",
                 "proxmox_guest_nameserver: 1.1.1.1",
-                "proxmox_guest_searchdomain: lv3.org",
+                "proxmox_guest_searchdomain: example.com",
                 "proxmox_host_admin_user: ops",
             ]
         )
         + "\n"
     )
-    (repo_root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text(
-        "management_ipv4: 65.108.75.123\nmanagement_tailscale_ipv4: 100.64.0.1\n"
+    (repo_root / "inventory" / "host_vars" / "proxmox-host.yml").write_text(
+        "management_ipv4: 203.0.113.1\nmanagement_tailscale_ipv4: 100.64.0.1\n"
     )
     (repo_root / "tests" / "fixtures" / "docker-host-fixture.yml").write_text(
         json.dumps(
@@ -164,7 +164,7 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         repo_root / "config" / "ephemeral-capacity-pools.json",
     )
     monkeypatch.setattr(fixture_manager, "GROUP_VARS_PATH", repo_root / "inventory" / "group_vars" / "all.yml")
-    monkeypatch.setattr(fixture_manager, "HOST_VARS_PATH", repo_root / "inventory" / "host_vars" / "proxmox_florin.yml")
+    monkeypatch.setattr(fixture_manager, "HOST_VARS_PATH", repo_root / "inventory" / "host_vars" / "proxmox-host.yml")
     monkeypatch.setattr(
         fixture_manager.seed_data_snapshots, "seed_classes", lambda catalog=None: ["tiny", "standard", "recovery"]
     )
@@ -449,7 +449,7 @@ def test_stage_seed_snapshot_updates_receipt(monkeypatch: pytest.MonkeyPatch) ->
     receipt = {
         "receipt_id": "ops-base-20260327T120000Z",
         "seed_class": "tiny",
-        "context": {"jump_user": "ops", "jump_host": "65.108.75.123", "ci_user": "ops"},
+        "context": {"jump_user": "ops", "jump_host": "203.0.113.1", "ci_user": "ops"},
         "definition": {"ssh_user": "ops"},
         "ip_address": "10.20.10.120",
     }
@@ -550,7 +550,7 @@ def test_reaper_retags_untagged_cluster_vms(fixture_repo: Path, monkeypatch: pyt
         fixture_manager,
         "fetch_cluster_resources",
         lambda endpoint, api_token: [
-            {"vmid": 912, "node": "proxmox_florin", "status": "running", "type": "qemu", "tags": ""}
+            {"vmid": 912, "node": "proxmox-host", "status": "running", "type": "qemu", "tags": ""}
         ],
     )
     monkeypatch.setattr(
@@ -593,7 +593,7 @@ def test_proxmox_api_credentials_prefers_env_override(monkeypatch: pytest.Monkey
 
 def test_insecure_proxmox_ssl_context_only_for_private_ip_endpoint() -> None:
     assert fixture_manager.insecure_proxmox_ssl_context("https://100.64.0.1:8006/api2/json") is not None
-    assert fixture_manager.insecure_proxmox_ssl_context("https://proxmox.lv3.org:8006/api2/json") is None
+    assert fixture_manager.insecure_proxmox_ssl_context("https://proxmox.example.com:8006/api2/json") is None
 
 
 def test_select_pool_ip_skips_existing_nonfinal_receipts(fixture_repo: Path) -> None:
@@ -690,7 +690,7 @@ def test_fixture_up_prefers_prewarmed_member(fixture_repo: Path, monkeypatch: py
         fixture_manager,
         "fetch_cluster_resources",
         lambda endpoint, api_token: [
-            {"vmid": 910, "node": "proxmox_florin", "status": "stopped", "type": "qemu", "tags": ""}
+            {"vmid": 910, "node": "proxmox-host", "status": "stopped", "type": "qemu", "tags": ""}
         ],
     )
     monkeypatch.setattr(fixture_manager, "start_cluster_vm", lambda endpoint, api_token, resource: None)

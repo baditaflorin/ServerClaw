@@ -15,7 +15,7 @@
 
 ## Scope
 
-Investigate the live Homepage dashboard at `home.lv3.org`, identify which
+Investigate the live Homepage dashboard at `home.example.com`, identify which
 runtime-general services are degraded or failing, and restore the repo-managed
 recovery path so Homepage, Uptime Kuma, and the shared edge can be replayed
 safely from exact `main`, then promote that replay into the protected release
@@ -23,7 +23,7 @@ and canonical-truth surfaces on the latest realistic `origin/main` baseline.
 
 ## Observed Failure
 
-- `https://home.lv3.org` returned an internal failure instead of the expected
+- `https://home.example.com` returned an internal failure instead of the expected
   oauth2-proxy redirect chain.
 - The runtime-general Traefik route for `/homepage` failed because the
   Homepage container only listened on the guest address while Traefik still
@@ -31,18 +31,18 @@ and canonical-truth surfaces on the latest realistic `origin/main` baseline.
 - The initial runtime-general replay exposed a stale Uptime Kuma runtime
   contract: the role still expected `docker-compose` and the old preflight
   variable name, while the live host needed a one-time restore of the migrated
-  `kuma.db` state from `docker-runtime-lv3`.
+  `kuma.db` state from `docker-runtime`.
 
 ## Repairs Landed
 
 - bind Homepage on both the guest address and loopback so same-guest Traefik
   and verification probes keep using `127.0.0.1`
 - manage Docker guest public-edge host aliases as a repo-owned block so the
-  shared runtime host recovers the expected `home.lv3.org` publication inputs
+  shared runtime host recovers the expected `home.example.com` publication inputs
   without line-oriented drift
 - repair the Uptime Kuma role contract to use the Docker Compose plugin and the
   real role inputs
-- restore the legacy Uptime Kuma data directory onto `runtime-general-lv3`
+- restore the legacy Uptime Kuma data directory onto `runtime-general`
   during the first successful runtime-general replay, then mark that migration
   complete
 - keep ws-0333's fail-closed retirement guard intact while adding the new
@@ -57,17 +57,17 @@ and canonical-truth surfaces on the latest realistic `origin/main` baseline.
   `tests/test_docker_runtime_role.py`, preserved in
   `receipts/live-applies/evidence/2026-04-03-ws-0332-targeted-tests-r1.txt`
 - the exact-main `runtime-general-pool` replay completed successfully with
-  recaps `docker-runtime-lv3 : ok=4 changed=0 failed=0`,
-  `monitoring-lv3 : ok=38 changed=0 failed=0`,
-  `nginx-lv3 : ok=71 changed=5 failed=0`,
-  `proxmox_florin : ok=41 changed=10 failed=0`, and
-  `runtime-general-lv3 : ok=322 changed=7 failed=0`, preserved in
+  recaps `docker-runtime : ok=4 changed=0 failed=0`,
+  `monitoring : ok=38 changed=0 failed=0`,
+  `nginx-edge : ok=71 changed=5 failed=0`,
+  `proxmox-host : ok=41 changed=10 failed=0`, and
+  `runtime-general : ok=322 changed=7 failed=0`, preserved in
   `receipts/live-applies/evidence/2026-04-03-ws-0332-mainline-live-apply-r1.txt`
 - external verification re-confirmed the shared edge routes after the replay:
-  `https://home.lv3.org` returned the expected oauth2-proxy `302`,
-  `https://uptime.lv3.org` redirected to `/dashboard`,
-  `https://uptime.lv3.org/dashboard` returned `200`, and
-  `https://status.lv3.org` returned `200`, preserved in
+  `https://home.example.com` returned the expected oauth2-proxy `302`,
+  `https://uptime.example.com` redirected to `/dashboard`,
+  `https://uptime.example.com/dashboard` returned `200`, and
+  `https://status.example.com` returned `200`, preserved in
   `receipts/live-applies/evidence/2026-04-03-ws-0332-public-routes-r1.txt`
 - the protected release closeout on exact `main` preserved the repo-wide
   blocker status at `controller_dependency_gap x3` in

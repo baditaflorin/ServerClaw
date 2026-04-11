@@ -14,11 +14,11 @@ REFERENCE_INVENTORY_ROOT = REPO_ROOT / "inventory" / "examples" / "reference-pla
 REFERENCE_CONFIG_ROOT = REPO_ROOT / "config" / "examples"
 
 LIVE_MARKERS = (
-    "lv3.org",
-    "65.108.75.123",
+    "example.com",
+    "203.0.113.1",
     "10.10.10.",
-    "Debian-trixie-latest-amd64-base",
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
+    "proxmox-host",
+    "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server",
 )
 
 

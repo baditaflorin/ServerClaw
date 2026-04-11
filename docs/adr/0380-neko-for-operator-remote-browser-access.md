@@ -39,46 +39,46 @@ Prior WebRTC implementations in this codebase experienced three categories of fa
    - Symptom: WebRTC connections would drop after 60 seconds without explicit exception
 
 3. **Resource Contention on Shared Docker Runtime:**
-   - LiveKit on `docker-runtime-lv3` competes for kernel I/O with Redpanda, Kafka, and Docker registry
+   - LiveKit on `docker-runtime` competes for kernel I/O with Redpanda, Kafka, and Docker registry
    - Real-time media streaming is I/O-sensitive; competing workloads cause packet loss and jitter
    - ADR 0347 documented this as requiring workload isolation but was not retroactively applied to LiveKit
    - Symptom: WebRTC latency spikes during concurrent container deployments
 
 **Decision:**
 
-Deploy Neko remote desktop for interactive operator access on a **dedicated compute VM (runtime-comms-lv3, VMID 121)** with explicit architecture to prevent all three categories of failure:
+Deploy Neko remote desktop for interactive operator access on a **dedicated compute VM (runtime-comms, VMID 121)** with explicit architecture to prevent all three categories of failure:
 
 1. **Dedicated VM (Resource Isolation):**
-   - New VM: `runtime-comms-lv3` (VMID 121), `10.10.10.41` (guest network)
+   - New VM: `runtime-comms` (VMID 121), `10.10.10.41` (guest network)
    - Sizing: 8 vCPU, 16 GB RAM, 64 GB disk (browser rendering + WebRTC bitrate buffer)
    - OS: Ubuntu 24.04 LTS with cloud-init bootstrap
-   - Isolation rationale: Prevents Neko I/O from starving Redpanda/Kafka on docker-runtime-lv3 (applies ADR 0347 lesson learned)
+   - Isolation rationale: Prevents Neko I/O from starving Redpanda/Kafka on docker-runtime (applies ADR 0347 lesson learned)
 
 2. **Signalling Path (WebSocket through NGINX):**
-   - Protocol: WebSocket upgrade over HTTPS (TLS termination at nginx-lv3)
-   - Hostname: `browser.lv3.org`
-   - Backend: HTTP proxy to `runtime-comms-lv3:8080` (Neko signalling port)
+   - Protocol: WebSocket upgrade over HTTPS (TLS termination at nginx-edge)
+   - Hostname: `browser.example.com`
+   - Backend: HTTP proxy to `runtime-comms:8080` (Neko signalling port)
    - Timeout exception: `proxy_read_timeout 3600s` (documented deviation from ADR 0170 60s constraint)
    - Justification: WebRTC sessions sustain 5–60 minute operator interactions; 60s timeout incompatible with real-world use
 
 3. **Media Path (Direct UDP from Proxmox Host):**
    - Neko exports UDP media streams (RTP/STUN) on port range `50000–60000`
-   - Host-level port forwarding: `proxmox_florin` forwards incoming UDP `50000–60000` → `runtime-comms-lv3:50000–60000`
+   - Host-level port forwarding: `proxmox-host` forwards incoming UDP `50000–60000` → `runtime-comms:50000–60000`
    - Rationale: UDP cannot be proxied through NGINX (no Layer 4 routing); direct forwarding minimizes latency
    - This matches LiveKit architecture (ADR 0293): signalling through TLS proxy, media direct from host
 
 4. **Firewall Locking (Concurrency Prevention):**
-   - Guest firewall rules for `runtime-comms-lv3` are independent from Docker runtime firewall rules (separate nftables state files)
+   - Guest firewall rules for `runtime-comms` are independent from Docker runtime firewall rules (separate nftables state files)
    - File-level locking in `platform/locking/file_domain.py` (ADR 0153) ensures concurrent Ansible workstreams do not corrupt firewall indexes
-   - Consequence: Firewall convergence for `runtime-comms-lv3` cannot race with `docker-runtime-lv3` updates
+   - Consequence: Firewall convergence for `runtime-comms` cannot race with `docker-runtime` updates
 
 5. **Network Security:**
    - Inbound traffic restricted to management network:
      - Management SSH (port 22) from Proxmox control plane
-     - NGINX edge proxy (port 8080 TCP) from `nginx-lv3` only
+     - NGINX edge proxy (port 8080 TCP) from `nginx-edge` only
      - WebRTC media (UDP 50000–60000) from Proxmox host public interface
    - Outbound: Container internet access (Tailscale egress if needed)
-   - No public exposure: `browser.lv3.org` published via NGINX only to authenticated Tailscale users
+   - No public exposure: `browser.example.com` published via NGINX only to authenticated Tailscale users
 
 **Consequences:**
 
@@ -100,8 +100,8 @@ Deploy Neko remote desktop for interactive operator access on a **dedicated comp
 Three regression tests ensure past failures do not recur:
 
 1. **Firewall Concurrency (test_neko_firewall_concurrency.py):**
-   - Start Neko convergence on `runtime-comms-lv3`
-   - Simultaneously apply Docker runtime workload on `docker-runtime-lv3` (sibling VM)
+   - Start Neko convergence on `runtime-comms`
+   - Simultaneously apply Docker runtime workload on `docker-runtime` (sibling VM)
    - Verify Neko firewall rules persist (no clobbering via concurrent apply)
    - Passes: Firewall lock prevents rule mutation during concurrent workstream execution
 
@@ -113,7 +113,7 @@ Three regression tests ensure past failures do not recur:
    - Passes: Neko responds to WebRTC protocol requirements (not just HTTP health check)
 
 3. **Timeout Hierarchy Compliance (test_neko_timeout_hierarchy.py):**
-   - Parse NGINX site config for `browser.lv3.org`
+   - Parse NGINX site config for `browser.example.com`
    - Assert `proxy_read_timeout 3600s` is explicitly set (not relying on defaults)
    - Verify ADR 0380 is referenced in comments or changelog (exception is documented)
    - Passes: Timeout exception is intentional, not accidental

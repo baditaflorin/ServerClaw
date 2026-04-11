@@ -37,7 +37,7 @@ shared_surfaces:
   - docs/runbooks/configure-harbor.md
   - docs/runbooks/live-apply-receipts-and-verification-evidence.md
   - docs/runbooks/validate-repository-automation.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - .gitea/workflows/validate.yml
   - .gitea/workflows/renovate.yml
@@ -153,7 +153,7 @@ ownership_manifest:
       contract: canonical-truth-v1
     - id: gitea_openbao_runner_shared_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/validate_repo.sh
         - scripts/k6_load_testing.py

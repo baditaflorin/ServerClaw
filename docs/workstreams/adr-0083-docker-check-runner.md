@@ -8,14 +8,14 @@
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`
 - Conflicts With: none
-- Shared Surfaces: `docker/`, `config/`, `Makefile`, `registry.lv3.org`
+- Shared Surfaces: `docker/`, `config/`, `Makefile`, `registry.example.com`
 
 ## Scope
 
 - create `docker/check-runners/` directory with four Dockerfiles: `ansible/`, `python/`, `infra/`, `security/`
 - write `config/check-runner-manifest.json` — maps each check label to image, command, and timeout
 - write `scripts/parallel_check.py` — launches multiple check containers concurrently and aggregates exit codes into a pass/fail summary with per-check timing
-- add `make build-check-runners` target (builds all four images locally), `make push-check-runners` (pushes to `registry.lv3.org`)
+- add `make build-check-runners` target (builds all four images locally), `make push-check-runners` (pushes to `registry.example.com`)
 - write Windmill workflow `platform-check-runner-rebuild` — triggers on Dockerfile changes merged to `main`, rebuilds and pushes, writes digest back to manifest
 - add `.tool-versions` / `requirements.txt` pins in each Dockerfile directory
 
@@ -41,19 +41,19 @@
 
 ## Expected Live Surfaces
 
-- four check runner images live at `registry.lv3.org/check-runner/{ansible,python,infra,security}:<version>`
+- four check runner images live at `registry.example.com/check-runner/{ansible,python,infra,security}:<version>`
 - `make remote-lint` uses these images (via `config/check-runner-manifest.json`)
 
 ## Verification
 
 - `make build-check-runners` produces all four images with no build errors
 - `scripts/parallel_check.py lint-ansible lint-yaml validate-schemas` completes in < 20 s on the build server with all three checks running concurrently
-- image digests in `config/check-runner-manifest.json` match the actual published digests in `registry.lv3.org`
+- image digests in `config/check-runner-manifest.json` match the actual published digests in `registry.example.com`
 
 ## Completion Notes
 
 - the repository carries pinned Dockerfiles for `ansible`, `python`, `infra`, and `security` check runners under `docker/check-runners/`
-- manifest-backed execution is available through [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) and the `make run-checks` wrapper on `main`
+- manifest-backed execution is available through [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/parallel_check.py) and the `make run-checks` wrapper on `main`
 - digest write-back remains delegated to the Windmill rebuild helper once the images are published from a credentialed worker
 
 ## Merge Criteria

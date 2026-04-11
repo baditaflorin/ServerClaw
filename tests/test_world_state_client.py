@@ -40,7 +40,7 @@ def prepare_world_state_db(path: Path) -> Path:
         [
             ("service_health", "2026-03-24T09:00:00+00:00", json.dumps({"services": [{"service_id": "grafana"}]}), 0),
             ("service_health", "2026-03-24T09:05:00+00:00", json.dumps({"services": [{"service_id": "windmill"}]}), 0),
-            ("dns_records", "2026-03-24T09:10:00+00:00", json.dumps([{"fqdn": "grafana.lv3.org"}]), 1),
+            ("dns_records", "2026-03-24T09:10:00+00:00", json.dumps([{"fqdn": "grafana.example.com"}]), 1),
         ],
     )
     connection.executemany(
@@ -53,7 +53,7 @@ def prepare_world_state_db(path: Path) -> Path:
                 0,
                 0,
             ),
-            ("dns_records", json.dumps([{"fqdn": "grafana.lv3.org"}]), "2026-03-24T09:10:00+00:00", 1, 1),
+            ("dns_records", json.dumps([{"fqdn": "grafana.example.com"}]), "2026-03-24T09:10:00+00:00", 1, 1),
         ],
     )
     connection.commit()

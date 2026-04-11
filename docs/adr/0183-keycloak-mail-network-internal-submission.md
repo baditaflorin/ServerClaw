@@ -15,7 +15,7 @@ Live testing on 2026-03-27 showed that this host-published path is unreliable fr
 
 - the relay accepted and authenticated from the Docker runtime host namespace
 - the Keycloak container could open sockets to host-published submission ports but frequently received no SMTP greeting
-- switching Keycloak to the public hostname `mail.lv3.org:587` avoided the private hairpin path but still failed because the container resolved `mail.lv3.org` to the public IP `65.108.75.123`, which is another same-host hairpin
+- switching Keycloak to the public hostname `mail.example.com:587` avoided the private hairpin path but still failed because the container resolved `mail.example.com` to the public IP `203.0.113.1`, which is another same-host hairpin
 - after Keycloak joined the `mail-platform_default` Docker network, it could reach the Stalwart container directly by internal DNS name
 - STARTTLS on that direct Docker-hostname path failed certificate validation because the certificate is not issued for `lv3-mail-stalwart`
 

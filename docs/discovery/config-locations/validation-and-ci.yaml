@@ -34,7 +34,7 @@ entries:
     owner: human
     format: GitHub Actions-compatible YAML
     use_for: Local CI on self-hosted Gitea runner
-    runs_on: docker-build-lv3 self-hosted runner
+    runs_on: docker-build self-hosted runner
   .github/workflows/:
     purpose: "GitHub Actions workflows (LEGACY — mirrors Gitea)"
     owner: human

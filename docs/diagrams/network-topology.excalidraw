@@ -1,7 +1,7 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://draw.lv3.org",
+  "source": "https://draw.example.com",
   "elements": [
     {
       "id": "dd325709dc6d4e64",
@@ -127,14 +127,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "proxmox_florin\n65.108.75.123\nTailscale 100.64.0.1",
+      "text": "proxmox-host\n203.0.113.1\nTailscale 100.64.0.1",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "proxmox_florin\n65.108.75.123\nTailscale 100.64.0.1",
+      "originalText": "proxmox-host\n203.0.113.1\nTailscale 100.64.0.1",
       "lineHeight": 1.25
     },
     {
@@ -328,14 +328,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "nginx-lv3\n10.10.10.10",
+      "text": "nginx-edge\n10.10.10.10",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "nginx-lv3\n10.10.10.10",
+      "originalText": "nginx-edge\n10.10.10.10",
       "lineHeight": 1.25
     },
     {
@@ -395,14 +395,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "docker-runtime-lv3\n10.10.10.20",
+      "text": "docker-runtime\n10.10.10.20",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "docker-runtime-lv3\n10.10.10.20",
+      "originalText": "docker-runtime\n10.10.10.20",
       "lineHeight": 1.25
     },
     {
@@ -462,14 +462,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "monitoring-lv3\n10.10.10.40",
+      "text": "monitoring\n10.10.10.40",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "monitoring-lv3\n10.10.10.40",
+      "originalText": "monitoring\n10.10.10.40",
       "lineHeight": 1.25
     },
     {
@@ -529,14 +529,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "postgres-lv3\n10.10.10.50",
+      "text": "postgres\n10.10.10.50",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "postgres-lv3\n10.10.10.50",
+      "originalText": "postgres\n10.10.10.50",
       "lineHeight": 1.25
     },
     {

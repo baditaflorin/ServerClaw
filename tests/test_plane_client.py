@@ -8,7 +8,7 @@ from scripts import sync_adrs_to_plane
 
 
 def test_parse_query_error_prefers_error_message() -> None:
-    location = "https://tasks.lv3.org/god-mode/?error_code=5185&error_message=ADMIN_USER_DOES_NOT_EXIST"
+    location = "https://tasks.example.com/god-mode/?error_code=5185&error_message=ADMIN_USER_DOES_NOT_EXIST"
 
     assert plane._parse_query_error(location) == "ADMIN_USER_DOES_NOT_EXIST"
 

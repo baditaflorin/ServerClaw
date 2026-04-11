@@ -69,4 +69,4 @@
 - repository implementation shipped in `0.146.1`
 - the production platform-context runtime is live from `main` and recorded in `receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json`
 - focused role and service coverage passed with `11 passed in 0.89s`, and `./scripts/validate_repo.sh ansible-syntax` completed successfully
-- repeated ansible live-apply attempts from the build-server runner hit SSH banner-exchange timeouts on the `docker-runtime-lv3` jump path, so the final live apply replayed the tested repository artifacts manually over the same build-server-to-guest SSH path before guest-local and proxied endpoint verification
+- repeated ansible live-apply attempts from the build-server runner hit SSH banner-exchange timeouts on the `docker-runtime` jump path, so the final live apply replayed the tested repository artifacts manually over the same build-server-to-guest SSH path before guest-local and proxied endpoint verification

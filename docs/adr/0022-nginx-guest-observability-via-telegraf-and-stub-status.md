@@ -11,7 +11,7 @@
 
 ADR 0011 established that the platform should monitor both the Proxmox control plane and guest internals in a predictable way.
 
-The first implemented dashboard covered VM-level metrics for `nginx-lv3`, but that is not enough to understand the public edge service itself. We also need service-level visibility for the NGINX process:
+The first implemented dashboard covered VM-level metrics for `nginx-edge`, but that is not enough to understand the public edge service itself. We also need service-level visibility for the NGINX process:
 
 - active connections
 - requests over time
@@ -28,7 +28,7 @@ We will monitor the NGINX guest with a guest-local telemetry path built from:
    - enabled only on loopback
    - exposed on `127.0.0.1:8080/basic_status`
    - not published through the public edge
-2. Telegraf on `nginx-lv3`
+2. Telegraf on `nginx-edge`
    - scrapes the local `stub_status` endpoint
    - also captures guest system metrics such as CPU, memory, disk, network, and processes
    - writes to the existing InfluxDB bucket on the monitoring VM

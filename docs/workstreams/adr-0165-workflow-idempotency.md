@@ -28,7 +28,7 @@
 
 - Repository implementation completed and merged for release `0.153.0`
 - Live apply completed on 2026-03-25 from `main` commit `129b5c733d6bb2583b9ccf41ff128342053d7654`
-- Production Windmill converge now applies `migrations/0016_idempotency_store.sql` on `postgres-lv3`, verifies `platform.idempotency_records`, and tolerates the current Windmill API delete semantics plus transient control-plane reconnects during schedule probes
+- Production Windmill converge now applies `migrations/0016_idempotency_store.sql` on `postgres`, verifies `platform.idempotency_records`, and tolerates the current Windmill API delete semantics plus transient control-plane reconnects during schedule probes
 
 ## Notes For The Next Assistant
 
@@ -40,5 +40,5 @@
 
 - repository implementation completed in `0.153.0`
 - first platform version: `0.130.6`
-- production `postgres-lv3` now exposes `platform.idempotency_records` for scheduler runtimes reached through the repo-managed Windmill converge path
+- production `postgres` now exposes `platform.idempotency_records` for scheduler runtimes reached through the repo-managed Windmill converge path
 - this session also hardened the production Windmill live-apply path by retrying Docker activation checks, constraining generated PostgreSQL passwords to URI-safe characters, and retrying schedule probes that can briefly drop the HTTP connection during control-plane restarts

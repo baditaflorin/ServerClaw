@@ -1,10 +1,10 @@
 # Workstream ADR 0065: Secret Rotation Automation With OpenBao
 
-- ADR: [ADR 0065](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0065-secret-rotation-automation-with-openbao.md)
+- ADR: [ADR 0065](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0065-secret-rotation-automation-with-openbao.md)
 - Title: Bounded credential lifetimes with automated rotation via OpenBao and Windmill
 - Status: live_applied
 - Branch: `codex/adr-0065-secret-rotation`
-- Worktree: `../proxmox_florin_server-secret-rotation`
+- Worktree: `../proxmox-host_server-secret-rotation`
 - Owner: codex
 - Depends On: `adr-0043-openbao`, `adr-0044-windmill`, `adr-0047-short-lived-creds`, `adr-0048-command-catalog`
 - Conflicts With: none

@@ -10,7 +10,7 @@
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0306-mainline-final-r3`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-main-context-v2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0306-main-context-v2`
 - Owner: codex
 - Depends On: `adr-0083-docker-check-runner`, `adr-0087-validation-gate`, `adr-0264-failure-domain-isolated-validation-lanes`, `adr-0266-validation-runner-capability-contracts-and-environment-attestation`
 - Conflicts With: none
@@ -132,7 +132,7 @@ does not yet have.
   restored the private Gitea listener on `10.10.10.20:3003`, and the runner
   converge in
   `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runner-converge-r2-0.177.115.txt`
-  reasserted the `lv3-gitea-runner` container on `docker-build-lv3` before both
+  reasserted the `lv3-gitea-runner` container on `docker-build` before both
   plays hit the shared non-blocking SBOM tail.
 - The exact-main hosted replay is now complete on the private `main` snapshot.
   Source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` was published as
@@ -183,7 +183,7 @@ does not yet have.
   `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-remote-validate-r1-0.177.119.txt`.
 - The detached exact-head `pre-push-gate` wrapper was exercised twice. Both
   replays passed every remote blocking check except `packer-validate` and
-  `tofu-validate` when `registry.lv3.org/check-runner/infra:2026.03.23`
+  `tofu-validate` when `registry.example.com/check-runner/infra:2026.03.23`
   returned transient `502 Bad Gateway` responses, preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-pre-push-gate-r1-0.177.119.txt`
   and
@@ -219,5 +219,5 @@ does not yet have.
 - No merge-to-main follow-up remains for ADR 0306 itself. The only residual
   caveat observed on 2026-03-31 is external to the ADR 0306 code path: exact
   detached `pre-push-gate` replays still depend on
-  `registry.lv3.org/check-runner/infra:2026.03.23`, which returned transient
+  `registry.example.com/check-runner/infra:2026.03.23`, which returned transient
   `502 Bad Gateway` responses during both detached replays.

@@ -6,7 +6,7 @@ from cache_status import load_manifest, render_summary, summarize_manifest
 
 def test_summarize_manifest_marks_warm_components() -> None:
     manifest = {
-        "docker_images": [{"image": "registry.lv3.org/check-runner/python:3.12"}],
+        "docker_images": [{"image": "registry.example.com/check-runner/python:3.12"}],
         "pip_cache_size_mb": 512,
         "packer_plugins": ["github.com/hashicorp/proxmox"],
         "ansible_collections": ["community.general"],

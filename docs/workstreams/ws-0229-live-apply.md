@@ -4,7 +4,7 @@
 - Title: on-platform Gitea Actions runner convergence, verification, and merge-safe documentation
 - Status: live_applied
 - Branch: `codex/ws-0229-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0229-live-apply`
 - Owner: codex
 - Depends On: `adr-0083-docker-based-check-runner`, `adr-0143-gitea`, `adr-0168-automated-validation-gate`, `adr-0224-server-resident-operations-architecture-bundle`
 - Conflicts With: none
@@ -13,7 +13,7 @@
 ## Scope
 
 - replay the merged `origin/main` Gitea and runner automation from an isolated worktree
-- verify that the dedicated `docker-build-lv3` runner is registered, online, and able to execute the repo-managed validation workflow
+- verify that the dedicated `docker-build` runner is registered, online, and able to execute the repo-managed validation workflow
 - confirm the focused repository validation and automation paths still pass from the latest mainline candidate
 - update ADR-local, runbook-local, receipt, and workstream state so another agent can merge safely if protected integration files must wait
 
@@ -43,7 +43,7 @@
 
 ## Expected Live Surfaces
 
-- `docker-build-lv3` is present in Gitea as an online self-hosted runner with the repo-managed labels
+- `docker-build` is present in Gitea as an online self-hosted runner with the repo-managed labels
 - a fresh push from this branch triggers `.gitea/workflows/validate.yml` on the platform runner
 - the workflow completes successfully using the server-resident runner path instead of laptop-local execution
 
@@ -64,14 +64,14 @@
 
 ## Live Apply Outcome
 
-- the latest current-base replay now sits on repo version `0.177.42`, and `make converge-gitea` completed successfully from branch head `65d4ed15`, finishing with `proxmox_florin ok=36 changed=4`, `postgres-lv3 ok=24 changed=0`, `docker-runtime-lv3 ok=224 changed=0`, and `docker-build-lv3 ok=100 changed=5`
+- the latest current-base replay now sits on repo version `0.177.42`, and `make converge-gitea` completed successfully from branch head `65d4ed15`, finishing with `proxmox-host ok=36 changed=4`, `postgres ok=24 changed=0`, `docker-runtime ok=224 changed=0`, and `docker-build ok=100 changed=5`
 - the earlier `0.177.39` Keycloak admin token `HTTP 500` and the first `0.177.41` repo-user reconciliation token failure were not reproduced on the successful `0.177.42` replay; the latest run requested the reconciliation token cleanly and finished without repo code changes
 - the rebased branch required refreshing two generated validation surfaces before the remote push gate would accept it: `docs/diagrams/agent-coordination-map.excalidraw` and `build/platform-manifest.json`
-- `curl -sf http://100.64.0.1:3009/user/login >/dev/null` succeeded, and the Gitea admin API confirmed runner `1` named `docker-build-lv3` online with labels `self-hosted`, `linux`, `amd64`, and `docker`
+- `curl -sf http://100.64.0.1:3009/user/login >/dev/null` succeeded, and the Gitea admin API confirmed runner `1` named `docker-build` online with labels `self-hosted`, `linux`, `amd64`, and `docker`
 - the first private Gitea push attempt on this workstream surfaced two actionable gate failures in the branch: `workstreams.yaml` needed `status: in_progress`, and the generated coordination diagram needed refresh after claiming `ws-0229-live-apply`
 - after those fixes, the latest private Gitea push of branch head `65d4ed15` passed the full server-side gate, including `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `integration-tests`, `packer-validate`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, and `yaml-lint`
 - the current canonical branch-local automation proof is Gitea workflow run `36` for `codex/ws-0229-live-apply` with `event: push`, `head_sha: 65d4ed1599138b8160e904ef5bd82a9e43b8f195`, `status: completed`, and `conclusion: success`
-- run `36` executed job `validate` (`job_id: 41`) on runner `docker-build-lv3` (`runner_id: 1`), starting at `2026-03-28T18:00:27Z` and completing at `2026-03-28T18:00:30Z`
+- run `36` executed job `validate` (`job_id: 41`) on runner `docker-build` (`runner_id: 1`), starting at `2026-03-28T18:00:27Z` and completing at `2026-03-28T18:00:30Z`
 - ADR 0229 itself is now marked implemented retroactively to the earlier ADR 0143 rollout, because the capability first became true in repo version `0.165.0` and platform version `0.130.15` on `2026-03-26`; this workstream re-verified it from repo version context `0.177.42` and platform version context `0.130.39`
 
 ## Mainline Integration Outcome

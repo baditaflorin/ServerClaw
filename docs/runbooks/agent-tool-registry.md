@@ -8,14 +8,14 @@ The registry adds a self-describing tool surface on top of the existing workflow
 
 ## Canonical Sources
 
-- tool registry: [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json)
-- tool schema: [docs/schema/agent-tool.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool.json)
-- registry schema: [docs/schema/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool-registry.json)
-- audit event schema: [docs/schema/governed-tool-call-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/governed-tool-call-audit-event.json)
-- registry CLI: [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/agent_tool_registry.py)
-- workflow catalog: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-- command catalog: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
-- API publication catalog: [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
+- tool registry: [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/agent-tool-registry.json)
+- tool schema: [docs/schema/agent-tool.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/agent-tool.json)
+- registry schema: [docs/schema/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/agent-tool-registry.json)
+- audit event schema: [docs/schema/governed-tool-call-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/governed-tool-call-audit-event.json)
+- registry CLI: [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/agent_tool_registry.py)
+- workflow catalog: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+- command catalog: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json)
+- API publication catalog: [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/api-publication.json)
 
 ## Current Transport Model
 
@@ -129,7 +129,7 @@ tunnel or alternate verification endpoint.
 
 When adding or changing a governed tool:
 
-1. update [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json)
+1. update [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/agent-tool-registry.json)
 2. keep the input and output schemas MCP-compatible
 3. cross-reference the owning workflow, command, or API publication surface where applicable
 4. keep `audit_on_call` enabled

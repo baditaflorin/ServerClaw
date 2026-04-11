@@ -18,7 +18,7 @@ Each run namespace reserves:
 - `.local/runs/<run_id>/logs/`
 - `.local/runs/<run_id>/receipts/`
 
-The repository now resolves these paths with [scripts/run_namespace.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_namespace.py).
+The repository now resolves these paths with [scripts/run_namespace.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/run_namespace.py).
 
 ## Common Usage
 

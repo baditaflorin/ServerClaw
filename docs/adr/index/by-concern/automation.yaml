@@ -125,7 +125,7 @@ adrs:
       - role
       - distribution
     summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
-      internal Ansible Galaxy server (galaxy.lv3.org).
+      internal Ansible Galaxy server (galaxy.example.com).
     filename: 0086-ansible-collection-packaging.md
     path: docs/adr/0086-ansible-collection-packaging.md
     implemented_in_repo_version: 0.88.0
@@ -250,7 +250,7 @@ adrs:
       - management
       - ui
       - api
-    summary: We will deploy Semaphore privately on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3 and a Tailscale-only
+    summary: We will deploy Semaphore privately on docker-runtime with a PostgreSQL backend on postgres and a Tailscale-only
       host proxy on the Proxmox node.
     filename: 0149-semaphore-for-ansible-job-management-ui-and-api.md
     path: docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md
@@ -269,8 +269,8 @@ adrs:
       - api
       - integration
       - automation
-    summary: We run n8n as a repo-managed compose service on docker-runtime-lv3, backed by PostgreSQL on postgres-lv3, and
-      published at https://n8n.lv3.org.
+    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and
+      published at https://n8n.example.com.
     filename: 0151-n8n-for-webhook-and-api-integration-automation.md
     path: docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md
     implemented_in_repo_version: 0.148.0
@@ -325,7 +325,7 @@ adrs:
       - workflow
       - agent
       - canvas
-    summary: 'Deploy Dify on docker-runtime-lv3 at agents.lv3.org behind the shared Keycloak-backed edge authentication flow.
+    summary: 'Deploy Dify on docker-runtime at agents.example.com behind the shared Keycloak-backed edge authentication flow.
       Connect Dify to:'
     filename: 0197-dify-visual-llm-workflow-canvas.md
     path: docs/adr/0197-dify-visual-llm-workflow-canvas.md
@@ -515,7 +515,7 @@ adrs:
       - recovery
       - automation
     summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
-      .lv3.org.
+      .example.com.
     filename: 0381-login-service-contracts-and-session-recovery-automation.md
     path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
   - adr: 0389

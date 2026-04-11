@@ -10,9 +10,9 @@
 
 ## Context
 
-ADR 0194 introduced `coolify-lv3` (VMID 170, `10.10.10.70`) as a dedicated PaaS
+ADR 0194 introduced `coolify` (VMID 170, `10.10.10.70`) as a dedicated PaaS
 guest that runs both the Coolify control plane and all repo-deployed applications.
-The Coolify deployment server is currently registered as `coolify-lv3` itself,
+The Coolify deployment server is currently registered as `coolify` itself,
 meaning the same guest that hosts the dashboard, API, and bootstrap artifacts also
 runs all user-facing app containers.
 
@@ -27,7 +27,7 @@ This colocation creates three operational risks that are now visible:
    Coolify dashboard offline simultaneously.
 
 3. **Upgrade interference.** Reconciling the Coolify stack version (role:
-   `coolify_runtime`) requires restarting Docker Compose on `coolify-lv3`, which
+   `coolify_runtime`) requires restarting Docker Compose on `coolify`, which
    restarts all running apps in the same operation.
 
 Coolify supports registering external deployment servers. The platform already
@@ -37,17 +37,17 @@ consistent with the existing topology philosophy.
 
 ## Decision
 
-We introduce a second dedicated guest, `coolify-apps-lv3` (proposed VMID 171,
+We introduce a second dedicated guest, `coolify-apps` (proposed VMID 171,
 `10.10.10.71`), that takes over as the registered Coolify deployment server for
-all applications deployed through `apps.lv3.org`.
+all applications deployed through `apps.example.com`.
 
-`coolify-lv3` retains its VMID (170) and IP (`10.10.10.70`) and continues to
+`coolify` retains its VMID (170) and IP (`10.10.10.70`) and continues to
 host only the Coolify control plane: the dashboard, API, and the SSH deploy key
 used to reach the new apps VM.
 
 ### Runtime shape
 
-| Property | coolify-lv3 (control plane) | coolify-apps-lv3 (apps runtime) |
+| Property | coolify (control plane) | coolify-apps (apps runtime) |
 |---|---|---|
 | VMID | 170 | 171 |
 | IP | 10.10.10.70 | 10.10.10.71 |
@@ -57,31 +57,31 @@ used to reach the new apps VM.
 | Memory | 8 192 MB | 8 192 MB |
 | Disk | 96 GB | 128 GB (larger for app images) |
 | Placement group | `paas-control-plane` | `paas-apps-runtime` |
-| Public hostnames | `coolify.lv3.org` | `*.apps.lv3.org` (proxied) |
+| Public hostnames | `coolify.example.com` | `*.apps.example.com` (proxied) |
 | NGINX upstream | `10.10.10.70:8000` | `10.10.10.71:80` / `:443` |
 | Coolify role | control plane | registered deployment server |
 
 ### Registration flow
 
-1. `coolify-apps-lv3` is provisioned via the repo-managed `proxmox_guests` role.
-2. The `coolify_runtime` role on `coolify-lv3` registers `coolify-apps-lv3` as
+1. `coolify-apps` is provisioned via the repo-managed `proxmox_guests` role.
+2. The `coolify_runtime` role on `coolify` registers `coolify-apps` as
    the active deployment server using the Coolify API and the existing SSH deploy
    key mechanism.
 3. Existing app deployments in Coolify are migrated to the new server record via
    `coolify_tool.py migrate-deployment-server`.
-4. The NGINX edge upstream for `*.apps.lv3.org` is updated to point to
+4. The NGINX edge upstream for `*.apps.example.com` is updated to point to
    `10.10.10.71` instead of `10.10.10.70`.
 
 ### Deployment surface
 
 The single `playbooks/coolify.yml` playbook (or its successor
 `playbooks/services/coolify.yml`) gains a new play tier for
-`coolify-apps-lv3`:
+`coolify-apps`:
 
-- tier-1: provision `coolify-apps-lv3` via `proxmox_guests`
-- tier-2: converge `coolify-lv3` control plane (unchanged)
-- tier-3: converge `coolify-apps-lv3` (Docker runtime, firewall, image cache)
-- tier-4: register `coolify-apps-lv3` as Coolify deployment server via API
+- tier-1: provision `coolify-apps` via `proxmox_guests`
+- tier-2: converge `coolify` control plane (unchanged)
+- tier-3: converge `coolify-apps` (Docker runtime, firewall, image cache)
+- tier-4: register `coolify-apps` as Coolify deployment server via API
 
 ## Places That Need to Change
 
@@ -92,12 +92,12 @@ that must be touched before the change is complete is listed below.
 
 ### 1. `inventory/hosts.yml`
 
-**What:** Add `coolify-apps-lv3` to the `lv3_guests` group and the
+**What:** Add `coolify-apps` to the `lv3_guests` group and the
 `coolify_apps_hosts` or `paas_apps` sub-group.
 
 ```yaml
 # Under lv3_guests:
-coolify-apps-lv3:
+coolify-apps:
   ansible_host: 10.10.10.71
 ```
 
@@ -114,12 +114,12 @@ the primary target for consolidation (see DRY section below).
 
 **What:**
 
-a. **Add VM guest spec** for `coolify-apps-lv3` in the `proxmox_guests` list
-   (near line 565, after the existing coolify-lv3 entry):
+a. **Add VM guest spec** for `coolify-apps` in the `proxmox_guests` list
+   (near line 565, after the existing coolify entry):
 
 ```yaml
 - vmid: 171
-  name: coolify-apps-lv3
+  name: coolify-apps
   role: coolify-apps
   template_key: lv3-debian-base
   ipv4: 10.10.10.71
@@ -134,7 +134,7 @@ a. **Add VM guest spec** for `coolify-apps-lv3` in the `proxmox_guests` list
     - coolify-apps
     - lv3
   placement:
-    failure_domain: host:proxmox_florin
+    failure_domain: host:proxmox-host
     placement_class: primary
     anti_affinity_group: paas-apps-runtime
     co_location_exceptions: []
@@ -144,14 +144,14 @@ a. **Add VM guest spec** for `coolify-apps-lv3` in the `proxmox_guests` list
 ```
 
 b. **Update the `coolify_apps` service definition** (near lines 2771–2806) to
-   set `owning_vm: coolify-apps-lv3` and update the upstream IP in the NGINX
+   set `owning_vm: coolify-apps` and update the upstream IP in the NGINX
    edge route block from `10.10.10.70` to `10.10.10.71`.
 
-c. **Add a new host-vars entry** for `coolify-apps-lv3` in the same style as
-   the `coolify-lv3` block (near line 841):
+c. **Add a new host-vars entry** for `coolify-apps` in the same style as
+   the `coolify` block (near line 841):
 
 ```yaml
-coolify-apps-lv3:
+coolify-apps:
   ansible_host: 10.10.10.71
 ```
 
@@ -164,11 +164,11 @@ d. **Update `runtime_pool` references** for the `coolify_apps` service from
 
 **What:**
 
-- Add a new VM entry for `coolify-apps-lv3` with `vmid: 171` and
+- Add a new VM entry for `coolify-apps` with `vmid: 171` and
   `ip: 10.10.10.71`.
-- Update `deployment_server_name: coolify-apps-lv3` under the `coolify`
+- Update `deployment_server_name: coolify-apps` under the `coolify`
   service block.
-- Update the `coolify_apps` service block: `owning_vm: coolify-apps-lv3`.
+- Update the `coolify_apps` service block: `owning_vm: coolify-apps`.
 
 **Why:** `versions/stack.yaml` is the canonical source of truth for deployed
 infrastructure state. The live apply for this ADR must update it atomically.
@@ -179,27 +179,27 @@ infrastructure state. The live apply for this ADR must update it atomically.
 
 **What:**
 
-- The `apps.lv3.org` and `*.apps.lv3.org` entries already exist. Update their
+- The `apps.example.com` and `*.apps.example.com` entries already exist. Update their
   `target_ip` (or upstream reference) from `10.10.10.70` to `10.10.10.71`.
 - No new public subdomains are required. The wildcard already covers all
   Coolify-deployed apps.
-- Optionally add an internal-only record `coolify-apps-lv3.internal` pointing
+- Optionally add an internal-only record `coolify-apps.internal` pointing
   to `10.10.10.71` for operator tooling (consistent with other VM internal records).
 
 ---
 
 ### 5. `playbooks/coolify.yml` (or `playbooks/services/coolify.yml`)
 
-**What:** Add a new Ansible play to provision and converge `coolify-apps-lv3`.
+**What:** Add a new Ansible play to provision and converge `coolify-apps`.
 The play structure should mirror the existing guest provisioning plays and include:
 
 - `lv3.platform.proxmox_guests` (scoped to vmid 171)
 - VM stop/start cycle after cloud-init changes
-- `lv3.platform.linux_guest_firewall` on `coolify-apps-lv3`
-- `lv3.platform.docker_runtime` on `coolify-apps-lv3`
-- `lv3.platform.repo_deploy_image_cache` on `coolify-apps-lv3`
+- `lv3.platform.linux_guest_firewall` on `coolify-apps`
+- `lv3.platform.docker_runtime` on `coolify-apps`
+- `lv3.platform.repo_deploy_image_cache` on `coolify-apps`
 - A post-task calling `coolify_tool.py register-deployment-server
-  --host coolify-apps-lv3 --ip 10.10.10.71` to register via the API
+  --host coolify-apps --ip 10.10.10.71` to register via the API
 
 **Why:** The playbook is the single run-surface for operators and automation.
 Missing this step means the VM is provisioned but never registered.
@@ -209,7 +209,7 @@ Missing this step means the VM is provisioned but never registered.
 ### 6. `config/contracts/service-partitions/catalog.json`
 
 **What:** Add a `dedicated-coolify-apps` partition entry alongside the existing
-`dedicated-coolify` partition. The new partition owns `coolify-apps-lv3` as its
+`dedicated-coolify` partition. The new partition owns `coolify-apps` as its
 exclusive compute surface.
 
 **Why:** The partition catalog drives runtime pool scoping for deployment
@@ -221,7 +221,7 @@ ADR 0320.
 
 ### 7. `inventory/group_vars/platform.yml` — NGINX edge upstream
 
-**What:** In the NGINX edge route definition for `*.apps.lv3.org` (near
+**What:** In the NGINX edge route definition for `*.apps.example.com` (near
 lines 2793–2806), change the upstream server from:
 
 ```yaml
@@ -237,7 +237,7 @@ upstream: http://10.10.10.71:80
 And the TLS passthrough (port 443) upstream likewise from `10.10.10.70:443` to
 `10.10.10.71:443`.
 
-**Why:** The NGINX edge currently routes all `*.apps.lv3.org` traffic to the
+**Why:** The NGINX edge currently routes all `*.apps.example.com` traffic to the
 Coolify control plane VM. After migration, that same subdomain space must route
 to the apps runtime VM.
 
@@ -247,17 +247,17 @@ to the apps runtime VM.
 
 **What:**
 
-- Update the default `--deployment-server` argument from `coolify-lv3` to
-  `coolify-apps-lv3`.
+- Update the default `--deployment-server` argument from `coolify` to
+  `coolify-apps`.
 - Add a `migrate-deployment-server` sub-command that calls the Coolify API to
   re-assign all existing application records from the old server record to the
   new one (idempotent, skips already-migrated apps).
 - Add a `register-deployment-server` sub-command (or extend the existing server
-  bootstrap path) to POST a new server record for `coolify-apps-lv3` including
+  bootstrap path) to POST a new server record for `coolify-apps` including
   SSH key material.
 
 **Why:** `coolify_tool.py` is the automation entry point for Coolify API
-operations. Hardcoded references to `coolify-lv3` as the deployment target must
+operations. Hardcoded references to `coolify` as the deployment target must
 be updated or made configurable before any app deploy automation works correctly
 post-migration.
 
@@ -265,12 +265,12 @@ post-migration.
 
 ### 9. `config/health-probe-catalog.json`
 
-**What:** Add health probe entries for `coolify-apps-lv3`:
+**What:** Add health probe entries for `coolify-apps`:
 
 ```json
 {
   "service_id": "coolify_apps_runtime",
-  "host": "coolify-apps-lv3",
+  "host": "coolify-apps",
   "ip": "10.10.10.71",
   "probe_type": "tcp",
   "port": 80,
@@ -287,7 +287,7 @@ the monitoring stack.
 
 ### 10. `config/service-redundancy-catalog.json`
 
-**What:** Add a `coolify-apps-lv3` entry with its backup scope, restart domain,
+**What:** Add a `coolify-apps` entry with its backup scope, restart domain,
 and failure domain classification.
 
 **Why:** The redundancy catalog feeds the DR runbook generator and backup
@@ -298,10 +298,10 @@ next backup audit.
 
 ### 11. Proxmox host Tailscale proxy (`inventory/group_vars/platform.yml` — `proxmox_tailscale_proxy_routes`)
 
-**What:** Add a TCP proxy mapping for `coolify-apps-lv3` port 80 and optionally
+**What:** Add a TCP proxy mapping for `coolify-apps` port 80 and optionally
 a management port if direct operator shell access is needed over Tailscale.
 
-**Why:** The existing `coolify-lv3` already has a host-side TCP proxy entry
+**Why:** The existing `coolify` already has a host-side TCP proxy entry
 (port 8012 → dashboard). The new VM needs a corresponding entry so
 `coolify_tool.py` can optionally reach the apps runtime directly for diagnostic
 calls without going through the public edge.
@@ -310,8 +310,8 @@ calls without going through the public edge.
 
 ### 12. Monitoring scrape config (`config/prometheus/`)
 
-**What:** Add a Prometheus scrape target for `coolify-apps-lv3` node exporter
-(and Docker metrics if applicable) alongside the existing coolify-lv3 target.
+**What:** Add a Prometheus scrape target for `coolify-apps` node exporter
+(and Docker metrics if applicable) alongside the existing coolify target.
 
 **Why:** Without a scrape target the new VM is invisible to Grafana dashboards
 and Prometheus alerting.
@@ -320,7 +320,7 @@ and Prometheus alerting.
 
 ### 13. Backup scope (`playbooks/backup.yml` or backup role vars)
 
-**What:** Add `coolify-apps-lv3` to the list of VMs covered by Proxmox Backup
+**What:** Add `coolify-apps` to the list of VMs covered by Proxmox Backup
 Server (PBS). Include the Docker volumes directory (`/var/lib/docker/volumes`)
 in the Restic file-level backup scope alongside the existing Docker runtime VMs.
 
@@ -355,7 +355,7 @@ pre-push gate.
   structure, guest spec presence, and firewall role inclusion.
 - `tests/test_coolify_tool.py` — extend with tests for
   `register-deployment-server` and `migrate-deployment-server` sub-commands.
-- `tests/test_subdomain_catalog.py` — assert `apps.lv3.org` points to
+- `tests/test_subdomain_catalog.py` — assert `apps.example.com` points to
   `10.10.10.71` after migration.
 
 ---
@@ -382,7 +382,7 @@ stanzas. This cuts four lines of duplication per environment slice.
 
 ### DRY-2: Proxmox guest spec duplicated across topology slices
 
-**Problem:** The `coolify-lv3` guest spec (VMID, IP, cores, memory, disk, tags)
+**Problem:** The `coolify` guest spec (VMID, IP, cores, memory, disk, tags)
 appears three times in `platform.yml`—once for each topology slice. The pattern
 is the same for every other VM.
 
@@ -412,7 +412,7 @@ added for the new VM, it inherits the same anchor, keeping the diff minimal.
 
 ### DRY-4: `coolify_tool.py` hardcodes deployment server name
 
-**Problem:** The string `"coolify-lv3"` appears as a hardcoded default in at
+**Problem:** The string `"coolify"` appears as a hardcoded default in at
 least one `--deployment-server` argument default in `coolify_tool.py`. If the
 deployment server name ever changes again (or staging uses a different name),
 the script silently targets the wrong server.
@@ -433,14 +433,14 @@ regardless of future renames.
 
 ### DRY-5: NGINX edge upstream IPs appear in two places
 
-**Problem:** The `*.apps.lv3.org` upstream IP (`10.10.10.70`) is declared both
+**Problem:** The `*.apps.example.com` upstream IP (`10.10.10.70`) is declared both
 in the `platform.yml` route block and implicitly derived from the
 `coolify_apps.owning_vm` → `ansible_host` chain. If one is updated without the
 other, the edge proxy targets the wrong host.
 
 **Suggestion:** Drive the upstream IP in the NGINX edge route template directly
 from `hostvars[coolify_apps_owning_vm]['ansible_host']` rather than a hardcoded
-address. This is the same pattern used for `postgres-lv3` upstreams and
+address. This is the same pattern used for `postgres` upstreams and
 eliminates the dual-maintenance risk.
 
 ---
@@ -452,7 +452,7 @@ eliminates the dual-maintenance risk.
 - Coolify control plane uptime is decoupled from application workload pressure.
 - App deployments, container restarts, and disk-full events on the apps VM no
   longer affect the dashboard or the `lv3 deploy-repo` automation path.
-- The Coolify stack can be upgraded on `coolify-lv3` without touching running
+- The Coolify stack can be upgraded on `coolify` without touching running
   apps.
 - The new VM is a clean slate for future horizontal expansion (a second apps
   VM registered as a second Coolify server, load-balanced at the edge).
@@ -461,21 +461,21 @@ eliminates the dual-maintenance risk.
 
 - Adds one more managed Proxmox guest, increasing the total managed surface by ~8%.
 - The initial migration of existing app deployments requires a coordinated
-  Coolify API operation and a brief window where `*.apps.lv3.org` upstream is
+  Coolify API operation and a brief window where `*.apps.example.com` upstream is
   being re-pointed.
-- Every automation path that assumed `coolify-lv3` is both control plane and
+- Every automation path that assumed `coolify` is both control plane and
   apps runtime must be updated (all 16 integration points above).
 
 ## Migration Path
 
-1. Provision `coolify-apps-lv3` with `playbooks/coolify.yml` (new tier-1 play).
-2. Register `coolify-apps-lv3` as a deployment server in Coolify via
+1. Provision `coolify-apps` with `playbooks/coolify.yml` (new tier-1 play).
+2. Register `coolify-apps` as a deployment server in Coolify via
    `coolify_tool.py register-deployment-server`.
 3. Migrate existing application records via
-   `coolify_tool.py migrate-deployment-server --from coolify-lv3 --to coolify-apps-lv3`.
-4. Update NGINX edge upstream for `*.apps.lv3.org` (triggers a graceful reload).
+   `coolify_tool.py migrate-deployment-server --from coolify --to coolify-apps`.
+4. Update NGINX edge upstream for `*.apps.example.com` (triggers a graceful reload).
 5. Verify via `coolify_tool.py whoami` and direct edge probe against
-   `https://repo-smoke.apps.lv3.org`.
+   `https://repo-smoke.apps.example.com`.
 6. Update `versions/stack.yaml` and cut live-apply receipt.
 
 ## Repository Verification
@@ -493,12 +493,12 @@ Before live apply, the following must pass:
 The following observations were recorded during implementation (2026-04-03) and
 supersede or refine the original design notes above.
 
-### Finding 1: Authoritative VM spec lives in `host_vars/proxmox_florin.yml`, not `platform.yml`
+### Finding 1: Authoritative VM spec lives in `host_vars/proxmox-host.yml`, not `platform.yml`
 
 The ADR design section pointed at `inventory/group_vars/platform.yml` as the
 primary place to add the VM guest spec. In practice, the `proxmox_guests` list
 that drives VM provisioning lives in
-`inventory/host_vars/proxmox_florin.yml` (the Proxmox host's host-vars file).
+`inventory/host_vars/proxmox-host.yml` (the Proxmox host's host-vars file).
 `platform.yml` contains a parallel `platform_guest_catalog` structure used for
 group-level service definitions. Both were updated; the host-vars file is the
 authoritative source for provisioning.
@@ -508,12 +508,12 @@ MAC address allocated: `BC:24:11:C7:84:1B` (assigned from the managed pool).
 ### Finding 2: Jinja2 DRY pattern for IP references already existed
 
 DRY-5 in the design section proposed driving NGINX upstream IPs from
-`hostvars[...]`. During implementation, the `host_vars/proxmox_florin.yml` file
+`hostvars[...]`. During implementation, the `host_vars/proxmox-host.yml` file
 already used a Jinja2 `selectattr` pattern for dynamic IP lookups:
 
 ```yaml
 private_ip: >-
-  {{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps-lv3') | map(attribute='ipv4') | first) }}
+  {{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-apps') | map(attribute='ipv4') | first) }}
 ```
 
 This pattern was extended to the `coolify_apps` service definition. Adding
@@ -530,10 +530,10 @@ The test suite was written to assert all 8 play names.
 
 ### Finding 4: Registration play runs on `localhost`
 
-The deployment server registration play (`Register coolify-apps-lv3 as the
+The deployment server registration play (`Register coolify-apps as the
 Coolify deployment server`) runs against `localhost` and delegates calls to
 `coolify_tool.py` via `ansible.builtin.command`. This avoids needing SSH
-connectivity to `coolify-lv3` at registration time and keeps API credentials
+connectivity to `coolify` at registration time and keeps API credentials
 local to the controller.
 
 ### Finding 5: `coolify_tool.py` `_request` method uses keyword-only arguments
@@ -563,13 +563,13 @@ HTTP 422 "This field is not allowed." The Coolify v1 API does not expose an endp
 for moving applications between servers programmatically.
 
 **Resolution:** Migration was performed via direct PostgreSQL update on the `coolify-db`
-container on `coolify-lv3`:
+container on `coolify`:
 
 ```sql
--- Find standalone_dockers destination ID for coolify-apps-lv3
-SELECT id, server_id, network FROM standalone_dockers;  -- id=34 for coolify-apps-lv3
+-- Find standalone_dockers destination ID for coolify-apps
+SELECT id, server_id, network FROM standalone_dockers;  -- id=34 for coolify-apps
 
--- Migrate all apps from coolify-lv3 (destination_id=1) to coolify-apps-lv3 (destination_id=34)
+-- Migrate all apps from coolify (destination_id=1) to coolify-apps (destination_id=34)
 UPDATE applications SET destination_id = 34 WHERE destination_id = 1;
 ```
 
@@ -577,13 +577,13 @@ Run via: `qm guest exec 170 -- docker exec coolify-db psql -U coolify -c "<SQL>"
 After migration, Coolify cache was cleared: `php artisan cache:clear && config:clear`
 via `qm guest exec 170 -- docker exec coolify bash -c "<cmd>"`.
 
-Both `repo-smoke` and `education-wemeshup` now run on `coolify-apps-lv3`.
+Both `repo-smoke` and `education-wemeshup` now run on `coolify-apps`.
 `migrate-deployment-server` was updated to handle the 422 gracefully with
 `app_name:migrated_via_db` in the skipped list rather than crashing.
 
 ### Finding 10: NGINX edge upstream must use HTTP not HTTPS to Caddy (coolify-proxy)
 
-The initial NGINX edge route for `*.apps.lv3.org` was configured with
+The initial NGINX edge route for `*.apps.example.com` was configured with
 `upstream: https://10.10.10.71:443`. This caused Caddy (the `coolify-proxy` container)
 to attempt its own ACME TLS certificate issuance for each app domain. The HTTP-01 ACME
 challenge failed because NGINX intercepts `/.well-known/acme-challenge/` and serves it
@@ -591,9 +591,9 @@ from `/var/www/lv3-edge-acme` (only contains NGINX-managed challenges). Result: 
 had no valid cert → port 443 returned 503 for all app requests.
 
 **Resolution:** Updated `upstream: http://10.10.10.71:80` in `platform.yml` (both
-production and staging service entries). NGINX terminates TLS for `*.apps.lv3.org`
+production and staging service entries). NGINX terminates TLS for `*.apps.example.com`
 using the lv3-edge wildcard cert and proxies to Caddy on port 80, which serves apps
-correctly. This matches the same pattern used by `coolify-lv3` (`http://10.10.10.70:8000`).
+correctly. This matches the same pattern used by `coolify` (`http://10.10.10.70:8000`).
 
 ### Finding 8: Controller SSH tunnel fails; direct `controller_url` access works
 
@@ -603,9 +603,9 @@ is not authorized there. The direct Tailscale proxy URL `http://100.64.0.1:8012`
 is reachable from the controller without tunneling. Playbook tasks now reference
 `coolify_admin_auth_local_file` via `vars_files` from `platform.yml`.
 
-### Finding 9: Coolify SSH deploy key must be installed on `coolify-apps-lv3`
+### Finding 9: Coolify SSH deploy key must be installed on `coolify-apps`
 
-After server registration, Coolify must SSH to `coolify-apps-lv3` to validate the server.
+After server registration, Coolify must SSH to `coolify-apps` to validate the server.
 The Coolify deploy key public key (`ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC0gB481BWDLL...`)
 must be in `/root/.ssh/authorized_keys` on the new VM. During live apply this was done
 via `qm guest exec`. Follow-up: add this key to the cloud-init user-data or the

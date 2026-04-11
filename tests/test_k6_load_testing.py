@@ -61,9 +61,9 @@ def test_build_targets_uses_smoke_dedup_and_load_profiles(tmp_path: Path) -> Non
                 "$schema": "docs/schema/capacity-model.schema.json",
                 "schema_version": "1.0.0",
                 "host": {
-                    "id": "proxmox_florin",
+                    "id": "proxmox-host",
                     "name": "florin",
-                    "metrics_host": "proxmox_florin",
+                    "metrics_host": "proxmox-host",
                     "physical": {"ram_gb": 64, "vcpu": 16, "disk_gb": 1000},
                     "target_utilisation": {"ram_percent": 80, "vcpu_percent": 75, "disk_percent": 75},
                     "reserved_for_platform": {"ram_gb": 8, "vcpu": 2, "disk_gb": 100},
@@ -101,7 +101,7 @@ def test_build_targets_uses_smoke_dedup_and_load_profiles(tmp_path: Path) -> Non
                     {
                         "id": "grafana",
                         "name": "Grafana",
-                        "public_url": "https://grafana.lv3.org",
+                        "public_url": "https://grafana.example.com",
                     },
                 ]
             },
@@ -774,7 +774,7 @@ def test_build_receipts_keeps_passed_result_when_only_nats_regression_notificati
         {
             "service_id": "keycloak",
             "service_name": "Keycloak",
-            "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+            "target_url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
             "availability_slo_id": "keycloak-availability",
             "availability_objective_percent": 99.7,
             "latency_slo_id": "keycloak-latency",

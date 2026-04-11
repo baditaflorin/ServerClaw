@@ -22,7 +22,7 @@ collection replayable from git.
   OpenBao endpoint.
 - The controller has the shared bootstrap SSH key at
   `.local/ssh/hetzner_llm_agents_ed25519`.
-- `docker-runtime-lv3` and `proxmox_florin` are reachable through the standard
+- `docker-runtime` and `proxmox-host` are reachable through the standard
   Proxmox jump path.
 
 ## Converge
@@ -45,7 +45,7 @@ The converge flow:
   Tailscale TCP proxy
 - generates and mirrors the controller-local Typesense API key into the
   OpenBao-backed runtime env contract
-- deploys the Typesense runtime on `docker-runtime-lv3`
+- deploys the Typesense runtime on `docker-runtime`
 - refreshes the repo-managed `platform-services` collection through
   `scripts/typesense_catalog_sync.py`
 - re-verifies the authenticated
@@ -64,12 +64,12 @@ curl -fsS -H "X-TYPESENSE-API-KEY: $TYPESENSE_API_KEY" \
   http://100.64.0.1:8016/collections/platform-services
 LV3_TOKEN=$(cat .local/platform-context/api-token.txt)
 curl -fsS -H "Authorization: Bearer $LV3_TOKEN" \
-  'https://api.lv3.org/v1/platform/search/structured?q=api&collection=platform-services'
+  'https://api.example.com/v1/platform/search/structured?q=api&collection=platform-services'
 ```
 
 Expected results:
 
-- `http://127.0.0.1:8108/health` returns `200` on `docker-runtime-lv3`
+- `http://127.0.0.1:8108/health` returns `200` on `docker-runtime`
 - `http://100.64.0.1:8016/collections/platform-services` returns `200` with
   a non-zero `num_documents` count when the repo-managed API key is presented
 - the authenticated structured-search route returns

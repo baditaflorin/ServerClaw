@@ -4,7 +4,7 @@
 - Title: enforce replaceability scorecards and vendor exit plans for critical integrated product ADRs, then publish the updated governance docs live
 - Status: merged
 - Branch: `codex/ws-0212-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0212-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0212-live-apply`
 - Owner: codex
 - Depends On: `adr-0205-capability-contracts-before-product-selection`, `adr-0213-architecture-fitness-functions-in-the-validation-gate`
 - Conflicts With: none
@@ -52,7 +52,7 @@
 
 ## Expected Live Surfaces
 
-- `docs.lv3.org` serves the updated governed ADR pages with their replaceability scorecards and vendor exit plans
+- `docs.example.com` serves the updated governed ADR pages with their replaceability scorecards and vendor exit plans
 - the edge host carries the refreshed generated docs content for the governed ADR paths
 
 ## Ownership Notes
@@ -86,8 +86,8 @@
 - 2026-03-28 live apply receipt: `receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json`
 - the first `make deploy-docs-portal` run copied the updated `docs-portal` content but failed because the shared edge publication lane also expected `build/changelog-portal/`
 - the recovery followed the documented shared-edge path: `make generate-ops-portal`, `make generate-changelog-portal`, `make docs`, and `make configure-edge-publication env=production`
-- independent verification confirmed `docs.lv3.org` and the ADR 0212 path return `302` to the shared `/oauth2/sign_in` flow with `X-Robots-Tag: noindex, nofollow`
-- independent verification on `nginx-lv3` confirmed the deployed ADR 0212 and ADR 0042 HTML pages exist, contain `Replaceability Scorecard` and `Vendor Exit Plan`, and match the local SHA-256 digests
+- independent verification confirmed `docs.example.com` and the ADR 0212 path return `302` to the shared `/oauth2/sign_in` flow with `X-Robots-Tag: noindex, nofollow`
+- independent verification on `nginx-edge` confirmed the deployed ADR 0212 and ADR 0042 HTML pages exist, contain `Replaceability Scorecard` and `Vendor Exit Plan`, and match the local SHA-256 digests
 - repo validation after the live apply also reconciled the standalone dependency-graph generator with the docs-site wrapper so the `generated-docs`/`generated-portals` paths no longer disagree on `docs/site-generated/architecture/dependency-graph.md`
 
 ## Mainline Integration Outcome

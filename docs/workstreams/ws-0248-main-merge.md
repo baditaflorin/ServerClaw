@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.47
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0248-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0248-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0248-main-merge`
 - Owner: codex
 - Depends On: `ws-0248-live-apply`
 
@@ -75,34 +75,34 @@ apply.
   attempt exposed a transient Keycloak admin-token timeout after Docker
   activity. `curl -fsS http://10.10.10.20:8091/realms/master` returned `200`
   immediately afterward, and `make converge-keycloak env=production` completed
-  successfully with `docker-runtime-lv3 : ok=150 changed=0 failed=0`,
-  `monitoring-lv3 : ok=17 changed=0 failed=0`,
-  `nginx-lv3 : ok=39 changed=4 failed=0`,
-  `postgres-lv3 : ok=47 changed=0 failed=0`, and
-  `proxmox_florin : ok=201 changed=0 failed=0`.
+  successfully with `docker-runtime : ok=150 changed=0 failed=0`,
+  `monitoring : ok=17 changed=0 failed=0`,
+  `nginx-edge : ok=39 changed=4 failed=0`,
+  `postgres : ok=47 changed=0 failed=0`, and
+  `proxmox-host : ok=201 changed=0 failed=0`.
 - The guarded exact-main Outline wrapper then completed successfully with
-  `docker-runtime-lv3 : ok=209 changed=5 failed=0`,
+  `docker-runtime : ok=209 changed=5 failed=0`,
   `localhost : ok=25 changed=1 failed=0`,
-  `nginx-lv3 : ok=38 changed=2 failed=0`, and
-  `postgres-lv3 : ok=47 changed=0 failed=0`, proving the
+  `nginx-edge : ok=38 changed=2 failed=0`, and
+  `postgres : ok=47 changed=0 failed=0`, proving the
   `ready_for_merge`-aware interface-contract gate, the immutable-guest
   exception path, and the repo-managed Outline publication bootstrap all worked
   from the synchronized mainline candidate.
 - `make configure-edge-publication env=production` completed successfully with
-  `nginx-lv3 : ok=63 changed=6 failed=0`, reloading both oauth2-proxy and
+  `nginx-edge : ok=63 changed=6 failed=0`, reloading both oauth2-proxy and
   NGINX after the exact-main logout publication refresh.
 - Live HTTP verification confirmed:
-  `https://home.lv3.org/.well-known/lv3/session/logout -> 302` to the shared
+  `https://home.example.com/.well-known/lv3/session/logout -> 302` to the shared
   oauth2-proxy sign-out path,
-  `https://ops.lv3.org/.well-known/lv3/session/proxy-logout -> 302` to the
+  `https://ops.example.com/.well-known/lv3/session/proxy-logout -> 302` to the
   logged-out landing page,
-  `https://ops.lv3.org/.well-known/lv3/session/logged-out -> 200` with
+  `https://ops.example.com/.well-known/lv3/session/logged-out -> 200` with
   `Cache-Control: no-store` and `Clear-Site-Data`,
-  and `curl -I https://wiki.lv3.org/ -> 200` with the expected
+  and `curl -I https://wiki.example.com/ -> 200` with the expected
   Outline-compatible CSP override.
-- `uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt`
-  passed and reported `verified shared edge logout via https://home.lv3.org/`
-  plus `verified Outline logout via https://wiki.lv3.org/auth/oidc`.
+- `uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/outline.automation-password.txt`
+  passed and reported `verified shared edge logout via https://home.example.com/`
+  plus `verified Outline logout via https://wiki.example.com/auth/oidc`.
 - Repo automation and validation coverage completed from this worktree:
   `./scripts/validate_repo.sh agent-standards`,
   `make validate-data-models`,

@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0233-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0233-live-apply`
 - Owner: codex
 - Depends On: `adr-0143-gitea-for-self-hosted-git-and-ci`, `adr-0168-automated-validation-gate`, `adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation`
 - Conflicts With: none
@@ -41,8 +41,8 @@
 
 ## Expected Live Surfaces
 
-- the private `ops/proxmox_florin_server` Gitea repo carries repo-managed Actions secrets for Cosign signing
-- the self-hosted `docker-build-lv3` runner can assemble a control-plane bundle, sign it with Cosign, and publish the resulting assets into a Gitea Release
+- the private `ops/proxmox-host_server` Gitea repo carries repo-managed Actions secrets for Cosign signing
+- the self-hosted `docker-build` runner can assemble a control-plane bundle, sign it with Cosign, and publish the resulting assets into a Gitea Release
 - a follow-up verification path can fetch the private release assets and confirm the published Sigstore bundle using the committed public key
 
 ## Verification
@@ -57,7 +57,7 @@
 
 ## Live Apply Outcome
 
-- `make converge-gitea` completed successfully from the isolated latest-`origin/main` integration worktree with final recap `docker-build-lv3 ok=100 changed=5 failed=0`, `docker-runtime-lv3 ok=227 changed=2 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`
+- `make converge-gitea` completed successfully from the isolated latest-`origin/main` integration worktree with final recap `docker-build ok=100 changed=5 failed=0`, `docker-runtime ok=227 changed=2 failed=0`, `postgres ok=24 changed=0 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`
 - the managed Gitea bootstrap path now seeds repository secret `RELEASE_BUNDLE_REPO_TOKEN` from the mirrored admin token so private release assets can be replayed by both publish and verify workflows
 - a private push of branch head `2fb56c14b62a73d0de47cb367a78c987dfd257c5` passed the full server-side gate and produced successful Gitea workflow runs `68` and `69` on the self-hosted runner path
 - prerelease tag `bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a` now carries the bundle tarball, checksum, and Sigstore bundle assets in private Gitea Releases
@@ -74,7 +74,7 @@
 - branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json`
 - merged-main-equivalent live-apply receipt: `receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json`
 - published prerelease tag: `bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a`
-- private release URL: `http://git.lv3.org:3009/ops/proxmox_florin_server/releases/tag/bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a`
+- private release URL: `http://git.example.com:3009/ops/proxmox-host_server/releases/tag/bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a`
 
 ## Mainline Integration
 

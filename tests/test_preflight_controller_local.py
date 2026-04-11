@@ -274,7 +274,7 @@ def test_run_workflow_resolves_repo_local_secret_mirror(tmp_path: Path, monkeypa
     mirrored_key.parent.mkdir(parents=True)
     mirrored_key.write_text("key", encoding="utf-8")
     secret_manifest = minimal_secret_manifest(
-        Path("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/id_ed25519")
+        Path("/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/id_ed25519")
     )
     workflow = minimal_workflow(
         workflow_id="live-apply-service",
@@ -355,7 +355,7 @@ def test_run_workflow_materializes_shared_bootstrap_aliases_for_worktree(
     (shared_ssh_dir / "hetzner_llm_agents_ed25519").write_text("PRIVATE\n", encoding="utf-8")
     (shared_ssh_dir / "hetzner_llm_agents_ed25519.pub").write_text("PUBLIC\n", encoding="utf-8")
     secret_manifest = minimal_secret_manifest(
-        Path("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519")
+        Path("/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/bootstrap.id_ed25519")
     )
     workflow = minimal_workflow(
         workflow_id="post-merge-gate",

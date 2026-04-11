@@ -9,7 +9,7 @@
 
 ## Context
 
-LLM agents (ServerClaw via chat.lv3.org, Dify workflows, Claude Code sessions,
+LLM agents (ServerClaw via chat.example.com, Dify workflows, Claude Code sessions,
 MCP-connected tools) need to inspect and operate the platform's physical hosts
 — not just read committed files or call HTTP APIs.
 
@@ -28,7 +28,7 @@ They do **not** cover:
 1. **True host shell access** — agents need `systemctl`, `journalctl`, `docker`,
    `free`, `df`, `ip addr` — the host's own binaries, not a sandboxed container
 2. **Multi-host execution** — the platform spans 7+ VMs; agents need to run
-   commands on any of them, not just runtime-control-lv3
+   commands on any of them, not just runtime-control
 3. **MCP-native tool discovery** — chat surfaces (LibreChat, Claude Code) use
    MCP; tools should be discoverable and callable without HTTP proxy wiring
 4. **Audit and traceability** — every agent command must be logged with identity,
@@ -73,13 +73,13 @@ Supported targets with friendly names:
 
 | Name | IP | Purpose |
 |------|----|---------|
-| `runtime-control-lv3` | local | API gateway, agent tools, control plane |
+| `runtime-control` | local | API gateway, agent tools, control plane |
 | `proxmox` | 10.10.10.1 | Hypervisor |
-| `postgres-lv3` | 10.10.10.60 | Shared PostgreSQL |
-| `docker-runtime-lv3` | 10.10.10.20 | Docker workloads, Dify, LibreChat |
+| `postgres` | 10.10.10.60 | Shared PostgreSQL |
+| `docker-runtime` | 10.10.10.20 | Docker workloads, Dify, LibreChat |
 | `build-server` | 10.10.10.30 | CI/CD, gate runner |
-| `coolify-lv3` | 10.10.10.70 | Coolify PaaS |
-| `runtime-comms-lv3` | 10.10.10.21 | Neko, LiveKit |
+| `coolify` | 10.10.10.70 | Coolify PaaS |
+| `runtime-comms` | 10.10.10.21 | Neko, LiveKit |
 
 ### 3. SSH key provisioning (Phase 2 — not yet implemented)
 
@@ -91,7 +91,7 @@ The API gateway host needs a dedicated SSH key pair for cross-host execution:
   community.crypto.openssh_keypair:
     path: /etc/lv3/api-gateway/agent-ssh-key
     type: ed25519
-    comment: "agent-exec@runtime-control-lv3"
+    comment: "agent-exec@runtime-control"
     owner: root
     mode: "0600"
 
@@ -99,7 +99,7 @@ The API gateway host needs a dedicated SSH key pair for cross-host execution:
   ansible.posix.authorized_key:
     user: ops
     key: "{{ agent_ssh_public_key }}"
-    comment: "agent-exec@runtime-control-lv3 (ADR 0386)"
+    comment: "agent-exec@runtime-control (ADR 0386)"
   delegate_to: "{{ item }}"
   loop: "{{ groups['all'] }}"
 ```
@@ -154,7 +154,7 @@ The MCP schema for `execute-host-command`:
     "required": ["command"],
     "properties": {
       "command": { "type": "string" },
-      "host": { "type": "string", "enum": ["runtime-control-lv3", "proxmox", ...] },
+      "host": { "type": "string", "enum": ["runtime-control", "proxmox", ...] },
       "timeout": { "type": "integer", "minimum": 1, "maximum": 120 }
     }
   }
@@ -170,7 +170,7 @@ Every `execute-host-command` invocation produces a structured log entry:
   "actor_id": "service/dify",
   "tool": "execute-host-command",
   "command": "df -h",
-  "host": "runtime-control-lv3",
+  "host": "runtime-control",
   "exit_code": 0,
   "output_bytes": 1234,
   "duration_ms": 365,
@@ -187,7 +187,7 @@ This integrates with:
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| 1. Local nsenter | **Done** (0.178.70) | True host shell on runtime-control-lv3 via privileged container + nsenter |
+| 1. Local nsenter | **Done** (0.178.70) | True host shell on runtime-control via privileged container + nsenter |
 | 2. SSH key provisioning | **Not started** | Ansible task to generate + distribute agent SSH key pair |
 | 3. Multi-host execution | **Wired, blocked on Phase 2** | Handler and registry support multi-host; SSH fails without keys |
 | 4. MCP server endpoint | **Done** (0.178.67) | `export-mcp-tools` exposes all tools including execute-host-command |
@@ -215,7 +215,7 @@ This integrates with:
 - An agent with a compromised identity could use `execute-host-command` to
   exfiltrate data or modify host state — mitigated by ADR 0125 daily caps,
   audit logging, and the safety filter
-- SSH key compromise on runtime-control-lv3 grants access to all managed hosts —
+- SSH key compromise on runtime-control grants access to all managed hosts —
   mitigated by internal-only networking (10.10.10.0/24) and key rotation via
   Ansible convergence
 

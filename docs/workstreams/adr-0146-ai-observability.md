@@ -11,13 +11,13 @@
 - Owner: codex
 - Depends On: `adr-0043-openbao`, `adr-0056-keycloak-sso`, `adr-0075-service-capability-catalog`, `adr-0077-compose-secrets-injection`
 - Conflicts With: none
-- Shared Surfaces: `playbooks/langfuse.yml`, `collections/ansible_collections/lv3/platform/roles/langfuse_runtime/`, `collections/ansible_collections/lv3/platform/roles/langfuse_postgres/`, `config/service-capability-catalog.json`, `inventory/host_vars/proxmox_florin.yml`
+- Shared Surfaces: `playbooks/langfuse.yml`, `collections/ansible_collections/lv3/platform/roles/langfuse_runtime/`, `collections/ansible_collections/lv3/platform/roles/langfuse_postgres/`, `config/service-capability-catalog.json`, `inventory/host_vars/proxmox-host.yml`
 
 ## Scope
 
 - add ADR 0146 for self-hosted Langfuse agent observability
-- deploy Langfuse on `docker-runtime-lv3` with PostgreSQL on `postgres-lv3`
-- publish `langfuse.lv3.org` through the shared NGINX edge
+- deploy Langfuse on `docker-runtime` with PostgreSQL on `postgres`
+- publish `langfuse.example.com` through the shared NGINX edge
 - provision the Keycloak OIDC client for Langfuse sign-in
 - seed a repo-managed bootstrap org, project, API key pair, and bootstrap user
 - add the repo-side smoke verifier and config loader for future Langfuse-enabled agent runtimes
@@ -42,7 +42,7 @@
 
 ## Expected Live Surfaces
 
-- `https://langfuse.lv3.org`
+- `https://langfuse.example.com`
 - Langfuse bootstrap project `lv3-agent-observability`
 - repo-managed project API keys mirrored under `.local/langfuse/`
 - one successful live synthetic trace verification with a direct Langfuse trace URL
@@ -51,7 +51,7 @@
 
 - `make syntax-check-langfuse`
 - `uv run --with pytest --with pyyaml python -m pytest tests/test_langfuse_observability.py tests/test_keycloak_runtime_role.py tests/test_compose_runtime_secret_injection.py -q`
-- `uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py --base-url https://langfuse.lv3.org --project-id lv3-agent-observability --bootstrap-email baditaflorin@gmail.com --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt`
+- `uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py --base-url https://langfuse.example.com --project-id lv3-agent-observability --bootstrap-email operator@example.com --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt`
 
 ## Merge Criteria
 
@@ -63,7 +63,7 @@
 ## Outcome
 
 - Repo implementation completed for release `0.163.0` on `2026-03-26`.
-- Live verification completed on the public production hostname: `https://langfuse.lv3.org/api/public/health` returned `200`, the seeded `lv3-agent-observability` project was reachable through the public API, and the smoke verifier ingested trace `4080b556f5c041e3a6afc28f37b99d41` with direct UI resolution at `https://langfuse.lv3.org/project/lv3-agent-observability/traces/4080b556f5c041e3a6afc28f37b99d41`.
+- Live verification completed on the public production hostname: `https://langfuse.example.com/api/public/health` returned `200`, the seeded `lv3-agent-observability` project was reachable through the public API, and the smoke verifier ingested trace `4080b556f5c041e3a6afc28f37b99d41` with direct UI resolution at `https://langfuse.example.com/project/lv3-agent-observability/traces/4080b556f5c041e3a6afc28f37b99d41`.
 - The final rollout required follow-up fixes after the first live apply attempt: canonical Langfuse topology generation, restart-safe edge certificate recovery defaults, URL-safe PostgreSQL credential handling, import-safe smoke helper loading, and Redis volume ownership pinning so background persistence no longer blocks trace ingestion.
 
 ## Notes For The Next Assistant

@@ -11,7 +11,7 @@ MAKEFILE_PATH = REPO_ROOT / "Makefile"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 def test_glitchtip_dns_stage_converges_only_the_errors_subdomain_record() -> None:
@@ -21,7 +21,7 @@ def test_glitchtip_dns_stage_converges_only_the_errors_subdomain_record() -> Non
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "errors.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "errors.example.com"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the GlitchTip subdomain entry")
     assert (
@@ -106,11 +106,11 @@ def test_inventory_and_execution_scope_expose_glitchtip_publication_surface() ->
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
     scopes = yaml.safe_load(ANSIBLE_EXECUTION_SCOPES_PATH.read_text(encoding="utf-8"))
 
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
-    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-lv3" and 3005 in rule["ports"])
+    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-edge" and 3005 in rule["ports"])
     monitoring_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 3005 in rule["ports"]
+        rule for rule in docker_runtime_rules if rule["source"] == "monitoring" and 3005 in rule["ports"]
     )
     scope_entry = scopes["playbooks"]["playbooks/glitchtip.yml"]
 

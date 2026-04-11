@@ -4,7 +4,7 @@
 - Title: Single `lv3` CLI that routes deploy, lint, validate, status, vm, secret, and fixture commands to the right execution target
 - Status: merged
 - Branch: `codex/adr-0090-platform-cli`
-- Worktree: `../proxmox_florin_server-platform-cli`
+- Worktree: `../proxmox-host_server-platform-cli`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0082-remote-build-gateway`
 - Conflicts With: none

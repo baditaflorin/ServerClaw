@@ -4,7 +4,7 @@ This runbook documents the current manual fallback for certificate rotation unti
 
 ## Scope
 
-- public edge certificates served by `nginx-lv3`
+- public edge certificates served by `nginx-edge`
 - internal service certificates issued through step-ca
 - controller-side trust material that must stay aligned with rotated certificates
 

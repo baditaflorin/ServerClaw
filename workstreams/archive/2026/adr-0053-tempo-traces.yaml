@@ -11,7 +11,7 @@ depends_on:
   - adr-0052-loki-logs
 conflicts_with: []
 shared_surfaces:
-  - monitoring-lv3
+  - monitoring
   - Grafana
   - internal APIs
   - workflow execution

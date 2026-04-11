@@ -31,12 +31,12 @@ def test_repo_catalog_validates() -> None:
 
     guests = set(catalog["guests"])
     assert guests == {
-        "backup-lv3",
-        "docker-build-lv3",
-        "docker-runtime-lv3",
-        "monitoring-lv3",
-        "nginx-lv3",
-        "postgres-lv3",
+        "backup",
+        "docker-build",
+        "docker-runtime",
+        "monitoring",
+        "nginx-edge",
+        "postgres",
     }
 
 
@@ -47,7 +47,7 @@ def test_build_service_plan_flags_grafana_and_skips_headscale() -> None:
     headscale_plan = immutable_guest_replacement.build_service_plan(catalog, "headscale")
 
     assert grafana_plan["immutable_guest_replacement"] is True
-    assert grafana_plan["guest"] == "monitoring-lv3"
+    assert grafana_plan["guest"] == "monitoring"
     assert grafana_plan["validation_mode"] == "preview_guest"
     assert grafana_plan["classification"] == "edge_and_stateful"
 
@@ -58,7 +58,7 @@ def test_build_service_plan_flags_grafana_and_skips_headscale() -> None:
 def test_check_live_apply_rejects_without_override() -> None:
     catalog = immutable_guest_replacement.load_guest_replacement_catalog()
 
-    with pytest.raises(ValueError, match="grafana -> monitoring-lv3"):
+    with pytest.raises(ValueError, match="grafana -> monitoring"):
         immutable_guest_replacement.check_live_apply(
             catalog,
             service_id="grafana",
@@ -89,7 +89,7 @@ def test_validate_catalog_requires_r2_for_warm_standby(
     guest_catalog_path = tmp_path / "config" / "immutable-guest-replacement-catalog.json"
     service_catalog_path = tmp_path / "config" / "service-capability-catalog.json"
     redundancy_catalog_path = tmp_path / "config" / "service-redundancy-catalog.json"
-    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml"
+    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
 
     _write_json(
         guest_catalog_path,
@@ -182,7 +182,7 @@ def test_rag_context_alias_resolves_to_platform_context_api(monkeypatch: pytest.
             "platform_context_api": {
                 "id": "platform_context_api",
                 "name": "Platform Context API",
-                "vm": "docker-runtime-lv3",
+                "vm": "docker-runtime",
                 "exposure": "private-only",
             }
         },

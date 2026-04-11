@@ -13,23 +13,23 @@ import security_headers_audit as audit
 def test_derive_edge_hostnames_includes_service_topology_and_extra_sites() -> None:
     role_defaults = {
         "public_edge_extra_sites": [
-            {"hostname": "docs.lv3.org"},
-            {"hostname": "changelog.lv3.org"},
+            {"hostname": "docs.example.com"},
+            {"hostname": "changelog.example.com"},
         ]
     }
     platform_vars = {
         "platform_service_topology": {
-            "grafana": {"public_hostname": "grafana.lv3.org", "edge": {"enabled": True}},
-            "windmill": {"public_hostname": "windmill.lv3.org", "edge": {"enabled": False}},
-            "uptime": {"public_hostname": "uptime.lv3.org", "edge": {"enabled": True}},
+            "grafana": {"public_hostname": "grafana.example.com", "edge": {"enabled": True}},
+            "windmill": {"public_hostname": "windmill.example.com", "edge": {"enabled": False}},
+            "uptime": {"public_hostname": "uptime.example.com", "edge": {"enabled": True}},
         }
     }
 
     assert audit.derive_edge_hostnames(role_defaults, platform_vars) == [
-        "changelog.lv3.org",
-        "docs.lv3.org",
-        "grafana.lv3.org",
-        "uptime.lv3.org",
+        "changelog.example.com",
+        "docs.example.com",
+        "grafana.example.com",
+        "uptime.example.com",
     ]
 
 
@@ -40,13 +40,13 @@ def test_expected_headers_for_host_merges_override_over_default() -> None:
             "content_security_policy": "default-src 'self'",
         },
         "public_edge_security_headers_overrides": {
-            "ops.lv3.org": {
+            "ops.example.com": {
                 "content_security_policy": "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' https://unpkg.com"
             }
         },
     }
 
-    assert audit.expected_headers_for_host(role_defaults, "ops.lv3.org") == {
+    assert audit.expected_headers_for_host(role_defaults, "ops.example.com") == {
         "x_frame_options": "DENY",
         "content_security_policy": "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' https://unpkg.com",
     }
@@ -79,7 +79,7 @@ def test_audit_host_reports_missing_and_mismatched_headers(monkeypatch) -> None:
         ),
     )
 
-    result = audit.audit_host(role_defaults, "grafana.lv3.org", timeout=5.0)
+    result = audit.audit_host(role_defaults, "grafana.example.com", timeout=5.0)
 
     assert result.passed is False
     assert "missing cross-origin-resource-policy" in result.details

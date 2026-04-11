@@ -19,12 +19,12 @@ Sending those prompts to external providers by default adds unnecessary privacy 
 
 ## Decision
 
-We run Ollama as a private, repo-managed runtime on `docker-runtime-lv3`.
+We run Ollama as a private, repo-managed runtime on `docker-runtime`.
 
 ### Runtime shape
 
 - service id: `ollama`
-- runtime host: `docker-runtime-lv3`
+- runtime host: `docker-runtime`
 - publication model: private-only on port `11434`
 - persistent model storage: `/data/ollama/models`
 - pinned image: `docker.io/ollama/ollama:0.18.2@sha256:1550310a86dbfd206a0319b3e1580e4a8edb0000963ca7550af1b7ed57e4c87f`
@@ -59,7 +59,7 @@ The compose template adds `host.docker.internal:host-gateway` so the Open WebUI 
 ## Implementation Notes
 
 - The new service is wired into the image, workflow, command, dependency, health-probe, service-capability, completeness, and control-plane lane catalogs.
-- `inventory/host_vars/proxmox_florin.yml` opens the private Ollama port for the guest network and private RFC1918 callers while keeping the service off the public edge.
+- `inventory/host_vars/proxmox-host.yml` opens the private Ollama port for the guest network and private RFC1918 callers while keeping the service off the public edge.
 - `scripts/ollama_probe.py` provides a simple three-run latency benchmark against `/api/generate`.
 - The Open WebUI runtime now recovers from stale compose-network drift before retrying container startup, matching the existing Docker drift handling already used for other services.
 
@@ -75,7 +75,7 @@ The compose template adds `host.docker.internal:host-gateway` so the Open WebUI 
 ### Trade-offs
 
 - CPU-only local inference is materially slower than frontier hosted APIs for some completions; the startup-model latency observed on `llama3.2:3b` was acceptable for bounded normalisation and operator workbench queries, but not a replacement for all model classes.
-- Model files consume persistent disk and RAM on `docker-runtime-lv3`.
+- Model files consume persistent disk and RAM on `docker-runtime`.
 - The local model connector must remain explicitly scoped to safe use cases; this ADR does not authorize broad autonomous operational decisions by the model.
 
 ## Verification
@@ -83,7 +83,7 @@ The compose template adds `host.docker.internal:host-gateway` so the Open WebUI 
 The first live implementation from `main` on 2026-03-25 verified:
 
 - `curl -fsS http://127.0.0.1:11434/api/version` returned `{"version":"0.18.2"}`
-- `docker exec ollama ollama show llama3.2:3b` succeeded on `docker-runtime-lv3`
+- `docker exec ollama ollama show llama3.2:3b` succeeded on `docker-runtime`
 - the Open WebUI container could reach `http://host.docker.internal:11434/api/version`
 - a three-run local generation probe against `llama3.2:3b` reported `min=2357.8ms`, `avg=3062.2ms`, `p95=4396.5ms`, `max=4396.5ms`
 

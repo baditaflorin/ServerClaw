@@ -8,7 +8,7 @@
 - Release Date: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0302-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0302-main-integration`
 - Owner: codex
 - Depends On: `ws-0302-live-apply`
 
@@ -76,7 +76,7 @@ backup protection for repo-managed configuration and state artifacts.
   0302 integration pass.
 - The live platform proof remains the successful Restic interval backup receipt `receipts/restic-backups/20260331T060131Z.json`, the event-driven live-apply backup receipt `receipts/restic-backups/20260331T055348Z.json`, the restore-verification receipt `receipts/restic-restore-verifications/20260331T055701Z.json`, and the refreshed snapshot manifest `receipts/restic-snapshots-latest.json`.
 - Repository automation passed on the integrated tree with `make syntax-check-restic-config-backup`, focused pytest for the Restic and ledger coverage, `make preflight WORKFLOW=restic-config-backup`, `make preflight WORKFLOW=restic-config-restore-verify`, `./scripts/validate_repo.sh workstream-surfaces agent-standards data-models`, `UV_PYTHON=python3.13 make validate`, and `UV_PYTHON=python3.13 make pre-push-gate`.
-- The backup-coverage ledger still reports two unrelated uncovered assets, `monitoring-lv3` and `backup-lv3`, while confirming that the ADR 0302 Restic-backed assets are protected with current receipts and timestamps.
+- The backup-coverage ledger still reports two unrelated uncovered assets, `monitoring` and `backup`, while confirming that the ADR 0302 Restic-backed assets are protected with current receipts and timestamps.
 
 ## Outcome
 

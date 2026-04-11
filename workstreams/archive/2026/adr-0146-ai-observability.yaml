@@ -20,7 +20,7 @@ shared_surfaces:
   - config/health-probe-catalog.json
   - config/secret-catalog.json
   - config/image-catalog.json
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - scripts/langfuse_trace_smoke.py
   - platform/llm/observability.py
 ready_to_merge: false

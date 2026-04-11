@@ -11,8 +11,8 @@
 
 ## Scope
 
-- verify the exact live baseline for `runtime-general-lv3`, `runtime-control-lv3`,
-  and the current `docker-runtime-lv3` residual workload
+- verify the exact live baseline for `runtime-general`, `runtime-control`,
+  and the current `docker-runtime` residual workload
 - apply the remaining runtime-pool playbooks from the latest integrated mainline
 - keep ADR 0321 honest by rebalancing host-side guest memory if a straight
   additive rollout would violate the 20 GiB floor
@@ -43,7 +43,7 @@
 - `playbooks/services/runtime-control-pool.yml`
 - `collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2`
 - `inventory/hosts.yml`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `config/capacity-model.json`
 - `config/runtime-pool-autoscaling.json`
@@ -58,21 +58,21 @@
 
 ## Expected Live Surfaces
 
-- Proxmox host `proxmox_florin`
-- VM `runtime-general-lv3` at `10.10.10.91`
-- VM `runtime-control-lv3` at `10.10.10.92`
-- Nomad on `monitoring-lv3`
-- residual application workloads on `docker-runtime-lv3`
+- Proxmox host `proxmox-host`
+- VM `runtime-general` at `10.10.10.91`
+- VM `runtime-control` at `10.10.10.92`
+- Nomad on `monitoring`
+- residual application workloads on `docker-runtime`
 - private host proxies and public NGINX edge routes backed by the migrated
   services
 
 ## Initial Baseline
 
 - `origin/main` baseline commit is `9c58e76c652b9d5e65504d44412aad454207bcb8`
-- `runtime-general-lv3` and `runtime-control-lv3` are absent live at workstream
+- `runtime-general` and `runtime-control` are absent live at workstream
   start
 - the `runtime-control` Nomad namespace is absent at workstream start
-- `docker-runtime-lv3` still carries control-plane and lightweight support
+- `docker-runtime` still carries control-plane and lightweight support
   services that the repo has already classified for other pools
 - host-level available memory is about `22 GiB`, so the remaining pool rollout
   may require a coordinated memory rebalance to satisfy ADR 0321
@@ -96,13 +96,13 @@
 - the governed capacity rebalance is now fully live-applied end to end,
   including the `live-apply-service` post-apply restic trigger
 - the committed and verified live memory settings are:
-  - `docker-runtime-lv3`: `18 GiB`
-  - `docker-build-lv3`: `12 GiB`
-  - `coolify-lv3`: `6 GiB`
-  - `artifact-cache-lv3`: `4 GiB`
+  - `docker-runtime`: `18 GiB`
+  - `docker-build`: `12 GiB`
+  - `coolify`: `6 GiB`
+  - `artifact-cache`: `4 GiB`
 - the Proxmox host now reports roughly `75 GiB` available memory after the
   replayed rebalance verification, preserving ADR 0321 headroom for
-  `runtime-general-lv3` and `runtime-control-lv3`
+  `runtime-general` and `runtime-control`
 - the restic self-heal path needed one additional repo fix before the wrapper
   could pass cleanly:
   - `playbooks/restic-config-backup.yml` now enables
@@ -113,7 +113,7 @@
 - live-apply evidence for the rebalance attempts is recorded under
   `receipts/live-applies/evidence/2026-04-03-ws-0331-runtime-pool-capacity-rebalance-live-apply-r*.txt`
 - the next owned step remains the exact-main live apply for
-  `runtime-general-lv3`, followed by `runtime-control-lv3`
+  `runtime-general`, followed by `runtime-control`
 
 ### 2026-04-04: Exact-Main Runtime-Control Correction Loop
 
@@ -123,8 +123,8 @@
 - the first exact-main runtime-control replays exposed two separate failure
   modes:
   - a transient SSH reconnect race after guest-firewall evaluation on
-    `runtime-control-lv3`
-  - a stale live Proxmox per-guest firewall on `postgres-lv3` that still
+    `runtime-control`
+  - a stale live Proxmox per-guest firewall on `postgres` that still
     blocked `10.10.10.92 -> 10.10.10.50:5432` even though the repo inventory
     already declared that allowance
 - the stale PostgreSQL firewall rule was corrected by replaying
@@ -158,9 +158,9 @@
   terminated as a duplicate while the corrected replay was already running, and
   replay `r28` became the authoritative successful exact-main live apply
 - `receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-control-mainline-live-apply-r28.txt`
-  captured the green recap that kept `runtime-control-lv3`, `postgres-lv3`,
-  `proxmox_florin`, and the remaining production guests at zero failures while
-  retiring the legacy control-plane copies from `docker-runtime-lv3`
+  captured the green recap that kept `runtime-control`, `postgres`,
+  `proxmox-host`, and the remaining production guests at zero failures while
+  retiring the legacy control-plane copies from `docker-runtime`
 - the first post-apply verification sweep in
   `receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r1.txt`
   exposed that `configure-runtime-control-pool.md` was still checking the

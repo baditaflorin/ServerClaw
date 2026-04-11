@@ -10,7 +10,7 @@
 - Implemented On: 2026-04-02
 - Live Applied On: 2026-04-02
 - Branch: `codex/ws-0317-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0317-main-integration`
 - Owner: codex
 - Depends On: `adr-0307-temporary-guest-operator-accounts-with-72-hour-expiry`, `adr-0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning`, `adr-0318-repeatable-operator-onboarding-with-cc-audit-trail`
 - Conflicts With: `ws-0318-operator-onboarding-iac`
@@ -43,8 +43,8 @@
 
 ## Expected Live Surfaces
 
-- `https://sso.lv3.org`
-- `https://sso.lv3.org/realms/master/protocol/openid-connect/token`
+- `https://sso.example.com`
+- `https://sso.example.com/realms/master/protocol/openid-connect/token`
 - `ops@100.64.0.1`
 - Keycloak user `matei.busui-tmp`
 

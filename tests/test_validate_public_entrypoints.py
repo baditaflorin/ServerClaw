@@ -56,7 +56,7 @@ def test_validate_public_entrypoints_scans_generated_onboarding_packs(tmp_path: 
     module = load_module("validate_public_entrypoints_onboarding", "scripts/validate_public_entrypoints.py")
     _write_required_entrypoints(tmp_path)
     (tmp_path / "build" / "onboarding" / "agent-core.yaml").write_text(
-        "hostname: proxmox_florin\n",
+        "hostname: proxmox-host\n",
         encoding="utf-8",
     )
 

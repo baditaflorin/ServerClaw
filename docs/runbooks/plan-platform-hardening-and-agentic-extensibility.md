@@ -17,21 +17,21 @@ The two tracks are designed to proceed in parallel. Hardening work does not need
 
 | ADR | Title | Theme |
 |-----|-------|-------|
-| [ADR 0062](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0062-ansible-role-composability-and-dry-defaults.md) | Ansible Role Composability And DRY Defaults | Modularity |
-| [ADR 0063](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0063-centralised-vars-and-computed-facts-library.md) | Centralised Vars And Computed Facts Library | DRY |
-| [ADR 0064](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0064-health-probe-contracts-for-all-services.md) | Health Probe Contracts For All Services | Production Readiness |
-| [ADR 0065](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0065-secret-rotation-automation-with-openbao.md) | Secret Rotation Automation With OpenBao | Security |
-| [ADR 0066](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0066-structured-mutation-audit-log.md) | Structured Mutation Audit Log | Security / Auditability |
-| [ADR 0067](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0067-guest-network-policy-enforcement.md) | Guest Network Policy Enforcement | Security |
-| [ADR 0068](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0068-container-image-policy-and-supply-chain-integrity.md) | Container Image Policy And Supply Chain Integrity | Security / Production Readiness |
+| [ADR 0062](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0062-ansible-role-composability-and-dry-defaults.md) | Ansible Role Composability And DRY Defaults | Modularity |
+| [ADR 0063](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0063-centralised-vars-and-computed-facts-library.md) | Centralised Vars And Computed Facts Library | DRY |
+| [ADR 0064](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0064-health-probe-contracts-for-all-services.md) | Health Probe Contracts For All Services | Production Readiness |
+| [ADR 0065](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0065-secret-rotation-automation-with-openbao.md) | Secret Rotation Automation With OpenBao | Security |
+| [ADR 0066](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0066-structured-mutation-audit-log.md) | Structured Mutation Audit Log | Security / Auditability |
+| [ADR 0067](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0067-guest-network-policy-enforcement.md) | Guest Network Policy Enforcement | Security |
+| [ADR 0068](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0068-container-image-policy-and-supply-chain-integrity.md) | Container Image Policy And Supply Chain Integrity | Security / Production Readiness |
 
 ### Track 2: Agentic Extensibility
 
 | ADR | Title | Theme |
 |-----|-------|-------|
-| [ADR 0069](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0069-agent-tool-registry-and-governed-tool-calls.md) | Agent Tool Registry And Governed Tool Calls | Agentic |
-| [ADR 0070](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0070-rag-context-for-platform-queries.md) | Retrieval-Augmented Context For Platform Queries | Agentic |
-| [ADR 0071](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md) | Agent Observation Loop And Autonomous Drift Detection | Agentic |
+| [ADR 0069](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0069-agent-tool-registry-and-governed-tool-calls.md) | Agent Tool Registry And Governed Tool Calls | Agentic |
+| [ADR 0070](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0070-rag-context-for-platform-queries.md) | Retrieval-Augmented Context For Platform Queries | Agentic |
+| [ADR 0071](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md) | Agent Observation Loop And Autonomous Drift Detection | Agentic |
 
 ---
 
@@ -160,7 +160,7 @@ The combination of a governed tool registry, a grounded retrieval layer, and a p
 Implementation is considered successful when:
 
 - `make validate` enforces argument specs on new roles and detects missing probe contracts
-- a compromised container on `docker-runtime-lv3` cannot reach `postgres-lv3` on any port outside the declared policy
+- a compromised container on `docker-runtime` cannot reach `postgres` on any port outside the declared policy
 - no managed container runs from an unpinned image or an image with a critical CVE
 - every static secret has a rotation record in `secret-catalog.json` with a last-rotated timestamp within its declared period
 - an agent can answer "what changed on the platform in the last 24 hours" by querying the mutation audit log without SSH access

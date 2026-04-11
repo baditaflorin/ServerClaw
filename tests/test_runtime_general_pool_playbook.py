@@ -23,9 +23,9 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "Converge the dedicated runtime-general guest substrate",
         "Refresh monitoring guest firewall policy after the runtime-general peer catalog changes",
         "Ensure the runtime-general Nomad namespace exists",
-        "Converge the operator and support services on runtime-general-lv3",
+        "Converge the operator and support services on runtime-general",
         "Refresh the shared NGINX edge after the runtime-general move",
-        "Retire the legacy support-service copies from docker-runtime-lv3",
+        "Retire the legacy support-service copies from docker-runtime",
     ]
 
     assert playbook[0]["hosts"] == "proxmox_hosts"
@@ -34,7 +34,7 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "lv3.platform.proxmox_network",
     ]
 
-    assert playbook[1]["hosts"] == "runtime-general-lv3"
+    assert playbook[1]["hosts"] == "runtime-general"
     assert playbook[1]["vars"]["runtime_pool_substrate_pool_id"] == "runtime-general"
     pre_task_names = [task["name"] for task in playbook[1]["pre_tasks"]]
     assert "Detect whether Docker is already active before the managed runtime converge" not in pre_task_names
@@ -61,18 +61,18 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
     ]
     assert playbook[1]["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
 
-    assert playbook[3]["hosts"] == "monitoring-lv3"
+    assert playbook[3]["hosts"] == "monitoring"
     assert [role["role"] for role in playbook[3]["roles"]] == ["lv3.platform.nomad_namespace"]
 
-    assert playbook[4]["hosts"] == "runtime-general-lv3"
-    assert playbook[4]["vars"]["runtime_general_legacy_uptime_kuma_host"] == "docker-runtime-lv3"
+    assert playbook[4]["hosts"] == "runtime-general"
+    assert playbook[4]["vars"]["runtime_general_legacy_uptime_kuma_host"] == "docker-runtime"
     assert playbook[4]["vars"]["runtime_general_legacy_uptime_kuma_data_dir"] == "/opt/uptime-kuma/data"
     assert playbook[4]["vars"]["runtime_general_uptime_kuma_restore_marker"] == "/opt/uptime-kuma/.legacy-data-restored"
     pre_task_names = [task["name"] for task in playbook[4]["pre_tasks"]]
     assert "Detect whether runtime-general already restored legacy Uptime Kuma data" in pre_task_names
-    assert "Detect whether legacy Uptime Kuma data exists on docker-runtime-lv3" in pre_task_names
+    assert "Detect whether legacy Uptime Kuma data exists on docker-runtime" in pre_task_names
     assert "Stop the fresh runtime-general Uptime Kuma container before restoring legacy data" in pre_task_names
-    assert "Restore legacy Uptime Kuma data onto runtime-general-lv3" in pre_task_names
+    assert "Restore legacy Uptime Kuma data onto runtime-general" in pre_task_names
     assert "Record that runtime-general restored legacy Uptime Kuma data" in pre_task_names
     assert [role["role"] for role in playbook[4]["roles"]] == [
         "lv3.platform.linux_guest_firewall",
@@ -111,7 +111,7 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         "http://127.0.0.1:3500/v1.0/invoke/http://127.0.0.1:9080/method/uptime-kuma"
     )
 
-    assert playbook[5]["hosts"] == "nginx-lv3"
+    assert playbook[5]["hosts"] == "nginx-edge"
     assert [role["role"] for role in playbook[5]["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.nginx_edge_publication",
@@ -131,7 +131,7 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
         for task in playbook[5]["post_tasks"]
         if task["name"] == "Verify the public status page route through the shared edge"
     )
-    assert status_public_route_task["ansible.builtin.uri"]["url"] == "https://status.lv3.org/"
+    assert status_public_route_task["ansible.builtin.uri"]["url"] == "https://status.example.com/"
     assert status_public_route_task["delegate_to"] == "localhost"
     assert status_public_route_task["become"] is False
     homepage_public_route_task = next(
@@ -157,7 +157,7 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
     assert readiness_task["delegate_to"] == "localhost"
     assert readiness_task["delegate_facts"] is True
 
-    assert playbook[6]["hosts"] == "docker-runtime-lv3"
+    assert playbook[6]["hosts"] == "docker-runtime"
     retirement_assert = next(
         task
         for task in playbook[6]["pre_tasks"]
@@ -169,7 +169,7 @@ def test_runtime_general_pool_playbook_covers_provisioning_substrate_namespace_s
     down_task = next(
         task
         for task in playbook[6]["tasks"]
-        if task["name"] == "Stop the legacy support-service compose stacks on docker-runtime-lv3"
+        if task["name"] == "Stop the legacy support-service compose stacks on docker-runtime"
     )
     assert down_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
 

@@ -3,10 +3,10 @@
 - ADR: [ADR 0295](../adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md)
 - Title: Shared artifact-cache direction for reused container images now and
   npm or PyPI-style package caches later, with a phased path from
-  `docker-build-lv3` to a dedicated cache VM
+  `docker-build` to a dedicated cache VM
 - Status: merged
 - Branch: `codex/ws-0274-artifact-cache-plane`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-artifact-cache-plane`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0274-artifact-cache-plane`
 - Owner: codex
 - Depends On: `adr-0068-container-image-policy`,
   `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`,
@@ -34,7 +34,7 @@
   automation path
 - seed cache warming from the repo's existing image manifests so expected pulls
   are explicit and repeatable
-- keep the long-term path open for a dedicated `artifact-cache-lv3` VM without
+- keep the long-term path open for a dedicated `artifact-cache` VM without
   rewriting protected release truth on this branch
 
 ## Non-Goals
@@ -67,10 +67,10 @@
 
 ## Expected Live Surfaces
 
-- phase 1 is now live on `docker-build-lv3` through
+- phase 1 is now live on `docker-build` through
   `ws-0295-live-apply`, with repo-managed pull-through mirrors on
   `10.10.10.30:5001-5004`
-- the dedicated `artifact-cache-lv3` VM from ADR 0296 still awaits a later
+- the dedicated `artifact-cache` VM from ADR 0296 still awaits a later
   implementation and live-apply step
 
 ## Ownership Notes
@@ -98,7 +98,7 @@
 
 ## Notes For The Next Assistant
 
-- the next implementation step is to add a real `artifact-cache-lv3` guest in
-  inventory and then move the mirror endpoints off `docker-build-lv3`
+- the next implementation step is to add a real `artifact-cache` guest in
+  inventory and then move the mirror endpoints off `docker-build`
 - runtime-host adoption should happen after the dedicated VM exists so cache
   endpoints stop moving underneath consumers

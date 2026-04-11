@@ -12,7 +12,7 @@ This runbook documents ADR 0174: integration-only assembly of the top-level cano
 - `receipts/live-applies/*.json`
 - `docs/adr/*.md`
 - `docs/runbooks/*.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 
 ## Canonical Outputs
 

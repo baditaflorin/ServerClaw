@@ -1,7 +1,7 @@
 # Workstream ADR 0100: RTO/RPO Targets and Disaster Recovery Playbook
 
 - ADR: [ADR 0100](../adr/0100-rto-rpo-targets-and-disaster-recovery-playbook.md)
-- Title: Formal RTO < 4h / RPO < 24h targets, repo-managed DR readiness reporting, and off-site recovery path for `backup-lv3`
+- Title: Formal RTO < 4h / RPO < 24h targets, repo-managed DR readiness reporting, and off-site recovery path for `backup`
 - Status: merged
 - Branch: `codex/adr-0100-dr-playbook`
 - Worktree: `.worktrees/adr-0100`
@@ -44,7 +44,7 @@
 ## Expected Live Surfaces
 
 - the current live platform still shows no off-site storage configured until Storage Box credentials are supplied at apply time
-- `backup-lv3` remains the PBS recovery anchor VM
+- `backup` remains the PBS recovery anchor VM
 - Windmill can seed the repo-managed DR wrapper on the next Windmill converge from `main`
 
 ## Verification
@@ -61,7 +61,7 @@
 - DR targets are machine-readable
 - the repo ships a DR readiness report and operator CLI surface
 - the recovery order matches the current VM layout
-- the backup playbook can optionally converge the off-site `backup-lv3` copy
+- the backup playbook can optionally converge the off-site `backup` copy
 - the ADR and workstream metadata reflect completed repository implementation
 
 ## Notes For The Next Assistant

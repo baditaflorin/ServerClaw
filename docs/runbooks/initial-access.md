@@ -10,13 +10,13 @@ Confirmed working login:
 
 ```bash
 LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
-ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@65.108.75.123
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@203.0.113.1
 ```
 
 Confirmed remote system:
 
 ```text
-Linux Debian-trixie-latest-amd64-base 6.12.63+deb13-amd64
+Linux proxmox-host 6.12.63+deb13-amd64
 ```
 
 The remainder of this document is retained as recovery history and fallback procedure.
@@ -47,7 +47,7 @@ Use Hetzner Rescue System instead:
 Rescue login:
 
 ```bash
-ssh root@65.108.75.123
+ssh root@203.0.113.1
 ```
 
 Notes:
@@ -86,21 +86,21 @@ python3 scripts/materialize_bootstrap_key_alias.py
 Public key value:
 
 ```text
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox-host_server
 ```
 
 Preferred login test with that key:
 
 ```bash
 LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
-ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" root@65.108.75.123
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" root@203.0.113.1
 ```
 
 If your SSH agent is offering other keys first, force this key only:
 
 ```bash
 LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
-ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@65.108.75.123
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@203.0.113.1
 ```
 
 ## Rejected path: VNC install
@@ -110,7 +110,7 @@ As of 2026-03-21, Hetzner VNC installation has been activated for the server and
 VNC endpoint:
 
 ```text
-65.108.75.123:1
+203.0.113.1:1
 ```
 
 This path is currently rejected for this host because it exposed the wrong OS installer.
@@ -126,7 +126,7 @@ Preferred post-install test:
 
 ```bash
 LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"
-ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@65.108.75.123
+ssh -i "${LOCAL_OVERLAY_ROOT}/ssh/bootstrap.id_ed25519" -o IdentitiesOnly=yes root@203.0.113.1
 ```
 
 If the VNC installer does not clearly apply the SSH public key, plan to use Rescue or console immediately after install to place the public key into `/root/.ssh/authorized_keys`.
@@ -157,9 +157,9 @@ Do not proceed until the rescue-driven install explicitly targets Debian 13.
 
 Before the confirmed reboot requirement was known, SSH public-key authentication was rejected for:
 
-- `live@65.108.75.123`
-- `debian@65.108.75.123`
-- `root@65.108.75.123`
+- `live@203.0.113.1`
+- `debian@203.0.113.1`
+- `root@203.0.113.1`
 
 That result is consistent with the server still running the old state before the new install starts.
 
@@ -212,7 +212,7 @@ chmod 600 /root/.ssh/authorized_keys
 Then verify:
 
 ```bash
-ssh -o PreferredAuthentications=publickey root@65.108.75.123
+ssh -o PreferredAuthentications=publickey root@203.0.113.1
 ```
 
 ## Stop point

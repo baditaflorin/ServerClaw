@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-31
 - Merged On: 2026-04-01
 - Branch: `codex/ws-0297-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0297-main-merge`
 - Source Branch: `codex/ws-0297-live-apply-r2`
 - Owner: codex
 

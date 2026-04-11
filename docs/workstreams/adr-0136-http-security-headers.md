@@ -54,5 +54,5 @@
 
 ## Notes For The Next Assistant
 
-- `docs.lv3.org`, `ops.lv3.org`, `grafana.lv3.org`, `uptime.lv3.org`, `status.lv3.org`, and `sso.lv3.org` now have host-specific CSP overrides derived from their current live HTML payloads.
+- `docs.example.com`, `ops.example.com`, `grafana.example.com`, `uptime.example.com`, `status.example.com`, and `sso.example.com` now have host-specific CSP overrides derived from their current live HTML payloads.
 - The live rollout converged from `Check whether the public edge certificate exists` onward after the full `make live-apply-service service=public-edge env=production` path stalled in static-site copy steps inside the integration worktree.

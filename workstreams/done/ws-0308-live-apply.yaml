@@ -39,7 +39,7 @@ shared_surfaces:
 - tests/test_controller_automation_toolkit.py
 - tests/test_common_docker_bridge_chains_helper.py
 - tests/test_docker_runtime_role.py
-- receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+- receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
 - receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json
 - receipts/live-applies/evidence/2026-04-02-ws-0308-*
 ownership_manifest:
@@ -109,7 +109,7 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
     - tests/test_common_docker_bridge_chains_helper.py
     - tests/test_docker_runtime_role.py
-    - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+    - receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
     mode: shared_contract
     contract: ws0308-docker-runtime-guard-v1
   - id: ws0308_adr_index

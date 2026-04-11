@@ -29,22 +29,22 @@ We run Dozzle as a repo-managed hub-and-agent deployment.
 ### Runtime shape
 
 - service id: `dozzle`
-- hub host: `docker-runtime-lv3`
-- agent hosts: `docker-runtime-lv3`, `docker-build-lv3`, `monitoring-lv3`
+- hub host: `docker-runtime`
+- agent hosts: `docker-runtime`, `docker-build`, `monitoring`
 - hub private port: `8089`
 - agent port: `7007`
-- public hostname: `logs.lv3.org`
+- public hostname: `logs.example.com`
 - publication model: shared NGINX edge plus Keycloak-backed oauth2-proxy
 - pinned image: `docker.io/amir20/dozzle:v10.2.0@sha256:35da6eb0ce33dc413d85017877121e82b1626f9247c4fb2acf1f19427cbf47c7`
 
-The hub runs on `docker-runtime-lv3` and aggregates the local agent plus the
-remote agents on `docker-build-lv3` and `monitoring-lv3`. Each agent is bound
+The hub runs on `docker-runtime` and aggregates the local agent plus the
+remote agents on `docker-build` and `monitoring`. Each agent is bound
 only to the private guest network and the repo-managed guest firewall only
 allows the hub host to reach the remote agent port.
 
 ### Access boundary
 
-`logs.lv3.org` is published through the shared NGINX edge and protected by the
+`logs.example.com` is published through the shared NGINX edge and protected by the
 existing oauth2-proxy plus Keycloak browser session from ADR 0133. The Dozzle
 runtime itself does not enable container actions or shell access and remains a
 read-only log surface.
@@ -78,7 +78,7 @@ ad hoc host access.
   long-term evidence remain in Loki.
 - The runtime still depends on Docker socket access on each agent host, so the
   no-actions and no-shell boundary must remain explicit.
-- `logs.lv3.org` depends on the shared NGINX edge and Keycloak gate for the
+- `logs.example.com` depends on the shared NGINX edge and Keycloak gate for the
   preferred operator path, even though the private hub remains reachable on the
   guest network when debugging the service itself.
 
@@ -90,14 +90,14 @@ The production rollout on 2026-03-26 verified:
   passed with `18 passed`
 - `make syntax-check-dozzle`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh health-probes`, and `./scripts/validate_repo.sh alert-rules`
   passed
-- the repo-managed Dozzle playbook converged successfully across `proxmox_florin`,
-  `nginx-lv3`, `docker-runtime-lv3`, `docker-build-lv3`, and `monitoring-lv3`
+- the repo-managed Dozzle playbook converged successfully across `proxmox-host`,
+  `nginx-edge`, `docker-runtime`, `docker-build`, and `monitoring`
   with no failed tasks during the final live apply
 - controller-routed private verification over the Proxmox jump path reached
-  `docker-runtime-lv3`, the hub healthcheck at `http://127.0.0.1:8089/healthcheck`
+  `docker-runtime`, the hub healthcheck at `http://127.0.0.1:8089/healthcheck`
   exited successfully, and `sudo docker exec dozzle /dozzle agent-test
   10.10.10.30:7007` plus `10.10.10.40:7007` both connected successfully
-- `curl -Ik --resolve logs.lv3.org:443:65.108.75.123 https://logs.lv3.org/`
+- `curl -Ik --resolve logs.example.com:443:203.0.113.1 https://logs.example.com/`
   returned `HTTP/2 302` to `/oauth2/sign_in` with the expected shared edge
   security headers
 

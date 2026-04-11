@@ -134,8 +134,8 @@ def test_compose_template_exposes_private_runtime_port_and_model_volume() -> Non
 
 
 def test_host_network_policy_allows_private_ollama_access() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     guest_rule = next(
         rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 11434 in rule["ports"]
     )

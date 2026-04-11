@@ -44,7 +44,7 @@ Each session resolves a stable workspace identity with:
 
 ### Remote build-server isolation
 
-`scripts/remote_exec.sh` now resolves a session workspace before contacting `docker-build-lv3`.
+`scripts/remote_exec.sh` now resolves a session workspace before contacting `docker-build`.
 
 Instead of syncing into one shared checkout, it now uses:
 

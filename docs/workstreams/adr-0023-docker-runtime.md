@@ -1,18 +1,18 @@
 # Workstream ADR 0023: Docker Runtime VM Baseline
 
-- ADR: [ADR 0023](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0023-docker-runtime-vm-baseline.md)
+- ADR: [ADR 0023](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0023-docker-runtime-vm-baseline.md)
 - Title: Docker runtime VM baseline
 - Status: live_applied
 - Branch: `codex/adr-0023-docker-runtime`
-- Worktree: `../proxmox_florin_server-docker-runtime`
+- Worktree: `../proxmox-host_server-docker-runtime`
 - Owner: codex
 - Depends On: none
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `playbooks/docker-runtime.yml`, `roles/docker_runtime`
+- Shared Surfaces: `docker-runtime`, `playbooks/docker-runtime.yml`, `roles/docker_runtime`
 
 ## Scope
 
-- install Docker Engine from Docker's official Debian repository on `docker-runtime-lv3`
+- install Docker Engine from Docker's official Debian repository on `docker-runtime`
 - replace conflicting distro Docker packages when present
 - install the Compose v2 plugin
 - configure Docker daemon defaults for service continuity and bounded log growth
@@ -46,7 +46,7 @@
 
 - `make syntax-check-docker-runtime`
 - `make converge-docker-runtime`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker version && docker compose version && sudo cat /etc/docker/daemon.json'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker version && docker compose version && sudo cat /etc/docker/daemon.json'`
 
 ## Merge Criteria
 

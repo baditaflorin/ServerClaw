@@ -1,7 +1,7 @@
 # Workstream ws-0291-live-apply: Live Apply ADR 0291 From Latest `origin/main`
 
 - ADR: [ADR 0291](../adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
-- Title: Deploy JupyterHub on `docker-runtime-lv3`, publish `notebooks.lv3.org`, and verify the interactive notebook environment end to end
+- Title: Deploy JupyterHub on `docker-runtime`, publish `notebooks.example.com`, and verify the interactive notebook environment end to end
 - Status: live_applied
 - Included In Repo Version: 0.177.111
 - Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json`
@@ -10,16 +10,16 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0291-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0291-live-apply`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secret-injection-pattern`, `adr-0145-ollama`, `adr-0274-minio-as-the-s3-compatible-object-storage-layer`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0291`, `docs/workstreams/ws-0291-live-apply.md`, `docs/runbooks/configure-jupyterhub.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `playbooks/jupyterhub.yml`, `playbooks/services/jupyterhub.yml`, `roles/jupyterhub_runtime/`, `roles/keycloak_runtime/`, `roles/nginx_edge_publication/`, `config/*catalog*.json`, `config/subdomain-exposure-registry.json`, `config/uptime-kuma/monitors.json`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/rules/slo_rules.yml`, `config/grafana/dashboards/slo-overview.json`, `config/ansible-execution-scopes.yaml`, `Makefile`, `scripts/validate_repo.sh`, `receipts/live-applies/`, `tests/`
+- Shared Surfaces: `docs/adr/0291`, `docs/workstreams/ws-0291-live-apply.md`, `docs/runbooks/configure-jupyterhub.md`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `playbooks/jupyterhub.yml`, `playbooks/services/jupyterhub.yml`, `roles/jupyterhub_runtime/`, `roles/keycloak_runtime/`, `roles/nginx_edge_publication/`, `config/*catalog*.json`, `config/subdomain-exposure-registry.json`, `config/uptime-kuma/monitors.json`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/rules/slo_rules.yml`, `config/grafana/dashboards/slo-overview.json`, `config/ansible-execution-scopes.yaml`, `Makefile`, `scripts/validate_repo.sh`, `receipts/live-applies/`, `tests/`
 
 ## Scope
 
-- deploy JupyterHub on `docker-runtime-lv3` with a repo-built hub image, a repo-built single-user image, and OpenBao-rendered runtime secrets
-- publish the browser surface at `https://notebooks.lv3.org` through the shared NGINX edge and verify Keycloak OIDC login handoff
+- deploy JupyterHub on `docker-runtime` with a repo-built hub image, a repo-built single-user image, and OpenBao-rendered runtime secrets
+- publish the browser surface at `https://notebooks.example.com` through the shared NGINX edge and verify Keycloak OIDC login handoff
 - create the dedicated confidential Keycloak client used by JupyterHub browser sign-in
 - expose the exploratory notebook contract inside spawned user servers with Ollama, the private platform-context API, and a service-local shared MinIO bucket
 - verify a repo-managed smoke user through the JupyterHub admin API, including server spawn, environment contract checks, and shutdown cleanup
@@ -35,7 +35,7 @@
 - `docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md`
 - `docs/workstreams/ws-0291-live-apply.md`
 - `docs/runbooks/configure-jupyterhub.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `playbooks/jupyterhub.yml`
@@ -74,8 +74,8 @@
 
 ## Expected Live Surfaces
 
-- JupyterHub runtime, sidecar MinIO, and OpenBao agent on `docker-runtime-lv3`
-- public hostname `notebooks.lv3.org` for browser access and `/hub/health` verification
+- JupyterHub runtime, sidecar MinIO, and OpenBao agent on `docker-runtime`
+- public hostname `notebooks.example.com` for browser access and `/hub/health` verification
 - authenticated gateway prefix `/v1/jupyterhub` for operator API access
 - dedicated Keycloak OIDC client `jupyterhub`
 - controller-local generated artifacts under `.local/jupyterhub/`
@@ -83,13 +83,13 @@
 ## Ownership Notes
 
 - this workstream owns the JupyterHub runtime, the branch-local live-apply evidence, and the notebook-environment contract documentation
-- `docker-runtime-lv3`, `nginx-lv3`, and the shared Keycloak runtime are cross-service live surfaces, so replay must stay inside the governed service workflow and document any narrow in-place exception
+- `docker-runtime`, `nginx-edge`, and the shared Keycloak runtime are cross-service live surfaces, so replay must stay inside the governed service workflow and document any narrow in-place exception
 - protected integration files remain deferred on this branch until the exact-main replay and final merge step
 
 ## Purpose
 
 Implement ADR 0291 by making JupyterHub the repo-managed interactive notebook
-environment on `docker-runtime-lv3`, publishing it at `notebooks.lv3.org`,
+environment on `docker-runtime`, publishing it at `notebooks.example.com`,
 verifying the live spawn contract against current platform services, and leaving
 a complete audit trail for the later exact-main replay.
 
@@ -104,14 +104,14 @@ a complete audit trail for the later exact-main replay.
   captures the branch-local proof from repository baseline `0.177.108` and
   platform baseline `0.130.71`.
 - `make converge-jupyterhub env=production` succeeded on replay `r10` with
-  final recap `docker-runtime-lv3 : ok=279 changed=5 failed=0 skipped=81`,
+  final recap `docker-runtime : ok=279 changed=5 failed=0 skipped=81`,
   `localhost : ok=24 changed=0 failed=0 skipped=4`, and
-  `nginx-lv3 : ok=40 changed=5 failed=0 skipped=6`, preserved in
+  `nginx-edge : ok=40 changed=5 failed=0 skipped=6`, preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0291-jupyterhub-converge-r10.txt`.
 - Direct controller verification confirmed the public health endpoint, the
-  Keycloak OIDC redirect at `https://notebooks.lv3.org/hub/oauth_login`, the
-  shared edge certificate SAN for `notebooks.lv3.org`, and the local JupyterHub,
-  Ollama, and platform-context probes on `docker-runtime-lv3`, preserved in
+  Keycloak OIDC redirect at `https://notebooks.example.com/hub/oauth_login`, the
+  shared edge certificate SAN for `notebooks.example.com`, and the local JupyterHub,
+  Ollama, and platform-context probes on `docker-runtime`, preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0291-direct-verification.txt`.
 
 ## Outcome

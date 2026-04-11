@@ -82,7 +82,7 @@ canonical_truth:
   changelog_entry: hardens runtime-pool retirement and shared-runtime recovery
     so legacy services cannot be retired before destination pools are verified
     and routine Keycloak or OpenBao converges cannot restart Docker on
-    docker-runtime-lv3
+    docker-runtime
   release_bump: patch
   included_in_repo_version: 0.178.1
 blockers: []

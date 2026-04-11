@@ -49,7 +49,7 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` API gateway runtime with repo-managed circuit policies and the packaged gateway `platform`, `config`, plus `scripts` surfaces required by the live circuit-aware startup path
+- `docker-runtime` API gateway runtime with repo-managed circuit policies and the packaged gateway `platform`, `config`, plus `scripts` surfaces required by the live circuit-aware startup path
 
 ## Verification
 
@@ -69,4 +69,4 @@
 
 - repository implementation is complete in release `0.152.0`
 - the circuit layer now protects Keycloak JWKS fetches, gateway upstream calls, NATS request-event publishing, the shared LLM client, and the Windmill scheduler and runbook executor paths
-- live apply completed on `docker-runtime-lv3` in platform version `0.130.5` with receipt `2026-03-25-adr-0164-circuit-breaker-live-apply`
+- live apply completed on `docker-runtime` in platform version `0.130.5` with receipt `2026-03-25-adr-0164-circuit-breaker-live-apply`

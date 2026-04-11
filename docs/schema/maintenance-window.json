@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/maintenance-window.json",
+  "$id": "https://example.com/schema/maintenance-window.json",
   "title": "Maintenance Window",
   "type": "object",
   "additionalProperties": false,

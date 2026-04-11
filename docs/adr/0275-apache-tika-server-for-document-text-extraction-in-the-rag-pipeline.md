@@ -35,7 +35,7 @@ service for the RAG and memory pipelines.
 
 ### Deployment rules
 
-- Tika runs as a Docker Compose service on the `runtime-ai-lv3` guest
+- Tika runs as a Docker Compose service on the `runtime-ai` guest
 - It is internal-only; no NGINX route or public subdomain is issued for it
 - The service exposes the standard `/tika` and `/meta` REST endpoints on the
   guest network

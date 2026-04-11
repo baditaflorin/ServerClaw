@@ -17,7 +17,7 @@ python3 scripts/certificate_validator.py --check-all
 
 ### Check a specific domain
 ```bash
-python3 scripts/certificate_validator.py --fqdn ci.lv3.org
+python3 scripts/certificate_validator.py --fqdn ci.example.com
 ```
 
 ### JSON output for parsing
@@ -27,14 +27,14 @@ python3 scripts/certificate_validator.py --json
 
 ## Common Issues & Fixes
 
-### Issue: "net::ERR_CERT_COMMON_NAME_INVALID" (e.g., ci.lv3.org)
+### Issue: "net::ERR_CERT_COMMON_NAME_INVALID" (e.g., ci.example.com)
 
 **Root Cause**: The subdomain is not included in the NGINX edge certificate.
 
 **Fix**:
 ```bash
 # 1. Verify the service is in subdomain-catalog.json
-grep '"ci.lv3.org"' config/subdomain-catalog.json
+grep '"ci.example.com"' config/subdomain-catalog.json
 
 # 2. Force certificate renewal for all edge-published domains
 make converge-nginx-edge env=production
@@ -47,7 +47,7 @@ sudo certbot renew --force-renewal --cert-name lv3-edge
 sudo systemctl restart nginx
 
 # 5. Verify the fix
-python3 scripts/certificate_validator.py --fqdn ci.lv3.org
+python3 scripts/certificate_validator.py --fqdn ci.example.com
 ```
 
 ### Issue: "Certificate expires in X days" (Expiring Soon)
@@ -94,10 +94,10 @@ python3 scripts/certificate_validator.py --check-all
 **Fix**:
 ```bash
 # 1. Check subdomain-catalog.json
-jq '.subdomains[] | select(.fqdn=="domain.lv3.org")' config/subdomain-catalog.json
+jq '.subdomains[] | select(.fqdn=="domain.example.com")' config/subdomain-catalog.json
 
 # 2. Verify exposure is "edge-published" or "edge-static"
-jq '.subdomains[] | select(.fqdn=="domain.lv3.org") | .exposure' config/subdomain-catalog.json
+jq '.subdomains[] | select(.fqdn=="domain.example.com") | .exposure' config/subdomain-catalog.json
 
 # 3. If not in catalog, add it:
 # Edit config/subdomain-catalog.json and add the subdomain entry with:
@@ -113,14 +113,14 @@ jq '.subdomains[] | select(.fqdn=="domain.lv3.org") | .exposure' config/subdomai
 make converge-nginx-edge env=production
 
 # 6. Verify
-python3 scripts/certificate_validator.py --fqdn domain.lv3.org
+python3 scripts/certificate_validator.py --fqdn domain.example.com
 ```
 
 ## Monitoring Setup
 
 ### Uptime Kuma Integration
 
-Certificate expiration is monitored via Uptime Kuma monitors at https://uptime.lv3.org
+Certificate expiration is monitored via Uptime Kuma monitors at https://uptime.example.com
 
 Checks are configured for:
 - HTTP status of each domain
@@ -167,7 +167,7 @@ openssl x509 -in /etc/letsencrypt/live/lv3-edge/cert.pem -text -noout | grep "Su
 
 ### Verify certificate served by NGINX
 ```bash
-openssl s_client -connect 65.108.75.123:443 -servername ci.lv3.org < /dev/null | openssl x509 -text -noout | grep -A10 "Subject Alternative Name"
+openssl s_client -connect 203.0.113.1:443 -servername ci.example.com < /dev/null | openssl x509 -text -noout | grep -A10 "Subject Alternative Name"
 ```
 
 ## Certificate Renewal Process
@@ -236,6 +236,6 @@ sudo tail -f /var/log/nginx/error.log | grep ssl
 ## Contact
 
 For certificate issues:
-- Check Alertmanager at https://alerts.lv3.org
-- Review logs in Dozzle at https://logs.lv3.org
+- Check Alertmanager at https://alerts.example.com
+- Review logs in Dozzle at https://logs.example.com
 - Escalate to platform team via Git issue

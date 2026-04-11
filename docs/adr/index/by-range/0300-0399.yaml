@@ -897,7 +897,7 @@ adrs:
       - dedicated
       - vm
       - separation
-    summary: We introduce a second dedicated guest, coolify-apps-lv3 (proposed VMID 171,
+    summary: We introduce a second dedicated guest, coolify-apps (proposed VMID 171,
     filename: 0340-dedicated-coolify-apps-vm-separation.md
     path: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
     implemented_in_repo_version: 0.177.153
@@ -1143,7 +1143,7 @@ adrs:
       - runtime
       - workload
       - split
-    summary: Split docker-runtime-lv3 into three purpose-scoped VMs aligned to workload
+    summary: Split docker-runtime into three purpose-scoped VMs aligned to workload
     filename: 0347-docker-runtime-workload-split.md
     path: docs/adr/0347-docker-runtime-workload-split.md
     implemented_in_repo_version: 0.179.0
@@ -1425,7 +1425,7 @@ adrs:
       - scheduler
       - auth
       - publication
-    summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
+    summary: Publish the Nomad UI on the public edge at scheduler.example.com without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0361'
@@ -1674,7 +1674,7 @@ adrs:
       - health
       - reliability
       - core
-    summary: 'runtime-control-lv3 retains only the four identity-core services:'
+    summary: 'runtime-control retains only the four identity-core services:'
     filename: 0376-identity-core-vm-isolation-and-watchdog.md
     path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
   - adr: '0377'
@@ -1738,7 +1738,7 @@ adrs:
       - recovery
       - automation
     summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
-      .lv3.org.
+      .example.com.
     filename: 0381-login-service-contracts-and-session-recovery-automation.md
     path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
   - adr: 0382
@@ -1804,7 +1804,7 @@ adrs:
     filename: 0385-ioc-library-refactor.md
     path: docs/adr/0385-ioc-library-refactor.md
   - adr: 0385
-    title: MemPalace Integration with chat.lv3.org
+    title: MemPalace Integration with chat.example.com
     status: Proposed
     implementation_status: Proposed
     date: '2026-03-21'
@@ -1815,8 +1815,8 @@ adrs:
       - chat
       - lv3
       - org
-    summary: Implement unified cross-interface memory by connecting chat.lv3.org to MemPalace, enabling both Claude Code and
-      chat.lv3.org users to access a shared memory poo
+    summary: Implement unified cross-interface memory by connecting chat.example.com to MemPalace, enabling both Claude Code and
+      chat.example.com users to access a shared memory poo
     filename: 0385-mempalace-chat-lv3-integration.md
     path: docs/adr/0385-mempalace-chat-lv3-integration.md
   - adr: 0386

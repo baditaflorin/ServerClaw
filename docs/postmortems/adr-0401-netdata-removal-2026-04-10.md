@@ -163,15 +163,15 @@ the nginx CSP entry for `realtime.{{ platform_domain }}` is owned by `realtime`.
 
 | File | What happened |
 |------|--------------|
-| `inventory/host_vars/proxmox_florin.yml` | `netdata_port` at line 33, `lv3_service_topology.realtime` block at line 2111 — both needed targeted removal |
+| `inventory/host_vars/proxmox-host.yml` | `netdata_port` at line 33, `lv3_service_topology.realtime` block at line 2111 — both needed targeted removal |
 | `inventory/group_vars/platform.yml` | 3 × `netdata_port: 19999` lines — simple line filter worked |
 
-**For `proxmox_florin.yml`:** The topology block was a 23-line YAML structure.
+**For `proxmox-host.yml`:** The topology block was a 23-line YAML structure.
 The decommission script's text-match would have removed only the `realtime:` key
 line, leaving the body as orphaned content. Required agent to read structure and
 remove the correct range.
 
-**CPU-only fix:** `lv3_service_topology` entries in `proxmox_florin.yml` follow
+**CPU-only fix:** `lv3_service_topology` entries in `proxmox-host.yml` follow
 the exact same structure as the catalog entries. Adding
 `config/service-topology.json` (or treating the topology block as a catalog
 with `id_field: service_name`) would make this removal deterministic.
@@ -240,7 +240,7 @@ markers. A `generate_https_tls_config.py` script that reads from
   should generate their expected values from the catalogs at test time:
   ```python
   from config_loaders import load_protected_sites
-  assert "realtime.lv3.org" not in load_protected_sites()
+  assert "realtime.example.com" not in load_protected_sites()
   ```
   This makes the test self-updating when a service is removed. No test edit
   needed at decommission time.
@@ -313,7 +313,7 @@ ADR 0393 identified three gaps. ADR 0396 fixed all three. This removal exposed
 | Role-internal vars/templates not linked to service | Not seen | monitoring_vm defaults + template | Inline service markers |
 | YAML TLS files not generated (no block markers) | Not seen | https_tls_alerts.yml | Generation coverage |
 | Cross-service test assertions | Partial | nginx_edge test, platform_vars test | Catalog-driven test generation |
-| Inventory topology block | Partial | proxmox_florin.yml | Topology as catalog |
+| Inventory topology block | Partial | proxmox-host.yml | Topology as catalog |
 
 ---
 
@@ -410,11 +410,11 @@ immediate failure with a clear error. Corrupt files would trigger a
 
 ### Amendment 7: Topology Block as Catalog
 
-The `lv3_service_topology` section in `inventory/host_vars/proxmox_florin.yml`
+The `lv3_service_topology` section in `inventory/host_vars/proxmox-host.yml`
 is effectively a catalog. Add a new CATALOG_REGISTRY entry type:
 
 ```python
-{"path": "inventory/host_vars/proxmox_florin.yml",
+{"path": "inventory/host_vars/proxmox-host.yml",
  "type": "yaml_topology_block",
  "list_key": "lv3_service_topology"}
 ```
@@ -434,7 +434,7 @@ The block is a simple top-level key deletion — no structural reasoning needed.
 | 4. Inline `# SERVICE:` markers | Role vars/templates | +3 role edits |
 | 5. Generate https_tls files | YAML corruption | +1 YAML file |
 | 6. Post-purge validation | Early corruption detection | Prevents 2 git restores |
-| 7. Topology as catalog | proxmox_florin.yml block | +1 inventory edit |
+| 7. Topology as catalog | proxmox-host.yml block | +1 inventory edit |
 | **Total if applied** | | **~95% CPU-only** |
 
 The remaining ~5% would be: judgment calls on whether gaps in Prometheus/Grafana

@@ -54,7 +54,7 @@ canonical_truth:
   changelog_entry: hardens shared docker-runtime bridge-chain checks so missing
     DOCKER and DOCKER-FORWARD chains fail safe before a host-wide Docker
     restart, records ADR 0329, and adds the runtime bridge-chain loss runbook
-    used to diagnose the 2026-04-01 uptime incident on docker-runtime-lv3
+    used to diagnose the 2026-04-01 uptime incident on docker-runtime
   release_bump: patch
   included_in_repo_version: 0.177.136
 blockers: []

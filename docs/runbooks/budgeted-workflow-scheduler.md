@@ -15,13 +15,13 @@ ADR 0157 adds per-lane resource reservations. Mutation workflows now declare CPU
 
 ## Canonical Sources
 
-- scheduler package: [platform/scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler)
-- workflow defaults: [config/workflow-defaults.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-defaults.yaml)
-- workflow catalog budgets: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-- execution lanes: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml)
-- watchdog entry point: [windmill/scheduler/watchdog-loop.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/windmill/scheduler/watchdog-loop.py)
-- Windmill seed defaults: [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml)
-- timeout hierarchy: [config/timeout-hierarchy.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/timeout-hierarchy.yaml)
+- scheduler package: [platform/scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler)
+- workflow defaults: [config/workflow-defaults.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-defaults.yaml)
+- workflow catalog budgets: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+- execution lanes: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/execution-lanes.yaml)
+- watchdog entry point: [windmill/scheduler/watchdog-loop.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/windmill/scheduler/watchdog-loop.py)
+- Windmill seed defaults: [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml)
+- timeout hierarchy: [config/timeout-hierarchy.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/timeout-hierarchy.yaml)
 
 ## Operator Paths
 
@@ -86,14 +86,14 @@ make execution-lane-info LANE=lane:docker-runtime
 - Without a ledger DSN, the scheduler falls back to repo-local file locks under `.local/scheduler/locks/`.
 - The watchdog heartbeat is written to `.local/scheduler/watchdog-heartbeat.json`.
 - Recent self-healing actions are tracked in `.local/scheduler/watchdog-actions.json`.
-- Windmill worker helpers first look for `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN` in the rendered runtime env, then fall back to `/proc/1/environ`, then to `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt` on the mirrored worker checkout.
+- Windmill worker helpers first look for `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN` in the rendered runtime env, then fall back to `/proc/1/environ`, then to `/srv/proxmox-host_server/.local/windmill/superadmin-secret.txt` on the mirrored worker checkout.
 
 ## Live Verification
 
 - 2026-03-27 latest-main live verification confirmed `f/lv3/windmill_healthcheck`, `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` all returned `status: ok` through the controller-side helper that submits the workflow and polls `jobs_u/get/<job_id>`.
 - The enabled scheduler surfaces were rechecked after the latest-main replay: `f/lv3/intent_queue_dispatcher_every_minute`, `f/lv3/lane_scheduler_every_2s`, `f/lv3/scheduler_watchdog_every_30s`, and `f/lv3/scheduler_watchdog_loop_every_10s`.
 - The live Windmill API script bodies for `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` now match the checked-in branch sources byte-for-byte after the duplicate seed-path contract was removed from the Windmill defaults.
-- The worker runtime env on `docker-runtime-lv3` now includes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and the mirrored worker secret file exists at `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt`.
+- The worker runtime env on `docker-runtime` now includes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and the mirrored worker secret file exists at `/srv/proxmox-host_server/.local/windmill/superadmin-secret.txt`.
 
 ## Troubleshooting
 

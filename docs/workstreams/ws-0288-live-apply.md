@@ -10,7 +10,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0288-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0288-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0021`, `adr-0023`, `adr-0042`, `adr-0077`, `adr-0086`
 - Conflicts With: none
@@ -27,7 +27,7 @@
 - `docs/workstreams/ws-0288-live-apply.md`
 - `docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md`
 - `docs/runbooks/configure-flagsmith.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
@@ -92,21 +92,21 @@
 - The focused runtime replay on the settled branch completed successfully in
   `receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-runtime-focused-r13.txt`
   with final recap
-  `docker-runtime-lv3 : ok=73 changed=0 unreachable=0 failed=0 skipped=29 rescued=0 ignored=0`.
+  `docker-runtime : ok=73 changed=0 unreachable=0 failed=0 skipped=29 rescued=0 ignored=0`.
 - The governed production replay
   `HETZNER_DNS_API_TOKEN=... make converge-flagsmith env=production` succeeded
   in
   `receipts/live-applies/evidence/2026-03-30-ws-0288-converge-flagsmith-r2.txt`
-  with final recaps `docker-runtime-lv3 : ok=171 changed=2 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`,
+  with final recaps `docker-runtime : ok=171 changed=2 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`,
   `localhost : ok=23 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`,
-  `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
-  and `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`.
+  `nginx-edge : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
+  and `postgres : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`.
 - Public verification succeeded after the governed replay:
-  `curl -fsS https://flags.lv3.org/health` returned the Flagsmith system status
-  page, `curl -I https://flags.lv3.org/` and
-  `curl -I https://flags.lv3.org/api/v1/projects/` both redirected to the
+  `curl -fsS https://flags.example.com/health` returned the Flagsmith system status
+  page, `curl -I https://flags.example.com/` and
+  `curl -I https://flags.example.com/api/v1/projects/` both redirected to the
   shared oauth2-proxy sign-in flow, and a guest-local
-  `curl -fsS http://127.0.0.1:8017/health` on `docker-runtime-lv3` returned the
+  `curl -fsS http://127.0.0.1:8017/health` on `docker-runtime` returned the
   same status page.
 - The correction loop evidence from
   `receipts/live-applies/evidence/2026-03-30-ws-0288-flagsmith-featurestate-debug-r7.txt`,
@@ -116,7 +116,7 @@
   feature values, and the Docker bridge-chain/runtime recovery work that had
   to land before the replay settled.
 - During the correction loop a manual Hetzner DNS API create was used to add
-  the `flags.lv3.org` A record, but the settled repository converge now treats
+  the `flags.example.com` A record, but the settled repository converge now treats
   the canonical record as managed and drift-free, with both DNS tasks skipped
   because no change is required.
 - The exact-main integration lane then carried ADR 0288 onto the shared

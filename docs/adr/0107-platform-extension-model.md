@@ -55,7 +55,7 @@ Every new service must complete the following before it is considered a first-cl
 make scaffold-service \
   NAME=my-service \
   TYPE=compose \
-  VM=docker-runtime-lv3 \
+  VM=docker-runtime \
   DEPENDS_ON=postgres,keycloak \
   OIDC=true
 ```
@@ -71,7 +71,7 @@ roles/my_service_runtime/
 
 config/service-capability-catalog.json  [patched: my-service entry added]
 config/health-probe-catalog.json        [patched: my-service probe added]
-config/subdomain-catalog.json           [patched: my-service.lv3.org added]
+config/subdomain-catalog.json           [patched: my-service.example.com added]
 config/api-gateway-catalog.json         [patched: /v1/my-service route added]
 config/dependency-graph.json            [patched: stub edges for postgres, keycloak]
 config/secret-catalog.json              [patched: my-service secrets stub]

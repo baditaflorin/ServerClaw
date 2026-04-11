@@ -37,7 +37,7 @@ shared_surfaces:
 - playbooks/services/runtime-control-pool.yml
 - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2
 - inventory/hosts.yml
-- inventory/host_vars/proxmox_florin.yml
+- inventory/host_vars/proxmox-host.yml
 - inventory/group_vars/platform.yml
 - config/capacity-model.json
 - config/runtime-pool-autoscaling.json
@@ -93,7 +93,7 @@ ownership_manifest:
     - playbooks/runtime-control-pool.yml
     - playbooks/services/runtime-control-pool.yml
     - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2
-    - inventory/host_vars/proxmox_florin.yml
+    - inventory/host_vars/proxmox-host.yml
     - inventory/group_vars/platform.yml
     - config/capacity-model.json
     - config/runtime-pool-autoscaling.json

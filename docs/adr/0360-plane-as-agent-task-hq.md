@@ -34,7 +34,7 @@ one is doing a live-apply, one is stuck on a failing test." Agents cannot assign
 sub-tasks to other agents or leave notes that survive their session. Humans
 cannot add a task to an active agent session without committing a file to git.
 
-The Plane instance at `tasks.lv3.org` (ADR 0193) is currently used only for the
+The Plane instance at `tasks.example.com` (ADR 0193) is currently used only for the
 ADR synchronization project. It is a capable task board sitting mostly idle
 while the real operational picture lives scattered across shell sessions and YAML
 files.
@@ -66,7 +66,7 @@ active work do not pollute each other.
 Each Claude Code worktree session is identified by its **worktree name**
 (e.g. `pensive-heyrovsky`, `ws-0360-main-merge`). This becomes the issue title
 prefix. Because Plane issues can have assignees, a shared automation user
-(`lv3-automation@lv3.org`) owns all agent-created issues. The worktree name
+(`lv3-automation@example.com`) owns all agent-created issues. The worktree name
 distinguishes sessions; assignee ownership is uniform across all automated
 work.
 
@@ -190,7 +190,7 @@ convention alone.
   negligible, but it is a new dependency.
 - If Plane is down or unreachable, the tracking layer degrades gracefully but
   humans lose visibility. The mitigation is the workstream YAML fallback and
-  the Uptime Kuma monitor on `tasks.lv3.org`.
+  the Uptime Kuma monitor on `tasks.example.com`.
 - The `plane_issue_id` field in workstream YAML creates a soft coupling between
   git state and Plane state. Over time, stale `Done` issues in Plane may not
   match merged branches if the sync script is not run on close. The `--repair`

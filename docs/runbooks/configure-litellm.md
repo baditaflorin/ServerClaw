@@ -2,7 +2,7 @@
 
 ## Overview
 
-LiteLLM Proxy provides an OpenAI-compatible API gateway on `docker-runtime-lv3:4000`, replacing One API.
+LiteLLM Proxy provides an OpenAI-compatible API gateway on `docker-runtime:4000`, replacing One API.
 
 ## Deployment
 
@@ -30,5 +30,5 @@ curl -fsS -H "Authorization: Bearer $(cat .local/litellm/master-key.txt)" http:/
 
 ## Troubleshooting
 
-- Check container logs: `ssh docker-runtime-lv3 docker logs litellm`
-- Check PostgreSQL: `ssh postgres-vm-lv3 sudo -u postgres psql -d litellm -c '\dt'`
+- Check container logs: `ssh docker-runtime docker logs litellm`
+- Check PostgreSQL: `ssh postgres-vm sudo -u postgres psql -d litellm -c '\dt'`

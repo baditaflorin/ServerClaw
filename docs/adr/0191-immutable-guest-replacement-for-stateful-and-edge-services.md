@@ -105,11 +105,11 @@ These updates make the repo-side contract explicit before a full guest replaceme
 - `make immutable-guest-replacement-plan service=grafana`
 - `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grafana`
 - `make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'`
-- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview`
+- `curl -Ik --resolve grafana.example.com:443:203.0.113.1 https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview`
 
 The guard now fails closed for governed services. On 2026-03-27 the explicit preflight check for `grafana` returned exit code `2` and instructed the operator to use the replacement planner or acknowledge the narrow in-place exception with `ALLOW_IN_PLACE_MUTATION=true`.
 
-The bounded production replay with the documented exception completed successfully on `monitoring-lv3` with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`. The public Grafana route still returned `HTTP/2 302` to `/login`, and the local health endpoints for Grafana, Prometheus, Alertmanager, Blackbox Exporter, and Tempo all remained healthy after the replay.
+The bounded production replay with the documented exception completed successfully on `monitoring` with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`. The public Grafana route still returned `HTTP/2 302` to `/login`, and the local health endpoints for Grafana, Prometheus, Alertmanager, Blackbox Exporter, and Tempo all remained healthy after the replay.
 
 The repository integration for this ADR landed on `main` in repo version `0.177.13` on 2026-03-28. `versions/stack.yaml` keeps platform version `0.130.31` because the live verification happened from the ADR workstream branch rather than from a fresh post-merge `main` replay.
 

@@ -42,7 +42,7 @@ def merge_repo(tmp_path: Path) -> dict[str, object]:
             "schema_version": "1.0.0",
             "subdomains": [
                 {
-                    "fqdn": "grafana.lv3.org",
+                    "fqdn": "grafana.example.com",
                     "service_id": "grafana",
                 }
             ],

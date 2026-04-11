@@ -50,7 +50,7 @@ images that are already in the approved catalog.
 ### Warm-cache behavior
 
 The platform will maintain warm copies of expected images on the build and
-deployment lanes that need them, starting with `coolify-lv3` and any future
+deployment lanes that need them, starting with `coolify` and any future
 remote build workers.
 
 The cache workflow must:
@@ -62,7 +62,7 @@ The cache workflow must:
 
 ### Implemented slice
 
-The implemented live slice now exists on `coolify-lv3`:
+The implemented live slice now exists on `coolify`:
 
 - the approved repo-deploy base-image profile catalog is committed and
   validated in repo automation

@@ -26,15 +26,15 @@ These three files must stay aligned:
 ### Production
 
 - status: `active`
-- public hostname pattern: `*.lv3.org`
-- edge path: shared NGINX edge on `nginx-lv3`
+- public hostname pattern: `*.example.com`
+- edge path: shared NGINX edge on `nginx-edge`
 - purpose: live operator and platform surfaces
 
 ### Staging
 
 - status: `planned`
-- public hostname pattern: `*.staging.lv3.org`
-- edge path: same shared NGINX edge on `nginx-lv3`
+- public hostname pattern: `*.staging.example.com`
+- edge path: same shared NGINX edge on `nginx-edge`
 - purpose: pre-production validation for selected services
 
 ## Isolation Rules
@@ -59,7 +59,7 @@ Allowed shared infrastructure in the current topology:
 1. Add or update the service in `config/service-capability-catalog.json`.
 2. Add a `staging` binding under `service.environments`.
 3. Add the staged hostname to `config/subdomain-catalog.json` with `environment: staging`.
-4. Keep the staged hostname under `*.staging.lv3.org`.
+4. Keep the staged hostname under `*.staging.example.com`.
 5. If the service needs different environment-wide rules, update `config/environment-topology.json`.
 6. Run:
 

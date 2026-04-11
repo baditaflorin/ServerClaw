@@ -24,7 +24,7 @@ It is the single document you need to read.
 If you just want to try the platform locally without a server:
 
 ```bash
-git clone <repo-url> && cd proxmox_florin_server
+git clone <repo-url> && cd proxmox-host_server
 make init-local              # Generate SSH keys and secrets
 make docker-dev-up           # Start 4 containers (8 GB RAM)
 make docker-dev-converge     # Deploy services via Ansible
@@ -40,7 +40,7 @@ See `docker-dev/README.md` for details.
 
 ```bash
 # Clone the repo
-git clone <repo-url> && cd proxmox_florin_server
+git clone <repo-url> && cd proxmox-host_server
 
 # Install git hooks and dependencies
 make setup

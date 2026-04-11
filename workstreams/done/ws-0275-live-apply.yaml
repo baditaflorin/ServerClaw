@@ -36,7 +36,7 @@ shared_surfaces:
 - receipts/live-applies/evidence/*ws-0275*
 - receipts/restic-backups/20260403T063547Z.json
 - receipts/restic-snapshots-latest.json
-- receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
+- receipts/sbom/host-runtime-ai-2026-04-03.cdx.json
 ownership_manifest:
   owned_surfaces:
   - id: workstream_registry
@@ -93,7 +93,7 @@ ownership_manifest:
     - receipts/live-applies/evidence/*ws-0275*
     - receipts/restic-backups/20260403T063547Z.json
     - receipts/restic-snapshots-latest.json
-    - receipts/sbom/host-runtime-ai-lv3-2026-04-03.cdx.json
+    - receipts/sbom/host-runtime-ai-2026-04-03.cdx.json
     mode: shared_contract
     contract: live-apply-receipts-v1
 blockers: []
@@ -102,7 +102,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: refreshes ADR 0275 on the latest exact mainline by replacing the
     shared runtime-ai pool receipt with a dedicated Apache Tika receipt, re-verifying
-    the private extraction path on runtime-ai-lv3, and aligning the document-runtime
+    the private extraction path on runtime-ai, and aligning the document-runtime
     validation tests with the syntax-check-safe host selection contract
   release_bump: patch
   included_in_repo_version: 0.177.151

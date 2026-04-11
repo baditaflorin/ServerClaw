@@ -24,7 +24,7 @@ def test_plausible_runtime_defaults_reference_service_topology_images_and_local_
 
     assert (
         defaults["plausible_service_topology"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('plausible') }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('plausible') }}"
     )
     assert (
         defaults["plausible_internal_port"]
@@ -49,7 +49,7 @@ def test_plausible_runtime_defaults_reference_service_topology_images_and_local_
     assert defaults["plausible_mailbox_password_local_file"] == "{{ mail_platform_mailbox_password_local_file }}"
     assert (
         defaults["plausible_site_registrations"]
-        == "{{ hostvars['proxmox_florin'].plausible_site_registrations | default([]) }}"
+        == "{{ hostvars['proxmox-host'].plausible_site_registrations | default([]) }}"
     )
 
 

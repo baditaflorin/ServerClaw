@@ -12,7 +12,7 @@ concern: networking
 total_adrs: 27
 adrs:
   - adr: '0015'
-    title: lv3.org DNS And Subdomain Model
+    title: example.com DNS And Subdomain Model
     status: Accepted
     implementation_status: Accepted
     date: '2026-03-21'
@@ -23,7 +23,7 @@ adrs:
       - dns
       - subdomain
       - model
-    summary: We will use named subdomains under lv3.org for platform entry points.
+    summary: We will use named subdomains under example.com for platform entry points.
     filename: 0015-lv3-org-dns-and-subdomain-model.md
     path: docs/adr/0015-lv3-org-dns-and-subdomain-model.md
     implemented_in_platform_version: 0.5.0

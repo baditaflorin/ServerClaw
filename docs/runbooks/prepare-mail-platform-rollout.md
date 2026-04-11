@@ -10,10 +10,10 @@ It exists so the next assistant can turn the mail decision into automation witho
 
 The target mail stack is:
 
-- primary mail server: Stalwart on `docker-runtime-lv3`
+- primary mail server: Stalwart on `docker-runtime`
 - local submission relay: Postfix sidecar on the same runtime host
 - management surface: Stalwart REST API with scoped API keys
-- observability surface: Grafana dashboard on `monitoring-lv3`
+- observability surface: Grafana dashboard on `monitoring`
 - fallback delivery: secondary relay route for queued outbound messages
 
 ## Preconditions
@@ -23,7 +23,7 @@ Before implementation starts, confirm:
 1. the Docker runtime VM still remains the correct home for stateful containerized services
 2. the monitoring VM still uses Grafana plus InfluxDB as the shared dashboard path
 3. no other active workstream is already changing SMTP NAT, DNS publication, or Docker runtime network exposure
-4. the chosen mail hostname, MX hostnames, and admin hostname do not conflict with the existing `lv3.org` publication model
+4. the chosen mail hostname, MX hostnames, and admin hostname do not conflict with the existing `example.com` publication model
 
 ## Required Design Inputs
 

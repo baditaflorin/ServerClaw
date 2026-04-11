@@ -160,7 +160,7 @@ The first temporary account created under this ADR is `florin-tmp-001` in `confi
 
 - Provisioned: 2026-03-31
 - Expires: 2026-04-03T00:00:00Z (72 hours)
-- Email: florin@badita.org
+- Email: operator@example.com
 - Role: `admin` — full login access to Keycloak SSO, Grafana, OpenBao, Tailscale, and SSH (once a public key is added)
 
 To offboard when the 72-hour window closes:

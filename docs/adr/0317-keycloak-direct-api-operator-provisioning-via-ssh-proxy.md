@@ -24,7 +24,7 @@ When you arrive at this repository and need to provision a Keycloak user, run th
 ssh -i .local/ssh/hetzner_llm_agents_ed25519 ops@100.64.0.1 "echo ok"
 
 # 2. Keycloak admin API works?
-curl -sk https://sso.lv3.org/realms/master/protocol/openid-connect/token \
+curl -sk https://sso.example.com/realms/master/protocol/openid-connect/token \
   -d "client_id=admin-cli&grant_type=password&username=lv3-bootstrap-admin&password=$(cat .local/keycloak/bootstrap-admin-password.txt | python3 -c 'import sys,urllib.parse; print(urllib.parse.quote(sys.stdin.read().strip()))')" \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print('OK, expires_in:', d.get('expires_in'))"
 ```
@@ -40,21 +40,21 @@ shared repository root rather than the worktree path. The repo-managed
 
 | Item | Value |
 |---|---|
-| Keycloak public URL | `https://sso.lv3.org` |
+| Keycloak public URL | `https://sso.example.com` |
 | Admin bootstrap username | `lv3-bootstrap-admin` |
 | Admin bootstrap password file | `.local/keycloak/bootstrap-admin-password.txt` |
 | Target realm | `lv3` |
 | Token TTL | **60 seconds** — get a fresh token for every curl call |
 | SSH proxy host | `ops@100.64.0.1` via `.local/ssh/hetzner_llm_agents_ed25519` |
 | Transactional SMTP | `10.10.10.20:587`, login `platform`, password `.local/mail-platform/profiles/platform-transactional-mailbox-password.txt` |
-| Sender address | `platform@lv3.org` |
+| Sender address | `platform@example.com` |
 | Existing user passwords | `.local/keycloak/<username>-password.txt` (check here before generating new) |
 
 **Why `admin-cli` only works in the master realm:** `admin-cli` is a public client in `master`
 but not in `lv3`. Use the master-realm token to call `/admin/realms/lv3/` endpoints.
 
 **Why Windmill redirects:** Windmill is configured with Keycloak OIDC SSO — its `/api/auth/login`
-endpoint returns 302 to `sso.lv3.org`, blocking programmatic API access without a browser flow.
+endpoint returns 302 to `sso.example.com`, blocking programmatic API access without a browser flow.
 
 ## Decision
 
@@ -73,7 +73,7 @@ ls .local/keycloak/ | grep "<username>"
 ### Step 1 — Acquire admin token (60-second TTL)
 
 ```bash
-TOKEN=$(curl -sk https://sso.lv3.org/realms/master/protocol/openid-connect/token \
+TOKEN=$(curl -sk https://sso.example.com/realms/master/protocol/openid-connect/token \
   -d "client_id=admin-cli&grant_type=password&username=lv3-bootstrap-admin&password=$(cat .local/keycloak/bootstrap-admin-password.txt | python3 -c 'import sys,urllib.parse; print(urllib.parse.quote(sys.stdin.read().strip()))')" \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 ```
@@ -85,7 +85,7 @@ TOKEN=$(curl -sk https://sso.lv3.org/realms/master/protocol/openid-connect/token
 
 ```bash
 curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/users?username=<username>&exact=true" \
+  "https://sso.example.com/admin/realms/lv3/users?username=<username>&exact=true" \
   | python3 -c "import sys,json; users=json.load(sys.stdin); print(f'Found {len(users)} user(s)')"
 ```
 
@@ -97,7 +97,7 @@ PASS="$(python3 -c "import secrets,base64; print(base64.b64encode(secrets.token_
 curl -sk -w "\nHTTP:%{http_code}" -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://sso.lv3.org/admin/realms/lv3/users" \
+  "https://sso.example.com/admin/realms/lv3/users" \
   -d "{
     \"username\": \"<username>\",
     \"email\": \"<email>\",
@@ -116,7 +116,7 @@ Save the password immediately: `echo "$PASS" > .local/keycloak/<username>-passwo
 
 ```bash
 USER_ID=$(curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/users?username=<username>&exact=true" \
+  "https://sso.example.com/admin/realms/lv3/users?username=<username>&exact=true" \
   | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['id'])")
 ```
 
@@ -125,7 +125,7 @@ USER_ID=$(curl -sk -H "Authorization: Bearer $TOKEN" \
 ```bash
 # Get role details
 ROLE=$(curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/roles/<role-name>")
+  "https://sso.example.com/admin/realms/lv3/roles/<role-name>")
 ROLE_ID=$(echo "$ROLE" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
 ROLE_NAME=$(echo "$ROLE" | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])")
 
@@ -133,7 +133,7 @@ ROLE_NAME=$(echo "$ROLE" | python3 -c "import sys,json; print(json.load(sys.stdi
 curl -sk -w "HTTP:%{http_code}" -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  "https://sso.lv3.org/admin/realms/lv3/users/$USER_ID/role-mappings/realm" \
+  "https://sso.example.com/admin/realms/lv3/users/$USER_ID/role-mappings/realm" \
   -d "[{\"id\":\"$ROLE_ID\",\"name\":\"$ROLE_NAME\"}]"
 ```
 
@@ -150,13 +150,13 @@ Role names per access tier (from `scripts/operator_manager.py`):
 ```bash
 # List all groups to find IDs
 curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/groups?max=100" \
+  "https://sso.example.com/admin/realms/lv3/groups?max=100" \
   | python3 -c "import sys,json; [print(g['id'], g['name']) for g in json.load(sys.stdin)]"
 
 # Add user to group (expect HTTP:204)
 curl -sk -w "HTTP:%{http_code}" -X PUT \
   -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/users/$USER_ID/groups/<group-id>"
+  "https://sso.example.com/admin/realms/lv3/users/$USER_ID/groups/<group-id>"
 ```
 
 ### Step 7 — Send welcome email via SMTP
@@ -172,12 +172,12 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 msg = MIMEMultipart('alternative')
-msg['Subject'] = '[lv3.org] Platform account credentials'
-msg['From'] = 'LV3 Platform <platform@lv3.org>'
+msg['Subject'] = '[example.com] Platform account credentials'
+msg['From'] = 'LV3 Platform <platform@example.com>'
 msg['To'] = '<recipient-email>'
-msg['Reply-To'] = 'ops@lv3.org'
+msg['Reply-To'] = 'ops@example.com'
 msg.attach(MIMEText(
-    "Login URL:  https://sso.lv3.org\n"
+    "Login URL:  https://sso.example.com\n"
     "Username:   <username>\n"
     "Password:   <password>\n", 'plain'))
 
@@ -186,7 +186,7 @@ with smtplib.SMTP('10.10.10.20', 587, timeout=10) as s:
     if s.has_extn('STARTTLS'):
         s.starttls(); s.ehlo()
     s.login('platform', '<platform-mailbox-password>')
-    s.sendmail('platform@lv3.org', ['<recipient-email>'], msg.as_string())
+    s.sendmail('platform@example.com', ['<recipient-email>'], msg.as_string())
     print('sent')
 PYEOF
 ```
@@ -199,10 +199,10 @@ SMTP password is in `.local/mail-platform/profiles/platform-transactional-mailbo
 TOKEN=$(...)  # fresh token
 USER_ID="<id>"
 curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/users/$USER_ID/role-mappings/realm" \
+  "https://sso.example.com/admin/realms/lv3/users/$USER_ID/role-mappings/realm" \
   | python3 -c "import sys,json; print([r['name'] for r in json.load(sys.stdin)])"
 curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://sso.lv3.org/admin/realms/lv3/users/$USER_ID/groups" \
+  "https://sso.example.com/admin/realms/lv3/users/$USER_ID/groups" \
   | python3 -c "import sys,json; print([g['name'] for g in json.load(sys.stdin)])"
 ```
 
@@ -211,7 +211,7 @@ curl -sk -H "Authorization: Bearer $TOKEN" \
 | Symptom | Cause | Fix |
 |---|---|---|
 | `invalid_grant` on master realm token | Wrong username or password | Username is `lv3-bootstrap-admin`, not `admin` |
-| HTTP:502 from sso.lv3.org | Keycloak container restarting | Wait 30 s, retry |
+| HTTP:502 from sso.example.com | Keycloak container restarting | Wait 30 s, retry |
 | `invalid_grant` on lv3 realm with `admin-cli` | `admin-cli` not a public client in lv3 | Use master realm token for all `/admin/realms/lv3/` API calls |
 | HTTP:400 `error-person-name-invalid-character` | Parentheses or special chars in firstName/lastName | Use plain ASCII only (e.g. `"Badita Tmp"` not `"Badita (Temporary)"`) |
 | Token expired mid-script | 60-second TTL | Get fresh token per curl call or use a Python script |
@@ -239,7 +239,7 @@ cat .local/mail-platform/profiles/platform-transactional-mailbox-password.txt
 # See Step 6 above
 
 # Quick health check
-curl -sk -o /dev/null -w '%{http_code}' https://sso.lv3.org/realms/lv3
+curl -sk -o /dev/null -w '%{http_code}' https://sso.example.com/realms/lv3
 # 200 = up, 502 = restarting (retry in 30s)
 ```
 

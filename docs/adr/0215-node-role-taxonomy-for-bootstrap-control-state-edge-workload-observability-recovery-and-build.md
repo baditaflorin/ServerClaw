@@ -9,8 +9,8 @@
 ## Context
 
 The platform already has guests with recognizable responsibilities such as
-`nginx-lv3`, `postgres-lv3`, `docker-runtime-lv3`, `monitoring-lv3`, and
-`backup-lv3`, but the repository still lacks one standard node-role vocabulary.
+`nginx-edge`, `postgres`, `docker-runtime`, `monitoring`, and
+`backup`, but the repository still lacks one standard node-role vocabulary.
 
 That gap shows up whenever people describe the estate informally:
 

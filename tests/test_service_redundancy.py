@@ -49,7 +49,7 @@ def test_show_service_renders_expected_summary() -> None:
     assert "Declared Tier: R2" in output
     assert "Implemented Tier: R0" in output
     assert "Standby Kind: warm" in output
-    assert "Standby Location: postgres-replica-lv3" in output
+    assert "Standby Location: postgres-replica" in output
     assert "Recorded Proofs:" in output
 
 
@@ -69,7 +69,7 @@ def test_live_apply_plan_reports_platform_and_implemented_tiers() -> None:
             "rehearsal_summary": "The latest R2 rehearsal on 2026-03-27 did not pass, so the implemented claim falls back to R0.",
             "live_apply_mode": "primary_and_standby",
             "standby_kind": "warm",
-            "standby_location": "postgres-replica-lv3",
+            "standby_location": "postgres-replica",
         }
     ]
     assert headscale_plan == [
@@ -96,7 +96,7 @@ def test_effective_tier_rejects_unsupported_r3_without_fallback() -> None:
 
 def test_validate_catalog_requires_full_service_coverage(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     service_catalog_path = tmp_path / "config" / "service-capability-catalog.json"
-    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml"
+    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
 
     _write_json(
         service_catalog_path,
@@ -171,7 +171,7 @@ def test_validate_catalog_requires_full_service_coverage(monkeypatch: pytest.Mon
 
 def test_validate_catalog_rejects_wrong_standby_kind(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     service_catalog_path = tmp_path / "config" / "service-capability-catalog.json"
-    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox_florin.yml"
+    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
 
     _write_json(
         service_catalog_path,

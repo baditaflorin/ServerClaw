@@ -4,7 +4,7 @@
 - Title: Integrate ADR 0208 dependency direction and composition roots into `origin/main`
 - Status: merged
 - Branch: `codex/ws-0208-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0208-main-merge`
 - Owner: codex
 - Depends On: `ws-0208-live-apply`
 - Conflicts With: none

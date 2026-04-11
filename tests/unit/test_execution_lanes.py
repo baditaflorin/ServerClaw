@@ -59,7 +59,7 @@ default_resource_reservation:
 schema_version: 1.0.0
 lanes:
   lane:docker-runtime:
-    hostname: docker-runtime-lv3
+    hostname: docker-runtime
     vmid: 120
     services:
       - netbox
@@ -72,7 +72,7 @@ lanes:
       total_memory_mb: 512
       total_disk_iops: 100
   lane:postgres:
-    hostname: postgres-lv3
+    hostname: postgres
     vmid: 150
     services:
       - postgres
@@ -148,7 +148,7 @@ schema_version: 1.0.0
 lanes:
   - lane_id: lane:docker-runtime
     vm_id: 120
-    hostname: docker-runtime-lv3
+    hostname: docker-runtime
     services:
       - netbox
     max_concurrent_ops: 1
@@ -160,7 +160,7 @@ lanes:
       total_disk_iops: 100
   - lane_id: lane:postgres
     vm_id: 150
-    hostname: postgres-lv3
+    hostname: postgres
     services:
       - postgres
     max_concurrent_ops: 1

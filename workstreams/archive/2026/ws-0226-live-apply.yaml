@@ -52,7 +52,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: implemented ADR 0226 by installing the repo-managed systemd
     service, timer, and path baseline for host-resident control loops on
-    proxmox_florin and verifying both manual and path-triggered reconcile passes
+    proxmox-host and verifying both manual and path-triggered reconcile passes
   release_bump: patch
   included_in_repo_version: 0.177.52
   latest_receipts:

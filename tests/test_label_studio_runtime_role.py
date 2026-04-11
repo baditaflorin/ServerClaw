@@ -27,7 +27,7 @@ def test_label_studio_runtime_defaults_reference_service_topology_image_and_loca
 
     assert (
         defaults["label_studio_service_topology"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('label_studio') }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('label_studio') }}"
     )
     assert (
         defaults["label_studio_internal_port"]

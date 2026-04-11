@@ -10,17 +10,17 @@
 - Live Applied On: 2026-03-31
 - Release Date: 2026-03-31
 - Branch: `codex/ws-0290-mainline`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0290-mainline`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0290-mainline`
 - Owner: codex
 - Depends On: `adr-0077`, `adr-0086`, `adr-0153`, `adr-0165`, `adr-0191`, `adr-0276`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0290`, `docs/workstreams/ws-0290-live-apply.md`, `docs/runbooks/configure-redpanda.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `playbooks/redpanda.yml`, `playbooks/services/redpanda.yml`, `collections/ansible_collections/lv3/platform/playbooks/redpanda.yml`, `roles/redpanda_runtime/`, `collections/ansible_collections/lv3/platform/roles/redpanda_runtime/`, `config/*catalog*.json`, `config/ansible-role-idempotency.yml`, `Makefile`, `tests/test_ansible_role_idempotency.py`, `tests/test_generate_platform_vars.py`, `tests/test_redpanda_playbook.py`, `tests/test_redpanda_runtime_role.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.116.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `workstreams.yaml`, `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0290`, `docs/workstreams/ws-0290-live-apply.md`, `docs/runbooks/configure-redpanda.md`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `playbooks/redpanda.yml`, `playbooks/services/redpanda.yml`, `collections/ansible_collections/lv3/platform/playbooks/redpanda.yml`, `roles/redpanda_runtime/`, `collections/ansible_collections/lv3/platform/roles/redpanda_runtime/`, `config/*catalog*.json`, `config/ansible-role-idempotency.yml`, `Makefile`, `tests/test_ansible_role_idempotency.py`, `tests/test_generate_platform_vars.py`, `tests/test_redpanda_playbook.py`, `tests/test_redpanda_runtime_role.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.116.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `workstreams.yaml`, `receipts/live-applies/`
 
 ## Scope
 
 - add the repo-managed Redpanda runtime, topic reconciliation contract, and
   private Kafka/Admin/HTTP Proxy/Schema Registry topology on
-  `docker-runtime-lv3`
+  `docker-runtime`
 - replay the governed live-apply path from the latest realistic `origin/main`
   baseline after cutting release `0.177.114`
 - verify the service end to end from the exact-main tree and leave a canonical
@@ -50,7 +50,7 @@
 - `docs/diagrams/service-dependency-graph.excalidraw`
 - `docs/site-generated/architecture/dependency-graph.md`
 - `receipts/ops-portal-snapshot.html`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `playbooks/redpanda.yml`
@@ -82,10 +82,10 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` listens privately on `10.10.10.20:9092`, `:9644`,
+- `docker-runtime` listens privately on `10.10.10.20:9092`, `:9644`,
   `:8103`, and `:8104`
-- `/opt/redpanda/docker-compose.yml` exists on `docker-runtime-lv3`
-- `lv3-redpanda` and `redpanda-openbao-agent` are running on `docker-runtime-lv3`
+- `/opt/redpanda/docker-compose.yml` exists on `docker-runtime`
+- `lv3-redpanda` and `redpanda-openbao-agent` are running on `docker-runtime`
 - the Redpanda Admin API answers `GET /v1/status/ready`
 - the HTTP Proxy accepts a smoke record on `platform.redpanda.smoke`
 - the Schema Registry answers for `platform.redpanda.smoke-value`
@@ -110,7 +110,7 @@
   `aafea88c9bee78e14372f40b94bc62d3abb79433` is preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-live-apply-r1-0.177.114.txt`
   and completed with final recap
-  `docker-runtime-lv3 : ok=176 changed=4 unreachable=0 failed=0 skipped=49 rescued=0 ignored=0`.
+  `docker-runtime : ok=176 changed=4 unreachable=0 failed=0 skipped=49 rescued=0 ignored=0`.
 - Runtime health evidence is preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0290-mainline-runtime-health-r1.json`
   and confirms `GET /v1/status/ready` returned `200`, HTTP Proxy produce and

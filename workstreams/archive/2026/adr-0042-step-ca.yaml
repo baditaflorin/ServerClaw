@@ -10,7 +10,7 @@ depends_on:
   - adr-0014-tailscale
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
+  - docker-runtime
   - SSH trust
   - internal TLS
   - certificate issuance

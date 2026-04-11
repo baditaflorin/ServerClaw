@@ -1000,12 +1000,12 @@ def test_intent_queue_wrapper_exposes_module_main(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(module, "_load_impl", lambda repo_root: SimpleNamespace(main=fake_main))
 
     payload = module.main(
-        repo_root="/srv/proxmox_florin_server", resource_hints=["lane"], workflow_hints=["wf"], max_items=0
+        repo_root="/srv/proxmox-host_server", resource_hints=["lane"], workflow_hints=["wf"], max_items=0
     )
 
     assert payload == {"status": "ok", "source": "impl"}
     assert captured == {
-        "repo_root": "/srv/proxmox_florin_server",
+        "repo_root": "/srv/proxmox-host_server",
         "resource_hints": ["lane"],
         "workflow_hints": ["wf"],
         "max_items": 0,
@@ -1021,9 +1021,9 @@ def test_scheduler_watchdog_wrapper_exposes_module_main(monkeypatch: pytest.Monk
         lambda repo_root: SimpleNamespace(main=lambda **kwargs: {"status": "ok", "repo_path": kwargs["repo_path"]}),
     )
 
-    payload = module.main(repo_path="/srv/proxmox_florin_server")
+    payload = module.main(repo_path="/srv/proxmox-host_server")
 
-    assert payload == {"status": "ok", "repo_path": "/srv/proxmox_florin_server"}
+    assert payload == {"status": "ok", "repo_path": "/srv/proxmox-host_server"}
 
 
 def test_lane_scheduler_uses_uv_fallback_when_yaml_missing(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

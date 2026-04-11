@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0253-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0253-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0093-interactive-ops-portal`, `adr-0113-world-state-materializer`, `adr-0209-use-case-services`, `adr-0244-runtime-assurance-matrix`
 - Conflicts With: none
@@ -65,7 +65,7 @@
 
 ## Expected Live Surfaces
 
-- `ops.lv3.org` renders a runtime assurance scoreboard that shows service and
+- `ops.example.com` renders a runtime assurance scoreboard that shows service and
   environment identity, per-dimension assurance state, evidence timestamps,
   owner, runbook, and next action
 - the portal converge path verifies the scoreboard partial instead of proving
@@ -87,20 +87,20 @@
 - The first full latest-`origin/main` replay exposed stale-controller
   interference rather than a current-branch regression: the launcher check
   failed with `404`, and `/opt/ops-portal/service/ops_portal/app.py` on
-  `docker-runtime-lv3` matched stale hash `e86b15706d837ce6` from
+  `docker-runtime` matched stale hash `e86b15706d837ce6` from
   `.worktrees/ws-0244-live-apply` instead of the active latest-main worktree.
 - After replaying again from commit `69fe90b21a2ccc76bee5d22aef4d79c32e656554`
   at repo version `0.177.72`, the full
   `make converge-ops-portal env=production` path completed successfully with
-  `docker-runtime-lv3 : ok=125 changed=10 unreachable=0 failed=0 skipped=20 rescued=0 ignored=0`.
+  `docker-runtime : ok=125 changed=10 unreachable=0 failed=0 skipped=20 rescued=0 ignored=0`.
 - Internal runtime checks on 2026-03-29 confirmed
   `http://10.10.10.20:8092/health` returned `200 {"status":"ok"}`,
   `http://10.10.10.20:8092/partials/overview` returned `200`,
   `http://10.10.10.20:8092/partials/launcher` returned `200`, and the
   converged `/opt/ops-portal/service/ops_portal/app.py` hash remained
   `a3330585cae1c40b` with `1906` lines, matching the latest-main worktree.
-- Public edge checks on 2026-03-29 confirmed `https://ops.lv3.org/health`
-  returned `HTTP 200` with `{"status":"ok"}`, and `https://ops.lv3.org/`
+- Public edge checks on 2026-03-29 confirmed `https://ops.example.com/health`
+  returned `HTTP 200` with `{"status":"ok"}`, and `https://ops.example.com/`
   returned `HTTP 302` to `/oauth2/sign_in`, preserving the authenticated shell
   behavior.
 

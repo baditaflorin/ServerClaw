@@ -12,13 +12,13 @@
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0056-keycloak-sso`, `adr-0109-public-status-page`
 - Conflicts With: none
-- Shared Surfaces: `inventory/host_vars/proxmox_florin.yml`, `roles/monitoring_vm/`, `roles/nginx_edge_publication/`, `docs/runbooks/`, `tests/`
+- Shared Surfaces: `inventory/host_vars/proxmox-host.yml`, `roles/monitoring_vm/`, `roles/nginx_edge_publication/`, `docs/runbooks/`, `tests/`
 
 ## Scope
 
 - add ADR 0140 to record the Grafana public-hardening decision and implementation state
 - explicitly disable Grafana public dashboards, keep the recovery login form, and keep embedding disabled
-- harden the NGINX publication for `grafana.lv3.org` so `/api/health` is blocked and version headers are stripped
+- harden the NGINX publication for `grafana.example.com` so `/api/health` is blocked and version headers are stripped
 - add repository verification that unauthenticated dashboard URLs redirect to login instead of rendering dashboard content
 - document the operator verification path in the monitoring and edge-publication runbooks
 
@@ -30,7 +30,7 @@
 
 ## Expected Repo Surfaces
 
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py`
 - `roles/nginx_edge_publication/templates/lv3-edge.conf.j2`
 - `roles/monitoring_vm/tasks/main.yml`
@@ -43,18 +43,18 @@
 
 ## Expected Live Surfaces
 
-- `https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview` redirects unauthenticated callers to `/login`
-- `https://grafana.lv3.org/api/health` returns `404`
+- `https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview` redirects unauthenticated callers to `/login`
+- `https://grafana.example.com/api/health` returns `404`
 - the public login response does not expose `X-Grafana-Version` or `Via`
-- local Grafana health and admin API checks on `monitoring-lv3` remain healthy
+- local Grafana health and admin API checks on `monitoring` remain healthy
 
 ## Verification
 
 - `uv run --with pytest --with pyyaml python -m pytest tests/test_monitoring_vm_role.py tests/test_nginx_edge_publication_role.py tests/test_service_topology_filters.py -q`
 - `make syntax-check-monitoring`
-- `curl -I https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview`
-- `curl -i https://grafana.lv3.org/api/health`
-- `curl -I https://grafana.lv3.org/login`
+- `curl -I https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview`
+- `curl -i https://grafana.example.com/api/health`
+- `curl -I https://grafana.example.com/login`
 
 ## Merge Criteria
 

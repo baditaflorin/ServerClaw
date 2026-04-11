@@ -13,7 +13,7 @@
 Port numbers for platform services are currently scattered across at least
 three locations:
 
-1. **`inventory/host_vars/proxmox_florin.yml` — `platform_port_assignments`**:
+1. **`inventory/host_vars/proxmox-host.yml` — `platform_port_assignments`**:
    The canonical registry of ~110 port numbers, keyed by name.
 
 2. **`scripts/generate_platform_vars.py`** — `PORT_KEYS` tuple and
@@ -73,7 +73,7 @@ assignments for platform-managed ports. The only permitted patterns are:
 my_service_port: "{{ platform_service_topology | platform_service_port('my_service', 'internal') }}"
 
 # Pattern B — flat assignment (acceptable for ports without a topology entry)
-my_service_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.my_service_port }}"
+my_service_port: "{{ hostvars['proxmox-host'].platform_port_assignments.my_service_port }}"
 ```
 
 Pattern A is preferred because it colocates the port with the service's full
@@ -97,7 +97,7 @@ The generator fails with a descriptive error listing the conflicting keys.
 Adding a new platform service requires:
 
 1. Add an entry to `platform_port_assignments` in
-   `inventory/host_vars/proxmox_florin.yml`.
+   `inventory/host_vars/proxmox-host.yml`.
 2. Add the key to `PORT_KEYS` in `generate_platform_vars.py`.
 3. Add the service to `build_service_urls()` in the same file.
 4. Run `make generate-platform-vars` to regenerate
@@ -134,7 +134,7 @@ Adding a new platform service requires:
 
 ## Boundaries
 
-- Applies only to services hosted on the `proxmox_florin` platform and its
+- Applies only to services hosted on the `proxmox-host` platform and its
   guest VMs.
 - Does not cover ports used exclusively inside Docker Compose networks
   (container-to-container traffic) that are never exposed on a VM interface.
@@ -147,7 +147,7 @@ The initial implementation (this ADR) includes:
 
 1. Fix `generate_platform_vars.py`:
    - Remove the Gitea-specific `urls.public` override that generated
-     `http://git.lv3.org:3009` instead of `https://git.lv3.org`.
+     `http://git.example.com:3009` instead of `https://git.example.com`.
    - Remove the duplicate `headscale_http_port` entry from `PORT_KEYS`.
    - Add `mail_platform_internal_submission_port` to `PORT_KEYS`.
    - Add `keycloak_internal_http_port` to `PORT_KEYS` and

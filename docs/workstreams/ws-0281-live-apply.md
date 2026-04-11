@@ -11,17 +11,17 @@
 - Live Applied On: 2026-04-03
 - Latest `origin/main` Base Used For The Exact Replay: `0.177.148` at `bdd326164a37f849ca435f5bf32e550f00c5a89b`
 - Branch: `codex/ws-0281-mainline-v2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0281-mainline-v2`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication-at-the-nginx-edge`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secrets-injection-pattern`, `adr-0130-mail-platform-for-transactional-email`, `adr-0191-immutable-guest-replacement`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0281-live-apply.md`, `docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md`, `docs/runbooks/configure-glitchtip.md`, `receipts/live-applies/`, `playbooks/glitchtip.yml`, `playbooks/services/glitchtip.yml`, `collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/`, `collections/ansible_collections/lv3/platform/roles/glitchtip_postgres/`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`, `collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `build/platform-manifest.json`, `config/`, `scripts/`, `tests/`, `Makefile`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0281-live-apply.md`, `docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md`, `docs/runbooks/configure-glitchtip.md`, `receipts/live-applies/`, `playbooks/glitchtip.yml`, `playbooks/services/glitchtip.yml`, `collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/`, `collections/ansible_collections/lv3/platform/roles/glitchtip_postgres/`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`, `collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `build/platform-manifest.json`, `config/`, `scripts/`, `tests/`, `Makefile`
 
 ## Purpose
 
 Implement ADR 0281 from the latest realistic mainline, prove the repo-managed
 GlitchTip publication and Sentry-compatible ingest path live at
-`errors.lv3.org`, and carry that verified result onto protected release truth
+`errors.example.com`, and carry that verified result onto protected release truth
 without bumping the already-current platform lineage again.
 
 ## Outcome
@@ -34,16 +34,16 @@ without bumping the already-current platform lineage again.
   verification.
 - The same replay reconverged PostgreSQL, Docker-runtime recovery, Keycloak,
   the GlitchTip runtime, repo-managed bootstrap, and NGINX publication with
-  final recap `docker-runtime-lv3 : ok=321 changed=0 failed=0`,
-  `localhost : ok=30 changed=0 failed=0`, `nginx-lv3 : ok=46 changed=5
-  failed=0`, and `postgres-lv3 : ok=70 changed=0 failed=0`.
+  final recap `docker-runtime : ok=321 changed=0 failed=0`,
+  `localhost : ok=30 changed=0 failed=0`, `nginx-edge : ok=46 changed=5
+  failed=0`, and `postgres : ok=70 changed=0 failed=0`.
 - Fresh public proof in
   `receipts/live-applies/evidence/2026-04-03-adr-0281-current-public-surface-r4-0.177.147.txt`,
   `receipts/live-applies/evidence/2026-04-03-adr-0281-current-public-cert-r4-0.177.147.txt`,
   `receipts/live-applies/evidence/2026-04-03-adr-0281-public-auth-config-r3-0.177.147.json`,
   and
   `receipts/live-applies/evidence/2026-04-03-adr-0281-event-smoke-r4-0.177.147.txt`
-  confirms `HTTP/2 200` on the public health endpoint, `CN=errors.lv3.org`,
+  confirms `HTTP/2 200` on the public health endpoint, `CN=errors.example.com`,
   the `LV3 Keycloak` OIDC provider metadata, and live issue creation for event
   `58285bc1956f4a90a19fe3ea393f9f38` / issue `PLATFORM-FINDINGS-B`.
 - While that replay was finishing, `origin/main` advanced to

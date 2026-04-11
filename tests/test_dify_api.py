@@ -20,7 +20,7 @@ class FakeResponse:
 
 
 def test_setup_runs_init_validation_before_bootstrap(monkeypatch) -> None:
-    client = DifyClient("https://agents.lv3.org")
+    client = DifyClient("https://agents.example.com")
     calls: list[tuple[str, str, dict]] = []
     responses = deque(
         [
@@ -38,7 +38,7 @@ def test_setup_runs_init_validation_before_bootstrap(monkeypatch) -> None:
     monkeypatch.setattr(requests.Session, "request", fake_request)
 
     result = client.setup(
-        email="ops@lv3.org",
+        email="ops@example.com",
         name="Ops",
         password="abcd1234abcd1234",
         init_password="init1234abcd1234",
@@ -46,15 +46,15 @@ def test_setup_runs_init_validation_before_bootstrap(monkeypatch) -> None:
 
     assert result == {"result": "success"}
     assert [call[1] for call in calls] == [
-        "https://agents.lv3.org/console/api/setup",
-        "https://agents.lv3.org/console/api/init",
-        "https://agents.lv3.org/console/api/init",
-        "https://agents.lv3.org/console/api/setup",
+        "https://agents.example.com/console/api/setup",
+        "https://agents.example.com/console/api/init",
+        "https://agents.example.com/console/api/init",
+        "https://agents.example.com/console/api/setup",
     ]
 
 
 def test_login_request_uses_csrf_token_cookie(monkeypatch) -> None:
-    client = DifyClient("https://agents.lv3.org")
+    client = DifyClient("https://agents.example.com")
     client.session.cookies.set("csrf_token", "csrf-123")
     seen_headers: list[dict[str, str]] = []
     seen_payloads: list[dict] = []
@@ -66,7 +66,7 @@ def test_login_request_uses_csrf_token_cookie(monkeypatch) -> None:
 
     monkeypatch.setattr(requests.Session, "request", fake_request)
 
-    payload = client.login(email="ops@lv3.org", password="abcd1234abcd1234")
+    payload = client.login(email="ops@example.com", password="abcd1234abcd1234")
 
     assert payload["result"] == "success"
     assert seen_headers[0]["X-CSRF-Token"] == "csrf-123"

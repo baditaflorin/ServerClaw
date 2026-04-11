@@ -312,7 +312,7 @@ schema_version: 1.0.0
 lanes:
   - lane_id: lane:test
     vm_id: 120
-    hostname: docker-runtime-lv3
+    hostname: docker-runtime
     services: []
     max_concurrent_ops: 1
     serialisation: strict
@@ -332,7 +332,7 @@ lanes:
     )
 
     result = scheduler.submit(
-        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime-lv3")
+        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime")
     )
 
     assert result.status == "budget_exceeded"
@@ -366,7 +366,7 @@ schema_version: 1.0.0
 lanes:
   - lane_id: lane:test
     vm_id: 120
-    hostname: docker-runtime-lv3
+    hostname: docker-runtime
     services: []
     max_concurrent_ops: 2
     serialisation: resource_lock
@@ -387,7 +387,7 @@ lanes:
     )
 
     result = scheduler.submit(
-        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime-lv3")
+        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime")
     )
 
     assert result.status == "completed"
@@ -414,7 +414,7 @@ schema_version: 1.0.0
 lanes:
   - lane_id: lane:test
     vm_id: 120
-    hostname: docker-runtime-lv3
+    hostname: docker-runtime
     services: []
     max_concurrent_ops: 2
     serialisation: resource_lock
@@ -438,7 +438,7 @@ lanes:
     )
 
     result = scheduler.submit(
-        SimpleNamespace(workflow_id="converge-netbox", arguments={}, target_vm="docker-runtime-lv3"),
+        SimpleNamespace(workflow_id="converge-netbox", arguments={}, target_vm="docker-runtime"),
         wait_for_completion=False,
     )
 

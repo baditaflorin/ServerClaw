@@ -49,5 +49,5 @@ canonical_truth:
     chunks 19k code/doc segments by language, indexer (repowise_index.py) embeds via
     Ollama nomic-embed-text and stores in Qdrant repowise collection, FastAPI service
     (repowise_service.py) serves /search with language and document_kind filters;
-    Ansible role repowise_runtime deploys on docker-runtime-lv3; no third-party APIs
+    Ansible role repowise_runtime deploys on docker-runtime; no third-party APIs
   release_bump: patch

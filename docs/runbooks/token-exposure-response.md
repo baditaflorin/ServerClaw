@@ -33,7 +33,7 @@ The Windmill wrapper for the same path is:
 
 ```bash
 python3 config/windmill/scripts/token-exposure-response.py \
-  --repo-path /srv/proxmox_florin_server \
+  --repo-path /srv/proxmox-host_server \
   --token-id keycloak-agent-hub-client-secret \
   --exposure-source git_diff \
   --dry-run

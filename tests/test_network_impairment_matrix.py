@@ -30,10 +30,10 @@ def test_build_network_impairment_report_filters_target_class() -> None:
     assert report["status"] == "planned"
     assert report["entry_count"] == 4
     assert report["target_details"]["inventory_hosts"] == [
-        "docker-runtime-staging-lv3",
-        "postgres-staging-lv3",
-        "monitoring-staging-lv3",
-        "backup-staging-lv3",
+        "docker-runtime",
+        "postgres",
+        "monitoring",
+        "backup",
     ]
 
 

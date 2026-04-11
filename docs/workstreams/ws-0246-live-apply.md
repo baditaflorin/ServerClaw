@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0246-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0246-live-apply`
 - Owner: codex
 - Depends On: `adr-0064-health-probe-contracts`, `adr-0123-service-uptime-contracts`, `adr-0244-runtime-assurance-matrix-per-service-and-environment`
 - Conflicts With: none
@@ -31,10 +31,10 @@
 ## Live Apply Outcome
 
 - rebased branch head `dc0624974fff094ff0f50a096ea5c411d64d53bf` re-ran the focused pytest slice with `36 passed in 2.25s`, and `./scripts/validate_repo.sh data-models health-probes agent-standards yaml json ansible-syntax workstream-surfaces` completed successfully
-- the Windmill replay initially exposed a false failure in `Converge repo-managed Windmill schedule enabled flags`; after fixing the task's wrapper-output reporting and resuming from `Generate the Windmill superadmin secret`, the replay completed with `docker-runtime-lv3 : ok=106 changed=21 failed=0 skipped=23`, and the seeded Windmill healthcheck assertions passed
-- `make converge-api-gateway` completed successfully from the same worktree with `docker-runtime-lv3 : ok=236 changed=106 failed=0 skipped=40`, including the shared startup, liveness, and readiness post-verify checks
+- the Windmill replay initially exposed a false failure in `Converge repo-managed Windmill schedule enabled flags`; after fixing the task's wrapper-output reporting and resuming from `Generate the Windmill superadmin secret`, the replay completed with `docker-runtime : ok=106 changed=21 failed=0 skipped=23`, and the seeded Windmill healthcheck assertions passed
+- `make converge-api-gateway` completed successfully from the same worktree with `docker-runtime : ok=236 changed=106 failed=0 skipped=40`, including the shared startup, liveness, and readiness post-verify checks
 - `uv run --with pyyaml python scripts/platform_observation_tool.py --checks check-service-health --output-dir .local/platform-observation/ws-0246-verify --digest-path .local/platform-observation/ws-0246-verify/digest.md` recorded `runtime_state=ready` plus structured `phase_results` for `api_gateway`, `platform_context_api`, and `windmill`; the broader estate still showed unrelated pre-existing `failed` and `startup` services outside ADR 0246 scope
-- the latest host snapshot reported `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`, while authenticated `https://api.lv3.org/v1/platform/health/{api_gateway,platform_context_api,windmill}` checks all returned `status=healthy`, `safe_to_act=true`, and `health_probe=ready`
+- the latest host snapshot reported `proxmox-host`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`, while authenticated `https://api.example.com/v1/platform/health/{api_gateway,platform_context_api,windmill}` checks all returned `status=healthy`, `safe_to_act=true`, and `health_probe=ready`
 
 ## Live Evidence
 

@@ -1,10 +1,10 @@
 # Workstream ADR 0069: Agent Tool Registry And Governed Tool Calls
 
-- ADR: [ADR 0069](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0069-agent-tool-registry-and-governed-tool-calls.md)
+- ADR: [ADR 0069](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0069-agent-tool-registry-and-governed-tool-calls.md)
 - Title: Self-describing, MCP-compatible tool catalog for agents and operators
 - Status: merged
 - Branch: `codex/adr-0069-agent-tool-registry`
-- Worktree: `../proxmox_florin_server-agent-tool-registry`
+- Worktree: `../proxmox-host_server-agent-tool-registry`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0049-private-api-publication`
 - Conflicts With: none

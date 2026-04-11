@@ -6,10 +6,10 @@ ADR 0165 adds deterministic workflow idempotency keys so the scheduler can suppr
 
 ## Canonical Sources
 
-- key construction: [platform/idempotency/keys.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/idempotency/keys.py)
-- store implementation: [platform/idempotency/store.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/idempotency/store.py)
-- scheduler integration: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py)
-- Postgres schema: [migrations/0016_idempotency_store.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0016_idempotency_store.sql)
+- key construction: [platform/idempotency/keys.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/idempotency/keys.py)
+- store implementation: [platform/idempotency/store.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/idempotency/store.py)
+- scheduler integration: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py)
+- Postgres schema: [migrations/0016_idempotency_store.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/migrations/0016_idempotency_store.sql)
 
 ## Operator Paths
 
@@ -36,10 +36,10 @@ Standard production converge:
 ```bash
 ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections \
   uvx --from ansible-core ansible-playbook -i inventory/hosts.yml \
-  playbooks/services/windmill.yml --limit docker-runtime-lv3,postgres-lv3
+  playbooks/services/windmill.yml --limit docker-runtime,postgres
 ```
 
-The committed Windmill runtime role now copies and applies `migrations/0016_idempotency_store.sql` on `postgres-lv3` during the converge, then asserts that `platform.idempotency_records` exists before the play completes.
+The committed Windmill runtime role now copies and applies `migrations/0016_idempotency_store.sql` on `postgres` during the converge, then asserts that `platform.idempotency_records` exists before the play completes.
 
 ## Runtime Model
 

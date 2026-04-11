@@ -6,12 +6,12 @@ Operate the ADR 0096 service-level objective stack from the repository source of
 
 ## Source Of Truth
 
-- [`config/slo-catalog.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/slo-catalog.json)
-- [`scripts/generate_slo_rules.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_slo_rules.py)
-- [`config/prometheus/rules/slo_rules.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/slo_rules.yml)
-- [`config/prometheus/rules/slo_alerts.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/slo_alerts.yml)
-- [`config/prometheus/file_sd/slo_targets.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/file_sd/slo_targets.yml)
-- [`config/grafana/dashboards/slo-overview.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/grafana/dashboards/slo-overview.json)
+- [`config/slo-catalog.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/slo-catalog.json)
+- [`scripts/generate_slo_rules.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/generate_slo_rules.py)
+- [`config/prometheus/rules/slo_rules.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/prometheus/rules/slo_rules.yml)
+- [`config/prometheus/rules/slo_alerts.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/prometheus/rules/slo_alerts.yml)
+- [`config/prometheus/file_sd/slo_targets.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/prometheus/file_sd/slo_targets.yml)
+- [`config/grafana/dashboards/slo-overview.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/grafana/dashboards/slo-overview.json)
 
 ## Regenerate Assets
 
@@ -69,7 +69,7 @@ If promotion is unexpectedly rejected, inspect the `slo_gate` section in the ret
 
 ## Updating Objectives
 
-1. Edit [`config/slo-catalog.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/slo-catalog.json).
+1. Edit [`config/slo-catalog.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/slo-catalog.json).
 2. Regenerate assets with `make generate-slo-rules`.
 3. Re-run the validation commands above.
 4. Update ADR metadata if the implementation state changed.

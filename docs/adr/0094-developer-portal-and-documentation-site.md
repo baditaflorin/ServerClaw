@@ -30,12 +30,12 @@ The platform already generates JSON catalogs (`config/service-capability-catalog
 
 ## Decision
 
-We will generate a **static documentation site** using MkDocs with the Material theme, auto-populated from the canonical platform data sources, and published at `docs.lv3.org` via the nginx edge.
+We will generate a **static documentation site** using MkDocs with the Material theme, auto-populated from the canonical platform data sources, and published at `docs.example.com` via the nginx edge.
 
 ### Site structure
 
 ```
-docs.lv3.org/
+docs.example.com/
 ├── index.md                    # Platform overview and quick-start
 ├── services/                   # Auto-generated from service-capability-catalog.json
 │   ├── index.md                # Service directory
@@ -114,7 +114,7 @@ The API reference section embeds the live OpenAPI schema from the platform gatew
 The `make docs` target:
 1. Runs `scripts/generate_docs_site.py` to populate generated pages
 2. Runs `mkdocs build --strict` to produce the static site in `site/`
-3. Rsync the output to `nginx-lv3` under `/srv/docs/`
+3. Rsync the output to `nginx-edge` under `/srv/docs/`
 
 The site is rebuilt and published on every merge to `main` as part of the Windmill post-merge workflow.
 
@@ -123,7 +123,7 @@ The site is rebuilt and published on every merge to `main` as part of the Windmi
 ```yaml
 # mkdocs.yml
 site_name: lv3 Platform Docs
-site_url: https://docs.lv3.org
+site_url: https://docs.example.com
 theme:
   name: material
   features:
@@ -145,7 +145,7 @@ nav:
 
 ### Access model
 
-This original public-readability decision was superseded by ADR 0133 in repo version `0.122.0` and platform version `0.114.7`. `docs.lv3.org` now requires a Keycloak-backed operator session even though the site remains read-only after login.
+This original public-readability decision was superseded by ADR 0133 in repo version `0.122.0` and platform version `0.114.7`. `docs.example.com` now requires a Keycloak-backed operator session even though the site remains read-only after login.
 
 ## Consequences
 
@@ -169,10 +169,10 @@ This original public-readability decision was superseded by ADR 0133 in repo ver
 
 ## Related ADRs
 
-- ADR 0015: DNS and subdomain model (`docs.lv3.org` is a new subdomain)
+- ADR 0015: DNS and subdomain model (`docs.example.com` is a new subdomain)
 - ADR 0021: Public subdomain publication (docs site is served via the nginx edge)
 - ADR 0033: Declarative service topology catalog (source for generated service pages)
 - ADR 0074: Ops portal (the live/interactive complement to the static docs site)
-- ADR 0076: Subdomain governance (`docs.lv3.org` registration)
+- ADR 0076: Subdomain governance (`docs.example.com` registration)
 - ADR 0081: Platform changelog (changelog.md is rendered in the docs site)
 - ADR 0092: Unified platform API gateway (OpenAPI schema source for API reference)

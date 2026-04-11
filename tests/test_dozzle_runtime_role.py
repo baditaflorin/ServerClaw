@@ -18,11 +18,11 @@ def test_defaults_define_hub_and_agent_ports() -> None:
     assert defaults["dozzle_runtime_hub_container_name"] == "dozzle"
     assert defaults["dozzle_runtime_agent_container_name"] == "dozzle-agent"
     assert defaults["dozzle_runtime_agent_port"] == 7007
-    assert defaults["dozzle_runtime_hub_inventory_host"] == "docker-runtime-lv3"
+    assert defaults["dozzle_runtime_hub_inventory_host"] == "docker-runtime"
     assert defaults["dozzle_runtime_agent_inventory_hosts"] == [
-        "docker-runtime-lv3",
-        "docker-build-lv3",
-        "monitoring-lv3",
+        "docker-runtime",
+        "docker-build",
+        "monitoring",
     ]
 
 

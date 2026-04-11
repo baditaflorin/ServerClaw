@@ -1,10 +1,10 @@
 # Workstream ADR 0058: NATS JetStream For Internal Event Bus And Agent Coordination
 
-- ADR: [ADR 0058](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md)
+- ADR: [ADR 0058](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md)
 - Title: Internal event backbone for workflows, alerts, and agents
 - Status: ready
 - Branch: `codex/adr-0058-nats-event-bus`
-- Worktree: `../proxmox_florin_server-nats-event-bus`
+- Worktree: `../proxmox-host_server-nats-event-bus`
 - Owner: codex
 - Depends On: `adr-0045-communication-lanes`, `adr-0046-identity-classes`, `adr-0047-short-lived-creds`
 - Conflicts With: none
@@ -35,8 +35,8 @@
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md`
+- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
+- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md`
 
 ## Merge Criteria
 

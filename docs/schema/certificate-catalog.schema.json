@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/certificate-catalog.schema.json",
+  "$id": "https://example.com/schema/certificate-catalog.schema.json",
   "title": "LV3 Certificate Catalog",
   "type": "object",
   "required": [

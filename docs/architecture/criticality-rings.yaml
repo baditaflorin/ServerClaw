@@ -93,7 +93,7 @@ rings:
         data_criticality: critical
 
       - id: docker_runtime
-        name: Docker Runtime (runtime-control-lv3)
+        name: Docker Runtime (runtime-control)
         reason: |
           Service execution runtime for platform containers. Required for running all
           containerized services and operator tools.

@@ -4,7 +4,7 @@
 - Title: Atomic intent claim registration, duplicate suppression, and conflict rejection for multi-agent workflow submissions
 - Status: merged
 - Branch: `codex/adr-0127-conflict-mgmt`
-- Worktree: `../proxmox_florin_server-adr-0127`
+- Worktree: `../proxmox-host_server-adr-0127`
 - Owner: codex
 - Depends On: `adr-0112-goal-compiler`, `adr-0115-mutation-ledger`, `adr-0119-budgeted-workflow-scheduler`
 - Conflicts With: none

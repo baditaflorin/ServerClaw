@@ -1,14 +1,14 @@
 # Workstream ws-0196-live-apply: Live Apply ADR 0196 From Latest `origin/main`
 
 - ADR: [ADR 0196](../adr/0196-netdata-realtime-streaming-metrics.md)
-- Title: production live apply for Netdata parent and child streaming metrics plus the authenticated `realtime.lv3.org` surface from the latest `origin/main`
+- Title: production live apply for Netdata parent and child streaming metrics plus the authenticated `realtime.example.com` surface from the latest `origin/main`
 - Status: merged
 - Implemented In Repo Version: 0.177.25
 - Live Applied In Platform Version: 0.130.32
 - Implemented On: 2026-03-27
 - Live Applied On: 2026-03-27
 - Branch: `codex/ws-0196-main-merge-v2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0196-live-apply`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0071-agent-observation-loop`, `adr-0133-portal-authentication-by-default`
 - Conflicts With: none
@@ -31,20 +31,20 @@
 - `make syntax-check-realtime`
 - `make workflow-info WORKFLOW=converge-realtime`
 - `./scripts/validate_repo.sh health-probes alert-rules agent-standards`
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=realtime env=production EXTRA_ARGS='-e bypass_promotion=true'`
-- `HETZNER_DNS_API_TOKEN=... BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make converge-realtime env=production`
-- `make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS='--base-url https://uptime.lv3.org'`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=realtime env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `HETZNER_DNS_API_TOKEN=... BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make converge-realtime env=production`
+- `make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS='--base-url https://uptime.example.com'`
 - `make uptime-kuma-manage ACTION=ensure-monitors`
-- `HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=realtime.lv3.org env=production`
-- `dig +short realtime.lv3.org`
-- `curl -skI https://realtime.lv3.org/`
+- `HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=realtime.example.com env=production`
+- `dig +short realtime.example.com`
+- `curl -skI https://realtime.example.com/`
 
 ## Outcome
 
 - the production Netdata parent-plus-children topology is live on
-  `monitoring-lv3`, `proxmox_florin`, `nginx-lv3`, `docker-runtime-lv3`, and
-  `postgres-lv3`
-- the shared authenticated edge now publishes `https://realtime.lv3.org` with
+  `monitoring`, `proxmox-host`, `nginx-edge`, `docker-runtime`, and
+  `postgres`
+- the shared authenticated edge now publishes `https://realtime.example.com` with
   the expanded Let's Encrypt certificate and the expected oauth2 sign-in
   redirect
 - the final Prometheus query for `netdata_info{job="netdata"}` returned five
@@ -60,7 +60,7 @@
 - the latest-main merge replay exposed missing `platform.yml` inheritance inside
   the realtime playbook; adding explicit `vars_files` loading and rerunning
   `make converge-realtime env=production` restored the live realtime edge vhost
-  and reconfirmed the `302` oauth2 sign-in redirect at `https://realtime.lv3.org/`
+  and reconfirmed the `302` oauth2 sign-in redirect at `https://realtime.example.com/`
 
 ## Mainline Integration
 

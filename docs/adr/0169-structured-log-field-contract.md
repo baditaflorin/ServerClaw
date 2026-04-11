@@ -36,7 +36,7 @@ Every platform-managed structured log line must include:
   "component": "http",
   "trace_id": "a1b2c3d4e5f6",
   "msg": "Request completed",
-  "vm": "docker-runtime-lv3"
+  "vm": "docker-runtime"
 }
 ```
 
@@ -81,13 +81,13 @@ Trade-offs:
 
 ## Implementation
 
-- repository runtime code now ships the shared logger in [`platform/logging/__init__.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/logging/__init__.py)
-- structured request logging and `X-Trace-Id` propagation are implemented in [`scripts/api_gateway/main.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/api_gateway/main.py) and [`scripts/platform_context_service.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_service.py)
-- Windmill promotion surfaces preserve trace context in [`config/windmill/scripts/deploy-and-promote.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/deploy-and-promote.py) and [`scripts/promotion_pipeline.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/promotion_pipeline.py)
-- live-apply and converge entrypoints inject `platform_trace_id` through [`Makefile`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) and [`inventory/group_vars/all.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/all.yml)
-- Ansible emits structured task logs through [`collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py)
-- the contract validator ships as [`scripts/log_validator.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/log_validator.py)
-- the production platform-context runtime was verified live from `main` in [`receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json)
+- repository runtime code now ships the shared logger in [`platform/logging/__init__.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/logging/__init__.py)
+- structured request logging and `X-Trace-Id` propagation are implemented in [`scripts/api_gateway/main.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/api_gateway/main.py) and [`scripts/platform_context_service.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/platform_context_service.py)
+- Windmill promotion surfaces preserve trace context in [`config/windmill/scripts/deploy-and-promote.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/deploy-and-promote.py) and [`scripts/promotion_pipeline.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/promotion_pipeline.py)
+- live-apply and converge entrypoints inject `platform_trace_id` through [`Makefile`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile) and [`inventory/group_vars/all.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/group_vars/all.yml)
+- Ansible emits structured task logs through [`collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py)
+- the contract validator ships as [`scripts/log_validator.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/log_validator.py)
+- the production platform-context runtime was verified live from `main` in [`receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json)
 
 ## Related ADRs
 

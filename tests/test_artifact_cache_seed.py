@@ -58,13 +58,13 @@ def test_build_seed_plan_rewrites_supported_refs_to_mirror_endpoints(tmp_path: P
 
 def test_build_seed_plan_reports_unsupported_registry_hosts(tmp_path: Path) -> None:
     catalog = tmp_path / "catalog.json"
-    catalog.write_text(json.dumps({"images": {"runner": {"ref": "registry.lv3.org/check-runner/python:3.12"}}}))
+    catalog.write_text(json.dumps({"images": {"runner": {"ref": "registry.example.com/check-runner/python:3.12"}}}))
     plan = artifact_cache_seed.build_seed_plan([catalog], {"docker.io": "http://10.10.10.30:5001"})
     assert plan["seed_images"] == []
     assert plan["unsupported_images"] == [
         {
-            "registry_host": "registry.lv3.org",
-            "source_ref": "registry.lv3.org/check-runner/python:3.12",
+            "registry_host": "registry.example.com",
+            "source_ref": "registry.example.com/check-runner/python:3.12",
         }
     ]
 

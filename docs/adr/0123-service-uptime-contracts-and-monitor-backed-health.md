@@ -16,7 +16,7 @@ The repository already contains the main pieces of a service uptime model:
 - ADR 0027 seeds Uptime Kuma from `config/uptime-kuma/monitors.json`
 - ADR 0092 and ADR 0093 expose internal status through the platform API and the interactive ops portal
 
-Those paths were still only loosely connected. `config/uptime-kuma/monitors.json` remained a hand-maintained duplicate of the health-probe catalog, while the internal health surfaces were not using the health-probe contract for most services. The result was that `https://uptime.lv3.org/dashboard/3` could contain useful live data, but the service catalog, world-state, API gateway, and portal could drift from it or only show a smaller subset of services.
+Those paths were still only loosely connected. `config/uptime-kuma/monitors.json` remained a hand-maintained duplicate of the health-probe catalog, while the internal health surfaces were not using the health-probe contract for most services. The result was that `https://uptime.example.com/dashboard/3` could contain useful live data, but the service catalog, world-state, API gateway, and portal could drift from it or only show a smaller subset of services.
 
 ## Decision
 

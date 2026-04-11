@@ -5,7 +5,7 @@
   self-service intake flow
 - Status: live_applied
 - Branch: `codex/ws-0224-repo-intake`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0224-repo-intake`
 - Owner: codex
 - Depends On: `adr-0156-agent-session-workspace-isolation`,
   `adr-0185-branch-scoped-ephemeral-preview-environments`,
@@ -62,8 +62,8 @@
 
 ## Expected Live Surfaces
 
-- the named application route `education-wemeshup.apps.lv3.org`
-- the wildcard DNS record `*.apps.lv3.org -> 65.108.75.123`
+- the named application route `education-wemeshup.apps.example.com`
+- the wildcard DNS record `*.apps.example.com -> 203.0.113.1`
 - the live-apply receipt
   `receipts/live-applies/2026-03-28-adr-0224-coolify-wildcard-dns-live-apply.json`
 
@@ -105,25 +105,25 @@ Observed across 2026-03-28 and 2026-03-29:
   proxying wildcard app traffic to the Coolify VM over plain HTTP instead of
   HTTPS.
 - After switching the wildcard edge upstream to HTTPS, the public app path still
-  timed out until the managed `coolify-lv3` guest firewall allowed `nginx-lv3`
+  timed out until the managed `coolify` guest firewall allowed `nginx-edge`
   to reach TCP `443` in addition to `80` and `8000`.
-- After replaying the Proxmox guest-firewall files plus the `coolify-lv3`
-  nftables policy, `education-wemeshup.apps.lv3.org` returned `HTTP/2 200` and
+- After replaying the Proxmox guest-firewall files plus the `coolify`
+  nftables policy, `education-wemeshup.apps.example.com` returned `HTTP/2 200` and
   `/api/v1/catalog/taxonomy` answered with API version `v1`, `2` categories,
   and `6` activities through the public edge.
 - Browser reachability still failed outside controller-local `--resolve` probes
-  because `*.apps.lv3.org` was present only as an NGINX edge alias, not as a
+  because `*.apps.example.com` was present only as an NGINX edge alias, not as a
   managed Hetzner DNS wildcard record.
 - This follow-up extends the generated `hetzner_dns_records` surface so public
   DNS aliases are derived from repo-managed `edge.aliases`, then replays the
-  Coolify service converge path to publish `*.apps.lv3.org` automatically.
+  Coolify service converge path to publish `*.apps.example.com` automatically.
 - The first scoped DNS publication attempt hit an opaque Hetzner API failure on
   wildcard-record creation while the Ansible task was still redacted by
   `no_log`. Replaying the exact `*.apps` POST directly against the Hetzner DNS
   API succeeded immediately, and the same repo-managed playbook then reran
   cleanly with `changed=0`.
-- Authoritative and public recursive resolvers now answer `65.108.75.123` for
-  `education-wemeshup.apps.lv3.org`, although the controller's default resolver
+- Authoritative and public recursive resolvers now answer `203.0.113.1` for
+  `education-wemeshup.apps.example.com`, although the controller's default resolver
   briefly kept the earlier NXDOMAIN cached after the wildcard record appeared.
 - Pulling the newer Dockerized app revision surfaced two transient failure
   classes that needed codified handling: Docker Hub anonymous-token timeouts
@@ -140,8 +140,8 @@ Observed across 2026-03-28 and 2026-03-29:
   historical same-host redirect loop.
 - The generator now emits the `coolify_apps` internal URL and edge upstream over
   TLS `443`, and a scoped edge plus guest-network replay restored public `200`
-  and the taxonomy API response for `education-wemeshup.apps.lv3.org`.
-- The next live replay hardened the build lane itself: `coolify-lv3` now
+  and the taxonomy API response for `education-wemeshup.apps.example.com`.
+- The next live replay hardened the build lane itself: `coolify` now
   renders `/etc/docker/daemon.json` with public resolvers `1.1.1.1` and
   `8.8.8.8` plus the approved Docker Hub mirror `https://mirror.gcr.io`, and
   the previously wedged BuildKit/npm worker processes disappeared immediately
@@ -156,7 +156,7 @@ Observed across 2026-03-28 and 2026-03-29:
   commit `dd577f374051d24710b461e9cfb796e21ad49da2` successfully on the first
   attempt.
 - Public verification now returns `HTTP/2 200` for
-  `https://education-wemeshup.apps.lv3.org/`, and
+  `https://education-wemeshup.apps.example.com/`, and
   `/api/v1/catalog/taxonomy` reports catalog version `2.0.0`, `95`
   categories, and `1056` activities through the production wildcard domain.
 
@@ -187,7 +187,7 @@ Observed across 2026-03-28 and 2026-03-29:
 - A new ADR was still added for the separate supply-path gap surfaced here:
   ADR 0274 now codifies cache-first base-image mirrors and warm caches for
   expected repo-deploy images.
-- The first implementation slice of ADR 0274 is now live on `coolify-lv3`
+- The first implementation slice of ADR 0274 is now live on `coolify`
   through the governed Docker daemon resolver and registry-mirror settings;
   scheduled image warming and catalog-backed bundle refresh still remain
   follow-up work.
@@ -195,13 +195,13 @@ Observed across 2026-03-28 and 2026-03-29:
   after an edge replay, verify that generated `inventory/group_vars/platform.yml`
   still points `coolify_apps.edge.upstream` to `https://10.10.10.70:443`, then
   replay `configure-edge-publication` and the scoped guest-network policy for
-  `proxmox_florin,coolify-lv3`.
+  `proxmox-host,coolify`.
 - If wildcard app traffic loops on `307 https://same-host/...`, check whether
   the NGINX edge is still proxying `coolify_apps` to `http://<coolify-vm>:80`
   instead of `https://<coolify-vm>:443`.
 - If the wildcard edge already proxies to `https://<coolify-vm>:443` but the
   request still times out, verify both the Proxmox VM firewall file and the
-  `coolify-lv3` guest nftables policy allow `nginx-lv3` to reach TCP `443`.
+  `coolify` guest nftables policy allow `nginx-edge` to reach TCP `443`.
 - If `configure-edge-publication` fails on missing `build/changelog-portal/`
   or `build/docs-portal/`, run `make generate-changelog-portal docs` in the
   current worktree before replaying the edge lane.

@@ -74,7 +74,7 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertIn("adr-0106-test", index_html)
             self.assertIn("Recovery tier", index_html)
             self.assertIn("Failure blast radius", index_html)
-            self.assertIn("ops.lv3.org", dns_html)
+            self.assertIn("ops.example.com", dns_html)
             self.assertIn("get-platform-status", agents_html)
             self.assertIn("Agent Coordination Map", agents_html)
             self.assertIn("0274-minio-as-the-s3-compatible-object-storage-layer.md", index_html)
@@ -149,7 +149,7 @@ class OpsPortalRenderTests(unittest.TestCase):
                         },
                         "hosts": [
                             {
-                                "host": "docker-runtime-lv3",
+                                "host": "docker-runtime",
                                 "hardening_index": 68,
                                 "hardening_index_delta": -2,
                                 "new_findings_since_last_scan": 1,
@@ -157,7 +157,7 @@ class OpsPortalRenderTests(unittest.TestCase):
                         ],
                         "images": [
                             {
-                                "host": "docker-runtime-lv3",
+                                "host": "docker-runtime",
                                 "image": "ghcr.io/example/app:1.0.0",
                             }
                         ],
@@ -176,7 +176,7 @@ class OpsPortalRenderTests(unittest.TestCase):
             index_html = (temp_dir / "index.html").read_text()
             self.assertIn("Security Posture", index_html)
             self.assertIn("Lowest Hardening", index_html)
-            self.assertIn("docker-runtime-lv3", index_html)
+            self.assertIn("docker-runtime", index_html)
         finally:
             ops_portal.latest_security_report = original
             shutil.rmtree(temp_dir)

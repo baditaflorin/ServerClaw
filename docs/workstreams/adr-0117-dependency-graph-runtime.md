@@ -4,7 +4,7 @@
 - Title: Persist a machine-usable DAG of service/host/network/cert dependencies in Postgres; expose traversal API for blast-radius, health propagation, and incident correlation used by triage and risk scoring
 - Status: live_applied
 - Branch: `codex/ws-0117-live-apply`
-- Worktree: `../proxmox_florin_server_ws-0117-live-apply`
+- Worktree: `../proxmox-host_server_ws-0117-live-apply`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0054-netbox-topology`, `adr-0058-nats-event-bus`, `adr-0075-service-capability-catalog`, `adr-0092-platform-api-gateway`, `adr-0098-postgres-ha`, `adr-0113-world-state-materializer`
 - Conflicts With: `adr-0113-world-state-materializer` (both read from NetBox; coordinate on refresh timing to avoid stampede)
@@ -13,7 +13,7 @@
 ## Scope
 
 - create Postgres migration `migrations/0012_graph_schema.sql` — `graph.nodes` and `graph.edges` tables with indexes from ADR 0117
-- create `config/dependency-graph.yaml` — initial manual edge declarations for all platform services (netbox→postgres, keycloak→postgres, windmill→postgres, mattermost→postgres, grafana→loki, grafana→prometheus, all services→step-ca, all services→docker-runtime-lv3)
+- create `config/dependency-graph.yaml` — initial manual edge declarations for all platform services (netbox→postgres, keycloak→postgres, windmill→postgres, mattermost→postgres, grafana→loki, grafana→prometheus, all services→step-ca, all services→docker-runtime)
 - create `platform/graph/__init__.py`
 - create `platform/graph/client.py` — `DependencyGraphClient` with `descendants()`, `ancestors()`, `path()`, `neighbourhood()`, `health_propagation()` methods using recursive CTEs
 - create `config/windmill/scripts/graph/import-from-netbox.py` — Windmill workflow: imports device→rack, IP, VLAN edges from NetBox world-state snapshot
@@ -72,9 +72,9 @@
 ## Live Apply Note
 
 - Focused repository validation passed with the ADR 0117 pytest suite (`29 passed`), `make syntax-check-windmill`, `make syntax-check-api-gateway`, and `scripts/validate_repository_data_models.py --validate`.
-- `make converge-windmill` was replayed successfully from this worktree branch after the fixes landed, with the final run completing on `docker-runtime-lv3`, `postgres-lv3`, and `proxmox_florin` without failed hosts.
+- `make converge-windmill` was replayed successfully from this worktree branch after the fixes landed, with the final run completing on `docker-runtime`, `postgres`, and `proxmox-host` without failed hosts.
 - Production verification confirmed `world_state.current_view` is populated, PostgreSQL holds the graph runtime rows, Windmill schedule arguments are stored in `schedule.args`, and authenticated gateway traversal returns the expected descendants and shortest path for the current service graph.
-- A repo-managed graph rebuild also completed successfully from the live guest checkout, proving the deployed worker wrapper can execute the managed scripts directly on `docker-runtime-lv3`.
+- A repo-managed graph rebuild also completed successfully from the live guest checkout, proving the deployed worker wrapper can execute the managed scripts directly on `docker-runtime`.
 - Protected integration files still deferred to merge-to-main are `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml`.
 
 ## Notes For The Next Assistant

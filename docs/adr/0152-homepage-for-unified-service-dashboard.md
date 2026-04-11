@@ -13,21 +13,21 @@ The platform now has enough private and edge-published services that operators n
 
 - `config/service-capability-catalog.json`
 - `config/subdomain-catalog.json`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `versions/stack.yaml`
 
 Those sources are accurate, but they are still repository-first data structures. They are not the fastest way to answer "what is live, where does it run, and which URL should I open first?" during onboarding, routine operations, or break-glass recovery.
 
 ## Decision
 
-We run Homepage on `docker-runtime-lv3` as the unified LV3 service dashboard and generate its repo-managed configuration directly from the canonical service and subdomain catalogs.
+We run Homepage on `docker-runtime` as the unified LV3 service dashboard and generate its repo-managed configuration directly from the canonical service and subdomain catalogs.
 
 ### Runtime shape
 
 - service id: `homepage`
-- runtime host: `docker-runtime-lv3`
+- runtime host: `docker-runtime`
 - private listener: `http://10.10.10.20:3090`
-- public URL: `https://home.lv3.org`
+- public URL: `https://home.example.com`
 - publication model: shared `nginx_edge_publication` route with the existing Keycloak-backed oauth2-proxy gate
 - image: `ghcr.io/gethomepage/homepage:v1.8.0@sha256:a543b3b044b2fa349dfe319c9e9b256c4eb5b4f6923361045aa468be4d2ba990`
 
@@ -51,15 +51,15 @@ The generated dashboard prefers public URLs when they exist, falls back to brows
 
 ### Publication and auth boundary
 
-Homepage does not own an application-level auth integration. It is protected at the shared edge in the same way as `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org`:
+Homepage does not own an application-level auth integration. It is protected at the shared edge in the same way as `ops.example.com`, `docs.example.com`, and `changelog.example.com`:
 
-- `home.lv3.org` is declared with `auth_requirement: edge_oidc`
+- `home.example.com` is declared with `auth_requirement: edge_oidc`
 - `nginx_edge_publication` routes it through the existing oauth2-proxy
 - the Homepage runtime stays simple and read-only
 
 ## Implementation Notes
 
-- `playbooks/homepage.yml` converges both the Homepage runtime on `docker-runtime-lv3` and the `home.lv3.org` edge publication on `nginx-lv3`.
+- `playbooks/homepage.yml` converges both the Homepage runtime on `docker-runtime` and the `home.example.com` edge publication on `nginx-edge`.
 - `roles/homepage_runtime` regenerates Homepage config from repo state on every converge before restarting the container.
 - The service is registered in the service, subdomain, health-probe, dependency, image, SLO, workflow, and data catalogs.
 - Uptime Kuma now manages a `Homepage Public` monitor, and the monitoring stack consumes the new Homepage SLO target.
@@ -74,7 +74,7 @@ Homepage does not own an application-level auth integration. It is protected at 
 
 ### Trade-offs
 
-- Homepage adds one more runtime on `docker-runtime-lv3`.
+- Homepage adds one more runtime on `docker-runtime`.
 - The dashboard is only as accurate as the canonical catalogs that feed it; missing catalog updates will produce missing dashboard entries.
 - Homepage remains read-only by design, so operator actions still flow through the ops portal, CLI, or direct service UIs.
 
@@ -87,8 +87,8 @@ Repository release `0.169.0` and live platform version `0.130.19` verified on 20
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` passed
 - `uv run --with pyyaml python scripts/validate_alert_rules.py` passed
 - `make converge-homepage` completed successfully from `main`
-- `curl -skI https://home.lv3.org` returned `HTTP/2 302` to `/oauth2/sign_in`
-- `dig +short home.lv3.org @1.1.1.1` returned `65.108.75.123`
+- `curl -skI https://home.example.com` returned `HTTP/2 302` to `/oauth2/sign_in`
+- `dig +short home.example.com @1.1.1.1` returned `203.0.113.1`
 
 ## Related ADRs
 

@@ -14,13 +14,13 @@ It is the repo-side reference for:
 
 ## Canonical Sources
 
-- schema migration: [migrations/0011_ledger_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0011_ledger_schema.sql)
-- event type registry: [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ledger-event-types.yaml)
-- writer: [platform/ledger/writer.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ledger/writer.py)
-- reader: [platform/ledger/reader.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ledger/reader.py)
-- replay API: [platform/ledger/replay.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ledger/replay.py)
-- migration helper: [windmill/ledger/migrate-audit-log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/windmill/ledger/migrate-audit-log.py)
-- legacy bridge: [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py)
+- schema migration: [migrations/0011_ledger_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/migrations/0011_ledger_schema.sql)
+- event type registry: [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/ledger-event-types.yaml)
+- writer: [platform/ledger/writer.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/ledger/writer.py)
+- reader: [platform/ledger/reader.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/ledger/reader.py)
+- replay API: [platform/ledger/replay.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/ledger/replay.py)
+- migration helper: [windmill/ledger/migrate-audit-log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/windmill/ledger/migrate-audit-log.py)
+- legacy bridge: [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/mutation_audit.py)
 
 ## Schema Summary
 
@@ -58,15 +58,15 @@ Optional fan-out after insert:
 Example:
 
 ```bash
-export LV3_LEDGER_DSN='postgresql://user:pass@postgres-lv3:5432/platform'
-export LV3_LEDGER_NATS_URL='nats://docker-runtime-lv3:4222'
+export LV3_LEDGER_DSN='postgresql://user:pass@postgres:5432/platform'
+export LV3_LEDGER_NATS_URL='nats://docker-runtime:4222'
 scripts/mutation_audit.py \
   --emit \
   --actor-class operator \
   --actor-id ops \
   --surface manual \
   --action document.manual_change \
-  --target proxmox_florin \
+  --target proxmox-host \
   --outcome success
 ```
 
@@ -124,7 +124,7 @@ Example Python snippet:
 ```python
 from platform.ledger import LedgerReplayer
 
-replayer = LedgerReplayer(dsn="postgresql://user:pass@postgres-lv3:5432/platform")
+replayer = LedgerReplayer(dsn="postgresql://user:pass@postgres:5432/platform")
 
 events = replayer.slice(
     target_kind="service",
@@ -147,8 +147,8 @@ Other target kinds raise `NotImplementedError` until their projection logic is d
 
 When projecting the ledger DSN into the Windmill runtime, keep both templates in sync:
 
-- [collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-main-merge/collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2)
-- [collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-main-merge/collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2)
+- [collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0115-main-merge/collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2)
+- [collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0115-main-merge/collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2)
 
 If only the OpenBao-backed template is updated, the later static `windmill-runtime.env.j2` render will still overwrite `/run/lv3-secrets/windmill/runtime.env` without the ledger keys.
 

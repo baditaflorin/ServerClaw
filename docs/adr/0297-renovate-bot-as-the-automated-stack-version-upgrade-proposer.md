@@ -37,12 +37,12 @@ without modifying the source files.
 ## Decision
 
 We will deploy **Renovate Bot** as a scheduled Gitea Actions job on
-`docker-build-lv3` that proposes pull requests for stack version upgrades.
+`docker-build` that proposes pull requests for stack version upgrades.
 
 ### Deployment rules
 
 - Renovate runs as a Gitea Actions scheduled workflow (cron) on
-  `docker-build-lv3`, not as a long-lived daemon; this avoids a new managed
+  `docker-build`, not as a long-lived daemon; this avoids a new managed
   service and keeps it within the existing CI execution budget (ADR 0119)
 - the Renovate Docker image is pulled through Harbor (ADR 0068) and pinned to a
   specific SHA digest

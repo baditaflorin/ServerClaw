@@ -3,7 +3,7 @@
 - Status: Proposed
 - Date: 2026-04-10
 - Related ADRs: 0199, 0274, 0373, 0397
-- Fixes: wiki.lv3.org not loading (S3 asset access broken)
+- Fixes: wiki.example.com not loading (S3 asset access broken)
 
 ## Context
 
@@ -37,24 +37,24 @@ Outline will migrate from embedded MinIO to the **shared platform MinIO** (ADR 0
 
 **Update in `outline_runtime`:**
 - Reference shared MinIO credentials from controller mirror
-- Use public gateway URL: `https://s3.lv3.org` for browser S3 access
+- Use public gateway URL: `https://s3.example.com` for browser S3 access
 - Use internal URL: `http://docker-runtime:9000` for service-to-service API calls
 
 **Add to `public_edge` or nginx role:**
-- MinIO API gateway at `s3.lv3.org` → `http://docker-runtime:9000`
+- MinIO API gateway at `s3.example.com` → `http://docker-runtime:9000`
 
 ### Architecture After Migration
 
 ```
 Browser                 Public Internet
   │
-  ├─ wiki.lv3.org ──────→ NGINX Edge (TLS)
+  ├─ wiki.example.com ──────→ NGINX Edge (TLS)
   │                          │
   │                          ├─ proxy → runtime-control (Outline)
   │                          │
   │                    + S3 gateway
   │                          │
-  └─ s3.lv3.org ────────────→ MinIO (docker-runtime:9000)
+  └─ s3.example.com ────────────→ MinIO (docker-runtime:9000)
 
 Outline Container      Internal Docker Network
   │
@@ -90,13 +90,13 @@ Outline Container      Internal Docker Network
 - Remove MinIO secret generation
 - Add dependency on `minio_runtime` convergence
 - Update env vars:
-  - `AWS_S3_UPLOAD_BUCKET_URL: {{ minio_public_base_url }}` (e.g., `https://s3.lv3.org`)
+  - `AWS_S3_UPLOAD_BUCKET_URL: {{ minio_public_base_url }}` (e.g., `https://s3.example.com`)
   - `AWS_SECRET_ACCESS_KEY: {{ minio_outline_secret }}` (from controller mirror)
   - `AWS_ACCESS_KEY_ID: outline` (service account ID)
 
 ### Phase 3: Configure Public S3 Gateway
 **File:** `public_edge` or `nginx_edge_publication` role
-- Add proxy rule for `s3.lv3.org`
+- Add proxy rule for `s3.example.com`
 - Route to `http://docker-runtime:9000`
 - Enable TLS termination
 
@@ -104,7 +104,7 @@ Outline Container      Internal Docker Network
 **Convergence:**
 1. Converge `minio_runtime` → buckets and credentials created
 2. Converge `outline_runtime` → uses shared MinIO
-3. Access `wiki.lv3.org` → verify page loads and assets download
+3. Access `wiki.example.com` → verify page loads and assets download
 4. Upload file in Outline → verify S3 storage works
 
 ## Consequences
@@ -126,10 +126,10 @@ Outline Container      Internal Docker Network
 - [ ] `minio_runtime` converges, creating `outline-documents` bucket
 - [ ] Outline service account created with correct policy
 - [ ] `outline_runtime` converges without minio sidecar errors
-- [ ] `wiki.lv3.org` homepage loads (assets downloadable)
+- [ ] `wiki.example.com` homepage loads (assets downloadable)
 - [ ] File upload in Outline wiki succeeds
 - [ ] Downloaded file is accessible via browser S3 access
-- [ ] `s3.lv3.org` returns 200 for bucket listing
+- [ ] `s3.example.com` returns 200 for bucket listing
 - [ ] NGINX logs show S3 gateway requests succeeding
 
 ## Deployment Notes

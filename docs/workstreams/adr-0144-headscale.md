@@ -1,19 +1,19 @@
 # Workstream ADR 0144: Headscale Mesh Control Plane
 
-- ADR: [ADR 0144](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md)
+- ADR: [ADR 0144](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md)
 - Title: Replace the hosted mesh control plane with repo-managed Headscale while preserving Tailscale client access and the `10.10.10.0/24` subnet route
 - Status: merged
 - Branch: `codex/adr-0144-headscale`
-- Worktree: `../proxmox_florin_server-headscale`
+- Worktree: `../proxmox-host_server-headscale`
 - Owner: codex
 - Depends On: `adr-0014-tailscale`
 - Conflicts With: work that assumes the commercial Tailscale tailnet IPs or operator-enrollment API remain canonical
-- Shared Surfaces: `inventory/hosts.yml`, `inventory/host_vars/proxmox_florin.yml`, `config/service-capability-catalog.json`, `config/control-plane-lanes.json`, `README.md`, `versions/stack.yaml`
+- Shared Surfaces: `inventory/hosts.yml`, `inventory/host_vars/proxmox-host.yml`, `config/service-capability-catalog.json`, `config/control-plane-lanes.json`, `README.md`, `versions/stack.yaml`
 
 ## Scope
 
-- deploy Headscale on `proxmox_florin`
-- publish `headscale.lv3.org` through the existing NGINX edge VM
+- deploy Headscale on `proxmox-host`
+- publish `headscale.example.com` through the existing NGINX edge VM
 - store Headscale ACLs and route approvers in repo-managed policy
 - add a dedicated Headscale converge playbook, workflow, and command contract
 - migrate the Proxmox host and one operator workstation to the Headscale control plane
@@ -39,9 +39,9 @@
 
 ## Expected Live Surfaces
 
-- Headscale systemd service on `proxmox_florin`
-- `https://headscale.lv3.org`
-- Proxmox host enrolled in Headscale as the `ops@`-owned node `proxmox-florin-subnet-router`
+- Headscale systemd service on `proxmox-host`
+- `https://headscale.example.com`
+- Proxmox host enrolled in Headscale as the `ops@`-owned node `proxmox-host-subnet-router`
 - `10.10.10.0/24` advertised and reachable through the Proxmox host route
 - operator workstation enrolled in the same Headscale-managed mesh
 
@@ -49,9 +49,9 @@
 
 - `make syntax-check-headscale`
 - `make converge-headscale`
-- `curl -I https://headscale.lv3.org/health`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 sudo headscale --config /etc/headscale/config.yaml nodes list`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@10.10.10.30 hostname`
+- `curl -I https://headscale.example.com/health`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 sudo headscale --config /etc/headscale/config.yaml nodes list`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@10.10.10.30 hostname`
 
 ## Merge Criteria
 

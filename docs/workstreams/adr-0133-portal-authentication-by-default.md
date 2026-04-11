@@ -14,8 +14,8 @@
 
 - add explicit portal auth classification to the governed subdomain catalog
 - validate the classification with a dedicated `scripts/validate_portal_auth.py` policy check
-- protect `docs.lv3.org` and `changelog.lv3.org` with the shared edge `oauth2-proxy`
-- expand the shared portal auth cookie scope to `.lv3.org` so one Keycloak session covers all protected portals
+- protect `docs.example.com` and `changelog.example.com` with the shared edge `oauth2-proxy`
+- expand the shared portal auth cookie scope to `.example.com` so one Keycloak session covers all protected portals
 - preserve Grafana's Keycloak login path while keeping anonymous access disabled
 - verify that unauthenticated requests no longer reach protected portal content
 
@@ -34,23 +34,23 @@
 
 ## Expected Live Surfaces
 
-- `https://ops.lv3.org/` redirects unauthenticated requests to the Keycloak sign-in flow
-- `https://changelog.lv3.org/` redirects unauthenticated requests to the Keycloak sign-in flow
-- `https://docs.lv3.org/` redirects unauthenticated requests to the Keycloak sign-in flow
-- `https://grafana.lv3.org/` blocks anonymous dashboard access
+- `https://ops.example.com/` redirects unauthenticated requests to the Keycloak sign-in flow
+- `https://changelog.example.com/` redirects unauthenticated requests to the Keycloak sign-in flow
+- `https://docs.example.com/` redirects unauthenticated requests to the Keycloak sign-in flow
+- `https://grafana.example.com/` blocks anonymous dashboard access
 
 ## Verification
 
 - `uv run --with pyyaml python scripts/validate_portal_auth.py --validate`
 - `uv run --with pyyaml --with jsonschema python -m unittest tests.test_nginx_edge_publication_role tests.test_public_edge_oidc_auth_role tests.test_subdomain_catalog tests.test_validate_portal_auth`
-- `curl -Ik https://ops.lv3.org/`
-- `curl -Ik https://changelog.lv3.org/`
-- `curl -Ik https://docs.lv3.org/`
-- `curl -Ik https://grafana.lv3.org/`
+- `curl -Ik https://ops.example.com/`
+- `curl -Ik https://changelog.example.com/`
+- `curl -Ik https://docs.example.com/`
+- `curl -Ik https://grafana.example.com/`
 
 ## Outcome
 
 - repository implementation is complete on `main` in repo release `0.130.0`
-- the shared edge auth proxy now protects `ops.lv3.org`, `changelog.lv3.org`, and `docs.lv3.org` with a shared `.lv3.org` session cookie
+- the shared edge auth proxy now protects `ops.example.com`, `changelog.example.com`, and `docs.example.com` with a shared `.example.com` session cookie
 - the governed subdomain catalog now records explicit auth posture for every hostname and rejects undocumented public exceptions
 - platform version `0.114.7` is the first live platform version where ADR 0133 is true

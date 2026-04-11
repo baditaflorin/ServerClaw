@@ -22,7 +22,7 @@ def test_render_outputs_include_homepage_tile_and_bookmarks() -> None:
     access_group = next(group["Access & Identity"] for group in services if "Access & Identity" in group)
     homepage_tile = next(item["Homepage"] for item in access_group if "Homepage" in item)
 
-    assert homepage_tile["href"] == "https://home.lv3.org"
+    assert homepage_tile["href"] == "https://home.example.com"
     assert homepage_tile["siteMonitor"] == "http://10.10.10.20:3090"
     assert homepage_tile["icon"] == "mdi-view-dashboard"
 
@@ -30,7 +30,7 @@ def test_render_outputs_include_homepage_tile_and_bookmarks() -> None:
     ops_portal = next(item["Ops Portal"][0] for item in quick_actions if "Ops Portal" in item)
 
     assert ops_portal["abbr"] == "OP"
-    assert ops_portal["href"] == "https://ops.lv3.org"
+    assert ops_portal["href"] == "https://ops.example.com"
     assert settings["title"] == "LV3 Unified Dashboard"
 
 

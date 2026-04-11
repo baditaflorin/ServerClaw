@@ -4,7 +4,7 @@
 - Title: Automated, layered Packer VM templates on the build server for fast, consistent Proxmox VM provisioning
 - Status: merged
 - Branch: `codex/adr-0084-packer-vm-template-pipeline`
-- Worktree: `../proxmox_florin_server-adr-0084`
+- Worktree: `../proxmox-host_server-adr-0084`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`
 - Conflicts With: none
@@ -55,8 +55,8 @@
 
 ## Completion Notes
 
-- the repository now carries the full Packer layout under [packer/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/packer), the template manifest under [config/vm-template-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/vm-template-manifest.json), and the Windmill rebuild helper at [config/windmill/scripts/packer-template-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/packer-template-rebuild.py)
-- [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml) now clones guests from the declared template catalog instead of constructing a Debian cloud template inline
+- the repository now carries the full Packer layout under [packer/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/packer), the template manifest under [config/vm-template-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/vm-template-manifest.json), and the Windmill rebuild helper at [config/windmill/scripts/packer-template-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/packer-template-rebuild.py)
+- [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml) now clones guests from the declared template catalog instead of constructing a Debian cloud template inline
 - the remaining operational step is live rebuild and publication of the templates from a credentialed worker so the manifest gains populated `build_date` and `digest` values
 
 ## Merge Criteria

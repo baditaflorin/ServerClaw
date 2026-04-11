@@ -149,7 +149,7 @@ This is the second-highest-priority gap.
 JupyterHub references:
 
 1. **`config/workbench-information-architecture.json`** — bookmark with
-   `{"title": "JupyterHub", "url": "https://jupyter.lv3.org"}`. The decommission
+   `{"title": "JupyterHub", "url": "https://jupyter.example.com"}`. The decommission
    script's text-match pass doesn't parse nested JSON structures.
 
 2. **`config/uptime-kuma/monitors.json`** — monitor entry `{"name": "JupyterHub
@@ -168,7 +168,7 @@ each file.
 
 ### Phase 2e: Port Assignment Outside Topology — Agent Required
 
-**What happened:** `inventory/host_vars/proxmox_florin.yml` contains a flat
+**What happened:** `inventory/host_vars/proxmox-host.yml` contains a flat
 `jupyterhub_port: 8097` assignment in a port-assignment section that is separate
 from the `lv3_service_topology` block (which is covered by the `yaml_topology_block`
 handler). The decommission script's topology handler matched the right topology
@@ -186,7 +186,7 @@ entire host_vars file for variables matching `<service_id>_port:` (and similar
 ### Phase 2f: False Positive in Capability Catalog Notes — Agent Required
 
 **What happened:** `config/service-capability-catalog.json`'s Redpanda entry had
-a `notes` field that read: *"...because docker-runtime-lv3 already reserves 8097
+a `notes` field that read: *"...because docker-runtime already reserves 8097
 for JupyterHub and 8099 for the Temporal UI."* The decommission script's
 text-match pass flagged this as a structural entry to remove, but it was just
 a prose comment inside a string value.

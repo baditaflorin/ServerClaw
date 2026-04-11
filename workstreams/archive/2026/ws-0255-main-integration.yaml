@@ -29,7 +29,7 @@ shared_surfaces:
   - docs/workstreams/ws-0255-live-apply.md
   - docs/workstreams/ws-0255-main-integration.md
   - inventory/group_vars/platform.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - playbooks/matrix-synapse.yml
   - playbooks/services/matrix-synapse.yml
   - collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml
@@ -111,7 +111,7 @@ ownership_manifest:
     - id: matrix_synapse_platform_contract
       paths:
         - inventory/group_vars/platform.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - scripts/generate_platform_vars.py
         - tests/test_generate_platform_vars.py
       mode: shared_contract
@@ -183,7 +183,7 @@ canonical_truth:
   changelog_entry: records ADR 0255 exact-main evidence on release 0.177.85 by
     carrying Matrix Synapse onto the latest available origin/main, preserving
     the canonical public and controller login proofs, and correcting public
-    HTTPS assurance from monitoring-lv3 to probe the internal edge while still
+    HTTPS assurance from monitoring to probe the internal edge while still
     validating the public hostname
   release_bump: patch
   included_in_repo_version: 0.177.85

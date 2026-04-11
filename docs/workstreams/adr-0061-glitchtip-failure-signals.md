@@ -1,10 +1,10 @@
 # Workstream ADR 0061: GlitchTip For Application Exceptions And Task Failures
 
-- ADR: [ADR 0061](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md)
+- ADR: [ADR 0061](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md)
 - Title: Focused exception and failure visibility for internal applications
 - Status: ready
 - Branch: `codex/adr-0061-glitchtip-failure-signals`
-- Worktree: `../proxmox_florin_server-glitchtip-failure-signals`
+- Worktree: `../proxmox-host_server-glitchtip-failure-signals`
 - Owner: codex
 - Depends On: `adr-0026-postgres-vm`, `adr-0049-private-api-publication`, `adr-0053-tempo-traces`
 - Conflicts With: none
@@ -35,8 +35,8 @@
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md`
+- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
+- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md`
 
 ## Merge Criteria
 

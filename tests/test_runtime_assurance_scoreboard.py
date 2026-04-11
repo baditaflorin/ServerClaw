@@ -10,16 +10,16 @@ def test_runtime_assurance_builder_promotes_direct_receipt_evidence_to_pass() ->
             "name": "Grafana",
             "category": "observability",
             "lifecycle_status": "active",
-            "vm": "monitoring-lv3",
-            "public_url": "https://grafana.lv3.org",
-            "subdomain": "grafana.lv3.org",
+            "vm": "monitoring",
+            "public_url": "https://grafana.example.com",
+            "subdomain": "grafana.example.com",
             "runbook": "docs/runbooks/monitoring-stack.md",
             "adr": "0011",
             "environments": {
                 "production": {
                     "status": "active",
-                    "url": "https://grafana.lv3.org",
-                    "subdomain": "grafana.lv3.org",
+                    "url": "https://grafana.example.com",
+                    "subdomain": "grafana.example.com",
                 }
             },
         }
@@ -29,7 +29,7 @@ def test_runtime_assurance_builder_promotes_direct_receipt_evidence_to_pass() ->
             "service_id": "grafana",
             "environment": "production",
             "status": "active",
-            "fqdn": "grafana.lv3.org",
+            "fqdn": "grafana.example.com",
             "publication": {"access_model": "upstream-auth"},
             "adapter": {"repo_route_service_id": "grafana", "tls": {"provider": "letsencrypt"}},
         }
@@ -86,16 +86,16 @@ def test_runtime_assurance_builder_keeps_missing_proof_visible() -> None:
             "name": "Keycloak",
             "category": "access",
             "lifecycle_status": "active",
-            "vm": "docker-runtime-lv3",
-            "public_url": "https://sso.lv3.org",
-            "subdomain": "sso.lv3.org",
+            "vm": "docker-runtime",
+            "public_url": "https://sso.example.com",
+            "subdomain": "sso.example.com",
             "runbook": "docs/runbooks/configure-keycloak.md",
             "adr": "0056",
             "environments": {
                 "production": {
                     "status": "active",
-                    "url": "https://sso.lv3.org",
-                    "subdomain": "sso.lv3.org",
+                    "url": "https://sso.example.com",
+                    "subdomain": "sso.example.com",
                 }
             },
         }
@@ -105,7 +105,7 @@ def test_runtime_assurance_builder_keeps_missing_proof_visible() -> None:
             "service_id": "keycloak",
             "environment": "production",
             "status": "active",
-            "fqdn": "sso.lv3.org",
+            "fqdn": "sso.example.com",
             "publication": {"access_model": "upstream-auth"},
             "adapter": {"repo_route_service_id": "keycloak", "tls": {"provider": "letsencrypt"}},
         }
@@ -152,16 +152,16 @@ def test_runtime_assurance_builder_handles_missing_health_entry_without_crashing
             "name": "Operations Portal",
             "category": "operations",
             "lifecycle_status": "active",
-            "vm": "docker-runtime-lv3",
-            "public_url": "https://ops.lv3.org",
-            "subdomain": "ops.lv3.org",
+            "vm": "docker-runtime",
+            "public_url": "https://ops.example.com",
+            "subdomain": "ops.example.com",
             "runbook": "docs/runbooks/platform-operations-portal.md",
             "adr": "0235",
             "environments": {
                 "production": {
                     "status": "active",
-                    "url": "https://ops.lv3.org",
-                    "subdomain": "ops.lv3.org",
+                    "url": "https://ops.example.com",
+                    "subdomain": "ops.example.com",
                 }
             },
         }
@@ -171,7 +171,7 @@ def test_runtime_assurance_builder_handles_missing_health_entry_without_crashing
             "service_id": "ops_portal",
             "environment": "production",
             "status": "active",
-            "fqdn": "ops.lv3.org",
+            "fqdn": "ops.example.com",
             "publication": {"access_model": "upstream-auth"},
             "adapter": {"repo_route_service_id": "ops_portal", "tls": {"provider": "letsencrypt"}},
         }
@@ -199,16 +199,16 @@ def test_runtime_assurance_builder_uses_explicit_smoke_suite_override() -> None:
             "name": "Operations Portal",
             "category": "access",
             "lifecycle_status": "active",
-            "vm": "docker-runtime-lv3",
-            "public_url": "https://ops.lv3.org",
-            "subdomain": "ops.lv3.org",
+            "vm": "docker-runtime",
+            "public_url": "https://ops.example.com",
+            "subdomain": "ops.example.com",
             "runbook": "docs/runbooks/ops-portal-down.md",
             "adr": "0251",
             "environments": {
                 "production": {
                     "status": "active",
-                    "url": "https://ops.lv3.org",
-                    "subdomain": "ops.lv3.org",
+                    "url": "https://ops.example.com",
+                    "subdomain": "ops.example.com",
                     "smoke_suites": [
                         {
                             "id": "portal-overview",
@@ -226,7 +226,7 @@ def test_runtime_assurance_builder_uses_explicit_smoke_suite_override() -> None:
             "service_id": "ops_portal",
             "environment": "production",
             "status": "active",
-            "fqdn": "ops.lv3.org",
+            "fqdn": "ops.example.com",
             "publication": {"access_model": "upstream-auth"},
             "adapter": {"repo_route_service_id": "ops_portal", "tls": {"provider": "letsencrypt"}},
         }

@@ -1,7 +1,7 @@
 # Workstream ADR 0202: Excalidraw Auto Generated Architecture Diagrams
 
 - ADR: [ADR 0202](../adr/0202-excalidraw-auto-generated-architecture-diagrams.md)
-- Title: Private Excalidraw publication at `draw.lv3.org` plus generated `.excalidraw` architecture scenes
+- Title: Private Excalidraw publication at `draw.example.com` plus generated `.excalidraw` architecture scenes
 - Status: merged
 - Implemented In Repo Version: 0.177.16
 - Implemented In Platform Version: 0.130.31
@@ -11,12 +11,12 @@
 - Owner: codex
 - Depends On: `adr-0038-generated-status-docs`, `adr-0075-service-capability-catalog`, `adr-0133-portal-authentication-by-default`, `adr-0136-http-security-headers`
 - Conflicts With: none
-- Shared Surfaces: `roles/excalidraw_runtime`, `playbooks/excalidraw.yml`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/`, `scripts/generate_diagrams.py`, `config/service-capability-catalog.json`, `inventory/host_vars/proxmox_florin.yml`, `docs/runbooks/`
+- Shared Surfaces: `roles/excalidraw_runtime`, `playbooks/excalidraw.yml`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/`, `scripts/generate_diagrams.py`, `config/service-capability-catalog.json`, `inventory/host_vars/proxmox-host.yml`, `docs/runbooks/`
 
 ## Scope
 
 - add a repo-managed `excalidraw_runtime` role and `playbooks/excalidraw.yml`
-- publish `draw.lv3.org` through the shared authenticated NGINX edge
+- publish `draw.example.com` through the shared authenticated NGINX edge
 - generate committed `.excalidraw` architecture scenes from repo-managed platform data
 - register Excalidraw in the service, subdomain, health-probe, dependency, SLO, and workflow catalogs
 - document operator converge and verification steps in `docs/runbooks/configure-excalidraw.md`
@@ -42,9 +42,9 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` serves the Excalidraw frontend on `http://10.10.10.20:3095`
-- `docker-runtime-lv3` serves the collaboration room on `http://10.10.10.20:3096`
-- `draw.lv3.org` is published through the shared authenticated edge
+- `docker-runtime` serves the Excalidraw frontend on `http://10.10.10.20:3095`
+- `docker-runtime` serves the collaboration room on `http://10.10.10.20:3096`
+- `draw.example.com` is published through the shared authenticated edge
 - Uptime Kuma manages the `Excalidraw Public` monitor
 
 ## Verification
@@ -73,5 +73,5 @@
 ## Notes For The Next Assistant
 
 - Keep the frontend collaboration-origin patch deterministic and confined to the runtime bootstrap script rather than forking the upstream image build without a stronger reason.
-- `draw.lv3.org` depends on shared-edge path routing. Future socket-path changes belong in the generic edge template contract, not in ad hoc nginx edits.
+- `draw.example.com` depends on shared-edge path routing. Future socket-path changes belong in the generic edge template contract, not in ad hoc nginx edits.
 - Treat `docs/diagrams/*.excalidraw` as generated outputs. If they drift, regenerate them from `scripts/generate_diagrams.py` and verify with `--check`.

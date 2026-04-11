@@ -10,7 +10,7 @@
 
 ## Context
 
-The developer portal (ADR 0094) renders ADRs, runbooks, the service catalog, API reference, and operational reference tables into a single browsable site at `docs.lv3.org`.
+The developer portal (ADR 0094) renders ADRs, runbooks, the service catalog, API reference, and operational reference tables into a single browsable site at `docs.example.com`.
 
 That aggregation is useful, but documentation sensitivity is not uniform:
 

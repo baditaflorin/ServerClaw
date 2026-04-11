@@ -19,7 +19,7 @@
 - make `robots.txt` universal across the shared NGINX edge
 - make `X-Robots-Tag: noindex, nofollow` universal across edge responses
 - add robots meta tags to repository-generated HTML surfaces served directly from the edge
-- cover the `lv3.org` apex in the shared edge certificate and DNS model
+- cover the `example.com` apex in the shared edge certificate and DNS model
 - add regression tests and role verification for the crawl-policy contract
 
 ## Non-Goals
@@ -43,8 +43,8 @@
 
 ## Expected Live Surfaces
 
-- `https://lv3.org/robots.txt` returns the shared disallow-all policy after apply from `main`
-- every published `https://*.lv3.org/robots.txt` endpoint returns the same policy after apply from `main`
+- `https://example.com/robots.txt` returns the shared disallow-all policy after apply from `main`
+- every published `https://*.example.com/robots.txt` endpoint returns the same policy after apply from `main`
 - published edge responses include `X-Robots-Tag: noindex, nofollow`
 - repository-generated HTML surfaces include `<meta name="robots" content="noindex, nofollow">`
 
@@ -58,18 +58,18 @@
 ## Merge Criteria
 
 - the edge role renders `robots.txt` without per-site exceptions
-- the shared certificate definition includes `lv3.org`
+- the shared certificate definition includes `example.com`
 - role verification checks `robots.txt`, the crawl header, and the robots meta tag
 - release metadata records ADR 0137 as implemented in repository version `0.134.0`
 
 ## Outcome
 
 - Implemented the shared crawl policy in the NGINX edge role and mirrored collection copy
-- Added apex certificate and DNS coverage for `lv3.org`
+- Added apex certificate and DNS coverage for `example.com`
 - Added HTML robots meta tags to repository-generated edge surfaces
 - Added focused tests and runbook verification for the crawl-policy contract
 - The shared public-edge rollout recorded in `receipts/live-applies/2026-03-25-adr-0136-http-security-headers-live-apply.json` carried the merged ADR 0137 edge state live in platform version `0.130.1`
-- Current live checks confirm `https://lv3.org/robots.txt`, `X-Robots-Tag: noindex, nofollow`, and the robots meta tag are all present on production
+- Current live checks confirm `https://example.com/robots.txt`, `X-Robots-Tag: noindex, nofollow`, and the robots meta tag are all present on production
 
 ## Notes For The Next Assistant
 

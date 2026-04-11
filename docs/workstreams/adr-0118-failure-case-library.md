@@ -4,7 +4,7 @@
 - Title: Structured Postgres case store for past failures with symptoms, root cause, remediation, and replay linkage — BM25 + signal-overlap retrieval surfaces similar cases in every triage report
 - Status: ready
 - Branch: `codex/adr-0118-failure-case-library`
-- Worktree: `../proxmox_florin_server-failure-case-library`
+- Worktree: `../proxmox-host_server-failure-case-library`
 - Owner: codex
 - Depends On: `adr-0057-mattermost-chatops`, `adr-0061-glitchtip`, `adr-0092-platform-api-gateway`, `adr-0093-interactive-ops-portal`, `adr-0098-postgres-ha`, `adr-0114-incident-triage-engine`, `adr-0115-mutation-ledger`
 - Conflicts With: none

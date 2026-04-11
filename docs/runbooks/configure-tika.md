@@ -3,11 +3,11 @@
 ## Purpose
 
 This runbook converges the private Apache Tika runtime from ADR 0275 and
-verifies that document text and metadata extraction work on `runtime-ai-lv3`.
+verifies that document text and metadata extraction work on `runtime-ai`.
 
 ## Result
 
-- `runtime-ai-lv3` runs Apache Tika from `/opt/tika`
+- `runtime-ai` runs Apache Tika from `/opt/tika`
 - the service listens privately on `10.10.10.90:9998`
 - `PUT /tika` returns clean plaintext when the caller requests `Accept: text/plain`
 - `PUT /meta` returns metadata JSON when the caller requests `Accept: application/json`
@@ -18,28 +18,28 @@ verifies that document text and metadata extraction work on `runtime-ai-lv3`.
 Syntax-check the Apache Tika workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-tika
 ```
 
-Converge the private runtime on `runtime-ai-lv3`:
+Converge the private runtime on `runtime-ai`:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-tika
 ```
 
 Replay the guarded production live-apply path:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make live-apply-service service=tika env=production
 ```
 
 Historical first runtime-ai pool rollout reference. This is not the routine Apache Tika replay path, but it remains useful if the entire runtime-ai pool ever needs to be rebuilt from the earlier migration baseline:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=runtime-ai-pool env=production EXTRA_ARGS='-e bypass_promotion=true'
 ```
 
@@ -48,11 +48,11 @@ ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=runtime-ai-pool env
 Verify the version endpoint on the guest:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=accept-new \
   -o UserKnownHostsFile=/dev/null \
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
   ops@10.10.10.90 \
   'python3 - <<'"'"'PY'"'"'
 import urllib.request
@@ -63,11 +63,11 @@ PY'
 Verify plaintext extraction:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=accept-new \
   -o UserKnownHostsFile=/dev/null \
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
   ops@10.10.10.90 \
   'python3 - <<'"'"'PY'"'"'
 import urllib.request
@@ -85,11 +85,11 @@ PY'
 Verify metadata extraction:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=accept-new \
   -o UserKnownHostsFile=/dev/null \
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
   ops@10.10.10.90 \
   'python3 - <<'"'"'PY'"'"'
 import json
@@ -113,8 +113,8 @@ PY'
   guest network; do not publish it through the public edge or the API gateway.
 - The repo-managed runtime intentionally uses the standard Apache Tika image,
   not the `-full` image, so OCR remains outside the live contract from ADR 0275.
-- Routine Tika replays on `runtime-ai-lv3` no longer require the ADR 0191
+- Routine Tika replays on `runtime-ai` no longer require the ADR 0191
   in-place mutation override that was previously needed when the service lived
-  on `docker-runtime-lv3`.
+  on `docker-runtime`.
 - Future callers must request `Accept: text/plain` on `/tika` if they want clean
   extracted text rather than the XHTML serialization.

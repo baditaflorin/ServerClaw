@@ -32,13 +32,13 @@ make scan-published-artifacts
 Or invoke the script directly:
 
 ```bash
-python3 scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+python3 scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 ```
 
 Scan a specific path only:
 
 ```bash
-python3 scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server --path build/changelog-portal
+python3 scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server --path build/changelog-portal
 ```
 
 ## Gate Integration

@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0265-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0265-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0265-live-apply`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-execution-gateway`, `adr-0083-docker-check-runners-for-repository-validation`, `adr-0156-agent-session-workspace-isolation`, `adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation`
 - Conflicts With: none
@@ -89,10 +89,10 @@
   passed, built immutable snapshot
   `de22562164d38fb57a8f2dcfb8ab8c58a49094fbed15643b73df2ccf3b52fce0`, and
   verified dry-run upload under
-  `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130452Z-de22562164d3/repo`.
+  `/home/ops/builds/proxmox-host_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130452Z-de22562164d3/repo`.
 - `LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make remote-validate`
   passed all six remote checks from
-  `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130506Z-de22562164d3/repo`.
+  `/home/ops/builds/proxmox-host_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130506Z-de22562164d3/repo`.
 - Canonical receipt:
   `receipts/live-applies/2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply.json`.
 

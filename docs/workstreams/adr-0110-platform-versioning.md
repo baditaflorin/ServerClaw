@@ -4,7 +4,7 @@
 - Title: Semantic versioning semantics definition, lv3 release command, structured RELEASE.md generation, and machine-checkable 1.0.0 readiness criteria
 - Status: merged
 - Branch: `codex/adr-0110-platform-versioning`
-- Worktree: `../proxmox_florin_server-platform-versioning`
+- Worktree: `../proxmox-host_server-platform-versioning`
 - Owner: codex
 - Depends On: `adr-0008-versioning-model`, `adr-0017-adr-lifecycle`, `adr-0073-promotion-gate`, `adr-0081-changelog`, `adr-0090-platform-cli`, `adr-0094-developer-portal`
 - Conflicts With: none
@@ -42,7 +42,7 @@
 
 - `lv3 release status` runs without errors and produces a 1.0.0 readiness checklist
 - `lv3 release --bump patch` updates VERSION, changelog.md, and creates a git tag
-- Docs site shows upgrade guide at `https://docs.lv3.org/upgrade/v1/`
+- Docs site shows upgrade guide at `https://docs.example.com/upgrade/v1/`
 
 ## Verification
 

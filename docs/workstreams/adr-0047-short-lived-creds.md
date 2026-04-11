@@ -1,10 +1,10 @@
 # Workstream ADR 0047: Short-Lived Credentials And Internal mTLS
 
-- ADR: [ADR 0047](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0047-short-lived-credentials-and-internal-mtls.md)
+- ADR: [ADR 0047](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0047-short-lived-credentials-and-internal-mtls.md)
 - Title: Credential lifetime and mTLS policy
 - Status: live_applied
 - Branch: `codex/adr-0047-short-lived-creds`
-- Worktree: `../proxmox_florin_server-short-lived-creds`
+- Worktree: `../proxmox-host_server-short-lived-creds`
 - Owner: codex
 - Depends On: `adr-0042-step-ca`, `adr-0043-openbao`, `adr-0046-identity-classes`
 - Conflicts With: none
@@ -27,7 +27,7 @@
 - `docs/runbooks/configure-step-ca.md`
 - `docs/runbooks/configure-openbao.md`
 - `inventory/group_vars/all.yml`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `playbooks/openbao.yml`
 - `roles/openbao_runtime/`
 - `workstreams.yaml`
@@ -54,5 +54,5 @@
 ## Live Apply Notes
 
 - Live apply completed on `2026-03-22` from `main`.
-- Controller-side verification proved short-lived `ops` SSH certificate login to both the Proxmox host and `docker-runtime-lv3`.
+- Controller-side verification proved short-lived `ops` SSH certificate login to both the Proxmox host and `docker-runtime`.
 - Controller-side verification proved that OpenBao serves a `step-ca`-issued certificate over the Proxmox Tailscale path and rejects TLS requests that do not present a valid client certificate.

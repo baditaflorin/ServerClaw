@@ -1,10 +1,10 @@
 # Workstream ADR 0099: Automated Backup Restore Verification
 
 - ADR: [ADR 0099](../adr/0099-automated-backup-restore-verification.md)
-- Title: Weekly Windmill workflow restoring postgres-lv3, docker-runtime-lv3, and backup-lv3 into ephemeral VMs and running smoke tests
+- Title: Weekly Windmill workflow restoring postgres, docker-runtime, and backup into ephemeral VMs and running smoke tests
 - Status: merged
 - Branch: `codex/adr-0099-backup-restore-verification`
-- Worktree: `../proxmox_florin_server-backup-restore-verification`
+- Worktree: `../proxmox-host_server-backup-restore-verification`
 - Owner: codex
 - Depends On: `adr-0020-backups`, `adr-0029-backup-vm`, `adr-0044-windmill`, `adr-0057-mattermost`, `adr-0066-audit-log`, `adr-0088-ephemeral-fixtures`, `adr-0097-alerting-routing`, `adr-0106-ephemeral-lifecycle`
 - Conflicts With: none
@@ -70,13 +70,13 @@
 ## Notes For The Next Assistant
 
 - The current implementation restores through the Proxmox host CLI over SSH instead of calling the PVE or PBS HTTP APIs directly. This keeps the workflow aligned with the repo's existing host-side PBS operations and avoids a second credentials path.
-- The smoke test for `docker-runtime-lv3` waits 90 seconds after SSH readiness before probing the service endpoints because Keycloak is the slowest runtime to settle after restore.
+- The smoke test for `docker-runtime` waits 90 seconds after SSH readiness before probing the service endpoints because Keycloak is the slowest runtime to settle after restore.
 - OpenBao remains a non-blocking observation in the Docker runtime smoke suite. A restored Docker runtime can still be judged pass if the required services recover while the OpenBao readiness probe reports a soft failure.
 - The repository does not currently ship a committed Prometheus or Alertmanager rule surface, so stale restore-verification age is exposed through Influx-backed Grafana status panels for now.
 
 ## Outcome
 
 - repository implementation is complete on `main` in repo release `0.99.0`
-- the restore-verification workflow now restores recent PBS snapshots for `postgres-lv3`, `docker-runtime-lv3`, and `backup-lv3` into the staged fixture network, runs service-specific smoke tests, emits receipts, and can publish notifications plus audit events
+- the restore-verification workflow now restores recent PBS snapshots for `postgres`, `docker-runtime`, and `backup` into the staged fixture network, runs service-specific smoke tests, emits receipts, and can publish notifications plus audit events
 - the repository now ships the Windmill wrapper, command and workflow catalog entries, dashboard summary metrics, and targeted test coverage for the restore-verification path
 - live rollout still requires enabling the workflow from `main`, verifying the staging bridge path on the Proxmox host, and confirming the external notification variables in the execution environment

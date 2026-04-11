@@ -48,7 +48,7 @@ uv run --with-requirements requirements/api-gateway.txt --with pyyaml --with jso
 Normal path:
 
 ```bash
-curl -sS -H "Authorization: Bearer <token>" https://api.lv3.org/v1/health | jq .
+curl -sS -H "Authorization: Bearer <token>" https://api.example.com/v1/health | jq .
 ```
 
 When Keycloak or a proxied upstream dependency is unavailable:

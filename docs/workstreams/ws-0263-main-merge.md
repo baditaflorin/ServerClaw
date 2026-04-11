@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.60
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0263-main-push`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0263-main-push`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0263-main-push`
 - Owner: codex
 - Depends On: `ws-0263-serverclaw-memory-substrate`
 
@@ -61,8 +61,8 @@ changing the replay's original source-commit context.
   `origin/main` commit `92c56a075c273dc4b4e2d720ceb5e75c46cb9399`.
 - The exact-main replay that backs this merge succeeded from source commit
   `7fe9af77cf7b842884533dde6b2b1af64857fe0d` with
-  `docker-runtime-lv3 ok=119 changed=19 failed=0 skipped=21` and
-  `proxmox_florin ok=42 changed=7 failed=0 skipped=15`.
+  `docker-runtime ok=119 changed=19 failed=0 skipped=21` and
+  `proxmox-host ok=42 changed=7 failed=0 skipped=15`.
 - External verification through `http://100.64.0.1:8010` returned
   `{"status":"ok","collection":"platform_context","memory_collection":"serverclaw_memory","memory_enabled":true}`,
   cited `docs/adr/0198-qdrant-vector-search-semantic-rag.md` via

@@ -249,7 +249,7 @@ adrs:
     implemented_in_platform_version: 0.6.0
     implemented_on: '2026-03-21'
   - adr: '0015'
-    title: lv3.org DNS And Subdomain Model
+    title: example.com DNS And Subdomain Model
     status: Accepted
     implementation_status: Accepted
     date: '2026-03-21'
@@ -260,7 +260,7 @@ adrs:
       - dns
       - subdomain
       - model
-    summary: We will use named subdomains under lv3.org for platform entry points.
+    summary: We will use named subdomains under example.com for platform entry points.
     filename: 0015-lv3-org-dns-and-subdomain-model.md
     path: docs/adr/0015-lv3-org-dns-and-subdomain-model.md
     implemented_in_platform_version: 0.5.0
@@ -423,7 +423,7 @@ adrs:
       - compose-managed
       - runtime
       - stacks
-    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
+    summary: Long-running workloads on docker-runtime will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
     implemented_in_platform_version: 0.23.0
@@ -506,7 +506,7 @@ adrs:
       - cli
       - wrapper
       - events
-    summary: We will count Docker builds on docker-build-lv3 by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring
+    summary: We will count Docker builds on docker-build by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring
       telemetry path.
     filename: 0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
     path: docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
@@ -706,7 +706,7 @@ adrs:
       - telemetry
       - telegraf
       - input
-    summary: We will collect container runtime telemetry on docker-runtime-lv3 by reusing the shared guest observability framework
+    summary: We will collect container runtime telemetry on docker-runtime by reusing the shared guest observability framework
       and Telegraf's Docker input plugin.
     filename: 0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md
     path: docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md
@@ -1301,7 +1301,7 @@ adrs:
       - platform
       - operations
       - portal
-    summary: We will deploy a Platform Operations Portal (ops.lv3.org) as a lightweight static web application served from
+    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served from
       the NGINX edge.
     filename: 0074-platform-operations-portal.md
     path: docs/adr/0074-platform-operations-portal.md
@@ -1421,7 +1421,7 @@ adrs:
       - deployment
       - history
       - portal
-    summary: We will generate a Deployment History Portal (changelog.lv3.org) as part of the operations portal suite (ADR
+    summary: We will generate a Deployment History Portal (changelog.example.com) as part of the operations portal suite (ADR
       0074).
     filename: 0081-platform-changelog-and-deployment-history.md
     path: docs/adr/0081-platform-changelog-and-deployment-history.md
@@ -1458,7 +1458,7 @@ adrs:
       - build
       - server
     summary: We will maintain a set of platform check runner images defined in docker/check-runners/ and published to the
-      internal registry (registry.lv3.org).
+      internal registry (registry.example.com).
     filename: 0083-docker-based-check-runner.md
     path: docs/adr/0083-docker-based-check-runner.md
     implemented_in_repo_version: 0.87.0
@@ -1512,7 +1512,7 @@ adrs:
       - role
       - distribution
     summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
-      internal Ansible Galaxy server (galaxy.lv3.org).
+      internal Ansible Galaxy server (galaxy.example.com).
     filename: 0086-ansible-collection-packaging.md
     path: docs/adr/0086-ansible-collection-packaging.md
     implemented_in_repo_version: 0.88.0
@@ -1614,7 +1614,7 @@ adrs:
       - platform
       - api
       - gateway
-    summary: We will deploy a platform API gateway on docker-runtime-lv3 as a FastAPI-based aggregation and proxy service,
+    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service,
       exposed on the host at http://10.10.10.20:8083 and
     filename: 0092-unified-platform-api-gateway.md
     path: docs/adr/0092-unified-platform-api-gateway.md
@@ -1671,7 +1671,7 @@ adrs:
       - across
       - platform
       - services
-    summary: 'We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime-lv3 and
+    summary: 'We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime and
       build a search indexer that ingests the six primary '
     filename: 0095-unified-platform-search.md
     path: docs/adr/0095-unified-platform-search.md
@@ -1727,7 +1727,7 @@ adrs:
       - availability
       - automated
       - failover
-    summary: We will provision a second PostgreSQL VM (postgres-replica-lv3, VMID 151) and implement Patroni-managed streaming
+    summary: We will provision a second PostgreSQL VM (postgres-replica, VMID 151) and implement Patroni-managed streaming
       replication with automatic failover, keeping p
     filename: 0098-postgres-high-availability.md
     path: docs/adr/0098-postgres-high-availability.md

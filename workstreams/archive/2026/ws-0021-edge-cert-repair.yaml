@@ -38,8 +38,8 @@ live_applied: true
 canonical_truth:
   changelog_entry: repaired shared edge publication playbooks so
     service-specific converges always load the canonical platform topology
-    before rebuilding the shared certificate SAN set, preventing `wiki.lv3.org`
-    and `draw.lv3.org` from dropping out of live publication
+    before rebuilding the shared certificate SAN set, preventing `wiki.example.com`
+    and `draw.example.com` from dropping out of live publication
   release_bump: patch
   included_in_repo_version: 0.177.28
   latest_receipts:

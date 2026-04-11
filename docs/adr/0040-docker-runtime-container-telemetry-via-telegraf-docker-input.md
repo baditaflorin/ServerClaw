@@ -9,9 +9,9 @@
 
 ## Context
 
-ADR 0011 established VM-level dashboards and guest-local service telemetry patterns, but `docker-runtime-lv3` is still mostly opaque once containers are running.
+ADR 0011 established VM-level dashboards and guest-local service telemetry patterns, but `docker-runtime` is still mostly opaque once containers are running.
 
-Today the managed dashboard for `docker-runtime-lv3` answers only VM questions such as:
+Today the managed dashboard for `docker-runtime` answers only VM questions such as:
 
 - how busy the VM CPU is
 - how full VM memory and disk are
@@ -28,7 +28,7 @@ We want that detail without introducing a second monitoring stack, without expos
 
 ## Decision
 
-We will collect container runtime telemetry on `docker-runtime-lv3` by reusing the shared guest observability framework and Telegraf's Docker input plugin.
+We will collect container runtime telemetry on `docker-runtime` by reusing the shared guest observability framework and Telegraf's Docker input plugin.
 
 The implementation is:
 
@@ -40,9 +40,9 @@ The implementation is:
    - add `telegraf` to the local `docker` group so the plugin can read container state
    - collect the standard `docker_container_cpu`, `docker_container_mem`, `docker_container_net`, `docker_container_status`, and `docker_container_health` measurements
 3. Keep the telemetry inside the existing private monitoring path.
-   - continue writing into the existing InfluxDB bucket on `monitoring-lv3`
+   - continue writing into the existing InfluxDB bucket on `monitoring`
    - continue provisioning Grafana dashboards from repo-managed JSON templates
-4. Extend the managed `LV3 docker-runtime-lv3 Detail` dashboard.
+4. Extend the managed `LV3 docker-runtime Detail` dashboard.
    - add container-count, aggregate CPU, aggregate memory, and unhealthy-container stats
    - add per-container CPU, memory, and network panels
    - add a table snapshot for container image, status, health, PID, exit code, and uptime

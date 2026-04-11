@@ -57,11 +57,11 @@ make converge-semaphore env=production
 ```
 
 Separately revoke the Gitea API token:
-1. Log in to Gitea at `https://git.lv3.org` as admin
+1. Log in to Gitea at `https://git.example.com` as admin
 2. Go to `ops-gitea` user settings > Applications
 3. Delete the old/compromised token
 4. Generate a new token
-5. Update the git remote: `git remote set-url gitea https://ops-gitea:<NEW_TOKEN>@git.lv3.org/ops/proxmox_florin_server.git`
+5. Update the git remote: `git remote set-url gitea https://ops-gitea:<NEW_TOKEN>@git.example.com/ops/proxmox-host_server.git`
 
 ### Step 2: Rotate Tier 2 (High-Privilege Infrastructure)
 
@@ -194,9 +194,9 @@ After all convergences complete:
 python config/windmill/scripts/portal-health-sweep.py
 
 # Check each OIDC login works
-# Visit: https://grafana.lv3.org (should redirect to Keycloak)
-# Visit: https://semaphore.lv3.org (should show Keycloak login)
-# Visit: https://harbor.lv3.org (should show Keycloak login)
+# Visit: https://grafana.example.com (should redirect to Keycloak)
+# Visit: https://semaphore.example.com (should show Keycloak login)
+# Visit: https://harbor.example.com (should show Keycloak login)
 
 # Run integration tests
 make test
@@ -235,5 +235,5 @@ use the existing unseal keys from `.local/openbao/init.json`.
 
 **SSH access lost after key rotation:**
 If the bootstrap key was rotated but not yet deployed, use the Proxmox console
-(web UI at `https://proxmox.lv3.org:8006`) to access VMs directly and deploy
+(web UI at `https://proxmox.example.com:8006`) to access VMs directly and deploy
 the new public key.

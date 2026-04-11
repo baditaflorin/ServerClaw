@@ -4,7 +4,7 @@
 - Title: CPU-only preflight engine that computes a structured SemanticDiff for any ExecutionIntent before execution — predicts exact changed objects across Ansible, OpenTofu, Docker, DNS, TLS, and firewall surfaces
 - Status: merged
 - Branch: `codex/adr-0120-diff-engine`
-- Worktree: `../proxmox_florin_server-diff-engine`
+- Worktree: `../proxmox-host_server-diff-engine`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0085-opentofu-vm-lifecycle`, `adr-0090-platform-cli`, `adr-0112-goal-compiler`, `adr-0113-world-state-materializer`, `adr-0115-mutation-ledger`, `adr-0116-change-risk-scoring`
 - Conflicts With: none

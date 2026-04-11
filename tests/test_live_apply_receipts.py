@@ -18,7 +18,7 @@ def build_receipt(source_commit: str) -> dict:
         "workflow_id": "test-workflow",
         "adr": "0083",
         "summary": "Test receipt.",
-        "targets": [{"kind": "guest", "name": "docker-build-lv3"}],
+        "targets": [{"kind": "guest", "name": "docker-build"}],
         "verification": [{"check": "Smoke", "result": "pass", "observed": "Healthy."}],
         "evidence_refs": ["docs/adr/0083-docker-based-check-runner.md"],
         "notes": [],

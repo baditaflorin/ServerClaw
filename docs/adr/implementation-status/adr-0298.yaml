@@ -36,7 +36,7 @@ detected_markers:
 - marker_type: git-commit
   adr_number: 0298
   location: git:afc1a3b59
-  evidence: afc1a3b59 [adr-0298] Route runtime cache ingress to artifact-cache-lv3
+  evidence: afc1a3b59 [adr-0298] Route runtime cache ingress to artifact-cache
   confidence: 0.8
   detected_on: '2026-04-07T07:55:14.670361'
 - marker_type: git-commit

@@ -14,7 +14,7 @@ shared_surfaces:
   - guest_access
   - private_network
   - inventory/hosts.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/service-capability-catalog.json
   - config/control-plane-lanes.json
 ownership_manifest:
@@ -41,7 +41,7 @@ ownership_manifest:
       contract: inventory-hosts-v1
     - id: proxmox_host_vars_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
       mode: shared_contract
       contract: proxmox-host-vars-v1
     - id: service_capability_catalog_contract

@@ -1,14 +1,14 @@
 # Workstream ADR 0029: Dedicated Backup VM With Local PBS
 
-- ADR: [ADR 0029](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0029-dedicated-backup-vm-with-local-pbs.md)
+- ADR: [ADR 0029](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0029-dedicated-backup-vm-with-local-pbs.md)
 - Title: Dedicated backup VM rollout
 - Status: merged
 - Branch: `codex/adr-0026-backup-vm`
-- Worktree: `../proxmox_florin_server-backup-vm`
+- Worktree: `../proxmox-host_server-backup-vm`
 - Owner: codex
 - Depends On: `adr-0020-backups`
 - Conflicts With: none
-- Shared Surfaces: `backup-lv3`, `/etc/pve/storage.cfg`, `/etc/pve/jobs.cfg`, guest provisioning, restore validation workflow
+- Shared Surfaces: `backup`, `/etc/pve/storage.cfg`, `/etc/pve/jobs.cfg`, guest provisioning, restore validation workflow
 
 ## Scope
 
@@ -43,12 +43,12 @@
 
 ## Verification
 
-- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/backup-vm.yml --syntax-check`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo qm list | grep 160'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /storage/lv3-backup-pbs --output-format json-pretty'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesm list lv3-backup-pbs --vmid 110'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo vzdump 110 --storage lv3-backup-pbs --mode snapshot --compress zstd --notification-mode notification-system'`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/backup-vm.yml --syntax-check`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo qm list | grep 160'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /storage/lv3-backup-pbs --output-format json-pretty'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /cluster/backup/backup-nightly --output-format json-pretty'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesm list lv3-backup-pbs --vmid 110'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo vzdump 110 --storage lv3-backup-pbs --mode snapshot --compress zstd --notification-mode notification-system'`
 
 ## Merge Criteria
 
@@ -61,6 +61,6 @@
 
 - this workstream intentionally improves restore operations without claiming off-host disaster recovery
 - a later follow-up should add replication or a second-site copy
-- live validation on 2026-03-22 succeeded for VM `160`, storage `lv3-backup-pbs`, job `backup-lv3-nightly`, and an ad hoc backup artifact for VM `110`
+- live validation on 2026-03-22 succeeded for VM `160`, storage `lv3-backup-pbs`, job `backup-nightly`, and an ad hoc backup artifact for VM `110`
 - the implementation branch remained `codex/adr-0026-backup-vm`, but the ADR and workstream were renumbered to `0029` during integration because `0028` was already assigned on `main`
 - the workstream is merged, but `live_applied` remains `false` in the registry until the merged automation is re-applied from `main`

@@ -30,7 +30,7 @@ def test_superset_playbook_orders_dns_database_runtime_edge_and_public_verify() 
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "bi.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "bi.example.com"
 
     assert [role["role"] for role in postgres_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
@@ -76,7 +76,7 @@ def test_superset_workflow_command_and_scope_catalog_entries_exist() -> None:
         "mutation_scope": "platform",
         "shared_surfaces": [
             "service:superset",
-            "inventory/host_vars/proxmox_florin.yml",
+            "inventory/host_vars/proxmox-host.yml",
         ],
     }
 

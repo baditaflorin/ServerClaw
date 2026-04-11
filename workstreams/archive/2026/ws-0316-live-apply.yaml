@@ -31,7 +31,7 @@ shared_surfaces:
   - docs/runbooks/configure-windmill.md
   - docs/runbooks/configure-plausible.md
   - docs/runbooks/windmill-operator-access-admin.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
   - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
   - config/windmill/scripts/**
@@ -40,7 +40,7 @@ shared_surfaces:
   - tests/test_windmill_operator_admin_app.py
   - docs/site-generated/architecture/dependency-graph.md
   - receipts/ops-portal-snapshot.html
-  - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+  - receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
   - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
   - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-mainline-live-apply.json
   - receipts/live-applies/evidence/2026-04-02-ws-0316-*
@@ -92,7 +92,7 @@ ownership_manifest:
       contract: adr-0316-metadata-v1
     - id: plausible_and_windmill_contracts
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
         - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
         - config/windmill/scripts/**
@@ -108,7 +108,7 @@ ownership_manifest:
         - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-live-apply.json
         - receipts/live-applies/2026-04-02-adr-0316-journey-analytics-mainline-live-apply.json
         - receipts/live-applies/evidence/2026-04-02-ws-0316-*
-        - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
       mode: shared_contract
       contract: live-apply-receipts-v1
 canonical_truth:

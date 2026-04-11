@@ -6,11 +6,11 @@ This runbook covers ADR 0157: the per-lane admission budget enforced before muta
 
 ## Canonical Sources
 
-- execution-lane catalog: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml)
-- workflow reservation catalog: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-- reservation defaults: [config/workflow-defaults.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-defaults.yaml)
-- scheduler implementation: [platform/scheduler/lanes.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/lanes.py)
-- scheduler entrypoint: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py)
+- execution-lane catalog: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/execution-lanes.yaml)
+- workflow reservation catalog: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+- reservation defaults: [config/workflow-defaults.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-defaults.yaml)
+- scheduler implementation: [platform/scheduler/lanes.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/lanes.py)
+- scheduler entrypoint: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py)
 
 ## Inspection
 

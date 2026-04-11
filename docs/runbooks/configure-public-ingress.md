@@ -27,8 +27,8 @@ make configure-ingress
 From an external client:
 
 ```bash
-curl -I http://65.108.75.123
-curl -I http://nginx.lv3.org
+curl -I http://203.0.113.1
+curl -I http://nginx.example.com
 ```
 
 From the Proxmox host:

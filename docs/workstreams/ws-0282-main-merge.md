@@ -8,7 +8,7 @@
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0282-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0282-main-merge`
 - Owner: codex
 - Depends On: `ws-0282-live-apply`
 
@@ -32,7 +32,7 @@ was already live on `0.130.60`.
 - `docs/runbooks/configure-mail-platform.md`
 - `inventory/group_vars/all.yml`
 - `inventory/group_vars/staging.yml`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `collections/ansible_collections/lv3/platform/playbooks/mailpit.yml`
 - `collections/ansible_collections/lv3/platform/roles/mailpit_runtime/`
@@ -101,11 +101,11 @@ was already live on `0.130.60`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production`
   succeeded from committed source `41653f0bfd2ec29a60796f50ddbf07dce76a6d87`
   with final recap
-  `docker-runtime-lv3 : ok=115 changed=4 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`,
+  `docker-runtime : ok=115 changed=4 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`,
   preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-live-apply-r7.txt`.
 - A fresh guest-local Mailpit probe returned `Version=v1.29.5`, `Messages=1`,
-  and `SMTPAccepted=16`, and a fresh probe from `monitoring-lv3` sent SMTP to
+  and `SMTPAccepted=16`, and a fresh probe from `monitoring` sent SMTP to
   `10.10.10.20:1025` and confirmed exactly one captured message with subject
   `LV3 Mailpit exact-main verification` created at `2026-03-30T04:37:04.036Z`,
   preserved in
@@ -133,28 +133,28 @@ was already live on `0.130.60`.
   and
   `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-live-apply-receipts-validate-r2.txt`.
 - A fresh current-server state check after the exact-main replay confirmed the
-  Proxmox host still reports `Debian-trixie-latest-amd64-base` and
+  Proxmox host still reports `proxmox-host` and
   `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, while
-  `docker-runtime-lv3` still runs `mailpit` as a healthy container on image
+  `docker-runtime` still runs `mailpit` as a healthy container on image
   digest `sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf`
   with Mailpit API info `Version=v1.29.5`, `Messages=1`, and
   `SMTPAccepted=18`, preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-host-state-r1.txt`
   and
   `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-mailpit-runtime-state-r2.txt`.
-- A fresh `monitoring-lv3` SMTP probe deleted old Mailpit messages, sent mail
+- A fresh `monitoring` SMTP probe deleted old Mailpit messages, sent mail
   to `10.10.10.20:1025`, and confirmed exactly one captured message with
   subject `LV3 Mailpit exact-main verification` created at
   `2026-03-30T07:25:12.36Z`, preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-monitoring-probe-r5.txt`.
 - An exploratory live `playbooks/mail-platform-verify.yml -e env=staging` run
-  still targeted `docker-runtime-staging-lv3` and failed with `Connection
+  still targeted `docker-runtime` and failed with `Connection
   refused` on `127.0.0.1:8025` because the current server does not deploy the
   separate staging guest topology; that environment-scope limitation is
   preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-mail-platform-verify-r1.txt`,
   while the authoritative current-server Mailpit proof remains the direct
-  `monitoring-lv3 -> docker-runtime-lv3` probe above.
+  `monitoring -> docker-runtime` probe above.
 - The final mainline closeout flips this workstream to `status: merged` on the
   integrated tree and refreshes the generated canonical-truth surfaces from
   that terminal state before pushing to `origin/main`.

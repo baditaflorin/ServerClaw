@@ -85,7 +85,7 @@ def test_temporal_playbook_bootstraps_schema_from_localhost_and_deploys_runtime(
     assert schema_update_task["ansible.builtin.command"]["argv"][5] == "{{ temporal_admin_tools_image }}"
     assert (
         runtime_play["hosts"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-control' }}"
     )
     assert [role["role"] for role in runtime_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",

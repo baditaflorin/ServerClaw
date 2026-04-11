@@ -30,12 +30,12 @@ We deploy Netdata as a parent-plus-children topology for real-time metrics.
 
 - service id: `realtime`
 - product: Netdata
-- parent host: `monitoring-lv3`
+- parent host: `monitoring`
 - child agents: all hosts in `lv3_guests` + `proxmox_hosts` for the active
   environment, excluding the monitoring parent — derived dynamically from
   inventory groups (see ADR 0319). No hardcoded list is maintained.
 - parent listener: `http://10.10.10.40:19999`
-- public URL: `https://realtime.lv3.org`
+- public URL: `https://realtime.example.com`
 - publication model: shared NGINX edge plus the existing Keycloak-backed
   oauth2-proxy gate
 - retention target: one day of parent-local dbengine retention for live
@@ -92,29 +92,29 @@ The 2026-03-27 rollout verified:
   scrape path, and shared edge publication
 - `HETZNER_DNS_API_TOKEN=... make converge-realtime env=production` reran
   cleanly through the dedicated workflow wrapper and finished with
-  `monitoring-lv3 : ok=185 changed=9 failed=0`, `nginx-lv3 : ok=100 changed=3 failed=0`,
-  `proxmox_florin : ok=55 changed=0 failed=0`, `docker-runtime-lv3 : ok=26 changed=2 failed=0`,
-  and `postgres-lv3 : ok=24 changed=0 failed=0`
-- Prometheus on `monitoring-lv3` returned five `netdata_info{job="netdata"}`
+  `monitoring : ok=185 changed=9 failed=0`, `nginx-edge : ok=100 changed=3 failed=0`,
+  `proxmox-host : ok=55 changed=0 failed=0`, `docker-runtime : ok=26 changed=2 failed=0`,
+  and `postgres : ok=24 changed=0 failed=0`
+- Prometheus on `monitoring` returned five `netdata_info{job="netdata"}`
   series for the realtime service topology, proving the consolidated parent
   export is being scraped
-- `dig +short realtime.lv3.org` returned `65.108.75.123` and
-  `curl -skI https://realtime.lv3.org/` returned `HTTP/2 302` to
+- `dig +short realtime.example.com` returned `203.0.113.1` and
+  `curl -skI https://realtime.example.com/` returned `HTTP/2 302` to
   `/oauth2/sign_in`, confirming the public route and shared auth gate
-- `make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS='--base-url https://uptime.lv3.org'`
+- `make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS='--base-url https://uptime.example.com'`
   created the private `Realtime Metrics Private` monitor and
   `make uptime-kuma-manage ACTION=ensure-monitors` reran cleanly from the
   separate worktree
 - a latest-main replay on 2026-03-28 uncovered that the realtime playbook was
   not inheriting `inventory/group_vars/platform.yml` during live converge; after
   adding explicit `vars_files` loading to every realtime play and rerunning
-  `make converge-realtime env=production`, `realtime.lv3.org` rendered on the
+  `make converge-realtime env=production`, `realtime.example.com` rendered on the
   live edge again and returned the expected oauth2 sign-in redirect
 
-The first governed `make provision-subdomain FQDN=realtime.lv3.org env=production`
+The first governed `make provision-subdomain FQDN=realtime.example.com env=production`
 attempt hit a transient Hetzner record-creation failure inside a `no_log`
 Ansible task even though zone discovery and token validation succeeded. A
-direct Hetzner API POST using the same credential from `nginx-lv3` created the
+direct Hetzner API POST using the same credential from `nginx-edge` created the
 missing A record, and the governed playbook then reran cleanly, expanded the
 shared Let's Encrypt certificate, and completed the edge verification path.
 

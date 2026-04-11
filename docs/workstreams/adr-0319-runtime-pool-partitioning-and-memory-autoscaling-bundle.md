@@ -8,7 +8,7 @@
 - Implemented On: 2026-04-01
 - Live Applied On: N/A
 - Branch: `codex/adr-0319-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0319-runtime-cells/.worktrees/adr-0319-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0319-runtime-cells/.worktrees/adr-0319-main-integration`
 - Owner: codex
 - Depends On: `adr-0105-platform-capacity-model`, `adr-0154-vm-scoped-parallel-execution-lanes`, `adr-0157-per-vm-concurrency-budget-and-resource-reservation`, `adr-0184-failure-domain-labels-and-anti-affinity-policy`, `adr-0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads`, `adr-0214-production-and-staging-cells-as-the-unit-of-high-availability`, `adr-0232-nomad-for-durable-batch-and-long-running-internal-jobs`
 - Conflicts With: none
@@ -20,7 +20,7 @@
 - define runtime pools as the next partition boundary inside the existing environment cell model
 - define pool-scoped deployment surfaces so agents can change one runtime pool without blocking unrelated work on another
 - define an explicit runtime memory increase, host free-memory floor, and autoscaling bounds for elastic pools
-- define mobility tiers and migration waves so the current `docker-runtime-lv3` catch-all host can be decomposed safely rather than all at once
+- define mobility tiers and migration waves so the current `docker-runtime` catch-all host can be decomposed safely rather than all at once
 - refine the bundle so it points at battle-tested API-first OSS building blocks instead of leaving the implementation path overly custom
 
 ## Non-Goals
@@ -69,4 +69,4 @@
 
 - implement ADR 0319 and ADR 0320 together first so the new pool boundary and the new deployment boundary arrive together
 - do ADR 0321 before ADR 0322 so autoscaling consumes governed memory envelopes instead of inventing its own
-- use ADR 0323 to decide which current `docker-runtime-lv3` services are safe first movers versus anchors that must stay fixed until later
+- use ADR 0323 to decide which current `docker-runtime` services are safe first movers versus anchors that must stay fixed until later

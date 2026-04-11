@@ -12,13 +12,13 @@ Use it when you need to:
 
 ## Canonical Sources
 
-- lane catalog: [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
-- lane CLI and validator: [scripts/control_plane_lanes.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_plane_lanes.py)
-- API publication catalog: [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
-- service inventory cross-checks: [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
-- workflow cross-checks: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-- architecture decision: [docs/adr/0045-control-plane-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0045-control-plane-communication-lanes.md)
-- publication policy: [docs/runbooks/private-first-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md)
+- lane catalog: [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/control-plane-lanes.json)
+- lane CLI and validator: [scripts/control_plane_lanes.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/control_plane_lanes.py)
+- API publication catalog: [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/api-publication.json)
+- service inventory cross-checks: [inventory/host_vars/proxmox-host.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/host_vars/proxmox-host.yml)
+- workflow cross-checks: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+- architecture decision: [docs/adr/0045-control-plane-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0045-control-plane-communication-lanes.md)
+- publication policy: [docs/runbooks/private-first-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/private-first-api-publication.md)
 
 ## Lane Summary
 
@@ -49,8 +49,8 @@ Use it when you need to:
 When adding or changing a control-plane surface:
 
 1. choose one existing lane or justify a new architectural decision
-2. update [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
-3. classify any HTTP API or webhook in [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
+2. update [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/control-plane-lanes.json)
+3. classify any HTTP API or webhook in [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/api-publication.json)
 4. update the owning runbook and workflow or service docs if the surface changed operationally
 5. run `python scripts/control_plane_lanes.py --validate`
 6. run `python scripts/api_publication.py --validate`

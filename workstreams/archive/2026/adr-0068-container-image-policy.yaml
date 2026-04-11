@@ -15,6 +15,6 @@ shared_surfaces:
   - Docker Compose files
   - config/image-catalog.json
   - receipts/image-scans/
-  - docker-build-lv3 role
+  - docker-build role
 ready_to_merge: false
 live_applied: false

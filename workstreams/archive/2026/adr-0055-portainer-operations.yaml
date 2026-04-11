@@ -12,7 +12,7 @@ depends_on:
   - adr-0048-command-catalog
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
+  - docker-runtime
   - Compose stacks
   - container logs
   - runtime controls

@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Operate the LV3 Patroni-managed PostgreSQL HA pair behind the `database.lv3.org` VIP.
+Operate the LV3 Patroni-managed PostgreSQL HA pair behind the `database.example.com` VIP.
 
 ## Topology
 
-- `postgres-lv3` at `10.10.10.50`
-- `postgres-replica-lv3` at `10.10.10.51`
-- VIP `10.10.10.55` exposed as `database.lv3.org`
+- `postgres` at `10.10.10.50`
+- `postgres-replica` at `10.10.10.51`
+- VIP `10.10.10.55` exposed as `database.example.com`
 - Patroni REST API on `:8008`
-- etcd quorum members on `postgres-lv3`, `postgres-replica-lv3`, and `monitoring-lv3`
+- etcd quorum members on `postgres`, `postgres-replica`, and `monitoring`
 
 ## Check Cluster State
 
@@ -51,7 +51,7 @@ ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.
 Only continue when Patroni is active on both PostgreSQL VMs, the replica VM exists, and the VIP path is reachable. Run from either PostgreSQL VM:
 
 ```bash
-sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres-lv3 --candidate postgres-replica-lv3
+sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres --candidate postgres-replica
 ```
 
 Then verify:
@@ -64,13 +64,13 @@ psql "host=10.10.10.55 port=5432 dbname=postgres user=ops sslmode=prefer" -Atqc 
 ## Switch Back
 
 ```bash
-sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres-replica-lv3 --candidate postgres-lv3
+sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres-replica --candidate postgres
 ```
 
 ## Unplanned Failover Checks
 
 1. Confirm Patroni elected a new leader.
-2. Confirm `database.lv3.org:5432` accepts connections.
+2. Confirm `database.example.com:5432` accepts connections.
 3. Confirm dependent services are healthy:
    - Keycloak discovery
    - NetBox private UI
@@ -84,7 +84,7 @@ sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres-replica-
 After the failed node returns:
 
 ```bash
-sudo patronictl -c /etc/patroni/config.yml reinit postgres-ha postgres-lv3
+sudo patronictl -c /etc/patroni/config.yml reinit postgres-ha postgres
 ```
 
 Use the current leader as the reinit source if Patroni prompts for it.
@@ -93,7 +93,7 @@ Use the current leader as the reinit source if Patroni prompts for it.
 
 - If both PostgreSQL VMs are up but no leader exists, check the etcd quorum on all three members.
 - If Patroni is healthy but the VIP does not move, inspect `keepalived` on both PostgreSQL VMs.
-- If services fail to reconnect after failover, verify they are using `database.lv3.org` rather than a pinned node IP.
+- If services fail to reconnect after failover, verify they are using `database.example.com` rather than a pinned node IP.
 
 ## Rehearsal Evidence
 

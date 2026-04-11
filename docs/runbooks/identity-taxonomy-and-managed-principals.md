@@ -2,24 +2,24 @@
 
 ## Purpose
 
-This runbook turns [ADR 0046](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0046-identity-classes-for-humans-services-and-agents.md) into an enforced repository contract.
+This runbook turns [ADR 0046](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0046-identity-classes-for-humans-services-and-agents.md) into an enforced repository contract.
 
 It defines:
 
 - the four allowed identity classes
 - the current named principals already in use on the platform
-- the metadata every future identity must carry in [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
+- the metadata every future identity must carry in [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml)
 
 ## Canonical Sources
 
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml)
   - `desired_state.identity_taxonomy`: required class definitions and managed identities
   - `observed_state.identity_taxonomy`: the current review date and the principals confirmed to exist
-- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py)
+- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repository_data_models.py)
   - enforces the taxonomy structure in the standard `make validate` gate
-- [docs/runbooks/proxmox-api-automation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
+- [docs/runbooks/proxmox-api-automation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/proxmox-api-automation.md)
   - operational lifecycle for the current Proxmox agent identity
-- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json)
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/controller-local-secrets.json)
   - controller-local secret inventory for credential material stored outside git
 
 ## Allowed Classes
@@ -64,18 +64,18 @@ The standard data-model validator fails if any of these fields are missing.
 
 | Principal | Class | Owner | Main Surface | Notes |
 | --- | --- | --- | --- | --- |
-| `ops` | `human_operator` | `Florin Badita` | Proxmox host and guest Linux administration | Currently shares the bootstrap SSH key material with the break-glass `root` path; ADR 0047 should retire that overlap. |
-| `ops@pam` | `human_operator` | `Florin Badita` | Routine Proxmox UI and CLI administration | Protected with TOTP and scoped to Proxmox administration. |
-| `florin.badita` | `human_operator` | `Florin Badita` | Shared SSO for internal control-plane apps | Provisioned in Keycloak with TOTP enrollment required on first interactive login. |
+| `ops` | `human_operator` | `Platform Operator` | Proxmox host and guest Linux administration | Currently shares the bootstrap SSH key material with the break-glass `root` path; ADR 0047 should retire that overlap. |
+| `ops@pam` | `human_operator` | `Platform Operator` | Routine Proxmox UI and CLI administration | Protected with TOTP and scoped to Proxmox administration. |
+| `florin.badita` | `human_operator` | `Platform Operator` | Shared SSO for internal control-plane apps | Provisioned in Keycloak with TOTP enrollment required on first interactive login. |
 | `lv3-automation@pve` | `agent` | `Repository automation` | Proxmox API automation | Uses a privilege-separated token stored only under `.local/proxmox-api`. |
 | `lv3-agent-hub` | `agent` | `Repository automation` | Shared Keycloak client-credentials path for approved agent workflows | Confidential client secret is mirrored only under `.local/keycloak/`. |
-| `server@lv3.org` | `service` | `Mail platform runtime` | Managed mailbox and authenticated mail submission | Backed by the internal mail platform on `docker-runtime-lv3`. |
-| `alerts@lv3.org` | `service` | `Platform operations` | Operator alert sender profile | Scoped to outbound alert delivery through the managed mail gateway and backed by profile-specific credentials under `.local/mail-platform/profiles/`. |
-| `platform@lv3.org` | `service` | `Platform services` | Platform transactional sender profile | Scoped to repo-managed service notifications through the managed mail gateway. |
-| `agents@lv3.org` | `agent` | `Repository automation` | Agent and workflow report sender profile | Scoped to automated report delivery through the managed mail gateway and rejected if reused for another profile. |
+| `server@example.com` | `service` | `Mail platform runtime` | Managed mailbox and authenticated mail submission | Backed by the internal mail platform on `docker-runtime`. |
+| `alerts@example.com` | `service` | `Platform operations` | Operator alert sender profile | Scoped to outbound alert delivery through the managed mail gateway and backed by profile-specific credentials under `.local/mail-platform/profiles/`. |
+| `platform@example.com` | `service` | `Platform services` | Platform transactional sender profile | Scoped to repo-managed service notifications through the managed mail gateway. |
+| `agents@example.com` | `agent` | `Repository automation` | Agent and workflow report sender profile | Scoped to automated report delivery through the managed mail gateway and rejected if reused for another profile. |
 | `grafana-oauth` | `service` | `Monitoring stack` | Grafana OIDC login against the shared Keycloak realm | Confidential client secret is used only for Grafana's generic OAuth integration. |
-| `root` | `break_glass` | `Florin Badita` | Emergency Proxmox host recovery | Key-only and reserved for recovery. Rotate immediately after any real use. |
-| `lv3-bootstrap-admin` | `break_glass` | `Florin Badita` | Keycloak master-realm recovery and realm administration bootstrap | Stored under `.local/keycloak/` and reserved for IdP recovery, not routine operator login. |
+| `root` | `break_glass` | `Platform Operator` | Emergency Proxmox host recovery | Key-only and reserved for recovery. Rotate immediately after any real use. |
+| `lv3-bootstrap-admin` | `break_glass` | `Platform Operator` | Keycloak master-realm recovery and realm administration bootstrap | Stored under `.local/keycloak/` and reserved for IdP recovery, not routine operator login. |
 
 ## Change Rules
 

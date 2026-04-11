@@ -4,7 +4,7 @@
 - Title: Durable loop that carries one finding through triage, proposal, execution, verification, and operator escalation
 - Status: live_applied
 - Branch: `codex/adr-0126-logic-loop-clean`
-- Worktree: `../proxmox_florin_server-adr-0126-logic-loop-clean`
+- Worktree: `../proxmox-host_server-adr-0126-logic-loop-clean`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0064-health-probe-contracts`, `adr-0071-agent-observation-loop`, `adr-0090-platform-cli`, `adr-0112-goal-compiler`, `adr-0114-incident-triage`, `adr-0115-mutation-ledger`, `adr-0119-budgeted-workflow-scheduler`
 - Conflicts With: `adr-0112-goal-compiler`, `adr-0114-incident-triage`, `adr-0119-budgeted-workflow-scheduler`
@@ -47,7 +47,7 @@
 - run `python3 scripts/lv3_cli.py loop start --trigger manual --service netbox`
 - run the repo-managed `scripts/sync_windmill_seed_scripts.py` helper against the production Windmill API from the rebased current-main checkout
 - run `POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fplatform_observation_loop` with a critical service-health finding and confirm the live Windmill wrapper returns structured loop output
-- run a live `observation_finding` closure-loop start on `docker-runtime-lv3` with `goal_achieved: true` and confirm the state machine stops at `RESOLVED`
+- run a live `observation_finding` closure-loop start on `docker-runtime` with `goal_achieved: true` and confirm the state machine stops at `RESOLVED`
 
 ## Merge Criteria
 

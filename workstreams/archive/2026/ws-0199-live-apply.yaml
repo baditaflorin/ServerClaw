@@ -13,7 +13,7 @@ depends_on:
 - adr-0107-platform-extension-model
 conflicts_with: []
 shared_surfaces:
-- inventory/host_vars/proxmox_florin.yml
+- inventory/host_vars/proxmox-host.yml
 - inventory/group_vars/platform.yml
 - config/service-capability-catalog.json
 - config/subdomain-catalog.json
@@ -83,7 +83,7 @@ ownership_manifest:
     mode: exclusive
   - id: outline_platform_catalog_contract
     paths:
-    - inventory/host_vars/proxmox_florin.yml
+    - inventory/host_vars/proxmox-host.yml
     - inventory/group_vars/platform.yml
     - docs/adr/.index.yaml
     - config/service-capability-catalog.json
@@ -134,7 +134,7 @@ ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: integrated ADR 0199 by publishing the repo-managed Outline living
-    knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak
+    knowledge wiki at `wiki.example.com`, wiring the durable `outline.automation` Keycloak
     bootstrap path, and verifying the governed living-knowledge collections end to
     end
   release_bump: patch

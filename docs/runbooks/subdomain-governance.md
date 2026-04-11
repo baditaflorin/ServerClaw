@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Keep `lv3.org` hostnames catalogued, validated, and provisioned through repo-managed automation instead of ad hoc DNS and edge edits.
+Keep `example.com` hostnames catalogued, validated, and provisioned through repo-managed automation instead of ad hoc DNS and edge edits.
 
 ## Canonical Sources
 
@@ -10,14 +10,14 @@ Keep `lv3.org` hostnames catalogued, validated, and provisioned through repo-man
 - `config/subdomain-exposure-registry.json`
 - `config/service-capability-catalog.json`
 - `roles/nginx_edge_publication/`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 
 ## Validation
 
 Run the subdomain-specific checks directly:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 uvx --from pyyaml python scripts/subdomain_catalog.py --validate
 uv run --with pyyaml python scripts/provider_boundary_catalog.py --validate
 ```
@@ -25,7 +25,7 @@ uv run --with pyyaml python scripts/provider_boundary_catalog.py --validate
 Run the full repository gate:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make validate
 ```
 
@@ -34,8 +34,8 @@ make validate
 Use the governed workflow only after the hostname already exists in `config/subdomain-catalog.json`.
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
+HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.example.com
 ```
 
 ## Reconcile Governed DNS Drift
@@ -45,7 +45,7 @@ in the catalog and should be reconciled as one audited bundle instead of as a
 single-hostname change:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 HETZNER_DNS_API_TOKEN=... make route-dns-assertion-ledger
 ```
 

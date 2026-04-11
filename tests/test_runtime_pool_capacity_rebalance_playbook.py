@@ -26,7 +26,7 @@ def test_runtime_pool_capacity_rebalance_playbook_covers_host_replay_guest_verif
     assert verify_qm_task["ansible.builtin.command"]["argv"][:2] == ["qm", "config"]
 
     assert playbook[1]["name"] == "Verify the rebalanced guests come back with SSH and Docker"
-    assert playbook[1]["hosts"] == "docker-build-lv3:artifact-cache-lv3:coolify-lv3:docker-runtime-lv3"
+    assert playbook[1]["hosts"] == "docker-build:artifact-cache:coolify:docker-runtime"
     start_task = next(
         task for task in playbook[1]["tasks"] if task["name"] == "Ensure Docker is started on the rebalanced guest"
     )

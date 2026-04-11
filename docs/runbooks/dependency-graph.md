@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook covers the repository-managed service dependency graph introduced by [ADR 0104](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0104-service-dependency-graph.md).
+This runbook covers the repository-managed service dependency graph introduced by [ADR 0104](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0104-service-dependency-graph.md).
 
 Use it when you need to:
 

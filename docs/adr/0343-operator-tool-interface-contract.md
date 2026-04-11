@@ -81,7 +81,7 @@ major version bump to the tool.
 ```json
 // Exit 0 examples
 {"status": "installed", "key_fingerprint": "SHA256:abc123", "target_vmid": 171}
-{"status": "migrated", "migrated_count": 3, "from_server": "coolify-lv3", "to_server": "coolify-apps-lv3"}
+{"status": "migrated", "migrated_count": 3, "from_server": "coolify", "to_server": "coolify-apps"}
 
 // Exit 2 example
 {"status": "no_op", "reason": "already_installed"}
@@ -140,7 +140,7 @@ mutations must be added to the registry before merging.
 The standard playbook pattern for any contract-compliant tool call:
 
 ```yaml
-- name: Install SSH deploy key on coolify-apps-lv3
+- name: Install SSH deploy key on coolify-apps
   ansible.builtin.command: >
     python3 scripts/proxmox_tool.py
     --auth-file "{{ proxmox_api_token_local_file }}"

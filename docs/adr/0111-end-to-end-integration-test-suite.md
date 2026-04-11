@@ -64,7 +64,7 @@ def keycloak_token(keycloak_url: str, test_credentials: dict) -> str:
 def test_keycloak_issues_valid_jwt(keycloak_token: str):
     """Verify Keycloak issues a parseable JWT with correct claims."""
     claims = decode_jwt(keycloak_token)
-    assert claims["iss"] == "https://sso.lv3.org/realms/lv3"
+    assert claims["iss"] == "https://sso.example.com/realms/lv3"
     assert "platform-read" in claims.get("realm_access", {}).get("roles", [])
 
 
@@ -226,7 +226,7 @@ pytest tests/integration/ --timeout=600
 
 ### Test operator identity
 
-The integration tests use a dedicated Keycloak user `test-runner@lv3.org` with `platform-read` role for read-only tests and `platform-operator` role for mutation tests. This account is:
+The integration tests use a dedicated Keycloak user `test-runner@example.com` with `platform-read` role for read-only tests and `platform-operator` role for mutation tests. This account is:
 - Created by the operator onboarding workflow (ADR 0108)
 - Credentials stored in OpenBao at `platform/test-runner/credentials`
 - Automatically rotated weekly by the secret rotation workflow (ADR 0065)
@@ -261,10 +261,10 @@ Test results are published to:
 
 ## Implementation Notes
 
-- Repository implementation landed in `0.100.0` with the environment-aware runner in [scripts/integration_suite.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/integration_suite.py), the opt-in live test matrix under [tests/integration/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/integration), and the nightly wrapper at [config/windmill/scripts/nightly-integration-tests.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/nightly-integration-tests.py).
-- The validation contract now includes a non-destructive gate entry in [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json), while [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) exposes `make integration-tests` and `make nightly-integration-tests` for local and worker execution.
-- Operator guidance for targets, environment variables, reports, and destructive toggles is documented in [docs/runbooks/integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/integration-test-suite.md).
-- No live platform version is claimed here. Scheduling the recurring worker job, provisioning `test-runner@lv3.org`, and storing its credentials in OpenBao remain follow-up apply tasks from `main`.
+- Repository implementation landed in `0.100.0` with the environment-aware runner in [scripts/integration_suite.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/integration_suite.py), the opt-in live test matrix under [tests/integration/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/tests/integration), and the nightly wrapper at [config/windmill/scripts/nightly-integration-tests.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/nightly-integration-tests.py).
+- The validation contract now includes a non-destructive gate entry in [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/validation-gate.json), while [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile) exposes `make integration-tests` and `make nightly-integration-tests` for local and worker execution.
+- Operator guidance for targets, environment variables, reports, and destructive toggles is documented in [docs/runbooks/integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/integration-test-suite.md).
+- No live platform version is claimed here. Scheduling the recurring worker job, provisioning `test-runner@example.com`, and storing its credentials in OpenBao remain follow-up apply tasks from `main`.
 
 ## Related ADRs
 

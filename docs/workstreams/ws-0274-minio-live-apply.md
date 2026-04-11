@@ -1,7 +1,7 @@
 # Workstream ws-0274-minio-live-apply: Live Apply ADR 0274 MinIO From Latest `origin/main`
 
 - ADR: [ADR 0274](../adr/0274-minio-as-the-s3-compatible-object-storage-layer.md)
-- Title: Deploy the shared MinIO object storage layer on `docker-runtime-lv3`, rewire the first S3 consumers, and record the first platform version where ADR 0274 is true
+- Title: Deploy the shared MinIO object storage layer on `docker-runtime`, rewire the first S3 consumers, and record the first platform version where ADR 0274 is true
 - Status: live_applied
 - Included In Repo Version: 0.177.124
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0274-minio-object-storage-mainline-live-apply.json`
@@ -10,15 +10,15 @@
 - Live Applied On: 2026-03-31
 - Release Date: 2026-03-31
 - Branch: `codex/ws-0274-mainline-refresh-v6`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0274-mainline-refresh-v6`
 - Owner: codex
 - Depends On: `adr-0021`, `adr-0077`, `adr-0143`, `adr-0146`, `adr-0198`, `adr-0274`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0274`, `docs/workstreams/ws-0274-minio-live-apply.md`, `docs/runbooks/minio-object-storage.md`, `workstreams.yaml`, repo onboarding metadata, `inventory/host_vars/proxmox_florin.yml`, generated platform vars/catalogs/SLO artifacts, MinIO runtime and consumer roles, and `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0274`, `docs/workstreams/ws-0274-minio-live-apply.md`, `docs/runbooks/minio-object-storage.md`, `workstreams.yaml`, repo onboarding metadata, `inventory/host_vars/proxmox-host.yml`, generated platform vars/catalogs/SLO artifacts, MinIO runtime and consumer roles, and `receipts/live-applies/`
 
 ## Scope
 
-- add a repo-managed standalone MinIO runtime on `docker-runtime-lv3`
+- add a repo-managed standalone MinIO runtime on `docker-runtime`
 - publish the MinIO API and console through the shared edge with governed DNS/topology metadata
 - migrate the launch consumers from ADR 0274 onto MinIO buckets: Loki, Langfuse, Gitea LFS, and RAG staging
 - live apply the exact branch implementation, verify it end to end, and capture a receipt with repo + platform evidence
@@ -63,9 +63,9 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` runs the shared MinIO API and console listeners
-- `minio.lv3.org` serves the S3-compatible API over TLS at the edge
-- `minio-console.lv3.org` serves the authenticated MinIO console over TLS at the edge
+- `docker-runtime` runs the shared MinIO API and console listeners
+- `minio.example.com` serves the S3-compatible API over TLS at the edge
+- `minio-console.example.com` serves the authenticated MinIO console over TLS at the edge
 - `loki-chunks`, `langfuse-exports`, `gitea-lfs`, and `rag-staging` exist with their expected policies on MinIO
 - Loki, Langfuse, Gitea, and the RAG platform context runtime all use the shared MinIO endpoint successfully
 

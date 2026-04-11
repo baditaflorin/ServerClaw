@@ -11,7 +11,7 @@
 ## Context
 
 ADR 0362 established the Agent Service API Gateway pattern. ADR 0363 implemented
-it for Plane (task management). The Outline wiki at `wiki.lv3.org` is the platform
+it for Plane (task management). The Outline wiki at `wiki.example.com` is the platform
 knowledge base — runbooks, ADRs, workstream docs, and operational findings all live
 there. An existing REST client (`scripts/outline_client.py`) already wraps the API.
 
@@ -72,7 +72,7 @@ Following ADR 0362 `_resolve_service_auth("outline")` precedence:
 
 1. Env var `LV3_OUTLINE_AUTH_FILE` → structured auth JSON
 2. `.local/outline/admin-auth.json` → `{base_url, api_token}`
-3. `.local/outline/api-token.txt` → single token; `base_url` defaults to `https://wiki.lv3.org`
+3. `.local/outline/api-token.txt` → single token; `base_url` defaults to `https://wiki.example.com`
 
 The existing `.local/outline/api-token.txt` has limited scope (only publicly accessible
 endpoints like `collections.list` work without auth). For full API access, create
@@ -80,7 +80,7 @@ endpoints like `collections.list` work without auth). For full API access, creat
 
 ```json
 {
-  "base_url": "https://wiki.lv3.org",
+  "base_url": "https://wiki.example.com",
   "api_token": "<token from Outline Settings → API → Personal access token>"
 }
 ```

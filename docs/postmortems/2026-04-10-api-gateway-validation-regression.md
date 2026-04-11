@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The API gateway (runtime-control-lv3) returned 503/500 errors for all tool requests due to **two cascading validation failures** in the agent tool registry loader:
+The API gateway (runtime-control) returned 503/500 errors for all tool requests due to **two cascading validation failures** in the agent tool registry loader:
 
 1. **Command catalog validation rejected `refresh-discovery-surfaces`** — had `live_apply_receipt_required: false`, but validator required `true` for all commands
 2. **JSON Schema validator crashed on union types** — `["number", "null"]` type arrays caused `TypeError: unhashable type: 'list'` when validating `get-disk-usage` tool output schema
@@ -227,7 +227,7 @@ Current issue was discovered only when first tool called. Options:
 # All tools responding correctly:
 curl -X POST http://localhost:8083/v1/dify-tools/execute-host-command \
   -H "X-LV3-Dify-Api-Key: ..." \
-  -d '{"command": "df -h", "host": "docker-runtime-lv3"}'
+  -d '{"command": "df -h", "host": "docker-runtime"}'
 # ✅ 200: Disk space returned
 
 # Disk usage tool:

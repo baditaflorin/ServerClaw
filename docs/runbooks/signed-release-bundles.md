@@ -23,8 +23,8 @@ python3 scripts/release_bundle.py init-signing
 
 This writes:
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.key`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/release-bundle-cosign.key`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/release-bundle-cosign.password.txt`
 - `keys/gitea-release-bundle-cosign.pub` in the current checkout
 
 Treat the `.local/gitea/` files as controller-only secrets. Commit the matching public key update in the same branch when the signing material is rotated.
@@ -52,15 +52,15 @@ Use this path when you need an operator-driven dry run outside the Gitea workflo
 ```bash
 python3 scripts/release_bundle.py publish \
   --gitea-url http://100.64.0.1:3009 \
-  --repository ops/proxmox_florin_server \
+  --repository ops/proxmox-host_server \
   --ref-name main \
   --ref-type branch \
   --commit "$(git rev-parse HEAD)" \
-  --output-dir /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundles \
+  --output-dir /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/release-bundles \
   --public-key-path keys/gitea-release-bundle-cosign.pub \
-  --private-key-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.key \
-  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.password.txt \
-  --api-token "$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)"
+  --private-key-path /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/release-bundle-cosign.key \
+  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/release-bundle-cosign.password.txt \
+  --api-token "$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/admin-token.txt)"
 ```
 
 ## Dispatch The Server-Resident Workflow
@@ -72,18 +72,18 @@ Dispatch it against a branch ref that already exists in the private Gitea repo:
 ```bash
 curl -sS \
   -X POST \
-  -H "Authorization: token $(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)" \
+  -H "Authorization: token $(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/admin-token.txt)" \
   -H 'Content-Type: application/json' \
   -d '{"ref":"codex/ws-0233-live-apply"}' \
-  http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/actions/workflows/release-bundle.yml/dispatches
+  http://100.64.0.1:3009/api/v1/repos/ops/proxmox-host_server/actions/workflows/release-bundle.yml/dispatches
 ```
 
 Inspect recent runs:
 
 ```bash
 curl -sS \
-  -H "Authorization: token $(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)" \
-  http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/actions/runs
+  -H "Authorization: token $(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/admin-token.txt)" \
+  http://100.64.0.1:3009/api/v1/repos/ops/proxmox-host_server/actions/runs
 ```
 
 ## Verify A Published Bundle
@@ -93,11 +93,11 @@ Download the private release assets and verify the published Sigstore bundle wit
 ```bash
 python3 scripts/release_bundle.py verify-release \
   --gitea-url http://100.64.0.1:3009 \
-  --repository ops/proxmox_florin_server \
+  --repository ops/proxmox-host_server \
   --release-tag bundle-branch-main-<commit12> \
   --output-dir /tmp/lv3-release-bundle-verify \
   --public-key-path keys/gitea-release-bundle-cosign.pub \
-  --api-token "$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)"
+  --api-token "$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/admin-token.txt)"
 ```
 
 The verifier checks:

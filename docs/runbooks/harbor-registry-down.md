@@ -7,9 +7,9 @@ medium (blocks gate checks and image builds; does not affect running services)
 ## Symptoms
 
 - `git push origin main` fails with gate errors
-- Docker pull errors: `502 Bad Gateway` from `registry.lv3.org`
+- Docker pull errors: `502 Bad Gateway` from `registry.example.com`
 - Gate checks show `runner_unavailable` for all Docker-based checks
-- Build server cannot pull `registry.lv3.org/check-runner/python:3.12.10`
+- Build server cannot pull `registry.example.com/check-runner/python:3.12.10`
 
 ## What Harbor Blocks When Down
 
@@ -26,7 +26,7 @@ Running services are unaffected — they only pull on first deploy or explicit u
 
 ```bash
 # Quick check from controller
-curl -s -o /dev/null -w "%{http_code}" https://registry.lv3.org/v2/
+curl -s -o /dev/null -w "%{http_code}" https://registry.example.com/v2/
 
 # Expected: 200 or 401 (auth required = healthy)
 # If 502: Harbor or its nginx upstream is down
@@ -49,7 +49,7 @@ cd /opt/harbor
 sudo docker compose down && sudo docker compose up -d
 
 # Wait ~60s for Harbor to become healthy
-curl -s -o /dev/null -w "%{http_code}" https://registry.lv3.org/v2/
+curl -s -o /dev/null -w "%{http_code}" https://registry.example.com/v2/
 ```
 
 ## Fix: Re-converge Harbor
@@ -69,7 +69,7 @@ Use `runner_image_pull_failure` reason code. You must provide substitute evidenc
 SKIP_REMOTE_GATE=1 \
 GATE_BYPASS_REASON_CODE=runner_image_pull_failure \
 GATE_BYPASS_SUBSTITUTE_EVIDENCE="schema-validation+workstream-surfaces passed locally" \
-GATE_BYPASS_DETAIL="Harbor registry.lv3.org returning 502" \
+GATE_BYPASS_DETAIL="Harbor registry.example.com returning 502" \
 GATE_BYPASS_REMEDIATION_REF="restore-harbor-registry" \
 git push origin main
 ```

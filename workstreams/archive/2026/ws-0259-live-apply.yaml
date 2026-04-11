@@ -86,7 +86,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: implemented ADR 0259 by reaffirming the governed n8n lane as
     the ServerClaw external connector fabric, hardening the runtime for
-    proxmox_florin-scoped topology, private postgres reachability, and
+    proxmox-host-scoped topology, private postgres reachability, and
     fresh-worktree edge publication, and recording a latest-main live-apply
     replay with protected editor and webhook verification
   release_bump: patch

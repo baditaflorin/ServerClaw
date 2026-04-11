@@ -57,13 +57,13 @@ Remove Open WebUI from the platform following ADR 0389's phased procedure.
 ### Phase 1: Production Teardown
 
 ```bash
-# Stop containers on docker-runtime-lv3
-ssh docker-runtime-lv3 "cd /opt/lv3/open-webui && docker compose down --remove-orphans"
+# Stop containers on docker-runtime
+ssh docker-runtime "cd /opt/lv3/open-webui && docker compose down --remove-orphans"
 
 # Remove NGINX site config and reconverge public-edge
 # Remove DNS record from dns-declarations.yaml and reconverge database-dns
 # Remove Keycloak OIDC client (keycloak_runtime/tasks/open_webui_client.yml)
-# Drop PostgreSQL database: open_webui (on postgres-lv3)
+# Drop PostgreSQL database: open_webui (on postgres)
 ```
 
 ### Phase 2: Code Removal — automated
@@ -127,7 +127,7 @@ grep -r "open.webui" config/generated/ | wc -l
 **Positive:**
 - Reduces operational surface by one service (containers, monitoring, backups,
   OIDC client, database, NGINX routes)
-- Frees resources on docker-runtime-lv3 (RAM, CPU, disk)
+- Frees resources on docker-runtime (RAM, CPU, disk)
 - Simplifies dependency graph — removes Ollama/SearXNG coupling
 - ~189 fewer files to maintain
 

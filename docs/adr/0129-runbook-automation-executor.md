@@ -9,7 +9,7 @@
 
 ## Context
 
-The platform has a growing library of runbooks under [`docs/runbooks/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks), but execution is still too manual for deterministic, repeatable procedures. Operators can already run one workflow at a time through `lv3 run` and Windmill, yet the repository lacked a stateful layer that can:
+The platform has a growing library of runbooks under [`docs/runbooks/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks), but execution is still too manual for deterministic, repeatable procedures. Operators can already run one workflow at a time through `lv3 run` and Windmill, yet the repository lacked a stateful layer that can:
 
 1. load one structured runbook definition
 2. render step inputs from run-time parameters and previous step outputs
@@ -26,9 +26,9 @@ We will implement a **runbook automation executor** in repository-managed Python
 - a file-backed run store under `.local/runbooks/runs/`
 - mutation-audit events for run start, resume, completion, and failed or escalated steps
 - operator entrypoints through `lv3 runbook execute|status|approve`
-- a Windmill wrapper at [`config/windmill/scripts/runbook-executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/runbook-executor.py)
+- a Windmill wrapper at [`config/windmill/scripts/runbook-executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/runbook-executor.py)
 
-The first integrated implementation lands as [`scripts/runbook_executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/runbook_executor.py). The repository already ships ADR 0119 scheduler and ADR 0115 ledger primitives elsewhere, but the current runbook executor keeps its persisted run state intentionally local in `.local/runbooks/runs/*.json` while emitting its execution trace through the existing mutation-audit path. That keeps the operator contract small and works in both controller-local and mounted-worker checkouts.
+The first integrated implementation lands as [`scripts/runbook_executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/runbook_executor.py). The repository already ships ADR 0119 scheduler and ADR 0115 ledger primitives elsewhere, but the current runbook executor keeps its persisted run state intentionally local in `.local/runbooks/runs/*.json` while emitting its execution trace through the existing mutation-audit path. That keeps the operator contract small and works in both controller-local and mounted-worker checkouts.
 
 ### Runbook shape
 

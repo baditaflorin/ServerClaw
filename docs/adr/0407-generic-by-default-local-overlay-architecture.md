@@ -10,7 +10,7 @@
 
 The ServerClaw publish pipeline (`publish_to_serverclaw.py`) applies regex
 string replacements to **every text file** in the repository to sanitize
-deployment-specific values (`lv3.org` → `example.com`, real IPs → placeholders,
+deployment-specific values (`example.com` → `example.com`, real IPs → placeholders,
 operator identity → generic). This results in:
 
 - **6,482 files modified** per publish
@@ -21,12 +21,12 @@ operator identity → generic). This results in:
 This is unsustainable. The root cause is that the committed code contains
 deployment-specific values (domain, hostnames, operator PII) which must be
 regex-scrubbed before publication. ADR 0385 eliminated all deployment-specific
-values from Ansible **roles** (0 occurrences of `lv3.org` in `roles/`), but the
+values from Ansible **roles** (0 occurrences of `example.com` in `roles/`), but the
 remaining codebase surfaces still contain ~40,900 references across 2,828 files.
 
 ### Current reference distribution
 
-| Category | `lv3.org` hits | Files | Notes |
+| Category | `example.com` hits | Files | Notes |
 |----------|---------------|-------|-------|
 | roles/ (Ansible) | 0 | 0 | ✅ ADR 0385 complete |
 | Jinja2 templates | 1 | 1 | ✅ Trivial |
@@ -58,8 +58,8 @@ This means:
 ```
 committed code (git)              .local/ (gitignored, never committed)
 ├── identity.yml                  ├── identity.yml          ← real domain, operator
-│   platform_domain: example.com  │   platform_domain: lv3.org
-│   operator: Platform Operator   │   operator: Florin Badita-Nistor
+│   platform_domain: example.com  │   platform_domain: example.com
+│   operator: Platform Operator   │   operator: Platform Operator
 ├── hosts.yml (generic VMs)       ├── hosts.yml             ← real IPs
 ├── host_vars/ (template values)  ├── host_vars/            ← real topology
 ├── config/generated/ (ABSENT)    ├── config/generated/     ← runtime-generated
@@ -103,11 +103,11 @@ endif
 **Goal**: Committed inventory uses template values; real hosts in `.local/`.
 
 1. Replace committed `hosts.yml` with publication template
-2. Replace committed `host_vars/proxmox_florin.yml` with publication template
-3. Move real files to `.local/hosts.yml` and `.local/host_vars/proxmox_florin.yml`
+2. Replace committed `host_vars/proxmox-host.yml` with publication template
+3. Move real files to `.local/hosts.yml` and `.local/host_vars/proxmox-host.yml`
 4. Add to Makefile: load `.local/hosts.yml` as inventory override
 
-**Impact**: Eliminates 227 `lv3.org` references in inventory.
+**Impact**: Eliminates 227 `example.com` references in inventory.
 
 ### Phase 3: Gitignore generated files (~30 minutes)
 
@@ -135,7 +135,7 @@ first, or fail gracefully with a helpful error.
 **Goal**: Docs use `example.com` in committed files.
 
 1. Run a one-time string replacement across `docs/`:
-   `lv3.org` → `example.com`, hostnames → generic names
+   `example.com` → `example.com`, hostnames → generic names
 2. Update documentation conventions: always use `example.com` when referring
    to deployment URLs; reference `.local/identity.yml` for real values
 3. Postmortems and ADRs that describe incidents may keep generic references
@@ -155,7 +155,7 @@ for real domain" header to docs that reference URLs.
    TEST_DOMAIN = "example.com"
    TEST_OPERATOR = "Platform Operator"
    ```
-2. Replace hardcoded `lv3.org` in test files with fixture references
+2. Replace hardcoded `example.com` in test files with fixture references
 3. Tests that validate real deployment use `.local/` values loaded conditionally
 
 **Impact**: Eliminates 599 references.

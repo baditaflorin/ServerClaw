@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.42
 - Release Date: 2026-03-28
 - Branch: `codex/ws-0233-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0233-main-merge`
 - Owner: codex
 - Depends On: `ws-0233-live-apply`
 

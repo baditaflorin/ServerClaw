@@ -12,7 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- [adr-0407] Generic-by-default codebase with local overlay — gitignore receipts/ (6,520 files) and config/generated/ (4 files) to eliminate 85% of publish pipeline diff; Ansible identity override via `-e @.local/identity.yml` auto-injection; CLAUDE.md documents deployment-specific value resolution; publish pipeline reduced from 6,482 to ~788 files per sync
+- [adr-0407] Generic-by-default codebase with local overlay — gitignore receipts/ (6,520 files) and config/generated/ (4 files); generalize docs/ (1,100+ files), tests/ (227 files), workstreams/ (107 files) from lv3.org to example.com; Ansible identity override via `-e @.local/identity.yml` auto-injection; publish pipeline reduced from 6,482 files to ~76 (97% reduction)
 - [security] Emergency credential rotation after public release — rotated all 220 platform-generated credentials (ADR 0405), 3 postmortems, rotation script, runbook; removed inline OIDC secret from ws-0362; converged 42 services with zero rotation-caused failures
 - static analysis gate: ruff/bandit/pyright pre-commit hooks; three new validation-gate lanes (python-type-safety, cross-catalog-integrity, waiver-escalation-proofs); Z3 formal verification of waiver escalation state machine (6 proofs + 19 test vectors); cross-catalog referential integrity checker; full ruff format pass across scripts/ and tests/
 - [publish] Prepare repository for public GitHub release at baditaflorin/ServerClaw — scrub PII, replace identity.yml with placeholders, remove credential files, add AI-native README positioning, clean CLAUDE.md for public consumption

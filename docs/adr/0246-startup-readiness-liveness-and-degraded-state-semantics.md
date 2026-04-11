@@ -68,7 +68,7 @@ We will standardize four service-health semantics for runtime assurance:
 
 - Live verification ran from rebased workstream commit
   `dc0624974fff094ff0f50a096ea5c411d64d53bf` by replaying the
-  `windmill` and `api_gateway` runtime paths on `docker-runtime-lv3`, then
+  `windmill` and `api_gateway` runtime paths on `docker-runtime`, then
   rechecking the structured observation output and authenticated platform
   health endpoints for `api_gateway`, `platform_context_api`, and `windmill`.
 - The final mainline integration recorded the first merged repository truth in

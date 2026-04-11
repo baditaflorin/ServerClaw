@@ -78,12 +78,12 @@
 - converging `playbooks/api-gateway.yml` through the public Proxmox jump succeeded through file sync, config render, and image build
 - the first live attempt exposed a packaged-path regression in `scripts/api_gateway/main.py`; release `0.146.1` fixes that by discovering the repo root from either the source-tree or packaged layout
 - the second live attempt reached `docker compose up`, but Docker failed to publish `8083` because the guest lost the `DOCKER` nat chain during container recreate: `iptables: No chain/target/match by that name`
-- after that failure, new SSH sessions to the public Proxmox host at `65.108.75.123:22` began timing out from this controller environment, so the Docker restart/retry step could not be completed in the same turn
+- after that failure, new SSH sessions to the public Proxmox host at `203.0.113.1:22` began timing out from this controller environment, so the Docker restart/retry step could not be completed in the same turn
 
 ## Live Apply 2026-03-26
 
-- replaying `playbooks/api-gateway.yml` from merged `main` succeeded on `docker-runtime-lv3` with `ok=125 changed=25 unreachable=0 failed=0 skipped=24`
+- replaying `playbooks/api-gateway.yml` from merged `main` succeeded on `docker-runtime` with `ok=125 changed=25 unreachable=0 failed=0 skipped=24`
 - the runtime verification steps passed during converge, including the authenticated platform service catalog probe and the anonymous aggregate-health canonical-error assertion
-- the public endpoint `https://api.lv3.org/v1/platform/degradations` returned `{"degradation_count":0,"services":{}}` after the replay
-- the authenticated public endpoint `https://api.lv3.org/v1/platform/services` reported `api_gateway.active_degradations: []`
+- the public endpoint `https://api.example.com/v1/platform/degradations` returned `{"degradation_count":0,"services":{}}` after the replay
+- the authenticated public endpoint `https://api.example.com/v1/platform/services` reported `api_gateway.active_degradations: []`
 - guest state under `/opt/api-gateway/data/degradation-state.json` showed an empty `services` object and `/opt/api-gateway/data/nats-outbox.jsonl` was absent after recovery

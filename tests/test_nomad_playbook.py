@@ -7,7 +7,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "nomad.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "nomad.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 
@@ -49,9 +49,9 @@ def test_nomad_playbook_covers_controller_proxy_server_clients_and_bootstrap() -
     ]
 
     client_roles = [role["role"] for role in playbook[3]["roles"]]
-    assert "runtime-general-lv3" in playbook[3]["hosts"]
-    assert "runtime-ai-lv3" in playbook[3]["hosts"]
-    assert "runtime-control-lv3" in playbook[3]["hosts"]
+    assert "runtime-general" in playbook[3]["hosts"]
+    assert "runtime-ai" in playbook[3]["hosts"]
+    assert "runtime-control" in playbook[3]["hosts"]
     assert client_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
@@ -69,13 +69,13 @@ def test_nomad_service_wrapper_imports_the_canonical_playbook() -> None:
 
 def test_nomad_inventory_opens_rpc_in_both_directions_between_server_and_clients() -> None:
     host_vars = HOST_VARS_PATH.read_text()
-    assert "Nomad client RPC from docker-runtime-lv3" in host_vars
-    assert "Nomad client RPC from runtime-general-lv3" in host_vars
-    assert "Nomad client RPC from docker-build-lv3" in host_vars
-    assert "Nomad client RPC from runtime-ai-lv3" in host_vars
-    assert "Nomad client RPC from runtime-control-lv3" in host_vars
-    assert "Nomad server RPC to docker-runtime-lv3" in host_vars
-    assert "Nomad server RPC to docker-build-lv3" in host_vars
+    assert "Nomad client RPC from docker-runtime" in host_vars
+    assert "Nomad client RPC from runtime-general" in host_vars
+    assert "Nomad client RPC from docker-build" in host_vars
+    assert "Nomad client RPC from runtime-ai" in host_vars
+    assert "Nomad client RPC from runtime-control" in host_vars
+    assert "Nomad server RPC to docker-runtime" in host_vars
+    assert "Nomad server RPC to docker-build" in host_vars
 
 
 def test_nomad_workflow_catalog_declares_the_converge_entrypoint() -> None:

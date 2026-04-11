@@ -70,10 +70,10 @@ We will verify restores through **readiness ladders** and
   stage, the warm-up attempts used, and whether synthetic replay was eligible.
 - The exact-main replay recorded in
   `receipts/restore-verifications/2026-03-29.json` verified the new semantics
-  on the live platform from the newest `origin/main` baseline: `postgres-lv3`
+  on the live platform from the newest `origin/main` baseline: `postgres`
   failed at `restore_completed` during the PBS restore step,
-  `docker-runtime-lv3` failed at `restore_completed` during `pbs-restore`, and
-  `backup-lv3` failed at `restore_completed` because no PBS backups were
+  `docker-runtime` failed at `restore_completed` during `pbs-restore`, and
+  `backup` failed at `restore_completed` because no PBS backups were
   available for selection.
 - The canonical integrated live-apply evidence is
   `receipts/live-applies/2026-03-29-adr-0272-restore-readiness-mainline-live-apply.json`,

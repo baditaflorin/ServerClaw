@@ -42,7 +42,7 @@ Security properties:
 
 ## Consequences
 
-- Agents and operators can SSH directly to `65.108.75.123:2222` without Tailscale.
+- Agents and operators can SSH directly to `203.0.113.1:2222` without Tailscale.
 - The `.ssh/config` `florin` entry (port 22, Tailscale IP) remains the preferred path;
   port 2222 is strictly a fallback.
 - The Hetzner rescue system is now a last resort only for disk, bootloader, or

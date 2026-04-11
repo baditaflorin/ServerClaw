@@ -26,7 +26,7 @@ The case library (ADR 0118) will store past failure resolutions. But the missing
 
 We will implement a **rule-based incident triage engine** as a Windmill workflow triggered on every firing alert from the alerting router (ADR 0097).
 
-The first repository implementation in `0.111.0` lands as [`scripts/incident_triage.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/incident_triage.py) plus Windmill wrappers under [`config/windmill/scripts/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts). Until ADR 0113, ADR 0115, and ADR 0117 are implemented live, context assembly uses repo-local fallbacks: live-apply receipts, the existing mutation-audit sink, optional Loki queries, and explicit alert-payload dependency metadata. The report emission path currently writes `triage.report_created` into the mutation-audit stream; when ADR 0115 lands, that output should move to `ledger.events` without changing the triage rule contract.
+The first repository implementation in `0.111.0` lands as [`scripts/incident_triage.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/incident_triage.py) plus Windmill wrappers under [`config/windmill/scripts/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts). Until ADR 0113, ADR 0115, and ADR 0117 are implemented live, context assembly uses repo-local fallbacks: live-apply receipts, the existing mutation-audit sink, optional Loki queries, and explicit alert-payload dependency metadata. The report emission path currently writes `triage.report_created` into the mutation-audit stream; when ADR 0115 lands, that output should move to `ledger.events` without changing the triage rule contract.
 
 ### Triage pipeline
 

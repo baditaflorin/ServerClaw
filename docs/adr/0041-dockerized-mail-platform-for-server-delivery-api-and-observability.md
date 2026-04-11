@@ -38,7 +38,7 @@ We will standardize on a Dockerized mail platform built around Stalwart as the p
 
 Primary runtime placement:
 
-- host: `docker-runtime-lv3`
+- host: `docker-runtime`
 - stack root: `/opt/mail-platform`
 - primary mail server: Stalwart
 - private submission and CRUD facade: FastAPI mail gateway service
@@ -81,7 +81,7 @@ Initial Stalwart responsibilities should include:
 
 Platform services should not need to know Stalwart's management API or raw SMTP topology.
 
-Instead, the platform exposes a private mail gateway API on `docker-runtime-lv3` that:
+Instead, the platform exposes a private mail gateway API on `docker-runtime` that:
 
 1. provides CRUD operations for domains and mailboxes
 2. gives internal services and agents one stable send endpoint
@@ -98,7 +98,7 @@ The implemented primary send path is:
 
 The implemented local receive path is:
 
-- external senders -> `mail.lv3.org` -> Stalwart -> `server@lv3.org`
+- external senders -> `mail.example.com` -> Stalwart -> `server@example.com`
 
 The gateway also retains a local SMTP submission path to Stalwart for future direct local-first delivery, but the first live implementation intentionally forces the Brevo fallback path until sender verification and deliverability policy are known-good.
 
@@ -164,7 +164,7 @@ This split is deliberate:
 
 ## Placement And Network Model
 
-The mail platform belongs on `docker-runtime-lv3`, not on the Proxmox host.
+The mail platform belongs on `docker-runtime`, not on the Proxmox host.
 
 Public exposure should be split by protocol:
 

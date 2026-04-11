@@ -6,9 +6,9 @@ ADR 0114 adds a repo-managed rule-based triage engine that turns an alert payloa
 
 The current implementation is CPU-only and repo-local:
 
-- the core engine runs from [`scripts/incident_triage.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/incident_triage.py)
-- the Windmill wrapper lives in [`config/windmill/scripts/run-triage.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/run-triage.py)
-- weekly calibration lives in [`config/windmill/scripts/calibrate-triage-rules.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/calibrate-triage-rules.py)
+- the core engine runs from [`scripts/incident_triage.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/incident_triage.py)
+- the Windmill wrapper lives in [`config/windmill/scripts/run-triage.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/run-triage.py)
+- weekly calibration lives in [`config/windmill/scripts/calibrate-triage-rules.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/calibrate-triage-rules.py)
 
 Until ADR 0113, ADR 0115, and ADR 0117 are implemented live, the engine uses repo-local fallback sources:
 
@@ -111,7 +111,7 @@ When `--emit` is enabled the engine also:
 
 ## Safety Rules
 
-- only check types listed in [`config/triage-auto-check-allowlist.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/triage-auto-check-allowlist.yaml) may auto-run
+- only check types listed in [`config/triage-auto-check-allowlist.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/triage-auto-check-allowlist.yaml) may auto-run
 - the local auto-check executor is observation-only; it does not mutate services
 - if Loki, maintenance windows, or mutation-audit history are unavailable, the engine degrades to payload-only signals instead of failing
 

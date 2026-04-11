@@ -2,7 +2,7 @@ from platform.web.search import SearchResult, WebSearchClient
 
 
 def test_build_url_injects_encoded_query_and_results_limit() -> None:
-    client = WebSearchClient("http://search.lv3.org/search?q=<query>&format=json")
+    client = WebSearchClient("http://search.example.com/search?q=<query>&format=json")
     url = client.build_url('fatal: keycloak "redirect_uri"', max_results=3)
     assert "q=fatal%3A%20keycloak%20%22redirect_uri%22" in url
     assert "results=3" in url
@@ -23,7 +23,7 @@ def test_search_returns_normalized_results(monkeypatch) -> None:
             return payload
 
     monkeypatch.setattr("urllib.request.urlopen", lambda request, timeout=10: FakeResponse())
-    client = WebSearchClient("http://search.lv3.org/search?q=<query>&format=json")
+    client = WebSearchClient("http://search.example.com/search?q=<query>&format=json")
     results = client.search("proxmox")
 
     assert results == [

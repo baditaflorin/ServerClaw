@@ -9,7 +9,7 @@ import matrix_bridge_smoke
 def test_matrix_admin_login_retries_rate_limit_then_succeeds(monkeypatch, tmp_path: Path) -> None:
     responses = [
         (429, {"errcode": "M_LIMIT_EXCEEDED", "retry_after_ms": 1000}),
-        (200, {"access_token": "token-123", "user_id": "@ops:lv3.org"}),
+        (200, {"access_token": "token-123", "user_id": "@ops:example.com"}),
     ]
     sleeps: list[float] = []
 
@@ -22,7 +22,7 @@ def test_matrix_admin_login_retries_rate_limit_then_succeeds(monkeypatch, tmp_pa
 
     token_file = tmp_path / "matrix-access-token.txt"
     ok, payload = matrix_admin_register.login(
-        "https://matrix.lv3.org",
+        "https://matrix.example.com",
         "ops",
         "secret",
         access_token_file=token_file,
@@ -43,7 +43,7 @@ def test_matrix_admin_login_returns_rate_limit_payload_when_budget_expires(monke
     monkeypatch.setattr(matrix_admin_register.time, "sleep", lambda seconds: None)
 
     ok, payload = matrix_admin_register.login(
-        "https://matrix.lv3.org",
+        "https://matrix.example.com",
         "ops",
         "secret",
         max_rate_limit_wait_seconds=1,
@@ -56,7 +56,7 @@ def test_matrix_admin_login_returns_rate_limit_payload_when_budget_expires(monke
 def test_matrix_bridge_login_retries_rate_limit_then_succeeds(monkeypatch, tmp_path: Path) -> None:
     responses = [
         (429, {"errcode": "M_LIMIT_EXCEEDED", "retry_after_ms": 1000}),
-        (200, {"access_token": "bridge-token", "user_id": "@ops:lv3.org"}),
+        (200, {"access_token": "bridge-token", "user_id": "@ops:example.com"}),
     ]
     sleeps: list[float] = []
 
@@ -69,7 +69,7 @@ def test_matrix_bridge_login_retries_rate_limit_then_succeeds(monkeypatch, tmp_p
 
     token_file = tmp_path / "matrix-bridge-token.txt"
     payload = matrix_bridge_smoke.login(
-        "https://matrix.lv3.org",
+        "https://matrix.example.com",
         "ops",
         "secret",
         access_token_file=token_file,

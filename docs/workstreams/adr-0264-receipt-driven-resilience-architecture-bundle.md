@@ -9,7 +9,7 @@
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0264-receipt-driven-resilience-adrs-r3`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server`
 - Owner: codex
 - Depends On: `adr-0036-live-apply-receipts`, `adr-0087-validation-gate`,
   `adr-0099-backup-restore-verification`,

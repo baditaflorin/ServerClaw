@@ -6,11 +6,11 @@ ADR 0175 makes shared producer-consumer boundaries explicit so parallel workstre
 
 ## Canonical Sources
 
-- contract definitions: [config/contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/contracts)
-- validator module: [platform/interface_contracts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/interface_contracts.py)
-- CLI wrapper: [scripts/interface_contracts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/interface_contracts.py)
-- workstream registry source: [workstreams/policy.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams/policy.yaml), [workstreams/active](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams/active), and [workstreams/archive](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams/archive)
-- workstream registry compatibility artifact: [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+- contract definitions: [config/contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/contracts)
+- validator module: [platform/interface_contracts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/interface_contracts.py)
+- CLI wrapper: [scripts/interface_contracts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/interface_contracts.py)
+- workstream registry source: [workstreams/policy.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams/policy.yaml), [workstreams/active](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams/active), and [workstreams/archive](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams/archive)
+- workstream registry compatibility artifact: [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml)
 
 ## Current Contract Set
 

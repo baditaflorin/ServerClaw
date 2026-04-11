@@ -13,7 +13,7 @@ The sequence was:
 
 1. An agent worktree did not have a `.local` directory (worktrees share the
    git index but not untracked/gitignored files).
-2. The agent created a symlink `.local -> /Users/.../proxmox_florin_server/.local`
+2. The agent created a symlink `.local -> /Users/.../proxmox-host_server/.local`
    pointing to the main worktree's real directory so scripts could find
    credentials.
 3. The agent ran `git add` and the symlink was committed — `.local/` appears
@@ -102,7 +102,7 @@ Recovery prerequisites:
 
 When the bootstrap SSH key is lost or compromised:
 
-1. Generate a new key pair: `ssh-keygen -t ed25519 -f .local/ssh/bootstrap.id_ed25519 -C "bootstrap@proxmox_florin_server"`
+1. Generate a new key pair: `ssh-keygen -t ed25519 -f .local/ssh/bootstrap.id_ed25519 -C "bootstrap@proxmox-host_server"`
 2. Deploy the public key to all VMs via `qm guest exec`:
    ```bash
    for VMID in $(qm list | awk 'NR>1 && $3=="running" {print $1}'); do
@@ -128,7 +128,7 @@ When migrating to a new server or forking this repo:
 - Keycloak client secrets must be extracted from the Keycloak admin API or
   provisioned via the `scripts/provision_operator.py` bootstrap flow
 - OpenBao unseal keys must be backed up to the control-plane recovery bundle
-  on `backup-lv3` immediately after vault initialization
+  on `backup` immediately after vault initialization
 - Database passwords are managed by OpenBao secret rotation; the initial
   values come from the first Ansible converge
 
@@ -152,4 +152,4 @@ When migrating to a new server or forking this repo:
 - ADR 0047: Short-lived credentials and mTLS
 - ADR 0092: Unified Platform API Gateway (uses `.local/keycloak/` secrets)
 - ADR 0102: Security hardening baseline
-- ADR 0166: Control-plane recovery (backup bundle on `backup-lv3`)
+- ADR 0166: Control-plane recovery (backup bundle on `backup`)

@@ -11,7 +11,7 @@ critical
 ## Immediate Steps
 
 1. Check whether OpenBao is sealed or serving errors on `https://10.10.10.20:8200/v1/sys/health`.
-2. Confirm the container is running on `docker-runtime-lv3`.
+2. Confirm the container is running on `docker-runtime`.
 3. Pause secret-dependent changes until the health state is understood.
 
 ## Diagnosis

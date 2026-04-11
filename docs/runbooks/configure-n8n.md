@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This runbook converges the repo-managed `n8n` runtime on `docker-runtime-lv3`,
-provisions its PostgreSQL backend on `postgres-lv3`, and publishes
-`n8n.lv3.org` through the shared NGINX edge.
+This runbook converges the repo-managed `n8n` runtime on `docker-runtime`,
+provisions its PostgreSQL backend on `postgres`, and publishes
+`n8n.example.com` through the shared NGINX edge.
 
 ADR 0259 uses this same runtime as the external app connector fabric for
 ServerClaw. The live surface here is the adapter plane for third-party SaaS,
@@ -15,8 +15,8 @@ not the home for long-lived assistant reasoning or session orchestration.
 - runtime role: `roles/n8n_runtime`
 - database role: `roles/n8n_postgres`
 - playbook: `playbooks/n8n.yml`
-- public hostname: `https://n8n.lv3.org`
-- controller-local artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/`
+- public hostname: `https://n8n.example.com`
+- controller-local artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/n8n/`
 - ServerClaw boundary: thin adapters call `n8n` through governed webhooks,
   queues, or API routes while session state and approvals stay in other
   runtimes such as Temporal
@@ -36,15 +36,15 @@ HETZNER_DNS_API_TOKEN=... make converge-n8n
 
 This workflow:
 
-- ensures Hetzner DNS contains `n8n.lv3.org`
+- ensures Hetzner DNS contains `n8n.example.com`
 - provisions the `n8n` PostgreSQL role and database
 - generates the database password, owner password, and encryption key if missing
 - stores runtime secrets through the shared OpenBao compose-env path
-- starts or updates the n8n compose stack on `docker-runtime-lv3`
+- starts or updates the n8n compose stack on `docker-runtime`
 - runs `n8n` in host-network mode so the runtime reaches private guest-network
-  dependencies such as `postgres-lv3` directly instead of relying on Docker
+  dependencies such as `postgres` directly instead of relying on Docker
   bridge NAT
-- re-renders the shared edge config so `n8n.lv3.org` is published
+- re-renders the shared edge config so `n8n.example.com` is published
 
 The playbook intentionally sets
 `public_edge_sync_generated_static_dirs: false` for the n8n edge publication.
@@ -56,19 +56,19 @@ rebuilding unrelated shared docs or changelog static portals.
 Public health:
 
 ```bash
-curl -fsS https://n8n.lv3.org/healthz
+curl -fsS https://n8n.example.com/healthz
 ```
 
 Protected editor redirect:
 
 ```bash
-curl -sSI https://n8n.lv3.org/
+curl -sSI https://n8n.example.com/
 ```
 
 Public webhook prefix without the browser auth redirect:
 
 ```bash
-curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke
+curl -sSI https://n8n.example.com/webhook-test/serverclaw-connector-smoke
 ```
 
 Expect a direct n8n response, usually `404` until a test workflow exists. The
@@ -78,7 +78,7 @@ important contract is that the request reaches the application without an
 Guest-local readiness:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.118.189.95 \
   ops@10.10.10.20 \
@@ -88,18 +88,18 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Guest-local owner login:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.118.189.95 \
   ops@10.10.10.20 \
   "curl -fsS -X POST http://127.0.0.1:5678/rest/login \
     -H 'Content-Type: application/json' \
-    -d '{\"emailOrLdapLoginId\":\"ops@lv3.org\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/owner-password.txt)\"}'"
+    -d '{\"emailOrLdapLoginId\":\"ops@example.com\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/n8n/owner-password.txt)\"}'"
 ```
 
 ## Access Model
 
-- The editor at `https://n8n.lv3.org/` is protected by the shared oauth2-proxy and Keycloak edge flow.
+- The editor at `https://n8n.example.com/` is protected by the shared oauth2-proxy and Keycloak edge flow.
 - The following paths are intentionally unauthenticated at the edge:
   - `/healthz`
   - `/webhook/`
@@ -120,9 +120,9 @@ This split is deliberate. Human operators use the protected editor path, while m
 
 ## Controller-Local Artifacts
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/database-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/owner-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/encryption-key.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/n8n/database-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/n8n/owner-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/n8n/encryption-key.txt`
 
 These files are generated and mirrored by the repo-managed roles. They are not committed.
 
@@ -142,7 +142,7 @@ The runtime leaves n8n's public API available behind the normal application auth
 
 If an API key is required:
 
-1. sign in through `https://n8n.lv3.org`
+1. sign in through `https://n8n.example.com`
 2. create the narrowest key and scopes that satisfy the integration
 3. store the resulting credential under the repo's controller-local secret management path before automating any use of it
 

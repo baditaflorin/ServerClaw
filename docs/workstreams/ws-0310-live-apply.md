@@ -11,11 +11,11 @@
 - Live Applied On: 2026-04-02
 - Exact-Main Replay Baseline: repo `0.177.143`, platform `0.130.90`
 - Branch: `codex/ws-0310-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0310-live-apply`
 - Owner: codex
 - Depends On: `adr-0093-interactive-ops-portal-runtime-contract`, `adr-0108-operator-onboarding-and-offboarding`, `adr-0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher`, `adr-0242-guided-human-onboarding-via-shepherd-tours`, `adr-0308-journey-aware-entry-routing-and-saved-home-selection`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `inventory/group_vars/platform.yml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/workstreams/ws-0310-live-apply.md`, `docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md`, `docs/adr/.index.yaml`, `docs/runbooks/platform-operations-portal.md`, `docs/runbooks/operator-onboarding.md`, `docs/runbooks/windmill-operator-access-admin.md`, `Makefile`, `playbooks/ops-portal.yml`, `.config-locations.yaml`, `config/activation-checklist.json`, `docs/schema/activation-checklist.schema.json`, `scripts/validate_repository_data_models.py`, `scripts/ops_portal/app.py`, `scripts/ops_portal/static/portal.css`, `scripts/ops_portal/templates/base.html`, `scripts/ops_portal/templates/index.html`, `scripts/ops_portal/templates/partials/activation.html`, `scripts/ops_portal/templates/partials/launcher.html`, `scripts/ops_portal/templates/partials/overview.html`, `scripts/ops_portal/templates/partials/runbooks.html`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`, `tests/test_interactive_ops_portal.py`, `tests/test_ops_portal_playbook.py`, `tests/test_ops_portal_runtime_role.py`, `receipts/live-applies/2026-04-02-adr-0310-activation-checklist-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0310-*`, `receipts/restic-backups/20260402T122554Z.json`, `receipts/restic-backups/20260402T124641Z.json`, `receipts/restic-snapshots-latest.json`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
+- Shared Surfaces: `workstreams.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `inventory/group_vars/platform.yml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/workstreams/ws-0310-live-apply.md`, `docs/adr/0310-first-run-activation-checklists-and-progressive-capability-reveal.md`, `docs/adr/.index.yaml`, `docs/runbooks/platform-operations-portal.md`, `docs/runbooks/operator-onboarding.md`, `docs/runbooks/windmill-operator-access-admin.md`, `Makefile`, `playbooks/ops-portal.yml`, `.config-locations.yaml`, `config/activation-checklist.json`, `docs/schema/activation-checklist.schema.json`, `scripts/validate_repository_data_models.py`, `scripts/ops_portal/app.py`, `scripts/ops_portal/static/portal.css`, `scripts/ops_portal/templates/base.html`, `scripts/ops_portal/templates/index.html`, `scripts/ops_portal/templates/partials/activation.html`, `scripts/ops_portal/templates/partials/launcher.html`, `scripts/ops_portal/templates/partials/overview.html`, `scripts/ops_portal/templates/partials/runbooks.html`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`, `tests/test_interactive_ops_portal.py`, `tests/test_ops_portal_playbook.py`, `tests/test_ops_portal_runtime_role.py`, `receipts/live-applies/2026-04-02-adr-0310-activation-checklist-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0310-*`, `receipts/restic-backups/20260402T122554Z.json`, `receipts/restic-backups/20260402T124641Z.json`, `receipts/restic-snapshots-latest.json`, `receipts/sbom/host-docker-runtime-2026-04-02.cdx.json`
 
 ## Purpose
 
@@ -29,7 +29,7 @@ the required first-run stages are complete or explicitly revealed.
 
 - add the catalog and schema for first-run activation stages, links, and
   progressive reveal policy
-- render the activation checklist directly inside `ops.lv3.org`
+- render the activation checklist directly inside `ops.example.com`
 - gate admin launcher entries, mutating service actions, and mutating runbooks
   on the same server-side activation state
 - sync and verify the new checklist partial through the managed ops-portal
@@ -79,12 +79,12 @@ the required first-run stages are complete or explicitly revealed.
 - `receipts/restic-backups/20260402T122554Z.json`
 - `receipts/restic-backups/20260402T124641Z.json`
 - `receipts/restic-snapshots-latest.json`
-- `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
+- `receipts/sbom/host-docker-runtime-2026-04-02.cdx.json`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
 
-- `https://ops.lv3.org#activation` renders the ADR 0310 checklist and preserves
+- `https://ops.example.com#activation` renders the ADR 0310 checklist and preserves
   progress across normal browser-session refreshes
 - launcher entries with purpose `administer` stay out of the navigable entry
   set until activation completes or the supervised reveal path is used
@@ -120,13 +120,13 @@ the required first-run stages are complete or explicitly revealed.
   records the repair, and
   `receipts/live-applies/evidence/2026-04-02-ws-0310-mainline-live-apply-r13.txt`
   captured the successful governed replay with final recap
-  `docker-runtime-lv3 : ok=192 changed=17 unreachable=0 failed=0 skipped=36`.
+  `docker-runtime : ok=192 changed=17 unreachable=0 failed=0 skipped=36`.
 - `receipts/live-applies/evidence/2026-04-02-ws-0310-mainline-ops-portal-guest-runtime-r21.txt`
   confirms the guest-local guarded journey through the repo-managed Proxmox
   jump path: `/health` returned `{"status":"ok"}`, activation and launcher
   partials stayed locked before checklist completion, mutating service actions
   failed closed while locked, completing the required items unlocked the admin
-  launcher redirect to `https://sso.lv3.org`, and the policy override path
+  launcher redirect to `https://sso.example.com`, and the policy override path
   produced the same unlocked launcher outcome.
 - `receipts/live-applies/evidence/2026-04-02-ws-0310-mainline-generate-adr-index-r1.txt`,
   `receipts/live-applies/evidence/2026-04-02-ws-0310-mainline-canonical-truth-r2.txt`,

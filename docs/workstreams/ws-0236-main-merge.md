@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.55
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0236-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-mainline`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0236-mainline`
 - Owner: codex
 - Depends On: `ws-0236-live-apply`
 
@@ -64,8 +64,8 @@ the broader operator-access and Windmill surfaces.
   tests/test_windmill_default_operations_surface.py
   tests/test_windmill_operator_admin_app.py` returned `36 passed`.
 - `make converge-windmill` completed successfully from the exact-main worktree
-  with `docker-runtime-lv3 ok=248 changed=45 failed=0`, `postgres-lv3 ok=65
-  changed=1 failed=0`, and `proxmox_florin ok=38 changed=7 failed=0`.
+  with `docker-runtime ok=248 changed=45 failed=0`, `postgres ok=65
+  changed=1 failed=0`, and `proxmox-host ok=38 changed=7 failed=0`.
 - Live Windmill verification after the replay reported app path
   `f/lv3/operator_access_admin`, app version `48`, edit timestamp
   `2026-03-29T15:11:20.200263Z`, route `http://100.64.0.1:8005/apps/get/p/f/lv3/operator_access_admin`
@@ -80,7 +80,7 @@ the broader operator-access and Windmill surfaces.
 - The exact-main replay fixed real shared-worker drift: the worker checkout had
   a newer `scripts/gate_status.py` that imported a missing
   `gate_bypass_waivers` helper, so the Windmill wrapper now adds
-  `/srv/proxmox_florin_server/scripts` to `sys.path` and falls back to an
+  `/srv/proxmox-host_server/scripts` to `sys.path` and falls back to an
   empty waiver summary only when that helper is absent. The replay also
   hardened transient Postgres readiness and default-script seeding races that
   surfaced only under concurrent live applies.

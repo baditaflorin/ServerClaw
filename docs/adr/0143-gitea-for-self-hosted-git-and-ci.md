@@ -9,7 +9,7 @@
 
 ## Context
 
-The platform repository (`proxmox_florin_server`) is currently hosted on an external git provider. This creates several dependencies:
+The platform repository (`proxmox-host_server`) is currently hosted on an external git provider. This creates several dependencies:
 
 - The ADR indexer (ADR 0121) uses a webhook from the external provider. The webhook secret is a long-lived credential stored in the platform and in the provider, creating a shared secret that is difficult to rotate.
 - The pre-push validation gate (ADR 0031) runs locally on the operator's machine. There is no server-side enforcement of the validation pipeline; a force-push bypasses it.
@@ -21,31 +21,31 @@ A self-hosted Gitea instance resolves all of these: local webhook delivery with 
 
 ## Decision
 
-We will deploy **Gitea** as a self-hosted git service on the `docker-runtime-lv3` VM, replacing the external git provider as the primary remote.
+We will deploy **Gitea** as a self-hosted git service on the `docker-runtime` VM, replacing the external git provider as the primary remote.
 
 ### Deployment
 
 ```yaml
 # In versions/stack.yaml — new service entry
 - service: gitea
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   image: gitea/gitea:latest
   port: 3030
   data_volume: /data/gitea
   keycloak_oidc: true
   access: tailscale_only
-  subdomain: git.lv3.org
+  subdomain: git.example.com
 ```
 
 Gitea is deployed as a Docker Compose service with:
-- Postgres `gitea` database (on `postgres-lv3`).
-- Keycloak OIDC integration via the platform SSO (ADR 0056): operator login via `sso.lv3.org`.
+- Postgres `gitea` database (on `postgres`).
+- Keycloak OIDC integration via the platform SSO (ADR 0056): operator login via `sso.example.com`.
 - Storage on a named Docker volume backed by the PBS backup policy (ADR 0029).
 - `access: tailscale_only` so Gitea is never exposed publicly. Operators reach it through the Proxmox-host Tailscale TCP proxy.
 
 ### Gitea Actions CI
 
-Gitea's built-in Actions system (compatible with GitHub Actions syntax) provides local CI without external dependencies. A self-hosted runner is deployed on `docker-build-lv3`:
+Gitea's built-in Actions system (compatible with GitHub Actions syntax) provides local CI without external dependencies. A self-hosted runner is deployed on `docker-build`:
 
 ```yaml
 # .gitea/workflows/validate.yml

@@ -75,8 +75,8 @@ def test_verify_tasks_hit_root_and_json_search_endpoints() -> None:
 
 
 def test_host_network_policy_allows_private_searxng_access() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 8881 in rule["ports"])
     assert 8881 in host_rule["ports"]

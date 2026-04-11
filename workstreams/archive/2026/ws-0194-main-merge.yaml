@@ -19,7 +19,7 @@ shared_surfaces:
   - docs/adr/0194-coolify-paas-deploy-from-repo.md
   - docs/workstreams/adr-0194-coolify-paas-deploy-from-repo.md
   - docs/runbooks/configure-coolify.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - config/ansible-execution-scopes.yaml
   - config/command-catalog.json
@@ -87,7 +87,7 @@ ownership_manifest:
         - VERSION
         - changelog.md
         - versions/stack.yaml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - config/ansible-execution-scopes.yaml
         - config/command-catalog.json

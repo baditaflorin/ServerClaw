@@ -30,17 +30,17 @@ the service topology variables that already exist (`platform_service_host`,
 
 | IP | Meaning | Roles affected |
 |----|---------|---------------|
-| `10.10.10.10` | nginx-lv3 | librechat, plane, ntopng |
-| `10.10.10.20` | docker-runtime-lv3 | api_gateway, librechat, litellm, sftpgo, repowise, plausible, plane_adr, serverclaw (main.yml) |
-| `10.10.10.30` | docker-build-lv3 | build_server |
-| `10.10.10.40` | monitoring-lv3 | main.yml (loki URL) |
-| `10.10.10.92` | runtime-control-lv3 | librechat |
+| `10.10.10.10` | nginx-edge | librechat, plane, ntopng |
+| `10.10.10.20` | docker-runtime | api_gateway, librechat, litellm, sftpgo, repowise, plausible, plane_adr, serverclaw (main.yml) |
+| `10.10.10.30` | docker-build | build_server |
+| `10.10.10.40` | monitoring | main.yml (loki URL) |
+| `10.10.10.92` | runtime-control | librechat |
 | `10.10.10.1` | proxmox gateway | coolify, control_plane_recovery_firewall |
 | `10.10.10.0/24` | platform subnet | ntopng, control_plane_recovery_firewall |
 
 ### Gap 2: Hostname literals in `hostvars[]` (4 files)
 
-Four files still use `hostvars['docker-runtime-lv3']` or similar instead of
+Four files still use `hostvars['docker-runtime']` or similar instead of
 the `playbook_execution_host_patterns` map or `platform_topology_host`.
 
 ### Gap 3: `docker_compose_converge` underadoption (2 of ~40 eligible roles)

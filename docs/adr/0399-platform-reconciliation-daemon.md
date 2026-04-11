@@ -19,10 +19,10 @@ canonical data sources (service catalogs, ADR corpus, deployment receipts):
 
 | Portal | URL | Generator | Source of Truth |
 |--------|-----|-----------|-----------------|
-| Homepage | home.lv3.org | `scripts/generate_homepage_config.py` | `service-capability-catalog.json`, `subdomain-catalog.json` |
-| Ops Portal | ops.lv3.org | `scripts/generate_ops_portal.py` | Service catalog, inventory, ADRs, runbooks |
-| Docs Portal | docs.lv3.org | `scripts/build_docs_portal.py` | `docs/` tree, MkDocs |
-| Changelog | changelog.lv3.org | `scripts/generate_changelog_portal.py` | Receipts, promotions, mutation audit |
+| Homepage | home.example.com | `scripts/generate_homepage_config.py` | `service-capability-catalog.json`, `subdomain-catalog.json` |
+| Ops Portal | ops.example.com | `scripts/generate_ops_portal.py` | Service catalog, inventory, ADRs, runbooks |
+| Docs Portal | docs.example.com | `scripts/build_docs_portal.py` | `docs/` tree, MkDocs |
+| Changelog | changelog.example.com | `scripts/generate_changelog_portal.py` | Receipts, promotions, mutation audit |
 
 ### The staleness problem
 
@@ -33,7 +33,7 @@ Today, portal regeneration is entirely manual:
 2. The service-capability-catalog and subdomain-catalog are updated.
 3. But `generate_homepage_config.py` is not re-run, and `make converge-homepage`
    is not invoked.
-4. The live dashboard at home.lv3.org continues showing removed services.
+4. The live dashboard at home.example.com continues showing removed services.
 
 The same pattern applies to all four portals. The ops portal shows stale ADR
 counts, the changelog portal misses recent deployments, and the docs portal

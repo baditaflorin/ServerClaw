@@ -1,14 +1,14 @@
 # Workstream ADR 0042: step-ca For SSH And Internal TLS
 
-- ADR: [ADR 0042](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0042-step-ca-for-ssh-and-internal-tls.md)
+- ADR: [ADR 0042](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0042-step-ca-for-ssh-and-internal-tls.md)
 - Title: Internal certificate authority for SSH and private TLS
 - Status: live_applied
 - Branch: `codex/adr-0042-step-ca`
-- Worktree: `../proxmox_florin_server-step-ca`
+- Worktree: `../proxmox-host_server-step-ca`
 - Owner: codex
 - Depends On: `adr-0014-tailscale`
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, SSH trust, internal TLS
+- Shared Surfaces: `docker-runtime`, SSH trust, internal TLS
 
 ## Scope
 
@@ -35,7 +35,7 @@
 
 ## Expected Live Surfaces
 
-- Compose-managed `step-ca` runtime on `docker-runtime-lv3`
+- Compose-managed `step-ca` runtime on `docker-runtime`
 - Tailscale-published CA API on `https://100.118.189.95:9443`
 - controller-local trust bootstrap artifacts under `.local/step-ca/`
 - CA-backed SSH host trust on the Proxmox host and managed guests
@@ -45,7 +45,7 @@
 
 - `make syntax-check-step-ca`
 - `make converge-step-ca`
-- `curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.118.189.95:9443/health`
+- `curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/step-ca/certs/root_ca.crt https://100.118.189.95:9443/health`
 - local `step` CLI issuance plus SSH certificate login to `ops@100.118.189.95` and `ops@10.10.10.20`
 
 ## Merge Criteria

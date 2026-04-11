@@ -31,8 +31,8 @@ def test_defaults_use_service_topology_urls_and_local_artifact_contract() -> Non
         == "{{ platform_service_topology | platform_service_url('coolify', 'controller') }}"
     )
     assert defaults["coolify_private_url"] == "http://{{ ansible_host }}:{{ coolify_dashboard_port }}"
-    assert defaults["coolify_public_url"] == "https://coolify.lv3.org"
-    assert defaults["coolify_apps_public_url"] == "https://apps.lv3.org"
+    assert defaults["coolify_public_url"] == "https://coolify.example.com"
+    assert defaults["coolify_apps_public_url"] == "https://apps.example.com"
     assert defaults["coolify_proxy_service_name"] == "coolify-proxy"
     assert defaults["coolify_proxy_image"] == "traefik:v3.6"
     assert defaults["coolify_proxy_path"] == "{{ coolify_data_root }}/proxy"
@@ -44,8 +44,8 @@ def test_defaults_use_service_topology_urls_and_local_artifact_contract() -> Non
     assert defaults["coolify_api_token_local_file"] == "{{ coolify_local_artifact_dir }}/api-token.txt"
     assert defaults["coolify_server_key_local_file"] == "{{ coolify_local_artifact_dir }}/server-key"
     assert defaults["coolify_admin_auth_local_file"] == "{{ coolify_local_artifact_dir }}/admin-auth.json"
-    assert defaults["coolify_smoke_domain"] == "http://apps.lv3.org"
-    assert defaults["coolify_smoke_alias_domain"] == "http://repo-smoke.apps.lv3.org"
+    assert defaults["coolify_smoke_domain"] == "http://apps.example.com"
+    assert defaults["coolify_smoke_alias_domain"] == "http://repo-smoke.apps.example.com"
 
 
 def test_main_tasks_bootstrap_api_token_and_local_server_registration() -> None:

@@ -7,7 +7,7 @@
 - Platform Version Observed During Integration: 0.130.92
 - Release Date: 2026-04-02
 - Branch: `codex/ws-0312-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0312-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0312-live-apply`
 - Owner: codex
 - Depends On: `ws-0312-live-apply`
 

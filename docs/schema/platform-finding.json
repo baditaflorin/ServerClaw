@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/platform-finding.json",
+  "$id": "https://example.com/schema/platform-finding.json",
   "title": "Platform Finding",
   "type": "object",
   "additionalProperties": false,

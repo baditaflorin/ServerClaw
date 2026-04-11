@@ -18,7 +18,7 @@ def test_runbook_documents_private_runtime_contract() -> None:
     assert "10.10.10.20:11235" in runbook
     assert "/etc/lv3/crawl4ai/config.yml" in runbook
     assert "/monitor/health" in runbook
-    assert "coolify-lv3" in runbook
+    assert "coolify" in runbook
 
 
 def test_playbooks_exist_for_crawl4ai_service_and_leaf_wrapper() -> None:

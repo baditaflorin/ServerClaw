@@ -13,7 +13,7 @@
 ## Scope
 
 - add one reusable session-workspace resolver for both Python tools and shell entrypoints
-- isolate the remote build gateway so concurrent sessions no longer share one checkout on `docker-build-lv3`
+- isolate the remote build gateway so concurrent sessions no longer share one checkout on `docker-build`
 - scope scheduler runtime state to a session-local root when session metadata is present
 - record session metadata in validation-gate payloads and ledger metadata
 - add a canonical helper for session-suffixed live-apply receipt ids and wire the promotion pipeline onto it
@@ -43,7 +43,7 @@
 
 ## Expected Live Surfaces
 
-- `docker-build-lv3` receives remote syncs under a session-scoped subdirectory instead of one shared checkout
+- `docker-build` receives remote syncs under a session-scoped subdirectory instead of one shared checkout
 - explicit `LV3_SESSION_ID=<id>` runs preserve that namespace across remote shell, remote Docker, gate status payloads, and session-aware controller state
 - stale remote session directories older than two days are pruned during normal gateway usage
 
@@ -67,4 +67,4 @@
 - the repository implementation first landed on `main` in repo release `0.143.2`, and the integrated live apply from current `main` is recorded in release `0.159.1`
 - the 2026-03-26 live verification advanced platform version to `0.130.9` after `LV3_SESSION_ID=adr-0156-live make check-build-server` passed, the remote session workspace reported a valid git checkout path, and `LV3_SESSION_ID=adr-0156-live make remote-lint` completed successfully
 - the live-apply branch also repaired stale build-server jump-host references, stopped forcing a full remote `.git-remote` wipe between session syncs, and cleared current ansible/yaml lint debt that was blocking the ADR 0156 gate on `main`
-- the production ansible runner image on `docker-build-lv3` still carries an `ansible-lint` import mismatch, so the verified `remote-lint` run exercised the remote session workspace path and then completed through the command's built-in local fallback
+- the production ansible runner image on `docker-build` still carries an `ansible-lint` import mismatch, so the verified `remote-lint` run exercised the remote session workspace path and then completed through the command's built-in local fallback

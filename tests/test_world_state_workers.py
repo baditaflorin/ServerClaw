@@ -73,11 +73,11 @@ def worker_repo(tmp_path: Path) -> Path:
             {
                 "subdomains": [
                     {
-                        "fqdn": "grafana.lv3.org",
+                        "fqdn": "grafana.example.com",
                         "service_id": "grafana",
                         "environment": "production",
                         "status": "active",
-                        "target": "65.108.75.123",
+                        "target": "203.0.113.1",
                         "target_port": 443,
                         "exposure": "edge-published",
                     }
@@ -114,7 +114,7 @@ def worker_repo(tmp_path: Path) -> Path:
                         "id": "grafana",
                         "lifecycle_status": "active",
                         "internal_url": "http://127.0.0.1:65534/health",
-                        "vm": "monitoring-lv3",
+                        "vm": "monitoring",
                         "vmid": 140,
                         "environments": {"production": {"status": "active", "url": "http://127.0.0.1:65534/health"}},
                     }
@@ -131,7 +131,7 @@ observed_state:
   guests:
     instances:
       - vmid: 120
-        name: docker-runtime-lv3
+        name: docker-runtime
         ipv4: 10.10.10.20
         running: true
 """.strip()
@@ -144,11 +144,11 @@ all:
   children:
     proxmox_hosts:
       hosts:
-        proxmox_florin:
+        proxmox-host:
           ansible_host: 100.118.189.95
     lv3_guests:
       hosts:
-        docker-runtime-lv3:
+        docker-runtime:
           ansible_host: 10.10.10.20
           environment: production
 """.strip()
@@ -180,7 +180,7 @@ def test_run_worker_materializes_fixture_surface(
     worker_repo: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     fixture_path = tmp_path / "proxmox-fixture.json"
-    fixture_path.write_text(json.dumps([{"vmid": 110, "name": "nginx-lv3", "status": "running"}]) + "\n")
+    fixture_path.write_text(json.dumps([{"vmid": 110, "name": "nginx-edge", "status": "running"}]) + "\n")
     monkeypatch.setenv("WORLD_STATE_PROXMOX_VMS_FIXTURE", str(fixture_path))
     db_path = prepare_sqlite_world_state(tmp_path / "world-state.sqlite3")
 
@@ -194,18 +194,18 @@ def test_run_worker_materializes_fixture_surface(
     assert result["status"] == "ok"
     rows = current_view_rows(connection_factory=sqlite_connection_factory(db_path))
     assert rows[0]["surface"] == "proxmox_vms"
-    assert rows[0]["data"][0]["name"] == "nginx-lv3"
+    assert rows[0]["data"][0]["name"] == "nginx-edge"
 
 
 def test_collect_dns_records_reads_repo_catalog(worker_repo: Path) -> None:
     records = collect_dns_records(worker_repo)
     assert records == [
         {
-            "fqdn": "grafana.lv3.org",
+            "fqdn": "grafana.example.com",
             "service_id": "grafana",
             "environment": "production",
             "status": "active",
-            "target": "65.108.75.123",
+            "target": "203.0.113.1",
             "target_port": 443,
             "exposure": "edge-published",
         }
@@ -250,7 +250,7 @@ def test_collect_service_health_uses_http_contract_expected_status(tmp_path: Pat
                             "description": "workflow runtime",
                             "category": "automation",
                             "lifecycle_status": "active",
-                            "vm": "docker-runtime-lv3",
+                            "vm": "docker-runtime",
                             "vmid": 120,
                             "internal_url": f"http://127.0.0.1:{port}/api/version",
                             "health_probe_id": "windmill",
@@ -275,7 +275,7 @@ def test_collect_service_health_uses_http_contract_expected_status(tmp_path: Pat
                     "services": {
                         "windmill": {
                             "service_name": "windmill",
-                            "owning_vm": "docker-runtime-lv3",
+                            "owning_vm": "docker-runtime",
                             "role": "windmill_runtime",
                             "verify_file": "roles/windmill_runtime/tasks/verify.yml",
                             "liveness": {
@@ -350,7 +350,7 @@ def test_collect_service_health_marks_reset_probe_as_down_instead_of_crashing(tm
                             "lifecycle_status": "active",
                             "internal_url": f"http://127.0.0.1:{port}/api/version",
                             "health_probe_id": "windmill",
-                            "vm": "docker-runtime-lv3",
+                            "vm": "docker-runtime",
                             "vmid": 120,
                             "environments": {
                                 "production": {"status": "active", "url": f"http://127.0.0.1:{port}/api/version"}
@@ -430,7 +430,7 @@ def test_collect_service_health_marks_startup_when_startup_probe_has_not_complet
                             "lifecycle_status": "active",
                             "internal_url": f"http://127.0.0.1:{port}/healthz",
                             "health_probe_id": "api_gateway",
-                            "vm": "docker-runtime-lv3",
+                            "vm": "docker-runtime",
                             "vmid": 120,
                             "environments": {
                                 "production": {"status": "active", "url": f"http://127.0.0.1:{port}/healthz"}

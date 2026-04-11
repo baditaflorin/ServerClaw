@@ -10,7 +10,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0276-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0276-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0276-live-apply`
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime-guest`, `adr-0065-secret-rotation-automation`, `adr-0079-playbook-decomposition-and-shared-execution-model`, `adr-0115-mutation-ledger`, `adr-0124-platform-event-taxonomy`
 - Conflicts With: none
@@ -56,7 +56,7 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` serves NATS on TCP `4222` and monitoring on loopback `8222`
+- `docker-runtime` serves NATS on TCP `4222` and monitoring on loopback `8222`
 - JetStream exposes the committed `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams
 - `platform.mutation.recorded` publishes into `PLATFORM_EVENTS`
 - `secret.rotation.completed` publishes into `SECRET_ROTATION`
@@ -97,12 +97,12 @@ replay can promote onto the protected `main` surfaces safely.
   repository version `0.177.97`.
 - `uv run --with pytest -m pytest -q tests/test_nats_jetstream_runtime_role.py tests/test_secret_rotation.py tests/test_service_id_resolver.py tests/unit/test_event_taxonomy.py tests/unit/test_ledger_writer.py tests/test_ansible_execution_scopes.py`
   returned `38 passed in 0.68s` on the rebased head.
-- `uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276syntax-postrebase --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check`
+- `uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276syntax-postrebase --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check`
   passed on the rebased tree, and `make preflight WORKFLOW=live-apply-service`
   also passed.
-- `ANSIBLE_HOST_KEY_CHECKING=False uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276recover-r1 --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ANSIBLE_HOST_KEY_CHECKING=False uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276recover-r1 --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
   succeeded with final recap
-  `docker-runtime-lv3 : ok=79 changed=1 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`
+  `docker-runtime : ok=79 changed=1 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`
   after the latest server inspection found `lv3-nats-jetstream` had exited.
 - `make check-nats-streams` and `make apply-nats-streams` both returned
   `PLATFORM_EVENTS: none`, `RAG_DOCUMENT: none`, and
@@ -115,7 +115,7 @@ replay can promote onto the protected `main` surfaces safely.
 - A temporary compose restart from `/opt/nats-jetstream/docker-compose.yml`
   restored service health, after which the authoritative exact-main replay
   `ws0276mainline-r2` completed successfully with final recap
-  `docker-runtime-lv3 : ok=80 changed=4 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`
+  `docker-runtime : ok=80 changed=4 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`
   and re-verified the NATS loopback monitor endpoint.
 - After that exact-main replay, `make check-nats-streams` and
   `make apply-nats-streams` both again returned `PLATFORM_EVENTS: none`,

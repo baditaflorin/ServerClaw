@@ -17,21 +17,21 @@ ADR 0052, ADR 0053, ADR 0059, and ADR 0060 are now implemented and live; the rem
 
 ## Proposed ADR Map
 
-- [ADR 0052](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0052-centralized-log-aggregation-with-grafana-loki.md): centralized log aggregation and search in Grafana, implemented on `monitoring-lv3`
-- [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md): traces and service maps for internal apps and workflows, implemented on `monitoring-lv3`
-- [ADR 0054](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0054-netbox-for-topology-ipam-and-inventory.md): visual topology, IPAM, and inventory plane
-- [ADR 0055](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0055-portainer-for-read-mostly-docker-runtime-operations.md): read-mostly runtime console for Docker operations, now live privately on `docker-runtime-lv3`
-- [ADR 0056](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0056-keycloak-for-operator-and-agent-sso.md): shared SSO for internal apps
-- [ADR 0057](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0057-mattermost-for-chatops-and-operator-agent-collaboration.md): ChatOps and collaboration surface
-- [ADR 0058](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md): internal event backbone for workflows and agents
-- [ADR 0059](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0059-ntopng-for-private-network-flow-visibility.md): private network flow visibility
-- [ADR 0060](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0060-open-webui-for-operator-and-agent-workbench.md): supervised conversational workbench for operators and agents
-- [ADR 0061](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md): exception and task-failure visibility
+- [ADR 0052](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0052-centralized-log-aggregation-with-grafana-loki.md): centralized log aggregation and search in Grafana, implemented on `monitoring`
+- [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md): traces and service maps for internal apps and workflows, implemented on `monitoring`
+- [ADR 0054](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0054-netbox-for-topology-ipam-and-inventory.md): visual topology, IPAM, and inventory plane
+- [ADR 0055](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0055-portainer-for-read-mostly-docker-runtime-operations.md): read-mostly runtime console for Docker operations, now live privately on `docker-runtime`
+- [ADR 0056](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0056-keycloak-for-operator-and-agent-sso.md): shared SSO for internal apps
+- [ADR 0057](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0057-mattermost-for-chatops-and-operator-agent-collaboration.md): ChatOps and collaboration surface
+- [ADR 0058](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md): internal event backbone for workflows and agents
+- [ADR 0059](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0059-ntopng-for-private-network-flow-visibility.md): private network flow visibility
+- [ADR 0060](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0060-open-webui-for-operator-and-agent-workbench.md): supervised conversational workbench for operators and agents
+- [ADR 0061](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md): exception and task-failure visibility
 
 Current implementation note:
 
-- ADR 0053 is now live on `monitoring-lv3` with Tempo, Prometheus-backed service graphs, and a shared OTLP collector
-- ADR 0059 is now live as host-local `ntopng` capture on `proxmox_florin`, with operator-only access on `http://100.118.189.95:3001`
+- ADR 0053 is now live on `monitoring` with Tempo, Prometheus-backed service graphs, and a shared OTLP collector
+- ADR 0059 is now live as host-local `ntopng` capture on `proxmox-host`, with operator-only access on `http://100.118.189.95:3001`
 
 ## Recommended Rollout Order
 
@@ -51,12 +51,12 @@ Current implementation note:
 
 ## Current Implemented Step
 
-- ADR 0055 is now live as a private Portainer surface on `docker-runtime-lv3` with host-side Tailscale publication at `https://100.118.189.95:9444` and a repo-managed wrapper for read-mostly inspection plus bounded restarts.
+- ADR 0055 is now live as a private Portainer surface on `docker-runtime` with host-side Tailscale publication at `https://100.118.189.95:9444` and a repo-managed wrapper for read-mostly inspection plus bounded restarts.
 5. add human and agent coordination layers
    - introduce chat and event distribution for approvals, notifications, and handoffs
    - priority: ADR 0057, ADR 0058
 6. add the conversational workbench
-   - ADR 0060 is now live as a private Open WebUI workbench on `docker-runtime-lv3`
+   - ADR 0060 is now live as a private Open WebUI workbench on `docker-runtime`
    - keep it read-heavy until ADR 0069 and ADR 0070 add governed tools and repo-grounded context
 7. tighten application-level failure visibility
    - add exception tracking when internal apps and workflows are ready to emit structured failures
@@ -66,18 +66,18 @@ Current implementation note:
 
 The pragmatic first placement for these services is:
 
-- `monitoring-lv3` for Loki and Tempo if the monitoring VM has enough capacity
-- `proxmox_florin` for ntopng, where `vmbr10` and `vmbr0` can be observed directly without adding a mirror or `nProbe`
-- `docker-runtime-lv3` for NetBox, Portainer, Keycloak, Mattermost, NATS, Open WebUI, and GlitchTip
-- `postgres-lv3` for applications that need a dedicated relational backend
+- `monitoring` for Loki and Tempo if the monitoring VM has enough capacity
+- `proxmox-host` for ntopng, where `vmbr10` and `vmbr0` can be observed directly without adding a mirror or `nProbe`
+- `docker-runtime` for NetBox, Portainer, Keycloak, Mattermost, NATS, Open WebUI, and GlitchTip
+- `postgres` for applications that need a dedicated relational backend
 
 This keeps the first rollout aligned with the current single-node-first topology. If the control-plane blast radius grows too large, a dedicated control-plane VM can be introduced in a later ADR.
 
 Current state:
 
-- ADR 0053 is now live with Tempo, Prometheus-backed service-graph metrics, and a shared OTLP collector on `monitoring-lv3`
-- the first instrumented internal path is the private mail gateway on `docker-runtime-lv3`
-- ADR 0052 is now live with centralized Loki search for the Proxmox host, `nginx-lv3`, and `docker-runtime-lv3`
+- ADR 0053 is now live with Tempo, Prometheus-backed service-graph metrics, and a shared OTLP collector on `monitoring`
+- the first instrumented internal path is the private mail gateway on `docker-runtime`
+- ADR 0052 is now live with centralized Loki search for the Proxmox host, `nginx-edge`, and `docker-runtime`
 
 ## Operating Principles
 
@@ -90,7 +90,7 @@ Current state:
 
 ## Current Status
 
-- ADR 0057 is now implemented as a private-first Mattermost rollout on `docker-runtime-lv3` with a Proxmox-host Tailscale proxy, repo-managed channels and incoming webhooks, and Grafana alert routing into the managed collaboration surface.
+- ADR 0057 is now implemented as a private-first Mattermost rollout on `docker-runtime` with a Proxmox-host Tailscale proxy, repo-managed channels and incoming webhooks, and Grafana alert routing into the managed collaboration surface.
 - Shared SSO for Mattermost remains follow-on work under ADR 0056 instead of a blocker for the initial private ChatOps deployment.
 
 ## Verification Targets

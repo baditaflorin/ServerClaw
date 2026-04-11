@@ -1,7 +1,7 @@
 # Restic Config Backups
 
 ADR 0302 adds an encrypted file-level backup path for platform configuration and
-receipt artifacts on `docker-runtime-lv3` using Restic and the existing MinIO
+receipt artifacts on `docker-runtime` using Restic and the existing MinIO
 runtime.
 
 ## Entry Points
@@ -26,7 +26,7 @@ runtime.
 
 ## What Converge Installs
 
-1. The `restic` package on `docker-runtime-lv3`.
+1. The `restic` package on `docker-runtime`.
 2. An OpenBao-backed runtime credential bundle at
    `/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json`.
 3. The `lv3-restic-config-backup.service` and `lv3-restic-config-backup.timer`
@@ -36,11 +36,11 @@ runtime.
 5. The MinIO bucket `restic-config-backup` with Object Lock and versioning.
 
 The current production baseline resolves the Restic repository through the
-dedicated `minio` runtime on `docker-runtime-lv3`. For backward compatibility,
+dedicated `minio` runtime on `docker-runtime`. For backward compatibility,
 the repo-managed converge task and live-apply trigger still fall back to the
 older `outline-minio` container when that legacy runtime exists instead of the
 dedicated service.
-When `docker-runtime-lv3` has gone through a broad Docker recovery, the shared
+When `docker-runtime` has gone through a broad Docker recovery, the shared
 `minio` container may exist but remain stopped or stay half-running with no
 reachable Docker network attachment. The repo-managed converge task and
 live-apply trigger now treat both states as recoverable and repair the
@@ -72,16 +72,16 @@ make backup-coverage-ledger
 ## Notes
 
 - The manual, timer, and Windmill paths all execute the mirrored worker checkout
-  at `/srv/proxmox_florin_server`. The converge role and live-apply trigger
+  at `/srv/proxmox-host_server`. The converge role and live-apply trigger
   stage the minimal backup support files there before validation runs, but the
   broader worker checkout should still be kept current for ongoing scheduled use.
 - When the live-apply trigger finds the runtime credential file missing on
-  `docker-runtime-lv3`, it now self-heals through the repo-managed
+  `docker-runtime`, it now self-heals through the repo-managed
   `converge-restic-config-backup` path before retrying the backup trigger
   instead of failing immediately on an empty `/run` credential directory after a
   host reboot.
 - The restic backup agent now prefers the dedicated OpenBao control-plane
-  address when `runtime-control-lv3` is reachable, but still falls back to the
+  address when `runtime-control` is reachable, but still falls back to the
   local Docker-runtime OpenBao listener during the transition window before the
   runtime-control migration is live.
 - The host-side service, live-apply trigger, and Windmill wrapper still fall
@@ -98,10 +98,10 @@ make backup-coverage-ledger
   recorded in the backup receipt, but a notification failure does not discard a
   successful Restic snapshot receipt.
 - If a backup run is interrupted and the next replay reports `repository is
-  already locked`, confirm the named PID on `docker-runtime-lv3` is gone and
+  already locked`, confirm the named PID on `docker-runtime` is gone and
   then clear the stale repository lock with `restic unlock` before retrying the
   managed workflow.
 - If the shared MinIO layer or the Restic path starts hanging after a broader
-  Docker-runtime recovery, check `/` headroom on `docker-runtime-lv3` and
-  follow [docker-runtime-disk-pressure.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/docs/runbooks/docker-runtime-disk-pressure.md)
+  Docker-runtime recovery, check `/` headroom on `docker-runtime` and
+  follow [docker-runtime-disk-pressure.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0274-mainline-refresh-v6/docs/runbooks/docker-runtime-disk-pressure.md)
   before replaying the managed backup or MinIO live-apply wrapper.

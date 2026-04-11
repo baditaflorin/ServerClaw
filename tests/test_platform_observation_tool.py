@@ -65,8 +65,8 @@ def test_write_outputs_creates_digest_and_json(tmp_path: Path):
 
 
 def test_format_certificate_subject_flattens_nested_pairs():
-    subject = ((("commonName", "proxmox.lv3.org"),), (("organizationName", "LV3"),))
-    assert tool.format_certificate_subject(subject) == "commonName=proxmox.lv3.org, organizationName=LV3"
+    subject = ((("commonName", "proxmox.example.com"),), (("organizationName", "LV3"),))
+    assert tool.format_certificate_subject(subject) == "commonName=proxmox.example.com, organizationName=LV3"
 
 
 def test_normalize_image_reference_strips_default_registry_prefixes():
@@ -80,7 +80,7 @@ def test_check_image_freshness_flags_unpinned_and_local_build(monkeypatch):
             {
                 "id": "windmill-server",
                 "service_id": "windmill",
-                "runtime_host": "docker-runtime-lv3",
+                "runtime_host": "docker-runtime",
                 "container_name": "windmill-windmill_server-1",
                 "image_reference": "ghcr.io/windmill-labs/windmill:main",
                 "source_kind": "upstream",
@@ -90,7 +90,7 @@ def test_check_image_freshness_flags_unpinned_and_local_build(monkeypatch):
             {
                 "id": "mail-gateway",
                 "service_id": "mail_platform",
-                "runtime_host": "docker-runtime-lv3",
+                "runtime_host": "docker-runtime",
                 "container_name": "lv3-mail-gateway",
                 "image_reference": "mail-platform-mail-gateway",
                 "source_kind": "local_build",
@@ -140,7 +140,7 @@ def test_check_image_freshness_supports_pinned_mapping_catalog(monkeypatch):
             "windmill_runtime": {
                 "kind": "runtime",
                 "service_id": "windmill",
-                "runtime_host": "docker-runtime-lv3",
+                "runtime_host": "docker-runtime",
                 "container_name": "windmill-windmill_server-1",
                 "ref": "ghcr.io/windmill-labs/windmill:1.662.0@sha256:abc",
                 "digest": "sha256:abc",
@@ -163,7 +163,7 @@ def test_check_image_freshness_supports_pinned_mapping_catalog(monkeypatch):
     def fake_execute_runner(context, runner, target, command):
         del context
         assert runner == "guest_jump"
-        assert target == "docker-runtime-lv3"
+        assert target == "docker-runtime"
         assert "windmill-windmill_server-1" in command
         return tool.CommandResult(
             command=command,
@@ -220,7 +220,7 @@ def test_check_certificate_expiry_uses_tls_probe(monkeypatch):
                 "certificate_id": "proxmox-ui",
                 "severity": "ok",
                 "status": "ok",
-                "subject": "commonName=proxmox.lv3.org",
+                "subject": "commonName=proxmox.example.com",
                 "issuer": "commonName=Let's Encrypt",
                 "not_after": "2026-06-19T20:50:43Z",
                 "days_remaining": 88,
@@ -253,7 +253,7 @@ def test_check_service_health_supports_service_catalog(monkeypatch):
         "services": {
             "windmill": {
                 "service_name": "windmill",
-                "owning_vm": "docker-runtime-lv3",
+                "owning_vm": "docker-runtime",
                 "startup": {
                     "kind": "http",
                     "description": "startup",
@@ -296,7 +296,7 @@ def test_check_service_health_supports_service_catalog(monkeypatch):
     def fake_execute_runner(context, runner, target, command):
         del context
         assert runner == "guest_jump"
-        assert target == "docker-runtime-lv3"
+        assert target == "docker-runtime"
         if "echo" in command:
             return tool.CommandResult(command=command, returncode=0, stdout="windmill", stderr="")
         return tool.CommandResult(
@@ -325,7 +325,7 @@ def test_check_service_health_marks_starting_services_as_warning(monkeypatch):
         "services": {
             "api_gateway": {
                 "service_name": "api-gateway",
-                "owning_vm": "docker-runtime-lv3",
+                "owning_vm": "docker-runtime",
                 "startup": {
                     "kind": "http",
                     "description": "startup",
@@ -369,7 +369,7 @@ def test_check_service_health_marks_starting_services_as_warning(monkeypatch):
     def fake_execute_runner(context, runner, target, command):
         del context
         assert runner == "guest_jump"
-        assert target == "docker-runtime-lv3"
+        assert target == "docker-runtime"
         if "/healthz" in command:
             return tool.CommandResult(
                 command=command,
@@ -400,7 +400,7 @@ def test_build_service_probes_retains_full_service_definition() -> None:
         "services": {
             "coolify": {
                 "service_name": "coolify",
-                "owning_vm": "coolify-lv3",
+                "owning_vm": "coolify",
                 "liveness": {
                     "kind": "http",
                     "description": "health",
@@ -442,7 +442,7 @@ def test_execute_structured_probe_fails_when_docker_publication_assertion_fails(
         "id": "coolify-readiness",
         "service_id": "coolify",
         "runner": "structured",
-        "target": "coolify-lv3",
+        "target": "coolify",
         "phase": "readiness",
         "definition": {
             "kind": "http",
@@ -456,7 +456,7 @@ def test_execute_structured_probe_fails_when_docker_publication_assertion_fails(
         },
         "service_definition": {
             "service_name": "coolify",
-            "owning_vm": "coolify-lv3",
+            "owning_vm": "coolify",
             "liveness": {
                 "kind": "http",
                 "description": "health",
@@ -488,7 +488,7 @@ def test_execute_structured_probe_fails_when_docker_publication_assertion_fails(
         del context
         if command.startswith("curl "):
             assert runner == "guest_jump"
-            assert target == "coolify-lv3"
+            assert target == "coolify"
             return tool.CommandResult(command=command, returncode=0, stdout="ok\n__STATUS__=200", stderr="")
         assert "lv3-docker-publication-assurance" in command
         return tool.CommandResult(

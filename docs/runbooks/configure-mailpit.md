@@ -7,7 +7,7 @@ verifies the guest-network HTTP and SMTP capture path end to end.
 
 ## Result
 
-- `runtime-general-lv3` runs Mailpit from `/opt/dev-tools/mailpit`
+- `runtime-general` runs Mailpit from `/opt/dev-tools/mailpit`
 - Mailpit listens privately on `10.10.10.91:8025` for the UI and REST API
 - Mailpit listens privately on `10.10.10.91:1025` for unauthenticated SMTP capture
 - staging and other non-production SMTP-aware automation can point at `mailpit`
@@ -18,30 +18,30 @@ verifies the guest-network HTTP and SMTP capture path end to end.
 Syntax-check the Mailpit workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-mailpit
 ```
 
 Converge the Mailpit runtime directly:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-mailpit env=production
 ```
 
 Run the governed live-apply wrapper:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production
 ```
 
 ## Verification
 
-Verify the private Mailpit info endpoint on `runtime-general-lv3`:
+Verify the private Mailpit info endpoint on `runtime-general`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.91 \
@@ -51,7 +51,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Verify Mailpit captures an SMTP probe through the REST API:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.91 \
@@ -68,8 +68,8 @@ urllib.request.urlopen(
 ).read()
 
 message = EmailMessage()
-message["From"] = "runbook-check@lv3.org"
-message["To"] = "mailpit-runbook@lv3.org"
+message["From"] = "runbook-check@example.com"
+message["To"] = "mailpit-runbook@example.com"
 message["Subject"] = subject
 message.set_content("Runbook verification through Mailpit")
 
@@ -87,7 +87,7 @@ PY'
 Verify the staging mail-verification playbook still syntax-checks with the Mailpit path:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml \
   --private-key .local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
@@ -99,7 +99,7 @@ ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml \
 
 - Mailpit is intentionally private-only. Do not publish it on the public NGINX edge.
 - Mailpit is intentionally stateless. Restarting or re-creating the container clears captured messages.
-- Mailpit now belongs to `runtime-general-lv3`, not the shared `docker-runtime-lv3` guest.
+- Mailpit now belongs to `runtime-general`, not the shared `docker-runtime` guest.
 - The governed Mailpit converge now retries automatically if Docker reports a
   stale compose-network error such as `failed to create endpoint mailpit ...
   network ... does not exist`; prefer rerunning the repo-managed workflow over

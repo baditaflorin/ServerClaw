@@ -25,8 +25,8 @@ def configure_repo(monkeypatch, tmp_path: Path) -> None:
                 {
                     "id": "netbox",
                     "name": "NetBox",
-                    "vm": "docker-runtime-lv3",
-                    "public_url": "https://netbox.lv3.org",
+                    "vm": "docker-runtime",
+                    "public_url": "https://netbox.example.com",
                 }
             ]
         },

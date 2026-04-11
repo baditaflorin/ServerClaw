@@ -60,10 +60,10 @@ Initial trace candidates:
 
 ## Implementation Notes
 
-- `monitoring-lv3` now runs Prometheus, Tempo, and `otelcol-contrib` beside the existing Grafana and InfluxDB services.
+- `monitoring` now runs Prometheus, Tempo, and `otelcol-contrib` beside the existing Grafana and InfluxDB services.
 - Grafana is provisioned with dedicated Prometheus and Tempo datasources so operators can inspect traces in Explore and render the built-in service map.
 - The shared OTLP collector listens on `10.10.10.40:4317` and `10.10.10.40:4318` and forwards traces into the local Tempo backend.
 - The managed Prometheus unit enables both `exemplar-storage` and `native-histograms` so Tempo's metrics generator can persist span metrics and service-graph edges without remote-write failures.
-- The first live producer is the private mail gateway on `docker-runtime-lv3`, instrumented for inbound FastAPI requests plus outbound `httpx` calls to Stalwart and Brevo.
+- The first live producer is the private mail gateway on `docker-runtime`, instrumented for inbound FastAPI requests plus outbound `httpx` calls to Stalwart and Brevo.
 - Standard resource tags now include `service.name`, `service.namespace=lv3`, and `deployment.environment=lv3` for the first rollout, and the mail gateway now reads those values from `OTEL_RESOURCE_ATTRIBUTES`.
 - Live verification from `main` confirms Tempo search for `mail-gateway`, Prometheus span metrics for gateway operations, and Prometheus service-graph metrics for the first traced API edge.

@@ -44,7 +44,7 @@ def test_edge_sites_preserve_proxy_hardening_fields() -> None:
     sites = filters.service_topology_edge_sites(
         {
             "grafana": {
-                "public_hostname": "grafana.lv3.org",
+                "public_hostname": "grafana.example.com",
                 "edge": {
                     "enabled": True,
                     "tls": True,
@@ -62,7 +62,7 @@ def test_edge_sites_preserve_proxy_hardening_fields() -> None:
     )
     assert sites == [
         {
-            "hostname": "grafana.lv3.org",
+            "hostname": "grafana.example.com",
             "kind": "proxy",
             "noindex": True,
             "upstream": "http://10.10.10.40:3000",
@@ -80,7 +80,7 @@ def test_edge_sites_preserve_exact_redirects() -> None:
     sites = filters.service_topology_edge_sites(
         {
             "nextcloud": {
-                "public_hostname": "cloud.lv3.org",
+                "public_hostname": "cloud.example.com",
                 "edge": {
                     "enabled": True,
                     "tls": True,
@@ -97,7 +97,7 @@ def test_edge_sites_preserve_exact_redirects() -> None:
 
     assert sites == [
         {
-            "hostname": "cloud.lv3.org",
+            "hostname": "cloud.example.com",
             "kind": "proxy",
             "upstream": "http://10.10.10.20:8084",
             "exact_redirects": [
@@ -113,7 +113,7 @@ def test_edge_sites_preserve_proxy_header_and_security_policy_controls() -> None
     sites = filters.service_topology_edge_sites(
         {
             "plausible": {
-                "public_hostname": "analytics.lv3.org",
+                "public_hostname": "analytics.example.com",
                 "edge": {
                     "enabled": True,
                     "tls": True,
@@ -129,7 +129,7 @@ def test_edge_sites_preserve_proxy_header_and_security_policy_controls() -> None
 
     assert sites == [
         {
-            "hostname": "analytics.lv3.org",
+            "hostname": "analytics.example.com",
             "kind": "proxy",
             "upstream": "http://10.10.10.20:8016",
             "crawl_policy_enabled": False,
@@ -161,19 +161,19 @@ def test_edge_certificate_domains_include_aliases() -> None:
     domains = filters.service_topology_edge_certificate_domains(
         {
             "coolify_apps": {
-                "public_hostname": "apps.lv3.org",
+                "public_hostname": "apps.example.com",
                 "edge": {
                     "enabled": True,
                     "tls": True,
                     "kind": "proxy",
                     "upstream": "http://10.10.10.70:80",
-                    "aliases": ["*.apps.lv3.org"],
+                    "aliases": ["*.apps.example.com"],
                 },
             }
         }
     )
 
-    assert domains == ["*.apps.lv3.org", "apps.lv3.org"]
+    assert domains == ["*.apps.example.com", "apps.example.com"]
 
 
 def test_service_topology_dns_records_include_additional_records() -> None:
@@ -186,13 +186,13 @@ def test_service_topology_dns_records_include_additional_records() -> None:
                     "visibility": "public",
                     "name": "minio",
                     "type": "A",
-                    "target": "65.108.75.123",
+                    "target": "203.0.113.1",
                     "ttl": 60,
                     "additional_records": [
                         {
                             "name": "minio-console",
                             "type": "A",
-                            "target": "65.108.75.123",
+                            "target": "203.0.113.1",
                             "ttl": 60,
                         }
                     ],
@@ -202,6 +202,6 @@ def test_service_topology_dns_records_include_additional_records() -> None:
     )
 
     assert records == [
-        {"name": "minio", "type": "A", "value": "65.108.75.123", "ttl": 60},
-        {"name": "minio-console", "type": "A", "value": "65.108.75.123", "ttl": 60},
+        {"name": "minio", "type": "A", "value": "203.0.113.1", "ttl": 60},
+        {"name": "minio-console", "type": "A", "value": "203.0.113.1", "ttl": 60},
     ]

@@ -1,14 +1,14 @@
 # Workstream ADR 0043: OpenBao For Secrets, Transit, And Dynamic Credentials
 
-- ADR: [ADR 0043](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md)
+- ADR: [ADR 0043](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md)
 - Title: Secret authority for applications, services, and agents
 - Status: live_applied
 - Branch: `codex/adr-0043-openbao`
-- Worktree: `../proxmox_florin_server-openbao`
+- Worktree: `../proxmox-host_server-openbao`
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime`
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, secret distribution, transit operations
+- Shared Surfaces: `docker-runtime`, secret distribution, transit operations
 
 ## Scope
 
@@ -35,8 +35,8 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` runs the managed OpenBao runtime with integrated Raft storage and controller-managed init and unseal
-- `postgres-lv3` serves the managed OpenBao database backend for dynamic read-only PostgreSQL credentials
+- `docker-runtime` runs the managed OpenBao runtime with integrated Raft storage and controller-managed init and unseal
+- `postgres` serves the managed OpenBao database backend for dynamic read-only PostgreSQL credentials
 - controller-local `.local/openbao/` artifacts hold the init payload, named operator passwords, and refreshed short-TTL reusable AppRole credentials
 
 ## Verification

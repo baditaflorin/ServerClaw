@@ -40,7 +40,7 @@ def test_record_event_writes_ledger_and_glitchtip(monkeypatch: pytest.MonkeyPatc
             "milestone": "inventory",
             "result": "error",
             "flow_id": "flow-1",
-            "route": "https://ops.lv3.org/journeys/operator-access-admin/alert",
+            "route": "https://ops.example.com/journeys/operator-access-admin/alert",
             "properties": {"alert_source": "inventory"},
             "glitchtip": {"requested": True, "message": "Inventory alert"},
         },

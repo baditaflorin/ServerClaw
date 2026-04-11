@@ -17,11 +17,11 @@ def test_parse_report_text_extracts_hardening_index_and_findings() -> None:
             "warning[]=AUTH-9208|Set a password hashing iteration count\n"
             "suggestion[]=KRNL-6000|Consider enabling kernel hardening\n"
         ),
-        host="docker-runtime-lv3",
+        host="docker-runtime",
         suppressions={},
     )
 
-    assert report["host"] == "docker-runtime-lv3"
+    assert report["host"] == "docker-runtime"
     assert report["hardening_index"] == 72
     assert report["finding_counts"]["warning"] == 1
     assert report["finding_counts"]["suggestion"] == 1
@@ -31,7 +31,7 @@ def test_parse_report_text_extracts_hardening_index_and_findings() -> None:
 def test_parse_report_text_hides_suppressed_findings_by_default() -> None:
     report = parser.parse_report_text(
         "warning[]=AUTH-9208|Set a password hashing iteration count\n",
-        host="docker-runtime-lv3",
+        host="docker-runtime",
         suppressions={"AUTH-9208": {"reason": "accepted risk"}},
     )
 

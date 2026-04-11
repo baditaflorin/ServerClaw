@@ -6,9 +6,9 @@ Use the repo-managed public edge header policy to verify that every published ho
 
 ## Repo-Managed Inputs
 
-- Role defaults: [collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml)
-- Edge template: [collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2)
-- Audit tool: [scripts/security_headers_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/security_headers_audit.py)
+- Role defaults: [collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml)
+- Edge template: [collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2)
+- Audit tool: [scripts/security_headers_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/security_headers_audit.py)
 
 ## Verify From The Repo
 
@@ -21,7 +21,7 @@ make security-headers-audit
 Audit a single hostname while iterating on a CSP override:
 
 ```bash
-uv run --with pyyaml python scripts/security_headers_audit.py --host docs.lv3.org
+uv run --with pyyaml python scripts/security_headers_audit.py --host docs.example.com
 ```
 
 ## Verify A Live Response Manually
@@ -29,7 +29,7 @@ uv run --with pyyaml python scripts/security_headers_audit.py --host docs.lv3.or
 Spot-check the response headers from outside the platform:
 
 ```bash
-curl -sSI https://docs.lv3.org/ | rg 'Strict-Transport-Security|Content-Security-Policy|X-Frame-Options|X-Content-Type-Options|Referrer-Policy|Permissions-Policy|X-Robots-Tag'
+curl -sSI https://docs.example.com/ | rg 'Strict-Transport-Security|Content-Security-Policy|X-Frame-Options|X-Content-Type-Options|Referrer-Policy|Permissions-Policy|X-Robots-Tag'
 ```
 
 ## When To Change The Policy

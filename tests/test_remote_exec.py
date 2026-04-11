@@ -11,7 +11,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT_PATH = REPO_ROOT / "scripts" / "remote_exec.sh"
 SESSION_ID = "test-session"
-REMOTE_WORKSPACE_ROOT = f"/opt/builds/proxmox_florin_server/.lv3-session-workspaces/{SESSION_ID}/repo"
+REMOTE_WORKSPACE_ROOT = f"/opt/builds/proxmox-host_server/.lv3-session-workspaces/{SESSION_ID}/repo"
 
 
 def write_executable(path: Path, contents: str) -> None:
@@ -103,7 +103,7 @@ def build_config(
         "ansible_collection_cache": "/opt/builds/.ansible/collections",
         "ansible_requirements_sha_file": "/opt/builds/.ansible/requirements.sha",
         "apt_proxy_url": "http://10.10.10.30:3142",
-        "registry_base": "registry.lv3.org",
+        "registry_base": "registry.example.com",
         "commands": {
             "remote-lint": {
                 "runner_id": "build-server-validation",
@@ -157,21 +157,21 @@ def build_config(
 def build_manifest(path: Path) -> None:
     payload = {
         "lint-ansible": {
-            "image": "registry.lv3.org/check-runner/ansible:0.1.0",
+            "image": "registry.example.com/check-runner/ansible:0.1.0",
             "command": ["./scripts/validate_repo.sh", "yaml", "ansible-lint"],
             "working_dir": "/workspace",
             "timeout_seconds": 180,
             "cache_mounts": ["ansible_collections"],
         },
         "validate-schemas": {
-            "image": "registry.lv3.org/check-runner/python:0.1.0",
+            "image": "registry.example.com/check-runner/python:0.1.0",
             "command": "python scripts/validate_repository_data_models.py --validate",
             "working_dir": "/workspace",
             "timeout_seconds": 180,
             "cache_mounts": ["pip"],
         },
         "packer-validate": {
-            "image": "registry.lv3.org/check-runner/infra:0.1.0",
+            "image": "registry.example.com/check-runner/infra:0.1.0",
             "command": "packer validate packer",
             "working_dir": "/workspace",
             "timeout_seconds": 180,
@@ -212,7 +212,7 @@ def run_remote_exec(
 
     build_config(
         config_path,
-        workspace_root="/opt/builds/proxmox_florin_server",
+        workspace_root="/opt/builds/proxmox-host_server",
         local_command=local_command,
         ssh_options=ssh_options,
     )
@@ -257,7 +257,7 @@ def run_remote_exec(
 
 def extract_run_workspace_root(text: str) -> str:
     match = re.search(
-        r"(/opt/builds/proxmox_florin_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/[^ ]+/repo)", text
+        r"(/opt/builds/proxmox-host_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/[^ ]+/repo)", text
     )
     assert match is not None, text
     return match.group(1)
@@ -269,7 +269,7 @@ def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     assert completed.returncode == 0, completed.stderr
     run_workspace_root = extract_run_workspace_root(completed.stderr)
     assert "Remote docker command:" in completed.stderr
-    assert "registry.lv3.org/check-runner/ansible:0.1.0" in completed.stderr
+    assert "registry.example.com/check-runner/ansible:0.1.0" in completed.stderr
     assert "/opt/builds/.ansible/collections:/opt/builds/.ansible/collections" in completed.stderr
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha" in completed.stderr
     assert f"{run_workspace_root}:/workspace" in completed.stderr
@@ -417,7 +417,7 @@ def test_remote_exec_applies_configured_ssh_options(tmp_path: Path) -> None:
 
     build_config(
         config_path,
-        workspace_root="/opt/builds/proxmox_florin_server",
+        workspace_root="/opt/builds/proxmox-host_server",
         local_command='printf local-fallback > "$REMOTE_EXEC_MARKER"',
         ssh_options=["-o", "ProxyCommand=ssh jump.example -W %h:%p"],
     )
@@ -575,6 +575,6 @@ def test_remote_exec_forwards_packer_related_environment_variables(tmp_path: Pat
     assert "LV3_SNAPSHOT_SOURCE_COMMIT=" in ssh_log
     assert "LV3_SNAPSHOT_BRANCH=" in ssh_log
     assert re.search(
-        r"LV3_SESSION_LOCAL_ROOT=/opt/builds/proxmox_florin_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/.+/repo/\.local/session-workspaces/test-session",
+        r"LV3_SESSION_LOCAL_ROOT=/opt/builds/proxmox-host_server/\.lv3-session-workspaces/test-session/repo/\.lv3-runs/.+/repo/\.local/session-workspaces/test-session",
         ssh_log,
     )

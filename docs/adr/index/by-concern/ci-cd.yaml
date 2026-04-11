@@ -140,7 +140,7 @@ adrs:
       - platform
       - api
       - gateway
-    summary: We will deploy a platform API gateway on docker-runtime-lv3 as a FastAPI-based aggregation and proxy service,
+    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service,
       exposed on the host at http://10.10.10.20:8083 and
     filename: 0092-unified-platform-api-gateway.md
     path: docs/adr/0092-unified-platform-api-gateway.md
@@ -216,7 +216,7 @@ adrs:
       - git
       - webhook-driven
       - automation
-    summary: We will deploy Gitea as a self-hosted git service on the docker-runtime-lv3 VM, replacing the external git provider
+    summary: We will deploy Gitea as a self-hosted git service on the docker-runtime VM, replacing the external git provider
       as the primary remote.
     filename: 0143-gitea-for-self-hosted-git-and-ci.md
     path: docs/adr/0143-gitea-for-self-hosted-git-and-ci.md

@@ -12,7 +12,7 @@ ADR 0101 (Automated Certificate Lifecycle Management) and ADR 0273 (Public Endpo
 
 Recent operational incidents demonstrate the problem:
 
-- ci.lv3.org, bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org, and ntfy.lv3.org all have **certificate hostname mismatch** errors because they are in `config/subdomain-catalog.json` with `exposure: "edge-published"` but are **missing from the NGINX edge certificate's Subject Alternative Names (SANs)**.
+- ci.example.com, bi.example.com, grist.example.com, paperless.example.com, annotate.example.com, and ntfy.example.com all have **certificate hostname mismatch** errors because they are in `config/subdomain-catalog.json` with `exposure: "edge-published"` but are **missing from the NGINX edge certificate's Subject Alternative Names (SANs)**.
 
 - There is no automated check to detect this mismatch before deployment or before the user encounters a broken site.
 
@@ -40,7 +40,7 @@ We will implement **certificate validation and concordance enforcement** that:
 python3 scripts/certificate_validator.py --check-all
 
 # Check one domain
-python3 scripts/certificate_validator.py --fqdn ci.lv3.org
+python3 scripts/certificate_validator.py --fqdn ci.example.com
 
 # JSON output for automation
 python3 scripts/certificate_validator.py --check-all --json
@@ -118,7 +118,7 @@ This playbook:
 
 ```bash
 python3 scripts/add-certificate-monitors-to-uptime-kuma.py \
-    --base-url https://uptime.lv3.org \
+    --base-url https://uptime.example.com \
     --api-key <api-key>
 ```
 
@@ -222,11 +222,11 @@ class CertValidationResult:
 ```json
 [
   {
-    "fqdn": "ci.lv3.org",
+    "fqdn": "ci.example.com",
     "service": "woodpecker",
     "status": "valid",
     "cn": "lv3-edge",
-    "sans": ["*.lv3.org", "lv3.org", ...],
+    "sans": ["*.example.com", "example.com", ...],
     "expires": "Aug 15 00:00:00 2026 GMT",
     "days_until_expiry": 131,
     "error": null
@@ -249,7 +249,7 @@ class CertValidationResult:
 
 - Requires Hetzner DNS API credentials for certificate renewal (already required by ADR 0021)
 - Certificate validation adds a few seconds to deployment pipelines
-- Some internal services (database.lv3.org, vault.lv3.org) use self-signed certs and will appear as "failed" (expected behavior — not all domains use edge certificates)
+- Some internal services (database.example.com, vault.example.com) use self-signed certs and will appear as "failed" (expected behavior — not all domains use edge certificates)
 
 **Risk Mitigation**
 
@@ -264,19 +264,19 @@ class CertValidationResult:
 1. Add service to `config/subdomain-catalog.json` with `exposure: "edge-published"`
 2. Deploy service playbook
 3. Run `make converge-nginx-edge env=production` (regenerates cert with new domain)
-4. Run `python3 scripts/certificate_validator.py --fqdn my-service.lv3.org`
+4. Run `python3 scripts/certificate_validator.py --fqdn my-service.example.com`
 5. Should show: `✓ Valid`
 
 ### Scenario 2: Certificate Hostname Mismatch Found
 
 1. Run `python3 scripts/certificate_validator.py --check-all`
-2. Output shows: `[CERT_MISMATCH] ci.lv3.org — hostname mismatch`
+2. Output shows: `[CERT_MISMATCH] ci.example.com — hostname mismatch`
 3. Run `make converge-nginx-edge env=production`
 4. Run validator again — should now show `✓ Valid`
 
 ### Scenario 3: Certificate Expiring Soon
 
-1. Uptime Kuma alert: "ci.lv3.org certificate expires in 14 days"
+1. Uptime Kuma alert: "ci.example.com certificate expires in 14 days"
 2. Run `make converge-nginx-edge env=production` (certbot renews automatically)
 3. Wait for NGINX reload completion
 4. Uptime Kuma shows updated expiry date

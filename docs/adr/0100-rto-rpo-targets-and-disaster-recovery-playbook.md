@@ -20,11 +20,11 @@ The draft answer that existed before this ADR had two serious problems:
 
 The current platform reality is:
 
-- `backup-lv3` is the local PBS anchor VM on `10.10.10.60`
+- `backup` is the local PBS anchor VM on `10.10.10.60`
 - its datastore lives on a dedicated 640 GB secondary disk attached to VM `160`
 - the nightly host-side PBS backup job currently protects VMs `110`, `120`, `130`, `140`, and `150`
-- no PBS remotes or PBS sync jobs are currently configured on `backup-lv3`
-- no off-site copy of `backup-lv3` is currently recorded in live state
+- no PBS remotes or PBS sync jobs are currently configured on `backup`
+- no off-site copy of `backup` is currently recorded in live state
 
 Without explicit targets, machine-readable readiness, and a documented tier order that matches the real topology, recovery remains partly improvised.
 
@@ -32,9 +32,9 @@ Without explicit targets, machine-readable readiness, and a documented tier orde
 
 We will define formal platform RTO/RPO targets, store them in machine-readable repo data, publish the ordered disaster recovery playbook, and expose a repo-managed readiness report.
 
-The off-site recovery anchor is the **backup-lv3 PBS VM itself**:
+The off-site recovery anchor is the **backup PBS VM itself**:
 
-- Proxmox keeps taking nightly guest backups into local PBS on `backup-lv3`
+- Proxmox keeps taking nightly guest backups into local PBS on `backup`
 - a second, optional off-site Proxmox backup stores VM `160` on Hetzner Storage Box-backed external storage
 - after a total host loss, the operator restores VM `160` first
 - once PBS is back, the remaining VMs are restored from PBS in dependency order
@@ -47,9 +47,9 @@ This replaces the earlier incorrect idea of "PBS remote sync to Storage Box".
 |---|---|---|---|
 | Single service failure | < 5 min | 0 | Docker restart or targeted converge |
 | VM failure with Postgres HA | < 1 min | 0 committed transactions | ADR 0098 target state |
-| Stateless VM failure | < 30 min | 0 | nginx-lv3 or monitoring-lv3 reprovision/restore |
-| Stateful VM failure without HA | < 2 h | < 24 h | docker-runtime-lv3 or backup-lv3 restore path |
-| Full host recovery with off-site backup-lv3 copy | < 4 h | < 24 h | restore VM 160 first, then restore remaining VMs from PBS |
+| Stateless VM failure | < 30 min | 0 | nginx-edge or monitoring reprovision/restore |
+| Stateful VM failure without HA | < 2 h | < 24 h | docker-runtime or backup restore path |
+| Full host recovery with off-site backup copy | < 4 h | < 24 h | restore VM 160 first, then restore remaining VMs from PBS |
 | Full host recovery with no backup | < 8 h | unbounded | repo-only rebuild; stateful data lost |
 
 **Platform-wide RTO: < 4 hours.**
@@ -63,23 +63,23 @@ This replaces the earlier incorrect idea of "PBS remote sync to Storage Box".
 2. Reinstall Proxmox VE from Debian packages
 3. Verify `pvesh get /version` works
 
-#### Tier 1: Restore `backup-lv3`
+#### Tier 1: Restore `backup`
 1. Mount or reconnect the off-site storage target
-2. Restore VM `160` (`backup-lv3`) from the latest off-site Proxmox backup
-3. Verify PBS datastore visibility on `backup-lv3`
+2. Restore VM `160` (`backup`) from the latest off-site Proxmox backup
+3. Verify PBS datastore visibility on `backup`
 
 #### Tier 2: Restore stateful data services
-1. Restore VM `150` (`postgres-lv3`) from PBS
-2. Restore VM `120` (`docker-runtime-lv3`) from PBS
+1. Restore VM `150` (`postgres`) from PBS
+2. Restore VM `120` (`docker-runtime`) from PBS
 3. Verify `step-ca` and OpenBao health
 
 #### Tier 3: Restore edge and observability
-1. Restore VM `140` (`monitoring-lv3`) from PBS
-2. Restore VM `110` (`nginx-lv3`) from PBS
+1. Restore VM `140` (`monitoring`) from PBS
+2. Restore VM `110` (`nginx-edge`) from PBS
 3. Verify Grafana and Keycloak through the edge
 
 #### Tier 4: Restore build infrastructure
-1. Restore VM `130` (`docker-build-lv3`) from PBS
+1. Restore VM `130` (`docker-build`) from PBS
 2. Verify the build gateway path
 
 #### Tier 5: Platform verification sweep
@@ -91,17 +91,17 @@ This replaces the earlier incorrect idea of "PBS remote sync to Storage Box".
 
 This ADR is implemented in repository automation by:
 
-- [config/disaster-recovery-targets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/disaster-recovery-targets.json) for machine-readable targets and tier deadlines
-- [scripts/disaster_recovery_runbook.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/disaster_recovery_runbook.py) for the structured recovery plan
-- [config/windmill/scripts/disaster-recovery-runbook.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/disaster-recovery-runbook.py) for the Windmill wrapper
-- [scripts/generate_dr_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_dr_report.py) plus `make dr-status` for current DR readiness
-- [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py) `release status` output for the DR review criterion in ADR 0110
-- [playbooks/backup-vm.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/backup-vm.yml) plus [roles/proxmox_backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/proxmox_backups) for the optional off-site backup of VM `160`
-- [docs/runbooks/disaster-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/disaster-recovery.md) and [docs/runbooks/break-glass.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md) for the operator path
+- [config/disaster-recovery-targets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/disaster-recovery-targets.json) for machine-readable targets and tier deadlines
+- [scripts/disaster_recovery_runbook.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/disaster_recovery_runbook.py) for the structured recovery plan
+- [config/windmill/scripts/disaster-recovery-runbook.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/disaster-recovery-runbook.py) for the Windmill wrapper
+- [scripts/generate_dr_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/generate_dr_report.py) plus `make dr-status` for current DR readiness
+- [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py) `release status` output for the DR review criterion in ADR 0110
+- [playbooks/backup-vm.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/backup-vm.yml) plus [roles/proxmox_backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/proxmox_backups) for the optional off-site backup of VM `160`
+- [docs/runbooks/disaster-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/disaster-recovery.md) and [docs/runbooks/break-glass.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/break-glass.md) for the operator path
 
 ### Off-site backup model
 
-The off-site copy uses Proxmox-managed external storage and protects the whole `backup-lv3` VM.
+The off-site copy uses Proxmox-managed external storage and protects the whole `backup` VM.
 
 Why this model:
 
@@ -122,7 +122,7 @@ The repo therefore treats the off-site copy as:
 - table-top review: once per quarter
 - live off-site recovery drill: once per year
 
-Table-top completion is recorded under [receipts/dr-table-top-reviews](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/dr-table-top-reviews).
+Table-top completion is recorded under [receipts/dr-table-top-reviews](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/dr-table-top-reviews).
 
 ## Consequences
 

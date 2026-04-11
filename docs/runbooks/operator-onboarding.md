@@ -44,7 +44,7 @@ python3 scripts/windmill_run_wait_result.py \
   }'
 ```
 
-That route runs on `docker-runtime-lv3` and already exposes `LV3_OPENBAO_URL=http://lv3-openbao:8201`
+That route runs on `docker-runtime` and already exposes `LV3_OPENBAO_URL=http://lv3-openbao:8201`
 inside the worker runtime, so it avoids the controller-side mTLS trap automatically.
 
 ## Roster-First Flow
@@ -83,7 +83,7 @@ The app now includes a `Guided Onboarding` launcher:
 
 Provisioning access is no longer the end of the browser-first onboarding path.
 After the Windmill-backed identity step succeeds, direct the operator to
-`https://ops.lv3.org#activation` so they complete the ADR 0310 first-run
+`https://ops.example.com#activation` so they complete the ADR 0310 first-run
 activation checklist before they use advanced launcher destinations or live
 mutating controls.
 
@@ -92,7 +92,7 @@ mutating controls.
 Once the operator exists in Keycloak and the governed backend has returned the
 bootstrap credentials:
 
-1. have the operator sign in through the protected portal path at `ops.lv3.org`
+1. have the operator sign in through the protected portal path at `ops.example.com`
 2. review the **First-Run Activation** panel at `#activation`
 3. complete the linked onboarding and portal-orientation checklist items
 4. use the runbook launcher's validation-gate status path as the safe first task
@@ -151,11 +151,11 @@ Keycloak direct-API fallback from ADR 0317, use:
 python3 scripts/provision_operator.py \
   --id matei-busui-tmp-001 \
   --name "Matei Busui" \
-  --email busui.matei1994@gmail.com \
+  --email operator@example.com \
   --username matei.busui-tmp \
   --role admin \
   --expires 2026-04-08T00:00:00Z \
-  --requester florin@badita.org
+  --requester operator@example.com
 ```
 
 Notes:
@@ -163,7 +163,7 @@ Notes:
 - `scripts/provision_operator.py` now resolves `.local/` from the shared repo root, so it is safe
   to run from a dedicated git worktree under `.worktrees/`.
 - When the public Keycloak edge is degraded but the legacy direct fallback lane on
-  `docker-runtime-lv3` is still healthy, forward `127.0.0.1:18080` from
+  `docker-runtime` is still healthy, forward `127.0.0.1:18080` from
   `ops@10.10.10.20` and run the script with
   `LV3_KEYCLOAK_URL=http://127.0.0.1:18080`.
 - If the controller-local bootstrap password file is stale relative to the live
@@ -214,7 +214,7 @@ make sync-operators
 - `python3 scripts/operator_access_inventory.py --id <operator-id>`
 - `make workflow-info WORKFLOW=operator-onboard`
 - `make workflow-info WORKFLOW=sync-operators`
-- `curl -fsS https://sso.lv3.org/realms/lv3/.well-known/openid-configuration >/dev/null`
+- `curl -fsS https://sso.example.com/realms/lv3/.well-known/openid-configuration >/dev/null`
 - `curl -fsS http://100.64.0.1:8005/api/version`
 - `LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"; curl -s -H "Authorization: Bearer $(cat "${LOCAL_OVERLAY_ROOT}/windmill/superadmin-secret.txt")" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/quarterly_access_review_every_monday_0900")'`
 

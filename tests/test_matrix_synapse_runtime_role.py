@@ -21,28 +21,28 @@ def test_matrix_synapse_runtime_defaults_expose_internal_controller_and_public_u
 
     assert (
         defaults["matrix_synapse_port"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
     )
     assert (
         defaults["matrix_synapse_host_proxy_port"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
     )
     assert (
         defaults["matrix_synapse_internal_base_url"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
     )
     assert (
         defaults["matrix_synapse_controller_url"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
     )
     assert (
         defaults["matrix_synapse_public_base_url"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}/"
+        == "{{ hostvars['proxmox-host'].platform_service_topology.matrix_synapse.urls.public }}/"
     )
     assert defaults["matrix_synapse_container_data_dir"] == "/data"
     assert (
         defaults["matrix_synapse_ops_access_token_local_file"]
-        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-access-token.txt"
+        == "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/matrix-synapse/ops-access-token.txt"
     )
     assert (
         defaults["matrix_synapse_log_config_container_file"]

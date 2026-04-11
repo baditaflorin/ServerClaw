@@ -20,7 +20,7 @@ def test_docker_publication_assurance_playbook_targets_managed_docker_guests() -
     assert play["name"] == "Converge Docker publication assurance on managed Docker guests"
     assert (
         play["hosts"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3:coolify-lv3' }}"
+        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'docker-runtime:coolify' }}"
     )
     assert [role["role"] for role in play["roles"]] == [
         "lv3.platform.linux_guest_firewall",

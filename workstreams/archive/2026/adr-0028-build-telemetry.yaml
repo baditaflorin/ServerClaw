@@ -10,7 +10,7 @@ depends_on:
   - adr-0011-monitoring
 conflicts_with: []
 shared_surfaces:
-  - docker-build-lv3
+  - docker-build
   - playbooks/monitoring-stack.yml
   - roles/docker_build_observability
   - roles/monitoring_vm

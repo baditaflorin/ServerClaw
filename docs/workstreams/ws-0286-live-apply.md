@@ -9,11 +9,11 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0286-live-apply-r3`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply-r3`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0286-live-apply-r3`
 - Owner: codex
 - Depends On: `adr-0107`, `adr-0165`, `adr-0275`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0275`, `docs/adr/0286`, `docs/workstreams/ws-0286-live-apply.md`, `docs/runbooks/configure-tika.md`, `docs/runbooks/configure-tesseract-ocr.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/tika.yml`, `playbooks/tesseract-ocr.yml`, `collections/ansible_collections/lv3/platform/playbooks/tika.yml`, `collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml`, `collections/ansible_collections/lv3/platform/roles/tika_runtime/`, `collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `Makefile`, `scripts/document_extraction.py`, `scripts/generate_platform_vars.py`, `scripts/validate_repo.sh`, `tests/test_document_extraction.py`, `tests/test_tika_runtime_role.py`, `tests/test_tesseract_ocr_runtime_role.py`, `receipts/image-scans/`, `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0275`, `docs/adr/0286`, `docs/workstreams/ws-0286-live-apply.md`, `docs/runbooks/configure-tika.md`, `docs/runbooks/configure-tesseract-ocr.md`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `playbooks/tika.yml`, `playbooks/tesseract-ocr.yml`, `collections/ansible_collections/lv3/platform/playbooks/tika.yml`, `collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml`, `collections/ansible_collections/lv3/platform/roles/tika_runtime/`, `collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `Makefile`, `scripts/document_extraction.py`, `scripts/generate_platform_vars.py`, `scripts/validate_repo.sh`, `tests/test_document_extraction.py`, `tests/test_tika_runtime_role.py`, `tests/test_tesseract_ocr_runtime_role.py`, `receipts/image-scans/`, `receipts/live-applies/`
 
 ## Purpose
 
@@ -52,11 +52,11 @@ and branch-local live-apply evidence that another agent can merge safely.
 - The governed Tika prerequisite replay is preserved in
   `receipts/live-applies/evidence/2026-03-30-adr-0286-tika-prereq-replay.txt`
   and completed with final recap
-  `docker-runtime-lv3 : ok=129 changed=5 unreachable=0 failed=0 skipped=24 rescued=1 ignored=0`.
+  `docker-runtime : ok=129 changed=5 unreachable=0 failed=0 skipped=24 rescued=1 ignored=0`.
 - The governed Tesseract replay is preserved in
   `receipts/live-applies/evidence/2026-03-30-adr-0286-live-apply-run.txt`
   and completed with final recap
-  `docker-runtime-lv3 : ok=127 changed=5 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`.
+  `docker-runtime : ok=127 changed=5 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`.
 - Direct private-endpoint verification is preserved in
   `receipts/live-applies/evidence/2026-03-30-adr-0286-endpoint-verify-r1-0.177.107.txt`
   and confirmed `Apache Tika 3.2.3`, the healthy OCR payload, and direct OCR

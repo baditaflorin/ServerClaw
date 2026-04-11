@@ -4,7 +4,7 @@
 - Title: Governed correction-loop contracts plus live observation-loop replay
 - Status: merged
 - Branch: `codex/ws-0204-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0204-live-apply`
 - Owner: codex
 - Included In Repo Version: `0.177.37`
 - Platform Version Observed During Merge: `0.130.37`

@@ -36,8 +36,8 @@ The Docker guest security baseline will require:
 4. Privileged local access stays explicit.
    - Docker group membership is granted only to named operator identities that actually need it
 5. Runtime and build guests can diverge intentionally.
-   - stricter ingress rules may apply to `docker-runtime-lv3`
-   - more permissive interactive tooling may apply to `docker-build-lv3`
+   - stricter ingress rules may apply to `docker-runtime`
+   - more permissive interactive tooling may apply to `docker-build`
 
 ## Consequences
 

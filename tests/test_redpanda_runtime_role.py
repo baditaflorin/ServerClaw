@@ -19,7 +19,7 @@ def test_defaults_define_private_redpanda_runtime_contract() -> None:
 
     assert (
         defaults["redpanda_service_topology"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('redpanda') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service('redpanda') }}"
     )
     assert defaults["redpanda_site_dir"] == "/opt/redpanda"
     assert defaults["redpanda_compose_file"] == "{{ redpanda_site_dir }}/docker-compose.yml"

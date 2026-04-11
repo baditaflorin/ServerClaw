@@ -26,6 +26,6 @@ shared_surfaces:
   - config/secret-catalog.json
   - config/image-catalog.json
   - config/controller-local-secrets.json
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
 ready_to_merge: false
 live_applied: false

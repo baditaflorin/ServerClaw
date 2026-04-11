@@ -15,7 +15,7 @@ COLLECTION_PLAYBOOK_PATH = (
     / "services"
     / "guest-log-shipping.yml"
 )
-PROXMOX_HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+PROXMOX_HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -68,7 +68,7 @@ def test_guest_log_shipping_enables_postgres_audit_pipeline_from_repo_catalog() 
     role_vars = playbook[0]["roles"][0]["vars"]
 
     assert role_vars["loki_log_agent_postgres_audit_enabled"] == (
-        "{{ monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres-lv3' }}"
+        "{{ monitoring_stack_guest_role == 'postgres' and inventory_hostname == 'postgres' }}"
     )
     assert "config/pgaudit/approved-roles.yaml" in role_vars["loki_log_agent_postgres_audit_approved_roles"]
     assert "ansible_host ~ ':12345'" in role_vars["loki_log_agent_http_listen_address"]
@@ -78,7 +78,7 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
     playbook = load_yaml(PLAYBOOK_PATH)
     verify_play = playbook[1]
     assert verify_play["vars"]["monitoring_stack_postgres_audit_host"] == (
-        "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+        "{{ 'postgres' if (env | default('production')) == 'staging' else 'postgres' }}"
     )
     verify_task = next(
         task
@@ -87,7 +87,7 @@ def test_guest_log_shipping_verifies_postgres_audit_scrape_after_guest_converge(
     )
 
     assert verify_play["hosts"] == (
-        "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+        "{{ 'monitoring' if (env | default('production')) == 'staging' else 'monitoring' }}"
     )
     assert verify_play["vars"]["monitoring_stack_postgres_audit_metrics_job_name"] == "postgres-audit-alloy"
     assert (

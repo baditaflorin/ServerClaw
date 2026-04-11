@@ -45,11 +45,11 @@ def test_extract_unreleased_items_and_update_changelog(tmp_path: Path) -> None:
 
 ## Latest Release
 
-- [0.96.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.96.0.md)
+- [0.96.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-notes/0.96.0.md)
 
 ## Previous Releases
 
-- [0.95.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.95.0.md)
+- [0.95.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-notes/0.95.0.md)
 """
 
     assert notes.extract_unreleased_items(changelog) == [

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Converge the repo-managed unified platform API gateway on `docker-runtime-lv3` and publish it on `api.lv3.org`.
+Converge the repo-managed unified platform API gateway on `docker-runtime` and publish it on `api.example.com`.
 
 ## Entry Points
 
@@ -36,7 +36,7 @@ ansible-playbook -i inventory/hosts.yml -e proxmox_guest_ssh_connection_mode=pro
 
 ## Verify
 
-From `docker-runtime-lv3`:
+From `docker-runtime`:
 
 ```bash
 curl -sf http://127.0.0.1:8083/healthz
@@ -52,11 +52,11 @@ Expected:
 From an operator workstation with a valid Keycloak token:
 
 ```bash
-curl https://api.lv3.org/healthz
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/health
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/services
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation/api_gateway
+curl https://api.example.com/healthz
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/health
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/services
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/attestation
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/attestation/api_gateway
 ```
 
 Expected:
@@ -73,4 +73,4 @@ Expected:
 - Non-idempotent webhook and proxied write paths remain single-shot until ADR 0165 idempotency keys are in place.
 - Native `/v1/platform/*` endpoints read repo-synced catalogs copied into the runtime bundle.
 - Error responses for repo-managed gateway endpoints use the canonical registry in `config/error-codes.yaml`.
-- The public edge certificate for `api.lv3.org` is part of the shared `lv3-edge` certificate on `nginx-lv3`.
+- The public edge certificate for `api.example.com` is part of the shared `lv3-edge` certificate on `nginx-edge`.

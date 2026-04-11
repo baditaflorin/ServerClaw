@@ -170,9 +170,9 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive() -> None:
             "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
             "host_user": "ops",
             "host_addr": "100.64.0.1",
-            "guests": {"docker-runtime-lv3": "10.10.10.20"},
+            "guests": {"docker-runtime": "10.10.10.20"},
         },
-        "docker-runtime-lv3",
+        "docker-runtime",
         "true",
     )
 

@@ -26,7 +26,7 @@ def test_flagsmith_runtime_defaults_reference_service_topology_images_and_local_
 
     assert (
         defaults["flagsmith_service_topology"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('flagsmith') }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('flagsmith') }}"
     )
     assert (
         defaults["flagsmith_internal_port"]

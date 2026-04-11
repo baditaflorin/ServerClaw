@@ -42,7 +42,7 @@ schema_version: "1.0"
 operators:
   - id: florin-admin
     name: Florin
-    email: florin@lv3.org
+    email: florin@example.com
     role: admin
     keycloak_username: florin
     ssh_key_fingerprint: "SHA256:abc123..."

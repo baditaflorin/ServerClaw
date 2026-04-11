@@ -22,7 +22,7 @@ import scripts.proxmox_tool as tool
 # ---------------------------------------------------------------------------
 
 _PROD_AUTH = {
-    "api_url": "https://proxmox.lv3.org:8006/api2/json",
+    "api_url": "https://proxmox.example.com:8006/api2/json",
     "full_token_id": "lv3-automation@pve!primary",
     "value": "test-secret",
     "authorization_header": "PVEAPIToken=lv3-automation@pve!primary=test-secret",
@@ -113,7 +113,7 @@ def test_proxmox_client_guest_exec_success(monkeypatch: pytest.MonkeyPatch) -> N
 
     monkeypatch.setattr(tool.ProxmoxClient, "_request", fake_request)
     client = tool.ProxmoxClient(
-        api_url="https://proxmox.lv3.org:8006/api2/json",
+        api_url="https://proxmox.example.com:8006/api2/json",
         authorization_header="PVEAPIToken=x=y",
         node="pve",
     )
@@ -139,7 +139,7 @@ def test_proxmox_client_guest_exec_timeout(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setattr(tool.time, "monotonic", lambda: next(_times))
 
     client = tool.ProxmoxClient(
-        api_url="https://proxmox.lv3.org:8006/api2/json",
+        api_url="https://proxmox.example.com:8006/api2/json",
         authorization_header="PVEAPIToken=x=y",
         node="pve",
     )
@@ -154,7 +154,7 @@ def test_proxmox_client_guest_exec_timeout(monkeypatch: pytest.MonkeyPatch) -> N
 
 def test_command_guest_exec(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
     """guest-exec outputs JSON with vmid, exit_code, stdout, stderr."""
-    fake = FakeGuestExec([(0, "nginx-lv3\n", "")])
+    fake = FakeGuestExec([(0, "nginx-edge\n", "")])
     monkeypatch.setattr(tool.ProxmoxClient, "guest_exec", fake)
 
     rc = tool.main(
@@ -172,7 +172,7 @@ def test_command_guest_exec(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, cap
     assert rc == 0
     assert out["vmid"] == 110
     assert out["exit_code"] == 0
-    assert "nginx-lv3" in out["stdout"]
+    assert "nginx-edge" in out["stdout"]
 
 
 def test_command_guest_exec_shell_flag(

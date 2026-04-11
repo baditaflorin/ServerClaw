@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0245-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0245-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0245-live-apply`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0113-world-state-materializer`, `adr-0123-service-uptime-contracts`, `adr-0244-runtime-assurance-matrix-per-service-and-environment`
 - Conflicts With: none
@@ -53,8 +53,8 @@
 
 ## Expected Live Surfaces
 
-- `api.lv3.org` exposes a repo-managed declared-to-live attestation API for the active production service catalog
-- `ops.lv3.org` shows the attestation rollup and per-service witness details from the shared gateway contract
+- `api.example.com` exposes a repo-managed declared-to-live attestation API for the active production service catalog
+- `ops.example.com` shows the attestation rollup and per-service witness details from the shared gateway contract
 - branch-local attestation verification proves declared host binding, observed runtime identity, endpoint or route proof, and the latest successful assurance receipt for the affected production services
 
 ## Verification
@@ -66,9 +66,9 @@
 - `make preflight WORKFLOW=converge-api-gateway` and `make preflight WORKFLOW=converge-ops-portal` both passed from this worktree on the same `0.177.72` replay commit.
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh agent-standards`, `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check`, and `git diff --check` all passed on the documented `0.177.72` state.
 - `make validate` reported the same unrelated ansible-lint warnings in `control_plane_recovery`, `monitoring_vm`, `openbao_runtime`, and `windmill_runtime`, continued through the downstream idempotency, shell, JSON, compose runtime env guard, retry guard, repository data model, ADR 0230 policy, and architecture fitness steps, and then exited on the expected branch-local workstream surface ownership guard because branch `codex/ws-0245-live-apply` maps to terminal workstream `ws-0245-live-apply`.
-- With explicit ADR 0153 service locks held for `vm:120/service:api_gateway` and `vm:120/service:ops_portal`, `make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` completed successfully from source commit `b7f10ba204e98566e35e7c796918160b0a0a969c` with recap `docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0`.
-- From the same source commit, `make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` completed successfully with recap `docker-runtime-lv3 : ok=131 changed=17 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0`.
-- After that latest-main replay, public `https://api.lv3.org/healthz` returned `HTTP 200` with `{"status":"ok"}`, unauthenticated `HEAD https://api.lv3.org/v1/platform/attestation` returned `HTTP 401`, authenticated `GET https://api.lv3.org/v1/platform/attestation` returned `HTTP 200` with a `45`-service summary and `api_gateway` attested, authenticated `GET https://api.lv3.org/v1/platform/attestation/api_gateway` returned `HTTP 200` with `service_id=api_gateway` and `status=attested`, guest-local `http://127.0.0.1:8092/health` returned `HTTP 200` with `{"status":"ok"}`, guest-local `http://127.0.0.1:8092/` returned `HTTP 200` with `root_len=487865` and still contained `Runtime Assurance`, guest-local `http://127.0.0.1:8092/partials/overview` returned `HTTP 200` with `overview_len=403506` and still contained `Runtime Assurance`, guest-local `http://127.0.0.1:8092/partials/launcher` returned `HTTP 200` with `launcher_len=65756` and still contained `Application Launcher`, public `https://ops.lv3.org/health` returned `HTTP 200` with `{"status":"ok"}`, and public `https://ops.lv3.org/` returned `HTTP 302` to `/oauth2/sign_in`.
+- With explicit ADR 0153 service locks held for `vm:120/service:api_gateway` and `vm:120/service:ops_portal`, `make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` completed successfully from source commit `b7f10ba204e98566e35e7c796918160b0a0a969c` with recap `docker-runtime : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0`.
+- From the same source commit, `make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` completed successfully with recap `docker-runtime : ok=131 changed=17 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0`.
+- After that latest-main replay, public `https://api.example.com/healthz` returned `HTTP 200` with `{"status":"ok"}`, unauthenticated `HEAD https://api.example.com/v1/platform/attestation` returned `HTTP 401`, authenticated `GET https://api.example.com/v1/platform/attestation` returned `HTTP 200` with a `45`-service summary and `api_gateway` attested, authenticated `GET https://api.example.com/v1/platform/attestation/api_gateway` returned `HTTP 200` with `service_id=api_gateway` and `status=attested`, guest-local `http://127.0.0.1:8092/health` returned `HTTP 200` with `{"status":"ok"}`, guest-local `http://127.0.0.1:8092/` returned `HTTP 200` with `root_len=487865` and still contained `Runtime Assurance`, guest-local `http://127.0.0.1:8092/partials/overview` returned `HTTP 200` with `overview_len=403506` and still contained `Runtime Assurance`, guest-local `http://127.0.0.1:8092/partials/launcher` returned `HTTP 200` with `launcher_len=65756` and still contained `Application Launcher`, public `https://ops.example.com/health` returned `HTTP 200` with `{"status":"ok"}`, and public `https://ops.example.com/` returned `HTTP 302` to `/oauth2/sign_in`.
 
 ## Mainline Integration
 

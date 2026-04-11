@@ -6,9 +6,9 @@ This runbook covers the repo-managed Flagsmith deployment introduced by [ADR 028
 
 The Flagsmith workflow converges:
 
-- the shared PostgreSQL role and `flagsmith` database on `postgres-lv3`
-- the Flagsmith Community Edition runtime on `docker-runtime-lv3`
-- the public hostname `flags.lv3.org` on the shared NGINX edge
+- the shared PostgreSQL role and `flagsmith` database on `postgres`
+- the Flagsmith Community Edition runtime on `docker-runtime`
+- the public hostname `flags.example.com` on the shared NGINX edge
 - the repo-managed baseline org, project, environment, and feature seed state
 - the controller-local mirrored environment API keys stored under `.local/flagsmith/`
 
@@ -27,7 +27,7 @@ HETZNER_DNS_API_TOKEN=... make converge-flagsmith
 ```
 
 The target validates the subdomain exposure contract and refreshes the shared
-generated edge static sites before publishing `flags.lv3.org`, so a fresh
+generated edge static sites before publishing `flags.example.com`, so a fresh
 worktree does not need a separate docs or portal generation step first.
 
 To exercise the full repository wrapper path, run:
@@ -63,12 +63,12 @@ make syntax-check-flagsmith
 Runtime and public verification:
 
 ```bash
-curl -fsS https://flags.lv3.org/health
-curl -I https://flags.lv3.org/
-curl -I https://flags.lv3.org/api/v1/projects/
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+curl -fsS https://flags.example.com/health
+curl -I https://flags.example.com/
+curl -I https://flags.example.com/api/v1/projects/
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p" \
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p" \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
   ops@10.10.10.20 \

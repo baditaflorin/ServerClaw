@@ -19,14 +19,14 @@
 The April 3 live runtime check found two conditions that can strand services
 down even when the repo models the migration correctly on paper:
 
-- `docker-runtime-lv3` still experienced host-wide Docker restarts during
+- `docker-runtime` still experienced host-wide Docker restarts during
   service-specific Ansible runs. The guest journal on `2026-04-03T06:34`
   recorded an active Keycloak converge stopping `docker.service` on the shared
   runtime and replaying bridge-chain recovery logic there.
-- `runtime-general-lv3` and `runtime-control-lv3` are declared in repo
+- `runtime-general` and `runtime-control` are declared in repo
   metadata, but the corresponding live VMs `191` and `192` did not yet exist on
   the Proxmox host during this check. That means any retirement step that stops
-  the legacy `docker-runtime-lv3` copies must fail closed until the destination
+  the legacy `docker-runtime` copies must fail closed until the destination
   pool has been verified in the same run.
 
 ## Scope
@@ -40,7 +40,7 @@ down even when the repo models the migration correctly on paper:
   maintenance-window override
 - route the observed Keycloak and OpenBao bridge-chain recovery paths through
   that helper so the default converge path fails closed instead of restarting
-  Docker on `docker-runtime-lv3`
+  Docker on `docker-runtime`
 - update the runtime-pool runbooks to warn operators not to bypass the new
   fail-closed retirement guard with retirement-only or limited-scope replays
 - update the Keycloak and OpenBao runbooks so their stated recovery path matches
@@ -54,7 +54,7 @@ down even when the repo models the migration correctly on paper:
 - shared-runtime Docker restarts now flow through a common helper that refuses
   to restart Docker on protected hosts unless an operator explicitly opts in.
 - the observed Keycloak and OpenBao bridge-chain recovery paths now use that
-  helper, so routine converges fail closed on `docker-runtime-lv3`.
+  helper, so routine converges fail closed on `docker-runtime`.
 - the April 3 outage pattern is now documented in the runtime-pool, Keycloak,
   and OpenBao runbooks plus the generated coordination map.
 

@@ -23,7 +23,7 @@ Add an entry under the appropriate alphabetical section:
     service_type: docker_compose        # OR: system_package, infrastructure, multi_instance
     image_catalog_key: my_new_service_runtime   # (docker_compose only)
     internal_port: 8123
-    host_group: docker-runtime-lv3      # Which group runs this service
+    host_group: docker-runtime      # Which group runs this service
     site_dir: /opt/my-new-service       # (docker_compose only, optional — defaults to /opt/<service>)
     container_name: my-new-service      # (optional — defaults to service name)
     needs_openbao: true                 # Does this service need secret injection?
@@ -42,20 +42,20 @@ Add an entry under the appropriate alphabetical section:
     # Optional: Extra defaults for compatibility or special cases
     extra_defaults:
       my_service_runtime_package: my-service-package  # For system packages
-      my_service_runtime_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.my_service_port }}"
+      my_service_runtime_port: "{{ hostvars['proxmox-host'].platform_port_assignments.my_service_port }}"
 
     # Optional: DNS, proxy, SSO, TLS config (ADR 0374 cross-cutting concerns)
     dns:
       records:
-        - fqdn: myservice.lv3.org
+        - fqdn: myservice.example.com
           type: public
-          target_host: nginx-lv3
+          target_host: nginx-edge
           ttl: 3600
     proxy:
       enabled: true
       upstream_port: 8123
-      upstream_host: docker-runtime-lv3
-      public_fqdn: myservice.lv3.org
+      upstream_host: docker-runtime
+      public_fqdn: myservice.example.com
       auth_proxy: false
 ```
 
@@ -95,7 +95,7 @@ my_new_service_runtime/
 # Service-specific my_new_service configuration
 my_new_service_runtime_option_1: value1
 my_new_service_runtime_option_2: value2
-my_new_service_runtime_database_host: "{{ hostvars['proxmox_florin'].platform_guest_catalog.by_name['postgres-vm-lv3'].ipv4 }}"
+my_new_service_runtime_database_host: "{{ hostvars['proxmox-host'].platform_guest_catalog.by_name['postgres-vm'].ipv4 }}"
 ```
 
 **CRITICAL:** Do NOT define these — they are derived:
@@ -149,7 +149,7 @@ argument_specs:
   main:
     short_description: Converge my_new_service on the platform.
     description: >-
-      Converges my_new_service on docker-runtime-lv3.
+      Converges my_new_service on docker-runtime.
       Conventional variables (site_dir, data_dir, secret_dir, compose_file, env_file,
       container_name, internal_port, openbao_*, local_artifact_dir) are automatically
       derived from the platform_service_registry via ADR 0373.
@@ -181,7 +181,7 @@ Create: `collections/ansible_collections/lv3/platform/playbooks/my_new_service.y
 ```yaml
 ---
 - name: Converge my_new_service on the platform
-  hosts: docker-runtime-lv3
+  hosts: docker-runtime
   become: true
   gather_facts: true
   tags: [tier-1, service-my_new_service]
@@ -258,7 +258,7 @@ python3 scripts/workstream_registry.py --write
 3. **Verify service:**
    ```bash
    # Check convergence logs
-   # Check health endpoint: curl http://docker-runtime-lv3:8123/health
+   # Check health endpoint: curl http://docker-runtime:8123/health
    # Check service is responding
    ```
 

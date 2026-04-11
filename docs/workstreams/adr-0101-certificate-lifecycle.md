@@ -4,7 +4,7 @@
 - Title: certificate inventory, TLS probes, and repo-managed renewal for current HTTPS endpoints
 - Status: live_applied
 - Branch: `codex/adr-0101-certificate-lifecycle`
-- Worktree: `../proxmox_florin_server-certificate-lifecycle`
+- Worktree: `../proxmox-host_server-certificate-lifecycle`
 - Owner: codex
 - Depends On: `adr-0042-step-ca`, `adr-0047-mtls`, `adr-0064-health-probes`, `adr-0091-drift-detection`, `adr-0096-slo-tracking`, `adr-0097-alerting-routing`
 - Conflicts With: none
@@ -46,7 +46,7 @@
 ## Expected Live Surfaces
 
 - All active HTTPS endpoints are inventoried in `config/certificate-catalog.json`
-- `openbao_runtime` installs a persistent renewal timer on `docker-runtime-lv3`
+- `openbao_runtime` installs a persistent renewal timer on `docker-runtime`
 - TLS observation and drift checks read from the same certificate catalog
 
 ## Verification

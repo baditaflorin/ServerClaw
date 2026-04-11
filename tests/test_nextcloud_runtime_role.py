@@ -25,7 +25,7 @@ def test_runtime_defaults_pin_public_hostname_and_local_artifacts() -> None:
     assert defaults["nextcloud_public_hostname"] == "{{ platform_service_topology.nextcloud.public_hostname }}"
     assert (
         defaults["nextcloud_database_host"]
-        == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+        == "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
     )
     assert defaults["nextcloud_admin_password_local_file"].endswith("/.local/nextcloud/admin-password.txt")
     assert defaults["nextcloud_redis_password_local_file"].endswith("/.local/nextcloud/redis-password.txt")
@@ -274,9 +274,9 @@ def test_postgres_role_provisions_named_database_and_role() -> None:
 
 
 def test_host_network_policy_allows_edge_and_private_nextcloud_access() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-lv3" and 8084 in rule["ports"])
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
+    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-edge" and 8084 in rule["ports"])
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 8084 in rule["ports"])
     assert nginx_rule["description"].lower().startswith("reverse proxy access")
     assert guest_rule["description"].lower().startswith("private guest-to-guest")

@@ -9,7 +9,7 @@
 
 ## Context
 
-Parallel Ansible execution is only safe when the target scope is explicit. In a mixed repository, one playbook may only need `backup-lv3`, another may only touch `monitoring-lv3`, while a third mutates shared Proxmox host state. If they all execute against broad inventory groups, safe concurrency collapses into either unnecessary serialization or risky overlap.
+Parallel Ansible execution is only safe when the target scope is explicit. In a mixed repository, one playbook may only need `backup`, another may only touch `monitoring`, while a third mutates shared Proxmox host state. If they all execute against broad inventory groups, safe concurrency collapses into either unnecessary serialization or risky overlap.
 
 The platform now has clear VM-level isolation and lane concepts, but Ansible execution still needs a matching repository-side targeting model.
 
@@ -31,9 +31,9 @@ Example metadata:
 playbook_id: monitoring-stack
 mutation_scope: host
 target_hosts:
-  - monitoring-lv3
+  - monitoring
 shared_surfaces:
-  - inventory/host_vars/monitoring-lv3.yml
+  - inventory/host_vars/monitoring.yml
 ```
 
 ### Execution rules

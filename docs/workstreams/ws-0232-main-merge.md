@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.44
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0232-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0232-main-merge`
 - Owner: codex
 - Depends On: `ws-0232-live-apply`
 
@@ -41,7 +41,7 @@ the live platform baseline from `0.130.44`.
 - `config/controller-local-secrets.json`
 - `config/dependency-graph.json`
 - `config/workflow-catalog.json`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `tests/test_nomad_playbook.py`
@@ -73,7 +73,7 @@ the live platform baseline from `0.130.44`.
 - `git fetch origin --prune` confirmed the final integration base was
   `origin/main` commit `a33ac1b8` with repository version `0.177.64`
 - `make immutable-guest-replacement-plan service=nomad` confirmed ADR 0191
-  still classifies `monitoring-lv3` as `edge_and_stateful` with validation mode
+  still classifies `monitoring` as `edge_and_stateful` with validation mode
   `preview_guest` and rollback window `180m`
 - `make live-apply-service service=nomad env=production` passed canonical
   truth, interface-contract, capacity, and redundancy checks, then failed
@@ -81,17 +81,17 @@ the live platform baseline from `0.130.44`.
   exception was supplied
 - `make live-apply-service service=nomad env=production ALLOW_IN_PLACE_MUTATION=true`
   completed successfully from the rebased `0.177.64` worktree with final recap
-  `docker-build-lv3 ok=83 changed=5 failed=0`,
-  `docker-runtime-lv3 ok=95 changed=5 failed=0`,
+  `docker-build ok=83 changed=5 failed=0`,
+  `docker-runtime ok=95 changed=5 failed=0`,
   `localhost ok=12 changed=0 failed=0`,
-  `monitoring-lv3 ok=98 changed=2 failed=0`, and
-  `proxmox_florin ok=51 changed=4 failed=0`
+  `monitoring ok=98 changed=2 failed=0`, and
+  `proxmox-host ok=51 changed=4 failed=0`
 - controller-side Nomad verification returned leader `"10.10.10.40:4647"` and
-  nodes `docker-runtime-lv3 ready runtime` plus `docker-build-lv3 ready build`
+  nodes `docker-runtime ready runtime` plus `docker-build ready build`
 - guest-side smoke verification returned `lv3-nomad-smoke-service` as
   `running` with deployment `successful`, `curl -fsS http://10.10.10.30:18180/`
   returned `lv3 nomad smoke service`, and the durable batch marker on
-  `docker-runtime-lv3` recorded `2026-03-29T02:19:07+00:00`
+  `docker-runtime` recorded `2026-03-29T02:19:07+00:00`
 - `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "release 0.177.65 records the verified ADR 0232 Nomad replay from the latest origin/main while the live platform baseline remains 0.130.44"` prepared release `0.177.65`
 - `uv run --with pytest --with pyyaml pytest tests/test_nomad_playbook.py tests/test_nomad_cluster_roles.py tests/test_generate_platform_vars.py tests/test_proxmox_tailscale_proxy_role.py -q` passed with `27 passed in 1.48s`
 - `make syntax-check-nomad`, `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, `uvx --from pyyaml python scripts/canonical_truth.py --check`, `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check`, and `git diff --check` all passed on the final integration worktree

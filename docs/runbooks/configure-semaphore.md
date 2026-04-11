@@ -2,16 +2,16 @@
 
 ## Purpose
 
-This runbook defines the repo-managed Semaphore runtime for private Ansible job management on `runtime-control-lv3`.
+This runbook defines the repo-managed Semaphore runtime for private Ansible job management on `runtime-control`.
 
 Semaphore is private-only on this platform. Repository automation remains the source of truth; Semaphore provides a bounded UI and API for running repo-managed jobs.
 
 ## Canonical Surfaces
 
-- playbook: [playbooks/semaphore.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/semaphore.yml)
-- roles: [roles/semaphore_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_postgres) and [roles/semaphore_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_runtime)
-- bootstrap helper: [scripts/semaphore_bootstrap.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semaphore_bootstrap.py)
-- governed wrapper: [scripts/semaphore_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semaphore_tool.py)
+- playbook: [playbooks/semaphore.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/semaphore.yml)
+- roles: [roles/semaphore_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/semaphore_postgres) and [roles/semaphore_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/semaphore_runtime)
+- bootstrap helper: [scripts/semaphore_bootstrap.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/semaphore_bootstrap.py)
+- governed wrapper: [scripts/semaphore_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/semaphore_tool.py)
 - controller-local auth artifacts: `.local/semaphore/`
 
 ## Access Model
@@ -67,7 +67,7 @@ After a converge:
 2. `curl -fsS http://100.118.189.95:8020/api/ping`
 3. `make semaphore-manage ACTION=list-projects`
 4. `make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template "Semaphore Self-Test" --wait'`
-5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.92 'docker compose --file /opt/semaphore/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/semaphore /srv/proxmox_florin_server-semaphore'`
+5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.92 'docker compose --file /opt/semaphore/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/semaphore /srv/proxmox-host_server-semaphore'`
 
 ## Operating Rules
 

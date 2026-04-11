@@ -28,7 +28,7 @@ def test_lago_playbook_converges_dns_postgres_runtime_edge_and_public_verify() -
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "billing.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "billing.example.com"
 
     assert postgres_play["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},

@@ -40,5 +40,5 @@ notes: |
   ADR 0376: Keycloak kept dying. Deployed identity-core watchdog with 30s OIDC
   discovery probe (not just /health/live), auto-restart on 2 failures, 6/hr limit.
   Added KC_CACHE=local to eliminate JGroups TCP loop from stale jgroups_ping rows.
-  Added oauth2-proxy watchdog timer on nginx-lv3 to restart on unresponsive proxy.
+  Added oauth2-proxy watchdog timer on nginx-edge to restart on unresponsive proxy.
   Root cause of 500s: Keycloak restart invalidated in-flight auth codes.

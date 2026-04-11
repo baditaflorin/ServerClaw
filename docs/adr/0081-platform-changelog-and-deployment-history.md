@@ -23,7 +23,7 @@ What is missing is a generated, human-readable changelog page that synthesises r
 
 ## Decision
 
-We will generate a **Deployment History Portal** (`changelog.lv3.org`) as part of the operations portal suite (ADR 0074).
+We will generate a **Deployment History Portal** (`changelog.example.com`) as part of the operations portal suite (ADR 0074).
 
 ### Data sources
 
@@ -104,11 +104,11 @@ This allows agents to answer "what changed in production in the last 7 days?" wi
 
 ## Implementation Notes
 
-- Repository automation now ships [scripts/deployment_history.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/deployment_history.py) as the shared history loader for live-apply receipts, promotion receipts, and mutation-audit events.
-- The generated portal lives under [build/changelog-portal/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/changelog-portal/) through [scripts/generate_changelog_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_changelog_portal.py) and is wired into `make generate-status` plus repository validation.
-- Repo-managed publication wiring now includes the planned `changelog.lv3.org` static edge site, the `changelog_portal` service catalog entry, and the governed `get-deployment-history` observe tool.
-- The repository release model now stores numbered notes under [docs/release-notes/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/) while leaving [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) as the portal-first scratchpad and index.
-- `changelog.lv3.org` was published live on platform version `0.40.0` after the shared NGINX edge certificate moved to Hetzner-backed DNS-01 validation.
+- Repository automation now ships [scripts/deployment_history.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/deployment_history.py) as the shared history loader for live-apply receipts, promotion receipts, and mutation-audit events.
+- The generated portal lives under [build/changelog-portal/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/build/changelog-portal/) through [scripts/generate_changelog_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/generate_changelog_portal.py) and is wired into `make generate-status` plus repository validation.
+- Repo-managed publication wiring now includes the planned `changelog.example.com` static edge site, the `changelog_portal` service catalog entry, and the governed `get-deployment-history` observe tool.
+- The repository release model now stores numbered notes under [docs/release-notes/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-notes/) while leaving [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/changelog.md) as the portal-first scratchpad and index.
+- `changelog.example.com` was published live on platform version `0.40.0` after the shared NGINX edge certificate moved to Hetzner-backed DNS-01 validation.
 
 ## Boundaries
 

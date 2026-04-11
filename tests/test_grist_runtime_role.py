@@ -21,17 +21,17 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
     assert defaults["grist_public_base_url"] == "https://{{ grist_service_topology.public_hostname }}"
     assert defaults["grist_session_authority"] == "{{ platform_session_authority }}"
-    assert defaults["grist_public_edge_private_ip"] == "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+    assert defaults["grist_public_edge_private_ip"] == "{{ hostvars['proxmox-host'].proxmox_public_edge_ipv4 }}"
     assert defaults["grist_public_hostname_overrides"][0]["hostname"] == "{{ grist_service_topology.public_hostname }}"
     assert (
         defaults["grist_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology.keycloak.public_hostname }}"
     )
-    assert defaults["grist_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.grist_port }}"
+    assert defaults["grist_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.grist_port }}"
     assert defaults["grist_internal_base_url"] == "http://127.0.0.1:{{ grist_internal_port }}"
     assert defaults["grist_static_env_file"] == "{{ grist_site_dir }}/grist.env"
     assert defaults["grist_keycloak_client_id"] == "grist"
-    assert defaults["grist_keycloak_issuer"] == "https://sso.lv3.org/realms/lv3"
+    assert defaults["grist_keycloak_issuer"] == "https://sso.example.com/realms/lv3"
     assert defaults["grist_keycloak_scopes"] == "openid profile email"
     assert defaults["grist_force_login"] is True
     assert defaults["grist_runtime_uid"] == "1001"
@@ -285,7 +285,7 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert "{{ grist_public_edge_private_ip }}" in keycloak_discovery["ansible.builtin.shell"]
     assert "{{ grist_keycloak_issuer }}/.well-known/openid-configuration" in keycloak_discovery["ansible.builtin.shell"]
     assert (
-        '{{ hostvars["proxmox_florin"].lv3_service_topology.keycloak.public_hostname }}'
+        '{{ hostvars["proxmox-host"].lv3_service_topology.keycloak.public_hostname }}'
         in keycloak_discovery["ansible.builtin.shell"]
     )
     assert (

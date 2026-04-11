@@ -34,7 +34,7 @@ make configure-backups
 1. Installs the CIFS client package needed by the Proxmox host.
 2. Writes the Proxmox-managed secret file for the external CIFS storage.
 3. Converges the external backup storage entry `lv3-backup-cifs`.
-4. Converges the nightly backup job `backup-lv3-nightly`.
+4. Converges the nightly backup job `backup-nightly`.
 5. Verifies that Proxmox can read the storage entry and the backup job config.
 
 ## Backup Policy
@@ -54,25 +54,25 @@ make configure-backups
 Inspect the converged storage entry:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo pvesh get /storage/lv3-backup-cifs --output-format json-pretty'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'sudo pvesh get /storage/lv3-backup-cifs --output-format json-pretty'
 ```
 
 Inspect the scheduled backup job:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'sudo pvesh get /cluster/backup/backup-nightly --output-format json-pretty'
 ```
 
 List the backup files for one managed VM after the first successful run:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo pvesm list lv3-backup-cifs --vmid 110'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'sudo pvesm list lv3-backup-cifs --vmid 110'
 ```
 
 Run one ad hoc backup to validate the target before waiting for the nightly schedule:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo vzdump 110 --storage lv3-backup-cifs --mode snapshot --compress zstd --notification-mode notification-system'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'sudo vzdump 110 --storage lv3-backup-cifs --mode snapshot --compress zstd --notification-mode notification-system'
 ```
 
 ## Restore-Oriented Checks
@@ -80,13 +80,13 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Inspect the configuration embedded in the latest backup archive for VM `110`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'latest=$(sudo pvesm list lv3-backup-cifs --vmid 110 | awk '\''NR==2 {print $1}'\''); sudo pvesm extractconfig "$latest" qemu-server.conf'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'latest=$(sudo pvesm list lv3-backup-cifs --vmid 110 | awk '\''NR==2 {print $1}'\''); sudo pvesm extractconfig "$latest" qemu-server.conf'
 ```
 
 Manual restore drill to a spare VMID without starting the guest:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'latest=$(sudo pvesm list lv3-backup-cifs --vmid 110 | awk '\''NR==2 {print $1}'\''); sudo qmrestore "$latest" 9101 --storage local --unique 1'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'latest=$(sudo pvesm list lv3-backup-cifs --vmid 110 | awk '\''NR==2 {print $1}'\''); sudo qmrestore "$latest" 9101 --storage local --unique 1'
 ```
 
 Post-restore checks:
@@ -98,7 +98,7 @@ Post-restore checks:
 Cleanup after a restore drill:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo qm stop 9101 || true; sudo qm destroy 9101 --destroy-unreferenced-disks 1 --purge 1'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'sudo qm stop 9101 || true; sudo qm destroy 9101 --destroy-unreferenced-disks 1 --purge 1'
 ```
 
 ## Rollback Notes
@@ -106,7 +106,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 If the new backup target or schedule needs to be removed after a live apply:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo pvesh delete /cluster/backup/backup-lv3-nightly && sudo pvesh delete /storage/lv3-backup-cifs'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@203.0.113.1 'sudo pvesh delete /cluster/backup/backup-nightly && sudo pvesh delete /storage/lv3-backup-cifs'
 ```
 
 Then remove the corresponding automation config from the repo or adjust it before the next run, otherwise the playbook will recreate the resources.

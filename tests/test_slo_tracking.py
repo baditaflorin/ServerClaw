@@ -55,7 +55,7 @@ def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> 
                         "indicator": "latency",
                         "objective_percent": 95.0,
                         "window_days": 30,
-                        "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+                        "target_url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
                         "probe_module": "http_2xx_follow_redirects",
                         "latency_threshold_ms": 500,
                         "description": "Latency SLO",
@@ -77,7 +77,7 @@ def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> 
                     {
                         "id": "grafana",
                         "name": "Grafana",
-                        "public_url": "https://grafana.lv3.org",
+                        "public_url": "https://grafana.example.com",
                     },
                 ]
             }
@@ -118,7 +118,7 @@ def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> 
 
     entries = build_slo_status_entries(
         prometheus_url="",
-        grafana_url="https://grafana.lv3.org",
+        grafana_url="https://grafana.example.com",
         catalog_path=tmp_path / "config" / "slo-catalog.json",
         service_catalog_path=tmp_path / "config" / "service-capability-catalog.json",
         stack_path=tmp_path / "versions" / "stack.yaml",

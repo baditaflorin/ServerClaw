@@ -67,7 +67,7 @@ def test_resolve_repo_local_path_maps_inaccessible_controller_secret_into_repo_l
     mirrored_secret = repo_root / ".local" / "windmill" / "superadmin-secret.txt"
     mirrored_secret.parent.mkdir(parents=True)
     mirrored_secret.write_text("secret", encoding="utf-8")
-    inaccessible = "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt"
+    inaccessible = "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt"
     original = repo_module._path_exists
 
     def fake_path_exists(path: Path) -> bool:

@@ -59,7 +59,7 @@ python3 scripts/session_workspace.py --repo-root .
 Inspect the shell assignments that `scripts/remote_exec.sh` consumes:
 
 ```bash
-python3 scripts/session_workspace.py --repo-root . --remote-workspace-base /home/ops/builds/proxmox_florin_server --format shell
+python3 scripts/session_workspace.py --repo-root . --remote-workspace-base /home/ops/builds/proxmox-host_server --format shell
 ```
 
 ## Run With An Explicit Session ID
@@ -90,7 +90,7 @@ If you must remove one manually:
 ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes \
   -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.30 \
-  'rm -rf /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/<session_slug>'
+  'rm -rf /home/ops/builds/proxmox-host_server/.lv3-session-workspaces/<session_slug>'
 ```
 
 Only remove a session directory after confirming no active remote command still uses it.

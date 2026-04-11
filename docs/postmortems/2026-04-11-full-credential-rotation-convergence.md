@@ -143,7 +143,7 @@ These failures existed before the rotation and are tracked separately:
 | plausible | Docs portal build | MkDocs build error, unrelated |
 | matrix-synapse | Docs portal build | Directory not empty error |
 | open-webui | Unknown workflow | Converge workflow not registered |
-| mattermost | `postgres-apps-lv3` unreachable | VM at 10.10.10.52 is offline |
+| mattermost | `postgres-apps` unreachable | VM at 10.10.10.52 is offline |
 
 ### No Make Target (3 services)
 
@@ -164,16 +164,16 @@ The bootstrap SSH key (`bootstrap.id_ed25519`) was rotated and deployed to:
 | Host | IP | Status |
 |------|----|--------|
 | Proxmox host | 100.64.0.1 (Tailscale) | Deployed |
-| nginx-lv3 | 10.10.10.10 | Deployed |
-| docker-build-lv3 | 10.10.10.20 | Deployed (inferred from summary) |
+| nginx-edge | 10.10.10.10 | Deployed |
+| docker-build | 10.10.10.20 | Deployed (inferred from summary) |
 | — | 10.10.10.30 | Deployed |
 | — | 10.10.10.40 | Deployed |
 | — | 10.10.10.50 | Deployed |
-| postgres-lv3 | 10.10.10.60 | Deployed |
+| postgres | 10.10.10.60 | Deployed |
 | — | 10.10.10.70 | Deployed |
 | coolify-apps | 10.10.10.71 | Deployed (during this session) |
 | — | 10.10.10.80 | Deployed |
-| runtime-control-lv3 | 10.10.10.92 | Deployed |
+| runtime-control | 10.10.10.92 | Deployed |
 
 ### VMs Not Reached
 
@@ -182,7 +182,7 @@ The bootstrap SSH key (`bootstrap.id_ed25519`) was rotated and deployed to:
 | 10.10.10.21 | Permission denied | Different auth method |
 | 10.10.10.22 | No route to host | VM offline |
 | 10.10.10.51 | No route to host | VM offline |
-| 10.10.10.52 | No route to host | VM offline (postgres-apps-lv3) |
+| 10.10.10.52 | No route to host | VM offline (postgres-apps) |
 | 10.10.10.54 | No route to host | VM offline |
 | 10.10.10.90 | Permission denied | Different auth method |
 | 10.10.10.91 | Permission denied | Different auth method |
@@ -244,7 +244,7 @@ The following self-hosted external tokens were rotated programmatically:
 
 2. **Several VMs missed during SSH key deployment** — The initial SSH key
    deployment covered 9 VMs but missed 8 others (some offline, some using
-   different auth). `postgres-apps-lv3` (10.10.10.52) being offline blocked
+   different auth). `postgres-apps` (10.10.10.52) being offline blocked
    mattermost convergence. **Mitigation:** Maintain a complete VM inventory
    for SSH key deployment; check which VMs are online before rotation.
 

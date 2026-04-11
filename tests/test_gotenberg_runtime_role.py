@@ -12,14 +12,12 @@ ROLE_META = REPO_ROOT / "roles" / "gotenberg_runtime" / "meta" / "argument_specs
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "gotenberg_runtime" / "templates" / "docker-compose.yml.j2"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "gotenberg.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "gotenberg.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
-RUNTIME_AI_HOSTS = (
-    "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-ai-lv3' }}"
-)
+RUNTIME_AI_HOSTS = "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-ai' }}"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -121,7 +119,7 @@ def test_inventory_opens_the_private_rendering_port_to_guest_and_docker_callers(
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
 
     assert host_vars["platform_port_assignments"]["gotenberg_port"] == 3007
-    runtime_ai_rules = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
+    runtime_ai_rules = host_vars["network_policy"]["guests"]["runtime-ai"]["allowed_inbound"]
     guest_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "all_guests" and 3007 in rule["ports"])
     assert 3007 in guest_rule["ports"]
     docker_rule = next(rule for rule in runtime_ai_rules if rule["source"] == "172.16.0.0/12" and 3007 in rule["ports"])

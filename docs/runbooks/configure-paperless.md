@@ -6,20 +6,20 @@ This runbook covers the repo-managed Paperless-ngx deployment introduced by [ADR
 
 The Paperless workflow converges:
 
-- the PostgreSQL backend on `postgres-lv3`
-- the Paperless runtime, Redis broker, and backup-covered state volumes on `docker-runtime-lv3`
-- the public hostname `paperless.lv3.org` on the shared NGINX edge
+- the PostgreSQL backend on `postgres`
+- the Paperless runtime, Redis broker, and backup-covered state volumes on `docker-runtime`
+- the public hostname `paperless.example.com` on the shared NGINX edge
 - the dedicated Keycloak OIDC client used by the Paperless sign-in flow
 - the durable Paperless API token in both controller-local secret storage and OpenBao
 - the repo-managed correspondents, document types, and tags used by archive automation
 
-docs.lv3.org remains the developer portal; Paperless intentionally publishes at `paperless.lv3.org`.
+docs.example.com remains the developer portal; Paperless intentionally publishes at `paperless.example.com`.
 
 ## Preconditions
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
-- Keycloak is already deployed and healthy on `sso.lv3.org`
+- Keycloak is already deployed and healthy on `sso.example.com`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 ## Converge
@@ -36,7 +36,7 @@ This is the required path for the authoritative platform-version bump because
 `make live-apply-service` checks canonical truth before mutation and is the
 exact-main replay that should settle the protected release surfaces.
 
-`docker-runtime-lv3` is still governed by ADR 0191 immutable guest replacement,
+`docker-runtime` is still governed by ADR 0191 immutable guest replacement,
 so `ALLOW_IN_PLACE_MUTATION=true` is the documented narrow exception for this
 bounded in-place Paperless replay on the shared runtime guest.
 
@@ -48,7 +48,7 @@ record the evidence in the workstream receipt instead of editing protected
 release truth on the branch.
 
 Before replaying Paperless on the shared runtime guest, confirm no competing
-automation is still mutating `docker-runtime-lv3`. A concurrent Docker restart
+automation is still mutating `docker-runtime`. A concurrent Docker restart
 can terminate `paperless` and `paperless-redis` cleanly during taxonomy
 verification and surface as a false `Wait for the Paperless authenticated
 taxonomy endpoint` failure.
@@ -78,7 +78,7 @@ On a workstream branch where protected integration files must remain untouched, 
 ```bash
 HETZNER_DNS_API_TOKEN=... \
 ANSIBLE_HOST_KEY_CHECKING=False \
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local \
+ANSIBLE_LOCAL_TEMP=/tmp/proxmox-host_server-ansible-local \
 ANSIBLE_REMOTE_TEMP=/tmp \
 ./scripts/run_with_namespace.sh uvx --from pyyaml python \
   ./scripts/ansible_scope_runner.py run \
@@ -124,31 +124,31 @@ uv run --with pytest python -m pytest \
 Runtime verification:
 
 ```bash
-curl -I https://paperless.lv3.org/
+curl -I https://paperless.example.com/
 python3 scripts/paperless_sync.py verify \
-  --base-url https://paperless.lv3.org \
-  --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/api-token.txt \
-  --desired-state-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/taxonomy.json
+  --base-url https://paperless.example.com \
+  --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/paperless/api-token.txt \
+  --desired-state-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/paperless/taxonomy.json
 python3 scripts/paperless_sync.py smoke-upload \
-  --base-url https://paperless.lv3.org \
-  --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/api-token.txt \
-  --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/paperless/smoke-upload-report.json
+  --base-url https://paperless.example.com \
+  --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/paperless/api-token.txt \
+  --report-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/paperless/smoke-upload-report.json
 ```
 
 Guest-side verification through the Proxmox jump path:
 
 ```bash
 ANSIBLE_HOST_KEY_CHECKING=False ansible \
-  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml \
-  docker-runtime-lv3 \
+  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml \
+  docker-runtime \
   -m shell \
   -a 'docker compose --file /opt/paperless/docker-compose.yml ps && TOKEN=$(sudo cat /etc/lv3/paperless/api-token) && curl -fsS http://127.0.0.1:8018/api/documents/?page_size=1 -H "Authorization: Token ${TOKEN}"' \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 The verify command asserts that the required correspondents, document types, and tags exist. The smoke upload submits a temporary PDF through the public API, waits for ingestion, validates searchability, and then deletes the test document so the archive remains clean.
 
 Paperless validates `Host` headers strictly. For guest-local probing, use the
-loopback listener `127.0.0.1:8018` or send `Host: paperless.lv3.org`; direct
+loopback listener `127.0.0.1:8018` or send `Host: paperless.example.com`; direct
 HTTP requests to `10.10.10.20:8018` return `400 Bad Request` by design.

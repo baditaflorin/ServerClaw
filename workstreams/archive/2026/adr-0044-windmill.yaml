@@ -10,8 +10,8 @@ depends_on:
   - adr-0026-postgres-vm
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
-  - postgres-lv3
+  - docker-runtime
+  - postgres
   - workflow APIs
   - webhook entry points
 ready_to_merge: false

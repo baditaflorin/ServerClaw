@@ -20,7 +20,7 @@ shared_surfaces:
   - docs/adr/.index.yaml
   - docs/runbooks/configure-livekit.md
   - README.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
   - Makefile
@@ -62,8 +62,8 @@ shared_surfaces:
   - tests/test_proxmox_network_role.py
   - receipts/image-scans/2026-03-30-livekit-runtime.json
   - receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
-  - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
-  - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
+  - receipts/sbom/host-docker-runtime-2026-03-31.cdx.json
+  - receipts/sbom/host-docker-runtime-2026-04-01.cdx.json
   - receipts/live-applies/*livekit*
   - receipts/live-applies/evidence/*livekit*
 ownership_manifest:
@@ -105,13 +105,13 @@ ownership_manifest:
         - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
         - tests/test_docker_runtime_role.py
         - tests/test_linux_guest_firewall_role.py
-        - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
-        - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-03-31.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-04-01.cdx.json
       mode: shared_contract
       contract: docker-runtime-recovery-v1
     - id: livekit_platform_topology_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - collections/ansible_collections/lv3/platform/roles/proxmox_network/**
@@ -156,7 +156,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: implements ADR 0293 by introducing LiveKit as the
     repo-managed real-time audio and voice channel for agents, converging the
-    runtime on docker-runtime-lv3, publishing livekit.lv3.org through the shared
+    runtime on docker-runtime, publishing livekit.example.com through the shared
     edge, and recording the first verified exact-main live-apply evidence
   release_bump: patch
   included_in_repo_version: 0.177.132

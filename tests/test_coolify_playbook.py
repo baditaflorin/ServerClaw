@@ -24,15 +24,15 @@ def test_coolify_playbook_covers_vm_provision_guest_runtime_and_edge() -> None:
         "Ensure Hetzner DNS publication for Coolify",
         "Converge Coolify on the dedicated guest",
         "Converge the Coolify apps runtime on the dedicated apps guest",
-        "Register coolify-apps-lv3 as the Coolify deployment server",
+        "Register coolify-apps as the Coolify deployment server",
         "Publish Coolify on the NGINX edge",
     ]
 
-    # Play 0: coolify-lv3 control plane provisioning
+    # Play 0: coolify control plane provisioning
     provision_roles = [role["role"] for role in playbook[0]["roles"]]
     assert provision_roles == ["lv3.platform.proxmox_guests"]
 
-    # Play 1: coolify-apps-lv3 apps VM provisioning (ADR 0340)
+    # Play 1: coolify-apps apps VM provisioning (ADR 0340)
     apps_provision_roles = [role["role"] for role in playbook[1]["roles"]]
     assert apps_provision_roles == ["lv3.platform.proxmox_guests"]
     apps_provision_vars = playbook[1].get("vars", {})
@@ -48,7 +48,7 @@ def test_coolify_playbook_covers_vm_provision_guest_runtime_and_edge() -> None:
     }
     assert dns_task["run_once"] is True
 
-    # Play 4: coolify-lv3 control plane convergence
+    # Play 4: coolify control plane convergence
     guest_roles = [role["role"] for role in playbook[4]["roles"]]
     assert guest_roles == [
         "lv3.platform.linux_guest_firewall",
@@ -57,7 +57,7 @@ def test_coolify_playbook_covers_vm_provision_guest_runtime_and_edge() -> None:
         "lv3.platform.coolify_runtime",
     ]
 
-    # Play 5: coolify-apps-lv3 apps runtime convergence (ADR 0340)
+    # Play 5: coolify-apps apps runtime convergence (ADR 0340)
     apps_roles = [role["role"] for role in playbook[5]["roles"]]
     assert apps_roles == [
         "lv3.platform.linux_guest_firewall",

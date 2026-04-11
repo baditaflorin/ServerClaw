@@ -53,14 +53,14 @@
 ## Live Apply Evidence
 
 - `receipts/live-applies/evidence/2026-04-04-ws-0332-minio-runtime-resume-r2.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0332-minio-edge-public-r2.txt` show the bounded MinIO replay from the latest realistic `origin/main` base plus the green API and authenticated console checks.
-- `receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-runtime-check-r3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-verification-r2.txt` show the Dozzle hub health, local plus remote agent reachability, and the shared OIDC redirect path at `https://logs.lv3.org/`.
+- `receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-runtime-check-r3.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0332-dozzle-verification-r2.txt` show the Dozzle hub health, local plus remote agent reachability, and the shared OIDC redirect path at `https://logs.example.com/`.
 - `receipts/live-applies/evidence/2026-04-04-ws-0332-searxng-runtime-resume-r4.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0332-searxng-verification-r2.txt` show the SearXNG runtime JSON endpoint, the Proxmox host proxy, the tailnet DNS hostname, and the Open WebUI web-search environment wiring.
 
 ## Live Apply Notes
 
 - A fresh exact-main worktree needed `make generate-edge-static-sites` before the shared `nginx_edge_publication` role could publish the docs and changelog portals; that committed generation step is preserved as evidence instead of being hidden as an ad hoc prerequisite.
-- The first full MinIO replay stalled under shared `docker-runtime-lv3` memory pressure even though `nftables` was already installed and active, so the final proof set resumes from the first safe service-local task rather than pretending the initial replay was green.
-- The Dozzle replay reached green service verification before the shared post-verify Syft SBOM scan saturated `docker-runtime-lv3`; that non-critical host-wide scan was intentionally stopped, and the explicit Dozzle runtime plus edge verification reruns are the final proof points.
+- The first full MinIO replay stalled under shared `docker-runtime` memory pressure even though `nftables` was already installed and active, so the final proof set resumes from the first safe service-local task rather than pretending the initial replay was green.
+- The Dozzle replay reached green service verification before the shared post-verify Syft SBOM scan saturated `docker-runtime`; that non-critical host-wide scan was intentionally stopped, and the explicit Dozzle runtime plus edge verification reruns are the final proof points.
 - The SearXNG runtime itself replayed and verified successfully, but a mid-play resume into the downstream `open_webui_runtime` role is not restart-safe because earlier registered variables are skipped. The final proof set therefore keeps the successful SearXNG runtime replay and an explicit Open WebUI environment verification instead of masking the bounded resume limitation.
 
 ## Exact-Main Integration Status

@@ -542,7 +542,7 @@ adrs:
       - health
       - reliability
       - core
-    summary: 'runtime-control-lv3 retains only the four identity-core services:'
+    summary: 'runtime-control retains only the four identity-core services:'
     filename: 0376-identity-core-vm-isolation-and-watchdog.md
     path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
   - adr: '0377'

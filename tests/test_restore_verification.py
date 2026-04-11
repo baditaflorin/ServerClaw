@@ -35,7 +35,7 @@ def test_select_backup_prefers_latest_when_requested() -> None:
 
 def test_build_failure_result_marks_target_failed() -> None:
     target = rv.RestoreTarget(
-        vm_name="postgres-lv3",
+        vm_name="postgres",
         source_vmid=150,
         target_vmid=900,
         bridge="vmbr20",
@@ -66,8 +66,8 @@ def test_build_failure_result_marks_target_failed() -> None:
 def test_build_report_counts_passes_and_failures() -> None:
     report = rv.build_report(
         [
-            {"vm": "postgres-lv3", "overall": "pass"},
-            {"vm": "docker-runtime-lv3", "overall": "fail"},
+            {"vm": "postgres", "overall": "pass"},
+            {"vm": "docker-runtime", "overall": "fail"},
         ],
         triggered_by="manual",
         environment="production",
@@ -80,7 +80,7 @@ def test_build_report_counts_passes_and_failures() -> None:
 
 def test_build_target_result_fails_when_synthetic_replay_fails() -> None:
     target = rv.RestoreTarget(
-        vm_name="docker-runtime-lv3",
+        vm_name="docker-runtime",
         source_vmid=120,
         target_vmid=901,
         bridge="vmbr20",
@@ -184,7 +184,7 @@ def test_build_target_result_fails_when_synthetic_replay_fails() -> None:
 
 def test_maybe_write_metrics_skips_without_environment(monkeypatch, tmp_path: Path) -> None:
     report = rv.build_report(
-        [{"vm": "postgres-lv3", "overall": "pass"}],
+        [{"vm": "postgres", "overall": "pass"}],
         triggered_by="manual",
         environment="production",
     )
@@ -199,7 +199,7 @@ def test_maybe_write_metrics_skips_without_environment(monkeypatch, tmp_path: Pa
 def test_select_restore_targets_filters_requested_names(monkeypatch) -> None:
     targets = [
         rv.RestoreTarget(
-            "postgres-lv3",
+            "postgres",
             150,
             900,
             "vmbr20",
@@ -210,7 +210,7 @@ def test_select_restore_targets_filters_requested_names(monkeypatch) -> None:
             rv.ResourceAmount(ram_gb=4, vcpu=2, disk_gb=48),
         ),
         rv.RestoreTarget(
-            "docker-runtime-lv3",
+            "docker-runtime",
             120,
             901,
             "vmbr20",
@@ -223,14 +223,14 @@ def test_select_restore_targets_filters_requested_names(monkeypatch) -> None:
     ]
     monkeypatch.setattr(rv, "load_restore_targets", lambda: targets)
 
-    selected = rv.select_restore_targets(["docker-runtime-lv3"])
+    selected = rv.select_restore_targets(["docker-runtime"])
 
-    assert [item.vm_name for item in selected] == ["docker-runtime-lv3"]
+    assert [item.vm_name for item in selected] == ["docker-runtime"]
 
 
 def test_execute_profiled_smoke_tests_retries_until_required_checks_pass(monkeypatch) -> None:
     target = rv.RestoreTarget(
-        vm_name="docker-runtime-lv3",
+        vm_name="docker-runtime",
         source_vmid=120,
         target_vmid=901,
         bridge="vmbr20",
@@ -272,7 +272,7 @@ def test_execute_profiled_smoke_tests_retries_until_required_checks_pass(monkeyp
     monkeypatch.setattr(rv.time, "sleep", lambda seconds: sleep_calls.append(int(seconds)))
 
     outcome = rv.execute_profiled_smoke_tests(
-        {"restored_guests": {"docker-runtime-lv3": "10.20.10.100"}},
+        {"restored_guests": {"docker-runtime": "10.20.10.100"}},
         target,
         execution_mode="qga",
         profile=profile,
@@ -290,12 +290,12 @@ def test_build_report_counts_highest_completed_stages() -> None:
     report = rv.build_report(
         [
             {
-                "vm": "postgres-lv3",
+                "vm": "postgres",
                 "overall": "pass",
                 "readiness_ladder": {"highest_completed_stage": {"id": "service_specific_warm_up_completed"}},
             },
             {
-                "vm": "docker-runtime-lv3",
+                "vm": "docker-runtime",
                 "overall": "fail",
                 "readiness_ladder": {"highest_completed_stage": {"id": "network_and_dependency_path_ready"}},
             },
@@ -332,7 +332,7 @@ def test_emit_mutation_audit_accepts_external_receipt_path(monkeypatch, tmp_path
 
 def test_wait_for_guest_access_falls_back_to_qga(monkeypatch) -> None:
     target = rv.RestoreTarget(
-        vm_name="docker-runtime-lv3",
+        vm_name="docker-runtime",
         source_vmid=120,
         target_vmid=901,
         bridge="vmbr20",
@@ -371,7 +371,7 @@ def test_main_records_failure_receipt_and_cleans_up(monkeypatch, tmp_path: Path)
         "host_vars": {"proxmox_guests": []},
     }
     target = rv.RestoreTarget(
-        vm_name="postgres-lv3",
+        vm_name="postgres",
         source_vmid=150,
         target_vmid=900,
         bridge="vmbr20",
@@ -437,7 +437,7 @@ def test_main_records_failure_receipt_and_cleans_up(monkeypatch, tmp_path: Path)
 
 def test_build_target_result_records_seed_snapshot() -> None:
     target = rv.RestoreTarget(
-        vm_name="postgres-lv3",
+        vm_name="postgres",
         source_vmid=150,
         target_vmid=900,
         bridge="vmbr20",
@@ -478,7 +478,7 @@ def test_build_target_result_records_seed_snapshot() -> None:
         seed_snapshot={
             "seed_class": "tiny",
             "snapshot_id": "tiny-abc123",
-            "remote_dir": "/var/lib/lv3-seed-data/restore-verification/postgres-lv3",
+            "remote_dir": "/var/lib/lv3-seed-data/restore-verification/postgres",
         },
     )
 

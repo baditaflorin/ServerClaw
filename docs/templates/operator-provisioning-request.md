@@ -9,7 +9,7 @@ Fill in the fields and hand to the provisioning agent or admin.
 
 | Field | Value | Notes |
 |-------|-------|-------|
-| **Full Name** | | e.g. "Florin Badita" |
+| **Full Name** | | e.g. "Platform Operator" |
 | **Email** | | Account details will be sent here |
 | **Role** | `admin` / `operator` / `viewer` | See role table below |
 | **Duration** | | e.g. "3 days", "1 week", "permanent" |
@@ -72,5 +72,5 @@ python3 scripts/provision_operator.py \
 - [ ] `config/operators.yaml` updated with new entry
 - [ ] Onboarding email sent (automatic via script, or manual via Gmail draft)
 - [ ] Commit operators.yaml change to branch and merge to main
-- [ ] Verify operator can log in at https://sso.lv3.org
+- [ ] Verify operator can log in at https://sso.example.com
 - [ ] Set calendar reminder for expiry date to offboard

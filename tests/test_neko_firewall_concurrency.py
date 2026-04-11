@@ -2,22 +2,22 @@
 """
 Neko Firewall Concurrency Regression Test
 
-Regression test: Ensure firewall rules for runtime-comms-lv3 survive
+Regression test: Ensure firewall rules for runtime-comms survive
 concurrent runs of Ansible playbooks on sibling VMs.
 
 Background (commit 17bc4ff5e):
   LiveKit UDP media port forwarding rules were erased when concurrent
-  workstreams applied firewall policy on docker-runtime-lv3. Root cause:
+  workstreams applied firewall policy on docker-runtime. Root cause:
   Concurrent nftables rule updates without per-VM locking.
 
 This test verifies the fix:
   - File-level locking (ADR 0153) prevents concurrent mutations
-  - Neko firewall rules on runtime-comms-lv3 are independent from docker-runtime-lv3
+  - Neko firewall rules on runtime-comms are independent from docker-runtime
 
 Test Strategy:
-  1. Start Neko convergence on runtime-comms-lv3
+  1. Start Neko convergence on runtime-comms
   2. Capture initial firewall rules for TCP 8080 (signalling) and UDP 50000-60000 (media)
-  3. Concurrently apply Docker runtime workload on docker-runtime-lv3 (sibling)
+  3. Concurrently apply Docker runtime workload on docker-runtime (sibling)
   4. After concurrent apply completes, verify Neko firewall rules are intact
   5. Assert no rule corruption or loss occurred
 
@@ -63,7 +63,7 @@ def get_nftables_rules(vm_hostname: str) -> Set[str]:
     Retrieve nftables rules for a VM.
 
     Args:
-        vm_hostname: VM hostname or IP (e.g., 'runtime-comms-lv3')
+        vm_hostname: VM hostname or IP (e.g., 'runtime-comms')
 
     Returns:
         Set of nftables rule lines (normalized)
@@ -86,7 +86,7 @@ def extract_neko_rules(nftables_output: Set[str]) -> Dict[str, Set[str]]:
     Looks for:
     - TCP port 8080 (signalling)
     - UDP ports 50000-60000 (media)
-    - Source: nginx-lv3, management network
+    - Source: nginx-edge, management network
 
     Args:
         nftables_output: Set of nftables rule lines
@@ -106,7 +106,7 @@ def extract_neko_rules(nftables_output: Set[str]) -> Dict[str, Set[str]]:
         if re.search(r"50000|60000|udp.*media", line, re.IGNORECASE):
             neko_rules["udp_media"].add(line.strip())
 
-        # Match allow rules from nginx-lv3
+        # Match allow rules from nginx-edge
         if "nginx" in line.lower() or "10.10.10.10" in line:
             neko_rules["allow_nginx"].add(line.strip())
 
@@ -120,15 +120,15 @@ def test_neko_firewall_persists_under_concurrent_apply():
     This is the core regression test for commit 17bc4ff5e.
 
     Test flow:
-    1. Capture baseline Neko firewall rules on runtime-comms-lv3
-    2. Start concurrent Ansible apply on docker-runtime-lv3 (sibling VM)
+    1. Capture baseline Neko firewall rules on runtime-comms
+    2. Start concurrent Ansible apply on docker-runtime (sibling VM)
     3. Wait for concurrent apply to complete
     4. Re-capture Neko firewall rules
     5. Assert rules are identical (no clobbering)
     """
     # Configuration
-    neko_vm = "runtime-comms-lv3"
-    sibling_vm = "docker-runtime-lv3"
+    neko_vm = "runtime-comms"
+    sibling_vm = "docker-runtime"
     timeout = 120
 
     print(f"\n=== Neko Firewall Concurrency Test ===")
@@ -218,7 +218,7 @@ def test_neko_firewall_rules_present():
 
     Sanity check that Neko firewall rules exist and contain expected ports.
     """
-    neko_vm = "runtime-comms-lv3"
+    neko_vm = "runtime-comms"
 
     print(f"\n=== Neko Firewall Rules Presence Test ===")
 

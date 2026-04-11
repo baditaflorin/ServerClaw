@@ -43,14 +43,14 @@ def test_build_security_payload_preserves_required_taxonomy_keys() -> None:
         "rule": "Test Rule",
         "time": "2026-03-30T12:00:00Z",
         "output": "something happened",
-        "output_fields": {"evt.hostname": "docker-build-lv3"},
+        "output_fields": {"evt.hostname": "docker-build"},
         "tags": ["lv3", "test"],
     }
 
-    payload = build_security_payload(event, topic="platform.security.falco", source_host="docker-build-lv3")
+    payload = build_security_payload(event, topic="platform.security.falco", source_host="docker-build")
 
     assert payload["event"] == "platform.security.falco"
-    assert payload["host"] == "docker-build-lv3"
+    assert payload["host"] == "docker-build"
     assert payload["rule"] == "Test Rule"
     assert payload["priority"] == "WARNING"
     assert payload["time"] == "2026-03-30T12:00:00Z"
@@ -61,21 +61,21 @@ def test_build_mutation_audit_event_uses_falco_surface() -> None:
     audit_event = build_mutation_audit_event(
         {"rule": "LV3 Falco smoke marker execution"},
         actor_id="falco-event-bridge",
-        source_host="monitoring-lv3",
-        correlation_id="falco:monitoring-lv3:smoke",
+        source_host="monitoring",
+        correlation_id="falco:monitoring:smoke",
     )
 
     assert audit_event["actor"]["class"] == "service"
     assert audit_event["actor"]["id"] == "falco-event-bridge"
     assert audit_event["surface"] == "falco"
     assert audit_event["action"] == "security_anomaly_detected"
-    assert audit_event["target"] == "monitoring-lv3:LV3 Falco smoke marker execution"
+    assert audit_event["target"] == "monitoring:LV3 Falco smoke marker execution"
 
 
 def test_bridge_config_requires_explicit_private_outputs() -> None:
     config = BridgeConfig(
         actor_id="falco-event-bridge",
-        source_host="docker-runtime-lv3",
+        source_host="docker-runtime",
         event_topic="platform.security.falco",
         nats_subject="platform.security.falco",
         nats_host="127.0.0.1",
@@ -96,7 +96,7 @@ def test_bridge_config_requires_explicit_private_outputs() -> None:
 def test_publish_ntfy_message_retries_retryable_http_errors(monkeypatch) -> None:
     config = BridgeConfig(
         actor_id="falco-event-bridge",
-        source_host="docker-runtime-lv3",
+        source_host="docker-runtime",
         event_topic="platform.security.falco",
         nats_subject="platform.security.falco",
         nats_host="127.0.0.1",
@@ -148,7 +148,7 @@ def test_publish_ntfy_message_retries_retryable_http_errors(monkeypatch) -> None
     monkeypatch.setattr("falco_event_bridge.time.sleep", fake_sleep)
     monkeypatch.setattr("falco_event_bridge.urllib.request.urlopen", fake_urlopen)
 
-    publish_ntfy_message(event=event, source_host="docker-runtime-lv3", config=config)
+    publish_ntfy_message(event=event, source_host="docker-runtime", config=config)
 
     assert attempts["count"] == 2
     assert slept == [1.0]
@@ -157,7 +157,7 @@ def test_publish_ntfy_message_retries_retryable_http_errors(monkeypatch) -> None
 def test_bridge_event_keeps_core_actions_when_ntfy_delivery_degrades(monkeypatch, tmp_path: Path) -> None:
     config = BridgeConfig(
         actor_id="falco-event-bridge",
-        source_host="docker-runtime-lv3",
+        source_host="docker-runtime",
         event_topic="platform.security.falco",
         nats_subject="platform.security.falco",
         nats_host="127.0.0.1",
@@ -174,8 +174,8 @@ def test_bridge_event_keeps_core_actions_when_ntfy_delivery_degrades(monkeypatch
         "priority": "Critical",
         "rule": "LV3 Falco smoke marker execution",
         "time": "2026-03-30T12:00:00Z",
-        "output": "LV3 Falco smoke marker executed (host=docker-build-lv3)",
-        "output_fields": {"evt.hostname": "docker-build-lv3"},
+        "output": "LV3 Falco smoke marker executed (host=docker-build)",
+        "output_fields": {"evt.hostname": "docker-build"},
         "tags": ["lv3", "smoke"],
     }
     published: list[dict[str, object]] = []

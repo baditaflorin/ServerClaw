@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.39
 - Release Date: 2026-03-28
 - Branch: `codex/ws-0205-main-final`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-main-final`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0205-main-final`
 - Owner: codex
 - Depends On: `ws-0205-live-apply`
 - Conflicts With: none
@@ -62,5 +62,5 @@ is verified end to end.
 - `uv run --with pytest --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest tests/test_capability_contracts.py tests/test_platform_manifest.py tests/test_interactive_ops_portal.py -q` passed with `13 passed in 0.89s`.
 - `uv run --with pyyaml python scripts/workstream_surface_ownership.py --validate-registry --validate-branch --base-ref origin/main`, `uv run --with pyyaml --with jsonschema python scripts/capability_contracts.py --validate`, and `./scripts/validate_repo.sh data-models generated-portals agent-standards` all passed on the integrated candidate.
 - `make immutable-guest-replacement-plan service=ops_portal` selected the ADR 0191 `preview_guest` path with a `180m` rollback window before the live replay.
-- `make live-apply-service service=ops_portal env=production ALLOW_IN_PLACE_MUTATION=true` completed with `docker-runtime-lv3 ok=99 changed=3 failed=0`, including local health and root-render checks in the play recap.
-- `curl -fsS https://ops.lv3.org/health` returned `{"status":"ok"}`, and `curl -sSI https://ops.lv3.org/` returned `HTTP/2 302` to `https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/`, preserving the authenticated edge boundary while the capability-contract catalog remained live behind it.
+- `make live-apply-service service=ops_portal env=production ALLOW_IN_PLACE_MUTATION=true` completed with `docker-runtime ok=99 changed=3 failed=0`, including local health and root-render checks in the play recap.
+- `curl -fsS https://ops.example.com/health` returned `{"status":"ok"}`, and `curl -sSI https://ops.example.com/` returned `HTTP/2 302` to `https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/`, preserving the authenticated edge boundary while the capability-contract catalog remained live behind it.

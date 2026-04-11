@@ -61,7 +61,7 @@ shared_surfaces:
   - docs/diagrams/service-dependency-graph.excalidraw
   - docs/site-generated/architecture/dependency-graph.md
   - docs/proxmox-tool-topology.yaml.example
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/all.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
@@ -197,7 +197,7 @@ ownership_manifest:
       mode: exclusive
     - id: falco_platform_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - tests/test_generate_platform_vars.py
@@ -354,8 +354,8 @@ ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: implements ADR 0300 by adding repo-managed Falco syscall
-    monitoring across docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and
-    postgres-lv3, restoring the runtime-control NATS fan-out path and streams,
+    monitoring across docker-runtime, docker-build, monitoring, and
+    postgres, restoring the runtime-control NATS fan-out path and streams,
     and verifying four-host NATS, ntfy, Loki, and mutation-audit delivery
   release_bump: minor
   included_in_repo_version: 0.178.0

@@ -6,11 +6,11 @@ This runbook covers the ADR 0127 intent conflict gate: claim inference, duplicat
 
 ## Canonical Sources
 
-- ADR: [docs/adr/0127-intent-deduplication-and-conflict-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0127-intent-deduplication-and-conflict-resolution.md)
-- registry engine: [platform/conflict/engine.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/conflict/engine.py)
-- scheduler integration: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py)
-- CLI surface: [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
-- workflow metadata: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
+- ADR: [docs/adr/0127-intent-deduplication-and-conflict-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0127-intent-deduplication-and-conflict-resolution.md)
+- registry engine: [platform/conflict/engine.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/conflict/engine.py)
+- scheduler integration: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py)
+- CLI surface: [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py)
+- workflow metadata: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
 
 ## How It Works
 

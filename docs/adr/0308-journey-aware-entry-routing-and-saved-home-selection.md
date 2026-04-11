@@ -92,13 +92,13 @@ orientation is complete.
 - The refreshed exact-main replay on 2026-04-02 used source commit
   `36e7636153e2decc324aee8d2c08bdd3d45580ae`, cut repository version
   `0.177.146`, advanced the platform lineage from `0.130.91` to `0.130.92`,
-  converged the interactive `ops_portal` runtime on `docker-runtime-lv3`, and
+  converged the interactive `ops_portal` runtime on `docker-runtime`, and
   recorded the canonical proof in
   `receipts/live-applies/2026-04-02-adr-0308-journey-entry-routing-mainline-live-apply.json`.
 - Guest-local verification confirmed the neutral `Journey-Aware Start Surface`,
   the activation-first routing contract, saved-home pin and clear behavior, the
   shared attention shell, and the oauth2-proxy-gated public
-  `https://ops.lv3.org/entry` edge from the same exact-main line.
+  `https://ops.example.com/entry` edge from the same exact-main line.
 - The correction loop is intentionally preserved in
   `receipts/live-applies/evidence/`: replay `r14` failed closed because the
   Docker `nat` `DOCKER` chain stayed missing after guest firewall evaluation,

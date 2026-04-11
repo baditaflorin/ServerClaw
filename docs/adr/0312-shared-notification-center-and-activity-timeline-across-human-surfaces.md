@@ -85,7 +85,7 @@ The first implementation should aggregate from:
   because ADR 0312 shipped in the same combined portal bundle.
 - Guest-local verification confirmed the live `Notification Center` partial and
   the dashboard-level `Attention Center`, `Runbook Launcher`, and
-  `Activity Timeline` markers from inside `docker-runtime-lv3`.
+  `Activity Timeline` markers from inside `docker-runtime`.
 - The same correction loop evidence preserves the first failed exact-main
   replay and the successful final rerun after the Docker bridge-chain recovery
   repair.
@@ -101,4 +101,4 @@ The first implementation should aggregate from:
 ## References
 
 - [Deployment History Portal](../runbooks/deployment-history-portal.md)
-- `https://changelog.lv3.org`
+- `https://changelog.example.com`

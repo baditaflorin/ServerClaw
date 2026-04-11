@@ -12,12 +12,12 @@
 The platform currently runs a single PostgreSQL HA cluster serving all services:
 
 ```
-  postgres-lv3          postgres-replica-lv3
+  postgres          postgres-replica
   VMID 150              VMID 151
   10.10.10.50    <-->   10.10.10.51
         \               /
          VIP 10.10.10.55
-         database.lv3.org
+         database.example.com
               |
     ALL ~20+ platform databases
 ```
@@ -68,8 +68,8 @@ each sized and tuned for its workload domain:
 ```
 BEFORE
 ───────────────────────────────────────────────────────────────
-  postgres-lv3 + postgres-replica-lv3
-  VIP: 10.10.10.55 / database.lv3.org
+  postgres + postgres-replica
+  VIP: 10.10.10.55 / database.example.com
   ALL databases (keycloak, gitea, mattermost, langfuse, …)
 
 
@@ -78,9 +78,9 @@ AFTER
 
   CLUSTER 1: postgres-control          (existing VMs, renamed role)
   ┌─────────────────────────────────────────────────────────┐
-  │  postgres-lv3 (VMID 150, 10.10.10.50)                  │
-  │  postgres-replica-lv3 (VMID 151, 10.10.10.51)          │
-  │  VIP: 10.10.10.55 / database.lv3.org  (UNCHANGED)      │
+  │  postgres (VMID 150, 10.10.10.50)                  │
+  │  postgres-replica (VMID 151, 10.10.10.51)          │
+  │  VIP: 10.10.10.55 / database.example.com  (UNCHANGED)      │
   │                                                         │
   │  keycloak · gitea · windmill · windmill_admin           │
   │  woodpecker · temporal · temporal_visibility            │
@@ -89,9 +89,9 @@ AFTER
 
   CLUSTER 2: postgres-apps             (new VMs)
   ┌─────────────────────────────────────────────────────────┐
-  │  postgres-apps-lv3 (VMID 152, 10.10.10.52)             │
+  │  postgres-apps (VMID 152, 10.10.10.52)             │
   │  postgres-apps-replica-lv3 (VMID 153, 10.10.10.53) *   │
-  │  VIP: 10.10.10.56 / database-apps.lv3.org  (NEW)       │
+  │  VIP: 10.10.10.56 / database-apps.example.com  (NEW)       │
   │                                                         │
   │  mattermost · matrix_synapse · mautrix_discord          │
   │  mautrix_whatsapp · nextcloud · outline · plane         │
@@ -101,9 +101,9 @@ AFTER
 
   CLUSTER 3: postgres-data             (new VMs)
   ┌─────────────────────────────────────────────────────────┐
-  │  postgres-data-lv3 (VMID 154, 10.10.10.54)             │
+  │  postgres-data (VMID 154, 10.10.10.54)             │
   │  postgres-data-replica-lv3 (VMID 155, 10.10.10.55?) *  │
-  │  VIP: 10.10.10.57 / database-data.lv3.org  (NEW)       │
+  │  VIP: 10.10.10.57 / database-data.example.com  (NEW)       │
   │  NOTE: 10.10.10.55 is taken by control VIP; data        │
   │  replica uses .55 in the /24 but VIP is .57             │
   │                                                         │
@@ -122,10 +122,10 @@ from this cluster is user-visible on every session start and every CI trigger.
 It must remain isolated from analytic write storms.
 
 **VMs (unchanged):**
-- `postgres-lv3`, VMID 150, 10.10.10.50
-- `postgres-replica-lv3`, VMID 151, 10.10.10.51
+- `postgres`, VMID 150, 10.10.10.50
+- `postgres-replica`, VMID 151, 10.10.10.51
 
-**VIP (unchanged):** 10.10.10.55 — `database.lv3.org`
+**VIP (unchanged):** 10.10.10.55 — `database.example.com`
 
 **Database assignments:**
 
@@ -156,10 +156,10 @@ control-plane OLTP. They can tolerate slightly higher replication lag
 without impacting auth.
 
 **VMs (new):**
-- `postgres-apps-lv3`, VMID 152, 10.10.10.52 — primary (provision first)
+- `postgres-apps`, VMID 152, 10.10.10.52 — primary (provision first)
 - `postgres-apps-replica-lv3`, VMID 153, 10.10.10.53 — replica (follow-on)
 
-**VIP:** 10.10.10.56 — `database-apps.lv3.org` (new DNS entry required)
+**VIP:** 10.10.10.56 — `database-apps.example.com` (new DNS entry required)
 
 **Spec:** 4 vCPU, 8 GB RAM, 128 GB disk (primary). Replica matches.
 
@@ -193,12 +193,12 @@ inflate WAL and saturate sequential I/O. Isolating them prevents monitoring
 infrastructure from impairing user-facing services.
 
 **VMs (new):**
-- `postgres-data-lv3`, VMID 154, 10.10.10.54 — primary (provision first)
+- `postgres-data`, VMID 154, 10.10.10.54 — primary (provision first)
 - `postgres-data-replica-lv3`, VMID 155, 10.10.10.55 — replica (follow-on;
   note: this VM IP 10.10.10.55 is within the /24 but the *VIP* for this
   cluster is 10.10.10.57 to avoid collision with the control VIP)
 
-**VIP:** 10.10.10.57 — `database-data.lv3.org` (new DNS entry required)
+**VIP:** 10.10.10.57 — `database-data.example.com` (new DNS entry required)
 
 **Spec:** 4 vCPU, 8 GB RAM, 128 GB disk (primary). Replica matches.
 
@@ -228,26 +228,26 @@ Plausible currently embeds PostgreSQL as a container in its Docker Compose
 stack (`plausible_db` service). After this ADR is implemented:
 
 1. The embedded `plausible_db` container is removed from the Compose file.
-2. The `plausible` database is created on `postgres-data-lv3`.
-3. `DATABASE_URL` in the Plausible env points to `database-data.lv3.org`.
+2. The `plausible` database is created on `postgres-data`.
+3. `DATABASE_URL` in the Plausible env points to `database-data.example.com`.
 4. An initial `pg_dump` from the embedded container seeds the external DB.
 
 ## Places That Need to Change
 
 ### 1. `inventory/hosts.yml`
 
-**What:** Add `postgres-apps-lv3` (VMID 152, 10.10.10.52) and
-`postgres-data-lv3` (VMID 154, 10.10.10.54) to the `postgres_guests`
+**What:** Add `postgres-apps` (VMID 152, 10.10.10.52) and
+`postgres-data` (VMID 154, 10.10.10.54) to the `postgres_guests`
 and `lv3_guests` inventory groups.
 
 **Why:** Ansible targets these hosts for the `postgres_vm` role and for
 common guest operations (cert renewal, observability, backup).
 
-### 2. `inventory/host_vars/proxmox_florin.yml`
+### 2. `inventory/host_vars/proxmox-host.yml`
 
 **What:**
-- Add VM definitions for VMID 152 (`postgres-apps-lv3`) and VMID 154
-  (`postgres-data-lv3`) in the Proxmox VM spec block.
+- Add VM definitions for VMID 152 (`postgres-apps`) and VMID 154
+  (`postgres-data`) in the Proxmox VM spec block.
 - Add Tailscale TCP proxy entries for the new postgres VMs so the
   controller can reach their postgres port (5432) through the mesh.
 
@@ -258,45 +258,45 @@ and databases without a direct routed path.
 ### 3. `inventory/group_vars/platform.yml`
 
 **What:**
-- Add `postgres_apps_host: database-apps.lv3.org` and
-  `postgres_data_host: database-data.lv3.org` as platform-wide variables.
+- Add `postgres_apps_host: database-apps.example.com` and
+  `postgres_data_host: database-data.example.com` as platform-wide variables.
 - For each service migrating to the apps cluster, add or update a
   `postgres_host` host_var or group_var override to
-  `database-apps.lv3.org`.
+  `database-apps.example.com`.
 - For each service migrating to the data cluster, set `postgres_host` to
-  `database-data.lv3.org`.
+  `database-data.example.com`.
 
-**Services that need `postgres_host` updated to `database-apps.lv3.org`:**
-
-| Service variable file | Current `postgres_host` | New value |
-|---|---|---|
-| `host_vars/mattermost-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/matrix-synapse-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/nextcloud-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/outline-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/plane-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/vikunja-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/n8n-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/netbox-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/directus-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/label-studio-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/sftpgo-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/paperless-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/mautrix-discord-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-| `host_vars/mautrix-whatsapp-lv3.yml` | `database.lv3.org` | `database-apps.lv3.org` |
-
-**Services that need `postgres_host` updated to `database-data.lv3.org`:**
+**Services that need `postgres_host` updated to `database-apps.example.com`:**
 
 | Service variable file | Current `postgres_host` | New value |
 |---|---|---|
-| `host_vars/langfuse-lv3.yml` | `database.lv3.org` | `database-data.lv3.org` |
-| `host_vars/flagsmith-lv3.yml` | `database.lv3.org` | `database-data.lv3.org` |
-| `host_vars/lago-lv3.yml` | `database.lv3.org` | `database-data.lv3.org` |
-| `host_vars/glitchtip-lv3.yml` | `database.lv3.org` | `database-data.lv3.org` |
-| `host_vars/dify-lv3.yml` | `database.lv3.org` | `database-data.lv3.org` |
-| `host_vars/superset-lv3.yml` | `database.lv3.org` | `database-data.lv3.org` |
-| `host_vars/grist-lv3.yml` | `database.lv3.org` | `database-data.lv3.org` |
-| `host_vars/plausible-lv3.yml` | embedded Docker PG | `database-data.lv3.org` |
+| `host_vars/mattermost-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/matrix-synapse-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/nextcloud-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/outline-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/plane-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/vikunja-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/n8n-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/netbox-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/directus-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/label-studio-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/sftpgo-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/paperless-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/mautrix-discord-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+| `host_vars/mautrix-whatsapp-lv3.yml` | `database.example.com` | `database-apps.example.com` |
+
+**Services that need `postgres_host` updated to `database-data.example.com`:**
+
+| Service variable file | Current `postgres_host` | New value |
+|---|---|---|
+| `host_vars/langfuse-lv3.yml` | `database.example.com` | `database-data.example.com` |
+| `host_vars/flagsmith-lv3.yml` | `database.example.com` | `database-data.example.com` |
+| `host_vars/lago-lv3.yml` | `database.example.com` | `database-data.example.com` |
+| `host_vars/glitchtip-lv3.yml` | `database.example.com` | `database-data.example.com` |
+| `host_vars/dify-lv3.yml` | `database.example.com` | `database-data.example.com` |
+| `host_vars/superset-lv3.yml` | `database.example.com` | `database-data.example.com` |
+| `host_vars/grist-lv3.yml` | `database.example.com` | `database-data.example.com` |
+| `host_vars/plausible-lv3.yml` | embedded Docker PG | `database-data.example.com` |
 
 ### 4. `collections/ansible_collections/lv3/platform/roles/postgres_vm/`
 
@@ -305,7 +305,7 @@ and databases without a direct routed path.
   configure keepalived/Patroni with the correct VIP per cluster
   (10.10.10.55, .56, .57).
 - Confirm the role's `defaults/main.yml` does not hard-code
-  `10.10.10.55` or `database.lv3.org`; those must be passed as vars.
+  `10.10.10.55` or `database.example.com`; those must be passed as vars.
 - Add `postgres_apps_vip: 10.10.10.56` and `postgres_data_vip: 10.10.10.57`
   as documented role variables.
 
@@ -317,7 +317,7 @@ parameterised on IP and hostname.
 
 **What:** Verify or extend the playbook to accept an `--extra-vars` parameter
 (e.g., `cluster: apps`) that selects the right host group and variable set
-when deploying `postgres-apps-lv3` vs `postgres-data-lv3`.
+when deploying `postgres-apps` vs `postgres-data`.
 
 **Why:** Currently the playbook likely targets `postgres_guests` as a whole.
 Adding two new VMs to that group means the playbook must be able to target a
@@ -339,8 +339,8 @@ to the external cluster gives it proper replication and backup coverage.
 ### 7. DNS entries (internal)
 
 **What:** Add two internal DNS A records:
-- `database-apps.lv3.org` → `10.10.10.56`
-- `database-data.lv3.org` → `10.10.10.57`
+- `database-apps.example.com` → `10.10.10.56`
+- `database-data.example.com` → `10.10.10.57`
 
 **Why:** All service `postgres_host` vars use hostnames. The VIP IP may
 change if topology changes; hostnames decouple services from IP addresses.
@@ -395,7 +395,7 @@ The existing single-cluster alert rules only fire for `10.10.10.50`.
   Services must be quiesced during their individual migration step to prevent
   split-write data loss.
 
-- **New DNS names.** Services currently hard-coding `database.lv3.org` in
+- **New DNS names.** Services currently hard-coding `database.example.com` in
   env vars or secrets (e.g., stored in OpenBao) must have those values
   updated when the service migrates. Missed entries will cause connection
   failures.
@@ -413,13 +413,13 @@ migration is atomic: dump, restore, update vars, restart service, verify.
 
 ### Phase 1 — Provision postgres-apps cluster
 
-1. Allocate VMID 152 and IP 10.10.10.52 in `inventory/host_vars/proxmox_florin.yml`.
-2. Add `postgres-apps-lv3` to `inventory/hosts.yml` under `postgres_guests`.
-3. Add DNS A record: `database-apps.lv3.org` → `10.10.10.56`.
+1. Allocate VMID 152 and IP 10.10.10.52 in `inventory/host_vars/proxmox-host.yml`.
+2. Add `postgres-apps` to `inventory/hosts.yml` under `postgres_guests`.
+3. Add DNS A record: `database-apps.example.com` → `10.10.10.56`.
 4. Provision the VM via Proxmox (4 vCPU, 8 GB RAM, 128 GB disk).
-5. Run `postgres-vm.yml` targeting `postgres-apps-lv3` to install and
+5. Run `postgres-vm.yml` targeting `postgres-apps` to install and
    configure PostgreSQL with VIP 10.10.10.56.
-6. Verify PostgreSQL is reachable at `database-apps.lv3.org:5432`.
+6. Verify PostgreSQL is reachable at `database-apps.example.com:5432`.
 
 ### Phase 2 — Migrate apps-cluster databases
 
@@ -427,23 +427,23 @@ For each service in the apps cluster assignment table:
 
 1. Quiesce the service (scale Docker Compose service to 0 replicas or
    enable maintenance mode).
-2. `pg_dump -h database.lv3.org -U <user> <db> | psql -h database-apps.lv3.org -U <user> <db>`
+2. `pg_dump -h database.example.com -U <user> <db> | psql -h database-apps.example.com -U <user> <db>`
 3. Update `postgres_host` in the service's inventory var file to
-   `database-apps.lv3.org`.
+   `database-apps.example.com`.
 4. Re-run the service playbook to regenerate env files and restart.
 5. Smoke-test the service (health check, login, representative write).
 6. After all apps services are verified, drop migrated databases from
-   `postgres-lv3` (do not drop until all services on the apps cluster
+   `postgres` (do not drop until all services on the apps cluster
    are confirmed stable for at least 24 hours).
 
 ### Phase 3 — Provision postgres-data cluster
 
-1. Allocate VMID 154 and IP 10.10.10.54 in `inventory/host_vars/proxmox_florin.yml`.
-2. Add `postgres-data-lv3` to `inventory/hosts.yml` under `postgres_guests`.
-3. Add DNS A record: `database-data.lv3.org` → `10.10.10.57`.
+1. Allocate VMID 154 and IP 10.10.10.54 in `inventory/host_vars/proxmox-host.yml`.
+2. Add `postgres-data` to `inventory/hosts.yml` under `postgres_guests`.
+3. Add DNS A record: `database-data.example.com` → `10.10.10.57`.
 4. Provision the VM (4 vCPU, 8 GB RAM, 128 GB disk).
-5. Run `postgres-vm.yml` targeting `postgres-data-lv3` with VIP 10.10.10.57.
-6. Verify PostgreSQL is reachable at `database-data.lv3.org:5432`.
+5. Run `postgres-vm.yml` targeting `postgres-data` with VIP 10.10.10.57.
+6. Verify PostgreSQL is reachable at `database-data.example.com:5432`.
 
 ### Phase 4 — Migrate data-cluster databases
 
@@ -451,7 +451,7 @@ Same per-service procedure as Phase 2. Additional step for Plausible:
 
 1. Stop Plausible Docker Compose stack.
 2. Dump embedded DB: `docker exec plausible_db pg_dump -U postgres plausible`
-3. Restore to external: `psql -h database-data.lv3.org -U plausible plausible`
+3. Restore to external: `psql -h database-data.example.com -U plausible plausible`
 4. Update `plausible_runtime` role to remove embedded DB container and
    set `DATABASE_URL` to external endpoint.
 5. Redeploy Plausible.
@@ -460,9 +460,9 @@ Same per-service procedure as Phase 2. Additional step for Plausible:
 ### Phase 5 — Replica provisioning (follow-on, not blocking Phase 1–4)
 
 7. Provision `postgres-apps-replica-lv3` (VMID 153, 10.10.10.53) and
-   configure streaming replication from `postgres-apps-lv3`.
+   configure streaming replication from `postgres-apps`.
 8. Provision `postgres-data-replica-lv3` (VMID 155, 10.10.10.55) and
-   configure streaming replication from `postgres-data-lv3`.
+   configure streaming replication from `postgres-data`.
 9. Add VIP failover configuration (keepalived) for both new clusters.
 10. Extend monitoring: add postgres exporter targets, update Grafana dashboards,
     add replication lag alerts for each new cluster.
@@ -470,8 +470,8 @@ Same per-service procedure as Phase 2. Additional step for Plausible:
 ### Phase 6 — Control cluster clean-up
 
 11. After all migrated databases have been stable on their new clusters
-    for a minimum of 48 hours, drop the migrated databases from `postgres-lv3`.
-12. Reclaim disk space with `VACUUM FULL` on `postgres-lv3` (schedule a
+    for a minimum of 48 hours, drop the migrated databases from `postgres`.
+12. Reclaim disk space with `VACUUM FULL` on `postgres` (schedule a
     maintenance window; this requires brief write unavailability).
 
 ## Related ADRs
@@ -484,4 +484,4 @@ Same per-service procedure as Phase 2. Additional step for Plausible:
   use the guest-exec primitive to run pg_dump/psql inside VMs
 - ADR 0344: Single-Source Environment Topology — new VMs must be added
   to the topology snapshot so operator tools can discover them
-- ADR 0347: docker-runtime-lv3 Workload Split (related separation concern)
+- ADR 0347: docker-runtime Workload Split (related separation concern)

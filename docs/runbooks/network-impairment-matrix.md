@@ -18,7 +18,7 @@ Use this runbook to validate and render the ADR 0189 network impairment matrix f
 ```bash
 python3 -m py_compile scripts/network_impairment_matrix.py config/windmill/scripts/network-impairment-matrix.py platform/faults/network_impairment_matrix.py
 uv run --with pytest --with pyyaml python -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q
-uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server --validate
+uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server --validate
 uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
 ```
 
@@ -33,13 +33,13 @@ Expected:
 Render the full matrix:
 
 ```bash
-uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server --format text
+uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server --format text
 ```
 
 Render the default live staging slice:
 
 ```bash
-uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server --target-class staging
+uv run --with pyyaml python scripts/network_impairment_matrix.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server --target-class staging
 ```
 
 Render through the governed Windmill path:
@@ -58,8 +58,8 @@ Expected:
 From a controller with the mirrored Windmill superadmin secret:
 
 ```bash
-python3 config/windmill/scripts/network-impairment-matrix.py --repo-path /srv/proxmox_florin_server --target-class staging
-curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fnetwork-impairment-matrix | jq '{path, summary}'
+python3 config/windmill/scripts/network-impairment-matrix.py --repo-path /srv/proxmox-host_server --target-class staging
+curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fnetwork-impairment-matrix | jq '{path, summary}'
 ```
 
 Expected:

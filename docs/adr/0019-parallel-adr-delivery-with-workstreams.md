@@ -47,6 +47,6 @@ We will separate architecture, implementation streams, and release:
 
 ## Sources
 
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-process.md
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/workstreams/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/release-process.md

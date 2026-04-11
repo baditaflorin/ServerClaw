@@ -36,7 +36,7 @@ shared_surfaces:
   - tests/test_command_palette_search.py
   - tests/test_windmill_operator_admin_app.py
   - receipts/ops-portal-snapshot.html
-  - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+  - receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
   - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json
   - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-mainline-live-apply.json
   - receipts/live-applies/*
@@ -102,7 +102,7 @@ ownership_manifest:
         - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
         - tests/test_command_palette_search.py
         - receipts/ops-portal-snapshot.html
-        - receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-04-02.cdx.json
         - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-live-apply.json
         - receipts/live-applies/2026-04-02-adr-0311-global-command-palette-mainline-live-apply.json
         - receipts/live-applies/*

@@ -2,17 +2,17 @@
 
 ## Purpose
 
-This runbook defines the repo-managed Portainer runtime for read-mostly Docker operations on `docker-runtime-lv3`.
+This runbook defines the repo-managed Portainer runtime for read-mostly Docker operations on `docker-runtime`.
 
 Portainer is private-only on this platform. Desired state remains in git and Compose files; Portainer is the visual inspection and bounded runtime-action surface.
 
 ## Canonical Surfaces
 
-- playbook: [playbooks/portainer.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/portainer.yml)
-- role: [roles/portainer_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/portainer_runtime)
-- governed wrapper: [scripts/portainer_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/portainer_tool.py)
-- workflow metadata: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
-- command metadata: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
+- playbook: [playbooks/portainer.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/portainer.yml)
+- role: [roles/portainer_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/portainer_runtime)
+- governed wrapper: [scripts/portainer_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/portainer_tool.py)
+- workflow metadata: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json)
+- command metadata: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json)
 - controller-local auth artifacts: `.local/portainer/`
 
 ## Access Model
@@ -61,7 +61,7 @@ After a converge:
 1. `make syntax-check-portainer`
 2. `curl -sk https://100.118.189.95:9444/api/system/status`
 3. `make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'`
-4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/portainer/docker-compose.yml ps'`
+4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/portainer/docker-compose.yml ps'`
 
 ## Operating Rules
 

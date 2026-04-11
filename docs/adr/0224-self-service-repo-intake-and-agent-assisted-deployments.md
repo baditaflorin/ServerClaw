@@ -11,7 +11,7 @@
 
 ADR 0194 already gives the platform a governed repo-deploy lane through
 Coolify. Operators can create or update one application from a Git repository,
-bind it to `*.apps.lv3.org`, and trigger deployment through a private API path.
+bind it to `*.apps.example.com`, and trigger deployment through a private API path.
 
 That is a strong base, but it is still operator-first and too thin for the
 workflow now being requested:
@@ -33,7 +33,7 @@ Observed across 2026-03-28 and 2026-03-29:
 - GitHub SSH access from the controller works for that repository.
 - The committed upstream `main` has now moved to a Docker Compose-backed
   application with `postgres`, `catalog-api`, and `catalog-web`, and the
-  public route `education-wemeshup.apps.lv3.org` is already governed by the
+  public route `education-wemeshup.apps.example.com` is already governed by the
   ADR 0194 Coolify lane.
 - The first production pull of the newer app shape surfaced two repeatable
   transient failure classes that do not require a human to redesign the
@@ -139,13 +139,13 @@ already has a meaningful first slice in place:
   `python3 scripts/lv3_cli.py deploy-repo ...`
 - governed runtime behavior:
   private GitHub deploy-key bootstrap, Docker Compose domain mapping,
-  wildcard `*.apps.lv3.org` DNS publication, stale same-app deployment
+  wildcard `*.apps.example.com` DNS publication, stale same-app deployment
   cancellation, bounded automatic retry of transient Coolify deployment
   failures, and Docker build-lane hardening through governed Docker daemon
-  resolver plus registry-mirror settings on `coolify-lv3`
+  resolver plus registry-mirror settings on `coolify`
 - still missing:
   the authenticated intake form, environment catalog UI, and policy-driven
-  operator workflow at `ops.lv3.org`
+  operator workflow at `ops.example.com`
 
 ## Consequences
 

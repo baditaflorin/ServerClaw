@@ -25,8 +25,8 @@ We will run Headscale on the Proxmox host as the authoritative control plane for
 
 The deployed shape is:
 
-- Headscale runs on `proxmox_florin` and listens privately on the host bridge address `10.10.10.1:8080`
-- `headscale.lv3.org` is published through the existing NGINX edge VM rather than binding Headscale directly to the public host
+- Headscale runs on `proxmox-host` and listens privately on the host bridge address `10.10.10.1:8080`
+- `headscale.example.com` is published through the existing NGINX edge VM rather than binding Headscale directly to the public host
 - ACLs and route approvers are stored in the repository as a managed HuJSON policy
 - the Proxmox host remains the user-owned subnet router for `10.10.10.0/24`
 - operator devices and the Proxmox host authenticate to the mesh as the named `ops@` user in this phase

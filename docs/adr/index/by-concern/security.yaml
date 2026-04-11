@@ -269,7 +269,7 @@ adrs:
       - operator
       - credential
       - management
-    summary: We will deploy Vaultwarden on docker-runtime-lv3 as a Bitwarden-compatible self-hosted credential vault for operator
+    summary: We will deploy Vaultwarden on docker-runtime as a Bitwarden-compatible self-hosted credential vault for operator
       use.
     filename: 0147-vaultwarden-for-operator-credential-management.md
     path: docs/adr/0147-vaultwarden-for-operator-credential-management.md
@@ -549,7 +549,7 @@ adrs:
       - scheduler
       - auth
       - publication
-    summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
+    summary: Publish the Nomad UI on the public edge at scheduler.example.com without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0361'

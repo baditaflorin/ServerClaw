@@ -28,15 +28,15 @@ That gap made trust elevation hard to review and autonomous behavior hard to aud
 
 ## Decision
 
-We will define an **agent capability policy** as a per-identity configuration in [`config/agent-policies.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-policies.yaml). Every automation identity must have a policy entry before it can submit autonomous work through the goal compiler or scheduler.
+We will define an **agent capability policy** as a per-identity configuration in [`config/agent-policies.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/agent-policies.yaml). Every automation identity must have a policy entry before it can submit autonomous work through the goal compiler or scheduler.
 
 The first repository implementation in `0.143.0` lands in:
 
-- [`config/agent-policies.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-policies.yaml)
-- [`platform/agent_policy/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/agent_policy)
-- [`platform/goal_compiler/compiler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/compiler.py)
-- [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py)
-- [`scripts/lv3_cli.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
+- [`config/agent-policies.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/agent-policies.yaml)
+- [`platform/agent_policy/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/agent_policy)
+- [`platform/goal_compiler/compiler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/goal_compiler/compiler.py)
+- [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py)
+- [`scripts/lv3_cli.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py)
 
 ### Policy schema
 

@@ -18,7 +18,7 @@ class FakeWoodpeckerClient:
         self.wait_calls: list[tuple[int, int, int, int]] = []
 
     def lookup_repository(self, full_name: str):
-        assert full_name == "ops/proxmox_florin_server"
+        assert full_name == "ops/proxmox-host_server"
         return {"id": 1, "full_name": full_name}
 
     def list_pipelines(self, repo_id: int, *, branch: str | None = None):
@@ -51,14 +51,14 @@ def test_command_trigger_pipeline_waits_for_discovered_run_when_trigger_returns_
     monkeypatch.setattr(
         woodpecker_tool,
         "build_client",
-        lambda auth_file: (client, {"repo_full_name": "ops/proxmox_florin_server"}),
+        lambda auth_file: (client, {"repo_full_name": "ops/proxmox-host_server"}),
     )
     monkeypatch.setattr(woodpecker_tool.time, "sleep", lambda _: None)
     buffer = io.StringIO()
 
     args = SimpleNamespace(
         auth_file="ignored.json",
-        repo="ops/proxmox_florin_server",
+        repo="ops/proxmox-host_server",
         branch="branch-under-test",
         variable=["KEY=VALUE"],
         wait=True,

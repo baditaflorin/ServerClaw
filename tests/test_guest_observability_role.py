@@ -16,7 +16,7 @@ def test_defaults_use_proxmox_host_service_topology_for_influx_url() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
 
     assert defaults["guest_observability_influx_url"] == (
-        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'influxdb') }}"
+        "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('grafana', 'influxdb') }}"
     )
     assert defaults["guest_observability_writer_token_local_file"] == "{{ monitoring_guest_writer_token_local_file }}"
 

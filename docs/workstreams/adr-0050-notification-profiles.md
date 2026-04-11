@@ -1,10 +1,10 @@
 # Workstream ADR 0050: Transactional Email And Notification Profiles
 
-- ADR: [ADR 0050](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0050-transactional-email-and-notification-profiles.md)
+- ADR: [ADR 0050](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0050-transactional-email-and-notification-profiles.md)
 - Title: Mail sender profiles for platform, operators, and agents
 - Status: live_applied
 - Branch: `codex/adr-0050-notification-profiles`
-- Worktree: `../proxmox_florin_server-notification-profiles`
+- Worktree: `../proxmox-host_server-notification-profiles`
 - Owner: codex
 - Depends On: `adr-0041-email-platform`, `adr-0046-identity-classes`
 - Conflicts With: none
@@ -37,7 +37,7 @@
 ## Verification
 
 - `make syntax-check-mail-platform`
-- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime`
 
 ## Merge Criteria
 
@@ -49,4 +49,4 @@
 
 - Live apply completed on `2026-03-22` from the `main` integration worktree using the repo-managed mail platform automation with a guest-only `--limit` because DNS and host ingress were already converged.
 - Scoped verification proved that the operator-alerts API key is rejected when it attempts to send as `platform-transactional`.
-- Focused live delivery verification succeeded for `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org`, and the mail gateway state recorded one successful Brevo send for each profile.
+- Focused live delivery verification succeeded for `alerts@example.com`, `platform@example.com`, and `agents@example.com`, and the mail gateway state recorded one successful Brevo send for each profile.

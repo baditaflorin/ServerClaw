@@ -8,7 +8,7 @@
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0261-main-promote`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-promote`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0261-main-promote`
 - Owner: codex
 - Depends On: `ws-0261-live-apply`, `ws-0262-live-apply`
 
@@ -51,8 +51,8 @@ before the final push to `origin/main`.
 - `git fetch origin --prune` confirmed the newest available upstream remained
   `origin/main` commit `8cd0623c2ee5717c1dd2ae1eedc6e693fb24e61e` while this
   promotion tree was being finalized.
-- `curl -fsS https://api.lv3.org/healthz` returned `{"status":"ok"}` and the
-  authenticated `https://api.lv3.org/v1/platform/services` response listed both
+- `curl -fsS https://api.example.com/healthz` returned `{"status":"ok"}` and the
+  authenticated `https://api.example.com/v1/platform/services` response listed both
   `browser_runner` and `openfga` from the synchronized release tree.
 - Guest-local browser-runner verification succeeded again through the Proxmox
   jump path: `curl http://127.0.0.1:8096/healthz` returned
@@ -61,16 +61,16 @@ before the final push to `origin/main`.
   and two artifacts.
 - The authenticated gateway route still worked from the synchronized tree:
   `uv run --with-requirements requirements/browser-runner.txt python
-  scripts/browser_runner_client.py health --base-url https://api.lv3.org/v1/browser-runner --bearer-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt`
+  scripts/browser_runner_client.py health --base-url https://api.example.com/v1/browser-runner --bearer-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/api-token.txt`
   returned `{"status":"ok","artifact_root":"/data/artifacts"}`, and
   `scripts/browser_runner_smoke.py` against the same base URL returned the
   expected heading, uppercase result, and two artifacts.
 - The governed Dify proof was repeated with the current tools API key:
-  `POST https://api.lv3.org/v1/dify-tools/browser-run-session` using
+  `POST https://api.example.com/v1/dify-tools/browser-run-session` using
   `X-LV3-Dify-Api-Key` returned HTTP `200` with title
   `LV3 Browser Runner Smoke`, result `BROWSER RUNNER`, and screenshot plus PDF
   artifacts.
-- `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091`
+- `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091`
   returned `verification_passed: true` with the expected tuples and checks.
 - `make pre-push-gate` passed, and `.local/validation-gate/last-run.json`
   recorded a successful build-server validation run at

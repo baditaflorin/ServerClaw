@@ -17,7 +17,7 @@ shared_surfaces:
   - docs/adr/.index.yaml
   - docs/runbooks/configure-livekit.md
   - Makefile
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
   - playbooks/livekit.yml
@@ -57,8 +57,8 @@ shared_surfaces:
   - docs/site-generated/architecture/dependency-graph.md
   - receipts/image-scans/2026-03-30-livekit-runtime.json
   - receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
-  - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
-  - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
+  - receipts/sbom/host-docker-runtime-2026-03-31.cdx.json
+  - receipts/sbom/host-docker-runtime-2026-04-01.cdx.json
   - receipts/ops-portal-snapshot.html
   - receipts/restic-backups/20260401T141105Z.json
   - receipts/restic-snapshots-latest.json
@@ -96,7 +96,7 @@ ownership_manifest:
       paths:
         - docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
         - Makefile
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - playbooks/livekit.yml
@@ -127,8 +127,8 @@ ownership_manifest:
         - docs/site-generated/architecture/dependency-graph.md
         - receipts/image-scans/2026-03-30-livekit-runtime.json
         - receipts/image-scans/2026-03-30-livekit-runtime.trivy.json
-        - receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json
-        - receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-03-31.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-04-01.cdx.json
         - scripts/livekit_tool.py
         - tests/test_generate_platform_vars.py
         - tests/test_docker_runtime_role.py

@@ -33,7 +33,7 @@ def make_repo(tmp_path: Path, monkeypatch) -> Path:
                 "local_snapshot_root": ".local/seed-data/snapshots",
                 "guest_stage_root": "/var/lib/lv3-seed-data",
                 "remote_store": {
-                    "host": "backup-lv3",
+                    "host": "backup",
                     "base_path": "/var/lib/lv3/seed-data-snapshots",
                     "directory_mode": "0750",
                 },

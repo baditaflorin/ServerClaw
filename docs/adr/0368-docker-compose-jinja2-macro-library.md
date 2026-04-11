@@ -253,11 +253,11 @@ Emits `extra_hosts` entries from a centrally managed variable `platform_hairpin_
 **Requires** a new variable in `inventory/group_vars/platform.yml`:
 ```yaml
 platform_hairpin_nat_hosts:
-  - hostname: agents.lv3.org
+  - hostname: agents.example.com
     address: 10.10.10.92
-  - hostname: dify.lv3.org
+  - hostname: dify.example.com
     address: 10.10.10.92
-  - hostname: data.lv3.org
+  - hostname: data.example.com
     address: 10.10.10.92
   # ... all internal domains that need hairpin NAT resolution
 ```

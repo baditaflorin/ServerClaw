@@ -4,7 +4,7 @@
 - Title: Investigate why multiple live services are failing to remain healthy across the platform runtime pools
 - Status: merged
 - Branch: `codex/ws-0325-service-uptime-investigation`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0325-service-uptime-investigation`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0325-service-uptime-investigation`
 - Owner: codex
 - Depends On: `ADR 0123`, `ADR 0196`, `ADR 0319`
 - Conflicts With: none
@@ -46,9 +46,9 @@
 ## Findings
 
 - The Proxmox host itself was stable during the investigation: `systemctl --failed`
-  on `proxmox_florin` was empty and there was no matching host-wide OOM or
+  on `proxmox-host` was empty and there was no matching host-wide OOM or
   reboot pattern.
-- The service churn localized to `docker-runtime-lv3`, where many unrelated
+- The service churn localized to `docker-runtime`, where many unrelated
   containers were exited or restarting while `dockerd` had restarted more
   recently than `containerd`.
 - The most direct repo-managed trigger was preserved in
@@ -57,11 +57,11 @@
   are missing` at `2026-04-01T16:21:17Z` during the Grist exact-main live apply.
 - The same chronology shows the shared `linux_guest_firewall` and
   `docker_runtime` prerequisites touching nftables and Docker bridge-chain
-  checks on `docker-runtime-lv3` immediately before that restart.
+  checks on `docker-runtime` immediately before that restart.
 - Secondary failures were present but not the primary uptime cause:
   `lv3-control-plane-backup.service` hit a `503`, `lv3-netbox-housekeeping.service`
   was missing `/run/lv3-secrets/netbox/runtime.env`, and
-  `lv3-control-plane-restore-drill.service` on `backup-lv3` could not write
+  `lv3-control-plane-restore-drill.service` on `backup` could not write
   `last-restore-drill.json` because of a permission error.
 
 ## Results
@@ -71,13 +71,13 @@
   `docker.service`.
 - Added ADR 0329 to record the shared-runtime blast-radius rule behind that
   change.
-- Added a dedicated runbook for bridge-chain loss on `docker-runtime-lv3` so a
+- Added a dedicated runbook for bridge-chain loss on `docker-runtime` so a
   future operator can confirm the degraded state and choose a deliberate
   maintenance restart only when justified.
 
 ## Remaining Risks
 
-- Many service-specific roles on `docker-runtime-lv3` still contain explicit
+- Many service-specific roles on `docker-runtime` still contain explicit
   Docker restart rescue paths. This workstream removes the shared preflight
   restart that was proven on 2026-04-01, but it does not yet eliminate every
   repo-managed daemon restart path on the shared runtime guest.

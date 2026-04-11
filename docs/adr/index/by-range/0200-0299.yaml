@@ -25,7 +25,7 @@ adrs:
       - vulnerability-scanning
       - container
       - registry
-    summary: 'Migrate registry.lv3.org from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
+    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
       vulnerability scanning on every push integ'
     filename: 0201-harbor-container-registry-with-cve-scanning.md
     path: docs/adr/0201-harbor-container-registry-with-cve-scanning.md
@@ -44,7 +44,7 @@ adrs:
       - generated
       - architecture
       - diagrams
-    summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
+    summary: We will add a repo-managed Excalidraw publication at draw.example.com and commit a
     filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
     path: docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md
     implemented_in_repo_version: 0.177.16

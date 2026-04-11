@@ -4,7 +4,7 @@
 - Title: Restructure 40+ roles into the lv3.platform collection with DRY shared utilities and internal Galaxy server
 - Status: merged
 - Branch: `codex/adr-0086-ansible-collections`
-- Worktree: `../proxmox_florin_server-ansible-collections`
+- Worktree: `../proxmox-host_server-ansible-collections`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`
 - Conflicts With: any workstream branch with roles in `roles/` (coordinate via shared-surface gate)
@@ -18,7 +18,7 @@
 - update all role `meta/main.yml` files to declare dependencies on the shared roles
 - update all playbooks to use FQCNs (`lv3.platform.<role_name>`)
 - create symlinks `roles/`, `filter_plugins/`, and `callback_plugins/` back into the collection for backwards compatibility
-- provision internal Galaxy server (`galaxy.lv3.org`) as a Compose service on `docker-runtime-lv3`
+- provision internal Galaxy server (`galaxy.example.com`) as a Compose service on `docker-runtime`
 - write `make collection-build`, `make collection-publish`, `make collection-install` targets
 - write Windmill workflow `collection-publish` (triggers on `collections/` changes merged to `main`)
 - write `docs/runbooks/ansible-collection-development.md`
@@ -48,7 +48,7 @@
 
 ## Expected Live Surfaces
 
-- `galaxy.lv3.org` serves `lv3.platform:1.0.0`
+- `galaxy.example.com` serves `lv3.platform:1.0.0`
 - `ansible-galaxy collection install lv3.platform:1.0.0 -s internal_galaxy` completes successfully from the controller
 - all playbooks pass `ansible-playbook --syntax-check` after migration
 
@@ -56,14 +56,14 @@
 
 - `make collection-build` produces `lv3-platform-1.0.0.tar.gz` with all roles present
 - `make collection-install` installs the built collection tarball locally
-- `python3 config/windmill/scripts/collection-publish.py --repo-root "$PWD" --dry-run` returns a publish plan for `galaxy.lv3.org`
+- `python3 config/windmill/scripts/collection-publish.py --repo-root "$PWD" --dry-run` returns a publish plan for `galaxy.example.com`
 - `ansible-lint` passes on all playbooks after the FQCN migration
 - the `preflight` shared role is referenced in at least 5 roles via `meta/main.yml` (DRY validation)
 
 ## Merge Criteria
 
 - all existing playbooks pass `--syntax-check` and `ansible-lint` after migration
-- publish automation is in place for `galaxy.lv3.org` and local tarball install succeeds
+- publish automation is in place for `galaxy.example.com` and local tarball install succeeds
 - DRY extraction confirmed: duplicate preflight blocks removed from at least 15 roles
 
 ## Notes For The Next Assistant

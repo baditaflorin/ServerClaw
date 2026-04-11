@@ -78,12 +78,12 @@ The first-run checklist is organized into these stages:
 - The exact-main replay on 2026-04-02 used source commit
   `4125edb25791a0e025dfc13976fe847282231712`, cut repository version
   `0.177.144`, advanced the platform lineage from `0.130.90` to `0.130.91`,
-  converged the interactive `ops_portal` runtime on `docker-runtime-lv3`, and
+  converged the interactive `ops_portal` runtime on `docker-runtime`, and
   recorded the canonical proof in
   `receipts/live-applies/2026-04-02-adr-0310-activation-checklist-mainline-live-apply.json`.
 - The refreshed live replay verified the first-run activation checklist,
   progressive capability reveal, and the server-side launcher, runbook, and
-  service-action guardrails on `https://ops.lv3.org`, including the guarded
+  service-action guardrails on `https://ops.example.com`, including the guarded
   guest-local journey that keeps advanced paths locked until the required
   activation steps are complete or intentionally overridden by policy.
 - The correction loop is intentionally preserved in
@@ -92,7 +92,7 @@ The first-run checklist is organized into these stages:
   paths, and the first exact-main live-apply rerun then failed closed because
   canonical truth detected a stale `README.md`. After those repairs, the final
   replay completed successfully with recap
-  `docker-runtime-lv3 : ok=192 changed=17 unreachable=0 failed=0 skipped=36`.
+  `docker-runtime : ok=192 changed=17 unreachable=0 failed=0 skipped=36`.
 
 ## Related ADRs
 

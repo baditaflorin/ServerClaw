@@ -18,7 +18,7 @@ def test_repo_policy_loads() -> None:
     policy = scan.load_public_surface_scan_policy()
 
     assert policy["schema_version"] == "1.0.0"
-    assert policy["nuclei"]["target"] == "https://lv3.org"
+    assert policy["nuclei"]["target"] == "https://example.com"
 
 
 def test_public_surface_scan_cli_help_runs() -> None:
@@ -38,15 +38,15 @@ def test_discover_scan_targets_only_includes_active_public_https_targets() -> No
     targets = scan.discover_scan_targets("production")
     target_map = {item["fqdn"]: item for item in targets}
 
-    assert "grafana.lv3.org" in target_map
-    assert "database.lv3.org" not in target_map
-    assert target_map["ops.lv3.org"]["requires_auth"] is True
+    assert "grafana.example.com" in target_map
+    assert "database.example.com" not in target_map
+    assert target_map["ops.example.com"]["requires_auth"] is True
 
 
 def test_header_and_version_findings_detect_missing_controls() -> None:
     policy = scan.load_public_surface_scan_policy()
     target = {
-        "fqdn": "grafana.lv3.org",
+        "fqdn": "grafana.example.com",
         "requires_auth": False,
     }
     response = {
@@ -81,13 +81,13 @@ def test_header_and_version_findings_detect_missing_controls() -> None:
 def test_auth_findings_require_redirect_and_hide_sensitive_content() -> None:
     policy = scan.load_public_surface_scan_policy()
     target = {
-        "fqdn": "ops.lv3.org",
+        "fqdn": "ops.example.com",
         "requires_auth": True,
     }
     response = {
         "status": 200,
         "headers": {
-            "X-Auth-Request-User": "ops@lv3.org",
+            "X-Auth-Request-User": "ops@example.com",
         },
         "body": "<html>Ops Portal dashboard</html>",
     }
@@ -107,7 +107,7 @@ def test_auth_findings_require_redirect_and_hide_sensitive_content() -> None:
 
 
 def test_classify_testssl_and_nuclei_findings() -> None:
-    target = {"fqdn": "grafana.lv3.org"}
+    target = {"fqdn": "grafana.example.com"}
     testssl_findings = scan.classify_testssl_findings(
         scan_id="scan-1",
         target=target,
@@ -121,7 +121,7 @@ def test_classify_testssl_and_nuclei_findings() -> None:
         raw_findings=[
             {
                 "template-id": "open-redirect",
-                "host": "https://lv3.org",
+                "host": "https://example.com",
                 "info": {"name": "Open Redirect", "severity": "high"},
             }
         ],
@@ -136,23 +136,30 @@ def test_build_report_and_events_summarize_high_and_critical_findings() -> None:
         scan_id="20260324T000000Z",
         environment="production",
         targets=[
-            {"fqdn": "grafana.lv3.org", "service_id": "grafana", "exposure": "edge-published", "requires_auth": False}
+            {
+                "fqdn": "grafana.example.com",
+                "service_id": "grafana",
+                "exposure": "edge-published",
+                "requires_auth": False,
+            }
         ],
-        http_observations={"grafana.lv3.org": {"status": 200, "final_url": "https://grafana.lv3.org", "headers": {}}},
+        http_observations={
+            "grafana.example.com": {"status": 200, "final_url": "https://grafana.example.com", "headers": {}}
+        },
         tls_results={},
         nuclei_result={
             "artifact": "",
             "returncode": 0,
             "duration_seconds": 0,
             "raw_findings": 0,
-            "target": "https://lv3.org",
+            "target": "https://example.com",
         },
         findings=[
             scan.build_finding(
                 scan_id="20260324T000000Z",
                 severity="high",
                 component="tls",
-                target="grafana.lv3.org",
+                target="grafana.example.com",
                 finding_id="tls.TLS1",
                 summary="Deprecated TLS protocol is still accepted.",
                 observed="TLS 1 offered",
@@ -161,7 +168,7 @@ def test_build_report_and_events_summarize_high_and_critical_findings() -> None:
                 scan_id="20260324T000000Z",
                 severity="critical",
                 component="open-redirect",
-                target="https://lv3.org",
+                target="https://example.com",
                 finding_id="open-redirect.sample",
                 summary="Open Redirect",
                 observed="matcher",

@@ -21,15 +21,15 @@ The canonical source of truth must remain in git. The wiki is a published workin
 
 ## Decision
 
-We will deploy **Outline** on `docker-runtime-lv3` and publish it at `https://wiki.lv3.org`.
+We will deploy **Outline** on `docker-runtime` and publish it at `https://wiki.example.com`.
 
 ### Runtime shape
 
 The repo-managed runtime uses:
 
-- `docker-runtime-lv3` for Outline, Redis, and MinIO-backed S3-compatible attachment storage
-- `postgres-lv3` for the Outline application database
-- the shared NGINX edge for the public hostname `wiki.lv3.org`
+- `docker-runtime` for Outline, Redis, and MinIO-backed S3-compatible attachment storage
+- `postgres` for the Outline application database
+- the shared NGINX edge for the public hostname `wiki.example.com`
 
 ### Identity and access
 
@@ -69,13 +69,13 @@ Runbook draft automation targets `Runbooks / Drafts` inside Outline. The initial
 
 **Positive**
 
-- operators get one browsable, searchable knowledge surface at `wiki.lv3.org`
+- operators get one browsable, searchable knowledge surface at `wiki.example.com`
 - release automation now refreshes living knowledge views alongside release artifacts
 - future agents can publish findings into a governed knowledge collection instead of hidden chat history
 
 **Negative / Trade-offs**
 
-- Outline introduces new runtime state on `docker-runtime-lv3`
+- Outline introduces new runtime state on `docker-runtime`
 - the published wiki depends on Keycloak, Postgres, and the shared edge for the full browser experience
 - the initial sync publishes curated landing and index documents rather than mirroring every markdown file as a separate Outline page
 

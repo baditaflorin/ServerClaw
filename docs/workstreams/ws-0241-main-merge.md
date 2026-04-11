@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.44
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0241-main-merge-r3`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-main-merge-r3`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0241-main-merge-r3`
 - Owner: codex
 - Depends On: `ws-0241-live-apply`
 

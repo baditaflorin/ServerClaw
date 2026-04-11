@@ -9,7 +9,7 @@
 
 ## Context
 
-The Proxmox Backup Server (PBS) on `backup-lv3` (ADR 0029) performs scheduled
+The Proxmox Backup Server (PBS) on `backup` (ADR 0029) performs scheduled
 VM-level snapshots and PostgreSQL dumps. This protects application data and OS
 state at the VM granularity. It does not protect the platform's operational
 artefacts at the file level:
@@ -24,7 +24,7 @@ artefacts at the file level:
 These files live in the Git repository, so their history is preserved in Gitea.
 However:
 
-- Gitea itself is a service on the platform; if `docker-runtime-lv3` suffers a
+- Gitea itself is a service on the platform; if `docker-runtime` suffers a
   catastrophic storage failure before PBS runs its next snapshot, recent receipt
   writes and live-apply attestations that were not yet committed to the repo are
   lost

@@ -18,7 +18,7 @@ shared_surfaces:
   - docs/diagrams/service-dependency-graph.excalidraw
   - docs/site-generated/architecture/dependency-graph.md
   - inventory/group_vars/platform.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - scripts/generate_platform_vars.py
   - Makefile
   - config/api-gateway-catalog.json
@@ -118,7 +118,7 @@ ownership_manifest:
     - id: label_studio_shared_platform_contract
       paths:
         - inventory/group_vars/platform.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - scripts/generate_platform_vars.py
         - Makefile
         - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
@@ -197,7 +197,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: implements ADR 0289 by deploying Label Studio as the
     shared-edge-protected human-in-the-loop annotation platform on
-    docker-runtime-lv3 with PostgreSQL-backed state, repo-managed project
+    docker-runtime with PostgreSQL-backed state, repo-managed project
     catalog reconciliation, and verified exact-main public and private apply
     evidence
   release_bump: patch

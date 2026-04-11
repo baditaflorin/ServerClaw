@@ -62,13 +62,13 @@
 - repository implementation completed in `0.146.2`
 - the watchdog now aborts stale mutation jobs, records repeated-action history, and emits a heartbeat file per tick
 - the Windmill runtime defaults now seed and enable a ten-second watchdog schedule
-- the live apply is still pending because the limited `playbooks/windmill.yml --limit docker-runtime-lv3` rollout reached the pre-existing OpenBao secret-injection step, then failed while waiting for the local OpenBao API and later hit SSH banner-exchange timeouts through the public Proxmox host jump
+- the live apply is still pending because the limited `playbooks/windmill.yml --limit docker-runtime` rollout reached the pre-existing OpenBao secret-injection step, then failed while waiting for the local OpenBao API and later hit SSH banner-exchange timeouts through the public Proxmox host jump
 
 ## Notes For The Next Assistant
 
-- The public Proxmox host at `65.108.75.123` now accepts the repo key as `root`, and a direct SSH proxy through that host to `ops@10.10.10.20` worked before the later banner-exchange failures began.
-- A limited live apply using `playbooks/windmill.yml --limit docker-runtime-lv3` with `proxmox_guest_ssh_connection_mode=proxmox_host_jump`, `proxmox_host_admin_user=root`, and a public-host inventory override reached `lv3.platform.windmill_runtime`.
-- That rollout synchronized the worker checkout and rewrote the watchdog-capable repo content on `docker-runtime-lv3`, but it did not reach the later Windmill API script or schedule seeding tasks.
+- The public Proxmox host at `203.0.113.1` now accepts the repo key as `root`, and a direct SSH proxy through that host to `ops@10.10.10.20` worked before the later banner-exchange failures began.
+- A limited live apply using `playbooks/windmill.yml --limit docker-runtime` with `proxmox_guest_ssh_connection_mode=proxmox_host_jump`, `proxmox_host_admin_user=root`, and a public-host inventory override reached `lv3.platform.windmill_runtime`.
+- That rollout synchronized the worker checkout and rewrote the watchdog-capable repo content on `docker-runtime`, but it did not reach the later Windmill API script or schedule seeding tasks.
 - The blocking task is `Wait for the local OpenBao API` inside `lv3.platform.common` `openbao_compose_env`, followed by intermittent `Connection timed out during banner exchange` failures on the SSH proxy path.
-- After the first successful `playbooks/windmill.yml` converge from `main`, verify the schedule exists in Windmill and that `.local/scheduler/watchdog-heartbeat.json` advances on `docker-runtime-lv3`.
+- After the first successful `playbooks/windmill.yml` converge from `main`, verify the schedule exists in Windmill and that `.local/scheduler/watchdog-heartbeat.json` advances on `docker-runtime`.
 - Do not mark this workstream `live_applied` or bump `platform_version` until that verification is complete.

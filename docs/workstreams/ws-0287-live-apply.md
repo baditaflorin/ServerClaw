@@ -10,16 +10,16 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0287-mainline-final`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-mainline-final`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0287-mainline-final`
 - Owner: codex
 - Depends On: `adr-0042`, `adr-0077`, `adr-0107`, `adr-0143`
 - Conflicts With: none
 
 ## Scope
 
-- add the repo-managed Woodpecker server and agent on `docker-runtime-lv3`
-- provision the dedicated PostgreSQL database, Gitea OAuth bootstrap, OpenBao-backed runtime secrets, and `ci.lv3.org` edge publication
-- define the repository-root `.woodpecker.yml` validation pipeline and seed the `ops/proxmox_florin_server` repository activation plus CI smoke secret through the Woodpecker API
+- add the repo-managed Woodpecker server and agent on `docker-runtime`
+- provision the dedicated PostgreSQL database, Gitea OAuth bootstrap, OpenBao-backed runtime secrets, and `ci.example.com` edge publication
+- define the repository-root `.woodpecker.yml` validation pipeline and seed the `ops/proxmox-host_server` repository activation plus CI smoke secret through the Woodpecker API
 - live-apply the change from this isolated latest-main worktree, verify the API-driven workflow end to end, and leave merge-safe receipts plus ADR metadata behind
 
 ## Shared Surfaces
@@ -28,7 +28,7 @@
 - `docs/workstreams/ws-0287-live-apply.md`
 - `docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md`
 - `docs/runbooks/configure-woodpecker.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `playbooks/woodpecker.yml`
@@ -118,16 +118,16 @@
   `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=woodpecker env=production EXTRA_ARGS='-e bypass_promotion=true'`
   succeeded in
   `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-live-apply-service-0.177.110.txt`
-  with final recap `docker-runtime-lv3 : ok=157 changed=4 failed=0`,
-  `nginx-lv3 : ok=47 changed=6 failed=0`, `postgres-lv3 : ok=51 changed=0 failed=0`,
-  `proxmox_florin : ok=277 changed=1 failed=0`, and `localhost : ok=4 changed=0 failed=0`.
+  with final recap `docker-runtime : ok=157 changed=4 failed=0`,
+  `nginx-edge : ok=47 changed=6 failed=0`, `postgres : ok=51 changed=0 failed=0`,
+  `proxmox-host : ok=277 changed=1 failed=0`, and `localhost : ok=4 changed=0 failed=0`.
 - Public and controller-local verification passed after the repaired exact-main
-  replay: `https://ci.lv3.org/healthz` returned `HTTP/2 200` with
+  replay: `https://ci.example.com/healthz` returned `HTTP/2 200` with
   `x-woodpecker-version: 3.13.0`, `http://100.64.0.1:8017/healthz` returned
-  `HTTP/1.1 200 OK`, the TLS certificate remained `CN=ci.lv3.org` from Let's
+  `HTTP/1.1 200 OK`, the TLS certificate remained `CN=ci.example.com` from Let's
   Encrypt `CN=E7`, `make woodpecker-manage ACTION=whoami` resolved to
   `ops-gitea`, and `make woodpecker-manage ACTION=list-secrets
-  WOODPECKER_ARGS='--repo ops/proxmox_florin_server'` still exposed
+  WOODPECKER_ARGS='--repo ops/proxmox-host_server'` still exposed
   `LV3_WOODPECKER_SECRET_SMOKE`.
 
 ## Mainline Closeout

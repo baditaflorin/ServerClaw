@@ -7,7 +7,7 @@
 - Implemented In Platform Version: 0.130.7
 - Implemented On: 2026-03-25
 - Branch: `codex/adr-0155-main-live`
-- Worktree: `/private/tmp/proxmox_florin_server-main-0155-v2`
+- Worktree: `/private/tmp/proxmox-host_server-main-0155-v2`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0119-budgeted-workflow-scheduler`, `adr-0127-intent-conflict-resolution`, `adr-0154-vm-scoped-execution-lanes`, `adr-0162-deadlock-detector`
 - Conflicts With: none

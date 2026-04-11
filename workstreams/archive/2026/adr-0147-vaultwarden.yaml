@@ -15,7 +15,7 @@ shared_surfaces:
   - roles/vaultwarden_runtime
   - roles/vaultwarden_postgres
   - playbooks/vaultwarden.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/service-capability-catalog.json
   - config/workflow-catalog.json
 ready_to_merge: false

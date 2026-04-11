@@ -9,7 +9,7 @@
 
 ## Context
 
-Installing Docker Engine and the Compose plugin is necessary, but it still does not define how long-running services should actually be deployed on `docker-runtime-lv3`.
+Installing Docker Engine and the Compose plugin is necessary, but it still does not define how long-running services should actually be deployed on `docker-runtime`.
 
 If services are launched ad hoc with `docker run`, the platform will accumulate hidden state:
 
@@ -22,7 +22,7 @@ That is not a good operating contract for a host that is expected to run product
 
 ## Decision
 
-Long-running workloads on `docker-runtime-lv3` will use a compose-managed deployment model.
+Long-running workloads on `docker-runtime` will use a compose-managed deployment model.
 
 The deployment contract will be:
 

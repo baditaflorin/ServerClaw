@@ -6,10 +6,10 @@ Run a reviewed dependency-wave manifest through the repo-managed live-apply surf
 
 ## Files
 
-- manifest example: [config/dependency-waves/security-observability-bootstrap.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/dependency-waves/security-observability-bootstrap.yaml)
-- playbook metadata catalog: [config/dependency-wave-playbooks.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/dependency-wave-playbooks.yaml)
-- executor: [scripts/dependency_wave_apply.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/dependency_wave_apply.py)
-- orchestration library: [platform/ansible/dependency_waves.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ansible/dependency_waves.py)
+- manifest example: [config/dependency-waves/security-observability-bootstrap.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/dependency-waves/security-observability-bootstrap.yaml)
+- playbook metadata catalog: [config/dependency-wave-playbooks.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/dependency-wave-playbooks.yaml)
+- executor: [scripts/dependency_wave_apply.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/dependency_wave_apply.py)
+- orchestration library: [platform/ansible/dependency_waves.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/ansible/dependency_waves.py)
 
 ## Manifest Rules
 
@@ -56,7 +56,7 @@ Execution model:
 ## Adding A New Playbook
 
 1. Add the playbook path to the manifest.
-2. If the fallback resolver is too generic, add an explicit entry to [config/dependency-wave-playbooks.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/dependency-wave-playbooks.yaml).
+2. If the fallback resolver is too generic, add an explicit entry to [config/dependency-wave-playbooks.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/dependency-wave-playbooks.yaml).
 3. Pick stable `shared_surfaces` and `lock_resources`.
 4. Run the manifest once with `--dry-run`.
 5. Only then run the real apply.

@@ -18,7 +18,7 @@ BRIDGE_ROLE_TASKS = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "tasks"
 BRIDGE_ROLE_META = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "meta" / "argument_specs.yml"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "falco.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "falco.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
@@ -153,7 +153,7 @@ def test_falco_suppressions_narrowly_allow_semgrep_drop_and_execute_noise() -> N
     )
 
     assert semgrep_suppression["override"] == {"condition": "append"}
-    assert 'container.image.repository = "registry.lv3.org/check-runner/python"' in semgrep_suppression["condition"]
+    assert 'container.image.repository = "registry.example.com/check-runner/python"' in semgrep_suppression["condition"]
     assert 'proc.name = "semgrep-core"' in semgrep_suppression["condition"]
     assert 'proc.exepath contains "/site-packages/semgrep/bin/semgrep-core"' in semgrep_suppression["condition"]
 
@@ -164,10 +164,10 @@ def test_bridge_defaults_reuse_private_nats_and_ntfy_contracts() -> None:
     assert defaults["falco_event_bridge_service_name"] == "lv3-falco-event-bridge"
     assert (
         defaults["falco_event_bridge_listen_port"]
-        == "{{ hostvars['proxmox_florin'].platform_port_assignments.falco_event_bridge_port }}"
+        == "{{ hostvars['proxmox-host'].platform_port_assignments.falco_event_bridge_port }}"
     )
     assert defaults["falco_event_bridge_nats_subject"] == "platform.security.falco"
-    assert "runtime-control-lv3" in defaults["falco_event_bridge_nats_host"]
+    assert "runtime-control" in defaults["falco_event_bridge_nats_host"]
     assert defaults["falco_event_bridge_ntfy_topic"] == "platform-security-critical"
 
 
@@ -192,8 +192,8 @@ def test_playbook_converges_bridge_then_falco_runtime_across_hosts() -> None:
     assert len(playbook) == 2
     first_roles = [role["role"] for role in playbook[0]["roles"]]
     second_roles = [role["role"] for role in playbook[1]["roles"]]
-    assert playbook[0]["hosts"] == "docker-runtime-lv3"
-    assert playbook[1]["hosts"] == "docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3"
+    assert playbook[0]["hosts"] == "docker-runtime"
+    assert playbook[1]["hosts"] == "docker-runtime:docker-build:monitoring:postgres"
     assert "lv3.platform.ntfy_runtime" in first_roles
     assert first_roles[-1] == "lv3.platform.falco_event_bridge_runtime"
     assert second_roles[-1] == "lv3.platform.falco_runtime"
@@ -206,14 +206,14 @@ def test_inventory_exposes_private_bridge_port_and_guest_access_rules() -> None:
     host_vars = load_yaml(HOST_VARS_PATH)
 
     assert host_vars["platform_port_assignments"]["falco_event_bridge_port"] == 18084
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     build_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "docker-build-lv3" and 18084 in rule["ports"]
+        rule for rule in docker_runtime_rules if rule["source"] == "docker-build" and 18084 in rule["ports"]
     )
     monitoring_rule = next(
-        rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 18084 in rule["ports"]
+        rule for rule in docker_runtime_rules if rule["source"] == "monitoring" and 18084 in rule["ports"]
     )
-    postgres_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "postgres-lv3")
+    postgres_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "postgres")
     assert 18084 in build_rule["ports"]
     assert 18084 in monitoring_rule["ports"]
     assert 18084 in postgres_rule["ports"]

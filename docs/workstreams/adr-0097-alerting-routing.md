@@ -12,8 +12,8 @@
 
 ## Scope
 
-- write Ansible role `alertmanager_runtime` — deploys Alertmanager on `monitoring-lv3` alongside Grafana
-- write Ansible role `ntfy_runtime` — deploys Ntfy on `docker-runtime-lv3` as a lightweight push notification service
+- write Ansible role `alertmanager_runtime` — deploys Alertmanager on `monitoring` alongside Grafana
+- write Ansible role `ntfy_runtime` — deploys Ntfy on `docker-runtime` as a lightweight push notification service
 - write `config/alertmanager/alertmanager.yml` (Ansible-templated) — routing config with ntfy + mattermost receivers
 - write `config/alertmanager/rules/platform.yml` — core platform alert rules (Keycloak down, Postgres down, OpenBao sealed, cert expiry)
 - update `scripts/maintenance_window_tool.py` — add `create_alertmanager_silence()` call when a window is declared
@@ -47,15 +47,15 @@
 
 ## Expected Live Surfaces
 
-- Alertmanager running on `monitoring-lv3:9093`
-- Ntfy running on `docker-runtime-lv3:2586`
+- Alertmanager running on `monitoring:9093`
+- Ntfy running on `docker-runtime:2586`
 - Declaring a maintenance window via `lv3 maintenance start` creates an Alertmanager silence visible in the Alertmanager UI
 - Test alert (fire and resolve a synthetic alert) delivers to Mattermost `#platform-alerts` channel
 
 ## Verification
 
-- `curl http://monitoring-lv3:9093/-/healthy` → HTTP 200
-- `curl http://docker-runtime-lv3:2586/v1/health` → HTTP 200
+- `curl http://monitoring:9093/-/healthy` → HTTP 200
+- `curl http://docker-runtime:2586/v1/health` → HTTP 200
 - `amtool alert add alertname=TestAlert severity=critical service=test` → verify Mattermost receives notification within 60 seconds
 - `amtool alert add alertname=CriticalTest severity=critical service=test` → verify Ntfy delivers push notification (requires Ntfy app installed)
 - `lv3 maintenance start --service keycloak --duration 30m` → Alertmanager UI shows silence for keycloak alerts
@@ -76,7 +76,7 @@
 
 ## Notes For The Next Assistant
 
-- Alertmanager requires Prometheus to be configured with its URL as a remote alertmanager; add `alerting.alertmanagers` to the Prometheus config on `monitoring-lv3`
+- Alertmanager requires Prometheus to be configured with its URL as a remote alertmanager; add `alerting.alertmanagers` to the Prometheus config on `monitoring`
 - Ntfy topics are not password-protected by default; the `platform-alerts` topic must be configured with a subscriber password in `ntfy.conf`; the password is stored in OpenBao at `platform/ntfy/subscriber-password`
 - The Mattermost webhook for Alertmanager notifications must be created in Mattermost (`#platform-alerts-critical` and `#platform-alerts` channels); store webhook URLs in OpenBao at `platform/mattermost/webhooks/`
 - `validate_alert_rules.py` should be added to `config/validation-gate.json` as a new gate check with severity `error`

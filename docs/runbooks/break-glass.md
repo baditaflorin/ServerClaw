@@ -12,7 +12,7 @@ It must never contain actual credentials, unseal keys, private keys, or TOTP see
 - emergency Proxmox host SSH access for `root`
 - OpenBao unseal references from ADR 0051
 - `step-ca` root fingerprint
-- Storage Box access details for the off-site `backup-lv3` recovery copy
+- Storage Box access details for the off-site `backup` recovery copy
 
 ## Storage Locations
 

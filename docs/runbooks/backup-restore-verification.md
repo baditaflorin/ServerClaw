@@ -2,7 +2,7 @@
 
 ADR 0099 adds a repository-managed restore verification workflow that restores the highest-risk PBS-protected guests into the staging bridge, runs smoke tests, writes a receipt, and tears the restored VMs down unconditionally.
 
-ADR 0190 extends the `docker-runtime-lv3` portion of that flow with a privacy-safe synthetic transaction replay so recovery validation records request success rate and latency distribution instead of only single-shot smoke checks.
+ADR 0190 extends the `docker-runtime` portion of that flow with a privacy-safe synthetic transaction replay so recovery validation records request success rate and latency distribution instead of only single-shot smoke checks.
 
 ADR 0272 extends the same workflow with restore-readiness ladders and governed warm-up profiles so receipts record the highest completed recovery stage instead of only a binary final result.
 
@@ -17,21 +17,21 @@ ADR 0272 extends the same workflow with restore-readiness ladders and governed w
 
 For focused recovery drills or ADR-local replays, scope the run to one or more guests:
 
-- `make restore-verification RESTORE_ARGS='--targets docker-runtime-lv3 --selection-strategy latest --ssh-timeout-seconds 900'`
+- `make restore-verification RESTORE_ARGS='--targets docker-runtime --selection-strategy latest --ssh-timeout-seconds 900'`
 
 ## Targets
 
 The current repository implementation verifies three guests:
 
-- `postgres-lv3` restored to VMID `900`
-- `docker-runtime-lv3` restored to VMID `901`
-- `backup-lv3` restored to VMID `902`
+- `postgres` restored to VMID `900`
+- `docker-runtime` restored to VMID `901`
+- `backup` restored to VMID `902`
 
 Each restore uses the staging bridge and IP assignments already defined for the ADR 0088 fixture network:
 
-- `docker-runtime-lv3` -> `10.20.10.100/24`
-- `postgres-lv3` -> `10.20.10.110/24`
-- `backup-lv3` -> `10.20.10.120/24`
+- `docker-runtime` -> `10.20.10.100/24`
+- `postgres` -> `10.20.10.110/24`
+- `backup` -> `10.20.10.120/24`
 
 ## Workflow
 
@@ -78,13 +78,13 @@ That evidence makes it clear whether a restore failed before guest access, durin
 
 ## Smoke Tests
 
-### postgres-lv3
+### postgres
 
 - `pg_isready` on localhost
 - one `psql` table-count query per managed database
 - one `pg_dump --schema-only` per managed database
 
-### docker-runtime-lv3
+### docker-runtime
 
 - Keycloak readiness endpoint from the local guest
 - NetBox readiness endpoint from the local guest
@@ -92,7 +92,7 @@ That evidence makes it clear whether a restore failed before guest access, durin
 - OpenBao readiness endpoint as a non-blocking observation
 - repeated synthetic control-plane reads for Keycloak discovery, NetBox login, Windmill API version, and OpenBao health with per-request latency capture
 
-### backup-lv3
+### backup
 
 - TCP reachability on `127.0.0.1:8007`
 - `proxmox-backup-manager datastore list --output-format json`

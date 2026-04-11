@@ -28,10 +28,10 @@ We will use two semantic version streams plus one observed-state registry.
    - stored in the root `VERSION` file
    - represents the version of this repository's automation, runbooks, ADR set, and operational contract
 2. Platform version
-   - stored in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml`
+   - stored in `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml`
    - represents the intended release version of the managed Proxmox platform for this server
 3. Observed state
-   - also stored in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml`
+   - also stored in `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml`
    - records the latest known real-world state of the server, including OS and Proxmox version
 
 ## Version bump rules

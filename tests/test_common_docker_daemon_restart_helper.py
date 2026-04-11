@@ -76,12 +76,12 @@ def test_common_docker_daemon_restart_helper_protects_shared_runtime_hosts_by_de
     assert defaults["common_docker_daemon_restart_reason"] == ""
     assert defaults["common_docker_daemon_restart_force"] is False
     assert defaults["common_docker_daemon_restart_protected_hosts"] == [
-        "docker-runtime-lv3",
-        "docker-runtime-staging-lv3",
+        "docker-runtime",
+        "docker-runtime",
     ]
     assert options["common_docker_daemon_restart_reason"]["required"] is True
     assert options["common_docker_daemon_restart_force"]["default"] is False
     assert options["common_docker_daemon_restart_protected_hosts"]["default"] == [
-        "docker-runtime-lv3",
-        "docker-runtime-staging-lv3",
+        "docker-runtime",
+        "docker-runtime",
     ]

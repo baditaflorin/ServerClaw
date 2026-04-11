@@ -62,12 +62,12 @@
 
 ## Live Apply Evidence
 
-- 2026-03-27 latest-main live apply replayed `playbooks/windmill.yml` successfully from the rebased integration worktree with `docker-runtime-lv3 : ok=216 changed=38 failed=0`.
+- 2026-03-27 latest-main live apply replayed `playbooks/windmill.yml` successfully from the rebased integration worktree with `docker-runtime : ok=216 changed=38 failed=0`.
 - The live Windmill script bodies for `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` were rechecked through the API and matched the branch-local sources byte-for-byte after apply.
 - Manual end-to-end `jobs/run_wait_result` verification succeeded for `f/lv3/windmill_healthcheck`, `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop`.
 - The repo-managed schedules `f/lv3/intent_queue_dispatcher_every_minute`, `f/lv3/lane_scheduler_every_2s`, `f/lv3/scheduler_watchdog_every_30s`, and `f/lv3/scheduler_watchdog_loop_every_10s` were verified as enabled after apply.
 - The latest-main replay removed the duplicate `f/lv3/scheduler_watchdog_loop` seed contract from the Windmill defaults, so the wrapper path is now stable and no longer overwritten by the watchdog implementation body during sync.
-- The live worker runtime env on `docker-runtime-lv3` now exposes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt` exists on the worker checkout.
+- The live worker runtime env on `docker-runtime` now exposes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and `/srv/proxmox-host_server/.local/windmill/superadmin-secret.txt` exists on the worker checkout.
 
 ## Repo Validation
 

@@ -175,7 +175,7 @@ class TestLoadTopologySnapshot:
     def _make_snapshot(self, tmp_path: Path) -> Path:
         data = {
             "environments": {
-                "prod": {"nodes": ["pve1", "pve2"], "vms": {"171": "coolify-apps-lv3"}},
+                "prod": {"nodes": ["pve1", "pve2"], "vms": {"171": "coolify-apps"}},
                 "staging": {"nodes": ["pve-staging"], "vms": {}},
             }
         }

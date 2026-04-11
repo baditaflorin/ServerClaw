@@ -184,7 +184,7 @@ entries:
     validation: Manual review
     naming_convention: <git-sha>.json and <git-sha>.sarif.json
   docker/docker-compose.yml:
-    purpose: Docker Compose reference for services on docker-runtime-lv3
+    purpose: Docker Compose reference for services on docker-runtime
     owner: human
     format: Docker Compose YAML
     use_for: Understanding service dependencies and networking

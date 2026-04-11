@@ -9,7 +9,7 @@
 
 ## Summary
 
-The proxmox_florin_server codebase was published to GitHub as `baditaflorin/ServerClaw` with 3,339 commits of full git history. A preparation commit (`31d24a6cd`) scrubbed identity files and removed some docs with credentials, but:
+The proxmox-host_server codebase was published to GitHub as `baditaflorin/ServerClaw` with 3,339 commits of full git history. A preparation commit (`31d24a6cd`) scrubbed identity files and removed some docs with credentials, but:
 
 1. One hardcoded secret was **missed** in the current tree
 2. All pre-scrub data is **recoverable from git history** (real domain, email, IPs, operator identity, passwords)
@@ -31,10 +31,10 @@ The proxmox_florin_server codebase was published to GitHub as `baditaflorin/Serv
 
 | # | Secret | Recovery Method | Action |
 |---|--------|----------------|--------|
-| 4 | **Operator identity** — `baditaflorin@gmail.com`, `Florin Badita`, Keycloak username `florin.badita` | `git log serverclaw/main -- config/operators.yaml` then checkout prior commit | Consider if this identity exposure is acceptable (likely yes — it's the repo owner's public identity) |
-| 5 | **Platform domain** — `lv3.org` with all subdomains | `git log serverclaw/main -- inventory/group_vars/all/identity.yml` | Domain is already public via DNS; no rotation possible, but now explicitly tied to this infrastructure codebase |
-| 6 | **Proxmox host SSH** — `root@65.108.75.123` | `git log serverclaw/main -- inventory/hosts.yml` | Ensure SSH root login is disabled or key-only; firewall the Proxmox API port (8006) |
-| 7 | **Keycloak admin URL** — `https://auth.lv3.org/admin` | Git history of `SEMAPHORE-SETUP-QUICK-START.md` | Ensure Keycloak admin console is behind IP allowlist or VPN |
+| 4 | **Operator identity** — `operator@example.com`, `Platform Operator`, Keycloak username `florin.badita` | `git log serverclaw/main -- config/operators.yaml` then checkout prior commit | Consider if this identity exposure is acceptable (likely yes — it's the repo owner's public identity) |
+| 5 | **Platform domain** — `example.com` with all subdomains | `git log serverclaw/main -- inventory/group_vars/all/identity.yml` | Domain is already public via DNS; no rotation possible, but now explicitly tied to this infrastructure codebase |
+| 6 | **Proxmox host SSH** — `root@203.0.113.1` | `git log serverclaw/main -- inventory/hosts.yml` | Ensure SSH root login is disabled or key-only; firewall the Proxmox API port (8006) |
+| 7 | **Keycloak admin URL** — `https://auth.example.com/admin` | Git history of `SEMAPHORE-SETUP-QUICK-START.md` | Ensure Keycloak admin console is behind IP allowlist or VPN |
 
 ### TIER 3 — EXPOSED IN CURRENT TREE (Infrastructure Topology)
 
@@ -42,10 +42,10 @@ These are NOT secrets but reveal internal architecture. They are present in comm
 
 | Category | Details | Files |
 |----------|---------|-------|
-| **Internal IP map** | Full 10.10.10.x topology (20+ IPs mapped to services) | `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `config/build-server.json`, `config/generated/nginx-upstreams.conf` |
-| **Public IP** | `65.108.75.123` (Hetzner), `100.118.189.95` (Tailscale) | `receipts/live-applies/`, `inventory/host_vars/proxmox_florin.yml` |
+| **Internal IP map** | Full 10.10.10.x topology (20+ IPs mapped to services) | `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `config/build-server.json`, `config/generated/nginx-upstreams.conf` |
+| **Public IP** | `203.0.113.1` (Hetzner), `100.118.189.95` (Tailscale) | `receipts/live-applies/`, `inventory/host_vars/proxmox-host.yml` |
 | **Tailscale IP** | `100.64.0.1` (jump host) | `inventory/group_vars/platform.yml`, workstream docs |
-| **Domain name** | `lv3.org` with 30+ subdomains mapped to IPs | `config/generated/dns-declarations.yaml`, `config/certificate-catalog.json`, `config/uptime-kuma/monitors.json`, 250+ files |
+| **Domain name** | `example.com` with 30+ subdomains mapped to IPs | `config/generated/dns-declarations.yaml`, `config/certificate-catalog.json`, `config/uptime-kuma/monitors.json`, 250+ files |
 | **Service topology** | Complete map of what runs on which VM | `config/generated/nginx-upstreams.yaml`, `config/service-capability-catalog.json` |
 | **Secret management structure** | Secret names, paths, rotation workflows | `config/token-inventory.yaml`, `config/controller-local-secrets.json` |
 | **Deployment evidence** | Proof of service availability with timestamps | `receipts/live-applies/`, `receipts/subdomain-exposure-audit/` |
@@ -79,7 +79,7 @@ These are NOT secrets but reveal internal architecture. They are present in comm
 ### What went wrong
 1. **Workstream documentation contained a real secret** — `ws-0362-semaphore-keycloak-oidc.md` had the Keycloak OIDC client secret pasted inline and was missed during the scrub
 2. **Full git history was pushed** — all 3,339 commits went to GitHub, making every pre-scrub version of every file recoverable
-3. **Infrastructure topology was not scrubbed** — `host_vars/`, `group_vars/platform.yml`, `config/generated/`, `config/build-server.json`, receipts, etc. still contain real IPs and the `lv3.org` domain
+3. **Infrastructure topology was not scrubbed** — `host_vars/`, `group_vars/platform.yml`, `config/generated/`, `config/build-server.json`, receipts, etc. still contain real IPs and the `example.com` domain
 4. **No systematic secret scan before publish** — gitleaks was configured but not run as a pre-publish gate against the full tree
 5. **Semaphore password deletion was incomplete** — the password was removed from `SEMAPHORE-SETUP-QUICK-START.md` (deleted) but the OIDC secret in the workstream doc was overlooked
 
@@ -140,10 +140,10 @@ git push serverclaw clean-release:main --force
 Since the full internal topology is now public:
 
 - [ ] **Firewall audit** — Verify Proxmox API (8006), build server, internal services are not reachable from the public internet
-- [ ] **SSH hardening** — Confirm `root` SSH login to `65.108.75.123` is disabled; only key-based auth with jump host
-- [ ] **Keycloak admin** — Put `auth.lv3.org/admin` behind IP allowlist
+- [ ] **SSH hardening** — Confirm `root` SSH login to `203.0.113.1` is disabled; only key-based auth with jump host
+- [ ] **Keycloak admin** — Put `auth.example.com/admin` behind IP allowlist
 - [ ] **Tailscale ACLs** — Review that Tailscale node `100.118.189.95` / `100.64.0.1` access is properly scoped
-- [ ] **Monitor for scanning** — Watch firewall logs for increased scanning activity against `65.108.75.123` and `lv3.org` subdomains
+- [ ] **Monitor for scanning** — Watch firewall logs for increased scanning activity against `203.0.113.1` and `example.com` subdomains
 
 ---
 
@@ -153,21 +153,21 @@ Priority files that still contain real infrastructure data:
 
 ```
 # Files with real IPs/domain still on serverclaw/main:
-inventory/host_vars/proxmox_florin.yml       # full topology
-inventory/group_vars/platform.yml            # 143 refs to lv3.org
+inventory/host_vars/proxmox-host.yml       # full topology
+inventory/group_vars/platform.yml            # 143 refs to example.com
 config/generated/nginx-upstreams.conf        # IP-to-service mapping
 config/generated/nginx-upstreams.yaml        # same
-config/generated/dns-declarations.yaml       # 36 lv3.org refs
-config/generated/sso-clients.yaml            # 15 lv3.org refs
+config/generated/dns-declarations.yaml       # 36 example.com refs
+config/generated/sso-clients.yaml            # 15 example.com refs
 config/build-server.json                     # build server IP
-config/certificate-catalog.json              # 147 lv3.org refs
-config/uptime-kuma/monitors.json             # 30 lv3.org refs
-config/service-capability-catalog.json       # 234 lv3.org refs
-config/health-probe-catalog.json             # 52 lv3.org refs
-config/command-catalog.json                  # 70 lv3.org refs
-config/workflow-catalog.json                 # 137 lv3.org refs
-config/slo-catalog.json                      # 25 lv3.org refs
-config/dependency-graph.json                 # 44 lv3.org refs
+config/certificate-catalog.json              # 147 example.com refs
+config/uptime-kuma/monitors.json             # 30 example.com refs
+config/service-capability-catalog.json       # 234 example.com refs
+config/health-probe-catalog.json             # 52 example.com refs
+config/command-catalog.json                  # 70 example.com refs
+config/workflow-catalog.json                 # 137 example.com refs
+config/slo-catalog.json                      # 25 example.com refs
+config/dependency-graph.json                 # 44 example.com refs
 receipts/live-applies/*                      # deployment evidence
 receipts/subdomain-exposure-audit/*          # domain enumeration
 receipts/https-tls-assurance/*               # TLS probe results
@@ -187,7 +187,7 @@ docs/workstreams/ws-0362-*.md                # OIDC secret
 
 2. **Separate public branch** — Maintain a `public` branch that only contains scrubbed commits; never push `main` directly to GitHub
 
-3. **Template everything** — Replace remaining hardcoded `lv3.org` references in config/ and docs/ with `{{ platform_domain }}` template variables
+3. **Template everything** — Replace remaining hardcoded `example.com` references in config/ and docs/ with `{{ platform_domain }}` template variables
 
 4. **Exclude receipts from public** — Add `receipts/` to a `.github/.gitattributes` export-ignore or maintain them in a separate private repo
 

@@ -33,50 +33,50 @@ class SubdomainCatalogTests(unittest.TestCase):
         self.assertIn("ops", reserved_prefixes)
         self.assertIn("mail", reserved_prefixes)
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "ops.lv3.org")["auth_requirement"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "ops.example.com")["auth_requirement"],
             "edge_oidc",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "home.lv3.org")["auth_requirement"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "home.example.com")["auth_requirement"],
             "edge_oidc",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "database.lv3.org")["auth_requirement"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "database.example.com")["auth_requirement"],
             "private_network",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "n8n.lv3.org")["auth_requirement"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "n8n.example.com")["auth_requirement"],
             "edge_oidc",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "flags.lv3.org")["auth_requirement"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "flags.example.com")["auth_requirement"],
             "edge_oidc",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "flags.lv3.org")["service_id"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "flags.example.com")["service_id"],
             "flagsmith",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "annotate.lv3.org")["auth_requirement"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "annotate.example.com")["auth_requirement"],
             "edge_oidc",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "annotate.lv3.org")["service_id"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "annotate.example.com")["service_id"],
             "label_studio",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "lv3.org")["service_id"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "example.com")["service_id"],
             "nginx_edge",
         )
         self.assertEqual(
-            subdomain_catalog.get_subdomain_entry(self.catalog, "vault.lv3.org")["target"],
+            subdomain_catalog.get_subdomain_entry(self.catalog, "vault.example.com")["target"],
             "100.64.0.1",
         )
 
     def test_missing_edge_route_entry_fails(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
         broken_catalog["subdomains"] = [
-            entry for entry in broken_catalog["subdomains"] if entry["fqdn"] != "grafana.lv3.org"
+            entry for entry in broken_catalog["subdomains"] if entry["fqdn"] != "grafana.example.com"
         ]
 
         with self.assertRaisesRegex(
@@ -92,7 +92,7 @@ class SubdomainCatalogTests(unittest.TestCase):
 
     def test_reserved_prefix_requires_allowlist(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
-        broken_catalog["subdomains"][0]["fqdn"] = "internal.lv3.org"
+        broken_catalog["subdomains"][0]["fqdn"] = "internal.example.com"
 
         with self.assertRaisesRegex(
             ValueError,
@@ -107,7 +107,7 @@ class SubdomainCatalogTests(unittest.TestCase):
 
     def test_edge_oidc_requires_authenticated_edge_site(self) -> None:
         broken_defaults = copy.deepcopy(self.public_edge_defaults)
-        del broken_defaults["public_edge_authenticated_sites"]["docs.lv3.org"]
+        del broken_defaults["public_edge_authenticated_sites"]["docs.example.com"]
 
         with self.assertRaisesRegex(
             ValueError,
@@ -122,7 +122,7 @@ class SubdomainCatalogTests(unittest.TestCase):
 
     def test_private_only_requires_private_network_auth(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
-        entry = subdomain_catalog.get_subdomain_entry(broken_catalog, "database.lv3.org")
+        entry = subdomain_catalog.get_subdomain_entry(broken_catalog, "database.example.com")
         entry["auth_requirement"] = "upstream_auth"
 
         with self.assertRaisesRegex(
@@ -143,7 +143,7 @@ class SubdomainCatalogTests(unittest.TestCase):
         )
         entry = subdomain_catalog.get_subdomain_entry(
             self.catalog,
-            "grafana.staging.lv3.org",
+            "grafana.staging.example.com",
         )
 
         with self.assertRaisesRegex(
@@ -157,7 +157,7 @@ class SubdomainCatalogTests(unittest.TestCase):
             self.host_vars,
             self.public_edge_defaults,
         )
-        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "ops.lv3.org")
+        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "ops.example.com")
 
         self.assertEqual(
             subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),
@@ -169,7 +169,7 @@ class SubdomainCatalogTests(unittest.TestCase):
             self.host_vars,
             self.public_edge_defaults,
         )
-        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "docs.lv3.org")
+        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "docs.example.com")
 
         self.assertEqual(
             subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),
@@ -181,7 +181,7 @@ class SubdomainCatalogTests(unittest.TestCase):
             self.host_vars,
             self.public_edge_defaults,
         )
-        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "status.lv3.org")
+        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "status.example.com")
 
         self.assertEqual(
             subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),
@@ -193,7 +193,7 @@ class SubdomainCatalogTests(unittest.TestCase):
             self.host_vars,
             self.public_edge_defaults,
         )
-        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "lv3.org")
+        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "example.com")
 
         self.assertEqual(
             subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),
@@ -206,12 +206,12 @@ class SubdomainCatalogTests(unittest.TestCase):
             self.public_edge_defaults,
         )
 
-        self.assertIn("*.apps.lv3.org", edge_route_hostnames)
-        self.assertIn("lv3.org", edge_route_hostnames)
+        self.assertIn("*.apps.example.com", edge_route_hostnames)
+        self.assertIn("example.com", edge_route_hostnames)
         self.assertEqual(
             subdomain_catalog.route_mode_for_entry(
                 {
-                    "fqdn": "repo-smoke.apps.lv3.org",
+                    "fqdn": "repo-smoke.apps.example.com",
                     "status": "planned",
                     "exposure": "edge-published",
                 },

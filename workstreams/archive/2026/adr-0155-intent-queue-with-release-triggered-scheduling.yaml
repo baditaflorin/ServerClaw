@@ -4,7 +4,7 @@ title: Intent queue with release-triggered scheduling
 status: live_applied
 owner: codex
 branch: codex/adr-0155-main-live
-worktree_path: .worktrees/proxmox_florin_server-main-0155-v2
+worktree_path: .worktrees/proxmox-host_server-main-0155-v2
 doc: docs/workstreams/adr-0155-intent-queue-with-release-triggered-scheduling.md
 depends_on:
   - adr-0044-windmill

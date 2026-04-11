@@ -114,7 +114,7 @@ entries:
     purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
     owner: human
     format: JSON
-    use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup-lv3 store
+    use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup store
     update_when: Adjusting seed classes, dataset volumes, or storage locations
     validation: uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
   config/network-impairment-matrix.yaml:

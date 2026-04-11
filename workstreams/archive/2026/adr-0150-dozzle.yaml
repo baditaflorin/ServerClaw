@@ -14,7 +14,7 @@ conflicts_with: []
 shared_surfaces:
   - roles/dozzle_runtime
   - roles/nginx_edge_publication
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/service-capability-catalog.json
   - config/subdomain-catalog.json
   - config/api-gateway-catalog.json

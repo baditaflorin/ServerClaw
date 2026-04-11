@@ -10,7 +10,7 @@ depends_on:
   - adr-0011-monitoring
 conflicts_with: []
 shared_surfaces:
-  - monitoring-lv3
+  - monitoring
   - Grafana
   - host logs
   - guest logs

@@ -8,12 +8,12 @@ runtime.
 
 ## Canonical Sources
 
-- ADR: [docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md)
-- command catalog: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
-- controller launcher: [scripts/governed_command.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/governed_command.py)
-- runtime helper: [scripts/governed_command_runtime.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/governed_command_runtime.py)
-- agent tool surface: [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/agent_tool_registry.py)
-- live-apply evidence model: [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
+- ADR: [docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md)
+- command catalog: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/command-catalog.json)
+- controller launcher: [scripts/governed_command.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/governed_command.py)
+- runtime helper: [scripts/governed_command_runtime.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/governed_command_runtime.py)
+- agent tool surface: [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/agent_tool_registry.py)
+- live-apply evidence model: [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 
 ## Execution Model
 
@@ -37,7 +37,7 @@ the command survives client disconnects and leaves durable logs and receipts.
 Execution profiles can also pin guest-local service URLs when the runtime
 wrapper must call a service from inside the worker VM. ADR 0227 now uses that
 contract for `network-impairment-matrix` so the governed replay targets
-`http://127.0.0.1:8000` on `docker-runtime-lv3` instead of a controller-side
+`http://127.0.0.1:8000` on `docker-runtime` instead of a controller-side
 proxy address.
 
 ## Primary Commands
@@ -103,8 +103,8 @@ On the runtime host, these paths live under the repo checkout:
   and `.local/state/execution-lanes/registry.lock`
 
 The runtime helper also maintains the compatibility symlink for
-`/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server` when the worker
-checkout actually lives at `/srv/proxmox_florin_server`.
+`/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server` when the worker
+checkout actually lives at `/srv/proxmox-host_server`.
 
 The worker converge now also enforces the execution-lane registry directory and
 files as mutable runtime surfaces so `ops`-scoped governed commands can acquire
@@ -113,15 +113,15 @@ their coordination lock without root-owned write failures.
 ## Live Apply Repair Note
 
 The 2026-03-28 ADR 0227 live apply exposed a pre-existing permissions edge on
-`docker-runtime-lv3`: the execution-lane registry files already existed as
+`docker-runtime`: the execution-lane registry files already existed as
 root-owned `0644` files before the new mutable-file contract was converged.
 
 After the role change landed, a one-time repair was required on the live guest:
 
 ```bash
 sudo chmod 0666 \
-  /srv/proxmox_florin_server/.local/state/execution-lanes/registry.json \
-  /srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock
+  /srv/proxmox-host_server/.local/state/execution-lanes/registry.json \
+  /srv/proxmox-host_server/.local/state/execution-lanes/registry.lock
 ```
 
 That chmod is not the long-term operating model. The repository contract now
@@ -136,5 +136,5 @@ Before executing a mutating governed command:
 2. confirm the approval decision, operator parameters, and receipt plan
 3. ensure any controller-local file secrets required by the command are present
    either on the controller or already mirrored into the runtime checkout
-4. execute the governed command through [scripts/governed_command.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/governed_command.py) or the `run-governed-command` tool rather than calling the Make target directly from a controller shell
+4. execute the governed command through [scripts/governed_command.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/governed_command.py) or the `run-governed-command` tool rather than calling the Make target directly from a controller shell
 5. capture the transient unit name plus the stdout, stderr, and receipt paths in the live-apply evidence

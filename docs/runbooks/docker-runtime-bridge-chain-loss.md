@@ -2,14 +2,14 @@
 
 ## Purpose
 
-Recognize and recover the shared `docker-runtime-lv3` failure mode where the
+Recognize and recover the shared `docker-runtime` failure mode where the
 Docker `DOCKER` or `DOCKER-FORWARD` chains disappear and repo-managed service
 replays start destabilizing unrelated workloads.
 
 ## When To Use It
 
 Use this runbook when one or more of these appear together on
-`docker-runtime-lv3`:
+`docker-runtime`:
 
 - many unrelated containers are exited or restarting at the same time
 - a live apply transcript shows `Restart Docker when required bridge chains are
@@ -25,8 +25,8 @@ Use this runbook when one or more of these appear together on
 Prefer the repo-managed jump path instead of ad hoc SSH wiring:
 
 ```bash
-ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
   -m shell \
   -a 'systemctl is-active docker && iptables -t nat -S DOCKER && iptables -t filter -S DOCKER-FORWARD && docker ps --format "{{.Names}} {{.Status}}"'
@@ -35,8 +35,8 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv
 Also capture the current failed-unit view:
 
 ```bash
-ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
   -m shell \
   -a 'systemctl --failed --no-pager --no-legend || true'
@@ -49,7 +49,7 @@ blast radius.
 ## Recovery Steps
 
 1. Confirm whether the issue is scoped to bridge-chain loss on
-   `docker-runtime-lv3` rather than host-wide Proxmox failure or a full guest
+   `docker-runtime` rather than host-wide Proxmox failure or a full guest
    outage.
 2. If `docker.service` is active but the chains are missing, treat the runtime
    as degraded and stop additional service replays until a deliberate recovery
@@ -61,7 +61,7 @@ blast radius.
    now attempt one Docker restart automatically if the bridge-chain helper still
    fails after the nftables reload. If that replay already consumed its single
    restart or the guest is broadly degraded before any service converge begins,
-   restart Docker once on `docker-runtime-lv3`, then re-check the chains and
+   restart Docker once on `docker-runtime`, then re-check the chains and
    container state before touching service-specific playbooks.
 5. After the runtime is stable again, rerun only the affected service converges
    from the repo root instead of replaying unrelated services.
@@ -69,8 +69,8 @@ blast radius.
 Example manual maintenance command on the guest:
 
 ```bash
-ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
   -m shell \
   -a 'sudo systemctl restart docker && sleep 10 && systemctl is-active docker && iptables -t nat -S DOCKER && iptables -t filter -S DOCKER-FORWARD && docker ps --format "{{.Names}} {{.Status}}"'
@@ -84,7 +84,7 @@ During the 2026-04-01 Grist exact-main replay:
   recorded `lv3.platform.common : Restart Docker when required bridge chains are
   missing` at `2026-04-01T16:21:17Z`
 - workstream `ws-0325-service-uptime-investigation` later confirmed that
-  `docker-runtime-lv3` had many unrelated containers exited or stuck in restart
+  `docker-runtime` had many unrelated containers exited or stuck in restart
   loops, while the Proxmox host itself had no matching host-wide systemd
   failure pattern
 

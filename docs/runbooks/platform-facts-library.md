@@ -10,12 +10,12 @@ The goal is to keep host and service topology facts in one committed, agent-read
 
 The generated facts library is built from:
 
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
-- [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml)
+- [inventory/host_vars/proxmox-host.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/host_vars/proxmox-host.yml)
 
 The committed output is:
 
-- [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml)
+- [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/group_vars/platform.yml)
 
 Do not hand-edit `platform.yml`.
 
@@ -36,8 +36,8 @@ make validate-generated-vars
 Inspect resolved inventory facts for one host without running a playbook:
 
 ```bash
-make show-platform-facts HOST=proxmox_florin
-make show-platform-facts HOST=docker-runtime-lv3
+make show-platform-facts HOST=proxmox-host
+make show-platform-facts HOST=docker-runtime
 ```
 
 ## What Lives In The Generated File

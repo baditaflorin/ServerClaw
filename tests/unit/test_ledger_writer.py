@@ -369,7 +369,7 @@ def test_reader_and_replayer_return_ordered_events_and_project_state() -> None:
     assert replayer.project_state("service:netbox", at="2026-03-24T00:30:00+00:00") == {"version": "1.0.0"}
     assert replayer.project_state("service:netbox", at="2026-03-24T02:00:00+00:00") == {"version": "1.1.0"}
     with pytest.raises(NotImplementedError):
-        replayer.project_state("host:proxmox_florin", at="2026-03-24T02:00:00+00:00")
+        replayer.project_state("host:proxmox-host", at="2026-03-24T02:00:00+00:00")
 
 
 def test_migration_helper_moves_legacy_rows_and_installs_view() -> None:
@@ -383,7 +383,7 @@ def test_migration_helper_moves_legacy_rows_and_installs_view() -> None:
                 "actor_id": "ops",
                 "surface": "manual",
                 "action": "document.manual_change",
-                "target": "proxmox_florin",
+                "target": "proxmox-host",
                 "outcome": "success",
                 "correlation_id": "legacy:1",
                 "evidence_ref": "docs/runbooks/mutation-audit-log.md",

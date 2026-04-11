@@ -16,7 +16,7 @@ def test_build_report_detects_new_lynis_findings_and_hardening_delta() -> None:
     previous = json.loads((REPO_ROOT / "tests" / "fixtures" / "security_posture_previous.json").read_text())
     host_reports = [
         {
-            "host": "docker-runtime-lv3",
+            "host": "docker-runtime",
             "hardening_index": 72,
             "finding_counts": {"warning": 2, "suggestion": 1, "suppressed": 0},
             "findings": [
@@ -41,7 +41,7 @@ def test_build_report_detects_new_lynis_findings_and_hardening_delta() -> None:
         }
     ]
     trivy_payloads = {
-        "docker-runtime-lv3": [
+        "docker-runtime": [
             {
                 "image": "ghcr.io/example/app:1.0.0",
                 "artifact_name": "ghcr.io/example/app:1.0.0",
@@ -80,18 +80,18 @@ def test_default_lynis_hosts_reads_active_service_vms(monkeypatch) -> None:
         "load_json",
         lambda path: {
             "services": [
-                {"vm": "docker-runtime-lv3", "environments": {"production": {"status": "active"}}},
-                {"vm": "coolify-lv3", "environments": {"production": {"status": "active"}}},
+                {"vm": "docker-runtime", "environments": {"production": {"status": "active"}}},
+                {"vm": "coolify", "environments": {"production": {"status": "active"}}},
                 {"vm": "old-host", "environments": {"production": {"status": "retired"}}},
-                {"vm": "proxmox_florin"},
+                {"vm": "proxmox-host"},
             ]
         },
     )
 
     assert report.default_lynis_hosts("production") == [
-        "coolify-lv3",
-        "docker-runtime-lv3",
-        "proxmox_florin",
+        "coolify",
+        "docker-runtime",
+        "proxmox-host",
     ]
 
 
@@ -110,14 +110,14 @@ def test_build_security_events_emits_summary_and_critical_findings() -> None:
             },
             "hosts": [
                 {
-                    "host": "docker-runtime-lv3",
+                    "host": "docker-runtime",
                     "hardening_index": 72,
                     "hardening_index_delta": -11,
                 }
             ],
             "images": [
                 {
-                    "host": "docker-runtime-lv3",
+                    "host": "docker-runtime",
                     "image": "ghcr.io/example/app:1.0.0",
                     "cves": [
                         {
@@ -142,7 +142,7 @@ def test_resolve_repo_local_path_maps_missing_controller_local_secret(tmp_path: 
     mirrored_secret.write_text("secret", encoding="utf-8")
 
     resolved = drift_lib.resolve_repo_local_path(
-        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/worker.id_ed25519",
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/worker.id_ed25519",
         repo_root=repo_root,
     )
 
@@ -157,7 +157,7 @@ def test_resolve_repo_local_path_maps_inaccessible_controller_local_secret(
     mirrored_secret = repo_root / ".local" / "ssh" / "worker.id_ed25519"
     mirrored_secret.parent.mkdir(parents=True)
     mirrored_secret.write_text("secret", encoding="utf-8")
-    inaccessible = "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/worker.id_ed25519"
+    inaccessible = "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/worker.id_ed25519"
     original = drift_lib._path_exists
 
     def fake_path_exists(path: Path) -> bool:
@@ -190,7 +190,7 @@ def test_run_ansible_security_scan_uses_bootstrap_key_and_jump_mode(monkeypatch,
         inventory=tmp_path / "inventory.yml",
         playbook=tmp_path / "playbook.yml",
         output_dir=tmp_path / "output",
-        hosts=["proxmox_florin", "docker-runtime-lv3"],
+        hosts=["proxmox-host", "docker-runtime"],
         bootstrap_key=tmp_path / "bootstrap.id_ed25519",
         jump_host_addr="10.10.10.1",
     )
@@ -211,9 +211,9 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive(tmp_path: Path) -> 
             "bootstrap_key": tmp_path / "worker.id_ed25519",
             "host_user": "ops",
             "host_addr": "100.64.0.1",
-            "guests": {"docker-runtime-lv3": "10.10.10.20"},
+            "guests": {"docker-runtime": "10.10.10.20"},
         },
-        "docker-runtime-lv3",
+        "docker-runtime",
         "true",
     )
 
@@ -227,19 +227,19 @@ def test_resolve_nats_tunnel_target_prefers_runtime_control() -> None:
     target = drift_lib.resolve_nats_tunnel_target(
         {
             "guests": {
-                "docker-runtime-lv3": "10.10.10.20",
-                "runtime-control-lv3": "10.10.10.92",
+                "docker-runtime": "10.10.10.20",
+                "runtime-control": "10.10.10.92",
             }
         }
     )
 
-    assert target == "runtime-control-lv3"
+    assert target == "runtime-control"
 
 
 def test_resolve_nats_tunnel_target_falls_back_to_docker_runtime() -> None:
-    target = drift_lib.resolve_nats_tunnel_target({"guests": {"docker-runtime-lv3": "10.10.10.20"}})
+    target = drift_lib.resolve_nats_tunnel_target({"guests": {"docker-runtime": "10.10.10.20"}})
 
-    assert target == "docker-runtime-lv3"
+    assert target == "docker-runtime"
 
 
 def test_inventory_guest_proxy_command_is_non_interactive() -> None:
@@ -262,7 +262,7 @@ def test_skip_lynis_reuses_cached_reports(monkeypatch, tmp_path: Path) -> None:
     cached_dir = tmp_path / "lynis"
     cached_dir.mkdir()
     fixture = REPO_ROOT / "tests" / "fixtures" / "security_posture_docker_runtime.dat"
-    (cached_dir / "docker-runtime-lv3-lynis-report.dat").write_text(fixture.read_text(), encoding="utf-8")
+    (cached_dir / "docker-runtime-lynis-report.dat").write_text(fixture.read_text(), encoding="utf-8")
 
     monkeypatch.setattr(report, "load_controller_context", lambda: {"bootstrap_key": None, "host_addr": "100.64.0.1"})
     monkeypatch.setattr(report, "load_previous_report", lambda _path: None)

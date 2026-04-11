@@ -60,14 +60,14 @@ tofu/
 
 ### Remote state backend
 
-State configuration is committed in `tofu/environments/*/backend.tf` and targets the internal S3-compatible object store at `https://minio.lv3.org` with `use_lockfile = true`. The execution wrapper automatically uses the remote backend when `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are provided at runtime; otherwise it falls back to build-server local state under `~/.cache/lv3-tofu-plans/` so validation, import, and drift checks still work without storing backend credentials in git.
+State configuration is committed in `tofu/environments/*/backend.tf` and targets the internal S3-compatible object store at `https://minio.example.com` with `use_lockfile = true`. The execution wrapper automatically uses the remote backend when `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are provided at runtime; otherwise it falls back to build-server local state under `~/.cache/lv3-tofu-plans/` so validation, import, and drift checks still work without storing backend credentials in git.
 
 ### `proxmox-vm` module interface
 
 ```hcl
 module "docker_runtime" {
   source       = "../../modules/proxmox-vm"
-  name         = "docker-runtime-lv3"
+  name         = "docker-runtime"
   vmid         = 110
   template     = "lv3-docker-host"       # Packer template (ADR 0084)
   cores        = 4
@@ -85,7 +85,7 @@ module "docker_runtime" {
 
 OpenTofu authenticates to Proxmox using a short-lived API token issued via OpenBao (ADR 0047). The token is injected at plan/apply time by `make remote-tofu-plan` / `make remote-tofu-apply` via the remote execution gateway (ADR 0082). Tokens are never stored in the repository or state file.
 
-Current implementation detail: remote `tofu` runs execute inside the pinned infra check-runner image with Docker host networking enabled on `build-lv3`, because the container path could not reliably resolve `proxmox.lv3.org` over the default bridge network during live import verification.
+Current implementation detail: remote `tofu` runs execute inside the pinned infra check-runner image with Docker host networking enabled on `build-lv3`, because the container path could not reliably resolve `proxmox.example.com` over the default bridge network during live import verification.
 
 ### make targets
 

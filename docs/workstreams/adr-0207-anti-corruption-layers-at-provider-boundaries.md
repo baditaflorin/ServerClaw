@@ -4,7 +4,7 @@
 - Title: Translate critical provider payloads into canonical internal facts and enforce that contract in validation
 - Status: implemented
 - Branch: `codex/ws-0207-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0207-live-apply`
 - Owner: codex
 - Depends On: `adr-0206-ports-and-adapters-for-external-integrations`, `adr-0210-canonical-domain-models-over-vendor-schemas`, `adr-0213-architecture-fitness-functions-in-the-validation-gate`
 - Conflicts With: none
@@ -79,9 +79,9 @@
 - `uv run --with pytest --with pyyaml python -m pytest tests/test_validate_repo_cache.py tests/test_validate_alert_rules.py tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py tests/test_post_merge_gate.py tests/test_provider_boundary_catalog.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py tests/test_plane_client.py tests/test_remote_exec.py tests/test_validation_gate.py tests/test_closure_loop_windmill.py tests/test_config_merge_repo_surfaces.py tests/test_correction_loops.py tests/test_incident_triage.py tests/test_live_apply_receipts.py tests/unit/test_closure_loop.py tests/test_validate_dependency_direction.py tests/test_dependency_direction_gate.py tests/test_health_composite.py tests/test_lv3_cli.py -q` passed with `178 passed in 23.52s` on the merged `0.177.42` tree before the final push
 - `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules data-models generated-docs generated-portals agent-standards` passed on the merged `0.177.42` release tree; it still emitted the existing non-blocking `.repo-structure.yaml` warning while exiting `0`
 - `make remote-validate` passed twice across the final merge: first as the authoritative build-server manifest on the merged `0.177.38` tree, then again on the merged `0.177.42` recut after `scripts/remote_exec.sh` fell back locally when build-server `rsync` could not set mtimes under `build/docs-portal/*`
-- the live Windmill converge now succeeds with `docker-runtime-lv3 : ok=220 changed=39 failed=0` and prunes stale immutable files from the worker mirror
-- the guest-local worker proof now succeeds from the mirrored checkout via `python3 /srv/proxmox_florin_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server`, where the worker-safe fallback returns `status: ok` after `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` and `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate`
-- the governed Hetzner DNS reconcile for `ops.lv3.org` still finishes `ok=19 changed=0 skipped=2 failed=0`
+- the live Windmill converge now succeeds with `docker-runtime : ok=220 changed=39 failed=0` and prunes stale immutable files from the worker mirror
+- the guest-local worker proof now succeeds from the mirrored checkout via `python3 /srv/proxmox-host_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox-host_server`, where the worker-safe fallback returns `status: ok` after `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` and `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate`
+- the governed Hetzner DNS reconcile for `ops.example.com` still finishes `ok=19 changed=0 skipped=2 failed=0`
 
 ## Merge Criteria
 
@@ -92,10 +92,10 @@
 
 ## Mainline Notes
 
-- the Windmill worker replay must pin `windmill_worker_checkout_repo_root_local_dir` to the active worktree during multi-worktree integration, otherwise `/srv/proxmox_florin_server` can mirror the shared top-level checkout instead of the branch being verified
+- the Windmill worker replay must pin `windmill_worker_checkout_repo_root_local_dir` to the active worktree during multi-worktree integration, otherwise `/srv/proxmox-host_server` can mirror the shared top-level checkout instead of the branch being verified
 - the authoritative full-manifest proof comes from the merged `0.177.38` build-server `make remote-validate` run; after the `0.177.42` recut, the same target hit build-server `rsync` mtime errors under `build/docs-portal/*`, fell back locally, and still exited `0` because `scripts/remote_exec.sh` now preserves a Python 3.10+ interpreter for the login-shell fallback while `scripts/validate_repo.sh` resolves its direct Python validators through that contract
 - the first push attempt after the `0.177.41` recut exposed two additional local-fallback gate issues on the integration tree: one duplicate `coolify_runtime` YAML key in `config/ansible-role-idempotency.yml` and loose payload typing in `config/windmill/scripts/post-merge-gate.py`; both were fixed before the final local `scripts/run_gate.py --workspace . --status-file .local/validation-gate/recheck.json --source local-fallback --print-json` pass on the `0.177.42` tree
-- the worker-local fallback remains the live proof that ADR 0207 checks pass even while the registry-backed `check-runner` images remain unavailable on `docker-runtime-lv3`
+- the worker-local fallback remains the live proof that ADR 0207 checks pass even while the registry-backed `check-runner` images remain unavailable on `docker-runtime`
 
 ## Notes For The Next Assistant
 

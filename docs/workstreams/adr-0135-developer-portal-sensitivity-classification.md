@@ -38,7 +38,7 @@
 ## Expected Live Surfaces
 
 - the next docs-portal build publishes sensitivity notices on generated pages
-- restricted ADRs and runbooks appear as summary-only pages in `docs.lv3.org`
+- restricted ADRs and runbooks appear as summary-only pages in `docs.example.com`
 - confidential ADRs and runbooks are omitted from the published portal output
 
 ## Outcome

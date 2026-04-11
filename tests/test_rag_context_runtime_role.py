@@ -36,8 +36,8 @@ def test_compose_template_build_uses_host_network() -> None:
 
 
 def test_host_network_policy_allows_platform_context_proxy_port() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     assert 8010 in host_rule["ports"]
 

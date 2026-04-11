@@ -66,11 +66,11 @@ The same role that currently seeds repo-managed Windmill scripts will also:
 
 ### Security boundary
 
-The app remains a Windmill-private surface. It is not exposed anonymously and it does not replace the `ops.lv3.org` portal. It is an authenticated administrative UI inside the existing Windmill access boundary.
+The app remains a Windmill-private surface. It is not exposed anonymously and it does not replace the `ops.example.com` portal. It is an authenticated administrative UI inside the existing Windmill access boundary.
 
 ### UX boundary
 
-This ADR adds a browser-first admin path inside Windmill. It does not attempt to redesign the entire ops portal or move all identity administration into `ops.lv3.org`.
+This ADR adds a browser-first admin path inside Windmill. It does not attempt to redesign the entire ops portal or move all identity administration into `ops.example.com`.
 
 ## Consequences
 

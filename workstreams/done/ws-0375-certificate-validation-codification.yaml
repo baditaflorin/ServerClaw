@@ -1,7 +1,7 @@
 ---
 # Workstream: Certificate Validation and Concordance Enforcement (ADR 0375)
 # Codify certificate monitoring and validation as architectural requirement
-# Fix certificate hostname mismatch issues (ci.lv3.org, bi.lv3.org, etc.)
+# Fix certificate hostname mismatch issues (ci.example.com, bi.example.com, etc.)
 
 id: ws-0375-certificate-validation-codification
 adr: '0375'
@@ -15,14 +15,14 @@ owner: platform-infrastructure
 title: "Certificate Validation and Concordance Enforcement (ADR 0375)"
 description: |
   Implement automated certificate validation and concordance enforcement per ADR 0101
-  and ADR 0273. Fixes hostname mismatch errors (ci.lv3.org, etc.) and codifies
+  and ADR 0273. Fixes hostname mismatch errors (ci.example.com, etc.) and codifies
   certificate monitoring as part of the standard deployment workflow.
 
 objectives:
   - Implement certificate validator script for all edge-published domains
   - Create Ansible playbooks for validation and automatic remediation
   - Integrate with Uptime Kuma for continuous monitoring
-  - Fix immediate certificate issues (ci.lv3.org, bi.lv3.org, etc.)
+  - Fix immediate certificate issues (ci.example.com, bi.example.com, etc.)
   - Create ADR 0375 documenting the implementation
   - Integrate into pre-deployment checks and CI/CD gates
 
@@ -50,8 +50,8 @@ blockers: []
 notes: |
   Implements the missing validation layer from ADR 0101 and ADR 0273.
 
-  Recent operational issue: ci.lv3.org, bi.lv3.org, grist.lv3.org,
-  paperless.lv3.org, annotate.lv3.org, and ntfy.lv3.org all have
+  Recent operational issue: ci.example.com, bi.example.com, grist.example.com,
+  paperless.example.com, annotate.example.com, and ntfy.example.com all have
   hostname mismatch errors because they are in subdomain-catalog.json
   but missing from the NGINX edge certificate SANs.
 

@@ -4,7 +4,7 @@
 - Title: Opt-in speculative execution for reversible workflows on top of the current scheduler and conflict registry
 - Status: merged
 - Branch: `codex/live-apply-0159`
-- Worktree: `../proxmox_florin_server-live-apply-0159`
+- Worktree: `../proxmox-host_server-live-apply-0159`
 - Owner: codex
 - Depends On: `adr-0115-mutation-ledger`, `adr-0119-budgeted-workflow-scheduler`, `adr-0124-platform-event-taxonomy`, `adr-0127-intent-conflict-resolution`
 - Conflicts With: none

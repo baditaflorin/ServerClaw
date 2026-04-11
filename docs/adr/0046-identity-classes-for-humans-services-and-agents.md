@@ -62,8 +62,8 @@ Every identity must have:
 
 ## Implementation Notes
 
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) now defines the enforced identity taxonomy, the required metadata contract, and the current managed principals for humans, services, agents, and break-glass use.
-- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) now validates the taxonomy in the standard `make validate` gate and cross-checks it against the current Proxmox and mail identities already declared elsewhere in canonical state.
-- [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md) documents how operators should classify, review, and extend the inventory.
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml) now defines the enforced identity taxonomy, the required metadata contract, and the current managed principals for humans, services, agents, and break-glass use.
+- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repository_data_models.py) now validates the taxonomy in the standard `make validate` gate and cross-checks it against the current Proxmox and mail identities already declared elsewhere in canonical state.
+- [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/identity-taxonomy-and-managed-principals.md) documents how operators should classify, review, and extend the inventory.
 - The current shared SSH key path between `ops` and `root` is now explicit repository debt instead of hidden coupling, which leaves ADR 0047 as the follow-up to replace it with short-lived credentials.
-- Live review from `main` on 2026-03-22 confirmed that `ops`, `ops@pam`, `lv3-automation@pve`, `server@lv3.org`, and `root` still match their declared human, agent, service, and break-glass classes.
+- Live review from `main` on 2026-03-22 confirmed that `ops`, `ops@pam`, `lv3-automation@pve`, `server@example.com`, and `root` still match their declared human, agent, service, and break-glass classes.

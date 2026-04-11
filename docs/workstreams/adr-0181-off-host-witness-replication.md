@@ -1,6 +1,6 @@
 # Workstream ADR 0181: Off-Host Witness And Control Metadata Replication
 
-- ADR: [ADR 0181](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0181-off-host-witness-and-control-metadata-replication.md)
+- ADR: [ADR 0181](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0181-off-host-witness-and-control-metadata-replication.md)
 - Title: Off-host witness bundle for recovery metadata
 - Status: live_applied
 - Branch: `codex/adr-0181-metadata-replication`
@@ -20,7 +20,7 @@
 ## Non-Goals
 
 - configuring the real off-host storage mount in this repository change
-- replacing PBS backups or the backup-lv3 restore path
+- replacing PBS backups or the backup restore path
 - introducing a second compute failure domain
 
 ## Expected Repo Surfaces

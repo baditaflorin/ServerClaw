@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.46
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0238-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0238-main-integration`
 - Owner: codex
 - Depends On: `ws-0238-live-apply`
 

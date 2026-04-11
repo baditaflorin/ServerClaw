@@ -10,11 +10,11 @@
 - Live Applied In Platform Version: 0.130.85
 - Latest Verified Base: `origin/main@16280d12a34e722926e452886bcc40642b70cc09` (`repo 0.177.137`, `platform 0.130.86`)
 - Branch: `codex/ws-0308-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0308-live-apply`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0056-keycloak`, `adr-0108-operator-onboarding-and-offboarding`
 - Conflicts With: `ws-0307-0308-operator-adrs`
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0308-live-apply.md`, `docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md`, `docs/runbooks/operator-onboarding.md`, `docs/adr/.index.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `config/workflow-catalog.json`, `config/windmill/scripts/gate-status.py`, `scripts/gate_status.py`, `scripts/preflight_controller_local.py`, `scripts/workflow_catalog.py`, `platform/repo.py`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `tests/test_preflight_controller_local.py`, `tests/test_controller_automation_toolkit.py`, `tests/test_common_docker_bridge_chains_helper.py`, `tests/test_docker_runtime_role.py`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`, `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0308-*`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0308-live-apply.md`, `docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md`, `docs/runbooks/operator-onboarding.md`, `docs/adr/.index.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `config/workflow-catalog.json`, `config/windmill/scripts/gate-status.py`, `scripts/gate_status.py`, `scripts/preflight_controller_local.py`, `scripts/workflow_catalog.py`, `platform/repo.py`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `tests/test_preflight_controller_local.py`, `tests/test_controller_automation_toolkit.py`, `tests/test_common_docker_bridge_chains_helper.py`, `tests/test_docker_runtime_role.py`, `receipts/sbom/host-docker-runtime-2026-04-02.cdx.json`, `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0308-*`
 
 ## Scope
 
@@ -55,12 +55,12 @@
 - `tests/test_controller_automation_toolkit.py`
 - `tests/test_common_docker_bridge_chains_helper.py`
 - `tests/test_docker_runtime_role.py`
-- `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
+- `receipts/sbom/host-docker-runtime-2026-04-02.cdx.json`
 - `receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json`
 
 ## Expected Live Surfaces
 
-- `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
+- `https://sso.example.com/realms/lv3/.well-known/openid-configuration`
 - `https://100.64.0.1:8200` as the private OpenBao mTLS edge
 - `http://100.64.0.1:8005/api/version` as the private Windmill API proxy
 - the SSH proxy path from the controller through `ops@100.64.0.1` to `ops@10.10.10.20`
@@ -77,7 +77,7 @@
 - The workstream first replayed from synchronized `origin/main` commit `a2f2ea16d24504a9bb4015a86db20761e1be66db` (`repo 0.177.136`, `platform 0.130.85`), then rebased onto `origin/main` commit `16280d12a34e722926e452886bcc40642b70cc09` (`repo 0.177.137`, `platform 0.130.86`). The latest rebased exact-main replay source is commit `2592ab846fa95548e920eac10f28b17e0f818fae`.
 - `make preflight WORKFLOW=operator-onboard` passed on the rebased exact-main tree, with Keycloak discovery, the private OpenBao mTLS listener, and the private Windmill API all returning healthy results in `receipts/live-applies/evidence/2026-04-02-ws-0308-preflight-r3-0.177.137.txt`.
 - `uv run --with pytest python -m pytest -q tests/test_common_docker_bridge_chains_helper.py tests/test_docker_runtime_role.py::test_common_docker_bridge_chains_warms_control_socket_before_failing_safe tests/test_controller_automation_toolkit.py tests/test_validation_gate.py tests/test_validation_gate_windmill.py tests/test_operator_manager.py tests/test_preflight_controller_local.py` passed with `45 passed in 3.08s`, recorded in `receipts/live-applies/evidence/2026-04-02-ws-0308-pytest-r5-0.177.137.txt`.
-- The first exact-main `make converge-windmill env=production` replay failed truthfully in `receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r3-0.177.136.txt` when the shared Docker bridge-chain assertion evaluated stale post-retry state even after the retry loop had recovered the chain. After refreshing the final nat and forward probes in `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, the repaired replay passed on `0.177.136` in `receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r4-0.177.136.txt`, and the rebased replay passed again on `0.177.137` in `receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r5-0.177.137.txt` with final recaps `docker-runtime-lv3 ok=331 changed=46 failed=0`, `postgres-lv3 ok=93 changed=2 failed=0`, and `proxmox_florin ok=41 changed=4 failed=0`.
+- The first exact-main `make converge-windmill env=production` replay failed truthfully in `receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r3-0.177.136.txt` when the shared Docker bridge-chain assertion evaluated stale post-retry state even after the retry loop had recovered the chain. After refreshing the final nat and forward probes in `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, the repaired replay passed on `0.177.136` in `receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r4-0.177.136.txt`, and the rebased replay passed again on `0.177.137` in `receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r5-0.177.137.txt` with final recaps `docker-runtime ok=331 changed=46 failed=0`, `postgres ok=93 changed=2 failed=0`, and `proxmox-host ok=41 changed=4 failed=0`.
 - The rebased exact-main Windmill dry run succeeded against `f/lv3/operator_onboard` and preserved the generated state path plus roster path in `receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r4-0.177.137.txt`.
 - The controller-local fallback path still works from this isolated worktree after `platform/repo.py` learned how to resolve shared `.local` assets from the parent repository root; the successful rebased proof is `receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r4-0.177.137.txt`.
 - The final branch-local closeout passed `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate` in `receipts/live-applies/evidence/2026-04-02-ws-0308-live-apply-receipts-validate-r4-0.177.137.txt`, `./scripts/validate_repo.sh agent-standards` in `receipts/live-applies/evidence/2026-04-02-ws-0308-agent-standards-r3-0.177.137.txt`, `./scripts/validate_repo.sh workstream-surfaces` in `receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r5-0.177.137.txt`, and `git diff --check` in `receipts/live-applies/evidence/2026-04-02-ws-0308-git-diff-check-r4-0.177.137.txt`.
@@ -91,7 +91,7 @@
 - Operator-onboard preflight now fails closed on real dependency outages by checking Keycloak discovery, the private OpenBao listener, and the Windmill API before the workflow starts.
 - The Windmill gate-status path and controller-local fallback now resolve the real worker path and local secret checkout shape from either the repo root or a detached git worktree.
 - The exact-main replay also hardened a shared runtime guard by re-probing Docker chain state after the retry loop, eliminating a false failure that latest `origin/main` exposed during the Windmill converge.
-- The branch now also records the refreshed `docker-runtime-lv3` SBOM snapshot in `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`, capturing the runtime state that the rebased exact-main converge validated.
+- The branch now also records the refreshed `docker-runtime` SBOM snapshot in `receipts/sbom/host-docker-runtime-2026-04-02.cdx.json`, capturing the runtime state that the rebased exact-main converge validated.
 - The repo automation bundle is now fully replayed on the branch: rebased `remote-validate` is green, and the only branch-local pre-push failure still points at the protected `changelog.md` update that intentionally waits for merge-to-main.
 
 ## Mainline Integration

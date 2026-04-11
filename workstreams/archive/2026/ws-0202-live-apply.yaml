@@ -13,7 +13,7 @@ depends_on:
 - adr-0136-http-security-headers
 conflicts_with: []
 shared_surfaces:
-- inventory/host_vars/proxmox_florin.yml
+- inventory/host_vars/proxmox-host.yml
 - collections/ansible_collections/lv3/platform/roles/excalidraw_runtime/
 - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
 - playbooks/excalidraw.yml
@@ -29,7 +29,7 @@ shared_surfaces:
 ready_to_merge: false
 live_applied: true
 canonical_truth:
-  changelog_entry: implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org,
+  changelog_entry: implemented ADR 0202 by publishing private Excalidraw at draw.example.com,
     generating committed architecture diagrams from repo-managed platform data, and
     recording verified live-apply evidence
   release_bump: patch

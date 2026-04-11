@@ -4,7 +4,7 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 POSTGRES_GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "postgres_guests.yml"
 POSTGRES_CLIENT_PLAYBOOKS = [
     REPO_ROOT / "playbooks" / "dify.yml",
@@ -42,13 +42,13 @@ def test_postgres_guest_group_vars_allow_docker_runtime_bridge_sources() -> None
 
 def test_postgres_network_policy_allows_docker_runtime_bridge_sources() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    postgres_rules = host_vars["network_policy"]["guests"]["postgres-lv3"]["allowed_inbound"]
+    postgres_rules = host_vars["network_policy"]["guests"]["postgres"]["allowed_inbound"]
     postgres_5432_sources = {rule["source"] for rule in postgres_rules if 5432 in rule.get("ports", [])}
 
     assert {
-        "runtime-control-lv3",
-        "docker-runtime-lv3",
-        "runtime-control-lv3",
+        "runtime-control",
+        "docker-runtime",
+        "runtime-control",
         "172.16.0.0/12",
         "192.168.0.0/16",
         "10.200.0.0/16",
@@ -57,10 +57,10 @@ def test_postgres_network_policy_allows_docker_runtime_bridge_sources() -> None:
 
 def test_postgres_network_policy_allows_monitoring_to_scrape_alloy_metrics() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    postgres_rules = host_vars["network_policy"]["guests"]["postgres-lv3"]["allowed_inbound"]
+    postgres_rules = host_vars["network_policy"]["guests"]["postgres"]["allowed_inbound"]
     postgres_12345_sources = {rule["source"] for rule in postgres_rules if 12345 in rule.get("ports", [])}
 
-    assert postgres_12345_sources == {"monitoring-lv3"}
+    assert postgres_12345_sources == {"monitoring"}
 
 
 def test_postgres_client_sources_are_centralized_in_group_vars() -> None:

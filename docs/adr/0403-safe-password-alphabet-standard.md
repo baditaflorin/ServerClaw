@@ -25,11 +25,11 @@ Passwords on this platform are consumed in many different contexts simultaneousl
 
 ### The Outline incident (2026-04-10)
 
-The Outline wiki service (`wiki.lv3.org`) was broken because its DATABASE_URL
+The Outline wiki service (`wiki.example.com`) was broken because its DATABASE_URL
 was constructed as:
 
 ```
-postgres://outline:PASSWORD@postgres-vm-lv3:5432/outline
+postgres://outline:PASSWORD@postgres-vm:5432/outline
 ```
 
 The password had been generated with `openssl rand -base64 24`, which produced

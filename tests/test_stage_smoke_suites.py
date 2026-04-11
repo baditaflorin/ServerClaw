@@ -45,7 +45,7 @@ def test_validate_stage_smoke_catalog_rejects_cross_service_binding(tmp_path: Pa
                     "environments": {
                         "production": {
                             "status": "active",
-                            "url": "https://api.lv3.org",
+                            "url": "https://api.example.com",
                         }
                     },
                 },

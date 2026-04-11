@@ -25,21 +25,21 @@
 
 - `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_subdomain_exposure_audit.py tests/test_interactive_ops_portal.py tests/test_compose_runtime_secret_injection.py` passed with `28 passed`.
 - `uvx --from pyyaml --with jsonschema python scripts/subdomain_exposure_audit.py --check-registry --validate` passed from the committed branch state.
-- `ansible-playbook -i inventory/hosts.yml -e ansible_ssh_private_key_file=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 playbooks/ops-portal.yml` replayed cleanly from commit `343f9028531a503815f156cbad54f17ebff3aeb3` with `docker-runtime-lv3 ok=99 changed=0 failed=0`.
-- `curl -sf http://10.10.10.20:8092/health` returned `{"status":"ok"}` and `/partials/overview` rendered the canonical publication strings including `ops.lv3.org · operator · shared-edge · platform-sso`.
+- `ansible-playbook -i inventory/hosts.yml -e ansible_ssh_private_key_file=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 playbooks/ops-portal.yml` replayed cleanly from commit `343f9028531a503815f156cbad54f17ebff3aeb3` with `docker-runtime ok=99 changed=0 failed=0`.
+- `curl -sf http://10.10.10.20:8092/health` returned `{"status":"ok"}` and `/partials/overview` rendered the canonical publication strings including `ops.example.com · operator · shared-edge · platform-sso`.
 - `uvx --from pyyaml --with jsonschema python scripts/subdomain_exposure_audit.py --check-registry --include-live-dns --include-http-auth --include-tls --include-hetzner-zone --print-report-json --write-receipt` completed successfully and recorded `receipts/subdomain-exposure-audit/20260328T113654Z.json`.
 
 ## Live Evidence
 
 - Branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0210-canonical-domain-models-live-apply.json`
 - Live publication audit receipt: `receipts/subdomain-exposure-audit/20260328T113654Z.json`
-- Ops portal runtime on `docker-runtime-lv3` now serves the canonical publication contract from `/opt/ops-portal/data/config/subdomain-exposure-registry.json` with `schema_version: 2.0.0`.
+- Ops portal runtime on `docker-runtime` now serves the canonical publication contract from `/opt/ops-portal/data/config/subdomain-exposure-registry.json` with `schema_version: 2.0.0`.
 
 ## Outcome
 
 - ADR 0210 is live on the platform: the canonical publication contract now separates `publication` semantics from delivery-specific `adapter` fields, and the interactive ops portal renders that canonical model on the live overview cards.
 - The first replay exposed a packaging regression where the portal image omitted `publication_contract.py`; the branch fixed that Dockerfile contract and added a regression test so future rollouts fail in CI instead of at runtime.
-- The live publication audit path is now resilient to TLS probe failures and records those issues as findings instead of aborting; the latest live audit still reports pre-existing drift outside ADR 0210 for `mail.lv3.org`, `vault.lv3.org`, `autoconfig.lv3.org`, `lv3.org`, `notify.lv3.org`, `registry.lv3.org`, `www.lv3.org`, and `database.lv3.org`.
+- The live publication audit path is now resilient to TLS probe failures and records those issues as findings instead of aborting; the latest live audit still reports pre-existing drift outside ADR 0210 for `mail.example.com`, `vault.example.com`, `autoconfig.example.com`, `example.com`, `notify.example.com`, `registry.example.com`, `www.example.com`, and `database.example.com`.
 
 ## Mainline Integration
 

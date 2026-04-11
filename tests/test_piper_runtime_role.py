@@ -26,7 +26,7 @@ def test_defaults_define_private_piper_runtime_contract() -> None:
 
     assert (
         defaults["piper_service_topology"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('piper') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service('piper') }}"
     )
     assert defaults["piper_runtime_site_dir"] == "/opt/piper"
     assert defaults["piper_runtime_compose_file"] == "{{ piper_runtime_site_dir }}/docker-compose.yml"

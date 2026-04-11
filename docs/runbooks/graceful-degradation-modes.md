@@ -28,7 +28,7 @@ Expected:
 
 ## Inspect Live Gateway Degradation State
 
-On `docker-runtime-lv3`:
+On `docker-runtime`:
 
 ```bash
 sudo cat /opt/api-gateway/data/degradation-state.json
@@ -45,9 +45,9 @@ Expected:
 From an operator workstation with a valid platform token:
 
 ```bash
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/services | jq '.services[] | select(.id=="api_gateway") | {id, degradation_modes, active_degradations}'
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/degradations | jq
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/health | jq '.services[] | select(.service_id=="api_gateway") | {service_id, composite_status, active_degradations}'
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/services | jq '.services[] | select(.id=="api_gateway") | {id, degradation_modes, active_degradations}'
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/degradations | jq
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/health | jq '.services[] | select(.service_id=="api_gateway") | {service_id, composite_status, active_degradations}'
 ```
 
 Expected:

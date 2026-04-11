@@ -11,7 +11,7 @@
 
 The platform now carries more than 50 repo-managed services, but a large share
 of those services still land on the same shared runtime host:
-`docker-runtime-lv3`.
+`docker-runtime`.
 
 That concentration now hurts both delivery flow and runtime safety:
 
@@ -59,8 +59,8 @@ Production must converge toward at least these three pools:
 - `runtime-ai`: memory-bursty inference, retrieval, OCR, notebook, and heavy
   worker services
 
-Dedicated non-pool planes such as `nginx-lv3`, `postgres-lv3`,
-`monitoring-lv3`, `docker-build-lv3`, and `coolify-lv3` remain separate from
+Dedicated non-pool planes such as `nginx-edge`, `postgres`,
+`monitoring`, `docker-build`, and `coolify` remain separate from
 this runtime-pool split.
 
 ### Preferred runtime substrate
@@ -88,7 +88,7 @@ it makes them the default direction for new pool-aware implementation work.
 - no runtime pool may carry more than 70% steady-state usage of its approved
   baseline memory envelope for more than one review window; sustained excess
   means the pool is under-partitioned
-- `docker-runtime-lv3` is now a legacy catch-all that must shrink over time,
+- `docker-runtime` is now a legacy catch-all that must shrink over time,
   not the permanent home for every new service
 
 ## Consequences
@@ -104,7 +104,7 @@ it makes them the default direction for new pool-aware implementation work.
 
 **Negative / Trade-offs**
 
-- the repository needs more topology metadata than one `docker-runtime-lv3`
+- the repository needs more topology metadata than one `docker-runtime`
   catch-all
 - more pools mean more playbooks, probes, and migration planning work
 - some current services will need explicit exceptions until the pool split is

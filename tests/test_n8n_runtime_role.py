@@ -21,22 +21,20 @@ def test_runtime_defaults_pin_public_hostname_and_local_artifacts() -> None:
     assert defaults["n8n_requires_docker_nat"] == "{{ n8n_network_mode != 'host' }}"
     assert (
         defaults["n8n_port"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('n8n', 'internal') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('n8n', 'internal') }}"
     )
     assert (
         defaults["n8n_internal_base_url"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('n8n', 'internal') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('n8n', 'internal') }}"
     )
-    assert (
-        defaults["n8n_public_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.urls.public }}"
-    )
+    assert defaults["n8n_public_base_url"] == "{{ hostvars['proxmox-host'].platform_service_topology.n8n.urls.public }}"
     assert (
         defaults["n8n_public_hostname"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.public_hostname }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology.n8n.public_hostname }}"
     )
     assert (
         defaults["n8n_database_host"]
-        == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+        == "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
     )
     assert defaults["n8n_owner_password_local_file"].endswith("/.local/n8n/owner-password.txt")
     assert defaults["n8n_encryption_key_local_file"].endswith("/.local/n8n/encryption-key.txt")
@@ -79,9 +77,9 @@ def test_postgres_role_provisions_named_database_and_role() -> None:
 
 
 def test_host_network_policy_allows_edge_and_private_n8n_access() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-lv3" and 5678 in rule["ports"])
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
+    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-edge" and 5678 in rule["ports"])
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 5678 in rule["ports"])
     assert nginx_rule["description"].lower().startswith("reverse proxy access")
     assert guest_rule["description"].lower().startswith("private guest-to-guest")

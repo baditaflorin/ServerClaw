@@ -7,7 +7,7 @@
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-03-28
 - Branch: `codex/adr-0204-architecture-governance`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0204-architecture-governance`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0204-architecture-governance`
 - Owner: codex
 - Depends On: `adr-0030-role-interface-contracts`, `adr-0062-role-composability`, `adr-0175-cross-workstream-interface-contracts`
 - Conflicts With: none

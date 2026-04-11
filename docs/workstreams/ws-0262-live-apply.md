@@ -4,7 +4,7 @@
 - Title: OpenFGA and Keycloak delegated authorization live apply from latest `origin/main`
 - Status: `live_applied`
 - Branch: `codex/ws-0262-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0262-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0262-main-merge`
 - Owner: codex
 - Included In Repo Version: 0.177.95
 - Platform Version Before Exact-Main Replay: 0.130.62
@@ -45,32 +45,32 @@ authoritative on `main`.
 
 - `make converge-mail-platform env=production` completed successfully from the
   synchronized tree with final recap
-  `docker-runtime-lv3 ok=190 changed=8 failed=0 skipped=36`,
-  `monitoring-lv3 ok=154 changed=0 failed=0 skipped=20`, and
-  `proxmox_florin ok=73 changed=0 failed=0 skipped=33`.
+  `docker-runtime ok=190 changed=8 failed=0 skipped=36`,
+  `monitoring ok=154 changed=0 failed=0 skipped=20`, and
+  `proxmox-host ok=73 changed=0 failed=0 skipped=33`.
 - `make converge-keycloak env=production` completed successfully with final
-  recap `docker-runtime-lv3 ok=175 changed=0 failed=0 skipped=38`,
-  `monitoring-lv3 ok=17 changed=0 failed=0 skipped=1`,
-  `nginx-lv3 ok=39 changed=3 failed=0 skipped=7`,
-  `postgres-lv3 ok=51 changed=0 failed=0 skipped=14`, and
-  `proxmox_florin ok=219 changed=0 failed=0 skipped=105`.
+  recap `docker-runtime ok=175 changed=0 failed=0 skipped=38`,
+  `monitoring ok=17 changed=0 failed=0 skipped=1`,
+  `nginx-edge ok=39 changed=3 failed=0 skipped=7`,
+  `postgres ok=51 changed=0 failed=0 skipped=14`, and
+  `proxmox-host ok=219 changed=0 failed=0 skipped=105`.
 - `make converge-openfga env=production` completed successfully with final
-  recap `docker-runtime-lv3 ok=256 changed=5 failed=0 skipped=69`,
+  recap `docker-runtime ok=256 changed=5 failed=0 skipped=69`,
   `localhost ok=2 changed=1 failed=0`,
-  `postgres-lv3 ok=51 changed=0 failed=0 skipped=14`, and
-  `proxmox_florin ok=41 changed=4 failed=0 skipped=16`.
+  `postgres ok=51 changed=0 failed=0 skipped=14`, and
+  `proxmox-host ok=41 changed=4 failed=0 skipped=16`.
 - `make converge-api-gateway env=production` completed successfully with final
-  recap `docker-runtime-lv3 ok=285 changed=111 failed=0 skipped=39`.
+  recap `docker-runtime ok=285 changed=111 failed=0 skipped=39`.
 - Direct verification after the replay confirmed
   `http://100.64.0.1:8014/stores` still returned the delegated authorization
   store `serverclaw-authz`, and
-  `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091`
+  `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091`
   returned `verification_passed: true` with the declared principals, tuples,
   and checks satisfied.
 - Public and authenticated gateway verification also passed: `curl -fsS
-  https://api.lv3.org/healthz` returned `{"status":"ok"}`,
-  `https://api.lv3.org/v1/platform/services` listed the `openfga` service with
-  `gateway_prefix: /v1/openfga`, and `https://api.lv3.org/v1/openfga/healthz`
+  https://api.example.com/healthz` returned `{"status":"ok"}`,
+  `https://api.example.com/v1/platform/services` listed the `openfga` service with
+  `gateway_prefix: /v1/openfga`, and `https://api.example.com/v1/openfga/healthz`
   returned the canonical `AUTH_INSUFFICIENT_ROLE` envelope with `HTTP_STATUS=403`
   for the `lv3-agent-hub` bearer token, proving the route is live and
   correctly role-gated.

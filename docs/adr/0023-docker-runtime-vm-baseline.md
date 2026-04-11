@@ -13,7 +13,7 @@ The current Docker runtime guest exists, but its software baseline is still only
 
 Today that means:
 
-- `docker-runtime-lv3` at `10.10.10.20` is present as VM `120`
+- `docker-runtime` at `10.10.10.20` is present as VM `120`
 - guest provisioning currently installs Debian's `docker.io` package
 - there is no explicit Docker Compose v2 plugin baseline
 - there is no dedicated Docker daemon configuration for service continuity or log retention
@@ -24,7 +24,7 @@ That is not a stable production contract. The runtime VM needs an explicit host 
 
 We will manage the Docker runtime VM with a dedicated runtime baseline role and playbook.
 
-The baseline for `docker-runtime-lv3` is:
+The baseline for `docker-runtime` is:
 
 1. Install Docker Engine from Docker's official Debian repository.
    - remove conflicting distro packages such as `docker.io`

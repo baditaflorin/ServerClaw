@@ -9,7 +9,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0234-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0234-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0093-interactive-ops-portal`,
   `adr-0133-portal-authentication-by-default`,
@@ -33,7 +33,7 @@
   states, and loading transitions
 - keep product-native tools as linked destinations rather than embedding them
   into one page shell
-- update the published `ops.lv3.org` CSP so the browser can load the pinned
+- update the published `ops.example.com` CSP so the browser can load the pinned
   PatternFly stylesheet bundle
 - verify the guest-local and published portal surfaces end to end and record a
   durable receipt before merge-to-main truth updates
@@ -78,9 +78,9 @@
 
 ## Expected Live Surfaces
 
-- `ops.lv3.org` renders a PatternFly shell with a shared masthead, responsive
+- `ops.example.com` renders a PatternFly shell with a shared masthead, responsive
   navigation, and consistent status-state components
-- `docker-runtime-lv3` serves the same shell on the guest-local ops portal
+- `docker-runtime` serves the same shell on the guest-local ops portal
   listener
 - the published edge security policy allows the pinned PatternFly stylesheet
   while keeping the portal auth-gated and same-origin for the repo-managed JS
@@ -100,21 +100,21 @@
   `scripts/ansible_scope_runner.py` on
   `playbooks/services/ops_portal.yml`.
 - The direct scoped replay had to pass
-  `-e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2`.
+  `-e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0234-live-apply-r2`.
   Without that override the controller-side sync read from the top-level repo
   checkout and failed on missing service inputs such as
   `scripts/ops_portal/runtime_assurance.py`,
   `scripts/ops_portal/static/portal.js`, and
   `scripts/ops_portal/templates/partials/launcher.html`.
 - The final ops-portal replay completed with
-  `docker-runtime-lv3 ok=130 changed=14 failed=0 skipped=15`.
+  `docker-runtime ok=130 changed=14 failed=0 skipped=15`.
 - The public-edge replay used `service:public-edge` for
   `interface_contracts.py`, emitted the promotion bypass event for
   `public-edge`, and then ran `scripts/ansible_scope_runner.py` on
   `playbooks/services/public-edge.yml` because the capacity, redundancy, and
   immutable-guest guard scripts intentionally do not catalogue
   `public-edge`. That replay completed with
-  `nginx-lv3 ok=61 changed=4 failed=0 skipped=14`.
+  `nginx-edge ok=61 changed=4 failed=0 skipped=14`.
 - After rebasing the worktree onto `origin/main` commit
   `73fb0ec1336d7b5540f51590f4b4f9a3a136577c`, guest-local hashes and the public
   edge headers still matched the verified ADR 0234 rollout because the newly
@@ -123,8 +123,8 @@
 
 ## Live Apply Outcome
 
-- ADR 0234 is live on `ops.lv3.org` and on the guest-local
-  `docker-runtime-lv3` listener, with the shared PatternFly shell, masthead,
+- ADR 0234 is live on `ops.example.com` and on the guest-local
+  `docker-runtime` listener, with the shared PatternFly shell, masthead,
   responsive navigation, and shared state components rendered from the
   interactive ops portal.
 - The published edge now permits the pinned PatternFly stylesheet while keeping
@@ -134,7 +134,7 @@
   from synced data and service trees before the container rebuild, preventing
   stale local filesystem metadata from polluting branch-local live applies.
 - Competing `ops_portal` branch-local replays still share
-  `/opt/ops-portal/service` on `docker-runtime-lv3`, so truthful live applies
+  `/opt/ops-portal/service` on `docker-runtime`, so truthful live applies
   must obtain an uncontended replay window before asserting guest hashes.
 
 ## Live Evidence

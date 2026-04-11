@@ -8,7 +8,7 @@
 - Release Date: 2026-04-01
 - Live Applied On: 2026-04-01
 - Branch: `codex/ws-0293-main-integration-r1`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-main-integration-r1`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0293-main-integration-r1`
 - Owner: codex
 - Depends On: `ws-0293-livekit-live-apply`
 
@@ -54,13 +54,13 @@ and public room-lifecycle contract.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=livekit env=production`
   succeeded from exact-main source commit
   `9cad64c634f304bce0e8946529fd9386a67f317e` with final recap
-  `proxmox_florin ok=32 changed=0 failed=0 skipped=12`,
-  `docker-runtime-lv3 ok=184 changed=4 failed=0 skipped=59`,
-  `nginx-lv3 ok=46 changed=5 failed=0 skipped=7`, and
+  `proxmox-host ok=32 changed=0 failed=0 skipped=12`,
+  `docker-runtime ok=184 changed=4 failed=0 skipped=59`,
+  `nginx-edge ok=46 changed=5 failed=0 skipped=7`, and
   `localhost ok=19 changed=0 failed=0 skipped=7`.
 - Independent controller-side checks after the exact-main replay returned
-  `HTTP/2 200` for `https://livekit.lv3.org`, presented
-  `subject=CN=livekit.lv3.org` with `DNS:livekit.lv3.org` in the SAN set, and
+  `HTTP/2 200` for `https://livekit.example.com`, presented
+  `subject=CN=livekit.example.com` with `DNS:livekit.example.com` in the SAN set, and
   passed the standalone `scripts/livekit_tool.py verify-room-lifecycle` probe.
 - The final exact-main validation bundle is green on the merged tree:
   `79 passed` across the LiveKit-focused pytest slice,

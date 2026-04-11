@@ -28,9 +28,9 @@ ownership_manifest:
     mode: exclusive
 notes: |
   Implements ADR 0375: automated SSL certificate validation for all 53
-  edge-published domains. Fixes hostname mismatches on ci.lv3.org,
-  bi.lv3.org, grist.lv3.org, paperless.lv3.org, annotate.lv3.org,
-  ntfy.lv3.org. Adds pre-push gate, Uptime Kuma integration, and
+  edge-published domains. Fixes hostname mismatches on ci.example.com,
+  bi.example.com, grist.example.com, paperless.example.com, annotate.example.com,
+  ntfy.example.com. Adds pre-push gate, Uptime Kuma integration, and
   automated remediation playbooks.
 ownership_manifest:
   owned_surfaces:

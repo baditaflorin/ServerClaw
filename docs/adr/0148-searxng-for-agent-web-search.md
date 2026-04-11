@@ -31,19 +31,19 @@ The problems:
 
 ## Decision
 
-We will deploy **SearXNG** on `docker-runtime-lv3` as a self-hosted search aggregation API for agent and operator use.
+We will deploy **SearXNG** on `docker-runtime` as a self-hosted search aggregation API for agent and operator use.
 
 ### Deployment
 
 ```yaml
 # In versions/stack.yaml
 - service: searxng
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   image: searxng/searxng:latest
   port: 8881
   access: internal_only     # Accessible on the private network; not Tailscale-only (agents use it)
   config_volume: /data/searxng
-  subdomain: search.lv3.org # Tailscale-only; not public
+  subdomain: search.example.com # Tailscale-only; not public
 ```
 
 SearXNG uses outbound connections to external search engines but never exposes the query source IP as a user identifier: from Google's perspective, SearXNG is a search aggregator, not an individual operator.
@@ -57,7 +57,7 @@ use_default_settings: true
 server:
   secret_key: "{{ vault_searxng_secret }}"
   bind_address: "0.0.0.0:8881"
-  base_url: "https://search.lv3.org"
+  base_url: "https://search.example.com"
 
 search:
   safe_search: 0
@@ -137,7 +137,7 @@ Web search results in a triage report are links only; the content is not summari
 - Open WebUI is now rendered with the repo-managed SearXNG integration flags and
   `SEARXNG_QUERY_URL` so web search stays on the private platform path.
 - The repo-side client defaults to the tailnet hostname
-  `http://search.lv3.org/search?q=<query>&format=json` and adds the `results`
+  `http://search.example.com/search?q=<query>&format=json` and adds the `results`
   parameter itself when the caller does not supply one.
 - The SearXNG runtime now manages both `settings.yml` and `limiter.toml`. The
   private platform ranges (`10.10.10.0/24`, `172.16.0.0/12`, `192.168.0.0/16`,
@@ -150,7 +150,7 @@ Web search results in a triage report are links only; the content is not summari
 - The live platform rollout completed on 2026-03-26 from the workstream branch:
   the guest runtime serves `http://10.10.10.20:8881/search?...&format=json`,
   the Proxmox host Tailscale proxy serves the same API at
-  `http://100.64.0.1/search?...`, `search.lv3.org` resolves to `100.64.0.1`,
+  `http://100.64.0.1/search?...`, `search.example.com` resolves to `100.64.0.1`,
   and the hostname-backed JSON endpoint returns results.
 - The final DNS publication had to be retried after `13:00 UTC` on
   2026-03-26 because Hetzner's legacy `dns.hetzner.com` write API was in a

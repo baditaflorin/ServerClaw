@@ -21,12 +21,12 @@ make validate-tofu
 Import the production VMs one at a time:
 
 ```bash
-make tofu-import ENV=production VM=nginx-lv3
-make tofu-import ENV=production VM=docker-runtime-lv3
-make tofu-import ENV=production VM=docker-build-lv3
-make tofu-import ENV=production VM=monitoring-lv3
-make tofu-import ENV=production VM=postgres-lv3
-make tofu-import ENV=production VM=backup-lv3
+make tofu-import ENV=production VM=nginx-edge
+make tofu-import ENV=production VM=docker-runtime
+make tofu-import ENV=production VM=docker-build
+make tofu-import ENV=production VM=monitoring
+make tofu-import ENV=production VM=postgres
+make tofu-import ENV=production VM=backup
 ```
 
 Verify that the imported state matches the current platform:

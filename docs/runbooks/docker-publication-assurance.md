@@ -14,10 +14,10 @@ Run the shared convergence playbook from the repository root:
 make converge-docker-publication-assurance env=production
 ```
 
-That replay targets `docker-runtime-lv3` and `coolify-lv3`, installs the
+That replay targets `docker-runtime` and `coolify`, installs the
 repo-managed helper at `/usr/local/bin/lv3-docker-publication-assurance`, and
 replays every service contract in
-[config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json)
+[config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/health-probe-catalog.json)
 that declares `readiness.docker_publication`.
 
 Service-specific converges also stage a transient copy of the current

@@ -4,7 +4,7 @@
 - Title: Add a repo-managed branch preview lifecycle on the governed ephemeral VM pool and record branch-local evidence for create, validate, and destroy
 - Status: live_applied
 - Branch: `codex/ws-0185-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply`
 - Owner: codex
 - Depends On: `adr-0088-ephemeral-fixtures`, `adr-0106-ephemeral-environment-lifecycle-policy`, `adr-0156-agent-session-workspace-isolation`, `adr-0183-multi-environment-live-lanes`
 - Conflicts With: none
@@ -26,12 +26,12 @@
 
 ## Expected Repo Surfaces
 
-- [config/preview-environment-profiles.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/config/preview-environment-profiles.json)
-- [docs/schema/preview-environment-profiles.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/schema/preview-environment-profiles.schema.json)
-- [scripts/preview_environment.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/scripts/preview_environment.py)
-- [docs/runbooks/preview-environments.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/runbooks/preview-environments.md)
-- [receipts/preview-environments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/receipts/preview-environments)
-- [receipts/live-applies/preview](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/receipts/live-applies/preview)
+- [config/preview-environment-profiles.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/config/preview-environment-profiles.json)
+- [docs/schema/preview-environment-profiles.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/docs/schema/preview-environment-profiles.schema.json)
+- [scripts/preview_environment.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/scripts/preview_environment.py)
+- [docs/runbooks/preview-environments.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/docs/runbooks/preview-environments.md)
+- [receipts/preview-environments](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/receipts/preview-environments)
+- [receipts/live-applies/preview](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/receipts/live-applies/preview)
 
 ## Expected Live Surfaces
 
@@ -57,14 +57,14 @@
 
 - committed-head replay preview id: `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z`
 - profile: `runtime-smoke`
-- preview domain: `ws-0185-live-apply.preview.lv3.org`
+- preview domain: `ws-0185-live-apply.preview.example.com`
 - preview member: VM `910` at `10.20.10.130`
 - lifecycle result: create, validate, and destroy all passed through repo automation
 - smoke verification: `id ops >/dev/null`
 - synthetic verification: `systemctl is-active docker`, `docker info >/dev/null`
 - durable evidence:
-  - [receipts/preview-environments/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/receipts/preview-environments/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json)
-  - [receipts/live-applies/preview/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/receipts/live-applies/preview/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json)
+  - [receipts/preview-environments/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/receipts/preview-environments/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json)
+  - [receipts/live-applies/preview/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/receipts/live-applies/preview/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json)
 
 ## Operational Notes
 

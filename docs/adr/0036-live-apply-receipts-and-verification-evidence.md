@@ -41,8 +41,8 @@ Each receipt should capture, at minimum:
 
 ## Implementation Notes
 
-- Structured receipts now live under [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies).
-- [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/live_apply_receipts.py) validates receipt schema, git commit references, workflow ids, and evidence file references.
-- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make receipts` and `make receipt-info RECEIPT=<id>` for receipt discovery.
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) now records the latest receipt ids that support the current live platform summary.
+- Structured receipts now live under [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies).
+- [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/live_apply_receipts.py) validates receipt schema, git commit references, workflow ids, and evidence file references.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile) now exposes `make receipts` and `make receipt-info RECEIPT=<id>` for receipt discovery.
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml) now records the latest receipt ids that support the current live platform summary.
 - Historical receipts were backfilled for the current known live applies so the framework starts with actual evidence rather than an empty directory.

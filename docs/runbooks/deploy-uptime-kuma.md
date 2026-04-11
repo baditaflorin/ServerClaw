@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This runbook converges Uptime Kuma on the runtime-general VM and publishes it through the NGINX edge at `https://uptime.lv3.org`.
+This runbook converges Uptime Kuma on the runtime-general VM and publishes it through the NGINX edge at `https://uptime.example.com`.
 
 ## Result
 
-- Hetzner DNS contains the `uptime.lv3.org` A record
-- `runtime-general-lv3` runs Uptime Kuma from `/opt/uptime-kuma`
-- `nginx-lv3` reverse proxies `uptime.lv3.org` and expands the shared edge certificate when needed
+- Hetzner DNS contains the `uptime.example.com` A record
+- `runtime-general` runs Uptime Kuma from `/opt/uptime-kuma`
+- `nginx-edge` reverse proxies `uptime.example.com` and expands the shared edge certificate when needed
 - local control-machine auth for future monitor management is stored under `.local/uptime-kuma/`
 - the first repo-managed monitor set is applied from generated `config/uptime-kuma/monitors.json`
 - the public status-page definition is reconciled from `config/uptime-kuma/status-page.json`
@@ -18,14 +18,14 @@ This runbook converges Uptime Kuma on the runtime-general VM and publishes it th
 Deploy the runtime, DNS record, and NGINX publication:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 HETZNER_DNS_API_TOKEN=... make deploy-uptime-kuma
 ```
 
 Prepare a small local client environment for repo-driven monitor management:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 -m venv .local/uptime-kuma/client-venv
 .local/uptime-kuma/client-venv/bin/pip install -r requirements/uptime-kuma-client.txt
 ```
@@ -33,14 +33,14 @@ python3 -m venv .local/uptime-kuma/client-venv
 Bootstrap the first durable local auth file and seed the initial monitors:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS="--base-url https://uptime.lv3.org"
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
+make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS="--base-url https://uptime.example.com"
 ```
 
 Re-apply the repo-managed monitor seed later:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/uptime_contract.py --write
 make uptime-kuma-manage ACTION=ensure-monitors
 ```
@@ -48,21 +48,21 @@ make uptime-kuma-manage ACTION=ensure-monitors
 Reconcile the repo-managed public status page:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make uptime-kuma-manage ACTION=ensure-status-page
 ```
 
 List the current monitors from the repo client:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make uptime-kuma-manage ACTION=list-monitors
 ```
 
 List the current maintenances from the repo client:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make uptime-kuma-manage ACTION=list-maintenances
 ```
 
@@ -71,14 +71,14 @@ make uptime-kuma-manage ACTION=list-maintenances
 Verify the runtime container:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml runtime-general-lv3 -m shell -a 'sudo docker ps --filter name=uptime-kuma && sudo ls -ld /opt/uptime-kuma /opt/uptime-kuma/data' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml runtime-general -m shell -a 'sudo docker ps --filter name=uptime-kuma && sudo ls -ld /opt/uptime-kuma /opt/uptime-kuma/data' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify public publication:
 
 ```bash
-curl -I https://uptime.lv3.org
-curl -I https://nginx.lv3.org
+curl -I https://uptime.example.com
+curl -I https://nginx.example.com
 ```
 
 Verify the seeded monitors are visible:
@@ -91,7 +91,7 @@ Verify the status-page definition can be reconciled:
 
 ```bash
 make uptime-kuma-manage ACTION=ensure-status-page
-curl -I https://status.lv3.org
+curl -I https://status.example.com
 ```
 
 ## Notes

@@ -31,7 +31,7 @@ def test_semaphore_defaults_define_controller_local_artifacts() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
 
     assert defaults["semaphore_admin_username"] == "ops-semaphore"
-    assert defaults["semaphore_admin_email"] == "ops-semaphore@lv3.org"
+    assert defaults["semaphore_admin_email"] == "ops-semaphore@example.com"
     assert defaults["semaphore_local_artifact_dir"] == "{{ playbook_dir }}/../.local/semaphore"
     assert defaults["semaphore_admin_password_local_file"] == "{{ semaphore_local_artifact_dir }}/admin-password.txt"
     assert defaults["semaphore_api_token_local_file"] == "{{ semaphore_local_artifact_dir }}/api-token.txt"

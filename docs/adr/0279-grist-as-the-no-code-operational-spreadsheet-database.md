@@ -109,7 +109,7 @@ Grist injects a `<script>window.gristConfig = {...}</script>` inline bootstrap
 block on every page. Without `'unsafe-inline'` in `script-src`, the client
 cannot determine the organisation from the URL and throws
 `Cannot figure out what organization the URL is for` before any login flow
-begins. The `nginx_edge_publication` role now carries a `grist.lv3.org`
+begins. The `nginx_edge_publication` role now carries a `grist.example.com`
 override in `public_edge_security_headers_overrides`.
 
 **`GRIST_SERVE_SAME_ORIGIN=true` is required for single-org mode.**

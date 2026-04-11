@@ -18,7 +18,7 @@ This is by design: the `publish_to_serverclaw.py` script creates **sanitized
 snapshot commits** on the ServerClaw remote, not direct mirrors. The two repos
 share an ancestor but diverge structurally because the publish pipeline:
 
-1. Replaces identity files (hosts.yml, identity.yml, operators.yaml, proxmox_florin.yml)
+1. Replaces identity files (hosts.yml, identity.yml, operators.yaml, proxmox-host.yml)
 2. Performs regex sanitization on 6,479 files (domains, IPs, hostnames)
 3. Deletes excluded files
 4. Creates a new commit on the `serverclaw` remote's `main` branch
@@ -64,7 +64,7 @@ were made after the initial public release.
 
 This was the initial sanitized publication commit created by
 `publish_to_serverclaw.py`. It applied string replacements across all
-6,466 files, replacing `lv3.org` with `example.com`, real IPs with
+6,466 files, replacing `example.com` with `example.com`, real IPs with
 placeholders, and operator identity with generic values.
 
 ---
@@ -74,8 +74,8 @@ placeholders, and operator identity with generic values.
 A `git push --force serverclaw main` would have:
 
 1. **Exposed real infrastructure details** — The private `main` branch
-   contains real IPs (`65.108.75.123`, `10.10.10.x` subnet), real domain
-   (`lv3.org`), operator identity, and deployment-specific host names. The
+   contains real IPs (`203.0.113.1`, `10.10.10.x` subnet), real domain
+   (`example.com`), operator identity, and deployment-specific host names. The
    sanitizer replaces all of these.
 
 2. **Overwritten the sanitized inventory** — The public repo has a templated

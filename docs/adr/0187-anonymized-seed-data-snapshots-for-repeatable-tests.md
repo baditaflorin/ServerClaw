@@ -69,7 +69,7 @@ Previews, restore drills, and failover rehearsals should declare which seed clas
 ## Implementation Notes
 
 - The implemented surface adds the deterministic seed catalog, local build and publish tooling, backup-vm snapshot-store management, fixture seed staging hooks, and restore-verification seed staging hooks.
-- The merged-main live apply on 2026-03-28 re-converged `backup-lv3` from the latest integrated branch state and remotely verified the published `tiny-4fc40ef2f916`, `standard-c81d5e556889`, and `recovery-7028dc9df835` snapshots under `/var/lib/lv3/seed-data-snapshots/`.
+- The merged-main live apply on 2026-03-28 re-converged `backup` from the latest integrated branch state and remotely verified the published `tiny-4fc40ef2f916`, `standard-c81d5e556889`, and `recovery-7028dc9df835` snapshots under `/var/lib/lv3/seed-data-snapshots/`.
 - Two adjacent live automation gaps remain outside ADR 0187's implemented core:
   - `fixture_manager.py create ops-base` is still blocked live because template `lv3-ops-base` (`9003`) is declared in repo metadata but not currently present on the Proxmox host.
   - The restore-verification path restores and boots target VMs, but restored-guest SSH readiness remains slow enough that the full workflow does not yet complete within the current live-apply session window.

@@ -1,7 +1,7 @@
 # Workstream ADR 0109: Public Status Page
 
 - ADR: [ADR 0109](../adr/0109-public-status-page.md)
-- Title: Public `status.lv3.org` backed by Uptime Kuma with maintenance-window publication and independent Uptime Robot monitoring
+- Title: Public `status.example.com` backed by Uptime Kuma with maintenance-window publication and independent Uptime Robot monitoring
 - Status: merged
 - Branch: `codex/adr-0109-implementation`
 - Worktree: `.worktrees/adr-0109`
@@ -12,7 +12,7 @@
 
 ## Scope
 
-- add the public `status.lv3.org` hostname to the canonical service topology and subdomain catalog
+- add the public `status.example.com` hostname to the canonical service topology and subdomain catalog
 - publish the Uptime Kuma status page slug `lv3-platform` through the shared NGINX edge
 - extend `scripts/uptime_kuma_tool.py` to reconcile the status page and inspect maintenances
 - extend `scripts/maintenance_window_tool.py` to sync public status-page maintenances on open and close
@@ -40,12 +40,12 @@
 - `config/subdomain-catalog.json`
 - `config/service-capability-catalog.json`
 - `config/health-probe-catalog.json`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `docs/runbooks/public-status-page.md`
 
 ## Expected Live Surfaces
 
-- `https://status.lv3.org` is publicly reachable without authentication once applied from `main`
+- `https://status.example.com` is publicly reachable without authentication once applied from `main`
 - the Uptime Kuma public page shows the repo-managed public monitor groups
 - opening a maintenance window creates the matching public maintenance entry in Uptime Kuma when the admin session is available
 - Uptime Robot reports the three external public monitors defined in the repo config

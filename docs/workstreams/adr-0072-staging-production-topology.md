@@ -1,10 +1,10 @@
 # Workstream ADR 0072: Staging And Production Environment Topology
 
-- ADR: [ADR 0072](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0072-staging-and-production-environment-topology.md)
+- ADR: [ADR 0072](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0072-staging-and-production-environment-topology.md)
 - Title: Canonical production and staging topology for shared-edge single-node operations
 - Status: merged
 - Branch: `codex/adr-0072-staging-production-topology`
-- Worktree: `../proxmox_florin_server-adr-0072-staging-production-topology`
+- Worktree: `../proxmox-host_server-adr-0072-staging-production-topology`
 - Owner: codex
 - Depends On: `adr-0074-ops-portal`, `adr-0075-service-capability-catalog`
 - Conflicts With: none

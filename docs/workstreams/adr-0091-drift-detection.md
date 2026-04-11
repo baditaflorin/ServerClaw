@@ -4,7 +4,7 @@
 - Title: Scheduled drift detection across VM resources, service configuration, Docker images, DNS, and TLS — surfaced in the ops portal with NATS event emission
 - Status: merged
 - Branch: `codex/adr-0091-drift-detection`
-- Worktree: `../proxmox_florin_server-drift-detection`
+- Worktree: `../proxmox-host_server-drift-detection`
 - Owner: codex
 - Depends On: `adr-0085-opentofu-vm-lifecycle`, `adr-0074-ops-portal`, `adr-0075-service-capability-catalog`, `adr-0058-nats-jetstream`
 - Conflicts With: none

@@ -110,7 +110,7 @@ lv3 release --bump patch --dry-run
 - verify the operator machine still has the Proxmox Tailscale route for `10.10.10.0/24`
 
 `lv3 run ...` cannot authenticate:
-- verify `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt` exists and is current
+- verify `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt` exists and is current
 
 `lv3 run ...` returns `PARSE_ERROR`:
 - inspect the compiled rule set in `config/goal-compiler-rules.yaml`

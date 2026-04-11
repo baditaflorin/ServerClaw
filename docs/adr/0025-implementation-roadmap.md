@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-ADR 0025 declared the principle that runtime services on `docker-runtime-lv3` must be **compose-managed, declarative, and systemd-integrated**. Today, **64 of 68 runtime roles** (94%) have Docker Compose templates and deploy via `docker compose up`, but the integration is **incomplete**:
+ADR 0025 declared the principle that runtime services on `docker-runtime` must be **compose-managed, declarative, and systemd-integrated**. Today, **64 of 68 runtime roles** (94%) have Docker Compose templates and deploy via `docker compose up`, but the integration is **incomplete**:
 
 - **Compose deployment**: 94% implemented (64 roles)
 - **Health checks**: 56% implemented (36 of 64 roles with healthcheck directives)

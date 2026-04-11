@@ -2,12 +2,12 @@
 
 ## Overview
 
-Refresh all operator-facing discovery surfaces (home.lv3.org, ops.lv3.org, wiki.lv3.org) to sync with the current service catalog and ADR corpus. This is the cascade entry point after service deployments or when you need to push documentation and service listing changes to the portals.
+Refresh all operator-facing discovery surfaces (home.example.com, ops.example.com, wiki.example.com) to sync with the current service catalog and ADR corpus. This is the cascade entry point after service deployments or when you need to push documentation and service listing changes to the portals.
 
 ## Symptoms of Stale Surfaces
 
-- New services deployed but not appearing on home.lv3.org or ops.lv3.org
-- ADRs committed to git but not visible on wiki.lv3.org
+- New services deployed but not appearing on home.example.com or ops.example.com
+- ADRs committed to git but not visible on wiki.example.com
 - Service metadata changes (URLs, lifecycle status, ADR references) not propagated to discovery portals
 
 ## Prerequisites
@@ -27,10 +27,10 @@ make refresh-discovery-surfaces env=production
 
 This runs the complete cascade:
 1. Regenerate platform-manifest.json and discovery artifacts
-2. Sync ADRs and docs to wiki.lv3.org (Outline)
-3. Converge homepage (home.lv3.org on runtime-general-lv3)
-4. Converge ops portal (ops.lv3.org on docker-runtime-lv3)
-5. Refresh NGINX edge configs (nginx-lv3)
+2. Sync ADRs and docs to wiki.example.com (Outline)
+3. Converge homepage (home.example.com on runtime-general)
+4. Converge ops portal (ops.example.com on docker-runtime)
+5. Refresh NGINX edge configs (nginx-edge)
 
 Expected duration: ~3–5 minutes
 
@@ -44,16 +44,16 @@ The `trigger_service` parameter documents which service deployment or change tri
 
 ### Selective Refresh (Skip Surfaces that Don't Need Updating)
 
-Skip refreshing Outline (wiki.lv3.org) if no ADRs were added/modified:
+Skip refreshing Outline (wiki.example.com) if no ADRs were added/modified:
 
 ```bash
 make refresh-discovery-surfaces env=production refresh_outline=false
 ```
 
 Available toggles:
-- `refresh_homepage=false` — Skip refreshing home.lv3.org
-- `refresh_ops_portal=false` — Skip refreshing ops.lv3.org
-- `refresh_outline=false` — Skip syncing wiki.lv3.org (saves ~90 seconds if no docs changed)
+- `refresh_homepage=false` — Skip refreshing home.example.com
+- `refresh_ops_portal=false` — Skip refreshing ops.example.com
+- `refresh_outline=false` — Skip syncing wiki.example.com (saves ~90 seconds if no docs changed)
 - `refresh_platform_manifest=false` — Skip regenerating platform-manifest.json
 - `refresh_discovery_artifacts=false` — Skip regenerating discovery artifacts
 
@@ -72,7 +72,7 @@ These files are transient and regenerated on every refresh.
 
 Runs on the controller, calls the Outline API.
 
-- **sync_docs_to_outline.py sync** — Syncs ADRs, runbooks, and landing pages from git to wiki.lv3.org
+- **sync_docs_to_outline.py sync** — Syncs ADRs, runbooks, and landing pages from git to wiki.example.com
 - Requires `.local/outline/api-token.txt` (OIDC token)
 - If token is expired: See **Outline Token Expired?** section below
 
@@ -80,12 +80,12 @@ Runs on the controller, calls the Outline API.
 
 Runs on remote VMs (via Proxmox SSH).
 
-- **homepage convergence** (runtime-general-lv3) — Pulls latest service catalog, regenerates home.lv3.org UI
-- **ops portal convergence** (docker-runtime-lv3) — Pulls latest service catalog, regenerates ops.lv3.org UI
+- **homepage convergence** (runtime-general) — Pulls latest service catalog, regenerates home.example.com UI
+- **ops portal convergence** (docker-runtime) — Pulls latest service catalog, regenerates ops.example.com UI
 
 ### Phase 5: Publish NGINX Edge Configs
 
-Runs on NGINX edge (nginx-lv3).
+Runs on NGINX edge (nginx-edge).
 
 - Reloads NGINX configs for the updated discovery services
 - Non-disruptive reload (existing connections preserved)
@@ -102,7 +102,7 @@ python3 scripts/sync_docs_to_outline.py bootstrap-token
 
 This re-authenticates with Keycloak and creates a fresh API token. Requires:
 - `.local/keycloak/outline.automation-password.txt` (service account password)
-- Keycloak running and reachable at `https://auth.lv3.org`
+- Keycloak running and reachable at `https://auth.example.com`
 
 Then retry the full cascade:
 
@@ -121,13 +121,13 @@ Both services depend on the current service-capability-catalog.json and dynamica
 
 2. **Verify SSH access to the VM:**
    ```bash
-   ssh -i .local/ssh/bootstrap.id_ed25519 ops@10.10.10.91 'uname -a'  # for runtime-general-lv3
+   ssh -i .local/ssh/bootstrap.id_ed25519 ops@10.10.10.91 'uname -a'  # for runtime-general
    ```
 
 3. **Check NGINX edge connectivity:**
    ```bash
-   curl -I https://home.lv3.org
-   curl -I https://ops.lv3.org
+   curl -I https://home.example.com
+   curl -I https://ops.example.com
    ```
 
 ### Wiki (Outline) Sync Fails with Different Error
@@ -136,7 +136,7 @@ Check Outline availability and API token validity:
 
 ```bash
 curl -H "Authorization: Bearer $(cat .local/outline/api-token.txt)" \
-  https://wiki.lv3.org/api/collections.list
+  https://wiki.example.com/api/collections.list
 ```
 
 If 401, re-bootstrap the token (see above). If 5xx, Outline may be down or restarting.
@@ -144,9 +144,9 @@ If 401, re-bootstrap the token (see above). If 5xx, Outline may be down or resta
 ## Related Procedures
 
 - **refresh-outline-api-token.md** — Manual refresh of Outline OIDC token (if bootstrap-token fails)
-- **configure-homepage.md** — Setup and troubleshooting for home.lv3.org
-- **configure-ops-portal.md** — Setup and troubleshooting for ops.lv3.org
-- **configure-outline.md** — Setup and troubleshooting for wiki.lv3.org
+- **configure-homepage.md** — Setup and troubleshooting for home.example.com
+- **configure-ops-portal.md** — Setup and troubleshooting for ops.example.com
+- **configure-outline.md** — Setup and troubleshooting for wiki.example.com
 
 ## Related ADRs
 

@@ -15,7 +15,7 @@ def test_nextcloud_dns_stage_converges_only_the_nextcloud_subdomain_record() -> 
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "cloud.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "cloud.example.com"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Nextcloud subdomain entry")
     assert (
@@ -50,7 +50,7 @@ def test_nextcloud_playbook_converges_postgres_runtime_and_edge_roles() -> None:
     assert "post_tasks" not in plays[2]
     assert (
         plays[4]["hosts"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
     )
     assert [task["name"] for task in verify_tasks] == [
         "Run shared Nextcloud post-verify checks",

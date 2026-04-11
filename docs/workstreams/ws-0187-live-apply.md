@@ -13,7 +13,7 @@
 ## Scope
 
 - add the repo-managed seed snapshot catalog and deterministic anonymized dataset builder
-- publish snapshots onto the managed `backup-lv3` store through committed automation
+- publish snapshots onto the managed `backup` store through committed automation
 - wire `tiny`, `standard`, and `recovery` staging into ephemeral fixtures and restore verification
 - validate the repo automation, rerun the live path from merged `main`, and record the final integration evidence
 
@@ -34,19 +34,19 @@
 - `uv run --with pyyaml python scripts/seed_data_snapshots.py verify --seed-class tiny --snapshot-id tiny-4fc40ef2f916 --remote`
 - `uv run --with pyyaml python scripts/seed_data_snapshots.py verify --seed-class standard --snapshot-id standard-c81d5e556889 --remote`
 - `uv run --with pyyaml python scripts/seed_data_snapshots.py verify --seed-class recovery --snapshot-id recovery-7028dc9df835 --remote`
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm env=production`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm env=production`
 - `TF_VAR_proxmox_endpoint=https://127.0.0.1:18006/api2/json LV3_PROXMOX_API_INSECURE=true LV3_PROXMOX_HOST_ADDR=100.64.0.1 python3 scripts/fixture_manager.py create seed-staging-smoke --purpose ws-0187-live-apply --policy integration-test --seed-class tiny --seed-snapshot-id tiny-4fc40ef2f916 --json`
 - `uv run --with pyyaml python scripts/restore_verification.py --seed-class tiny --seed-snapshot-id tiny-4fc40ef2f916 --print-report-json`
 
 ## Outcome
 
 - Passed:
-  - `backup-lv3` now manages `/var/lib/lv3/seed-data-snapshots/{tiny,standard,recovery}` through the committed `backup_vm` role, and the merged-main replay `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm env=production` completed successfully from the integrated branch state.
+  - `backup` now manages `/var/lib/lv3/seed-data-snapshots/{tiny,standard,recovery}` through the committed `backup_vm` role, and the merged-main replay `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm env=production` completed successfully from the integrated branch state.
   - Deterministic anonymized seed snapshots were built locally and published live to:
     - `tiny/tiny-4fc40ef2f916`
     - `standard/standard-c81d5e556889`
     - `recovery/recovery-7028dc9df835`
-  - Remote checksum verification passed for all three published snapshots on `backup-lv3`.
+  - Remote checksum verification passed for all three published snapshots on `backup`.
   - The fixture and restore-verification automation surfaces were both advanced far enough live to expose and fix several real repo issues:
     - `fixture_manager.py` now honors endpoint-only API overrides, supports controller-side insecure HTTPS for tunneled Proxmox API access, understands the ADR 0106 `capacity-model.json.reservations[].kind=ephemeral_pool` shape, preserves local module paths inside the Docker Tofu fallback, forwards `TF_VAR_*` values into the container, rewrites loopback Proxmox endpoints for Docker via `host.docker.internal`, and prefers `LV3_PROXMOX_HOST_ADDR` for the SSH jump host.
     - A reusable `tests/fixtures/seed-staging-smoke-fixture.yml` fixture was added so seed staging can be exercised against the live `lv3-debian-base` template (`9000`) without depending on the richer `lv3-ops-base` template catalog.

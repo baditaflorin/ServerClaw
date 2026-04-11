@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0251-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0251-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0073-promotion-gate`, `adr-0111-integration-test-suite`,
   `adr-0244-runtime-assurance-matrix`, `adr-0253-runtime-assurance-scoreboard`
@@ -114,7 +114,7 @@
 - 2026-03-29 the scoped `ops_portal` rerun proved the packaging fix by passing
   the container, listener, root-page, launcher, and runtime-assurance partial
   render checks before failing the final non-degraded assertion after the live
-  API gateway on `docker-runtime-lv3` drifted back away from current
+  API gateway on `docker-runtime` drifted back away from current
   `origin/main`; transcripts:
   `receipts/live-applies/evidence/2026-03-29-adr-0251-ops-portal-live-apply.txt`,
   `receipts/live-applies/evidence/2026-03-29-adr-0251-ops-portal-live-apply-rerun.txt`,
@@ -123,7 +123,7 @@
   and recurrence proof:
   `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-drift-recur.txt`
 - 2026-03-29 the rebased exact-main `api_gateway` replay uncovered a second
-  concurrency hazard on `docker-runtime-lv3`: tree-sync archives used fixed
+  concurrency hazard on `docker-runtime`: tree-sync archives used fixed
   guest filenames like `/opt/api-gateway/collections-sync.tar.gz`, so parallel
   gateway replays could delete each other between copy and expand; this branch
   now derives a per-run guest archive filename inside
@@ -164,14 +164,14 @@
   `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-postrebase-rerun.txt`
   completes successfully from the rebased exact-main worktree, and immediate
   post-run checks confirm `pve-manager/9.1.6`, a fresh public
-  `https://api.lv3.org/v1/platform/runtime-assurance` envelope at
+  `https://api.example.com/v1/platform/runtime-assurance` envelope at
   `2026-03-29T17:12:50Z`, the updated ops-portal partial on `:8092`, and both
   `environment-topology.json` plus `runtime-assurance-matrix.json` present on
   the host bind mount and inside the running `api-gateway` container
 - 2026-03-29
   `receipts/live-applies/evidence/2026-03-29-adr-0251-windmill-worker-checkout-rerun.txt`
   proves the branch-local `windmill` worker checkout refresh path still works:
-  `/srv/proxmox_florin_server/scripts/stage_smoke.py` appears briefly, the live
+  `/srv/proxmox-host_server/scripts/stage_smoke.py` appears briefly, the live
   `promotion_pipeline.py` imports `stage_smoke`, and the updated
   `config/windmill/scripts/gate-status.py` wrapper lands on the host before a
   separate concurrent `ws-0266-main-integration-r2` replay overwrites the same
@@ -182,9 +182,9 @@
 - 2026-03-29
   `receipts/live-applies/evidence/2026-03-29-adr-0251-exact-main-durable-verification.txt`
   confirms the blocker is now resolved on current `origin/main`: the live
-  worker checkout on `docker-runtime-lv3` keeps `scripts/stage_smoke.py`, both
+  worker checkout on `docker-runtime` keeps `scripts/stage_smoke.py`, both
   `promotion_pipeline.py` and `ops_portal/runtime_assurance.py` import it,
-  `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server`
+  `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox-host_server`
   returns `status: ok`, the bounded exact-main promotion gate replay rejects
   the real staged `grafana` receipt because the receipt is stale, projected
   vCPU commitment `36.0` exceeds target `22.5`, and Prometheus SLO queries time

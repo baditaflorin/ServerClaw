@@ -47,7 +47,7 @@ def test_build_artifact_cache_playbook_repoints_consumers_and_removes_local_stac
     play = playbook[0]
 
     assert play["name"] == "Converge build artifact cache consumers on the docker build guest"
-    assert play["vars"]["artifact_cache_remote_host"] == "{{ hostvars['artifact-cache-lv3'].ansible_host }}"
+    assert play["vars"]["artifact_cache_remote_host"] == "{{ hostvars['artifact-cache'].ansible_host }}"
     assert play["vars"]["docker_runtime_registry_mirrors"] == [
         "http://{{ artifact_cache_remote_host }}:5001",
         "https://mirror.gcr.io",

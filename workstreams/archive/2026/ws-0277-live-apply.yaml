@@ -20,7 +20,7 @@ shared_surfaces:
   - docs/adr/.index.yaml
   - docs/schema/api-gateway-catalog.schema.json
   - docs/runbooks/configure-typesense.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
   - scripts/api_gateway/main.py
@@ -99,7 +99,7 @@ ownership_manifest:
         - docs/adr/.index.yaml
         - docs/schema/api-gateway-catalog.schema.json
         - docs/runbooks/configure-typesense.md
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - scripts/api_gateway/main.py

@@ -9,7 +9,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0263-mainline-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0263-mainline`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0263-mainline`
 - Owner: codex
 - Depends On: `adr-0121-local-search-and-indexing-fabric`,
   `adr-0198-qdrant-vector-search-semantic-rag`,
@@ -36,7 +36,7 @@
 - store canonical structured memory objects in PostgreSQL with explicit scope,
   provenance, retention, consent, and refresh metadata
 - store semantic recall in a dedicated Qdrant collection on the live
-  `docker-runtime-lv3` substrate
+  `docker-runtime` substrate
 - materialize a local keyword index for exact recall using the repo-managed
   local search fabric package
 - expose governed create, list, get, delete, and hybrid query operations
@@ -74,9 +74,9 @@
 
 ## Expected Live Surfaces
 
-- `docker-runtime-lv3` private platform-context runtime serves a governed
+- `docker-runtime` private platform-context runtime serves a governed
   ServerClaw memory API on the existing `:8010` private endpoint
-- `postgres-lv3` contains the canonical `memory.entries` schema used by the
+- `postgres` contains the canonical `memory.entries` schema used by the
   runtime
 - the live runtime maintains a dedicated Qdrant memory collection plus a local
   keyword-search index for the same memory objects
@@ -97,12 +97,12 @@
   `7fe9af77cf7b842884533dde6b2b1af64857fe0d` on top of `origin/main`
   commit `bae420263872e079fdc34f7f755a6984a3cd5949`
   (`VERSION` `0.177.87`, integrated platform baseline `0.130.59`), with final
-  recap `docker-runtime-lv3 ok=119 changed=19 failed=0 skipped=21` and
-  `proxmox_florin ok=42 changed=7 failed=0 skipped=15`.
+  recap `docker-runtime ok=119 changed=19 failed=0 skipped=21` and
+  `proxmox-host ok=42 changed=7 failed=0 skipped=15`.
 - The workstream fixed the replay blockers surfaced by earlier attempts: the
   runtime image now ships the ServerClaw memory bootstrap module, the recovery
   path prefers a host-network classic Docker build before compose startup on
-  `docker-runtime-lv3`, and the replay guidance now calls out stale
+  `docker-runtime`, and the replay guidance now calls out stale
   `platform-context_default` and `ollama_default` network cleanup when Docker
   bridge state drifts.
 - Focused regression and repo-facing validation passed on the workstream head:
@@ -127,7 +127,7 @@
 - LV3 run id: `e6fa9fca7a534939928bc8c0938756b2`
 - ansible scope run id: `9e8dcfe46d20419fb39c464891acd29c`
 - trace id: `3a088906b6a84a9bae17eb26dac49daf`
-- Replay recap: `docker-runtime-lv3 ok=119 changed=19 failed=0`, `proxmox_florin ok=42 changed=7 failed=0`
+- Replay recap: `docker-runtime ok=119 changed=19 failed=0`, `proxmox-host ok=42 changed=7 failed=0`
 - External post-apply verification through `http://100.64.0.1:8010` returned `healthz.status=ok`, cited `docs/adr/0198-qdrant-vector-search-semantic-rag.md` through `lv3_cli.py query-platform-context`, and verified memory id `1f03ab41-1e97-4537-896e-4e7bd3ae2693` through CLI create/query/delete with both `semantic` and `keyword` recall.
 
 ## Merge Criteria
@@ -158,7 +158,7 @@
 - keep this work on the private `rag-context` lane unless a later ADR explicitly
   promotes the memory substrate behind the shared API gateway
 - prefer the host-network classic Docker build path before `docker compose up`
-  on `docker-runtime-lv3`; earlier `compose up --build` replays were not
+  on `docker-runtime`; earlier `compose up --build` replays were not
   reliable on this host
 - treat stale `platform-context_default` and `ollama_default` Docker networks as
   a first-class recovery clue when compose reports missing bridge devices during

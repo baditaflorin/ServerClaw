@@ -61,5 +61,5 @@
 
 ## Notes For The Next Assistant
 
-- `R2` is currently honest only for PostgreSQL because `postgres-replica-lv3` already exists and participates in Patroni failover.
+- `R2` is currently honest only for PostgreSQL because `postgres-replica` already exists and participates in Patroni failover.
 - `R3` handling is intentionally strict in live apply: the catalog may describe future intent, but deployment will not treat it as implemented on a single host.

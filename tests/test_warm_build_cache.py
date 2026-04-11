@@ -13,13 +13,13 @@ SPEC.loader.exec_module(warm_build_cache)
 
 def test_collect_check_runner_images_deduplicates_entries() -> None:
     manifest = {
-        "lint-yaml": {"image": "registry.lv3.org/check-runner/ansible:2.17"},
-        "lint-ansible": {"image": "registry.lv3.org/check-runner/ansible:2.17"},
-        "type-check": {"image": "registry.lv3.org/check-runner/python:3.12"},
+        "lint-yaml": {"image": "registry.example.com/check-runner/ansible:2.17"},
+        "lint-ansible": {"image": "registry.example.com/check-runner/ansible:2.17"},
+        "type-check": {"image": "registry.example.com/check-runner/python:3.12"},
     }
     assert warm_build_cache.collect_check_runner_images(manifest) == [
-        "registry.lv3.org/check-runner/ansible:2.17",
-        "registry.lv3.org/check-runner/python:3.12",
+        "registry.example.com/check-runner/ansible:2.17",
+        "registry.example.com/check-runner/python:3.12",
     ]
 
 

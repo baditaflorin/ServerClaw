@@ -16,7 +16,7 @@ shared_surfaces:
   - roles/n8n_postgres
   - roles/n8n_runtime
   - roles/nginx_edge_publication
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/service-capability-catalog.json
   - config/workflow-catalog.json
   - config/subdomain-catalog.json

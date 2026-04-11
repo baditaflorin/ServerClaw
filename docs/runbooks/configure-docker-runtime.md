@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook captures the executable path for converging the production Docker baseline on `docker-runtime-lv3`.
+This runbook captures the executable path for converging the production Docker baseline on `docker-runtime`.
 
 ## Result
 
@@ -35,15 +35,15 @@ make syntax-check-docker-runtime
 ```
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker version'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker version'
 ```
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose version'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose version'
 ```
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo cat /etc/docker/daemon.json'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo cat /etc/docker/daemon.json'
 ```
 
 ## Notes
@@ -63,8 +63,8 @@ Observed symptom:
 Manual recovery used for this rollout:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo qm config 120 | grep ^net0'
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 "sudo qm guest exec 120 -- bash -lc 'sed -i \"s/<old-mac>/<current-mac>/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo qm config 120 | grep ^net0'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 "sudo qm guest exec 120 -- bash -lc 'sed -i \"s/<old-mac>/<current-mac>/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
 ```
 
 If this recurs, treat it as guest network metadata drift and reconcile the guest's netplan MAC match before retrying the Docker convergence.

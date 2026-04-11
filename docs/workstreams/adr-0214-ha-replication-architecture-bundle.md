@@ -8,7 +8,7 @@
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0214-ha-replication-adrs`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0214-ha-replication-adrs`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0214-ha-replication-adrs`
 - Owner: codex
 - Depends On: `adr-0072-staging-production-topology`,
   `adr-0073-promotion-pipeline`, `adr-0179-redundancy-tier-matrix`,

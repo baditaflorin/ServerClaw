@@ -9,7 +9,7 @@
 
 ## Context
 
-Splitting `docker-runtime-lv3` into several runtime pools will not improve
+Splitting `docker-runtime` into several runtime pools will not improve
 parallel work on its own if the repo still deploys everything through one shared
 surface.
 

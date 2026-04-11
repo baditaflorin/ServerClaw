@@ -29,7 +29,7 @@ detected_markers:
     without breaking current consumers\nScope: Extend the runtime role to render preserved
     service principals, document the local password files, and add role coverage\nStatus:
     Ready for exact-commit live apply from the rebased ws-0276 branch\nNext: Converge
-    docker-runtime-lv3, reconcile streams, verify end to end, and record the live-apply
+    docker-runtime, reconcile streams, verify end to end, and record the live-apply
     receipt\nSee also: ADR 0276'
   confidence: 1.0
   detected_on: '2026-04-07T07:55:04.495625'

@@ -6,7 +6,7 @@ This runbook defines how LV3 pins, scans, refreshes, and upgrades every managed 
 
 ## Managed Sources
 
-The machine-readable source of truth is [config/image-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/image-catalog.json).
+The machine-readable source of truth is [config/image-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/image-catalog.json).
 
 Each entry records:
 
@@ -17,8 +17,8 @@ Each entry records:
 - the scan receipt path
 - the converge targets that make the new pin live
 
-Current catalog summary receipts live under [receipts/image-scans](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/image-scans).
-Underlying Syft and Grype artifacts live under [receipts/sbom](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/sbom) and [receipts/cve](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/cve).
+Current catalog summary receipts live under [receipts/image-scans](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/image-scans).
+Underlying Syft and Grype artifacts live under [receipts/sbom](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/sbom) and [receipts/cve](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/cve).
 
 ## Policy
 

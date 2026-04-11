@@ -10,7 +10,7 @@ depends_on:
   - adr-0020-backups
 conflicts_with: []
 shared_surfaces:
-  - backup-lv3
+  - backup
   - /etc/pve/storage.cfg
   - /etc/pve/jobs.cfg
   - backup_policy

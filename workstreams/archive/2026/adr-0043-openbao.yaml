@@ -10,7 +10,7 @@ depends_on:
   - adr-0023-docker-runtime
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
+  - docker-runtime
   - secret distribution
   - transit operations
   - automation credentials

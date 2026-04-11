@@ -7,7 +7,7 @@ the Kafka API, Admin API, HTTP Proxy, and Schema Registry contract end to end.
 
 ## Result
 
-- `docker-runtime-lv3` runs Redpanda from `/opt/redpanda`
+- `docker-runtime` runs Redpanda from `/opt/redpanda`
 - Redpanda listens privately on `10.10.10.20:9092` for the Kafka API
 - the Admin API listens privately on `10.10.10.20:9644`
 - the HTTP Proxy and Schema Registry listeners are published privately on
@@ -21,30 +21,30 @@ the Kafka API, Admin API, HTTP Proxy, and Schema Registry contract end to end.
 Syntax-check the Redpanda workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-redpanda
 ```
 
 Converge the Redpanda runtime directly:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-redpanda env=production
 ```
 
 Run the governed live-apply wrapper:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=redpanda env=production
 ```
 
 ## Verification
 
-Verify the private Redpanda Admin API readiness endpoint on `docker-runtime-lv3`:
+Verify the private Redpanda Admin API readiness endpoint on `docker-runtime`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -74,7 +74,7 @@ PY'
 Verify HTTP Proxy produce/read and Schema Registry access with the platform principal:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -150,7 +150,7 @@ PY'
 - Redpanda is intentionally private-only. Do not publish it on the public NGINX edge.
 - The repo-managed deployment uses `8103` and `8104` for the HTTP Proxy and
   Schema Registry listeners because `8097` is already assigned to JupyterHub
-  and `8099` is already assigned to the Temporal UI on `docker-runtime-lv3`.
+  and `8099` is already assigned to the Temporal UI on `docker-runtime`.
 - The role reconciles topics programmatically with `rpk` from the declared topic
   list. Manual `rpk topic create` operations outside the role are treated as drift.
 - If a failed rollout leaves `/var/lib/docker/volumes/lv3-redpanda-data/_data/startup_log`
@@ -161,6 +161,6 @@ PY'
   Redpanda documents Schema Registry authorization as an enterprise feature, so
   this workstream avoids baking unmanaged license state into the default runtime.
 - The durable log volume is the named Docker volume `lv3-redpanda-data`. Today
-  it inherits the governed VM-level backup coverage of `docker-runtime-lv3`;
+  it inherits the governed VM-level backup coverage of `docker-runtime`;
   if Redpanda-specific snapshot automation is added later, record that evidence
   in the live-apply receipt and related backup runbooks.

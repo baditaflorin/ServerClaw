@@ -16,7 +16,7 @@ def test_defaults_define_private_mailpit_runtime_contract() -> None:
 
     assert (
         defaults["mailpit_service_topology"]
-        == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('mailpit') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service('mailpit') }}"
     )
     assert defaults["mailpit_site_dir"] == "/opt/dev-tools/mailpit"
     assert defaults["mailpit_compose_file"] == "{{ mailpit_site_dir }}/docker-compose.yml"
@@ -26,8 +26,8 @@ def test_defaults_define_private_mailpit_runtime_contract() -> None:
     assert defaults["mailpit_smtp_port"] == "{{ mailpit_service_topology.ports.smtp }}"
     assert defaults["mailpit_api_url"] == "{{ mailpit_service_topology.urls.internal }}/api/v1"
     assert defaults["mailpit_docker_network_name"] == "dev-tools_default"
-    assert defaults["mailpit_test_from_address"] == "mailpit-probe@lv3.org"
-    assert defaults["mailpit_test_to_address"] == "dev-mail@lv3.org"
+    assert defaults["mailpit_test_from_address"] == "mailpit-probe@example.com"
+    assert defaults["mailpit_test_to_address"] == "dev-mail@example.com"
 
 
 def test_argument_spec_requires_private_listener_and_probe_inputs() -> None:

@@ -20,7 +20,7 @@ shared_surfaces:
   - docs/adr/0193-plane-kanban-task-board.md
   - docs/workstreams/adr-0193-plane-kanban-task-board.md
   - docs/runbooks/configure-plane.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - config/ansible-execution-scopes.yaml
   - config/command-catalog.json
@@ -99,7 +99,7 @@ ownership_manifest:
     - id: plane_contract_surfaces
       paths:
         - Makefile
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - config/ansible-execution-scopes.yaml
         - config/command-catalog.json
@@ -152,7 +152,7 @@ ready_to_merge: false
 live_applied: true
 canonical_truth:
   changelog_entry: integrated ADR 0193 by publishing the repo-managed Plane task
-    board at `tasks.lv3.org`, wiring the governed controller wrapper and ADR
+    board at `tasks.example.com`, wiring the governed controller wrapper and ADR
     sync path, and verifying both the private controller lane and authenticated
     public edge
   release_bump: patch

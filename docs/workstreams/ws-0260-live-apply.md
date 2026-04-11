@@ -4,7 +4,7 @@
 - Title: Nextcloud personal data plane live apply from latest `origin/main`
 - Status: `live_applied`
 - Branch: `codex/ws-0260-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0260-live-apply`
 - Owner: codex
 - Included In Repo Version: 0.177.93
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
@@ -14,7 +14,7 @@
 ## Purpose
 
 Implement ADR 0260 by making Nextcloud the repo-managed personal data plane on
-`docker-runtime-lv3`, publishing `cloud.lv3.org` through the shared NGINX edge,
+`docker-runtime`, publishing `cloud.example.com` through the shared NGINX edge,
 and preserving enough branch-local state that a later exact-main replay can
 promote the service onto the protected `main` surfaces safely.
 
@@ -43,14 +43,14 @@ promote the service onto the protected `main` surfaces safely.
   `bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production`
   completed successfully on that synchronized tree with final recap
-  `docker-runtime-lv3 ok=181 changed=4 failed=0 skipped=109`,
-  `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`,
-  `postgres-lv3 ok=52 changed=0 failed=0 skipped=14`, and
+  `docker-runtime ok=181 changed=4 failed=0 skipped=109`,
+  `nginx-edge ok=39 changed=4 failed=0 skipped=7`,
+  `postgres ok=52 changed=0 failed=0 skipped=14`, and
   `localhost ok=18 changed=0 failed=0 skipped=3`.
 - Public verification after the replay returned `installed=true` from
-  `https://cloud.lv3.org/status.php`, and both `/.well-known/caldav` plus
+  `https://cloud.example.com/status.php`, and both `/.well-known/caldav` plus
   `/.well-known/carddav` returned `HTTP/2 301` with
-  `location: https://cloud.lv3.org/remote.php/dav/`.
+  `location: https://cloud.example.com/remote.php/dav/`.
 - Guest-local verification through the managed Proxmox jump path returned the
   same `status.php` payload from `http://10.10.10.20:8084/status.php`, kept
   `backgroundjobs_mode=cron`, confirmed `ops` as the enabled admin user, and

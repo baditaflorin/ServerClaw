@@ -100,6 +100,6 @@ next after success, failure, or interruption.
 
 ## References
 
-- `https://home.lv3.org`
-- `https://ops.lv3.org`
-- `https://docs.lv3.org`
+- `https://home.example.com`
+- `https://ops.example.com`
+- `https://docs.example.com`

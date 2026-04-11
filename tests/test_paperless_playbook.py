@@ -15,7 +15,7 @@ def test_paperless_playbook_converges_only_the_paperless_dns_record() -> None:
 
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "paperless.lv3.org"
+    assert dns_play["vars"]["subdomain_fqdn"] == "paperless.example.com"
 
     select_task = next(task for task in tasks if task.get("name") == "Select the Paperless subdomain entry")
     assert (

@@ -69,8 +69,8 @@ renamed without a major version bump to the tool.
 {
   "status": "migrated",
   "migrated_count": 3,
-  "from_server": "coolify-lv3",
-  "to_server": "coolify-apps-lv3"
+  "from_server": "coolify",
+  "to_server": "coolify-apps"
 }
 
 // Exit 2 — nothing to do
@@ -234,7 +234,7 @@ Use this checklist when bringing an existing tool into compliance with ADR 0343.
 The standard playbook pattern for any contract-compliant tool:
 
 ```yaml
-- name: Install SSH deploy key on coolify-apps-lv3
+- name: Install SSH deploy key on coolify-apps
   ansible.builtin.command: >
     python3 scripts/proxmox_tool.py
     --auth-file "{{ proxmox_api_token_local_file }}"

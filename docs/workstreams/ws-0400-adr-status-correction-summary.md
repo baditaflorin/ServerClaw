@@ -76,7 +76,7 @@ Corrective downgrade from "Implemented" to "Accepted" where canonical status cla
 | 0010 | Initial Proxmox VM Topology | Implemented (v0.2.0) | Accepted |
 | 0012 | Proxmox Host Bridge & NAT Network | Implemented (v0.2.0) | Accepted |
 | 0013 | Public Ingress & Guest Egress Model | Implemented (v0.2.0) | Accepted |
-| 0015 | lv3.org DNS & Subdomain Model | Implemented (v0.2.0) | Accepted |
+| 0015 | example.com DNS & Subdomain Model | Implemented (v0.2.0) | Accepted |
 | 0016 | Provision Guests from Debian Cloud Template | Implemented (v0.2.0) | Accepted |
 | 0017 | ADR Lifecycle & Implementation Metadata | Implemented (v0.2.0) | Accepted |
 | 0019 | Parallel ADR Delivery with Workstreams | Implemented (v0.2.0) | Accepted |

@@ -242,9 +242,9 @@ After migration, `directus_runtime/tasks/main.yml` should be ~100-120 lines inst
 
 ```bash
 # Run --check with verbose output before and after:
-ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime-lv3 --check -vvv 2>&1 | tee /tmp/before.log
+ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime --check -vvv 2>&1 | tee /tmp/before.log
 # (apply migration)
-ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime-lv3 --check -vvv 2>&1 | tee /tmp/after.log
+ansible-playbook playbooks/directus.yml -e env=production -l docker-runtime --check -vvv 2>&1 | tee /tmp/after.log
 # Compare task names and actions:
 diff <(grep '^TASK' /tmp/before.log) <(grep '^TASK' /tmp/after.log)
 ```
@@ -310,7 +310,7 @@ Create `collections/ansible_collections/lv3/platform/playbooks/vars/directus.yml
 ```yaml
 ---
 service_audit_name: directus
-service_dns_fqdn: data.lv3.org
+service_dns_fqdn: data.example.com
 service_postgres_role: lv3.platform.directus_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
@@ -492,8 +492,8 @@ For each, read the compose template and extract the hostname:address pairs. Add 
     # ... existing fields ...
     hairpin:
       publish:
-        - hostname: agents.lv3.org
-          address_host: nginx-lv3
+        - hostname: agents.example.com
+          address_host: nginx-edge
 ```
 
 Note: `address_host` is an inventory hostname, NOT a raw IP. The generator resolves it.
@@ -510,9 +510,9 @@ The generated file format:
 # GENERATED — do not edit. Source: platform_service_registry hairpin declarations.
 # Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only hairpin
 platform_hairpin_nat_hosts:
-  - hostname: agents.lv3.org
+  - hostname: agents.example.com
     address: 10.10.10.92
-  - hostname: data.lv3.org
+  - hostname: data.example.com
     address: 10.10.10.92
   # ... deduplicated and sorted
 ```
@@ -582,7 +582,7 @@ platform_service_registry:
     internal_port: 8055
     host_group: docker_runtime_lv3
     dns:
-      fqdn: directus.lv3.org
+      fqdn: directus.example.com
       type: public  # or 'internal' for split-view
       ttl: 3600
 ```
@@ -849,8 +849,8 @@ server {
     listen 443 ssl http2;
     server_name _;
 
-    ssl_certificate /etc/lv3/certs/edge.lv3.org/fullchain.pem;
-    ssl_certificate_key /etc/lv3/certs/edge.lv3.org/privkey.pem;
+    ssl_certificate /etc/lv3/certs/edge.example.com/fullchain.pem;
+    ssl_certificate_key /etc/lv3/certs/edge.example.com/privkey.pem;
 
     include config/generated/nginx-upstreams.conf;
 
@@ -920,7 +920,7 @@ platform_service_registry:
       provider: keycloak
       client_name: directus_runtime
       redirect_uris:
-        - https://directus.lv3.org/auth/callback
+        - https://directus.example.com/auth/callback
       scopes: [openid, profile, email]
       public_client: false
 ```

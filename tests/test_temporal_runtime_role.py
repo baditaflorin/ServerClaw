@@ -227,7 +227,7 @@ def test_temporal_health_probe_catalog_points_at_the_loopback_ui_port() -> None:
     probes = json.loads(HEALTH_PROBE_CATALOG_PATH.read_text(encoding="utf-8"))["services"]
     temporal_probe = probes["temporal"]
 
-    assert temporal_probe["owning_vm"] == "runtime-control-lv3"
+    assert temporal_probe["owning_vm"] == "runtime-control"
     assert temporal_probe["liveness"]["url"] == "http://127.0.0.1:8099"
     assert temporal_probe["startup"]["argv"][-3:] == ["operator", "cluster", "health"]
     assert temporal_probe["readiness"]["argv"][-4:] == ["namespace", "describe", "--namespace", "lv3"]

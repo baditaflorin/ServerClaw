@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schema/agent-tool.json",
+  "$id": "https://example.com/schema/agent-tool.json",
   "title": "LV3 Agent Tool",
   "type": "object",
   "additionalProperties": false,

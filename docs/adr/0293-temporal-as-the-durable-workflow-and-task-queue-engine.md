@@ -53,7 +53,7 @@ recovery are required.
 - The Temporal server is internal-only; no public subdomain is issued
 - The gRPC API endpoint is `temporal-frontend:7233` on the internal Compose
   network; the HTTP frontend API is `temporal-frontend:7243`
-- Operator diagnostics stay loopback-only on `docker-runtime-lv3`
+- Operator diagnostics stay loopback-only on `docker-runtime`
   (`127.0.0.1:7233`, `127.0.0.1:7243`, and `127.0.0.1:8099`) and are consumed
   through the documented Proxmox jump-path tunnel instead of public edge
   publication

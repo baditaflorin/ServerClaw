@@ -4,7 +4,7 @@
   "environment": "production",
   "hosts": [
     {
-      "host": "docker-runtime-lv3",
+      "host": "docker-runtime",
       "hardening_index": 74,
       "hardening_index_delta": null,
       "finding_counts": {

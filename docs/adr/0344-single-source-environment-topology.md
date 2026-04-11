@@ -13,14 +13,14 @@ The platform currently has two parallel sources of truth for environment
 topology (node names, VMIDs, IPs, container names, service ports):
 
 1. **Ansible inventory** (`inventory/group_vars/platform.yml`,
-   `inventory/host_vars/proxmox_florin.yml`, `inventory/hosts.yml`).
+   `inventory/host_vars/proxmox-host.yml`, `inventory/hosts.yml`).
    This is the authoritative source for Ansible plays and roles.
 
 2. **Hand-maintained `topology.yaml`** (`.local/proxmox-api/topology.yaml`).
    This was introduced in ADR 0342 / `proxmox_tool.py` to give non-Ansible
    tools a way to resolve VMIDs, node names, and API URLs per environment.
 
-These two sources will drift. A VMID change in `host_vars/proxmox_florin.yml`
+These two sources will drift. A VMID change in `host_vars/proxmox-host.yml`
 that is not reflected in `topology.yaml` causes `proxmox_tool.py` to operate
 on the wrong VM silently. The same problem affects any future tool that reads
 from the topology file.
@@ -61,12 +61,12 @@ The snapshot is a JSON file at a path configured in `inventory/group_vars/all.ym
   "generated_from": "inventory/",
   "environments": {
     "prod": {
-      "node": "Debian-trixie-latest-amd64-base",
+      "node": "proxmox-host",
       "api_url": "https://100.64.0.1:8006/api2/json",
       "vms": {
-        "coolify-lv3":       {"vmid": 170, "ip": "10.10.10.70"},
-        "coolify-apps-lv3":  {"vmid": 171, "ip": "10.10.10.71"},
-        "postgres-lv3":      {"vmid": 150, "ip": "10.10.10.50"}
+        "coolify":       {"vmid": 170, "ip": "10.10.10.70"},
+        "coolify-apps":  {"vmid": 171, "ip": "10.10.10.71"},
+        "postgres":      {"vmid": 150, "ip": "10.10.10.50"}
       },
       "services": {
         "coolify": {
@@ -81,7 +81,7 @@ The snapshot is a JSON file at a path configured in `inventory/group_vars/all.ym
       }
     },
     "staging": {
-      "node": "Debian-trixie-latest-amd64-base",
+      "node": "proxmox-host",
       "api_url": "https://100.64.0.1:8006/api2/json",
       "vms": {
         "coolify-staging":      {"vmid": 270, "ip": "10.10.10.170"},
@@ -146,7 +146,7 @@ file (`.local/proxmox-api/topology-overlay.json`):
 
 The overlay is merged last (highest priority) over the generated snapshot.
 The committed snapshot contains placeholder values for `api_url` (e.g.
-`"https://proxmox.lv3.org:8006/api2/json"`); the overlay supplies the
+`"https://proxmox.example.com:8006/api2/json"`); the overlay supplies the
 actual Tailscale address at tool runtime without committing it.
 
 ## Places That Need to Change
@@ -154,7 +154,7 @@ actual Tailscale address at tool runtime without committing it.
 ### 1. `scripts/generate_topology_snapshot.py` — new file
 
 **What:** Generate `scripts/topology-snapshot.json` from inventory.
-Parse `inventory/hosts.yml`, `inventory/host_vars/proxmox_florin.yml`,
+Parse `inventory/hosts.yml`, `inventory/host_vars/proxmox-host.yml`,
 and `inventory/group_vars/platform.yml` to extract VM specs, service ports,
 and container names per environment.
 

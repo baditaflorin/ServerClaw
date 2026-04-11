@@ -48,11 +48,11 @@ onboarding. It wraps ADR 0317's Keycloak direct-API procedure and adds email del
 python3 scripts/provision_operator.py \
     --id matei-busui-tmp-001 \
     --name "Matei Busui" \
-    --email busui.matei1994@gmail.com \
+    --email operator@example.com \
     --username matei.busui-tmp \
     --role admin \
     --expires 2026-04-08T00:00:00Z \
-    --requester florin@badita.org
+    --requester operator@example.com
 ```
 
 **What the script does (idempotent):**
@@ -166,7 +166,7 @@ Headscale authkey generation and duplicate onboarding email delivery.
 All secrets live in `.local/` (gitignored). No secrets are committed to the repository.
 
 When the public Keycloak edge is degraded but the documented direct lane on
-`docker-runtime-lv3` remains healthy, the script can now target that fallback
+`docker-runtime` remains healthy, the script can now target that fallback
 explicitly with `LV3_KEYCLOAK_URL=http://127.0.0.1:18080` after forwarding the
 guest loopback port over SSH.
 

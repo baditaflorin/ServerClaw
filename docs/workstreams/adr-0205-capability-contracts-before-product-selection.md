@@ -7,7 +7,7 @@
 - Implemented In Platform Version: 0.130.39
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0205-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0205-live-apply`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0093-interactive-ops-portal`, `adr-0132-self-describing-platform-manifest`, `adr-0204-architecture-governance`
 - Conflicts With: none
@@ -48,7 +48,7 @@
 ## Expected Live Surfaces
 
 - `http://10.10.10.20:8092` renders the new `Capability Contracts` panel in the interactive ops portal after converge
-- `https://ops.lv3.org` exposes the same contract-first summary behind the existing auth gate after the `ops_portal` replay
+- `https://ops.example.com` exposes the same contract-first summary behind the existing auth gate after the `ops_portal` replay
 
 ## Verification
 
@@ -68,7 +68,7 @@
 
 - ADR 0208 landed on `origin/main` first, so ADR 0205 was recut and released as `0.177.41` on top of that newer mainline instead of the earlier `0.177.40` candidate.
 - The governed replay used the ADR 0191 immutable-guest replacement planning path first, confirming `preview_guest` with a `180m` rollback window before the live run.
-- The final merged-main replay `make live-apply-service service=ops_portal env=production ALLOW_IN_PLACE_MUTATION=true` completed with `docker-runtime-lv3 ok=99 changed=3 failed=0`, and the public edge remained healthy with `https://ops.lv3.org/health` returning `{"status":"ok"}` while `https://ops.lv3.org/` still redirected to the existing OAuth sign-in boundary.
+- The final merged-main replay `make live-apply-service service=ops_portal env=production ALLOW_IN_PLACE_MUTATION=true` completed with `docker-runtime ok=99 changed=3 failed=0`, and the public edge remained healthy with `https://ops.example.com/health` returning `{"status":"ok"}` while `https://ops.example.com/` still redirected to the existing OAuth sign-in boundary.
 
 ## Merge Criteria
 

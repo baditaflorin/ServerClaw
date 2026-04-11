@@ -47,8 +47,8 @@
 
 ## Expected Live Surfaces
 
-- `https://api.lv3.org/v1/platform/agents` returns the current coordination snapshot for authenticated readers
-- `https://ops.lv3.org` shows a live agent coordination panel refreshed from the gateway
+- `https://api.example.com/v1/platform/agents` returns the current coordination snapshot for authenticated readers
+- `https://ops.example.com` shows a live agent coordination panel refreshed from the gateway
 - the static generated ops portal shows the latest recorded coordination snapshot receipt when one is committed
 - active observation-loop and closure-loop sessions publish into the shared coordination bucket
 
@@ -74,4 +74,4 @@
 - the coordination runtime, gateway route, interactive ops-portal panel, static snapshot panel, runbook, and snapshot helper are all committed on `main`
 - focused ADR 0161 test coverage passed on the integrated mainline for the coordination store, gateway route, interactive ops portal, static ops portal, closure-loop publishing, and observation-loop publishing
 - the first coordination snapshot receipt is committed as `receipts/agent-coordination/2026-03-25-adr-0161-agent-coordination-snapshot.json`
-- the live rollout is recorded in [receipts/live-applies/2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply.json)
+- the live rollout is recorded in [receipts/live-applies/2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies/2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply.json)

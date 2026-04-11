@@ -7,7 +7,7 @@
 - Canonical Mainline Receipt: `2026-03-31-adr-0288-crawl4ai-mainline-live-apply`
 - Live Applied In Platform Version: 0.130.75
 - Branch: `codex/ws-0288-crawl4ai-main-merge-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-crawl4ai-main-merge-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0288-crawl4ai-main-merge-r2`
 - Owner: codex
 - Depends On: none
 - Conflicts With: `ws-0288-live-apply`, `ws-0288-main-merge`
@@ -43,10 +43,10 @@ the registry and workstream docs stay merge-safe.
   left the live `crawl4ai` container exited during receipt capture, a second
   governed exact-tree converge restored the service and reran the role-local
   verification tasks with recap
-  `docker-runtime-lv3 : ok=113 changed=6 unreachable=0 failed=0 skipped=27
+  `docker-runtime : ok=113 changed=6 unreachable=0 failed=0 skipped=27
   rescued=1 ignored=0`.
 - Independent verification succeeded for local health, monitor, markdown crawl,
-  guest-network reachability from `coolify-lv3`, and the dedicated
+  guest-network reachability from `coolify`, and the dedicated
   `crawl4ai_runtime` bridge network. Evidence lives under
   `receipts/live-applies/evidence/2026-03-31-ws-0288-crawl4ai-mainline-*-0.177.115.txt`.
 - `make validate`, `make remote-validate`, and `make pre-push-gate` all passed
@@ -57,8 +57,8 @@ the registry and workstream docs stay merge-safe.
   the Crawl4AI startup failure classifier for missing Docker `DOCKER`
   iptables chains.
 - During the protected `main` push on 2026-03-31, the build-server snapshot
-  upload failed because `/home/ops/builds/proxmox_florin_server` on
-  `docker-build-lv3` was full; the recovery was a bounded `sudo rm -rf` of only
+  upload failed because `/home/ops/builds/proxmox-host_server` on
+  `docker-build` was full; the recovery was a bounded `sudo rm -rf` of only
   stale remote `ws-0288-*` session workspaces under
   `.lv3-session-workspaces/`, which restored `6.4G` free and kept the cleanup
   within the runbook guidance for remote snapshot failures.

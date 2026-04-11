@@ -15,12 +15,12 @@
 ## Context
 
 JupyterHub was introduced in ADR 0291 as the interactive notebook environment for
-the platform (notebooks.lv3.org, port 8097). It provided multi-user Jupyter
+the platform (notebooks.example.com, port 8097). It provided multi-user Jupyter
 notebook access with OIDC authentication via Keycloak.
 
 ### Reasons for removal
 
-1. **Usage**: The service has no active users. The notebooks.lv3.org URL has not
+1. **Usage**: The service has no active users. The notebooks.example.com URL has not
    been used since its initial setup. There is no notebook workflow that depends
    on it.
 
@@ -30,7 +30,7 @@ notebook access with OIDC authentication via Keycloak.
 
 3. **Resource reclamation**: Port 8097 is freed for future services. The JupyterHub
    Docker compose network, volume, and container resources are released from the
-   docker-runtime-lv3 host.
+   docker-runtime host.
 
 4. **Keycloak client cleanup**: Removing the `jupyterhub` Keycloak OIDC client
    reduces the surface of the realm's client roster and eliminates a stale
@@ -57,7 +57,7 @@ Remove JupyterHub from the platform entirely:
 - Remove the `jupyterhub` Keycloak OIDC client from `keycloak_runtime/tasks/main.yml`
   and its defaults from `keycloak_runtime/defaults/main.yml`
 - Remove the `jupyterhub:` block from `inventory/group_vars/all/platform_services.yml`
-- Remove the `jupyterhub_port: 8097` assignment from `inventory/host_vars/proxmox_florin.yml`
+- Remove the `jupyterhub_port: 8097` assignment from `inventory/host_vars/proxmox-host.yml`
 - Remove JupyterHub bookmark from `config/workbench-information-architecture.json`
 - Remove JupyterHub monitor from `config/uptime-kuma/monitors.json`
 - Remove all test assertions referencing JupyterHub service topology,

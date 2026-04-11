@@ -6,7 +6,7 @@ high
 
 ## Symptoms
 
-- Users hit `500 Internal Server Error` at `https://ops.lv3.org/oauth2/callback`
+- Users hit `500 Internal Server Error` at `https://ops.example.com/oauth2/callback`
 - Error detail in URL: `error=server_error&error_description=...code+not+valid`
 - oauth2-proxy logs show: `invalid_grant` or `Code not valid`
 - Happens immediately after Keycloak restarts or is restarted by the watchdog
@@ -24,11 +24,11 @@ This is not a bug — it is expected behaviour after any Keycloak restart.
 
 Tell the affected user:
 
-1. Clear cookies for `sso.lv3.org` (or all cookies for `*.lv3.org`)
+1. Clear cookies for `sso.example.com` (or all cookies for `*.example.com`)
 2. Navigate back to the service URL
 3. Login again from scratch
 
-In Chrome: Settings → Privacy → Cookies → See all site data → search `lv3.org` → Delete all.
+In Chrome: Settings → Privacy → Cookies → See all site data → search `example.com` → Delete all.
 
 ## Operator Diagnosis
 
@@ -59,7 +59,7 @@ After ADR 0376:
 
 Check restart frequency:
 ```bash
-# On runtime-control-lv3
+# On runtime-control
 journalctl -u lv3-identity-watchdog.service --since '2 hours ago' \
   | grep "Restarting keycloak"
 # If more than 6 lines in 1 hour: watchdog hit rate limit — investigate Keycloak root cause
@@ -78,7 +78,7 @@ If Keycloak is healthy but users still get 500: they have stale cookies — user
 The only way to prevent this entirely is to avoid Keycloak restarts during active sessions.
 The watchdog's rate limit (6/hr) and the `KC_CACHE=local` setting are the current
 mitigations. Future option: Keycloak session persistence to DB (already enabled via
-postgres-vm-lv3 — sessions survive container restart if Keycloak drains cleanly).
+postgres-vm — sessions survive container restart if Keycloak drains cleanly).
 
 ## Related
 

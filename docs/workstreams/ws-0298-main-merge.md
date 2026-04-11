@@ -8,8 +8,8 @@
 - Release Date: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0298-main-final-r4`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-final-r4`
-- Final Exact-Main Replay Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-final-r4`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0298-main-final-r4`
+- Final Exact-Main Replay Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0298-main-final-r4`
 - Owner: codex
 - Depends On: `ws-0298-live-apply`
 
@@ -39,7 +39,7 @@ canonical-truth surfaces only after the exact-main live replay succeeds.
 - `receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-py-compile-r2.txt`
   passed for `scripts/sbom_scanner.py`.
 - `receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-converge-windmill-r2.txt`
-  recorded the governed exact-main worker resync on `docker-runtime-lv3`.
+  recorded the governed exact-main worker resync on `docker-runtime`.
 - `receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-live-checkout-r3.txt`
   confirmed the live mirror carries the native Grype detection and Syft temp-dir
   hardening code paths.
@@ -60,7 +60,7 @@ canonical-truth surfaces only after the exact-main live replay succeeds.
 - `receipts/live-applies/evidence/2026-03-31-ws-0298-mainline-pre-push-gate-r3.txt`
   records the final pre-push replay: the remote `packer-validate` and
   `tofu-validate` lanes briefly hit `502 Bad Gateway` pulls for
-  `registry.lv3.org/check-runner/infra:2026.03.23`, the documented local
+  `registry.example.com/check-runner/infra:2026.03.23`, the documented local
   fallback then passed both lanes, and the only remaining non-pass was the
   expected `workstream-surfaces` guard for terminal branch
   `codex/ws-0298-main-final-r4`.
@@ -75,7 +75,7 @@ canonical-truth surfaces only after the exact-main live replay succeeds.
 - Release `0.177.118` integrates the final ADR 0298 mainline carry-forward and
   records the first verified platform promotion for this ADR.
 - Platform version `0.130.77` now records ADR 0298 as live-applied from the
-  exact-main replay on `docker-runtime-lv3`.
+  exact-main replay on `docker-runtime`.
 - The canonical receipt for this promotion is
   `receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json`.
 - On this dedicated integration branch, the only remaining top-level gate

@@ -65,7 +65,7 @@ backups:
                     "degraded": 0,
                     "uncovered": 1,
                     "degraded_assets": [],
-                    "uncovered_assets": ["backup-lv3"],
+                    "uncovered_assets": ["backup"],
                 },
             }
         )
@@ -83,11 +83,11 @@ backups:
     )
 
     assert report["restore_evidence"]["source"] == "control_plane_restore_drill"
-    assert report["backup_coverage"]["summary"]["uncovered_assets"] == ["backup-lv3"]
+    assert report["backup_coverage"]["summary"]["uncovered_assets"] == ["backup"]
     assert report["offsite_backup"]["configured"] is False
     assert report["overall_status"] == "degraded"
     assert "Host loss" in render_dr_report(report)
-    assert "backup-lv3" in render_dr_report(report)
+    assert "backup" in render_dr_report(report)
     assert "Docs site (ADR 0094): complete" in render_release_status(report)
 
 
@@ -110,4 +110,4 @@ def test_runbook_plan_restores_backup_vm_first(tmp_path: Path) -> None:
     tier_1 = next(tier for tier in plan["tiers"] if tier["id"] == "tier_1")
     assert "lv3-backup-offsite" in tier_1["steps"][0]["command"]
     assert "qmrestore" in tier_1["steps"][1]["command"]
-    assert "Restore backup-lv3 from off-site storage" in render_text(plan)
+    assert "Restore backup from off-site storage" in render_text(plan)

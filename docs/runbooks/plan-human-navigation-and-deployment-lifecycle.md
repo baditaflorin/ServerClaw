@@ -62,9 +62,9 @@ ADR 0075 — Service Capability Catalog          (data layer)
 
 **ADR 0075** is the foundation: a JSON catalog (`config/service-capability-catalog.json`) with one entry per service covering URL, VM, health probe, images, secrets, ADR, and runbook.
 
-**ADR 0074** generates a static web portal (`ops.lv3.org`) from that catalog. The portal has six views: Service Map (with live health), VM Inventory, DNS Map, Runbook Index, ADR Decision Log, and Agent Capability Surface. It is the answer to "where does everything live?"
+**ADR 0074** generates a static web portal (`ops.example.com`) from that catalog. The portal has six views: Service Map (with live health), VM Inventory, DNS Map, Runbook Index, ADR Decision Log, and Agent Capability Surface. It is the answer to "where does everything live?"
 
-**ADR 0081** adds the temporal layer: `changelog.lv3.org`, a generated deployment history timeline synthesised from receipts, promotion records, and the Loki mutation audit log.
+**ADR 0081** adds the temporal layer: `changelog.example.com`, a generated deployment history timeline synthesised from receipts, promotion records, and the Loki mutation audit log.
 
 **ADR 0076** defines how subdomains are created, managed, and retired — including the catalog file, TLS provisioning rules (Let's Encrypt for public, step-ca for private), and the `make provision-subdomain` automation.
 
@@ -146,11 +146,11 @@ Lane A and Lane D can start immediately. Lane B can start immediately. Lane C be
 
 | FQDN | Service | Exposure | ADR |
 |---|---|---|---|
-| `ops.lv3.org` | Platform Operations Portal | edge-published (auth-gated) | 0074 |
-| `changelog.lv3.org` | Deployment History Portal | edge-published (auth-gated) | 0081 |
-| `ops.staging.lv3.org` | Staging Ops Portal | private-only | 0074 |
+| `ops.example.com` | Platform Operations Portal | edge-published (auth-gated) | 0074 |
+| `changelog.example.com` | Deployment History Portal | edge-published (auth-gated) | 0081 |
+| `ops.staging.example.com` | Staging Ops Portal | private-only | 0074 |
 
-All other staging subdomains (`*.staging.lv3.org`) resolve via internal DNS only.
+All other staging subdomains (`*.staging.example.com`) resolve via internal DNS only.
 
 ---
 
@@ -204,13 +204,13 @@ All other staging subdomains (`*.staging.lv3.org`) resolve via internal DNS only
 
 - [ ] `make live-apply env=staging playbook=grafana.yml` succeeds and targets `10.20.10.*`
 - [ ] A full staging → production promotion runs through the Windmill pipeline with a promotion receipt
-- [ ] `https://ops.lv3.org` is live, auth-gated, and shows all services from the capability catalog
-- [ ] `https://changelog.lv3.org` shows the last 30 live-apply receipts in a human-readable timeline
-- [ ] No `.env` files exist in any Compose directory on `docker-runtime-lv3`
+- [ ] `https://ops.example.com` is live, auth-gated, and shows all services from the capability catalog
+- [ ] `https://changelog.example.com` shows the last 30 live-apply receipts in a human-readable timeline
+- [ ] No `.env` files exist in any Compose directory on `docker-runtime`
 - [ ] `make scaffold-service NAME=test-echo` produces all 12 artifacts with no TODO markers after completion
 - [ ] `make live-apply-group group=observability env=staging` runs cleanly
 - [ ] A maintenance window suppresses observation loop findings during a grafana restart
-- [ ] All new subdomains (`ops.lv3.org`, `changelog.lv3.org`) have TLS certificates issued and `make validate` passes the subdomain catalog check
+- [ ] All new subdomains (`ops.example.com`, `changelog.example.com`) have TLS certificates issued and `make validate` passes the subdomain catalog check
 
 ---
 

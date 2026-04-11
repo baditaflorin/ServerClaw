@@ -24,7 +24,7 @@ roles:
 
     primary_function: "Hypervisor management and VM provisioning"
     examples:
-      - proxmox_florin (10.10.10.1 or via Tailscale)
+      - proxmox-host (10.10.10.1 or via Tailscale)
 
     mandatory_capabilities:
       - proxmox_ve: "VE 9.x, kernel 6.17+, Debian 13 base"
@@ -58,7 +58,7 @@ roles:
 
     primary_function: "Platform orchestration and operational control"
     examples:
-      - runtime-control-lv3 (10.10.10.92, production)
+      - runtime-control (10.10.10.92, production)
 
     mandatory_capabilities:
       - orchestration_runtime: "Docker or Kubernetes for container scheduling"
@@ -92,10 +92,10 @@ roles:
 
     primary_function: "Durable state storage and retrieval"
     examples:
-      - postgres-lv3 (10.10.10.50, primary, production)
-      - postgres-replica-lv3 (10.10.10.51, read replica, production)
-      - postgres-apps-lv3 (10.10.10.52, application database, production)
-      - postgres-data-lv3 (10.10.10.54, data warehouse node, production)
+      - postgres (10.10.10.50, primary, production)
+      - postgres-replica (10.10.10.51, read replica, production)
+      - postgres-apps (10.10.10.52, application database, production)
+      - postgres-data (10.10.10.54, data warehouse node, production)
 
     mandatory_capabilities:
       - database_engine: "PostgreSQL 15+, MySQL 8+, or similar"
@@ -129,8 +129,8 @@ roles:
 
     primary_function: "Ingress/egress and boundary security"
     examples:
-      - nginx-lv3 (10.10.10.10, production)
-      - nginx-staging-lv3 (10.20.10.10, staging)
+      - nginx-edge (10.10.10.10, production)
+      - nginx-edge (10.20.10.10, staging)
 
     mandatory_capabilities:
       - http_proxy: "Reverse proxy (Nginx, Envoy, Caddy)"
@@ -164,11 +164,11 @@ roles:
 
     primary_function: "Application execution and service hosting"
     examples:
-      - runtime-general-lv3 (10.10.10.91, production)
-      - runtime-apps-lv3 (10.10.10.22, production)
-      - docker-runtime-lv3 (10.10.10.20, production, general)
-      - coolify-lv3 (10.10.10.70, production, PaaS)
-      - coolify-apps-lv3 (10.10.10.71, production, PaaS apps)
+      - runtime-general (10.10.10.91, production)
+      - runtime-apps (10.10.10.22, production)
+      - docker-runtime (10.10.10.20, production, general)
+      - coolify (10.10.10.70, production, PaaS)
+      - coolify-apps (10.10.10.71, production, PaaS apps)
 
     mandatory_capabilities:
       - container_runtime: "Docker, Podman, or Kubernetes"
@@ -203,8 +203,8 @@ roles:
 
     primary_function: "Platform observability and incident response"
     examples:
-      - monitoring-lv3 (10.10.10.40, production)
-      - monitoring-staging-lv3 (10.20.10.40, staging)
+      - monitoring (10.10.10.40, production)
+      - monitoring (10.20.10.40, staging)
 
     mandatory_capabilities:
       - metrics_ingestion: "Prometheus, Influx, or Graphite"
@@ -238,8 +238,8 @@ roles:
 
     primary_function: "Data protection and disaster recovery"
     examples:
-      - backup-lv3 (10.10.10.60, production)
-      - backup-staging-lv3 (10.20.10.60, staging)
+      - backup (10.10.10.60, production)
+      - backup (10.20.10.60, staging)
 
     mandatory_capabilities:
       - backup_engine: "Bacula, Velero, or similar"
@@ -274,8 +274,8 @@ roles:
 
     primary_function: "Continuous integration and artifact production"
     examples:
-      - docker-build-lv3 (10.10.10.30, production)
-      - docker-build-staging-lv3 (10.20.10.30, staging)
+      - docker-build (10.10.10.30, production)
+      - docker-build (10.20.10.30, staging)
 
     mandatory_capabilities:
       - ci_runner: "Jenkins, GitLab CI, Woodpecker, or Gitea Actions"

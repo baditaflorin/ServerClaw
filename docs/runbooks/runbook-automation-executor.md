@@ -8,12 +8,12 @@ The runbook automation executor loads a structured runbook definition, renders e
 
 The current implementation now shares one use-case service across multiple delivery adapters:
 
-- shared orchestration: [`platform/use_cases/runbooks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/use_cases/runbooks.py)
-- CLI adapter: [`scripts/runbook_executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/runbook_executor.py)
-- CLI entrypoint: [`scripts/lv3_cli.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py) via `lv3 runbook ...`
-- Windmill wrapper: [`config/windmill/scripts/runbook-executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/runbook-executor.py)
-- API gateway adapter: [`scripts/api_gateway/main.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/api_gateway/main.py)
-- ops portal adapter: [`scripts/ops_portal/app.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ops_portal/app.py)
+- shared orchestration: [`platform/use_cases/runbooks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/use_cases/runbooks.py)
+- CLI adapter: [`scripts/runbook_executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/runbook_executor.py)
+- CLI entrypoint: [`scripts/lv3_cli.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py) via `lv3 runbook ...`
+- Windmill wrapper: [`config/windmill/scripts/runbook-executor.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/runbook-executor.py)
+- API gateway adapter: [`scripts/api_gateway/main.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/api_gateway/main.py)
+- ops portal adapter: [`scripts/ops_portal/app.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/ops_portal/app.py)
 - persisted run records:
   - CLI and worker checkouts: `.local/runbooks/runs/<run_id>.json`
   - API gateway runtime: `/data/runbooks/runs/<run_id>.json`
@@ -136,19 +136,19 @@ List the API-gateway-exposed runbooks:
 
 ```bash
 curl -sS http://100.64.0.1:8083/v1/platform/runbooks \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)"
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/api-token.txt)"
 ```
 
 Execute the safe gateway verification runbook:
 
 ```bash
 curl -sS http://100.64.0.1:8083/v1/platform/runbooks/execute \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)" \
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/api-token.txt)" \
   -H "Content-Type: application/json" \
   -d '{"runbook_id":"validation-gate-status"}'
 ```
 
-When verifying from an SSH shell on `docker-runtime-lv3`, use the guest-local listeners instead of the Proxmox host proxy:
+When verifying from an SSH shell on `docker-runtime`, use the guest-local listeners instead of the Proxmox host proxy:
 
 - API gateway: `http://127.0.0.1:8083`
 - Windmill: `http://127.0.0.1:8000`
@@ -159,29 +159,29 @@ List resumable runbook tasks for one delivery surface:
 
 ```bash
 curl -sS 'http://100.64.0.1:8083/v1/platform/runbook-tasks?delivery_surface=ops_portal' \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)"
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/api-token.txt)"
 ```
 
 Open one persisted task together with its reentry summary:
 
 ```bash
 curl -sS http://100.64.0.1:8083/v1/platform/runbooks/<run_id> \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)"
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/api-token.txt)"
 ```
 
 Resume a paused task:
 
 ```bash
 curl -sS -X POST http://100.64.0.1:8083/v1/platform/runbooks/<run_id>/approve \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt)"
+  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/api-token.txt)"
 ```
 
 ## Windmill Worker Path
 
-From a worker checkout mounted at `/srv/proxmox_florin_server`:
+From a worker checkout mounted at `/srv/proxmox-host_server`:
 
 ```bash
-python3 config/windmill/scripts/runbook-executor.py --repo-path /srv/proxmox_florin_server --action status --run-id <run_id>
+python3 config/windmill/scripts/runbook-executor.py --repo-path /srv/proxmox-host_server --action status --run-id <run_id>
 ```
 
 ## Verification

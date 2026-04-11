@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0241-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0241-live-apply`
 - Owner: codex
 - Depends On: `adr-0108-operator-onboarding-and-offboarding`, `adr-0122-browser-first-operator-access-management`, `adr-0199-outline-living-knowledge-wiki`, `adr-0206-ports-and-adapters-for-external-integrations`
 - Conflicts With: none
@@ -54,15 +54,15 @@
 - regenerate the Windmill raw-app metadata lock after dependency changes
 - Windmill syntax and data-model validation
 - a latest-main `make converge-windmill` replay from this isolated worktree
-- live verification that the raw app bundle and note-mutation wrapper are present on `docker-runtime-lv3`
+- live verification that the raw app bundle and note-mutation wrapper are present on `docker-runtime`
 - live verification that updating one operator note through the governed wrapper persists markdown into the worker checkout without regressing roster validation
 
 ## Live Apply Outcome
 
-- `make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-live-apply` with final recap `docker-runtime-lv3 ok=231 changed=43 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`
-- live worker verification confirmed `/srv/proxmox_florin_server/scripts/operator_manager.py` hash `8c48a528d200389ec106dad7ef99d59d5fb1ff6891aa957c3503cf4f4359a77d`, `/srv/proxmox_florin_server/config/windmill/scripts/operator-update-notes.py` hash `7937e0fe94600789f75d777241ec50bb0b87cf81eca04e1454a84a09d870e5a8`, and the presence of `config/windmill/apps/wmill-lock.yaml` on `docker-runtime-lv3`
+- `make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0241-live-apply` with final recap `docker-runtime ok=231 changed=43 failed=0`, `postgres ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`
+- live worker verification confirmed `/srv/proxmox-host_server/scripts/operator_manager.py` hash `8c48a528d200389ec106dad7ef99d59d5fb1ff6891aa957c3503cf4f4359a77d`, `/srv/proxmox-host_server/config/windmill/scripts/operator-update-notes.py` hash `7937e0fe94600789f75d777241ec50bb0b87cf81eca04e1454a84a09d870e5a8`, and the presence of `config/windmill/apps/wmill-lock.yaml` on `docker-runtime`
 - live app proof in `receipts/live-applies/evidence/2026-03-29-adr-0241-app-summary.txt` confirmed `has_update_notes_backend: true`, `has_tiptap: true`, `has_editor_content: true`, `has_task_list: true`, and `has_insert_table: true` for `f/lv3/operator_access_admin`
-- a governed `f/lv3/operator_update_notes` run updated operator `florin-badita` with the Tiptap-authored markdown and returned `changed: true`, `status: ok`, `note_length: 231`, and `roster_path: /srv/proxmox_florin_server/config/operators.yaml`
+- a governed `f/lv3/operator_update_notes` run updated operator `florin-badita` with the Tiptap-authored markdown and returned `changed: true`, `status: ok`, `note_length: 231`, and `roster_path: /srv/proxmox-host_server/config/operators.yaml`
 - a second governed `f/lv3/operator_update_notes` run restored the original operator note string and returned `changed: true`, `status: ok`, and `note_length: 65`, leaving the live roster content back at the original single-line note
 - the final branch-local automation hardening covered both live-apply blockers discovered during replay: `config/windmill/apps/wmill-lock.yaml` is now a required validated raw-app surface, and the worker checkout archive now dereferences scoped-runner shard symlinks while using guest temp staging files so concurrent replays do not race on shared filenames
 

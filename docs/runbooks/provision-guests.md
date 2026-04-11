@@ -6,10 +6,10 @@ This runbook captures the first-code path for provisioning the initial Proxmox g
 
 ## Managed guests
 
-- `110` `nginx-lv3` `10.10.10.10`
-- `120` `docker-runtime-lv3` `10.10.10.20`
-- `130` `docker-build-lv3` `10.10.10.30`
-- `140` `monitoring-lv3` `10.10.10.40`
+- `110` `nginx-edge` `10.10.10.10`
+- `120` `docker-runtime` `10.10.10.20`
+- `130` `docker-build` `10.10.10.30`
+- `140` `monitoring` `10.10.10.40`
 
 ## Command
 
@@ -28,4 +28,4 @@ make provision-guests
 ## Notes
 
 - This runbook provisions guest shells and baseline packages, not the final application configuration.
-- Public ingress forwarding to the NGINX VM is now handled separately by [configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md).
+- Public ingress forwarding to the NGINX VM is now handled separately by [configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/configure-public-ingress.md).

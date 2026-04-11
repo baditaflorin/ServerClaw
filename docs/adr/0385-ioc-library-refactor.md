@@ -25,8 +25,8 @@ deep search-and-replace:
 
 | Pattern | Count | Impact |
 |---------|-------|--------|
-| `hostvars['proxmox_florin']` | 68 files | Every role that reads topology or ports hits one specific hostname |
-| `lv3.org` domain literals | 63 config files + service registry | DNS, SSO, TLS, alerts all assume one domain |
+| `hostvars['proxmox-host']` | 68 files | Every role that reads topology or ports hits one specific hostname |
+| `example.com` domain literals | 63 config files + service registry | DNS, SSO, TLS, alerts all assume one domain |
 | `*-lv3` hostname literals | 52 files (host_group, tasks, templates) | Service placement hardcoded to named VMs |
 | Operator-specific values in `all.yml` | ~200 lines | Email addresses, Tailscale IPs, Brevo keys, admin names mixed with platform defaults |
 
@@ -41,7 +41,7 @@ Fix the four patterns using Ansible's own variable system — no custom lookup
 framework needed. Each fix works independently, can be shipped and tested
 separately, and preserves full backwards compatibility.
 
-### Fix 1: Replace `hostvars['proxmox_florin']` with an indirection variable
+### Fix 1: Replace `hostvars['proxmox-host']` with an indirection variable
 
 **Root cause:** 68 role defaults and `derive_service_defaults.yml` itself
 reference the Proxmox host by name. A fork with host `proxmox_acme` breaks
@@ -54,7 +54,7 @@ everywhere.
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 ```
 
-Then replace every `hostvars['proxmox_florin']` with
+Then replace every `hostvars['proxmox-host']` with
 `hostvars[platform_topology_host]`. This is a mechanical find-and-replace
 across 68 files. The variable resolves at runtime to whatever the first
 Proxmox host is in the fork's inventory.
@@ -65,8 +65,8 @@ Proxmox host is in the fork's inventory.
 # Before:
 - ansible.builtin.assert:
     that:
-      - "'platform_service_registry' in hostvars['proxmox_florin']"
-      - common_derive_service_name in hostvars['proxmox_florin']['platform_service_registry']
+      - "'platform_service_registry' in hostvars['proxmox-host']"
+      - common_derive_service_name in hostvars['proxmox-host']['platform_service_registry']
 
 # After:
 - ansible.builtin.assert:
@@ -78,20 +78,20 @@ Proxmox host is in the fork's inventory.
 **Scope:** 68 files, mechanical replacement, low risk.
 **Test:** Run `ansible-inventory --list` then `make converge-keycloak` against
 the existing inventory — behaviour is identical because `groups['proxmox_hosts'][0]`
-resolves to `proxmox_florin`.
+resolves to `proxmox-host`.
 
 ---
 
 ### Fix 2: Extract `platform_domain` and derive all FQDNs from it
 
-**Root cause:** `lv3.org` appears as a string literal in 63+ config files,
+**Root cause:** `example.com` appears as a string literal in 63+ config files,
 service registry DNS/SSO/TLS blocks, and `all.yml`.
 
 **Fix:** Add one variable and make everything derive from it:
 
 ```yaml
 # inventory/group_vars/all.yml (add near top)
-platform_domain: lv3.org
+platform_domain: example.com
 ```
 
 Then in `platform_service_registry` (platform_services.yml), replace every
@@ -102,12 +102,12 @@ literal FQDN:
 api_gateway:
   dns:
     records:
-      - fqdn: api.lv3.org
+      - fqdn: api.example.com
   proxy:
-    public_fqdn: api.lv3.org
+    public_fqdn: api.example.com
   tls:
     domains:
-      - api.lv3.org
+      - api.example.com
 
 # After:
 api_gateway:
@@ -121,8 +121,8 @@ api_gateway:
       - "api.{{ platform_domain }}"
 ```
 
-Most services follow the pattern `<subdomain>.lv3.org`. A handful use
-different patterns (`chat.lv3.org` for ServerClaw, `sso.lv3.org` for
+Most services follow the pattern `<subdomain>.example.com`. A handful use
+different patterns (`chat.example.com` for ServerClaw, `sso.example.com` for
 Keycloak). These are already the `public_fqdn` in the registry — just
 templatize the domain suffix.
 
@@ -132,11 +132,11 @@ to reference `platform_domain` or a new `platform_operator_email`:
 
 ```yaml
 # Before:
-proxmox_acme_domain: proxmox.lv3.org
-hetzner_dns_zone_name: lv3.org
-mail_platform_domain: lv3.org
-open_webui_admin_email: ops@lv3.org
-proxmox_notification_email: baditaflorin@gmail.com
+proxmox_acme_domain: proxmox.example.com
+hetzner_dns_zone_name: example.com
+mail_platform_domain: example.com
+open_webui_admin_email: ops@example.com
+proxmox_notification_email: operator@example.com
 
 # After:
 proxmox_acme_domain: "proxmox.{{ platform_domain }}"
@@ -159,8 +159,8 @@ Test with `--check --diff` before live apply.
 
 ### Fix 3: Replace `*-lv3` hostname literals with `host_group` lookups
 
-**Root cause:** 52 files reference specific VM names like `runtime-control-lv3`,
-`postgres-lv3`. The service registry already declares `host_group` per service.
+**Root cause:** 52 files reference specific VM names like `runtime-control`,
+`postgres`. The service registry already declares `host_group` per service.
 Roles should use it.
 
 **Fix:** The `host_group` field in `platform_service_registry` already maps
@@ -173,7 +173,7 @@ target host directly:
 ```yaml
 # Before (in postgres_client tasks):
 - community.postgresql.postgresql_query:
-    login_host: "{{ hostvars['postgres-lv3'].ansible_host }}"
+    login_host: "{{ hostvars['postgres'].ansible_host }}"
 
 # After:
 - community.postgresql.postgresql_query:
@@ -188,7 +188,7 @@ For **service registry `host_group` fields**, replace literals:
 ```yaml
 # Before:
 api_gateway:
-  host_group: runtime-control-lv3
+  host_group: runtime-control
 
 # After:
 api_gateway:
@@ -201,9 +201,9 @@ hostnames as variables:
 ```yaml
 # inventory/group_vars/all.yml
 platform_host_names:
-  runtime_control: runtime-control-lv3
-  postgres: postgres-lv3
-  nginx_edge: nginx-lv3
+  runtime_control: runtime-control
+  postgres: postgres
+  nginx_edge: nginx-edge
   # ... etc
 ```
 
@@ -219,7 +219,7 @@ A fork changes this one map. Roles reference
 
 **Root cause:** `inventory/group_vars/all.yml` is a ~500-line file that mixes:
 - Platform structural defaults (paths, package lists, Proxmox settings)
-- Operator identity (`baditaflorin@gmail.com`, `Florin Badita`, `ops@lv3.org`)
+- Operator identity (`operator@example.com`, `Platform Operator`, `ops@example.com`)
 - Service-specific configuration (ServerClaw models, One API defaults)
 - Deployment-specific network config (Tailscale IPs, management allowed sources)
 
@@ -241,9 +241,9 @@ Ansible merges `group_vars/all/*.yml` automatically — no code changes needed.
 # inventory/group_vars/all/identity.yml
 # Fork operators: change every value in this file.
 
-platform_domain: lv3.org
-platform_operator_email: baditaflorin@gmail.com
-platform_operator_name: "Florin Badita"
+platform_domain: example.com
+platform_operator_email: operator@example.com
+platform_operator_name: "Platform Operator"
 platform_notification_author: "Proxmox LV3"
 
 # Admin accounts
@@ -265,7 +265,7 @@ mail_platform_brevo_sender_name: "{{ platform_operator_name }} Mail Bridge"
 proxmox_management_allowed_sources:
   - 100.64.0.0/10
   - 10.10.10.0/24
-  - 90.95.35.115/32
+  - 203.0.113.100/32
 
 monitoring_influxdb_org: lv3
 ```
@@ -296,15 +296,15 @@ Add two variables to `all.yml`. Don't change any consumers yet.
 Verify both resolve correctly:
 
 ```bash
-ansible -m debug -a "var=platform_domain" proxmox_florin
-ansible -m debug -a "var=platform_topology_host" proxmox_florin
+ansible -m debug -a "var=platform_domain" proxmox-host
+ansible -m debug -a "var=platform_topology_host" proxmox-host
 ```
 
-### Step 3: Replace `hostvars['proxmox_florin']` (2–3 hours, mechanical)
+### Step 3: Replace `hostvars['proxmox-host']` (2–3 hours, mechanical)
 
 ```bash
 # Find all occurrences
-grep -r "hostvars\['proxmox_florin'\]" \
+grep -r "hostvars\['proxmox-host'\]" \
   collections/ansible_collections/lv3/platform/roles/ \
   --include="*.yml" -l | wc -l
 # → 68 files
@@ -312,14 +312,14 @@ grep -r "hostvars\['proxmox_florin'\]" \
 # Replace (verify diff before committing)
 find collections/ansible_collections/lv3/platform/roles/ \
   -name "*.yml" -exec \
-  sed -i '' "s/hostvars\['proxmox_florin'\]/hostvars[platform_topology_host]/g" {} +
+  sed -i '' "s/hostvars\['proxmox-host'\]/hostvars[platform_topology_host]/g" {} +
 ```
 
 Test one playbook (`make converge-keycloak --check --diff`), then commit.
 
 ### Step 4: Templatize `platform_domain` in service registry (2–3 hours)
 
-Replace `lv3.org` literals in `platform_services.yml` with
+Replace `example.com` literals in `platform_services.yml` with
 `{{ platform_domain }}`. Update the 22 alertmanager rule files.
 Run `scripts/validate_service_registry.py`.
 
@@ -330,8 +330,8 @@ fields. Update the 52 files with hostname literals.
 
 ### Step 6: Sweep `all.yml` operator values (1 hour)
 
-Replace remaining operator-specific values (`ops@lv3.org`, `Florin Badita`,
-`baditaflorin@gmail.com`, `ServerClaw`, `search.lv3.org`, `chat.lv3.org`)
+Replace remaining operator-specific values (`ops@example.com`, `Platform Operator`,
+`operator@example.com`, `ServerClaw`, `search.example.com`, `chat.example.com`)
 with references to the identity variables.
 
 **Total estimated effort: 1–2 days of focused work.**
@@ -369,7 +369,7 @@ After all six steps, verify:
 
 ```bash
 # Zero direct references to operator hostname
-grep -r "hostvars\['proxmox_florin'\]" \
+grep -r "hostvars\['proxmox-host'\]" \
   collections/ansible_collections/lv3/platform/ \
   --include="*.yml" | wc -l
 # Expected: 0
@@ -379,8 +379,8 @@ grep -c "lv3\.org" inventory/group_vars/platform_services.yml
 # Expected: 0
 
 # Domain is a variable
-ansible -m debug -a "var=platform_domain" proxmox_florin
-# Expected: lv3.org
+ansible -m debug -a "var=platform_domain" proxmox-host
+# Expected: example.com
 
 # Reference deployment renders with example domain
 python scripts/reference_deployment_samples.py validate
@@ -391,7 +391,7 @@ make converge-keycloak env=production
 ```
 
 Add a **pre-commit check** (or extend the existing validation gate) that
-greps for literal `lv3.org` and `proxmox_florin` in role files and fails
+greps for literal `example.com` and `proxmox-host` in role files and fails
 if found. This prevents regression.
 
 ---
@@ -410,13 +410,13 @@ if found. This prevents regression.
 
 Steps 2–4 are **exactly what the existing fork runbook already describes**.
 The difference is that after this ADR, step 2 is "change 3 variables in one
-file" instead of "grep for lv3.org across 63 files and hope you got them all."
+file" instead of "grep for example.com across 63 files and hope you got them all."
 
 ---
 
 ## Success Criteria
 
-- [ ] `grep -r "proxmox_florin" collections/ --include="*.yml"` returns 0 hits
+- [ ] `grep -r "proxmox-host" collections/ --include="*.yml"` returns 0 hits
 - [ ] `grep -r "lv3\.org" inventory/group_vars/platform_services.yml` returns 0 hits
 - [ ] `all.yml` split into `all.yml` + `all/identity.yml` + `all/network.yml`
 - [ ] Reference deployment validation still passes

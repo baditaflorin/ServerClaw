@@ -67,8 +67,8 @@ programmatically, making every value recoverable from git history useless.
 | Keycloak client IDs and purposes | 14 | Enables targeted OIDC attacks |
 | Rotation workflow references | 12 | Reveals automation surface |
 | Internal IPs (10.10.10.x) | 20+ | Full network topology |
-| Public IP (65.108.75.123) | 1 | Direct targeting |
-| Domain + subdomains (lv3.org) | 30+ | DNS enumeration confirmed |
+| Public IP (203.0.113.1) | 1 | Direct targeting |
+| Domain + subdomains (example.com) | 30+ | DNS enumeration confirmed |
 | Operator identity | 1 | Social engineering vector |
 
 ### What Was NOT Exposed
@@ -153,7 +153,7 @@ The runbook prescribes a specific convergence order to avoid service outages:
 
 2. **Scrub was manual and incomplete** — The publish preparation commit
    (`31d24a6cd`) manually edited ~25 files but missed the OIDC secret in a
-   workstream doc. With 250+ files referencing `lv3.org`, manual scrubbing
+   workstream doc. With 250+ files referencing `example.com`, manual scrubbing
    was insufficient.
 
 3. **Full git history was pushed** — Even files that were scrubbed in the

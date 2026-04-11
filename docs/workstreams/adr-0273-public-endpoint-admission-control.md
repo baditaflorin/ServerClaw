@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0273-public-endpoint-admission-control`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0273-public-endpoint-admission-control`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0273-public-endpoint-admission-control`
 - Owner: codex
 - Depends On: `adr-0101-automated-certificate-lifecycle-management`, `adr-0139-subdomain-exposure-audit-and-registry`, `adr-0252-route-and-dns-publication-assertion-ledger`
 - Conflicts With: none
@@ -75,25 +75,25 @@
   remains idempotent when the live DNS state is already aligned
 - from release commit `e3de9561c1e55a190be8f20176a68c9c2fe97e39`,
   `make configure-edge-publication env=production` completed successfully with
-  `nginx-lv3 ok=61 changed=3 failed=0 skipped=14`; the exact-main run rebuilt
+  `nginx-edge ok=61 changed=3 failed=0 skipped=14`; the exact-main run rebuilt
   the docs and changelog portals, published the generated static directories,
   revalidated the shared-edge certificate inputs, rendered the final NGINX
   configuration, and re-verified both HTTP and HTTPS probe hostnames before
   finishing
-- direct live verification showed `https://lv3.org` returning `HTTP/2 308` to
-  `https://nginx.lv3.org/`, while `https://docs.lv3.org` and
-  `https://ops.lv3.org` both returned `HTTP/2 302` to the expected
+- direct live verification showed `https://example.com` returning `HTTP/2 308` to
+  `https://nginx.example.com/`, while `https://docs.example.com` and
+  `https://ops.example.com` both returned `HTTP/2 302` to the expected
   `oauth2/sign_in` paths with `x-robots-tag: noindex, nofollow`
 - the live shared-edge certificate proved the concordance contract with a
   Let's Encrypt issuer (`CN=E7`) and SAN coverage including
-  `agents.lv3.org`, `api.lv3.org`, `apps.lv3.org`, `changelog.lv3.org`,
-  `docs.lv3.org`, `draw.lv3.org`, `headscale.lv3.org`, `home.lv3.org`,
-  `langfuse.lv3.org`, `logs.lv3.org`, `lv3.org`, `n8n.lv3.org`,
-  `nginx.lv3.org`, `ops.lv3.org`, `realtime.lv3.org`, `registry.lv3.org`,
-  `status.lv3.org`, `tasks.lv3.org`, and `wiki.lv3.org`
+  `agents.example.com`, `api.example.com`, `apps.example.com`, `changelog.example.com`,
+  `docs.example.com`, `draw.example.com`, `headscale.example.com`, `home.example.com`,
+  `langfuse.example.com`, `logs.example.com`, `example.com`, `n8n.example.com`,
+  `nginx.example.com`, `ops.example.com`, `realtime.example.com`, `registry.example.com`,
+  `status.example.com`, `tasks.example.com`, and `wiki.example.com`
 - the final exact-main `make subdomain-exposure-audit` rerun wrote
   `receipts/subdomain-exposure-audit/20260329T124900Z.json`; the remaining
-  findings are still only the pre-existing `git.lv3.org` DNS warnings, not ADR
+  findings are still only the pre-existing `git.example.com` DNS warnings, not ADR
   0273 regressions
 
 ## Live Evidence
@@ -105,9 +105,9 @@
 - final audit receipt:
   `receipts/subdomain-exposure-audit/20260329T124900Z.json`
 - final direct probes:
-  `curl -I https://lv3.org`, `curl -I https://docs.lv3.org`,
-  `curl -I https://ops.lv3.org`, and
-  `echo | openssl s_client -servername docs.lv3.org -connect docs.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -text`
+  `curl -I https://example.com`, `curl -I https://docs.example.com`,
+  `curl -I https://ops.example.com`, and
+  `echo | openssl s_client -servername docs.example.com -connect docs.example.com:443 2>/dev/null | openssl x509 -noout -issuer -subject -text`
 
 ## Mainline Integration Outcome
 

@@ -32,7 +32,7 @@ shared_surfaces:
   - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
   - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/
   - docs/diagrams/
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - build/platform-manifest.json
   - config/
@@ -79,7 +79,7 @@ ownership_manifest:
         - Makefile
         - build/platform-manifest.json
         - inventory/group_vars/platform.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - config/ansible-execution-scopes.yaml
         - config/ansible-role-idempotency.yml
         - config/certificate-catalog.json
@@ -192,7 +192,7 @@ canonical_truth:
   changelog_entry: integrates ADR 0281 into main by promoting the April 3
     exact-main GlitchTip replay, preserving the already-current platform version
     `0.130.93`, and recording truthful public health, Keycloak OIDC, and
-    end-to-end event-ingest evidence for `errors.lv3.org`
+    end-to-end event-ingest evidence for `errors.example.com`
   release_bump: patch
   included_in_repo_version: 0.177.150
   latest_receipts:

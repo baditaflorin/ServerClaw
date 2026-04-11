@@ -29,7 +29,7 @@ shared_surfaces:
   - config/subdomain-exposure-registry.json
   - docs/schema/subdomain-catalog.schema.json
   - docs/schema/subdomain-exposure-registry.schema.json
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/subdomain_catalog.py
   - scripts/subdomain_exposure_audit.py
@@ -80,7 +80,7 @@ ownership_manifest:
         - config/subdomain-exposure-registry.json
         - docs/schema/subdomain-catalog.schema.json
         - docs/schema/subdomain-exposure-registry.schema.json
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/subdomain_catalog.py
         - scripts/subdomain_exposure_audit.py

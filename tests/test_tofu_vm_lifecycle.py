@@ -15,9 +15,9 @@ PRODUCTION_MAIN = REPO_ROOT / "tofu" / "environments" / "production" / "main.tf"
 STAGING_MAIN = REPO_ROOT / "tofu" / "environments" / "staging" / "main.tf"
 PRODUCTION_TFVARS = REPO_ROOT / "tofu" / "environments" / "production" / "terraform.tfvars"
 STAGING_TFVARS = REPO_ROOT / "tofu" / "environments" / "staging" / "terraform.tfvars"
-HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 TOKEN_SCRIPT = REPO_ROOT / "scripts" / "tofu_remote_command.py"
-REMOTE_WORKSPACE_BASE = Path("/home/ops/builds/proxmox_florin_server")
+REMOTE_WORKSPACE_BASE = Path("/home/ops/builds/proxmox-host_server")
 
 
 def _module_block(contents: str, module_name: str) -> str:
@@ -86,7 +86,7 @@ def test_remote_command_builds_production_import_target(tmp_path: Path) -> None:
             "import",
             "production",
             "--vm",
-            "nginx-lv3",
+            "nginx-edge",
             "--token-file",
             str(token_file),
         ],
@@ -106,7 +106,7 @@ def test_remote_command_builds_production_import_target(tmp_path: Path) -> None:
     assert "TF_VAR_proxmox_endpoint=https://proxmox.example.invalid:8006/api2/json" in command
     assert "TF_VAR_proxmox_api_token='lv3-automation@pve!primary=secret-token'" in command
     assert (
-        "./scripts/tofu_exec.sh import production module.nginx_lv3.proxmox_virtual_environment_vm.this proxmox_florin/110"
+        "./scripts/tofu_exec.sh import production module.nginx_lv3.proxmox_virtual_environment_vm.this proxmox-host/110"
         in command
     )
 
@@ -137,10 +137,10 @@ def test_remote_command_prefers_session_scoped_remote_workspace(tmp_path: Path) 
         text=True,
         env={
             **dict(os.environ),
-            "LV3_REMOTE_WORKSPACE_ROOT": "/srv/builds/proxmox_florin_server/.lv3-session-workspaces/test/repo",
+            "LV3_REMOTE_WORKSPACE_ROOT": "/srv/builds/proxmox-host_server/.lv3-session-workspaces/test/repo",
         },
     )
 
     command = completed.stdout.strip()
-    assert command.startswith("cd /srv/builds/proxmox_florin_server/.lv3-session-workspaces/test/repo && ")
+    assert command.startswith("cd /srv/builds/proxmox-host_server/.lv3-session-workspaces/test/repo && ")
     assert "./scripts/tofu_exec.sh plan staging" in command

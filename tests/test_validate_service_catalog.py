@@ -70,17 +70,17 @@ class ValidateServiceCatalogTest(unittest.TestCase):
                     "description": "Metrics dashboards and alerting for the platform.",
                     "category": "observability",
                     "lifecycle_status": "active",
-                    "vm": "monitoring-lv3",
+                    "vm": "monitoring",
                     "vmid": 140,
                     "internal_url": "http://10.10.10.40:3000",
-                    "public_url": "https://grafana.lv3.org",
-                    "subdomain": "grafana.lv3.org",
+                    "public_url": "https://grafana.example.com",
+                    "subdomain": "grafana.example.com",
                     "exposure": "edge-published",
                     "environments": {
                         "production": {
                             "status": "active",
-                            "url": "https://grafana.lv3.org",
-                            "subdomain": "grafana.lv3.org",
+                            "url": "https://grafana.example.com",
+                            "subdomain": "grafana.example.com",
                             "smoke_suites": [
                                 {
                                     "id": "broken-suite",
@@ -115,7 +115,7 @@ class ValidateServiceCatalogTest(unittest.TestCase):
                     "description": "Demo service.",
                     "category": "automation",
                     "lifecycle_status": "active",
-                    "vm": "docker-runtime-lv3",
+                    "vm": "docker-runtime",
                     "exposure": "private-only",
                     "internal_url": "http://10.10.10.20:9999",
                     "environments": {

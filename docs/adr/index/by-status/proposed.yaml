@@ -237,7 +237,7 @@ adrs:
       - recovery
       - automation
     summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
-      .lv3.org.
+      .example.com.
     filename: 0381-login-service-contracts-and-session-recovery-automation.md
     path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
   - adr: 0382
@@ -303,7 +303,7 @@ adrs:
     filename: 0385-ioc-library-refactor.md
     path: docs/adr/0385-ioc-library-refactor.md
   - adr: 0385
-    title: MemPalace Integration with chat.lv3.org
+    title: MemPalace Integration with chat.example.com
     status: Proposed
     implementation_status: Proposed
     date: '2026-03-21'
@@ -314,8 +314,8 @@ adrs:
       - chat
       - lv3
       - org
-    summary: Implement unified cross-interface memory by connecting chat.lv3.org to MemPalace, enabling both Claude Code and
-      chat.lv3.org users to access a shared memory poo
+    summary: Implement unified cross-interface memory by connecting chat.example.com to MemPalace, enabling both Claude Code and
+      chat.example.com users to access a shared memory poo
     filename: 0385-mempalace-chat-lv3-integration.md
     path: docs/adr/0385-mempalace-chat-lv3-integration.md
   - adr: 0386

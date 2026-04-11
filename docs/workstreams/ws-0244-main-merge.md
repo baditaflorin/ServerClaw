@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.54
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0244-main-merge-r3`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-main-merge-r3`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0244-main-merge-r3`
 - Owner: codex
 - Depends On: `ws-0244-live-apply`
 
@@ -66,7 +66,7 @@ for the authenticated API gateway plus ops portal runtime-assurance flow.
   successfully from the latest `origin/main`-based worktree after the gateway
   receipt-sync hang and verify-token fallback defects were fixed in the
   repo-managed roles.
-- Live verification on `docker-runtime-lv3` confirmed the guest and container
+- Live verification on `docker-runtime` confirmed the guest and container
   hashes matched the branch for both `api_gateway/main.py` and
   `ops_portal/app.py`, the authenticated gateway route returned `HTTP 200`
   with `45` bindings (`8` pass / `37` degraded / `0` failed / `0` unknown),

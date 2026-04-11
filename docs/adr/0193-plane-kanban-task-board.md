@@ -21,13 +21,13 @@ What is still missing is a repo-governed task board that can represent active in
 
 ## Decision
 
-We will run a self-hosted Plane task board on `docker-runtime-lv3` and treat it as a repo-managed service.
+We will run a self-hosted Plane task board on `docker-runtime` and treat it as a repo-managed service.
 
 The initial production contract is:
 
-1. Plane runs as a compose-managed stack on `docker-runtime-lv3`.
+1. Plane runs as a compose-managed stack on `docker-runtime`.
 2. Plane stores application state in the managed PostgreSQL VM and keeps cache, queue, and object-storage sidecars local to the runtime VM.
-3. The browser surface is published at `tasks.lv3.org` behind the existing shared Keycloak-backed edge authentication path.
+3. The browser surface is published at `tasks.example.com` behind the existing shared Keycloak-backed edge authentication path.
 4. Controller and automation access uses a dedicated Proxmox-host Tailscale TCP proxy.
 5. Repo automation bootstraps the initial admin, workspace, project, and API token locally.
 6. ADR metadata can be synchronized into Plane issues idempotently by repo-managed automation.
@@ -43,7 +43,7 @@ The initial production contract is:
 **Negative / Trade-offs**
 
 - Plane does not yet integrate with the shared Keycloak realm as an in-app OIDC client, so the browser SSO story is edge-auth only for now
-- the service adds another stateful application footprint to `docker-runtime-lv3`
+- the service adds another stateful application footprint to `docker-runtime`
 - merge-to-`main` still needs the usual shared-truth updates after the live apply is verified on this branch
 
 ## Implementation Notes
@@ -54,7 +54,7 @@ The live-apply branch:
 
 - add the Plane service to the repo-managed topology and validation catalogs
 - converge the PostgreSQL and runtime automation
-- publish `tasks.lv3.org` through the authenticated edge
+- publish `tasks.example.com` through the authenticated edge
 - bootstrap the initial Plane workspace and project
 - verify issue creation plus ADR synchronization end to end
 
@@ -69,11 +69,11 @@ Verified live evidence includes:
 - `make live-apply-service service=plane env=production ALLOW_IN_PLACE_MUTATION=true` reconverged the Proxmox host, PostgreSQL VM, Docker runtime VM, Plane bootstrap, and ADR-sync path from the merged-main candidate
 - `make configure-edge-publication env=production` completed successfully after regenerating the shared `build/changelog-portal` and `build/docs-portal` artifacts needed by the NGINX publication lane
 - `http://100.64.0.1:8011/api/instances/` returns `200`
-- `make plane-manage ACTION=whoami` reports the seeded `ops@lv3.org` identity against workspace `lv3-platform`, project `ADR`, and private controller URL `http://100.64.0.1:8011`
+- `make plane-manage ACTION=whoami` reports the seeded `ops@example.com` identity against workspace `lv3-platform`, project `ADR`, and private controller URL `http://100.64.0.1:8011`
 - the controller-local ADR sync summary at `.local/plane/adr-sync-summary.json` now records 218 synchronized ADR issues for the live `ADR` Plane project
-- `https://tasks.lv3.org/` returns `302` to the shared oauth2-proxy sign-in path, confirming the authenticated public entrypoint instead of the previous `https://nginx.lv3.org/` fallback
+- `https://tasks.example.com/` returns `302` to the shared oauth2-proxy sign-in path, confirming the authenticated public entrypoint instead of the previous `https://nginx.example.com/` fallback
 
 The merged-main replay also confirmed two shared dependency repairs that are now part of the recorded evidence:
 
-- the missing provider-side Hetzner A records for `coolify.lv3.org` and `apps.lv3.org` were repaired to match repo intent before the shared DNS lane was replayed
+- the missing provider-side Hetzner A records for `coolify.example.com` and `apps.example.com` were repaired to match repo intent before the shared DNS lane was replayed
 - the Plane runtime secret-injection lane now depends on OpenBao already being unsealed; the mainline replay was only resumed once the local OpenBao API again reported `sealed: false`

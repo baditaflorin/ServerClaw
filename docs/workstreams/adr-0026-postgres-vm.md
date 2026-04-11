@@ -1,14 +1,14 @@
 # Workstream ADR 0026: Dedicated PostgreSQL VM Baseline
 
-- ADR: [ADR 0026](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0026-dedicated-postgresql-vm-baseline.md)
+- ADR: [ADR 0026](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0026-dedicated-postgresql-vm-baseline.md)
 - Title: Dedicated PostgreSQL VM baseline
 - Status: merged
 - Branch: `codex/adr-0025-postgres-vm`
-- Worktree: `../proxmox_florin_server-postgres-vm`
+- Worktree: `../proxmox-host_server-postgres-vm`
 - Owner: codex
 - Depends On: none
 - Conflicts With: none
-- Shared Surfaces: `postgres-lv3`, `playbooks/postgres-vm.yml`, `roles/postgres_vm`, `roles/proxmox_tailscale_proxy`, `roles/hetzner_dns_record`
+- Shared Surfaces: `postgres`, `playbooks/postgres-vm.yml`, `roles/postgres_vm`, `roles/proxmox_tailscale_proxy`, `roles/hetzner_dns_record`
 
 ## Scope
 
@@ -31,7 +31,7 @@
 ## Expected Repo Surfaces
 
 - `inventory/hosts.yml`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `playbooks/postgres-vm.yml`
 - `playbooks/database-dns.yml`
 - `roles/postgres_vm`
@@ -42,22 +42,22 @@
 
 ## Expected Live Surfaces
 
-- VM `150` running as `postgres-lv3` on `10.10.10.50`
+- VM `150` running as `postgres` on `10.10.10.50`
 - `postgresql` service enabled on the guest
 - `nftables` enforcing deny-by-default inbound policy on the guest
 - TCP `5432` proxied from the Proxmox host Tailscale IP to the PostgreSQL VM
-- `database.lv3.org` resolving to the Proxmox host Tailscale IPv4
+- `database.example.com` resolving to the Proxmox host Tailscale IPv4
 - local peer administration available through `ops` and `postgres`
 
 ## Verification
 
-- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/site.yml --syntax-check`
-- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/postgres-vm.yml --syntax-check`
-- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/database-dns.yml --syntax-check`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo qm config 150'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 sudo systemctl status postgresql nftables --no-pager'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 sudo -u postgres psql -Atqc \"SHOW listen_addresses\"'`
-- `psql "host=database.lv3.org port=5432 dbname=postgres user=ops sslmode=prefer"`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/site.yml --syntax-check`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/postgres-vm.yml --syntax-check`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/database-dns.yml --syntax-check`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo qm config 150'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 sudo systemctl status postgresql nftables --no-pager'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 sudo -u postgres psql -Atqc \"SHOW listen_addresses\"'`
+- `psql "host=database.example.com port=5432 dbname=postgres user=ops sslmode=prefer"`
 
 ## Merge Criteria
 
@@ -69,7 +69,7 @@
 
 ## Notes For The Next Assistant
 
-- `database.lv3.org` is a Tailscale-only endpoint, not a public website
+- `database.example.com` is a Tailscale-only endpoint, not a public website
 - do not add NGINX HTTPS publication for PostgreSQL itself
 - this workstream was merged to `main` during integration because `0025` was already taken by the compose ADR series
 - live apply completed on `2026-03-22` and the merged `main` line now reflects that state

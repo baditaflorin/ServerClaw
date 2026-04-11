@@ -17,7 +17,7 @@ shared_surfaces:
   - roles/open_webui_runtime
   - roles/proxmox_tailscale_proxy
   - platform/web
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - config/image-catalog.json
   - config/service-capability-catalog.json
   - config/subdomain-catalog.json

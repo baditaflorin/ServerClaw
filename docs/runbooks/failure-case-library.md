@@ -101,7 +101,7 @@ be triggered manually for incidents discovered outside the automated path.
 
 ```bash
 python3 config/windmill/scripts/auto-create-case.py \
-  --repo-path /srv/proxmox_florin_server \
+  --repo-path /srv/proxmox-host_server \
   --payload-file /tmp/incident.json
 ```
 
@@ -124,7 +124,7 @@ Example `incident.json`:
 
 ```bash
 python3 config/windmill/scripts/audit-case-quality.py \
-  --repo-path /srv/proxmox_florin_server
+  --repo-path /srv/proxmox-host_server
 ```
 
 Add `--verify-commands` only when the controller can safely execute the stored
@@ -134,8 +134,8 @@ Post the summary to Mattermost:
 
 ```bash
 python3 config/windmill/scripts/audit-case-quality.py \
-  --repo-path /srv/proxmox_florin_server \
-  --mattermost-webhook-url https://mattermost.lv3.org/hooks/xxx
+  --repo-path /srv/proxmox-host_server \
+  --mattermost-webhook-url https://mattermost.example.com/hooks/xxx
 ```
 
 ---

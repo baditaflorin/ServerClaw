@@ -21,22 +21,20 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
     assert defaults["outline_public_base_url"] == "https://{{ outline_service_topology.public_hostname }}"
     assert defaults["outline_session_authority"] == "{{ platform_session_authority }}"
-    assert defaults["outline_public_edge_private_ip"] == "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+    assert defaults["outline_public_edge_private_ip"] == "{{ hostvars['proxmox-host'].proxmox_public_edge_ipv4 }}"
     assert (
         defaults["outline_public_hostname_overrides"][0]["hostname"] == "{{ outline_service_topology.public_hostname }}"
     )
     assert defaults["outline_public_hostname_overrides"][0]["address"] == "{{ outline_public_edge_private_ip }}"
     assert (
         defaults["outline_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology.keycloak.public_hostname }}"
     )
-    assert (
-        defaults["outline_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.outline_port }}"
-    )
+    assert defaults["outline_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.outline_port }}"
     assert defaults["outline_internal_base_url"] == "http://127.0.0.1:{{ outline_internal_port }}"
     assert (
         defaults["outline_database_host"]
-        == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+        == "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
     )
     assert defaults["outline_keycloak_client_id"] == "outline"
     assert defaults["outline_keycloak_logout_uri"] == (

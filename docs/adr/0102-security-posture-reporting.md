@@ -14,7 +14,7 @@ The platform has a defined security baseline for the Proxmox host (ADR 0006) and
 - OS packages accumulate vulnerabilities between manual audits
 - Security-relevant kernel parameters can drift from their set values (sysctl drift)
 - New CVEs affect packages installed on VMs without triggering any alert
-- Docker images running on `docker-runtime-lv3` are built from third-party base images that may have vulnerabilities at the time of deployment that were not present at build time
+- Docker images running on `docker-runtime` are built from third-party base images that may have vulnerabilities at the time of deployment that were not present at build time
 - The guest firewall rules (ADR 0067) can drift from the declared policy without detection (covered by ADR 0091 at the config level, but not at the vulnerability level)
 
 Without a continuous security scan, the platform's security posture degrades silently over time. The gap between "secure when deployed" and "secure today" widens with every month that passes without a fresh audit.
@@ -31,8 +31,8 @@ We will implement a **weekly automated security posture report** using two compl
 | Trivy | Container image CVEs: HIGH and CRITICAL only | CVE ID, severity, affected package, fixed version |
 | Gitleaks | Secrets in the git history (already in the validation gate, ADR 0087) | Secret type, file, line number |
 
-Lynis is run on: `proxmox host`, `docker-runtime-lv3`, `postgres-lv3`, `nginx-lv3`, and `monitoring-lv3`.
-Trivy is run on: all running containers on `docker-runtime-lv3` and `docker-build-lv3`.
+Lynis is run on: `proxmox host`, `docker-runtime`, `postgres`, `nginx-edge`, and `monitoring`.
+Trivy is run on: all running containers on `docker-runtime` and `docker-build`.
 
 ### Weekly scan workflow
 
@@ -83,7 +83,7 @@ The `scripts/parse_lynis_report.py` script parses the `.dat` report into structu
 
 ```json
 {
-  "host": "docker-runtime-lv3",
+  "host": "docker-runtime",
   "hardening_index": 72,
   "findings": [
     {
@@ -125,7 +125,7 @@ Results include CVE ID, package name, installed version, fixed version, and seve
   "scan_date": "2026-03-30T01:00:00Z",
   "hosts": [
     {
-      "host": "docker-runtime-lv3",
+      "host": "docker-runtime",
       "lynis_hardening_index": 72,
       "lynis_findings_count": {"warning": 5, "suggestion": 12},
       "new_findings_since_last_scan": 1
@@ -194,9 +194,9 @@ The managed Grafana platform overview dashboard also exposes security posture pa
 
 ## Implementation Notes
 
-- The first verified production security posture receipt was generated on 2026-03-26 and is recorded in [`receipts/security-reports/20260326T140237Z.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/security-reports/20260326T140237Z.json).
-- A full worker-executed replay from `windmill-windmill_worker-1` was later verified on 2026-03-26 and wrote [`receipts/security-reports/20260326T170143Z.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/security-reports/20260326T170143Z.json) from the mirrored checkout.
-- The branch-local live-apply evidence for that rollout is recorded in [`receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json).
+- The first verified production security posture receipt was generated on 2026-03-26 and is recorded in [`receipts/security-reports/20260326T140237Z.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/security-reports/20260326T140237Z.json).
+- A full worker-executed replay from `windmill-windmill_worker-1` was later verified on 2026-03-26 and wrote [`receipts/security-reports/20260326T170143Z.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/security-reports/20260326T170143Z.json) from the mirrored checkout.
+- The branch-local live-apply evidence for that rollout is recorded in [`receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json).
 - The live apply also hardened the repo-managed retry path: `playbooks/tasks/security-scan.yml` now removes stale Lynis pid files before a rerun, and `scripts/security_posture_report.py` can reuse cached Lynis artifacts with `--skip-lynis` when a later aggregation or publication retry is needed.
 - Windmill worker portability was improved by mirroring the bootstrap SSH key into the worker checkout, preferring the Proxmox internal bridge address for guest SSH jumps from the runtime VM, and purging stale Python bytecode from the mirrored worker checkout after sync so updated repo modules are actually loaded.
 - The 2026-03-26 worker replay completed end to end after that cleanup and wrote a fresh receipt from the worker checkout. Its wrapped `security_posture_report.py` process still returned `1` because the generated report summary status was `critical`, but the automation path itself completed successfully and emitted the expected `REPORT_JSON=` payload.

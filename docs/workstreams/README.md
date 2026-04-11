@@ -95,12 +95,12 @@ Preferred entry point:
 make start-workstream WORKSTREAM=adr-0011-monitoring
 ```
 
-This uses [scripts/create-workstream.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/create-workstream.sh) to:
+This uses [scripts/create-workstream.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/create-workstream.sh) to:
 
-- read the branch and worktree path from [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+- read the branch and worktree path from [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml)
 - create the worktree if it does not exist
 - attach it to the correct `codex/` branch
 
 ## Template
 
-Use [TEMPLATE.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/TEMPLATE.md) for new workstreams.
+Use [TEMPLATE.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/workstreams/TEMPLATE.md) for new workstreams.

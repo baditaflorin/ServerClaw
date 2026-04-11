@@ -24,7 +24,7 @@ ADR 0274 adds a shared MinIO staging bucket, `rag-staging`, for raw artifact upl
 ## Delivered Live Surfaces
 
 - private API: `http://100.118.189.95:8010`
-- Qdrant storage on `docker-runtime-lv3`
+- Qdrant storage on `docker-runtime`
 - controller-local bearer token: `.local/platform-context/api-token.txt`
 - controller-local MinIO staging secret: `.local/platform-context/minio-secret-key.txt`
 - repo-grounded OpenAPI tool server for Open WebUI global-tool integration
@@ -34,56 +34,56 @@ ADR 0274 adds a shared MinIO staging bucket, `rag-staging`, for raw artifact upl
 Syntax-check the workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-rag-context
 ```
 
 Converge the private runtime and host-side Tailscale proxy:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-rag-context
 ```
 
 Or use the service wrapper when running a production live apply:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make live-apply-service service=rag-context env=production
 ```
 
 Run the full repo-grounded rebuild from the current repo checkout as an explicit maintenance action:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/index_platform_knowledge.py --api-url http://100.64.0.1:8010 --api-token-file .local/platform-context/api-token.txt
 ```
 
 Build a bounded semantic seed manifest without uploading it:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/index_platform_knowledge.py --dry-run --include-path docs/adr/0198-qdrant-vector-search-semantic-rag.md --include-path docs/runbooks/rag-platform-context.md
 ```
 
 Query the private endpoint directly:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/query_platform_context.py --api-url http://100.64.0.1:8010 --question "how does step-ca issue SSH certificates"
 ```
 
 Or query it through the unified operator CLI:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/lv3_cli.py query-platform-context "how does step-ca issue SSH certificates" --limit 5
 ```
 
 Dry-run the chunk build without uploading:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 python3 scripts/index_platform_knowledge.py --dry-run
 ```
 
@@ -95,9 +95,9 @@ python3 scripts/index_platform_knowledge.py --dry-run
 4. `python3 scripts/lv3_cli.py query-platform-context "What retrieval backend is active for platform context?" --limit 3`
 5. Confirm the query response reports `"retrieval_backend": "vector"` during steady-state operation
 6. `curl -s http://100.64.0.1:8010/v1/platform-summary | jq '.error.code'` returns `AUTH_TOKEN_MISSING`
-7. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/platform-context/docker-compose.yml ps && sudo ls -l /opt/platform-context/openbao /run/lv3-secrets/platform-context && sudo test ! -e /opt/platform-context/platform-context.env && curl -fsS http://127.0.0.1:11434/api/version'`
+7. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/platform-context/docker-compose.yml ps && sudo ls -l /opt/platform-context/openbao /run/lv3-secrets/platform-context && sudo test ! -e /opt/platform-context/platform-context.env && curl -fsS http://127.0.0.1:11434/api/version'`
 8. If the managed live apply reports a degraded vector collection, let the role complete its bounded controller-side semantic seed repair and then schedule the full `scripts/index_platform_knowledge.py` rebuild separately when you need the entire mirrored corpus refreshed
-9. `test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/minio-secret-key.txt`
+9. `test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/minio-secret-key.txt`
 
 ## Open WebUI Integration
 
@@ -124,9 +124,9 @@ This follows the Open WebUI global OpenAPI tool-server model rather than exposin
 - The runtime now also expects the shared MinIO staging secret under `.local/platform-context/minio-secret-key.txt`; rerun `make converge-minio` before replaying platform-context if that file is missing.
 - Protected endpoints now return the canonical error envelope backed by `config/error-codes.yaml`.
 - The current runtime uses the local Ollama `nomic-embed-text` embedding model. Tests may still switch to the deterministic `token-hash` backend, and the service preserves a keyword fallback if vector retrieval is temporarily unavailable.
-- Production live apply skips the inline full mirrored-corpus rebuild because the expanded Ollama semantic corpus exceeds the safe synchronous rebuild budget on `docker-runtime-lv3`.
+- Production live apply skips the inline full mirrored-corpus rebuild because the expanded Ollama semantic corpus exceeds the safe synchronous rebuild budget on `docker-runtime`.
 - The managed verify path now probes live vector retrieval first and, when the collection is degraded by embedding-dimension drift such as the legacy `384` to Ollama `768` transition, repairs it with a bounded controller-side semantic seed rebuild rooted in ADR 0070, ADR 0145, ADR 0198, and this runbook.
-- The exact-main replay on 2026-03-29 verified that `docker compose up --build` is not a safe rebuild path on `docker-runtime-lv3` when Docker bridge state drifts. ADR 0263 now builds `lv3-platform-context-api` first with `DOCKER_BUILDKIT=0 docker build --network host ...` and then starts the stack with `docker compose up -d --no-build --remove-orphans`.
+- The exact-main replay on 2026-03-29 verified that `docker compose up --build` is not a safe rebuild path on `docker-runtime` when Docker bridge state drifts. ADR 0263 now builds `lv3-platform-context-api` first with `DOCKER_BUILDKIT=0 docker build --network host ...` and then starts the stack with `docker compose up -d --no-build --remove-orphans`.
 - If the live apply reaches the local Ollama readiness check and `http://10.10.10.20:11434/api/version` is refused, treat it as stale compose-network drift rather than an embedding-model defect. Recover `/opt/ollama` with `docker compose down --remove-orphans`, remove `ollama_default` if it still exists, then `docker compose up -d --remove-orphans` before rerunning the governed `rag-context` live apply.
 - Use `python3 scripts/index_platform_knowledge.py --api-url http://100.64.0.1:8010 --api-token-file .local/platform-context/api-token.txt` as the explicit full maintenance rebuild when you need the whole mirrored corpus refreshed.
 - Windmill seeds `f/lv3/rebuild_rag_index` so the deployed control plane can trigger a local-corpus rebuild without re-reading the full repository through chat context.

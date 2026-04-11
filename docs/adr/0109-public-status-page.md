@@ -9,7 +9,7 @@
 
 ## Context
 
-The platform already publishes several public hostnames, including `grafana.lv3.org`, `sso.lv3.org`, and `uptime.lv3.org`. External users still lacked one unauthenticated place to answer a simple question: is the platform down, or is the problem local to them?
+The platform already publishes several public hostnames, including `grafana.example.com`, `sso.example.com`, and `uptime.example.com`. External users still lacked one unauthenticated place to answer a simple question: is the platform down, or is the problem local to them?
 
 Uptime Kuma already tracks the public surfaces, but its built-in public status-page feature was not configured. The maintenance-window workflow also had no outward-facing publication path, so planned downtime looked indistinguishable from an outage to anyone outside the private operator context.
 
@@ -17,7 +17,7 @@ There was also no independent last-resort signal. If the platform lost the Uptim
 
 ## Decision
 
-We will publish a repo-managed public status page at `status.lv3.org`, backed by Uptime Kuma and supplemented by an independent Uptime Robot probe set.
+We will publish a repo-managed public status page at `status.example.com`, backed by Uptime Kuma and supplemented by an independent Uptime Robot probe set.
 
 ### Public status page
 
@@ -25,7 +25,7 @@ The repository now defines one Uptime Kuma status page in `config/uptime-kuma/st
 
 - slug: `lv3-platform`
 - title: `lv3 Platform Status`
-- hostname: `status.lv3.org`
+- hostname: `status.example.com`
 - groups:
   - Platform Access: `Keycloak OIDC Discovery`, `Uptime Kuma Public`
   - Observability: `Grafana Public`, `NGINX Edge Public`
@@ -34,7 +34,7 @@ Only externally meaningful monitors are published. Private-only services such as
 
 ### Edge publication
 
-`status.lv3.org` is registered in the canonical subdomain catalog and added to the shared NGINX edge topology. The edge keeps the hostname public and unauthenticated, but maps only the root request to the Uptime Kuma slug route so that the dedicated hostname serves the status page cleanly while still letting the backend load its normal assets.
+`status.example.com` is registered in the canonical subdomain catalog and added to the shared NGINX edge topology. The edge keeps the hostname public and unauthenticated, but maps only the root request to the Uptime Kuma slug route so that the dedicated hostname serves the status page cleanly while still letting the backend load its normal assets.
 
 ### Maintenance-window publication
 
@@ -50,13 +50,13 @@ This keeps ADR 0080 as the source of truth while exposing planned downtime on th
 
 The repository now includes `scripts/uptime_robot_tool.py` plus the canonical config in `config/uptime-robot/public-status-monitoring.json` for three independent 5-minute monitors:
 
-- `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
-- `https://grafana.lv3.org/api/health`
-- `https://status.lv3.org`
+- `https://sso.example.com/realms/lv3/.well-known/openid-configuration`
+- `https://grafana.example.com/api/health`
+- `https://status.example.com`
 
 The same config also defines two alert contacts:
 
-- operator email: `baditaflorin@gmail.com`
+- operator email: `operator@example.com`
 - Mattermost webhook: controller-local secret `uptime_robot_mattermost_webhook`
 
 ### SLO and health contract
@@ -73,7 +73,7 @@ The Uptime Kuma health-probe contract intentionally disables same-instance self-
 
 ### Positive
 
-- External users get a stable public status surface at `status.lv3.org`
+- External users get a stable public status surface at `status.example.com`
 - Planned maintenance can be reflected on the public page from the same maintenance-window workflow that suppresses internal alert noise
 - Independent external monitoring now exists for the public status surface and two critical public services
 - The platform’s public-facing operational posture is more product-like and less ad hoc

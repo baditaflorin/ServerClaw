@@ -15,7 +15,7 @@ description: |
      _resolve_plane_auth() exists. Must be built before other services can be added without
      copy-pasting credential discovery logic.
 
-  2. Outline tools (wiki.lv3.org) — existing REST client at scripts/outline_client.py,
+  2. Outline tools (wiki.example.com) — existing REST client at scripts/outline_client.py,
      no governed tool surface yet.
 
   3. Netbox tools — network source of truth, agents can't query IP allocations.
@@ -62,7 +62,7 @@ tasks:
     priority: low
     description: |
       Tools: list-dify-apps, get-dify-app, trigger-dify-workflow (approval_required: true)
-      IMPORTANT: use internal URL http://10.10.10.20:8094 — agents.lv3.org is behind oauth2-proxy
+      IMPORTANT: use internal URL http://10.10.10.20:8094 — agents.example.com is behind oauth2-proxy
       Auth: .local/dify/admin-auth.json (base_url, api_token = Dify API key)
 
 depends_on: []

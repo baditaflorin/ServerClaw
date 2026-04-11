@@ -37,7 +37,7 @@ A dedicated deadlock detector with active resolution provides:
 
 We will implement a **distributed deadlock detector** as a periodic Windmill workflow that scans the lock registry and intent queue for cycle formation, and a **resolution protocol** that aborts the lowest-priority participant in the cycle.
 
-The first repository implementation lands in [`platform/locking/deadlock_detector.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/locking/deadlock_detector.py) plus the Windmill wrapper [`config/windmill/scripts/detect-deadlocks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/detect-deadlocks.py). It operates over the worker-shared lock registry, intent queue, and coordination map files seeded in the repo checkout and is scheduled every 30 seconds through the existing Windmill runtime role.
+The first repository implementation lands in [`platform/locking/deadlock_detector.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/locking/deadlock_detector.py) plus the Windmill wrapper [`config/windmill/scripts/detect-deadlocks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/detect-deadlocks.py). It operates over the worker-shared lock registry, intent queue, and coordination map files seeded in the repo checkout and is scheduled every 30 seconds through the existing Windmill runtime role.
 
 ### Wait-for graph construction
 

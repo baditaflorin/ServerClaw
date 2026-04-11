@@ -13,11 +13,11 @@ ADR 0013 established that the NGINX VM at `10.10.10.10` is the single public edg
 
 ADR 0015 established the stable DNS names:
 
-- `proxmox.lv3.org`
-- `grafana.lv3.org`
-- `nginx.lv3.org`
-- `docker.lv3.org`
-- `build.lv3.org`
+- `proxmox.example.com`
+- `grafana.example.com`
+- `nginx.example.com`
+- `docker.example.com`
+- `build.example.com`
 
 In live operation, those names all reached the same default Debian NGINX page. That is misleading because the hostnames imply distinct services and exposure intent.
 
@@ -29,15 +29,15 @@ We will publish subdomains deliberately at the NGINX edge.
 
 Publication rules:
 
-1. `grafana.lv3.org`
+1. `grafana.example.com`
    - publicly reverse proxy to Grafana on `10.10.10.40:3000`
-2. `nginx.lv3.org`
+2. `nginx.example.com`
    - serve an explicit edge landing page from the NGINX VM
-3. `proxmox.lv3.org`
+3. `proxmox.example.com`
    - serve an explicit informational page stating that Proxmox administration remains private and is reached over Tailscale
-4. `docker.lv3.org`
+4. `docker.example.com`
    - serve an explicit informational page stating that the Docker runtime VM has no public web service by default
-5. `build.lv3.org`
+5. `build.example.com`
    - serve an explicit informational page stating that the build VM is private and operator-facing, not a public web workload
 
 TLS handling:

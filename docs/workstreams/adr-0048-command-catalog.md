@@ -1,10 +1,10 @@
 # Workstream ADR 0048: Command Catalog And Approval Gates
 
-- ADR: [ADR 0048](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0048-command-catalog-and-approval-gates.md)
+- ADR: [ADR 0048](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0048-command-catalog-and-approval-gates.md)
 - Title: Safe execution contracts for remote mutation
 - Status: live_applied
 - Branch: `codex/adr-0048-command-catalog`
-- Worktree: `../proxmox_florin_server-command-catalog`
+- Worktree: `../proxmox-host_server-command-catalog`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0046-identity-classes`
 - Conflicts With: none
@@ -39,8 +39,8 @@
 - `scripts/command_catalog.py --validate`
 - `scripts/command_catalog.py --command configure-network`
 - `scripts/command_catalog.py --check-approval --command configure-network --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned`
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0048-command-catalog-and-approval-gates.md`
+- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
+- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0048-command-catalog-and-approval-gates.md`
 - `make validate-data-models`
 
 ## Merge Criteria

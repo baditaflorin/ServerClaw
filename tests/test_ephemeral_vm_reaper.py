@@ -17,7 +17,7 @@ def test_reaper_blocks_when_repo_checkout_is_missing(tmp_path: Path) -> None:
 
 
 def test_reaper_treats_null_repo_path_as_default(monkeypatch) -> None:
-    monkeypatch.setattr(ephemeral_vm_reaper, "DEFAULT_REPO_PATH", "/srv/proxmox_florin_server")
+    monkeypatch.setattr(ephemeral_vm_reaper, "DEFAULT_REPO_PATH", "/srv/proxmox-host_server")
     monkeypatch.setattr(
         ephemeral_vm_reaper,
         "_load_fixture_manager",
@@ -26,7 +26,7 @@ def test_reaper_treats_null_repo_path_as_default(monkeypatch) -> None:
 
     payload = ephemeral_vm_reaper.main(repo_path=None)
     assert payload["status"] == "blocked"
-    assert payload["expected_repo_path"] == "/srv/proxmox_florin_server"
+    assert payload["expected_repo_path"] == "/srv/proxmox-host_server"
 
 
 def test_reaper_hydrates_proxmox_env_from_pid1(monkeypatch, tmp_path: Path) -> None:

@@ -4,7 +4,7 @@
 
 ADR 0126 connects observation findings to triage, proposal, execution, and verification with a durable run record.
 
-ADR 0204 now adds a governed correction-loop contract on top of that state machine. The authoritative catalog lives in [config/correction-loops.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply/config/correction-loops.json), and `make workflow-info WORKFLOW=platform-observation-loop` shows the live loop's invariant, repair order, verification source, and escalation boundary.
+ADR 0204 now adds a governed correction-loop contract on top of that state machine. The authoritative catalog lives in [config/correction-loops.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0204-live-apply/config/correction-loops.json), and `make workflow-info WORKFLOW=platform-observation-loop` shows the live loop's invariant, repair order, verification source, and escalation boundary.
 
 ## Start A Run
 
@@ -50,7 +50,7 @@ lv3 loop close <run_id> --reason "false positive"
 
 ## Observation Wrapper
 
-Windmill calls the wrapper at [`config/windmill/scripts/platform-observation-loop.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/platform-observation-loop.py). It:
+Windmill calls the wrapper at [`config/windmill/scripts/platform-observation-loop.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/platform-observation-loop.py). It:
 
 - accepts a batch of findings
 - ignores `ok` and `suppressed` items

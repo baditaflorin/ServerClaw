@@ -1,14 +1,14 @@
 # Workstream ADR 0024: Docker Guest Security Baseline
 
-- ADR: [ADR 0024](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0024-docker-guest-security-baseline.md)
+- ADR: [ADR 0024](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0024-docker-guest-security-baseline.md)
 - Title: Docker guest security baseline
 - Status: ready
 - Branch: `codex/adr-0024-docker-security`
-- Worktree: `../proxmox_florin_server-docker-security`
+- Worktree: `../proxmox-host_server-docker-security`
 - Owner: codex
 - Depends On: none
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `docker-build-lv3`, `playbooks/docker-security.yml`, `roles/docker_guest_security`
+- Shared Surfaces: `docker-runtime`, `docker-build`, `playbooks/docker-security.yml`, `roles/docker_guest_security`
 
 ## Scope
 
@@ -42,8 +42,8 @@
 
 ## Verification
 
-- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/docker-security.yml --syntax-check`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.20 'sudo iptables -S DOCKER-USER || true'`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/docker-security.yml --syntax-check`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@203.0.113.1 ops@10.10.10.20 'sudo iptables -S DOCKER-USER || true'`
 
 ## Merge Criteria
 

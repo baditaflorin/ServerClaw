@@ -4,7 +4,7 @@
 - Title: Weekly Lynis host hardening scans and Trivy container image CVE scans with results in the ops portal, GlitchTip, and Mattermost
 - Status: merged
 - Branch: `codex/adr-0102-security-posture`
-- Worktree: `../proxmox_florin_server-security-posture`
+- Worktree: `../proxmox-host_server-security-posture`
 - Owner: codex
 - Depends On: `adr-0006-security-baseline`, `adr-0024-docker-security`, `adr-0044-windmill`, `adr-0057-mattermost`, `adr-0061-glitchtip`, `adr-0066-audit-log`, `adr-0068-image-policy`, `adr-0087-validation-gate`, `adr-0093-interactive-ops-portal`, `adr-0097-alerting-routing`
 - Conflicts With: none
@@ -82,5 +82,5 @@
 - a full worker-side replay from `windmill-windmill_worker-1` is now also committed at `receipts/security-reports/20260326T170143Z.json`, confirming the mirrored checkout can execute the complete Lynis plus Trivy path through the private Proxmox jump
 - the branch-local live-apply record is committed at `receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json`
 - focused validation passed with `python3 -m py_compile scripts/parse_lynis_report.py scripts/security_posture_report.py config/windmill/scripts/security-posture-scan.py`, `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_parse_lynis_report.py tests/test_security_posture_report.py tests/test_ops_portal.py`, `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_security_posture_report.py tests/test_security_posture_windmill_wrapper.py`, `uv run --with pyyaml --with jsonschema python scripts/generate_ops_portal.py --check`, `make validate-generated-portals`, and `make syntax-check-windmill`
-- a full `ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime-lv3 ...` replay now completes cleanly after the bytecode-purge fix, confirming the Windmill runtime role can refresh the worker checkout and seed state without the earlier API disconnect
+- a full `ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime ...` replay now completes cleanly after the bytecode-purge fix, confirming the Windmill runtime role can refresh the worker checkout and seed state without the earlier API disconnect
 - the worker wrapper returns a structured `status: ok` payload and writes the new receipt above; the wrapped report command surfaces `returncode=1` only because the generated security summary status is `critical`

@@ -60,9 +60,9 @@ lv3 open <service>
 | `lv3 lint` | `make remote-lint` or `scripts/validate_repo.sh yaml ansible-lint` | build server (or local with `--local`) |
 | `lv3 validate` | `make remote-validate` or `make remote-pre-push` with `--strict` | build server |
 | `lv3 vm create` | repo-managed OpenTofu route via `make remote-tofu-apply ...` or a guarded `remote-exec` fallback | build server → Proxmox API |
-| `lv3 secret get` | `openbao kv get ...` (over Tailscale) | OpenBao on `docker-runtime-lv3` |
+| `lv3 secret get` | `openbao kv get ...` (over Tailscale) | OpenBao on `docker-runtime` |
 | `lv3 fixture up` | `make fixture-up FIXTURE=...` | build server → Proxmox staging |
-| `lv3 run` | Windmill API trigger | Windmill on `docker-runtime-lv3` |
+| `lv3 run` | Windmill API trigger | Windmill on `docker-runtime` |
 | `lv3 logs` | Loki API query | Loki on monitoring VM |
 | `lv3 ssh` | `ssh ops@<inventory-ip>` | direct SSH via Tailscale / subnet route |
 | `lv3 open` | `python3 -m webbrowser <url>` | local browser |
@@ -114,14 +114,14 @@ Total:   1m 46s
 ```
 $ lv3 status
 
-PLATFORM STATUS  (lv3.org)                          2026-03-22 09:41 UTC
+PLATFORM STATUS  (example.com)                          2026-03-22 09:41 UTC
 ───────────────────────────────────────────────────────────────────────
 SERVICE             VM                    URL                     HEALTH
-grafana             monitoring-lv3        grafana.lv3.org         ✓ 200
-prometheus          monitoring-lv3        —                       ✓ live
-openbao             docker-runtime-lv3    —                       ✓ live
-windmill            docker-runtime-lv3    windmill.lv3.org        ✓ 200
-keycloak            docker-runtime-lv3    auth.lv3.org            ✓ 200
+grafana             monitoring        grafana.example.com         ✓ 200
+prometheus          monitoring        —                       ✓ live
+openbao             docker-runtime    —                       ✓ live
+windmill            docker-runtime    windmill.example.com        ✓ 200
+keycloak            docker-runtime    auth.example.com            ✓ 200
 ...
 
 LAST DEPLOY         2026-03-23-<receipt>

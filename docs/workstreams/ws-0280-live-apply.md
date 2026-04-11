@@ -10,7 +10,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0280-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0280-live-apply`
 - Owner: codex
 - Depends On: `adr-0086-backup-and-recovery-for-stateful-services`, `adr-0092-unified-platform-api-gateway`, `adr-0124-ntfy-for-lightweight-push-notifications`
 - Conflicts With: none
@@ -27,7 +27,7 @@
 - `docs/workstreams/ws-0280-live-apply.md`
 - `docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md`
 - `docs/runbooks/configure-changedetection.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
@@ -84,7 +84,7 @@
   through
   `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt`;
   the settled branch-local replay completed with
-  `docker-runtime-lv3 : ok=311 changed=118 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`.
+  `docker-runtime : ok=311 changed=118 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`.
 - The exact-main retry branch then rebased ADR 0280 onto the shared
   `0.177.99 / 0.130.66` baseline, where the focused compatibility slice passed
   with `64 passed in 2.57s` in
@@ -97,7 +97,7 @@
   `65305c70c7049bcb177f59b5a44ab0d031a8a10c` succeeded in
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-0.177.100.txt`
   with final recap
-  `docker-runtime-lv3 : ok=312 changed=115 unreachable=0 failed=0 skipped=32 rescued=0 ignored=0`.
+  `docker-runtime : ok=312 changed=115 unreachable=0 failed=0 skipped=32 rescued=0 ignored=0`.
 - Fresh current-server proofs from that committed replay are preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-host-state-r1-0.177.100.txt`,
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-changedetection-runtime-state-r1-0.177.100.txt`,
@@ -105,7 +105,7 @@
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-gateway-route-r1-0.177.100.html`,
   confirming Debian 13 / Proxmox VE 9.1.6 on the host, a healthy
   Changedetection `0.54.7` runtime with `9` watches and `4` tags on
-  `docker-runtime-lv3`, a drift-free sync report, and a live authenticated
+  `docker-runtime`, a drift-free sync report, and a live authenticated
   `/v1/changedetection` gateway route.
 
 ## Remaining For Merge-To-Main

@@ -35,7 +35,7 @@ def make_repo(tmp_path: Path) -> Path:
     write(tmp_path / "config" / "command-catalog.json", '{"commands":{"converge-step-ca":{"description":"d"}}}')
     write(
         tmp_path / "config" / "service-capability-catalog.json",
-        '{"services":[{"id":"grafana","name":"Grafana","description":"Monitoring UI","category":"observability","lifecycle_status":"active","vm":"monitoring-lv3","exposure":"public","public_url":"https://grafana.lv3.org","environments":{"production":{"status":"active","url":"https://grafana.lv3.org"}}},{"id":"step_ca","name":"step-ca","description":"Certificate authority","category":"security","lifecycle_status":"active","vm":"docker-runtime-lv3","exposure":"private-only","internal_url":"https://10.10.10.20:9443","environments":{"production":{"status":"active","url":"https://10.10.10.20:9443"}}}]}',
+        '{"services":[{"id":"grafana","name":"Grafana","description":"Monitoring UI","category":"observability","lifecycle_status":"active","vm":"monitoring","exposure":"public","public_url":"https://grafana.example.com","environments":{"production":{"status":"active","url":"https://grafana.example.com"}}},{"id":"step_ca","name":"step-ca","description":"Certificate authority","category":"security","lifecycle_status":"active","vm":"docker-runtime","exposure":"private-only","internal_url":"https://10.10.10.20:9443","environments":{"production":{"status":"active","url":"https://10.10.10.20:9443"}}}]}',
     )
     write(
         tmp_path / "config" / "error-codes.yaml",
@@ -101,12 +101,12 @@ error_codes:
     )
     write(
         tmp_path / "config" / "slo-catalog.json",
-        '{"schema_version":"1.0.0","review_note":"review later","slos":[{"id":"grafana-availability","service_id":"grafana","indicator":"availability","objective_percent":99.5,"window_days":30,"target_url":"https://grafana.lv3.org","probe_module":"http_2xx_follow_redirects","description":"Grafana stays up."}]}',
+        '{"schema_version":"1.0.0","review_note":"review later","slos":[{"id":"grafana-availability","service_id":"grafana","indicator":"availability","objective_percent":99.5,"window_days":30,"target_url":"https://grafana.example.com","probe_module":"http_2xx_follow_redirects","description":"Grafana stays up."}]}',
     )
     write(tmp_path / "config" / "agent-tool-registry.json", '{"tools":[]}')
     write(
         tmp_path / "config" / "dependency-graph.json",
-        '{"schema_version":"1.0.0","nodes":[{"id":"grafana","service":"grafana","name":"Grafana","vm":"monitoring-lv3","tier":1},{"id":"step_ca","service":"step_ca","name":"step-ca","vm":"docker-runtime-lv3","tier":1}],"edges":[]}',
+        '{"schema_version":"1.0.0","nodes":[{"id":"grafana","service":"grafana","name":"Grafana","vm":"monitoring","tier":1},{"id":"step_ca","service":"step_ca","name":"step-ca","vm":"docker-runtime","tier":1}],"edges":[]}',
     )
     write(
         tmp_path / "versions" / "stack.yaml",
@@ -242,7 +242,7 @@ def test_platform_slos_return_catalog_entries(tmp_path: Path) -> None:
             embedding_model="unused",
             embedding_dimension=384,
             prometheus_url="",
-            grafana_url="https://grafana.lv3.org",
+            grafana_url="https://grafana.example.com",
         )
     )
 
@@ -405,7 +405,7 @@ def test_build_config_uses_corpus_root_for_default_observability_paths(tmp_path:
 
     assert config.error_registry_path == repo_root / "config" / "error-codes.yaml"
     assert config.prometheus_url == "http://100.118.189.95:9090"
-    assert config.grafana_url == "https://grafana.lv3.org"
+    assert config.grafana_url == "https://grafana.example.com"
 
 
 def test_platform_context_app_returns_canonical_errors(tmp_path: Path) -> None:

@@ -6,11 +6,11 @@ ADR 0158 adds a conflict-free merge path for append-heavy registry files. Instea
 
 ## Canonical Sources
 
-- merge-eligible file catalog: [config/merge-eligible-files.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/merge-eligible-files.yaml)
-- runtime module: [platform/config_merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/config_merge)
-- operator CLI: [scripts/config_merge_protocol.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/config_merge_protocol.py)
-- Windmill worker wrapper: [config/windmill/scripts/merge-config-changes.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/merge-config-changes.py)
-- schema migration: [migrations/0016_config_merge_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0016_config_merge_schema.sql)
+- merge-eligible file catalog: [config/merge-eligible-files.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/merge-eligible-files.yaml)
+- runtime module: [platform/config_merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/config_merge)
+- operator CLI: [scripts/config_merge_protocol.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/config_merge_protocol.py)
+- Windmill worker wrapper: [config/windmill/scripts/merge-config-changes.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/merge-config-changes.py)
+- schema migration: [migrations/0016_config_merge_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/migrations/0016_config_merge_schema.sql)
 
 ## Merge-Eligible Files
 
@@ -112,10 +112,10 @@ uv run --with pytest --with pyyaml pytest -q \
 Verify the live database and Windmill seeds after `make converge-windmill`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 \
   "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""
 
-WINDMILL_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+WINDMILL_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" \
 python3 scripts/windmill_run_wait_result.py \
   --base-url http://100.64.0.1:8005 \
   --workspace lv3 \
@@ -139,6 +139,6 @@ If a row cannot be applied:
 Use the staging table to inspect the blocked row:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 \
   "psql -d windmill -x -c \"SELECT change_id, file_path, key_value, status, status_reason FROM config_change_staging WHERE status = 'conflict' ORDER BY submitted_at DESC\""
 ```

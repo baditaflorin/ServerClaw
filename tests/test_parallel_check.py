@@ -47,7 +47,7 @@ def test_load_manifest_and_build_docker_command(tmp_path: Path) -> None:
         json.dumps(
             {
                 "lint-yaml": {
-                    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+                    "image": "registry.example.com/check-runner/ansible:2.17.10",
                     "command": "echo ok",
                     "working_dir": "/workspace",
                     "timeout_seconds": 30,
@@ -69,7 +69,7 @@ def test_build_docker_command_marks_workspace_as_safe_git_directory(tmp_path: Pa
     parallel_check = load_parallel_check_module()
     check = parallel_check.CheckDefinition(
         label="schema-validation",
-        image="registry.lv3.org/check-runner/python:3.12.10",
+        image="registry.example.com/check-runner/python:3.12.10",
         command="python scripts/validate_repository_data_models.py --validate",
         working_dir="/workspace",
         timeout_seconds=30,
@@ -97,7 +97,7 @@ def test_build_docker_command_mounts_worktree_git_metadata(tmp_path: Path) -> No
 
     check = parallel_check.CheckDefinition(
         label="validate-schemas",
-        image="registry.lv3.org/check-runner/python:3.12.10",
+        image="registry.example.com/check-runner/python:3.12.10",
         command="python scripts/validate_repository_data_models.py --validate",
         working_dir="/workspace",
         timeout_seconds=30,
@@ -130,7 +130,7 @@ def test_build_docker_command_mounts_declared_caches(
 
     check = parallel_check.CheckDefinition(
         label="security-scan",
-        image="registry.lv3.org/check-runner/security:2026.03.23",
+        image="registry.example.com/check-runner/security:2026.03.23",
         command="trivy fs .",
         working_dir="/workspace",
         timeout_seconds=30,
@@ -162,7 +162,7 @@ def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkey
 
     check = parallel_check.CheckDefinition(
         label="workstream-surfaces",
-        image="registry.lv3.org/check-runner/python:3.12.10",
+        image="registry.example.com/check-runner/python:3.12.10",
         command="./scripts/validate_repo.sh workstream-surfaces",
         working_dir="/workspace",
         timeout_seconds=30,
@@ -188,7 +188,7 @@ def test_build_docker_command_mounts_docker_socket_and_host_workspace(
 
     check = parallel_check.CheckDefinition(
         label="atlas-lint",
-        image="registry.lv3.org/check-runner/python:3.12.10",
+        image="registry.example.com/check-runner/python:3.12.10",
         command="python scripts/atlas_schema.py lint",
         working_dir="/workspace",
         timeout_seconds=30,

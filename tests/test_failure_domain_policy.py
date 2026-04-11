@@ -21,10 +21,10 @@ def build_host_vars(*, secondary_domain_active: bool = False, standby_has_except
     return {
         "platform_failure_domains": [
             {
-                "id": "host:proxmox_florin",
+                "id": "host:proxmox-host",
                 "kind": "host",
                 "status": "active",
-                "live_label": "fd-host-proxmox-florin",
+                "live_label": "fd-host-proxmox-host",
                 "summary": "Primary host",
             },
             {
@@ -38,10 +38,10 @@ def build_host_vars(*, secondary_domain_active: bool = False, standby_has_except
         "proxmox_guests": [
             {
                 "vmid": 150,
-                "name": "postgres-lv3",
+                "name": "postgres",
                 "tags": ["postgres", "database", "lv3"],
                 "placement": {
-                    "failure_domain": "host:proxmox_florin",
+                    "failure_domain": "host:proxmox-host",
                     "placement_class": "primary",
                     "anti_affinity_group": "postgres-ha",
                     "co_location_exceptions": [],
@@ -49,10 +49,10 @@ def build_host_vars(*, secondary_domain_active: bool = False, standby_has_except
             },
             {
                 "vmid": 151,
-                "name": "postgres-replica-lv3",
+                "name": "postgres-replica",
                 "tags": ["postgres", "database", "ha", "lv3"],
                 "placement": {
-                    "failure_domain": "host:proxmox_florin",
+                    "failure_domain": "host:proxmox-host",
                     "placement_class": "standby",
                     "anti_affinity_group": "postgres-ha",
                     "co_location_exceptions": standby_exceptions,
@@ -60,10 +60,10 @@ def build_host_vars(*, secondary_domain_active: bool = False, standby_has_except
             },
             {
                 "vmid": 160,
-                "name": "backup-lv3",
+                "name": "backup",
                 "tags": ["backup", "pbs", "lv3"],
                 "placement": {
-                    "failure_domain": "host:proxmox_florin",
+                    "failure_domain": "host:proxmox-host",
                     "placement_class": "recovery",
                     "anti_affinity_group": "control-plane-recovery",
                     "co_location_exceptions": standby_exceptions,
@@ -82,11 +82,11 @@ def build_environment_topology(*, include_standby_exclusion: bool = True) -> dic
                 "name": "Production",
                 "status": "active",
                 "purpose": "Primary environment",
-                "base_domain": "lv3.org",
-                "hostname_pattern": "<service>.lv3.org",
+                "base_domain": "example.com",
+                "hostname_pattern": "<service>.example.com",
                 "edge_service_id": "nginx_edge",
-                "edge_vm": "postgres-lv3",
-                "ingress_ipv4": "65.108.75.123",
+                "edge_vm": "postgres",
+                "ingress_ipv4": "203.0.113.1",
                 "topology_model": "single-node-shared-edge",
                 "isolation_model": "Shared edge",
             },
@@ -95,15 +95,15 @@ def build_environment_topology(*, include_standby_exclusion: bool = True) -> dic
                 "name": "Staging",
                 "status": "active",
                 "purpose": "Preview lane",
-                "base_domain": "staging.lv3.org",
-                "hostname_pattern": "<service>.staging.lv3.org",
+                "base_domain": "staging.example.com",
+                "hostname_pattern": "<service>.staging.example.com",
                 "edge_service_id": "nginx_edge",
-                "edge_vm": "postgres-lv3",
-                "ingress_ipv4": "65.108.75.123",
+                "edge_vm": "postgres",
+                "ingress_ipv4": "203.0.113.1",
                 "topology_model": "single-node-shared-edge",
                 "isolation_model": "Shared host",
                 "placement": {
-                    "failure_domain": "host:proxmox_florin",
+                    "failure_domain": "host:proxmox-host",
                     "placement_class": "preview",
                     "anti_affinity_group": "staging-preview",
                     "co_location_exceptions": [
@@ -125,11 +125,11 @@ def build_service_catalog() -> dict:
             {
                 "id": "postgres",
                 "name": "PostgreSQL",
-                "vm": "postgres-lv3",
+                "vm": "postgres",
                 "redundancy": {
                     "tier": "R2",
                     "standby": {
-                        "vm": "postgres-replica-lv3",
+                        "vm": "postgres-replica",
                     },
                 },
             }
@@ -141,7 +141,7 @@ def test_repo_policy_validates() -> None:
     report = failure_domain_policy.validate_failure_domain_policy()
     standby_pairs = {item["service_id"] for item in report["standby_pairs"]}
     assert "postgres" in standby_pairs
-    postgres_guest = next(item for item in report["guests"] if item["name"] == "postgres-replica-lv3")
+    postgres_guest = next(item for item in report["guests"] if item["name"] == "postgres-replica")
     assert "exc-same-domain" in postgres_guest["live_tags"]
 
 

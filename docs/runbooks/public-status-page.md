@@ -2,11 +2,11 @@
 
 ## Purpose
 
-This runbook manages the public `status.lv3.org` surface introduced by ADR 0109.
+This runbook manages the public `status.example.com` surface introduced by ADR 0109.
 
 It covers:
 
-- the Uptime Kuma status page definition served at `https://status.lv3.org`
+- the Uptime Kuma status page definition served at `https://status.example.com`
 - maintenance-window publication into the public page
 - independent Uptime Robot monitoring for last-resort outage detection
 
@@ -46,7 +46,7 @@ make uptime-robot-manage ACTION=list-monitors
 
 ## Expected Result
 
-- `status.lv3.org` proxies the Uptime Kuma status page slug `lv3-platform`
+- `status.example.com` proxies the Uptime Kuma status page slug `lv3-platform`
 - the public page shows the repo-managed public monitor groups
 - `make open-maintenance-window ...` posts or updates a matching Uptime Kuma maintenance entry for the affected public monitor set
 - Uptime Robot keeps three 5-minute monitors active for SSO, Grafana, and the public status page itself
@@ -56,7 +56,7 @@ make uptime-robot-manage ACTION=list-monitors
 Confirm the public page route responds:
 
 ```bash
-curl -I https://status.lv3.org
+curl -I https://status.example.com
 ```
 
 Confirm the Uptime Kuma page definition is present:
@@ -81,6 +81,6 @@ make close-maintenance-window SERVICE=keycloak
 
 ## Notes
 
-- The public page intentionally excludes private-only services and avoids recursive self-monitoring from Uptime Kuma itself. Independent coverage for `status.lv3.org` comes from Uptime Robot.
+- The public page intentionally excludes private-only services and avoids recursive self-monitoring from Uptime Kuma itself. Independent coverage for `status.example.com` comes from Uptime Robot.
 - `uptime_robot_api_key` and `uptime_robot_mattermost_webhook` are controller-local mirrors. Keep them outside git and source them from the approved secret store.
 - The Uptime Robot wrapper uses the documented legacy `/v2/` API endpoints because they publicly expose the monitor, alert-contact, and status-page contract needed by this repo automation.

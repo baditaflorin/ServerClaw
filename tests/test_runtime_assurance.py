@@ -139,14 +139,14 @@ def test_build_runtime_assurance_report_matches_browser_and_log_receipts(tmp_pat
                     "name": "Platform Operations Portal",
                     "lifecycle_status": "active",
                     "exposure": "edge-published",
-                    "public_url": "https://ops.lv3.org",
+                    "public_url": "https://ops.example.com",
                     "runbook": "docs/runbooks/platform-operations-portal.md",
                     "adr": "0244",
                     "environments": {
                         "production": {
                             "status": "active",
-                            "url": "https://ops.lv3.org",
-                            "subdomain": "ops.lv3.org",
+                            "url": "https://ops.example.com",
+                            "subdomain": "ops.example.com",
                         }
                     },
                 }
@@ -160,7 +160,7 @@ def test_build_runtime_assurance_report_matches_browser_and_log_receipts(tmp_pat
             "schema_version": "2.0.0",
             "publications": [
                 {
-                    "fqdn": "ops.lv3.org",
+                    "fqdn": "ops.example.com",
                     "service_id": "ops_portal",
                     "environment": "production",
                     "status": "active",
@@ -237,14 +237,14 @@ def test_build_runtime_assurance_report_ignores_metadata_and_unreadable_receipts
                     "name": "Platform Operations Portal",
                     "lifecycle_status": "active",
                     "exposure": "edge-published",
-                    "public_url": "https://ops.lv3.org",
+                    "public_url": "https://ops.example.com",
                     "runbook": "docs/runbooks/platform-operations-portal.md",
                     "adr": "0244",
                     "environments": {
                         "production": {
                             "status": "active",
-                            "url": "https://ops.lv3.org",
-                            "subdomain": "ops.lv3.org",
+                            "url": "https://ops.example.com",
+                            "subdomain": "ops.example.com",
                         }
                     },
                 }
@@ -258,7 +258,7 @@ def test_build_runtime_assurance_report_ignores_metadata_and_unreadable_receipts
             "schema_version": "2.0.0",
             "publications": [
                 {
-                    "fqdn": "ops.lv3.org",
+                    "fqdn": "ops.example.com",
                     "service_id": "ops_portal",
                     "environment": "production",
                     "status": "active",

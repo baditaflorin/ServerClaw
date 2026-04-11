@@ -59,7 +59,7 @@ def test_openbao_playbook_reestablishes_unsealed_state_before_postgres_end_to_en
 
     assert (
         unseal_play["hosts"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-control' }}"
     )
     assert ensure_task["ansible.builtin.include_role"]["name"] == "lv3.platform.openbao_runtime"
     assert ensure_task["ansible.builtin.include_role"]["tasks_from"] == "ensure_unsealed.yml"

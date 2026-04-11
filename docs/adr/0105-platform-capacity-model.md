@@ -33,12 +33,12 @@ The model records:
 - physical host capacity and target utilisation ceilings
 - resources reserved for the platform itself
 - active guest allocations validated from live `qm config` output
-- planned capacity for `postgres-replica-lv3`
+- planned capacity for `postgres-replica`
 - reserved headroom for the ADR 0106 ephemeral fixture pool
 
 ### Live utilisation collection
 
-`scripts/capacity_report.py` reads the committed model and, when live metrics are enabled, SSHes to `monitoring-lv3` through the Proxmox jump host. On the monitoring VM it runs `influx query` against the local InfluxDB API.
+`scripts/capacity_report.py` reads the committed model and, when live metrics are enabled, SSHes to `monitoring` through the Proxmox jump host. On the monitoring VM it runs `influx query` against the local InfluxDB API.
 
 The current live metrics contract is:
 
@@ -112,10 +112,10 @@ On 2026-03-26 the monitoring role was extended so the Grafana converge now impor
 - `make weekly-capacity-report NO_LIVE_METRICS=true`
 - `make weekly-capacity-report`
 - `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100`
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
-- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `curl -Ik --resolve grafana.example.com:443:203.0.113.1 https://grafana.example.com/d/lv3-capacity-overview/lv3-capacity-overview`
 
-The first 2026-03-26 production converge imported and verified the capacity dashboard but later hit a transient SSH reachability failure during a downstream blackbox verification task. An immediate replay from the same `codex/ws-0105-live-apply` worktree then completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`. The current-mainline replay from source commit `2907637daca87ee2bb739c0dd821eee0834aa319` completed cleanly again on 2026-03-27 with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`, and that replay also verified the fresh-worktree automation path after shortening per-run Ansible control-socket directories for long isolated worktrees. The public dashboard URL `https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to Grafana login, and both report entry points rendered with `metrics_source: ssh+influx`.
+The first 2026-03-26 production converge imported and verified the capacity dashboard but later hit a transient SSH reachability failure during a downstream blackbox verification task. An immediate replay from the same `codex/ws-0105-live-apply` worktree then completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`. The current-mainline replay from source commit `2907637daca87ee2bb739c0dd821eee0834aa319` completed cleanly again on 2026-03-27 with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`, and that replay also verified the fresh-worktree automation path after shortening per-run Ansible control-socket directories for long isolated worktrees. The public dashboard URL `https://grafana.example.com/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to Grafana login, and both report entry points rendered with `metrics_source: ssh+influx`.
 
 ## Related ADRs
 

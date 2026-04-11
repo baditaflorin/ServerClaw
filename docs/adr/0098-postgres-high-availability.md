@@ -9,9 +9,9 @@
 
 ## Context
 
-`postgres-lv3` (VMID 150) is a single-VM PostgreSQL instance that serves as the primary data store for five platform services: Keycloak, Mattermost, NetBox, OpenBao, and Windmill. It is the most consequential single point of failure in the platform:
+`postgres` (VMID 150) is a single-VM PostgreSQL instance that serves as the primary data store for five platform services: Keycloak, Mattermost, NetBox, OpenBao, and Windmill. It is the most consequential single point of failure in the platform:
 
-- If `postgres-lv3` crashes, all five services lose database connectivity simultaneously
+- If `postgres` crashes, all five services lose database connectivity simultaneously
 - Keycloak loses its session and user store → SSO breaks → every OIDC-protected service becomes inaccessible
 - NetBox loses its IPAM data → topology queries fail → the ops portal and agent tools degrade
 - Mattermost loses its message store → ChatOps ceases to function during an incident — exactly when it is most needed
@@ -23,11 +23,11 @@ The current backup model (ADR 0020) provides point-in-time VM snapshots via PBS,
 
 Even optimistically, this is a 20–30 minute recovery window, all of it manual. For a homelab, this is tolerable occasionally; for a platform that is the operator's primary tool, it is a recurring operational burden.
 
-The platform has the Proxmox infrastructure to provision a second VM (`postgres-replica-lv3`) on the same internal bridge at `10.10.10.51`. The approach chosen must not add operational complexity beyond what one person can maintain.
+The platform has the Proxmox infrastructure to provision a second VM (`postgres-replica`) on the same internal bridge at `10.10.10.51`. The approach chosen must not add operational complexity beyond what one person can maintain.
 
 ## Decision
 
-We will provision a second PostgreSQL VM (`postgres-replica-lv3`, VMID 151) and implement **Patroni-managed streaming replication** with automatic failover, keeping `postgres-lv3` as the initial primary and `postgres-replica-lv3` as a hot standby. A virtual IP (VIP) managed by the Ansible `linux_keepalived` role provides a stable connection endpoint that services do not need to reconfigure on failover.
+We will provision a second PostgreSQL VM (`postgres-replica`, VMID 151) and implement **Patroni-managed streaming replication** with automatic failover, keeping `postgres` as the initial primary and `postgres-replica` as a hot standby. A virtual IP (VIP) managed by the Ansible `linux_keepalived` role provides a stable connection endpoint that services do not need to reconfigure on failover.
 
 ### Topology
 
@@ -37,7 +37,7 @@ We will provision a second PostgreSQL VM (`postgres-replica-lv3`, VMID 151) and 
            ┌─────────────┴─────────────┐
            │                           │
   10.10.10.50                   10.10.10.51
-  postgres-lv3 (primary)    postgres-replica-lv3 (standby)
+  postgres (primary)    postgres-replica (standby)
   VMID 150                   VMID 151
   Patroni leader             Patroni follower
            │                           │
@@ -45,14 +45,14 @@ We will provision a second PostgreSQL VM (`postgres-replica-lv3`, VMID 151) and 
                     WAL shipping (synchronous)
 ```
 
-Services connect to `database.lv3.org`, which now resolves to `10.10.10.55` (the VIP). On automatic failover, keepalived moves the VIP to the replica without any service reconfiguration.
+Services connect to `database.example.com`, which now resolves to `10.10.10.55` (the VIP). On automatic failover, keepalived moves the VIP to the replica without any service reconfiguration.
 
 ### Patroni
 
 Patroni is deployed on both PostgreSQL VMs and manages leader election and automatic failover. It requires a distributed consensus store; we use **etcd** rather than Consul or ZooKeeper because etcd is already a reasonable dependency at this scale:
 
 ```
-etcd is deployed as a three-member quorum on postgres-lv3, postgres-replica-lv3, and monitoring-lv3.
+etcd is deployed as a three-member quorum on postgres, postgres-replica, and monitoring.
 ```
 
 This is the minimum quorum that allows Patroni to keep automatic failover working when either PostgreSQL VM is lost. A single-node etcd colocated only with the primary would have failed with the primary and would not have satisfied the automatic failover requirement.
@@ -96,10 +96,10 @@ postgresql:
 ```
 # /etc/keepalived/keepalived.conf (Ansible-templated on both nodes)
 vrrp_instance postgres_vip {
-    state {{ 'MASTER' if inventory_hostname == 'postgres-lv3' else 'BACKUP' }}
+    state {{ 'MASTER' if inventory_hostname == 'postgres' else 'BACKUP' }}
     interface eth0
     virtual_router_id 51
-    priority {{ '100' if inventory_hostname == 'postgres-lv3' else '90' }}
+    priority {{ '100' if inventory_hostname == 'postgres' else '90' }}
     advert_int 1
     virtual_ipaddress {
         10.10.10.55/24
@@ -121,18 +121,18 @@ The `check_patroni_leader.sh` script returns 0 if the local node is the Patroni 
 
 ### Service connection strings
 
-All services are updated to connect to the VIP DNS name `database.lv3.org` rather than the bare node IP:
+All services are updated to connect to the VIP DNS name `database.example.com` rather than the bare node IP:
 
 ```ini
 # Example: Keycloak connection string (Ansible-templated)
-KC_DB_URL=jdbc:postgresql://database.lv3.org:5432/keycloak
+KC_DB_URL=jdbc:postgresql://database.example.com:5432/keycloak
 ```
 
 This change is applied to: Keycloak, Mattermost, NetBox, OpenBao, Windmill.
 
 ### OpenTofu provisioning
 
-`postgres-replica-lv3` is added to `tofu/environments/production/main.tf` as a new VM resource cloned from the Debian 13 cloud template, with the same sizing as `postgres-lv3` (8 GB RAM, 4 vCPU, 80 GB disk).
+`postgres-replica` is added to `tofu/environments/production/main.tf` as a new VM resource cloned from the Debian 13 cloud template, with the same sizing as `postgres` (8 GB RAM, 4 vCPU, 80 GB disk).
 
 ### Ansible roles
 
@@ -153,7 +153,7 @@ This change is applied to: Keycloak, Mattermost, NetBox, OpenBao, Windmill.
 
 **Planned failover** (maintenance, upgrade):
 ```bash
-patronictl -c /etc/patroni/patroni.yml switchover postgres-ha --master postgres-lv3 --candidate postgres-replica-lv3
+patronictl -c /etc/patroni/patroni.yml switchover postgres-ha --master postgres --candidate postgres-replica
 ```
 Switchover completes in < 5 seconds with zero transaction loss.
 
@@ -172,9 +172,9 @@ Switchover completes in < 5 seconds with zero transaction loss.
 - RTO = 30–45 seconds for automatic failover, < 5 seconds for planned switchover
 
 **Negative / Trade-offs**
-- A second Postgres VM (`postgres-replica-lv3`) requires 8 GB RAM and 80 GB disk — a significant resource commitment on a single-host Proxmox node
+- A second Postgres VM (`postgres-replica`) requires 8 GB RAM and 80 GB disk — a significant resource commitment on a single-host Proxmox node
 - Patroni adds configuration complexity; the `patronictl` command must be used for Postgres maintenance instead of `pg_ctl`
-- A third etcd quorum member now runs on `monitoring-lv3`, which expands the operational footprint beyond the original two PostgreSQL VMs
+- A third etcd quorum member now runs on `monitoring`, which expands the operational footprint beyond the original two PostgreSQL VMs
 - `synchronous_commit: on` adds ~1–2ms latency to all Postgres writes; acceptable for the application workloads in this platform
 
 ## Alternatives Considered

@@ -11,7 +11,7 @@ depends_on:
   - adr-0013-public-ingress
 conflicts_with: []
 shared_surfaces:
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - Proxmox VE firewall
   - roles/proxmox/network/
   - roles/linux/guest_firewall/

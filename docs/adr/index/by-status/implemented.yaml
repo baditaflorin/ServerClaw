@@ -144,7 +144,7 @@ adrs:
       - compose-managed
       - runtime
       - stacks
-    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
+    summary: Long-running workloads on docker-runtime will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
     implemented_in_platform_version: 0.23.0
@@ -182,7 +182,7 @@ adrs:
       - cli
       - wrapper
       - events
-    summary: We will count Docker builds on docker-build-lv3 by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring
+    summary: We will count Docker builds on docker-build by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring
       telemetry path.
     filename: 0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
     path: docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
@@ -335,7 +335,7 @@ adrs:
       - telemetry
       - telegraf
       - input
-    summary: We will collect container runtime telemetry on docker-runtime-lv3 by reusing the shared guest observability framework
+    summary: We will collect container runtime telemetry on docker-runtime by reusing the shared guest observability framework
       and Telegraf's Docker input plugin.
     filename: 0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md
     path: docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md
@@ -913,7 +913,7 @@ adrs:
       - platform
       - operations
       - portal
-    summary: We will deploy a Platform Operations Portal (ops.lv3.org) as a lightweight static web application served from
+    summary: We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served from
       the NGINX edge.
     filename: 0074-platform-operations-portal.md
     path: docs/adr/0074-platform-operations-portal.md
@@ -1033,7 +1033,7 @@ adrs:
       - deployment
       - history
       - portal
-    summary: We will generate a Deployment History Portal (changelog.lv3.org) as part of the operations portal suite (ADR
+    summary: We will generate a Deployment History Portal (changelog.example.com) as part of the operations portal suite (ADR
       0074).
     filename: 0081-platform-changelog-and-deployment-history.md
     path: docs/adr/0081-platform-changelog-and-deployment-history.md
@@ -1070,7 +1070,7 @@ adrs:
       - build
       - server
     summary: We will maintain a set of platform check runner images defined in docker/check-runners/ and published to the
-      internal registry (registry.lv3.org).
+      internal registry (registry.example.com).
     filename: 0083-docker-based-check-runner.md
     path: docs/adr/0083-docker-based-check-runner.md
     implemented_in_repo_version: 0.87.0
@@ -1124,7 +1124,7 @@ adrs:
       - role
       - distribution
     summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
-      internal Ansible Galaxy server (galaxy.lv3.org).
+      internal Ansible Galaxy server (galaxy.example.com).
     filename: 0086-ansible-collection-packaging.md
     path: docs/adr/0086-ansible-collection-packaging.md
     implemented_in_repo_version: 0.88.0
@@ -1226,7 +1226,7 @@ adrs:
       - platform
       - api
       - gateway
-    summary: We will deploy a platform API gateway on docker-runtime-lv3 as a FastAPI-based aggregation and proxy service,
+    summary: We will deploy a platform API gateway on docker-runtime as a FastAPI-based aggregation and proxy service,
       exposed on the host at http://10.10.10.20:8083 and
     filename: 0092-unified-platform-api-gateway.md
     path: docs/adr/0092-unified-platform-api-gateway.md
@@ -1321,7 +1321,7 @@ adrs:
       - availability
       - automated
       - failover
-    summary: We will provision a second PostgreSQL VM (postgres-replica-lv3, VMID 151) and implement Patroni-managed streaming
+    summary: We will provision a second PostgreSQL VM (postgres-replica, VMID 151) and implement Patroni-managed streaming
       replication with automatic failover, keeping p
     filename: 0098-postgres-high-availability.md
     path: docs/adr/0098-postgres-high-availability.md
@@ -1528,7 +1528,7 @@ adrs:
       - public
       - status
       - page
-    summary: We will publish a repo-managed public status page at status.lv3.org, backed by Uptime Kuma and supplemented by
+    summary: We will publish a repo-managed public status page at status.example.com, backed by Uptime Kuma and supplemented by
       an independent Uptime Robot probe set.
     filename: 0109-public-status-page.md
     path: docs/adr/0109-public-status-page.md
@@ -2118,7 +2118,7 @@ adrs:
       - git
       - webhook-driven
       - automation
-    summary: We will deploy Gitea as a self-hosted git service on the docker-runtime-lv3 VM, replacing the external git provider
+    summary: We will deploy Gitea as a self-hosted git service on the docker-runtime VM, replacing the external git provider
       as the primary remote.
     filename: 0143-gitea-for-self-hosted-git-and-ci.md
     path: docs/adr/0143-gitea-for-self-hosted-git-and-ci.md
@@ -2155,7 +2155,7 @@ adrs:
       - llm
       - inference
       - api
-    summary: We run Ollama as a private, repo-managed runtime on docker-runtime-lv3.
+    summary: We run Ollama as a private, repo-managed runtime on docker-runtime.
     filename: 0145-ollama-for-local-llm-inference.md
     path: docs/adr/0145-ollama-for-local-llm-inference.md
     implemented_in_repo_version: 0.142.0
@@ -2171,7 +2171,7 @@ adrs:
       - langfuse
       - agent
       - observability
-    summary: We will deploy self-hosted Langfuse on docker-runtime-lv3 and publish it at https://langfuse.lv3.org.
+    summary: We will deploy self-hosted Langfuse on docker-runtime and publish it at https://langfuse.example.com.
     filename: 0146-langfuse-for-agent-observability.md
     path: docs/adr/0146-langfuse-for-agent-observability.md
     implemented_in_repo_version: 0.163.0
@@ -2188,7 +2188,7 @@ adrs:
       - operator
       - credential
       - management
-    summary: We will deploy Vaultwarden on docker-runtime-lv3 as a Bitwarden-compatible self-hosted credential vault for operator
+    summary: We will deploy Vaultwarden on docker-runtime as a Bitwarden-compatible self-hosted credential vault for operator
       use.
     filename: 0147-vaultwarden-for-operator-credential-management.md
     path: docs/adr/0147-vaultwarden-for-operator-credential-management.md
@@ -2206,7 +2206,7 @@ adrs:
       - agent
       - web
       - search
-    summary: We will deploy SearXNG on docker-runtime-lv3 as a self-hosted search aggregation API for agent and operator use.
+    summary: We will deploy SearXNG on docker-runtime as a self-hosted search aggregation API for agent and operator use.
     filename: 0148-searxng-for-agent-web-search.md
     path: docs/adr/0148-searxng-for-agent-web-search.md
     implemented_in_repo_version: 0.175.0
@@ -2225,7 +2225,7 @@ adrs:
       - management
       - ui
       - api
-    summary: We will deploy Semaphore privately on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3 and a Tailscale-only
+    summary: We will deploy Semaphore privately on docker-runtime with a PostgreSQL backend on postgres and a Tailscale-only
       host proxy on the Proxmox node.
     filename: 0149-semaphore-for-ansible-job-management-ui-and-api.md
     path: docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md
@@ -2262,8 +2262,8 @@ adrs:
       - api
       - integration
       - automation
-    summary: We run n8n as a repo-managed compose service on docker-runtime-lv3, backed by PostgreSQL on postgres-lv3, and
-      published at https://n8n.lv3.org.
+    summary: We run n8n as a repo-managed compose service on docker-runtime, backed by PostgreSQL on postgres, and
+      published at https://n8n.example.com.
     filename: 0151-n8n-for-webhook-and-api-integration-automation.md
     path: docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md
     implemented_in_repo_version: 0.148.0
@@ -2280,7 +2280,7 @@ adrs:
       - unified
       - service
       - dashboard
-    summary: We run Homepage on docker-runtime-lv3 as the unified LV3 service dashboard and generate its repo-managed configuration
+    summary: We run Homepage on docker-runtime as the unified LV3 service dashboard and generate its repo-managed configuration
       directly from the canonical service and s
     filename: 0152-homepage-for-unified-service-dashboard.md
     path: docs/adr/0152-homepage-for-unified-service-dashboard.md
@@ -3158,7 +3158,7 @@ adrs:
       - kanban
       - task
       - board
-    summary: We will run a self-hosted Plane task board on docker-runtime-lv3 and treat it as a repo-managed service.
+    summary: We will run a self-hosted Plane task board on docker-runtime and treat it as a repo-managed service.
     filename: 0193-plane-kanban-task-board.md
     path: docs/adr/0193-plane-kanban-task-board.md
     implemented_in_repo_version: 0.177.27
@@ -3176,7 +3176,7 @@ adrs:
       - deploy
       - from
       - repo
-    summary: 'We introduce Coolify as a dedicated repo-managed PaaS guest at coolify-lv3 and expose it through two repo-managed
+    summary: 'We introduce Coolify as a dedicated repo-managed PaaS guest at coolify and expose it through two repo-managed
       ingress lanes:'
     filename: 0194-coolify-paas-deploy-from-repo.md
     path: docs/adr/0194-coolify-paas-deploy-from-repo.md
@@ -3213,7 +3213,7 @@ adrs:
       - workflow
       - agent
       - canvas
-    summary: 'Deploy Dify on docker-runtime-lv3 at agents.lv3.org behind the shared Keycloak-backed edge authentication flow.
+    summary: 'Deploy Dify on docker-runtime at agents.example.com behind the shared Keycloak-backed edge authentication flow.
       Connect Dify to:'
     filename: 0197-dify-visual-llm-workflow-canvas.md
     path: docs/adr/0197-dify-visual-llm-workflow-canvas.md
@@ -3251,7 +3251,7 @@ adrs:
       - living
       - knowledge
       - wiki
-    summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
+    summary: We will deploy Outline on docker-runtime and publish it at https://wiki.example.com.
     filename: 0199-outline-living-knowledge-wiki.md
     path: docs/adr/0199-outline-living-knowledge-wiki.md
     implemented_in_repo_version: 0.177.19
@@ -3268,7 +3268,7 @@ adrs:
       - vulnerability-scanning
       - container
       - registry
-    summary: 'Migrate registry.lv3.org from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
+    summary: 'Migrate registry.example.com from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
       vulnerability scanning on every push integ'
     filename: 0201-harbor-container-registry-with-cve-scanning.md
     path: docs/adr/0201-harbor-container-registry-with-cve-scanning.md
@@ -3287,7 +3287,7 @@ adrs:
       - generated
       - architecture
       - diagrams
-    summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
+    summary: We will add a repo-managed Excalidraw publication at draw.example.com and commit a
     filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
     path: docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md
     implemented_in_repo_version: 0.177.16
@@ -5880,7 +5880,7 @@ adrs:
       - dedicated
       - vm
       - separation
-    summary: We introduce a second dedicated guest, coolify-apps-lv3 (proposed VMID 171,
+    summary: We introduce a second dedicated guest, coolify-apps (proposed VMID 171,
     filename: 0340-dedicated-coolify-apps-vm-separation.md
     path: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
     implemented_in_repo_version: 0.177.153
@@ -6068,7 +6068,7 @@ adrs:
       - scheduler
       - auth
       - publication
-    summary: Publish the Nomad UI on the public edge at scheduler.lv3.org without
+    summary: Publish the Nomad UI on the public edge at scheduler.example.com without
     filename: 0361-nomad-oidc-edge-publication.md
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0362'

@@ -4,7 +4,7 @@
 - Title: Integrate the verified ADR 0207 live apply into `origin/main`
 - Status: merged
 - Branch: `codex/ws-0207-main-recut`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0207-main-recut`
 - Owner: codex
 - Depends On: `ws-0207-live-apply`
 
@@ -20,6 +20,6 @@
 - `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules data-models generated-docs generated-portals agent-standards` passed on the merged `0.177.42` release tree; it still emitted the existing non-blocking `.repo-structure.yaml` warning while exiting `0`
 - `make remote-validate` proved both repo automation paths: the merged `0.177.38` tree completed the authoritative build-server manifest end to end, and the final merged `0.177.42` recut re-ran the same target successfully through the local fallback after build-server `rsync` hit `failed to set times` under `build/docs-portal/*`
 - `python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/recheck.json --source local-fallback --print-json` passed all 14 manifest checks on the final `0.177.42` tree after the pre-push gate surfaced and this branch fixed one duplicate `coolify_runtime` YAML key plus the `post-merge-gate.py` fallback typing annotations
-- the worktree-pinned Windmill replay succeeded with `docker-runtime-lv3 : ok=220 changed=39 failed=0` when run with `-e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut`
+- the worktree-pinned Windmill replay succeeded with `docker-runtime : ok=220 changed=39 failed=0` when run with `-e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0207-main-recut`
 - the updated guest-local `post-merge-gate.py` now returns `status: ok` for the worker-safe fallback command chain and captures the primary gate's registry image failures separately
 - `VERSION`, `RELEASE.md`, `docs/release-notes/0.177.42.md`, `README.md`, `versions/stack.yaml`, and `workstreams.yaml` now record the merged ADR 0207 truth before the final push to `origin/main`

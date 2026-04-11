@@ -49,7 +49,7 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_session_authority"] == "{{ platform_session_authority }}"
     assert (
         defaults["keycloak_database_host"]
-        == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+        == "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
     )
     assert defaults["keycloak_mail_platform_submission_host"] == "{{ smtp_host }}"
     assert defaults["keycloak_mail_platform_submission_port"] == "{{ smtp_port }}"
@@ -109,7 +109,7 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_grist_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
-    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.lv3.org"
+    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.example.com"
     assert defaults["keycloak_glitchtip_post_logout_redirect_uris"] == [
         "{{ keycloak_glitchtip_root_url }}",
         "{{ keycloak_glitchtip_root_url }}/",
@@ -120,7 +120,7 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_outline_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
-    assert defaults["keycloak_superset_root_url"] == "https://bi.lv3.org"
+    assert defaults["keycloak_superset_root_url"] == "https://bi.example.com"
     assert defaults["keycloak_superset_post_logout_redirect_uris"] == [
         "{{ keycloak_superset_root_url }}",
         "{{ keycloak_superset_root_url }}/",
@@ -129,7 +129,7 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_paperless_client_secret_local_file"].endswith(
         "/.local/keycloak/paperless-client-secret.txt"
     )
-    assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.example.com"
     assert defaults["keycloak_paperless_post_logout_redirect_uris"] == [
         "{{ keycloak_paperless_root_url }}",
         "{{ keycloak_paperless_root_url }}/",
@@ -967,7 +967,7 @@ def test_role_manages_directus_client_secret() -> None:
     assert defaults["keycloak_directus_client_secret_local_file"].endswith(
         "/.local/keycloak/directus-client-secret.txt"
     )
-    assert defaults["keycloak_directus_root_url"] == "https://data.lv3.org"
+    assert defaults["keycloak_directus_root_url"] == "https://data.example.com"
     assert directus_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_directus_client_id }}"
     assert directus_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_directus_root_url }}/auth/login/keycloak/callback"
@@ -1019,10 +1019,10 @@ def test_role_manages_outline_client_secret() -> None:
     )
     assert defaults["keycloak_grist_client_id"] == "grist"
     assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
-    assert defaults["keycloak_grist_root_url"] == "https://grist.lv3.org"
+    assert defaults["keycloak_grist_root_url"] == "https://grist.example.com"
     assert defaults["keycloak_outline_client_id"] == "outline"
     assert defaults["keycloak_outline_client_secret_local_file"].endswith("/.local/keycloak/outline-client-secret.txt")
-    assert defaults["keycloak_outline_root_url"] == "https://wiki.lv3.org"
+    assert defaults["keycloak_outline_root_url"] == "https://wiki.example.com"
     assert grafana_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_grafana_post_logout_redirect_uris }}"
     )
@@ -1073,7 +1073,7 @@ def test_role_manages_paperless_client_secret() -> None:
     assert defaults["keycloak_paperless_client_secret_local_file"].endswith(
         "/.local/keycloak/paperless-client-secret.txt"
     )
-    assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.example.com"
     assert (
         paperless_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_paperless_client_id }}"
     )
@@ -1108,7 +1108,7 @@ def test_role_manages_superset_client_secret() -> None:
     assert defaults["keycloak_superset_client_secret_local_file"].endswith(
         "/.local/keycloak/superset-client-secret.txt"
     )
-    assert defaults["keycloak_superset_root_url"] == "https://bi.lv3.org"
+    assert defaults["keycloak_superset_root_url"] == "https://bi.example.com"
     assert superset_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_superset_client_id }}"
     assert superset_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_superset_root_url }}/oauth-authorized/keycloak"
@@ -1147,7 +1147,7 @@ def test_role_manages_serverclaw_client_secret() -> None:
     assert defaults["keycloak_serverclaw_client_secret_local_file"].endswith(
         "/.local/keycloak/serverclaw-client-secret.txt"
     )
-    assert defaults["keycloak_serverclaw_root_url"] == "https://chat.lv3.org"
+    assert defaults["keycloak_serverclaw_root_url"] == "https://chat.example.com"
     assert defaults["keycloak_serverclaw_post_logout_redirect_uris"] == [
         "{{ keycloak_serverclaw_root_url }}",
         "{{ keycloak_serverclaw_root_url }}/",
@@ -1437,7 +1437,7 @@ def test_role_manages_glitchtip_client_secret() -> None:
     assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith(
         "/.local/keycloak/glitchtip-client-secret.txt"
     )
-    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.lv3.org"
+    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.example.com"
     assert defaults["keycloak_glitchtip_post_logout_redirect_uris"] == [
         "{{ keycloak_glitchtip_root_url }}",
         "{{ keycloak_glitchtip_root_url }}/",

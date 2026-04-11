@@ -31,15 +31,15 @@ This complements OpenBao: OpenBao manages machine-readable infrastructure secret
 
 ## Decision
 
-We will deploy **Vaultwarden** on `docker-runtime-lv3` as a Bitwarden-compatible self-hosted credential vault for operator use.
+We will deploy **Vaultwarden** on `docker-runtime` as a Bitwarden-compatible self-hosted credential vault for operator use.
 
 ### Deployment
 
-Vaultwarden is now repo-managed on `docker-runtime-lv3` with:
+Vaultwarden is now repo-managed on `docker-runtime` with:
 
-- a PostgreSQL backend on `postgres-lv3`
+- a PostgreSQL backend on `postgres`
 - a private HTTPS listener on `10.10.10.20:8222`
-- a Tailscale-published controller URL at `https://vault.lv3.org`
+- a Tailscale-published controller URL at `https://vault.example.com`
 - a `step-ca` issued internal TLS certificate renewed by a managed systemd timer
 - a controller-local admin token artifact for the bounded admin API bootstrap path
 
@@ -55,7 +55,7 @@ A single Vaultwarden organisation "LV3 Platform" with two collections:
 | `platform-services` | Credentials for services not managed by OpenBao (e.g., external SaaS logins, vendor portals) | All platform operators |
 | `personal` | Individual operator credentials (managed by each operator personally) | Per-operator only |
 
-The current implementation bootstraps the private Vaultwarden service, invites `ops@lv3.org`, and reserves organisation creation to that named operator account so the shared vault can be initialized without opening anonymous signups.
+The current implementation bootstraps the private Vaultwarden service, invites `ops@example.com`, and reserves organisation creation to that named operator account so the shared vault can be initialized without opening anonymous signups.
 
 ### TOTP migration
 
@@ -84,7 +84,7 @@ Vaultwarden's REST API is available only for tightly scoped future automation. T
 **Negative / Trade-offs**
 
 - Vaultwarden is a high-value target: it contains the break-glass credentials. It must remain private-only, regularly backed up, and protected by a strong operator master password.
-- Operators must trust the LV3 internal CA root certificate on their client device because `vault.lv3.org` is intentionally served with an internal `step-ca` certificate rather than a public CA certificate.
+- Operators must trust the LV3 internal CA root certificate on their client device because `vault.example.com` is intentionally served with an internal `step-ca` certificate rather than a public CA certificate.
 - The initial organisation and collection creation still requires the invited named operator to complete first login and finish the shared-vault setup.
 
 ## Boundaries

@@ -4,10 +4,10 @@ This runbook verifies the shared authentication boundary for the platform's brow
 
 ## Protected Portals
 
-- `ops.lv3.org`
-- `changelog.lv3.org`
-- `docs.lv3.org`
-- `grafana.lv3.org`
+- `ops.example.com`
+- `changelog.example.com`
+- `docs.example.com`
+- `grafana.example.com`
 
 ## Repository Validation
 
@@ -33,26 +33,26 @@ uv run --with pyyaml --with jsonschema python -m unittest \
 Unauthenticated requests must be blocked:
 
 ```bash
-curl -Ik https://ops.lv3.org/
-curl -Ik https://changelog.lv3.org/
-curl -Ik https://docs.lv3.org/
-curl -Ik https://grafana.lv3.org/
-curl -Ik https://home.lv3.org/.well-known/lv3/session/logout
-curl -Ik https://ops.lv3.org/.well-known/lv3/session/proxy-logout
-curl -Ik https://ops.lv3.org/.well-known/lv3/session/logged-out
+curl -Ik https://ops.example.com/
+curl -Ik https://changelog.example.com/
+curl -Ik https://docs.example.com/
+curl -Ik https://grafana.example.com/
+curl -Ik https://home.example.com/.well-known/lv3/session/logout
+curl -Ik https://ops.example.com/.well-known/lv3/session/proxy-logout
+curl -Ik https://ops.example.com/.well-known/lv3/session/logged-out
 uv run --with playwright python scripts/session_logout_verify.py \
-  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
+  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/outline.automation-password.txt
 ```
 
 Expected results:
 
-- `ops.lv3.org`, `changelog.lv3.org`, and `docs.lv3.org` return `302` to `/oauth2/sign_in`
-- `grafana.lv3.org` returns a login redirect or login page and does not serve dashboards anonymously
-- `home.lv3.org/.well-known/lv3/session/logout` returns `302` to the shared `oauth2-proxy` sign-out flow
-- `ops.lv3.org/.well-known/lv3/session/proxy-logout` clears the shared proxy cookie and lands on the logged-out page
-- `ops.lv3.org/.well-known/lv3/session/logged-out` returns `200` with `Cache-Control: no-store`
+- `ops.example.com`, `changelog.example.com`, and `docs.example.com` return `302` to `/oauth2/sign_in`
+- `grafana.example.com` returns a login redirect or login page and does not serve dashboards anonymously
+- `home.example.com/.well-known/lv3/session/logout` returns `302` to the shared `oauth2-proxy` sign-out flow
+- `ops.example.com/.well-known/lv3/session/proxy-logout` clears the shared proxy cookie and lands on the logged-out page
+- `ops.example.com/.well-known/lv3/session/logged-out` returns `200` with `Cache-Control: no-store`
 - `scripts/session_logout_verify.py` verifies end-to-end logout on one edge-protected surface and one app-local surface
-- the Outline portion of that verifier may observe the Keycloak confirmation page before logout completes; that confirmation is the currently declared product gap, and the verifier still proves the final post-logout challenge on both `home.lv3.org` and `wiki.lv3.org`
+- the Outline portion of that verifier may observe the Keycloak confirmation page before logout completes; that confirmation is the currently declared product gap, and the verifier still proves the final post-logout challenge on both `home.example.com` and `wiki.example.com`
 
 ## Deployment
 

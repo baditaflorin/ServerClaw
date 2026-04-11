@@ -72,9 +72,9 @@ sessions as one platform contract.
   worktree and then rechecking the shared logout endpoints plus the full
   browser logout journey.
 - The shared edge now exposes repo-managed logout surfaces at
-  `home.lv3.org/.well-known/lv3/session/logout`,
-  `ops.lv3.org/.well-known/lv3/session/proxy-logout`, and
-  `ops.lv3.org/.well-known/lv3/session/logged-out`, with NGINX extracting the
+  `home.example.com/.well-known/lv3/session/logout`,
+  `ops.example.com/.well-known/lv3/session/proxy-logout`, and
+  `ops.example.com/.well-known/lv3/session/logged-out`, with NGINX extracting the
   current bearer token from `/oauth2/auth` so Keycloak logout can receive an
   `id_token_hint` where the shared proxy flow supports it.
 - Grafana and the shared edge-protected portals now hand logout through that
@@ -83,7 +83,7 @@ sessions as one platform contract.
   cannot supply `id_token_hint` on its app-local logout handoff. The live
   platform now reaches the Keycloak confirmation page consistently, and the
   verifier submits that real confirmation form before proving both
-  `home.lv3.org` and `wiki.lv3.org` challenge again after logout.
+  `home.example.com` and `wiki.example.com` challenge again after logout.
 - The authoritative `make live-apply-service service=outline env=production`
   wrapper was exercised on the workstream branch and correctly stopped at the
   canonical-truth gate because `README.md` is a protected shared integration

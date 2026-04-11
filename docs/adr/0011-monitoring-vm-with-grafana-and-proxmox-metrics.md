@@ -66,7 +66,7 @@ The first converged implementation keeps the monitoring stack on the dedicated m
 - InfluxDB 2 receives Proxmox metrics through the native Proxmox external metric server integration over HTTP on the private network.
 - Grafana is provisioned with an InfluxDB data source automatically from locally generated secrets on the monitoring VM.
 - Grafana contains a managed high-level dashboard, `LV3 Platform Overview`, plus one managed detail dashboard per VM.
-- Grafana is published at `https://grafana.lv3.org` through the NGINX edge.
+- Grafana is published at `https://grafana.example.com` through the NGINX edge.
 
 ## Scope of the first monitoring rollout
 
@@ -114,25 +114,25 @@ This ADR defines the topology and data-flow direction. Follow-up automation shou
 The implemented dashboard set currently covers:
 
 - Proxmox host load, CPU, memory, and disk usage
-- `nginx-lv3` CPU, memory, disk, and network throughput
-- `nginx-lv3` NGINX service telemetry from loopback-only `stub_status`
-- `docker-runtime-lv3` CPU, memory, disk, and network throughput
-- `docker-build-lv3` CPU, memory, disk, and network throughput
-- `monitoring-lv3` CPU, memory, disk, and network throughput
+- `nginx-edge` CPU, memory, disk, and network throughput
+- `nginx-edge` NGINX service telemetry from loopback-only `stub_status`
+- `docker-runtime` CPU, memory, disk, and network throughput
+- `docker-build` CPU, memory, disk, and network throughput
+- `monitoring` CPU, memory, disk, and network throughput
 
 The implemented Grafana structure currently includes:
 
 - folder `LV3`
 - overview dashboard `LV3 Platform Overview`
-- detail dashboard `LV3 nginx-lv3 Detail`
-- detail dashboard `LV3 docker-runtime-lv3 Detail`
-- detail dashboard `LV3 docker-build-lv3 Detail`
-- detail dashboard `LV3 monitoring-lv3 Detail`
+- detail dashboard `LV3 nginx-edge Detail`
+- detail dashboard `LV3 docker-runtime Detail`
+- detail dashboard `LV3 docker-build Detail`
+- detail dashboard `LV3 monitoring Detail`
 
 The implemented guest-level telemetry currently includes:
 
-- `nginx-lv3` Telegraf shipping guest metrics into InfluxDB
-- `nginx-lv3` NGINX active connections, accepts, handled, requests, and connection-state visibility in Grafana
+- `nginx-edge` Telegraf shipping guest metrics into InfluxDB
+- `nginx-edge` NGINX active connections, accepts, handled, requests, and connection-state visibility in Grafana
 
 ## Sources
 

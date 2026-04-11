@@ -14,11 +14,11 @@
 - Live Applied On: 2026-04-02
 - Exact-Main Replay Baseline: repo `0.177.139`, platform `0.130.87`
 - Branch: `codex/ws-0315-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0315-live-apply`
 - Owner: codex
 - Depends On: `adr-0122-windmill-operator-access-admin`, `adr-0234-shared-human-app-shell-and-navigation-via-patternfly`, `adr-0236-server-state-and-mutation-feedback-via-tanstack-query`, `adr-0242-guided-human-onboarding-via-shepherd-tours`, `adr-0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core`, `adr-0313-contextual-help-glossary-and-escalation-drawer`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/workstreams/ws-0315-live-apply.md`, `docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md`, `docs/adr/.index.yaml`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/release-notes/README.md`, `docs/release-notes/0.177.140.md`, `docs/runbooks/windmill-operator-access-admin.md`, `docs/runbooks/validate-repository-automation.md`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package-lock.json`, `config/windmill/scripts/gate-status.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`, `scripts/gate_status.py`, `tests/test_windmill_operator_admin_app.py`, `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json`, `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0315-*`, `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
+- Shared Surfaces: `workstreams.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`, `build/platform-manifest.json`, `docs/workstreams/ws-0315-live-apply.md`, `docs/adr/0315-canonical-page-states-and-next-best-action-guidance-for-human-surfaces.md`, `docs/adr/.index.yaml`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/release-notes/README.md`, `docs/release-notes/0.177.140.md`, `docs/runbooks/windmill-operator-access-admin.md`, `docs/runbooks/validate-repository-automation.md`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json`, `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package-lock.json`, `config/windmill/scripts/gate-status.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`, `scripts/gate_status.py`, `tests/test_windmill_operator_admin_app.py`, `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json`, `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-04-02-ws-0315-*`, `receipts/sbom/host-docker-runtime-2026-04-02.cdx.json`
 
 ## Purpose
 
@@ -75,7 +75,7 @@ leave exact evidence for the later mainline replay from the newest realistic
 - `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json`
 - `receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-mainline-live-apply.json`
 - `receipts/live-applies/evidence/2026-04-02-ws-0315-*`
-- `receipts/sbom/host-docker-runtime-lv3-2026-04-02.cdx.json`
+- `receipts/sbom/host-docker-runtime-2026-04-02.cdx.json`
 
 ## Expected Live Surfaces
 
@@ -113,7 +113,7 @@ leave exact evidence for the later mainline replay from the newest realistic
   and `...-r2.txt` truthfully preserve the first two replay failures caused by
   stale branch-baseline copies of `config/windmill/scripts/gate-status.py` and
   `scripts/gate_status.py`; `...-r3.txt` captured the repaired governed replay
-  with final recap `docker-runtime-lv3 : ok=314 changed=48 unreachable=0 failed=0 skipped=99`, `postgres-lv3 : ok=95 changed=6 unreachable=0 failed=0 skipped=28`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`.
+  with final recap `docker-runtime : ok=314 changed=48 unreachable=0 failed=0 skipped=99`, `postgres : ok=95 changed=6 unreachable=0 failed=0 skipped=28`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`.
 - `receipts/live-applies/evidence/2026-04-02-ws-0315-live-apply-remote-app-verify.txt`
   confirms the authenticated browser route returned `200`, the deployed
   `/App.tsx` and `/index.css` digests match the local worktree exactly, and the
@@ -144,9 +144,9 @@ leave exact evidence for the later mainline replay from the newest realistic
   been cut.
 - `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-converge-windmill-r1.txt`
   captured the exact-main governed replay with final recap
-  `docker-runtime-lv3 : ok=327 changed=46 unreachable=0 failed=0 skipped=84`,
-  `postgres-lv3 : ok=93 changed=2 unreachable=0 failed=0 skipped=28`, and
-  `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`.
+  `docker-runtime : ok=327 changed=46 unreachable=0 failed=0 skipped=84`,
+  `postgres : ok=93 changed=2 unreachable=0 failed=0 skipped=28`, and
+  `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`.
 - `receipts/live-applies/evidence/2026-04-02-ws-0315-mainline-targeted-tests-r1.txt`
   shows `29 passed in 4.51s` for
   `tests/test_validation_gate.py`,

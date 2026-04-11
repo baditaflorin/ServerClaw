@@ -7,7 +7,7 @@
 - Canonical Mainline Receipt: `2026-04-03-adr-0289-label-studio-mainline-live-apply`
 - Live Applied In Platform Version: 0.130.97
 - Branch: `codex/ws-0289-label-studio-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0289-label-studio-live-apply-r1`
 - Owner: codex
 - Depends On: none
 - Conflicts With: `ws-0289-live-apply`
@@ -34,8 +34,8 @@ keeps the annotation-platform delivery merge-safe by using an explicit
 
 ## Final Mainline State
 
-- Label Studio is live on `docker-runtime-lv3` at private port `8110` with the
-  dedicated `label_studio` PostgreSQL database on `postgres-lv3`.
+- Label Studio is live on `docker-runtime` at private port `8110` with the
+  dedicated `label_studio` PostgreSQL database on `postgres`.
 - Browser access is enforced at the shared edge through oauth2-proxy and
   Keycloak, while the app-local admin password and token remain the deterministic
   automation and break-glass path.
@@ -73,14 +73,14 @@ keeps the annotation-platform delivery merge-safe by using an explicit
 - The rebased exact-main replay on the `0.177.152` / `0.130.95` baseline
   succeeded in
   `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r7-0.177.152.txt`
-  with recap `docker-runtime-lv3 ok=518 changed=148 failed=0`, `postgres-lv3
-  ok=73 changed=0 failed=0`, `nginx-lv3 ok=100 changed=5 failed=0`, and
+  with recap `docker-runtime ok=518 changed=148 failed=0`, `postgres
+  ok=73 changed=0 failed=0`, `nginx-edge ok=100 changed=5 failed=0`, and
   `localhost ok=22 changed=0 failed=0`.
 - After merging the newer `origin/main` head, the latest realistic mainline
   replay succeeded in
   `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r8-0.177.153.txt`
-  with recap `docker-runtime-lv3 ok=492 changed=144 failed=0`,
-  `postgres-lv3 ok=73 changed=0 failed=0`, `nginx-lv3 ok=100 changed=5
+  with recap `docker-runtime ok=492 changed=144 failed=0`,
+  `postgres ok=73 changed=0 failed=0`, `nginx-edge ok=100 changed=5
   failed=0`, and `localhost ok=22 changed=0 failed=0`.
 - Standalone public shared-edge redirect proofs are preserved in
   `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r3-0.177.152.txt`

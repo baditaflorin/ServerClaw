@@ -7,10 +7,10 @@ ADR 0083 moves heavyweight repository checks into pinned Docker images so operat
 ## Repository Surfaces
 
 - check runner images: `docker/check-runners/`
-- manifest: [config/check-runner-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/check-runner-manifest.json)
-- local parallel executor: [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py)
-- local operator targets: [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile)
-- rebuild workflow entry point: [config/windmill/scripts/check-runner-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/check-runner-rebuild.py)
+- manifest: [config/check-runner-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/check-runner-manifest.json)
+- local parallel executor: [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/parallel_check.py)
+- local operator targets: [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile)
+- rebuild workflow entry point: [config/windmill/scripts/check-runner-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/check-runner-rebuild.py)
 
 ## Standard Commands
 
@@ -20,7 +20,7 @@ Build all four runner images locally:
 make build-check-runners
 ```
 
-On `docker-build-lv3`, the Make target automatically adds `--network host` so image rebuilds use the host resolver instead of the VM's flaky Docker bridge DNS path. Override with `CHECK_RUNNER_BUILD_NETWORK=` if you need Docker's default build network.
+On `docker-build`, the Make target automatically adds `--network host` so image rebuilds use the host resolver instead of the VM's flaky Docker bridge DNS path. Override with `CHECK_RUNNER_BUILD_NETWORK=` if you need Docker's default build network.
 
 Run every manifest-defined check through the local Docker executor:
 
@@ -46,7 +46,7 @@ make push-check-runners
 2. Rebuild the affected image locally with `make build-check-runners`.
 3. Run `make run-checks CHECKS="..."` for the impacted check set.
 4. Push the images with `make push-check-runners` once registry credentials are available.
-5. Run the Windmill helper [config/windmill/scripts/check-runner-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/check-runner-rebuild.py) from the build worker checkout to publish the updated image digests back into the manifest. The helper also switches to `--network host` automatically when it runs on `docker-build-lv3`.
+5. Run the Windmill helper [config/windmill/scripts/check-runner-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/check-runner-rebuild.py) from the build worker checkout to publish the updated image digests back into the manifest. The helper also switches to `--network host` automatically when it runs on `docker-build`.
 
 ## Notes
 

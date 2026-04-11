@@ -9,7 +9,7 @@
 
 ## Context
 
-The platform already has enough orchestration to compile goals, reject semantic conflicts, and submit Windmill workflows, but its mutation path still degrades to "first workflow wins". A change to `netbox` and a change to `windmill` are independent at the service level, yet both land on `docker-runtime-lv3`; a change to `grafana` should not block a change to `netbox`, because those run on different VMs. Without an explicit per-VM concurrency model, multiple agents either collide on the same host or over-serialize unrelated work.
+The platform already has enough orchestration to compile goals, reject semantic conflicts, and submit Windmill workflows, but its mutation path still degrades to "first workflow wins". A change to `netbox` and a change to `windmill` are independent at the service level, yet both land on `docker-runtime`; a change to `grafana` should not block a change to `netbox`, because those run on different VMs. Without an explicit per-VM concurrency model, multiple agents either collide on the same host or over-serialize unrelated work.
 
 The practical isolation boundary on this platform is the VM:
 
@@ -26,12 +26,12 @@ We will treat the Proxmox host plus each managed VM as an **execution lane** wit
 
 The first production implementation lands in repo release `0.155.0`. The first verified platform implementation is `0.130.5`, after the production Windmill runtime exposed these concrete surfaces from `main`:
 
-- [`config/execution-lanes.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml) declares the canonical lane catalog and per-lane slot count.
-- [`platform/execution_lanes/catalog.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/execution_lanes/catalog.py) resolves an intent's primary lane and dependency lanes from the service catalog, dependency graph, and optional workflow lane overrides.
-- [`platform/execution_lanes/registry.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/execution_lanes/registry.py) stores active lane leases and queued intents under the shared git common-dir so separate worktrees coordinate instead of diverging.
-- [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py) now queues mutation intents when a lane is saturated, dispatches queued work asynchronously, and records required lanes in scheduler metadata.
-- [`platform/scheduler/watchdog.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/watchdog.py) releases lane leases and conflict claims when a queued job completes or violates a budget.
-- [`config/windmill/scripts/lane-scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/lane-scheduler.py) plus the seeded Windmill schedules provide the live dequeue loop.
+- [`config/execution-lanes.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/execution-lanes.yaml) declares the canonical lane catalog and per-lane slot count.
+- [`platform/execution_lanes/catalog.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/execution_lanes/catalog.py) resolves an intent's primary lane and dependency lanes from the service catalog, dependency graph, and optional workflow lane overrides.
+- [`platform/execution_lanes/registry.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/execution_lanes/registry.py) stores active lane leases and queued intents under the shared git common-dir so separate worktrees coordinate instead of diverging.
+- [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py) now queues mutation intents when a lane is saturated, dispatches queued work asynchronously, and records required lanes in scheduler metadata.
+- [`platform/scheduler/watchdog.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/watchdog.py) releases lane leases and conflict claims when a queued job completes or violates a budget.
+- [`config/windmill/scripts/lane-scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/lane-scheduler.py) plus the seeded Windmill schedules provide the live dequeue loop.
 
 ### Lane catalog
 
@@ -41,7 +41,7 @@ The lane catalog is repo-managed and validated:
 schema_version: 1.0.0
 lanes:
   lane:docker-runtime:
-    hostname: docker-runtime-lv3
+    hostname: docker-runtime
     vmid: 120
     services:
       - netbox

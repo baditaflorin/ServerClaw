@@ -54,7 +54,7 @@ def test_ephemeral_windmill_wrappers_load_repo_fixture_manager_even_with_conflic
         encoding="utf-8",
     )
     (repo_root / "inventory" / "group_vars" / "all.yml").write_text("", encoding="utf-8")
-    (repo_root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text("", encoding="utf-8")
+    (repo_root / "inventory" / "host_vars" / "proxmox-host.yml").write_text("", encoding="utf-8")
     (repo_root / ".local" / "proxmox-api" / "lv3-automation-primary.json").write_text(
         '{"api_url": "https://proxmox.example.invalid:8006/api2/json", "full_token_id": "token", "value": "secret"}\n',
         encoding="utf-8",
@@ -117,7 +117,7 @@ def test_ephemeral_pool_reconciler_uses_worker_local_bootstrap_key(tmp_path: Pat
         encoding="utf-8",
     )
     (repo_root / "inventory" / "group_vars" / "all.yml").write_text("", encoding="utf-8")
-    (repo_root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text("", encoding="utf-8")
+    (repo_root / "inventory" / "host_vars" / "proxmox-host.yml").write_text("", encoding="utf-8")
     (repo_root / ".local" / "proxmox-api" / "lv3-automation-primary.json").write_text(
         '{"api_url": "https://proxmox.example.invalid:8006/api2/json", "full_token_id": "token", "value": "secret"}\n',
         encoding="utf-8",

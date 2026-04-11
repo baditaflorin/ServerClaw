@@ -309,13 +309,13 @@ def test_update_notes_persists_markdown_and_review_audit(
         operator_id=onboarded["operator"]["id"],
         actor_id="reviewer",
         actor_class="operator",
-        notes_markdown="## Shift handoff\n\n- Check `wiki.lv3.org`\n- [x] Review alerts",
+        notes_markdown="## Shift handoff\n\n- Check `wiki.example.com`\n- [x] Review alerts",
         dry_run=False,
     )
 
     saved = yaml.safe_load(roster_path.read_text(encoding="utf-8"))
     operator = saved["operators"][0]
-    assert operator["notes"] == "## Shift handoff\n\n- Check `wiki.lv3.org`\n- [x] Review alerts"
+    assert operator["notes"] == "## Shift handoff\n\n- Check `wiki.example.com`\n- [x] Review alerts"
     assert operator["audit"]["last_reviewed_by"] == "reviewer"
     state = json.loads((state_dir / "alice-example.json").read_text(encoding="utf-8"))
     assert state["last_operation"] == "update-notes"

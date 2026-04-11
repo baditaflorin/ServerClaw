@@ -8,7 +8,7 @@
 - Release Date: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0291-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0291-main-merge`
 - Owner: codex
 - Depends On: `ws-0291-live-apply`
 
@@ -29,7 +29,7 @@ branch-local state alone.
 - `docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md`
 - `docs/adr/.index.yaml`
 - `docs/runbooks/configure-jupyterhub.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
@@ -116,16 +116,16 @@ branch-local state alone.
   `platform_version: 0.130.73`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=jupyterhub env=production`
   succeeded from committed source `89639b54194fcdd8713a4676bb53d961475afb91`
-  with final recap `docker-runtime-lv3 : ok=281 changed=5 failed=0 skipped=82`,
+  with final recap `docker-runtime : ok=281 changed=5 failed=0 skipped=82`,
   `localhost : ok=24 changed=0 failed=0 skipped=7`, and
-  `nginx-lv3 : ok=46 changed=4 failed=0 skipped=7`, preserved in
+  `nginx-edge : ok=46 changed=4 failed=0 skipped=7`, preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r11.txt`;
   that replay also recovered missing Docker bridge chains on
-  `docker-runtime-lv3` before revalidating the smoke-user notebook contract.
+  `docker-runtime` before revalidating the smoke-user notebook contract.
 - Fresh controller verification after the exact-main replay confirmed the
   public health endpoint, the Keycloak OIDC redirect, the shared edge
-  certificate SAN set including `DNS:notebooks.lv3.org` and
-  `DNS:flags.lv3.org`, and the local `docker-runtime-lv3` JupyterHub, Ollama,
+  certificate SAN set including `DNS:notebooks.example.com` and
+  `DNS:flags.example.com`, and the local `docker-runtime` JupyterHub, Ollama,
   and platform-context probes,
   preserved in
   `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r5.txt`.

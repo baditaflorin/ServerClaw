@@ -29,10 +29,10 @@ Without that loop, operators had to bridge observation, triage, execution, and v
 
 ## Decision
 
-We implement a durable **closure loop** under [`platform/closure_loop/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/closure_loop) and expose it through:
+We implement a durable **closure loop** under [`platform/closure_loop/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/closure_loop) and expose it through:
 
-- [`config/windmill/scripts/platform-observation-loop.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/platform-observation-loop.py) for observation-driven execution
-- [`scripts/lv3_cli.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py) via `lv3 loop start|status|approve|close`
+- [`config/windmill/scripts/platform-observation-loop.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/platform-observation-loop.py) for observation-driven execution
+- [`scripts/lv3_cli.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/lv3_cli.py) via `lv3 loop start|status|approve|close`
 - repo-local durable state at `.local/state/closure-loop/runs.json`
 
 The implemented state machine is:

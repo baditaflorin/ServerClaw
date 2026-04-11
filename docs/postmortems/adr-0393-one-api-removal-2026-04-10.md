@@ -24,7 +24,7 @@ Confirmed by `docker compose ps` returning empty. No active database (One-API
 uses bundled SQLite, not a dedicated PostgreSQL instance).
 
 **CPU-only operations:**
-- SSH to docker-runtime-lv3 to verify container state
+- SSH to docker-runtime to verify container state
 - Grep to confirm no live traffic in Prometheus
 - ADR impact analysis via `platform_ops.py impact one_api` (deterministic)
 

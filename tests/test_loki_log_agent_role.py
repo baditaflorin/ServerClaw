@@ -18,7 +18,7 @@ def test_defaults_use_proxmox_host_service_topology_for_loki_push_url() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
 
     assert defaults["loki_log_agent_loki_push_url"] == (
-        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'loki_push') }}"
+        "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('grafana', 'loki_push') }}"
     )
 
 

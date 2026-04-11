@@ -9,7 +9,7 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0293-temporal-main`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0293-temporal-main`
 - Owner: codex
 - Depends On: `adr-0042-postgresql-as-the-shared-relational-database`,
   `adr-0077-compose-secrets-injection-pattern`,
@@ -21,7 +21,7 @@
   `playbooks/temporal.yml`, `playbooks/services/temporal.yml`,
   `collections/ansible_collections/lv3/platform/roles/temporal_postgres/`,
   `collections/ansible_collections/lv3/platform/roles/temporal_runtime/`,
-  `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`,
+  `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`,
   `config/controller-local-secrets.json`, `config/secret-catalog.json`,
   `config/image-catalog.json`, `config/service-capability-catalog.json`,
   `config/health-probe-catalog.json`, `config/service-completeness.json`,
@@ -36,8 +36,8 @@
 
 ## Scope
 
-- deploy Temporal on `docker-runtime-lv3` as a private-only durable workflow
-  engine with PostgreSQL persistence on `postgres-lv3`
+- deploy Temporal on `docker-runtime` as a private-only durable workflow
+  engine with PostgreSQL persistence on `postgres`
 - bootstrap the required Temporal schemas and the default repo-managed `lv3`
   namespace entirely from repo automation
 - keep the frontend gRPC, HTTP, and UI listeners loopback-only so the rollout
@@ -69,7 +69,7 @@
 - `config/workflow-catalog.json`
 - `config/ansible-execution-scopes.yaml`
 - `config/ansible-role-idempotency.yml`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `Makefile`
 - `scripts/temporal_smoke.py`
@@ -88,9 +88,9 @@
 ## Expected Live Surfaces
 
 - Temporal frontend gRPC on `127.0.0.1:7233` and HTTP on `127.0.0.1:7243`
-  inside `docker-runtime-lv3`
-- Temporal UI on `127.0.0.1:8099` inside `docker-runtime-lv3`
-- PostgreSQL databases `temporal` and `temporal_visibility` on `postgres-lv3`
+  inside `docker-runtime`
+- Temporal UI on `127.0.0.1:8099` inside `docker-runtime`
+- PostgreSQL databases `temporal` and `temporal_visibility` on `postgres`
 - repo-managed namespace `lv3` with `168h` retention
 
 ## Verification Plan
@@ -109,8 +109,8 @@
 
 - The exact-main replay from the integrated `0.177.109` tree succeeded in
   `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-converge-temporal-0.177.109.txt`
-  with final recap `docker-runtime-lv3 ok=174 changed=2 failed=0` and
-  `postgres-lv3 ok=59 changed=2 failed=0`.
+  with final recap `docker-runtime ok=174 changed=2 failed=0` and
+  `postgres ok=59 changed=2 failed=0`.
 - Runtime verification is recorded in
   `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-runtime-health.txt`
   and reconfirms the loopback-only Temporal gRPC, HTTP, and UI listeners,

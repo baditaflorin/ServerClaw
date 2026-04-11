@@ -17,10 +17,10 @@ def test_collect_drift_reports_wrong_record(monkeypatch) -> None:
         lambda path: {
             "subdomains": [
                 {
-                    "fqdn": "grafana.lv3.org",
+                    "fqdn": "grafana.example.com",
                     "service_id": "grafana",
                     "status": "active",
-                    "target": "65.108.75.123",
+                    "target": "203.0.113.1",
                     "owner_adr": "0011",
                 }
             ]
@@ -32,7 +32,7 @@ def test_collect_drift_reports_wrong_record(monkeypatch) -> None:
 
     assert len(records) == 1
     assert records[0]["record_type"] == "A"
-    assert "65.108.75.123" in records[0]["detail"]
+    assert "203.0.113.1" in records[0]["detail"]
 
 
 def test_collect_drift_skips_matching_record(monkeypatch) -> None:
@@ -42,15 +42,15 @@ def test_collect_drift_skips_matching_record(monkeypatch) -> None:
         lambda path: {
             "subdomains": [
                 {
-                    "fqdn": "ops.lv3.org",
+                    "fqdn": "ops.example.com",
                     "service_id": "ops_portal",
                     "status": "active",
-                    "target": "65.108.75.123",
+                    "target": "203.0.113.1",
                     "owner_adr": "0074",
                 }
             ]
         },
     )
-    monkeypatch.setattr(drift, "query_records", lambda name, record_type, dns_server=None: ["65.108.75.123"])
+    monkeypatch.setattr(drift, "query_records", lambda name, record_type, dns_server=None: ["203.0.113.1"])
 
     assert drift.collect_drift() == []

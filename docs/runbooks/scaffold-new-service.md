@@ -2,7 +2,7 @@
 
 `make scaffold-service` creates the repo skeleton for a new service on the current mainline contracts.
 
-The ADR 0107 formal operator workflow now lives in [add-a-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-extension-model/docs/runbooks/add-a-new-service.md). Use this runbook as the lower-level reference for the generator itself.
+The ADR 0107 formal operator workflow now lives in [add-a-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server-extension-model/docs/runbooks/add-a-new-service.md). Use this runbook as the lower-level reference for the generator itself.
 
 The scaffold does not create capability contracts for you. ADR 0205 requires the capability contract to exist before a new critical shared product is selected, so update `config/capability-contract-catalog.json` first when the new service becomes the shared product for identity, workflow execution, secrets, topology, or another critical platform capability.
 
@@ -13,9 +13,9 @@ make scaffold-service \
   NAME=my-service \
   DESCRIPTION="One-line description" \
   CATEGORY=automation \
-  VM=docker-runtime-lv3 \
+  VM=docker-runtime \
   PORT=8080 \
-  SUBDOMAIN=my-service.lv3.org \
+  SUBDOMAIN=my-service.example.com \
   EXPOSURE=private-only \
   IMAGE=docker.io/vendor/image:latest
 ```
@@ -31,7 +31,7 @@ Only `NAME` is required. The target derives defaults for the rest.
 - root playbook entry point under `playbooks/`
 - service playbook entry point under `playbooks/services/`
 - new service entries in:
-  - `inventory/host_vars/proxmox_florin.yml`
+  - `inventory/host_vars/proxmox-host.yml`
   - `config/service-capability-catalog.json`
   - `config/subdomain-catalog.json` when a hostname is present
   - `config/health-probe-catalog.json`
@@ -72,6 +72,6 @@ make pin-image IMAGE=docker.io/vendor/image:tag
 2. Replace the placeholder digest, receipt metadata, and any scaffold notes in `config/image-catalog.json`.
 3. Replace the scaffolded startup, liveness, and readiness descriptions in `config/health-probe-catalog.json`.
 4. Add `degradation_modes` in `config/service-capability-catalog.json` if the service can stay reachable while a declared soft dependency is impaired.
-5. Review `inventory/host_vars/proxmox_florin.yml` and adjust DNS or edge publication details.
+5. Review `inventory/host_vars/proxmox-host.yml` and adjust DNS or edge publication details.
 6. Use an ADR 0106 ephemeral fixture for destructive or staging-like validation rather than creating an unmanaged long-lived VM.
 7. Finish the ADR and runbook content before merge.

@@ -17,7 +17,7 @@ A secondary benefit is parallelism: individual check containers can run concurre
 
 ## Decision
 
-We will maintain a set of **platform check runner images** defined in `docker/check-runners/` and published to the internal registry (`registry.lv3.org`).
+We will maintain a set of **platform check runner images** defined in `docker/check-runners/` and published to the internal registry (`registry.example.com`).
 
 ### Image inventory
 
@@ -37,25 +37,25 @@ Central manifest mapping each `make` target to a runner image and command:
 ```json
 {
   "lint-ansible": {
-    "image": "registry.lv3.org/check-runner/ansible:2.17",
+    "image": "registry.example.com/check-runner/ansible:2.17",
     "command": "ansible-lint --profile production .",
     "working_dir": "/workspace",
     "timeout_seconds": 120
   },
   "lint-yaml": {
-    "image": "registry.lv3.org/check-runner/ansible:2.17",
+    "image": "registry.example.com/check-runner/ansible:2.17",
     "command": "yamllint -c .yamllint .",
     "working_dir": "/workspace",
     "timeout_seconds": 60
   },
   "validate-schemas": {
-    "image": "registry.lv3.org/check-runner/python:3.12",
+    "image": "registry.example.com/check-runner/python:3.12",
     "command": "python scripts/validate_repository_data_models.py",
     "working_dir": "/workspace",
     "timeout_seconds": 90
   },
   "security-scan": {
-    "image": "registry.lv3.org/check-runner/security:latest",
+    "image": "registry.example.com/check-runner/security:latest",
     "command": "trivy fs --exit-code 1 --severity HIGH,CRITICAL .",
     "working_dir": "/workspace",
     "timeout_seconds": 180
@@ -69,7 +69,7 @@ Central manifest mapping each `make` target to a runner image and command:
 
 ```bash
 docker run --rm \
-  -v /opt/builds/proxmox_florin_server:/workspace:ro \
+  -v /opt/builds/proxmox-host_server:/workspace:ro \
   -w /workspace \
   --cpus=4 \
   <image> <command>
@@ -79,7 +79,7 @@ Multiple checks run concurrently using a small Go or Python runner script (`scri
 
 ### Update policy
 
-Images are rebuilt by a Windmill workflow (`platform-check-runner-rebuild`) whenever a `docker/check-runners/*/Dockerfile` changes on `main`. The new image is pushed to `registry.lv3.org` and the digest is written back to `config/check-runner-manifest.json` in a follow-up commit. The build server pulls the updated image as part of that workflow.
+Images are rebuilt by a Windmill workflow (`platform-check-runner-rebuild`) whenever a `docker/check-runners/*/Dockerfile` changes on `main`. The new image is pushed to `registry.example.com` and the digest is written back to `config/check-runner-manifest.json` in a follow-up commit. The build server pulls the updated image as part of that workflow.
 
 Images are **never** rebuilt ad-hoc on the operator's laptop.
 
@@ -97,7 +97,7 @@ When `build-lv3` is unreachable, `scripts/remote_exec.sh --local-fallback` runs 
 
 **Negative / Trade-offs**
 - First run after an image update requires a Docker pull (~200–400 MB); subsequent runs are instant from cache
-- Internal registry (`registry.lv3.org`) must be live before images can be pulled; bootstrap order matters (see workstream dependencies)
+- Internal registry (`registry.example.com`) must be live before images can be pulled; bootstrap order matters (see workstream dependencies)
 - Dockerfile maintenance adds a small ongoing overhead
 
 ## Alternatives Considered

@@ -23,13 +23,13 @@ all:
   children:
     proxmox_hosts:
       hosts:
-        proxmox_florin:
-          ansible_host: 65.108.75.123
+        proxmox-host:
+          ansible_host: 203.0.113.1
     lv3_guests:
       hosts:
-        nginx-lv3:
+        nginx-edge:
           ansible_host: 10.10.10.10
-        docker-runtime-lv3:
+        docker-runtime:
           ansible_host: 10.10.10.20
 """.strip()
         + "\n"
@@ -47,9 +47,9 @@ all:
                 "$schema": "docs/schema/capacity-model.schema.json",
                 "schema_version": "1.0.0",
                 "host": {
-                    "id": "proxmox_florin",
+                    "id": "proxmox-host",
                     "name": "florin",
-                    "metrics_host": "proxmox_florin",
+                    "metrics_host": "proxmox-host",
                     "physical": {"ram_gb": 64, "vcpu": 16, "disk_gb": 1000},
                     "target_utilisation": {
                         "ram_percent": 80,
@@ -61,30 +61,30 @@ all:
                 "guests": [
                     {
                         "vmid": 110,
-                        "name": "nginx-lv3",
+                        "name": "nginx-edge",
                         "status": "active",
                         "environment": "production",
-                        "metrics_host": "nginx-lv3",
+                        "metrics_host": "nginx-edge",
                         "allocated": {"ram_gb": 4, "vcpu": 2, "disk_gb": 32},
                         "budget": {"ram_gb": 6, "vcpu": 4, "disk_gb": 48},
                         "disk_paths": ["/"],
                     },
                     {
                         "vmid": 120,
-                        "name": "docker-runtime-lv3",
+                        "name": "docker-runtime",
                         "status": "active",
                         "environment": "production",
-                        "metrics_host": "docker-runtime-lv3",
+                        "metrics_host": "docker-runtime",
                         "allocated": {"ram_gb": 24, "vcpu": 4, "disk_gb": 96},
                         "budget": {"ram_gb": 32, "vcpu": 8, "disk_gb": 160},
                         "disk_paths": ["/"],
                     },
                     {
                         "vmid": 151,
-                        "name": "postgres-replica-lv3",
+                        "name": "postgres-replica",
                         "status": "planned",
                         "environment": "production",
-                        "metrics_host": "postgres-replica-lv3",
+                        "metrics_host": "postgres-replica",
                         "allocated": {"ram_gb": 8, "vcpu": 4, "disk_gb": 96},
                         "budget": {"ram_gb": 12, "vcpu": 6, "disk_gb": 128},
                         "capacity_class": "ha_reserved",
@@ -124,7 +124,7 @@ def test_build_report_without_live_metrics_renders_guest_summary(capacity_fixtur
     output = capacity_report.render_text(report)
 
     assert "Metrics source: disabled" in output
-    assert "nginx-lv3 [active]" in output
+    assert "nginx-edge [active]" in output
     assert "actual=n/a" in output
 
 
@@ -157,7 +157,7 @@ def test_capacity_model_accepts_service_load_profiles(capacity_fixture: Path) ->
 
     model = capacity_report.load_capacity_model(capacity_fixture)
 
-    assert model.host.identifier == "proxmox_florin"
+    assert model.host.identifier == "proxmox-host"
 
 
 def test_main_check_gate_emits_json_and_failure_code(
@@ -251,8 +251,8 @@ all:
   children:
     proxmox_hosts:
       hosts:
-        proxmox_florin:
-          ansible_host: 65.108.75.123
+        proxmox-host:
+          ansible_host: 203.0.113.1
     lv3_guests:
       hosts: {}
 """.strip()
@@ -291,9 +291,9 @@ all:
                 "$schema": "docs/schema/capacity-model.schema.json",
                 "schema_version": "1.0.0",
                 "host": {
-                    "id": "proxmox_florin",
+                    "id": "proxmox-host",
                     "name": "florin",
-                    "metrics_host": "proxmox_florin",
+                    "metrics_host": "proxmox-host",
                     "physical": {"ram_gb": 128, "vcpu": 32, "disk_gb": 1000},
                     "target_utilisation": {
                         "ram_percent": 80,

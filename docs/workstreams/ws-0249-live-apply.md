@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0249-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0249-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0249-live-apply`
 - Owner: codex
 - Depends On: `adr-0096-slo-tracking`, `adr-0101-certificate-lifecycle`, `adr-0142-public-surface-security-scan`
 - Conflicts With: none
@@ -21,7 +21,7 @@
 - generate Prometheus blackbox targets and expiry/failure alert rules for that
   surface set
 - replay the monitoring stack from this isolated worktree and verify the new
-  blackbox job plus Prometheus rule group on `monitoring-lv3`
+  blackbox job plus Prometheus rule group on `monitoring`
 - run the deeper `testssl.sh` assurance path, store a receipt, and capture the
   final live-apply evidence for safe merge-to-`main` integration
 
@@ -34,7 +34,7 @@
 - `./scripts/validate_repo.sh alert-rules agent-standards`
 - `make preflight WORKFLOW=converge-monitoring`
 - `make converge-monitoring`
-- SSH verification on `proxmox_florin` and `monitoring-lv3` confirmed kernel `6.17.13-2-pve`, `pve-manager/9.1.6`, active monitoring services, the Prometheus HTTPS/TLS targets file, the alert rules file, 33 active `https-tls-blackbox` targets, and 99 loaded `https_tls_assurance` rules
+- SSH verification on `proxmox-host` and `monitoring` confirmed kernel `6.17.13-2-pve`, `pve-manager/9.1.6`, active monitoring services, the Prometheus HTTPS/TLS targets file, the alert rules file, 33 active `https-tls-blackbox` targets, and 99 loaded `https_tls_assurance` rules
 - `uv run --with pyyaml python scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json` recorded clean discovery receipt `20260329T151822Z` with `33` discovered targets
 - `make https-tls-assurance ENV=production` recorded receipt `20260329T151359Z` with `33` targets in `677.4` seconds, status `warn`, `11` medium `tls.scan_timeout` findings, and no high or critical findings
 

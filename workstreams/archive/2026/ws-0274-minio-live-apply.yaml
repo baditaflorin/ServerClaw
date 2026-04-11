@@ -35,7 +35,7 @@ shared_surfaces:
   - receipts/restic-snapshots-latest.json
   - receipts/ops-portal-snapshot.html
   - receipts/sbom/**
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
   - tests/test_generate_platform_vars.py
@@ -154,7 +154,7 @@ ownership_manifest:
       mode: exclusive
     - id: minio_platform_topology_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py

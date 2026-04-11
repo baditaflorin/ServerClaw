@@ -22,7 +22,7 @@ shared_surfaces:
 - docs/release-notes/
 - docs/diagrams/
 - docs/site-generated/architecture/dependency-graph.md
-- inventory/host_vars/proxmox_florin.yml
+- inventory/host_vars/proxmox-host.yml
 - inventory/group_vars/postgres_guests.yml
 - config/service-capability-catalog.json
 - config/health-probe-catalog.json
@@ -122,7 +122,7 @@ ownership_manifest:
     contract: service-catalog-and-automation-contract-v1
   - id: dify_runtime_topology_contract
     paths:
-    - inventory/host_vars/proxmox_florin.yml
+    - inventory/host_vars/proxmox-host.yml
     - inventory/group_vars/platform.yml
     - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/*
@@ -151,8 +151,8 @@ ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: integrated ADR 0197 by replaying the repo-managed Dify visual workflow
-    canvas on current main, re-verifying the public `agents.lv3.org` edge plus governed
-    `api.lv3.org` tool bridge, and recording the worktree-safe smoke trace path and
+    canvas on current main, re-verifying the public `agents.example.com` edge plus governed
+    `api.example.com` tool bridge, and recording the worktree-safe smoke trace path and
     packaged API gateway runbook compatibility repair
   release_bump: patch
   included_in_repo_version: 0.177.48

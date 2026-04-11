@@ -13,7 +13,7 @@ The platform already has internal metrics and dashboards through ADR 0011, but i
 
 The dedicated Docker runtime VM at `10.10.10.20` is intentionally the place for long-running containerized application workloads.
 
-ADR 0021 already established the NGINX VM at `10.10.10.10` as the single public HTTP and HTTPS edge for published services, and ADR 0015 established the stable `lv3.org` hostname model.
+ADR 0021 already established the NGINX VM at `10.10.10.10` as the single public HTTP and HTTPS edge for published services, and ADR 0015 established the stable `example.com` hostname model.
 
 That left a clear gap:
 
@@ -28,14 +28,14 @@ We run Uptime Kuma on the Docker runtime VM under `/opt/uptime-kuma`.
 
 Deployment model:
 
-- runtime: Docker on `docker-runtime-lv3`
+- runtime: Docker on `docker-runtime`
 - application path: `/opt/uptime-kuma`
 - persistent data path: `/opt/uptime-kuma/data`
 - image source: official `louislam/uptime-kuma` container image
 
 Publication model:
 
-- public hostname: `uptime.lv3.org`
+- public hostname: `uptime.example.com`
 - DNS management: Hetzner DNS API, automated from the control machine
 - public edge: reverse proxy through the NGINX VM alongside the existing published hostnames
 - TLS: included in the shared edge certificate managed on the NGINX VM

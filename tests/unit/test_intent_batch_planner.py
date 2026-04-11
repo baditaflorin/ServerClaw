@@ -35,7 +35,7 @@ def batch_repo(tmp_path: Path) -> Path:
             {
                 "services": [
                     {"id": "netbox", "name": "NetBox", "vm": "netbox-lv3"},
-                    {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"},
+                    {"id": "grafana", "name": "Grafana", "vm": "monitoring"},
                 ]
             }
         )
@@ -106,7 +106,7 @@ all:
       hosts:
         netbox-lv3:
           ansible_host: 10.10.10.30
-        monitoring-lv3:
+        monitoring:
           ansible_host: 10.10.10.40
 """.strip()
         + "\n",

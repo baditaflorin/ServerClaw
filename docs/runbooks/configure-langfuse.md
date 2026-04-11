@@ -1,15 +1,15 @@
 # Configure Langfuse
 
-This runbook covers the repo-managed Langfuse deployment introduced by [ADR 0146](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0146-ai-observability/docs/adr/0146-langfuse-for-agent-observability.md).
+This runbook covers the repo-managed Langfuse deployment introduced by [ADR 0146](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0146-ai-observability/docs/adr/0146-langfuse-for-agent-observability.md).
 
 ## Scope
 
 The Langfuse workflow converges:
 
-- the PostgreSQL backend on `postgres-lv3`
-- the Langfuse runtime on `docker-runtime-lv3`
+- the PostgreSQL backend on `postgres`
+- the Langfuse runtime on `docker-runtime`
 - the shared MinIO object-storage contract used for exports and media uploads
-- the public hostname `langfuse.lv3.org` on the shared NGINX edge
+- the public hostname `langfuse.example.com` on the shared NGINX edge
 - the Keycloak OIDC client used by the Langfuse sign-in flow
 - the repo-managed bootstrap org, project, API keys, and bootstrap user
 
@@ -17,8 +17,8 @@ The Langfuse workflow converges:
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
-- MinIO is already deployed and healthy on `minio.lv3.org`
-- Keycloak is already deployed and healthy on `sso.lv3.org`
+- MinIO is already deployed and healthy on `minio.example.com`
+- Keycloak is already deployed and healthy on `sso.example.com`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 ## Converge
@@ -57,11 +57,11 @@ make syntax-check-langfuse
 Runtime and API verification:
 
 ```bash
-curl -fsS https://langfuse.lv3.org/api/public/health
+curl -fsS https://langfuse.example.com/api/public/health
 uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py \
-  --base-url https://langfuse.lv3.org \
+  --base-url https://langfuse.example.com \
   --project-id lv3-agent-observability \
-  --bootstrap-email baditaflorin@gmail.com \
+  --bootstrap-email operator@example.com \
   --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt
 ```
 
@@ -70,5 +70,5 @@ The smoke script emits one synthetic trace, polls the Langfuse public API until 
 Verify the shared MinIO secret exists locally before replaying Langfuse:
 
 ```bash
-test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/minio-secret-key.txt
+test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/langfuse/minio-secret-key.txt
 ```

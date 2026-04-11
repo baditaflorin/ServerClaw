@@ -12,7 +12,7 @@ ROLE_META = REPO_ROOT / "roles" / "typesense_runtime" / "meta" / "argument_specs
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "typesense_runtime" / "templates" / "docker-compose.yml.j2"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "typesense.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "typesense.yml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
@@ -94,7 +94,7 @@ def test_playbook_converges_proxy_runtime_and_catalog_sync() -> None:
         "lv3.platform.proxmox_tailscale_proxy",
         "lv3.platform.proxmox_security",
     ]
-    assert guest_play["hosts"] == "docker-runtime-lv3"
+    assert guest_play["hosts"] == "docker-runtime"
     assert guest_play["roles"][0]["vars"] == {"linux_guest_firewall_recover_missing_docker_bridge_chains": True}
     assert [role["role"] for role in guest_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",

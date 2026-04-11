@@ -65,9 +65,9 @@ Which translates to:
 ```bash
 # on build-lv3
 docker run --rm \
-  -v /opt/builds/proxmox_florin_server:/workspace \
+  -v /opt/builds/proxmox-host_server:/workspace \
   -e PROXMOX_API_TOKEN \
-  registry.lv3.org/check-runner/infra:latest \
+  registry.example.com/check-runner/infra:latest \
   /workspace/scripts/build_packer_template.sh lv3-debian-base
 ```
 
@@ -128,6 +128,6 @@ A Windmill workflow (`packer-template-rebuild`) triggers on:
 
 ## Implementation Notes
 
-- Repository implementation landed in `0.91.0` with repo-managed Packer templates under [packer/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/packer), the manifest at [config/vm-template-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/vm-template-manifest.json), the build-server helper targets in [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile), and the Windmill helper at [config/windmill/scripts/packer-template-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/packer-template-rebuild.py).
-- Managed guest cloning now consumes the declared template catalog through [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/all.yml), [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml), and [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml).
+- Repository implementation landed in `0.91.0` with repo-managed Packer templates under [packer/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/packer), the manifest at [config/vm-template-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/vm-template-manifest.json), the build-server helper targets in [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/Makefile), and the Windmill helper at [config/windmill/scripts/packer-template-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/packer-template-rebuild.py).
+- Managed guest cloning now consumes the declared template catalog through [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/group_vars/all.yml), [inventory/host_vars/proxmox-host.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/host_vars/proxmox-host.yml), and [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml).
 - Live publication of the four templates and manifest hydration still depends on running the rebuild flow from a credentialed worker against the Proxmox API.

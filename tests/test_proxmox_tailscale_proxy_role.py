@@ -6,7 +6,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_TASKS = REPO_ROOT / "roles" / "proxmox_tailscale_proxy" / "tasks" / "main.yml"
 ARGUMENT_SPECS = REPO_ROOT / "roles" / "proxmox_tailscale_proxy" / "meta" / "argument_specs.yml"
-HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
 def load_tasks() -> list[dict]:

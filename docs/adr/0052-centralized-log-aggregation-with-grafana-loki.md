@@ -47,12 +47,12 @@ Priority ingestion targets:
 
 ## Implementation Notes
 
-- `monitoring-lv3` now runs Loki locally and Grafana provisions a managed `Loki Logs` datasource at `http://127.0.0.1:3100`.
+- `monitoring` now runs Loki locally and Grafana provisions a managed `Loki Logs` datasource at `http://127.0.0.1:3100`.
 - The monitoring workflow now converges Grafana Alloy on the Proxmox host and all managed guests, keeping the rollout inside the existing `make converge-monitoring` path instead of creating a parallel ad hoc log workflow.
 - Guest and host log streams now carry consistent labels for `host`, `node_role`, `environment`, `lane`, and `source`, with additional `service`, `service_name`, `container`, `compose_project`, `log_type`, `unit`, and `syslog_identifier` labels where the source makes them available.
-- The initial live rollout verifies three priority ingestion paths: Proxmox host journald logs, `nginx-lv3` file-based NGINX access logs, and `docker-runtime-lv3` Docker container logs for the current control-plane applications.
+- The initial live rollout verifies three priority ingestion paths: Proxmox host journald logs, `nginx-edge` file-based NGINX access logs, and `docker-runtime` Docker container logs for the current control-plane applications.
 - Retention is tiered in Loki so general logs default to seven days, NGINX access logs retain for three days, and control-plane container logs retain for 28 days.
-- Operator procedures are documented in [docs/runbooks/monitoring-stack.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md), and the visual-operations roadmap now treats ADR 0052 as complete instead of proposed-only.
+- Operator procedures are documented in [docs/runbooks/monitoring-stack.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/monitoring-stack.md), and the visual-operations roadmap now treats ADR 0052 as complete instead of proposed-only.
 
 ## Boundaries
 

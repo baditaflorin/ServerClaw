@@ -1,6 +1,6 @@
 id: ws-0340-implementation
 adr: '0340'
-title: "Dedicated Coolify Apps VM Separation — introduce coolify-apps-lv3 as the Coolify
+title: "Dedicated Coolify Apps VM Separation — introduce coolify-apps as the Coolify
   deployment server"
 status: merged
 owner: claude
@@ -15,7 +15,7 @@ conflicts_with: []
 shared_surfaces:
   - workstreams.yaml
   - inventory/hosts.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - versions/stack.yaml
   - config/subdomain-catalog.json
@@ -47,7 +47,7 @@ ownership_manifest:
     - id: ws0340_inventory
       paths:
         - inventory/hosts.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
       mode: exclusive
     - id: ws0340_platform_inventory_contract
       paths:
@@ -86,10 +86,10 @@ blockers: []
 ready_to_merge: true
 live_applied: true
 canonical_truth:
-  changelog_entry: implements ADR 0340 by introducing coolify-apps-lv3 as the
+  changelog_entry: implements ADR 0340 by introducing coolify-apps as the
     dedicated Coolify deployment runtime, migrating the existing Coolify
     applications onto it, and finalizing the HTTP edge publication and
-    repo-smoke verification on `*.apps.lv3.org`
+    repo-smoke verification on `*.apps.example.com`
   release_bump: patch
   included_in_repo_version: 0.177.153
   latest_receipts:

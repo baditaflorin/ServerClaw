@@ -3,11 +3,11 @@
 ## Purpose
 
 This runbook converges the private Ollama runtime defined by ADR 0145 and verifies
-that local inference is reachable on `docker-runtime-lv3`.
+that local inference is reachable on `docker-runtime`.
 
 ## Result
 
-- `docker-runtime-lv3` runs Ollama from `/opt/ollama`
+- `docker-runtime` runs Ollama from `/opt/ollama`
 - model weights persist under `/data/ollama/models`
 - the repo-managed startup models from `config/ollama-models.yaml` are pulled during converge
 - One-API reaches the local inference API through the private docker-runtime listener and exposes the governed OpenAI-compatible contract to downstream consumers
@@ -19,14 +19,14 @@ that local inference is reachable on `docker-runtime-lv3`.
 Syntax-check the Ollama workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make syntax-check-ollama
 ```
 
-Converge the private runtime on `docker-runtime-lv3`:
+Converge the private runtime on `docker-runtime`:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 make converge-ollama
 ```
 
@@ -35,7 +35,7 @@ make converge-ollama
 Verify the runtime health endpoint on the guest:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -45,7 +45,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Verify the default startup model is present:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -56,13 +56,13 @@ Measure local inference latency from the controller through a temporary SSH tunn
 
 ```bash
 ssh -fN \
-  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -L 11434:127.0.0.1:11434 \
   -J ops@100.64.0.1 \
   ops@10.10.10.20
 
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
 uv run --with pyyaml python scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json
 
 pkill -f 'ssh -fN .*11434:127.0.0.1:11434'

@@ -15,10 +15,7 @@ def test_root_playbook_targets_runtime_host_and_roles() -> None:
     plays = yaml.safe_load(ROOT_PLAYBOOK.read_text())
     play = plays[0]
 
-    assert (
-        play["hosts"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
-    )
+    assert play["hosts"] == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
     assert play["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},
         {"role": "lv3.platform.docker_runtime"},
@@ -41,8 +38,8 @@ def test_collection_and_service_wrappers_import_redpanda_playbooks() -> None:
 
 
 def test_host_network_policy_allows_private_redpanda_ports() -> None:
-    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
 
     management_rule = next(
         rule for rule in docker_runtime_rules if rule["source"] == "management" and 9092 in rule["ports"]

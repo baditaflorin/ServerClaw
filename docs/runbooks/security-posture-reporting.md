@@ -48,12 +48,12 @@ managed image receipts.
 The workflow:
 
 1. runs `playbooks/tasks/security-scan.yml` against the repo-managed Lynis targets
-   derived from the active production service catalog (`proxmox_florin`,
-   `docker-runtime-lv3`, `docker-build-lv3`, `backup-lv3`, `coolify-lv3`,
-   `postgres-lv3`, `nginx-lv3`, and `monitoring-lv3`)
+   derived from the active production service catalog (`proxmox-host`,
+   `docker-runtime`, `docker-build`, `backup`, `coolify`,
+   `postgres`, `nginx-edge`, and `monitoring`)
 2. fetches each `report.dat` file into `.local/security-posture/lynis/`
 3. parses and suppresses known-acceptable Lynis findings
-4. SSHes to `docker-runtime-lv3` and `docker-build-lv3` and runs `scripts/trivy_scan_running_images.sh`
+4. SSHes to `docker-runtime` and `docker-build` and runs `scripts/trivy_scan_running_images.sh`
 5. compares the new scan to the latest committed receipt in `receipts/security-reports/`
 6. writes a new JSON receipt under `receipts/security-reports/`
 
@@ -75,7 +75,7 @@ When the relevant environment variables or controller-local secret files are pre
 
 ## Windmill Worker Checkout
 
-The Windmill-side wrapper expects the worker checkout at `/srv/proxmox_florin_server` to include the same repo surfaces the controller-side report needs:
+The Windmill-side wrapper expects the worker checkout at `/srv/proxmox-host_server` to include the same repo surfaces the controller-side report needs:
 
 - `ansible.cfg`
 - `collections/`
@@ -92,7 +92,7 @@ Worker-side runs also honor `LV3_PROXMOX_HOST_ADDR`; the Windmill path prefers t
 After updating the worker checkout from the latest `main`, verify the wrapper from the runtime VM with:
 
 ```bash
-docker exec windmill_worker bash -lc 'cd /srv/proxmox_florin_server && python3 config/windmill/scripts/security-posture-scan.py --repo-path /srv/proxmox_florin_server'
+docker exec windmill_worker bash -lc 'cd /srv/proxmox-host_server && python3 config/windmill/scripts/security-posture-scan.py --repo-path /srv/proxmox-host_server'
 ```
 
 Treat the run as successful only when the wrapper returns `status: ok` and includes a `REPORT_JSON=` payload from `scripts/security_posture_report.py`.

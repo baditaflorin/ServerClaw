@@ -77,7 +77,7 @@ schema_version: 1.0.0
 repo_version: 1.2.0
 platform_version: 0.40.0
 desired_state:
-  host_id: proxmox_florin
+  host_id: proxmox-host
   provider: hetzner-dedicated
   identity_taxonomy:
     managed_identities:
@@ -99,8 +99,8 @@ schema_version: "1.0.0"
 environment: production
 refresh_interval_minutes: 60
 identity:
-  platform_name: lv3.org
-  operator: Florin Badita
+  platform_name: example.com
+  operator: Platform Operator
   description: Test platform manifest.
 registered_agents:
   - agent_id: agent/observation-loop
@@ -143,8 +143,8 @@ data_sources:
                         "category": "automation",
                         "lifecycle_status": "active",
                         "health_probe_id": "netbox",
-                        "public_url": "https://netbox.lv3.org",
-                        "environments": {"production": {"status": "active", "url": "https://netbox.lv3.org"}},
+                        "public_url": "https://netbox.example.com",
+                        "environments": {"production": {"status": "active", "url": "https://netbox.example.com"}},
                     },
                     {
                         "id": "grafana",
@@ -152,8 +152,8 @@ data_sources:
                         "description": "Dashboards",
                         "category": "observability",
                         "lifecycle_status": "active",
-                        "public_url": "https://grafana.lv3.org",
-                        "environments": {"production": {"status": "active", "url": "https://grafana.lv3.org"}},
+                        "public_url": "https://grafana.example.com",
+                        "environments": {"production": {"status": "active", "url": "https://grafana.example.com"}},
                     },
                 ]
             },

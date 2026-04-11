@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/adr-0264-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0264-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0264-live-apply`
 - Owner: codex
 - Depends On: `ws-0264-receipt-driven-resilience-adrs`, `adr-0087-validation-gate`, `adr-0167-workstream-handoff-protocol`, `adr-0173-workstream-surface-ownership-manifest`
 - Conflicts With: none
@@ -64,7 +64,7 @@
 
 - `make pre-push-gate` selects only the lanes owned by changed surfaces plus fast global invariants
 - `make gate-status` records the same lane catalog and reusable lane evidence summaries on the integrated tree
-- `make remote-validate` propagates the changed-surface lane context onto `docker-build-lv3`
+- `make remote-validate` propagates the changed-surface lane context onto `docker-build`
 - the worker-side `post-merge-gate.py` fallback validates only worker-safe stages when the checkout lacks `.git`
 
 ## Ownership Notes
@@ -80,19 +80,19 @@
 - `make pre-push-gate`
 - `make gate-status`
 - `make remote-validate`
-- `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server`
-- `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server`
+- `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox-host_server`
+- `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox-host_server`
 
 ## Branch-Local Results
 
 - the lane-aware implementation and focused regression slice passed locally before the exact-main replay, and the final integrated tree regression sweep returned `72 passed` across the ADR 0264 test slice
 - the latest synchronized `origin/main` release cut advanced repository version `0.177.83` to `0.177.84`, and platform version `0.130.58` is the first integrated platform version that records ADR 0264 as verified from the current mainline
-- the exact-main `playbooks/windmill.yml --limit docker-runtime-lv3` replay exposed a missing `pyyaml` dependency in the repo-managed schedule sync step, so the Windmill runtime now runs that script through `uv run --no-project --with pyyaml python3`
+- the exact-main `playbooks/windmill.yml --limit docker-runtime` replay exposed a missing `pyyaml` dependency in the repo-managed schedule sync step, so the Windmill runtime now runs that script through `uv run --no-project --with pyyaml python3`
 - the same replay showed the worker mirror could keep stale exact-worktree files, so the runtime role now tracks explicit checkout integrity files for the validation lane catalog and its Windmill task surfaces, then asserts the refreshed checksums match the controller state
 - once the worker mirror held the latest ADR 0264 files, the worker-local `post-merge-gate.py` fallback exposed a gitless-checkout bug; the fallback is now split between git-required stages and worker-safe stages so the mirror can validate safely without pretending `.git` exists
-- the full exact-main Windmill replay completed successfully with final recap `docker-runtime-lv3 : ok=251 changed=49 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`
-- the worker mirror still needed one bounded manual repair during this live apply: the exact validation surfaces were refreshed into `/srv/proxmox_florin_server`, `/opt/windmill/worker-checkout.sha256` was removed, and the recovery step is now documented in the validation-gate runbook
-- after the worker refresh and a worker-side canonical truth rewrite, `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` returned `status: ok`, and `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server` returned `status: ok` while running the worker-safe fallback validation plus `scripts/provider_boundary_catalog.py --validate`
+- the full exact-main Windmill replay completed successfully with final recap `docker-runtime : ok=251 changed=49 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`
+- the worker mirror still needed one bounded manual repair during this live apply: the exact validation surfaces were refreshed into `/srv/proxmox-host_server`, `/opt/windmill/worker-checkout.sha256` was removed, and the recovery step is now documented in the validation-gate runbook
+- after the worker refresh and a worker-side canonical truth rewrite, `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox-host_server` returned `status: ok`, and `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox-host_server` returned `status: ok` while running the worker-safe fallback validation plus `scripts/provider_boundary_catalog.py --validate`
 - the canonical exact-main evidence is recorded in `receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json`
 
 ## Merge Criteria

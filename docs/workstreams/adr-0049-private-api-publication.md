@@ -1,10 +1,10 @@
 # Workstream ADR 0049: Private-First API Publication Model
 
-- ADR: [ADR 0049](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0049-private-first-api-publication-model.md)
+- ADR: [ADR 0049](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0049-private-first-api-publication-model.md)
 - Title: Publication tiers for internal, operator-only, and public APIs
 - Status: merged
 - Branch: `codex/adr-0049-private-first-api-publication-model`
-- Worktree: `../proxmox_florin_server-adr-0049`
+- Worktree: `../proxmox-host_server-adr-0049`
 - Owner: codex
 - Depends On: `adr-0045-communication-lanes`, `adr-0047-short-lived-creds`
 - Conflicts With: none
@@ -42,8 +42,8 @@
 
 ## Verification
 
-- `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/api_publication.py --validate`
-- `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_plane_lanes.py --validate`
+- `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/api_publication.py --validate`
+- `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/control_plane_lanes.py --validate`
 - `make validate`
 
 ## Merge Criteria

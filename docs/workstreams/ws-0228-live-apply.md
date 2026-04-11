@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0228-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0228-live-apply`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0087-validation-gate`, `adr-0091-continuous-drift-detection`, `adr-0105-capacity-model`, `adr-0111-end-to-end-integration-test-suite`, `adr-0129-runbook-automation-executor`, `adr-0141-token-lifecycle-management`, `adr-0142-public-surface-security-scanning`
 - Conflicts With: none
@@ -71,10 +71,10 @@
 - `./scripts/validate_repo.sh data-models`
 - `make converge-windmill`
 - live verification:
-  - `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fweekly_capacity_report`
-  - `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/weekly_capacity_report --payload-json '{"no_live_metrics":true}'`
-  - `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/audit_token_inventory --payload-json '{"dry_run":true}'`
-  - `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/token_exposure_response --payload-json '{"token_id":"local-platform-cli","exposure_source":"validation-dry-run","notes":"ws-0228 live verification","dry_run":true}'`
+  - `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fweekly_capacity_report`
+  - `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/weekly_capacity_report --payload-json '{"no_live_metrics":true}'`
+  - `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/audit_token_inventory --payload-json '{"dry_run":true}'`
+  - `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/token_exposure_response --payload-json '{"token_id":"local-platform-cli","exposure_source":"validation-dry-run","notes":"ws-0228 live verification","dry_run":true}'`
 
 ## Merge Criteria
 
@@ -89,7 +89,7 @@
 - the seeded default operations surface is complete on this branch: the earlier workflow-catalog completeness check found `34` wrapper-backed workflows and `0` missing seeded Windmill paths
 - the first rebased replay and representative API checks surfaced three real worker/runtime gaps on the branch: `weekly_capacity_report` still needed a PyYAML fallback on the worker, token lifecycle receipts still failed when concurrent checkout churn left repo-backed paths read-only, and the worker checkout archive staging path needed to stop using a shared remote filename
 - branch commits `8d9b6c10` and `a3de885c` repaired those gaps by switching the worker checkout staging paths to per-run tempfiles, keeping repo-backed token lifecycle paths writable, teaching `weekly_capacity_report` to fall back through `uv run --with pyyaml`, and making the token lifecycle Windmill wrappers self-heal their receipt and incident directories at runtime
-- the final replay log at `.local/ws-0228/converge-windmill-token-wrapper.log` completed successfully with `docker-runtime-lv3 ok=236 changed=43`, `postgres-lv3 ok=63 changed=1`, and `proxmox_florin ok=37 changed=7`, and it included both `Verify the Windmill default operations scripts are seeded` and `Assert the Windmill default operations scripts exist`
+- the final replay log at `.local/ws-0228/converge-windmill-token-wrapper.log` completed successfully with `docker-runtime ok=236 changed=43`, `postgres ok=63 changed=1`, and `proxmox-host ok=37 changed=7`, and it included both `Verify the Windmill default operations scripts are seeded` and `Assert the Windmill default operations scripts exist`
 - the proxied Windmill API on `http://100.64.0.1:8005` returned `CE v1.662.0`, the seeded metadata GETs for `f/lv3/post_merge_gate` and `f/lv3/maintenance_window` succeeded, `f/lv3/weekly_capacity_report` succeeded with `metrics_source: disabled`, `f/lv3/audit_token_inventory` succeeded with `7` healthy tokens, and dry-run `f/lv3/token_exposure_response` succeeded for `local-platform-cli`
 - the canonical branch-local evidence for this replay is receipt `2026-03-28-adr-0228-windmill-default-operations-surface-live-apply`
 - the later latest-main merge replay on 2026-03-29 surfaced three additional runtime truths that now belong to the same ADR trail: the live CE v1.662.0 control plane no longer resolves the older path-based `jobs/run_wait_result/p/...` route reliably for these seeded scripts, the worker mirror needed one more prune pass for stale empty directories so `f/lv3/post_merge_gate` would stop only on the expected protected-file canonical-truth holdback, and the worker-local `generated-portals` fallback required Python `3.11`-compatible empty-state rendering in `scripts/generate_ops_portal.py`
@@ -100,8 +100,8 @@
 
 - the exact-main integration branch finishes ADR 0228 as repository version `0.177.71` and platform version `0.130.49`
 - commit `afb96649` is the canonical merged-main replay source for that result; it keeps the Windmill raw-app and worker-sync hardening from the earlier branch work and adds the Python `3.11` compatibility fix for `scripts/generate_ops_portal.py`
-- replay `r25` completed successfully from that exact merged candidate, the worker-local validation subset passed directly on `docker-runtime-lv3`, and receipt `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` now records the integrated proof
-- the live `post_merge_gate` result is now green on mainline, with the expected nuance that the primary Docker-runner path still degrades to the worker-local fallback because the worker receives `502 Bad Gateway` while pulling `registry.lv3.org/check-runner/*`
+- replay `r25` completed successfully from that exact merged candidate, the worker-local validation subset passed directly on `docker-runtime`, and receipt `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` now records the integrated proof
+- the live `post_merge_gate` result is now green on mainline, with the expected nuance that the primary Docker-runner path still degrades to the worker-local fallback because the worker receives `502 Bad Gateway` while pulling `registry.example.com/check-runner/*`
 
 ## Notes For The Next Assistant
 

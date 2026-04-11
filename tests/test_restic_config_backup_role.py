@@ -18,7 +18,7 @@ def load_tasks() -> list[dict]:
 def test_defaults_pin_repo_checkout_and_receipt_locations() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text(encoding="utf-8"))
 
-    assert defaults["restic_config_backup_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
+    assert defaults["restic_config_backup_repo_checkout_host_path"] == "/srv/proxmox-host_server"
     assert (
         defaults["restic_config_backup_fallback_script_path"]
         == "/opt/api-gateway/service/scripts/restic_config_backup.py"

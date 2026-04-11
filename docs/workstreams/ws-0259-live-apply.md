@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/adr-0259-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0259-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/adr-0259-live-apply`
 - Owner: codex
 - Depends On: `adr-0151-n8n`, `adr-0206-ports-and-adapters`, `adr-0254-serverclaw`, `adr-0258-temporal`
 - Conflicts With: none
@@ -44,12 +44,12 @@
 
 ## Expected Live Surfaces
 
-- `https://n8n.lv3.org/healthz` still returns `200` through the shared edge
-- `https://n8n.lv3.org/` still redirects humans into the shared edge auth flow
-- `https://n8n.lv3.org/webhook-test/...` remains reachable without the browser
+- `https://n8n.example.com/healthz` still returns `200` through the shared edge
+- `https://n8n.example.com/` still redirects humans into the shared edge auth flow
+- `https://n8n.example.com/webhook-test/...` remains reachable without the browser
   auth redirect so ServerClaw can use governed webhook adapters
 - the guest-local readiness and owner-login checks still pass on
-  `docker-runtime-lv3`
+  `docker-runtime`
 
 ## Verification Plan
 
@@ -69,13 +69,13 @@
   `4a1f518ab7b0f7e5a997110f55c683a6700c1667`
   (`VERSION` `0.177.79`, integrated platform baseline `0.130.53`), with final
   recap
-  `docker-runtime-lv3 ok=117 changed=2 failed=0 skipped=32`,
-  `postgres-lv3 ok=47 changed=0 failed=0 skipped=7`,
-  `nginx-lv3 ok=37 changed=2 failed=0 skipped=8`, and
+  `docker-runtime ok=117 changed=2 failed=0 skipped=32`,
+  `postgres ok=47 changed=0 failed=0 skipped=7`,
+  `nginx-edge ok=37 changed=2 failed=0 skipped=8`, and
   `localhost ok=18 changed=0 failed=0 skipped=3`.
 - The workstream fixed the real replay blockers surfaced during the first
   branch-local run: `n8n` now reads topology from
-  `hostvars['proxmox_florin']`, uses host networking to reach `postgres-lv3`
+  `hostvars['proxmox-host']`, uses host networking to reach `postgres`
   across the private guest network, and skips unrelated generated static-site
   syncs when publishing through the shared NGINX edge from a fresh worktree.
 - Focused regression and repo-facing validation passed on the workstream head:
@@ -89,16 +89,16 @@
 
 ## Live Evidence
 
-- `curl -fsS https://n8n.lv3.org/healthz` returned `{"status":"ok"}`.
-- `curl -fsSI https://n8n.lv3.org/` returned `HTTP/2 302` with
-  `location: https://n8n.lv3.org/oauth2/sign_in?rd=https://n8n.lv3.org/`.
-- `curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke`
+- `curl -fsS https://n8n.example.com/healthz` returned `{"status":"ok"}`.
+- `curl -fsSI https://n8n.example.com/` returned `HTTP/2 302` with
+  `location: https://n8n.example.com/oauth2/sign_in?rd=https://n8n.example.com/`.
+- `curl -sSI https://n8n.example.com/webhook-test/serverclaw-connector-smoke`
   returned `HTTP/2 404` from `n8n` without an oauth redirect, preserving the
   unauthenticated webhook ingress contract.
-- Guest-local verification on `docker-runtime-lv3` returned
+- Guest-local verification on `docker-runtime` returned
   `readiness_status: 200`, `readiness_body: ok`,
-  `login_email: ops@lv3.org`, and `login_role: global:owner`.
-- `sudo docker ps | grep -w n8n` on `docker-runtime-lv3` showed the
+  `login_email: ops@example.com`, and `login_role: global:owner`.
+- `sudo docker ps | grep -w n8n` on `docker-runtime` showed the
   `docker.n8n.io/n8nio/n8n:2.2.6` runtime container and the
   `openbao/openbao:2.5.1` sidecar both running.
 - `scripts/service_redundancy.py --check-live-apply --service n8n` still reports

@@ -7,9 +7,9 @@ Proxmox host's server-resident `ansible-pull` reconcile loop.
 
 ## Canonical Surfaces
 
-- playbook: [playbooks/server-resident-reconciliation.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/server-resident-reconciliation.yml)
-- role: [collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation)
-- ADR: [docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md)
+- playbook: [playbooks/server-resident-reconciliation.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/server-resident-reconciliation.yml)
+- role: [collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation)
+- ADR: [docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md)
 
 ## Bootstrap From A Controller
 
@@ -20,23 +20,23 @@ token and the standard Proxmox SSH key:
 ansible-playbook \
   -i inventory/hosts.yml \
   playbooks/server-resident-reconciliation.yml \
-  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e server_resident_reconciliation_bootstrap_gitea_access=true
 ```
 
 The bootstrap run will:
 
 - ensure the restricted `lv3-reconcile` Gitea user exists
-- ensure that user has read-only access to `ops/proxmox_florin_server`
+- ensure that user has read-only access to `ops/proxmox-host_server`
 - create or recover the mirrored low-privilege Gitea token
-- mirror that token to `proxmox_florin`
+- mirror that token to `proxmox-host`
 - install the managed checkout path, askpass helper, dedicated local
   `ansible-pull` inventory, wrapper, and systemd timer
 
 ## Source Publication
 
 The host-local service pulls only from the private Gitea repository at
-`http://100.64.0.1:3009/ops/proxmox_florin_server.git`.
+`http://100.64.0.1:3009/ops/proxmox-host_server.git`.
 
 - For routine production runs, trigger the service only after the relevant
   merged `main` content has been published into that private repo.
@@ -46,7 +46,7 @@ The host-local service pulls only from the private Gitea repository at
   `ansible-pull` will fetch.
 - For ADR 0224 exact-main verification, publish the validated integration
   candidate into the private Gitea `main`, then confirm that both
-  `/srv/proxmox_florin_server` and the latest receipt's `source_commit`
+  `/srv/proxmox-host_server` and the latest receipt's `source_commit`
   resolve to that published snapshot.
 
 ## Verify The Live Host
@@ -54,14 +54,14 @@ The host-local service pulls only from the private Gitea repository at
 1. Confirm the managed systemd units exist and the timer is active:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
   'sudo systemctl status lv3-server-resident-reconciliation.service --no-pager && sudo systemctl status lv3-server-resident-reconciliation.timer --no-pager'
 ```
 
 2. Trigger one manual run:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
   'sudo systemctl start lv3-server-resident-reconciliation.service'
 ```
 
@@ -69,14 +69,14 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
    host-local receipt:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
-  'sudo git -C /srv/proxmox_florin_server rev-parse HEAD && echo --- && sudo git -C /srv/proxmox_florin_server status --short && echo --- && sudo cat /var/lib/lv3/server-resident-reconciliation/receipts/latest.json'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
+  'sudo git -C /srv/proxmox-host_server rev-parse HEAD && echo --- && sudo git -C /srv/proxmox-host_server status --short && echo --- && sudo cat /var/lib/lv3/server-resident-reconciliation/receipts/latest.json'
 ```
 
 4. Inspect the journal when a run fails:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
   'sudo journalctl -u lv3-server-resident-reconciliation.service -n 200 --no-pager'
 ```
 
@@ -92,7 +92,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   `/var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml`
   instead of the repo inventory, which lets `ansible-pull` complete its own
   checkout step through `localhost` while the playbook still limits itself to
-  the durable `proxmox_florin` alias.
+  the durable `proxmox-host` alias.
 - The host-local receipts live under
   `/var/lib/lv3/server-resident-reconciliation/receipts/` so the git checkout
   stays clean between timer runs.

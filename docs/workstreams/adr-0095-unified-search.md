@@ -4,11 +4,11 @@
 - Title: Zinc Search indexing audit log, topology, ADRs, and catalogs; exposed at /v1/platform/search via the API gateway
 - Status: ready
 - Branch: `codex/adr-0095-unified-search`
-- Worktree: `../proxmox_florin_server-unified-search`
+- Worktree: `../proxmox-host_server-unified-search`
 - Owner: codex
 - Depends On: `adr-0092-platform-api-gateway`, `adr-0054-netbox`, `adr-0066-audit-log`, `adr-0069-agent-tool-registry`, `adr-0070-rag-context`
 - Conflicts With: none
-- Shared Surfaces: `config/agent-tool-registry.json`, `config/api-gateway-catalog.json`, Compose stack on `docker-runtime-lv3`
+- Shared Surfaces: `config/agent-tool-registry.json`, `config/api-gateway-catalog.json`, Compose stack on `docker-runtime`
 
 ## Scope
 
@@ -17,7 +17,7 @@
 - write `scripts/search_index_audit.py` — indexes mutation audit log entries into Zinc (15-min schedule)
 - write `scripts/search_index_netbox.py` — indexes NetBox VMs and IPs into Zinc (hourly schedule)
 - write `scripts/search_index_windmill.py` — indexes Windmill run history into Zinc (15-min schedule)
-- write Ansible role `zinc_search_runtime` — deploys Zinc Search Compose service on `docker-runtime-lv3`
+- write Ansible role `zinc_search_runtime` — deploys Zinc Search Compose service on `docker-runtime`
 - add `/v1/platform/search` endpoint to the API gateway (FastAPI route in `scripts/api_gateway/main.py`)
 - add `platform_search` tool to `config/agent-tool-registry.json`
 - schedule all indexer scripts in Windmill (5 new scheduled flows)
@@ -46,7 +46,7 @@
 
 ## Expected Live Surfaces
 
-- Zinc Search accessible on `docker-runtime-lv3:4080` (internal only)
+- Zinc Search accessible on `docker-runtime:4080` (internal only)
 - `GET /v1/platform/search?q=postgres` returns results from at least 3 sources
 - `lv3 search postgres` returns results in the terminal
 - All 5 indexer Windmill flows have at least one successful run

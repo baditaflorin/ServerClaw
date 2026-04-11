@@ -4,7 +4,7 @@
 - Title: 15-item extension checklist encoded in the scaffold generator and enforced by a validation gate completeness check, with grandfathering for existing services
 - Status: merged
 - Branch: `codex/adr-0107-extension-model`
-- Worktree: `../proxmox_florin_server-extension-model`
+- Worktree: `../proxmox-host_server-extension-model`
 - Owner: codex
 - Depends On: `adr-0033-service-catalog`, `adr-0064-health-probes`, `adr-0078-scaffold-generator`, `adr-0087-validation-gate`, `adr-0092-platform-api-gateway`, `adr-0096-slo-tracking`, `adr-0104-dependency-graph`
 - Conflicts With: none
@@ -42,13 +42,13 @@
 
 ## Expected Live Surfaces
 
-- `make scaffold-service NAME=test-service TYPE=compose VM=docker-runtime-lv3 DEPENDS_ON=postgres,keycloak` generates all 15 artifacts in the correct directories
+- `make scaffold-service NAME=test-service TYPE=compose VM=docker-runtime DEPENDS_ON=postgres,keycloak` generates all 15 artifacts in the correct directories
 - `lv3 validate --service keycloak` shows which checklist items keycloak has (and which are grandfathered)
 - Validation gate rejects a push that adds a new service to the capability catalog without completing the checklist (non-grandfathered service only)
 
 ## Verification
 
-- Run `make scaffold-service NAME=demo-service TYPE=compose VM=docker-runtime-lv3 DEPENDS_ON=postgres`
+- Run `make scaffold-service NAME=demo-service TYPE=compose VM=docker-runtime DEPENDS_ON=postgres`
 - Verify all 15 expected files/patches are created
 - Run `lv3 validate --service demo_service` → all 15 items present
 - Delete one item (e.g., remove demo-service from health-probe-catalog.json); run `lv3 validate --service demo-service` → reports missing health probe

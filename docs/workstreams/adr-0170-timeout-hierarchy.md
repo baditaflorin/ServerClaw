@@ -4,7 +4,7 @@
 - Title: Canonical timeout hierarchy, deadline propagation helpers, validation, and runtime integration
 - Status: live_applied
 - Branch: `codex/adr-0170-timeout-hierarchy`
-- Worktree: `../proxmox_florin_server-timeout-hierarchy`
+- Worktree: `../proxmox-host_server-timeout-hierarchy`
 - Owner: codex
 - Depends On: `adr-0092-platform-api-gateway`, `adr-0113-world-state-materializer`, `adr-0119-budgeted-workflow-scheduler`
 - Conflicts With: `adr-0092-platform-api-gateway` (shared gateway runtime and catalog), `adr-0119-budgeted-workflow-scheduler` (shared watchdog path), `adr-0113-world-state-materializer` (shared worker timeouts)
@@ -31,7 +31,7 @@
 - the ADR is merged to `main`; the runtime hardening needed for the first honest live apply was released in `0.159.0`
 - the integrated mainline live apply advanced platform version to `0.130.8` on 2026-03-25
 - `make converge-windmill` completed successfully after the shared OpenBao helper learned to unseal locally before runtime secret injection
-- `make converge-openbao` still returns non-zero because `postgres-replica-lv3` is SSH-unreachable in the prep play, but the OpenBao runtime verification on `docker-runtime-lv3` passed and the receipt records that remaining replica issue
+- `make converge-openbao` still returns non-zero because `postgres-replica` is SSH-unreachable in the prep play, but the OpenBao runtime verification on `docker-runtime` passed and the receipt records that remaining replica issue
 
 ## Notes For The Next Assistant
 

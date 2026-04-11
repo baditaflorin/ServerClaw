@@ -35,7 +35,7 @@ We will maintain a machine-readable **repository structure index** at `.repo-str
 ### Format
 
 ```yaml
-repository: proxmox_florin_server
+repository: proxmox-host_server
 version: 1
 last_updated: 2026-03-26
 purpose: |

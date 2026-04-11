@@ -7,7 +7,7 @@
 
 ## Context
 
-The proxmox_florin_server platform is a complex infrastructure-as-code system with:
+The proxmox-host_server platform is a complex infrastructure-as-code system with:
 
 - **73 Ansible roles** managing 50+ services across multiple VMs
 - **383 ADRs** documenting decisions, tradeoffs, and implementation details
@@ -51,7 +51,7 @@ This is particularly valuable for a codebase with:
 
 ## Decision
 
-Integrate MemPalace as the primary **agent cross-session memory system** for the proxmox_florin_server platform.
+Integrate MemPalace as the primary **agent cross-session memory system** for the proxmox-host_server platform.
 
 ### Architecture Overview
 
@@ -78,7 +78,7 @@ Integrate MemPalace as the primary **agent cross-session memory system** for the
     MemPalace Palace
     (~/.mempalace/)
            │
-           ├─ wing_proxmox_florin/
+           ├─ wing_proxmox-host/
            │  ├─ hall_facts/
            │  │  └─ adr_0373_role_registry (temporal KG facts)
            │  ├─ hall_events/
@@ -140,7 +140,7 @@ This gives Claude Code access to:
 ```
 Session start:
   1. Read CLAUDE.md (project rules)
-  2. Load memory: mempalace wake_up --wing proxmox_florin
+  2. Load memory: mempalace wake_up --wing proxmox-host
   3. Establish context: last session completed Phase X, here's what was learned
 
 During work:
@@ -190,7 +190,7 @@ Session 8:
 
 Link MemPalace with existing ADRs:
 
-- **ADR discovery room** (`wing_proxmox_florin / hall_decisions / adr_NNNN_slug`)
+- **ADR discovery room** (`wing_proxmox-host / hall_decisions / adr_NNNN_slug`)
 - When an ADR is implemented, capture:
   - Rejected alternatives and why (not always in the written ADR)
   - Debugging sessions that led to the decision
@@ -219,12 +219,12 @@ Integrate with existing `workstreams.yaml` tracking:
 Example workstream room structure:
 
 ```
-wing_proxmox_florin
+wing_proxmox-host
   / hall_events
     / workstream_adr_0373_phase_1_2_3  (sessions 10-12)
     / workstream_adr_0373_phase_4_5    (sessions 13+)
 
-wing_proxmox_florin
+wing_proxmox-host
   / hall_discoveries
     / derive_service_defaults_scope_limit (contributed by workstream_adr_0373)
 ```
@@ -233,7 +233,7 @@ wing_proxmox_florin
 
 Index operational procedures in MemPalace:
 
-- `wing_proxmox_florin / hall_advice / runbook_NNNN_slug`
+- `wing_proxmox-host / hall_advice / runbook_NNNN_slug`
 - When an operator follows a runbook and encounters issues, capture the divergence
 - Example: "Runbook says wait 30s for service startup, but Keycloak needs 90s in this config"
 
@@ -250,7 +250,7 @@ mempalace_search "keycloak startup timeout"
 
 Collect and index technical patterns discovered across the codebase:
 
-- `wing_proxmox_florin / hall_discoveries / pattern_*`
+- `wing_proxmox-host / hall_discoveries / pattern_*`
 
 Examples:
 - `pattern_openbao_agent_config` — how to wire the agent into systemd/docker
@@ -278,7 +278,7 @@ Capture session boundaries and continuity:
 
 File incident investigations in MemPalace:
 
-- `wing_proxmox_florin / hall_events / incident_NNNN_slug`
+- `wing_proxmox-host / hall_events / incident_NNNN_slug`
 - Example: "Keycloak Timeout Incident (2026-04-07)"
   - Root cause: Admin token refresh fails during outline reconciliation
   - Fix applied: `keycloak_reconcile_outline_users: false`
@@ -293,10 +293,10 @@ File incident investigations in MemPalace:
 2. Initialize the palace: `mempalace init ~/.mempalace`
 3. Mine existing repositories:
    ```bash
-   mempalace mine /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/ \
-     --mode projects --wing proxmox_florin
+   mempalace mine /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/ \
+     --mode projects --wing proxmox-host
    mempalace mine ~/.claude/projects/.../memory/ \
-     --mode convos --wing proxmox_florin
+     --mode convos --wing proxmox-host
    ```
 4. Create specialist agents:
    ```bash
@@ -320,7 +320,7 @@ File incident investigations in MemPalace:
 2. Create CLAUDE.md memory instructions:
    ```markdown
    You have access to MemPalace agent memory. Use it to:
-   - Load critical facts at session start: mempalace wake_up --wing proxmox_florin
+   - Load critical facts at session start: mempalace wake_up --wing proxmox-host
    - Search for past decisions: mempalace_search "topic"
    - Record discoveries: mempalace_add_drawer "pattern: ..."
 
@@ -331,7 +331,7 @@ File incident investigations in MemPalace:
    {
      "hooks": {
        "Stop": [{
-         "matcher": "proxmox_florin",
+         "matcher": "proxmox-host",
          "hooks": [{
            "type": "command",
            "command": "~/.mempalace/hooks/mempal_save_hook.sh"
@@ -360,7 +360,7 @@ File incident investigations in MemPalace:
 
 3. Create initial knowledge graph facts:
    ```bash
-   mempalace_kg_add "proxmox_florin" "implements" "docker_compose_runtime" \
+   mempalace_kg_add "proxmox-host" "implements" "docker_compose_runtime" \
      valid_from="2026-01-01"
    mempalace_kg_add "ADR_0373" "status" "phase_4_in_progress" \
      valid_from="2026-04-08"
@@ -395,7 +395,7 @@ id: adr-0373-phase-4
 title: ADR 0373 Phase 4 — Migrate Group A Roles
 owner: Claude Agent
 status: in_progress
-mempalace_room: wing_proxmox_florin/hall_events/workstream_adr_0373_phase_4
+mempalace_room: wing_proxmox-host/hall_events/workstream_adr_0373_phase_4
 
 features:
   - roles/dify_runtime, roles/directus_runtime, ...
@@ -412,7 +412,7 @@ Each Plane issue can reference a MemPalace room:
 Issue: "ADR 0373 Phase 4 implementation"
 Description:
   - Checklist: migrate 8 remaining Docker app roles
-  - Memory room: mempalace_room/wing_proxmox_florin/hall_events/workstream_adr_0373_phase_4
+  - Memory room: mempalace_room/wing_proxmox-host/hall_events/workstream_adr_0373_phase_4
   - Search pattern: "roles/dify roles/directus"
 ```
 
@@ -428,7 +428,7 @@ Author: Claude <claude@anthropic.com>
 
 - Applied derive_service_defaults pattern (works for Docker services)
 - Discovered: ljust is not a Jinja2 filter; use Ansible ljust instead
-- See MemPalace wing_proxmox_florin/hall_discoveries/ljust_filter_limitation
+- See MemPalace wing_proxmox-host/hall_discoveries/ljust_filter_limitation
 
 Closes Plane issue PROXMOX-1234
 ```
@@ -443,7 +443,7 @@ Update the project CLAUDE.md to include memory access:
 This codebase uses MemPalace for cross-session agent memory.
 
 Before starting work:
-1. `mempalace wake_up --wing proxmox_florin` — load critical facts
+1. `mempalace wake_up --wing proxmox-host` — load critical facts
 2. Search for similar work: `mempalace_search "what I'm about to do"`
 
 During work:
@@ -452,7 +452,7 @@ During work:
 
 At session end:
 - Auto-save hook captures discoveries (every 15 messages)
-- Manual save: `mempalace_save wing_proxmox_florin`
+- Manual save: `mempalace_save wing_proxmox-host`
 
 See ~/.mempalace/status for the current palace structure.
 ```
@@ -505,7 +505,7 @@ See ~/.mempalace/status for the current palace structure.
 ## Questions for Review
 
 1. Should MemPalace storage live in `.local/` (per worktree) or `~/.mempalace/` (shared across worktrees)?
-   - **Recommendation:** `~/.mempalace/` (shared) so all proxmox_florin work across all worktrees feeds the same palace
+   - **Recommendation:** `~/.mempalace/` (shared) so all proxmox-host work across all worktrees feeds the same palace
 
 2. Should specialist agents (reviewer, architect, ops) have their own diaries or share one hall_advice room?
    - **Recommendation:** Separate diaries per agent (more focus, less noise)

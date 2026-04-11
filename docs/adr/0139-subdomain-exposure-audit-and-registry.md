@@ -9,7 +9,7 @@
 
 ## Context
 
-`config/subdomain-catalog.json` (ADR 0076) is the declared inventory of governed `lv3.org` hostnames. Before this ADR, the repository could validate basic catalog structure and edge-route coverage, but it still lacked a dedicated exposure view that answered four operator questions quickly and deterministically:
+`config/subdomain-catalog.json` (ADR 0076) is the declared inventory of governed `example.com` hostnames. Before this ADR, the repository could validate basic catalog structure and edge-route coverage, but it still lacked a dedicated exposure view that answered four operator questions quickly and deterministically:
 
 1. Which tracked hostnames are actually active today?
 2. Which hostnames are intentionally public, edge-authenticated, upstream-authenticated, or private-only?
@@ -18,14 +18,14 @@
 
 That gap creates a drift window. A hostname can move from "planned" to publicly reachable, or from "auth-gated" to anonymously reachable, without a single derived surface making the discrepancy obvious during review.
 
-On 2026-03-24, live DNS verification showed that `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` already resolved publicly while the catalog still marked them `planned`. The repository needed a durable registry and an audit step that could detect exactly that class of mismatch.
+On 2026-03-24, live DNS verification showed that `ops.example.com`, `docs.example.com`, and `changelog.example.com` already resolved publicly while the catalog still marked them `planned`. The repository needed a durable registry and an audit step that could detect exactly that class of mismatch.
 
 ## Decision
 
 We will maintain a **deterministic subdomain exposure registry** generated from:
 
 - `config/subdomain-catalog.json`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `roles/nginx_edge_publication/defaults/main.yml`
 
 and pair it with a **subdomain exposure audit** that can check live DNS and edge-auth behavior.
@@ -71,7 +71,7 @@ The audit script performs four classes of checks:
 
 3. **Live edge-auth probe**
    - For active `edge_oidc` hostnames, make an unauthenticated HTTPS request.
-   - Emit a CRITICAL finding if the request does not redirect into the Keycloak authorization flow at `sso.lv3.org`.
+   - Emit a CRITICAL finding if the request does not redirect into the Keycloak authorization flow at `sso.example.com`.
 
 4. **Hetzner DNS zone check**
    - When `HETZNER_DNS_API_TOKEN` is available, enumerate the full Hetzner DNS zone.
@@ -106,7 +106,7 @@ This is sufficient for repository implementation. Scheduling the worker wrapper 
 
 ## Boundaries
 
-- This ADR covers `lv3.org` hostnames tracked in the governed subdomain catalog.
+- This ADR covers `example.com` hostnames tracked in the governed subdomain catalog.
 - It does not replace separate hardening ADRs that change whether a given portal should be public.
 - It does not auto-remediate DNS or edge-auth drift.
 
@@ -114,7 +114,7 @@ This is sufficient for repository implementation. Scheduling the worker wrapper 
 
 - The repository now ships the canonical registry at `config/subdomain-exposure-registry.json`, the audit tool at `scripts/subdomain_exposure_audit.py`, the worker wrapper at `config/windmill/scripts/subdomain-exposure-audit.py`, and the operator workflow in `docs/runbooks/subdomain-exposure-audit.md`.
 - `config/subdomain-catalog.json` now records `auth_requirement` for every tracked hostname.
-- Production entries for `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` were corrected to `status: active` after live DNS verification on 2026-03-24.
+- Production entries for `ops.example.com`, `docs.example.com`, and `changelog.example.com` were corrected to `status: active` after live DNS verification on 2026-03-24.
 
 ## Related ADRs
 

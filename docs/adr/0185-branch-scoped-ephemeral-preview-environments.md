@@ -40,7 +40,7 @@ Previews should be created from committed automation only:
 
 - immutable VM or container images where possible
 - generated environment-specific inventory overlays
-- isolated DNS names such as `<workstream>.preview.lv3.org`
+- isolated DNS names such as `<workstream>.preview.example.com`
 - default deployment on preview networks or the auxiliary cloud domain
 
 ### Intended use

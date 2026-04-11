@@ -25,8 +25,8 @@ def write_inventory(path: Path, guest_names: list[str]) -> Path:
             "  children:\n"
             "    proxmox_hosts:\n"
             "      hosts:\n"
-            "        proxmox_florin:\n"
-            "          ansible_host: 65.108.75.123\n"
+            "        proxmox-host:\n"
+            "          ansible_host: 203.0.113.1\n"
             "    lv3_guests:\n"
             "      hosts:\n"
             f"{guests}\n"
@@ -56,9 +56,9 @@ def write_capacity_model(path: Path, *, host: dict, guests: list[dict], reservat
 
 def base_host() -> dict:
     return {
-        "id": "proxmox_florin",
+        "id": "proxmox-host",
         "name": "florin",
-        "metrics_host": "proxmox_florin",
+        "metrics_host": "proxmox-host",
         "physical": {"ram_gb": 64, "vcpu": 16, "disk_gb": 1000},
         "target_utilisation": {"ram_percent": 80, "vcpu_percent": 75, "disk_percent": 75},
         "reserved_for_platform": {"ram_gb": 8, "vcpu": 2, "disk_gb": 100},
@@ -72,14 +72,14 @@ def postgres_service() -> dict:
         "description": "HA database",
         "category": "data",
         "lifecycle_status": "active",
-        "vm": "postgres-lv3",
+        "vm": "postgres",
         "vmid": 150,
-        "internal_url": "postgres://database.lv3.org:5432",
+        "internal_url": "postgres://database.example.com:5432",
         "exposure": "private-only",
         "environments": {
             "production": {
                 "status": "active",
-                "url": "postgres://database.lv3.org:5432",
+                "url": "postgres://database.example.com:5432",
             }
         },
         "redundancy": {
@@ -87,12 +87,12 @@ def postgres_service() -> dict:
             "rto_target": "5m",
             "rpo_target": "0s",
             "backup_source": "backup_pbs",
-            "standby_location": "postgres-replica-lv3",
+            "standby_location": "postgres-replica",
             "failover_trigger": "Patroni unhealthy",
             "failback_method": "Reinitialize the former primary",
             "standby": {
                 "mode": "warm",
-                "vm": "postgres-replica-lv3",
+                "vm": "postgres-replica",
                 "vmid": 151,
                 "reservation": {
                     "resources": {"ram_gb": 8, "vcpu": 4, "disk_gb": 96},
@@ -100,12 +100,12 @@ def postgres_service() -> dict:
                     "required_network_attachment": "vmbr10",
                 },
                 "placement": {
-                    "primary_compose_project": "systemd:patroni-postgres-lv3",
-                    "standby_compose_project": "systemd:patroni-postgres-replica-lv3",
-                    "primary_namespace": "guest:postgres-lv3:patroni",
-                    "standby_namespace": "guest:postgres-replica-lv3:patroni",
-                    "primary_data_paths": ["guest:postgres-lv3:/var/lib/postgresql"],
-                    "standby_data_paths": ["guest:postgres-replica-lv3:/var/lib/postgresql"],
+                    "primary_compose_project": "systemd:patroni-postgres",
+                    "standby_compose_project": "systemd:patroni-postgres-replica",
+                    "primary_namespace": "guest:postgres:patroni",
+                    "standby_namespace": "guest:postgres-replica:patroni",
+                    "primary_data_paths": ["guest:postgres:/var/lib/postgresql"],
+                    "standby_data_paths": ["guest:postgres-replica:/var/lib/postgresql"],
                 },
                 "failure_domain_honesty": "This warm standby does not cover loss of the single Proxmox host.",
             },
@@ -117,7 +117,7 @@ def test_guest_backed_standby_is_approved(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(
         capacity_report,
         "INVENTORY_PATH",
-        write_inventory(tmp_path / "hosts.yml", ["postgres-lv3", "postgres-replica-lv3"]),
+        write_inventory(tmp_path / "hosts.yml", ["postgres", "postgres-replica"]),
     )
     model_path = write_capacity_model(
         tmp_path / "capacity-model.json",
@@ -125,20 +125,20 @@ def test_guest_backed_standby_is_approved(tmp_path: Path, monkeypatch) -> None:
         guests=[
             {
                 "vmid": 150,
-                "name": "postgres-lv3",
+                "name": "postgres",
                 "status": "active",
                 "environment": "production",
-                "metrics_host": "postgres-lv3",
+                "metrics_host": "postgres",
                 "allocated": {"ram_gb": 8, "vcpu": 4, "disk_gb": 96},
                 "budget": {"ram_gb": 12, "vcpu": 6, "disk_gb": 128},
                 "disk_paths": ["/"],
             },
             {
                 "vmid": 151,
-                "name": "postgres-replica-lv3",
+                "name": "postgres-replica",
                 "status": "planned",
                 "environment": "production",
-                "metrics_host": "postgres-replica-lv3",
+                "metrics_host": "postgres-replica",
                 "allocated": {"ram_gb": 8, "vcpu": 4, "disk_gb": 96},
                 "budget": {"ram_gb": 12, "vcpu": 6, "disk_gb": 128},
                 "disk_paths": ["/"],
@@ -161,21 +161,21 @@ def test_standby_rejects_namespace_and_data_path_conflicts(tmp_path: Path, monke
     monkeypatch.setattr(
         capacity_report,
         "INVENTORY_PATH",
-        write_inventory(tmp_path / "hosts.yml", ["postgres-lv3"]),
+        write_inventory(tmp_path / "hosts.yml", ["postgres"]),
     )
     service = postgres_service()
-    service["redundancy"]["standby"]["placement"]["standby_namespace"] = "guest:postgres-lv3:patroni"
-    service["redundancy"]["standby"]["placement"]["standby_data_paths"] = ["guest:postgres-lv3:/var/lib/postgresql"]
+    service["redundancy"]["standby"]["placement"]["standby_namespace"] = "guest:postgres:patroni"
+    service["redundancy"]["standby"]["placement"]["standby_data_paths"] = ["guest:postgres:/var/lib/postgresql"]
     model_path = write_capacity_model(
         tmp_path / "capacity-model.json",
         host=base_host(),
         guests=[
             {
                 "vmid": 150,
-                "name": "postgres-lv3",
+                "name": "postgres",
                 "status": "active",
                 "environment": "production",
-                "metrics_host": "postgres-lv3",
+                "metrics_host": "postgres",
                 "allocated": {"ram_gb": 8, "vcpu": 4, "disk_gb": 96},
                 "budget": {"ram_gb": 12, "vcpu": 6, "disk_gb": 128},
                 "disk_paths": ["/"],
@@ -187,7 +187,7 @@ def test_standby_rejects_namespace_and_data_path_conflicts(tmp_path: Path, monke
                 "kind": "standby",
                 "status": "reserved",
                 "service_id": "postgres",
-                "standby_vm": "postgres-replica-lv3",
+                "standby_vm": "postgres-replica",
                 "standby_vmid": 151,
                 "storage_class": "local-lvm",
                 "required_network_attachment": "vmbr10",
@@ -211,7 +211,7 @@ def test_standby_rejects_overcommitted_simulated_load(tmp_path: Path, monkeypatc
     monkeypatch.setattr(
         capacity_report,
         "INVENTORY_PATH",
-        write_inventory(tmp_path / "hosts.yml", ["docker-runtime-lv3", "postgres-lv3", "postgres-replica-lv3"]),
+        write_inventory(tmp_path / "hosts.yml", ["docker-runtime", "postgres", "postgres-replica"]),
     )
     model_path = write_capacity_model(
         tmp_path / "capacity-model.json",
@@ -219,30 +219,30 @@ def test_standby_rejects_overcommitted_simulated_load(tmp_path: Path, monkeypatc
         guests=[
             {
                 "vmid": 120,
-                "name": "docker-runtime-lv3",
+                "name": "docker-runtime",
                 "status": "active",
                 "environment": "production",
-                "metrics_host": "docker-runtime-lv3",
+                "metrics_host": "docker-runtime",
                 "allocated": {"ram_gb": 30, "vcpu": 9, "disk_gb": 590},
                 "budget": {"ram_gb": 32, "vcpu": 10, "disk_gb": 620},
                 "disk_paths": ["/"],
             },
             {
                 "vmid": 150,
-                "name": "postgres-lv3",
+                "name": "postgres",
                 "status": "active",
                 "environment": "production",
-                "metrics_host": "postgres-lv3",
+                "metrics_host": "postgres",
                 "allocated": {"ram_gb": 8, "vcpu": 4, "disk_gb": 96},
                 "budget": {"ram_gb": 12, "vcpu": 6, "disk_gb": 128},
                 "disk_paths": ["/"],
             },
             {
                 "vmid": 151,
-                "name": "postgres-replica-lv3",
+                "name": "postgres-replica",
                 "status": "planned",
                 "environment": "production",
-                "metrics_host": "postgres-replica-lv3",
+                "metrics_host": "postgres-replica",
                 "allocated": {"ram_gb": 8, "vcpu": 4, "disk_gb": 96},
                 "budget": {"ram_gb": 12, "vcpu": 6, "disk_gb": 128},
                 "disk_paths": ["/"],
@@ -254,7 +254,7 @@ def test_standby_rejects_overcommitted_simulated_load(tmp_path: Path, monkeypatc
                 "kind": "standby",
                 "status": "reserved",
                 "service_id": "ops_portal",
-                "standby_vm": "backup-lv3",
+                "standby_vm": "backup",
                 "storage_class": "local-lvm",
                 "required_network_attachment": "vmbr10",
                 "reserved": {"ram_gb": 8, "vcpu": 2, "disk_gb": 220},
@@ -286,7 +286,7 @@ def test_rag_context_alias_resolves_to_platform_context_api() -> None:
                     "description": "Semantic retrieval service.",
                     "category": "automation",
                     "lifecycle_status": "active",
-                    "vm": "docker-runtime-lv3",
+                    "vm": "docker-runtime",
                     "exposure": "private-only",
                     "environments": {"production": {"status": "active", "url": "http://100.64.0.1:8010"}},
                 }

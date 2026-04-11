@@ -17,7 +17,7 @@ lists in two places:
 
 When a new VM was added to `inventory/hosts.yml`, neither location updated
 automatically. The VM was provisioned and running, but invisible to services
-like `realtime.lv3.org` until a human or agent noticed the gap and re-ran the
+like `realtime.example.com` until a human or agent noticed the gap and re-ran the
 relevant playbook.
 
 Two additional gaps followed:
@@ -74,7 +74,7 @@ Current table:
 
 | Trigger | Required follow-up | Why |
 |---|---|---|
-| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology derived from `lv3_guests`; new VMs invisible on realtime.lv3.org until Netdata is installed |
+| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology derived from `lv3_guests`; new VMs invisible on realtime.example.com until Netdata is installed |
 | VM added to / removed from `lv3_guests` | `make live-apply-service service=guest-log-shipping` | Loki log-agent topology derived from `lv3_guests`; new VMs produce no log streams until the agent is deployed |
 
 New topology-tracking services MUST add a row to this table when introduced.
@@ -92,7 +92,7 @@ Full `site.yml` runs satisfy this automatically.
 
 ### Positive
 
-- New VMs appear on `realtime.lv3.org` after the next realtime converge with no
+- New VMs appear on `realtime.example.com` after the next realtime converge with no
   further code changes.
 - The AGENTS.md wiring table gives any LLM agent a single-read contract; no
   ADR archaeology required.

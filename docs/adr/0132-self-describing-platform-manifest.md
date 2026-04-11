@@ -42,7 +42,7 @@ We will generate and continuously publish a **self-describing platform manifest*
   "environment": "production",
 
   "identity": {
-    "platform_name": "lv3.org",
+    "platform_name": "example.com",
     "operator": "live",
     "description": "Single-node Proxmox homelab with agentic operations automation"
   },
@@ -128,7 +128,7 @@ We will generate and continuously publish a **self-describing platform manifest*
     "overview": "Intent-driven mutation with pre-execution diff, risk scoring, health gating, and budget enforcement",
     "entry_points": [
       {"component": "Platform CLI", "endpoint": "lv3 <instruction>", "adr": "0090"},
-      {"component": "Ops portal", "endpoint": "https://ops.lv3.org", "adr": "0093"},
+      {"component": "Ops portal", "endpoint": "https://ops.example.com", "adr": "0093"},
       {"component": "NATS subscription", "topic": "platform.>", "adr": "0124"}
     ],
     "pipeline": [
@@ -198,7 +198,7 @@ The `known_gaps` section lists ADRs that are `Proposed` but `Not Implemented`. I
 
 ```bash
 $ lv3 manifest show
-Platform: lv3.org (v0.110.0)  |  Health: degraded (1/6 services unsafe)
+Platform: example.com (v0.110.0)  |  Health: degraded (1/6 services unsafe)
 Open incidents: 1  |  Maintenance windows: 0 active, 1 upcoming
 
 Unsafe services:

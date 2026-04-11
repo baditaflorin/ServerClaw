@@ -74,4 +74,4 @@ entries:
         - workflows
         - local
         - primary
-      for_agents: PRIMARY CI - runs on docker-build-lv3 self-hosted runner
+      for_agents: PRIMARY CI - runs on docker-build self-hosted runner

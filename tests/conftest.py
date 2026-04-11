@@ -60,7 +60,7 @@ def _get_identity() -> dict:
 
 @pytest.fixture
 def platform_domain() -> str:
-    """The platform domain from identity.yml (e.g. 'lv3.org')."""
+    """The platform domain from identity.yml (e.g. 'example.com')."""
     return _get_identity().get("platform_domain", "localhost")
 
 

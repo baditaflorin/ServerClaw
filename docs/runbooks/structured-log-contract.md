@@ -7,9 +7,9 @@ This runbook defines how to emit, validate, and verify the ADR 0169 structured l
 ## Canonical Sources
 
 - ADR: [ADR 0169](../adr/0169-structured-log-field-contract.md)
-- shared logger: [platform/logging/__init__.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/logging/__init__.py)
-- validator CLI: [scripts/log_validator.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/log_validator.py)
-- Ansible callback: [collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py)
+- shared logger: [platform/logging/__init__.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/logging/__init__.py)
+- validator CLI: [scripts/log_validator.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/log_validator.py)
+- Ansible callback: [collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py)
 
 ## Required Fields
 

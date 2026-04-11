@@ -210,7 +210,7 @@ when those commands migrate (ADR 0345).
     --env prod docker-ps --vmid 171
   ```
 
-  This lists Docker containers on `coolify-apps-lv3` (VMID 171) without any direct SSH connection to the VM.
+  This lists Docker containers on `coolify-apps` (VMID 171) without any direct SSH connection to the VM.
 
 ## Related ADRs
 

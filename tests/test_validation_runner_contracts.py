@@ -154,7 +154,7 @@ def test_validate_contract_catalog_rejects_absolute_repo_local_build_server_key(
     module = load_module("validation_runner_contracts_absolute_build_server_key")
     catalog = module.load_contract_catalog()
     build_server_config = {
-        "ssh_key": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519",
+        "ssh_key": "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519",
         "ssh_options": [],
         "commands": {},
     }

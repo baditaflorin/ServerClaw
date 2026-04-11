@@ -6,10 +6,10 @@ This runbook converges the published `ntfy` push channel defined by ADR 0299.
 
 It delivers:
 
-- a repo-managed `ntfy` container on `docker-runtime-lv3`
+- a repo-managed `ntfy` container on `docker-runtime`
 - the governed topic registry in `config/ntfy/topics.yaml`
 - repo-managed publisher and subscriber credentials mirrored under `.local/ntfy/`
-- a public edge-published endpoint at `https://ntfy.lv3.org`
+- a public edge-published endpoint at `https://ntfy.example.com`
 
 ## Entrypoints
 
@@ -23,7 +23,7 @@ It delivers:
 - server config: `/opt/ntfy/server.yml`
 - data directory: `/var/lib/ntfy`
 - topic registry: `config/ntfy/topics.yaml`
-- controller-local secret directory: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/`
+- controller-local secret directory: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ntfy/`
 
 Generated controller-local artifacts:
 
@@ -40,11 +40,11 @@ Generated controller-local artifacts:
 ## Verification
 
 1. `make syntax-check-ntfy`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/ntfy/docker-compose.yml ps'`
-3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'`
-4. `curl -fsS https://ntfy.lv3.org/v1/health`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/ntfy/docker-compose.yml ps'`
+3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'`
+4. `curl -fsS https://ntfy.example.com/v1/health`
 5. `python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info --message 'ADR 0299 verification publish' --sequence-id ws-0299-verify-ansible-info --dedupe-state-file .local/state/ntfy/runbook-verify.json --dedupe-window-seconds 1`
-6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo python3 - <<'"'"'"'"'"'"'"'"'PY'"'"'"'"'"'"'"'"'\nimport sqlite3\nconn = sqlite3.connect(\"/var/lib/ntfy/cache.db\")\ncur = conn.cursor()\nprint({\"platform-security-critical_count\": cur.execute(\"select count(*) from messages where topic=\\'platform-security-critical\\'\").fetchone()[0]})\nPY'`
+6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo python3 - <<'"'"'"'"'"'"'"'"'PY'"'"'"'"'"'"'"'"'\nimport sqlite3\nconn = sqlite3.connect(\"/var/lib/ntfy/cache.db\")\ncur = conn.cursor()\nprint({\"platform-security-critical_count\": cur.execute(\"select count(*) from messages where topic=\\'platform-security-critical\\'\").fetchone()[0]})\nPY'`
 
 ## Governed Topics
 

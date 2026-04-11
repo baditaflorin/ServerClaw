@@ -107,9 +107,9 @@ Store the fingerprint as a file on the target host (e.g., `/var/lib/lv3/converge
 Currently, plays run sequentially because Ansible processes them in order. Services on different hosts can converge in parallel using `strategy: free` or by splitting into independent playbook invocations:
 
 ```
-Lane A (postgres-lv3):  database prep          ──┐
+Lane A (postgres):  database prep          ──┐
 Lane B (docker-runtime): docker pull + compose  ──┼── wait ── NGINX reload
-Lane C (nginx-lv3):     config generation       ──┘
+Lane C (nginx-edge):     config generation       ──┘
 ```
 
 The `ansible_scope_runner.py` already computes host limits per playbook. Extend it to detect independent lanes and fork parallel `ansible-playbook` processes.

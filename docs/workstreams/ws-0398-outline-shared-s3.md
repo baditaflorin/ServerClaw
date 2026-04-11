@@ -2,14 +2,14 @@
 
 ## Overview
 
-Migrate Outline (wiki.lv3.org) from an embedded MinIO sidecar to the shared platform MinIO instance. This fixes the broken asset loading issue where `http://minio:9000` (internal-only hostname) is unreachable from browsers.
+Migrate Outline (wiki.example.com) from an embedded MinIO sidecar to the shared platform MinIO instance. This fixes the broken asset loading issue where `http://minio:9000` (internal-only hostname) is unreachable from browsers.
 
 Implements the **Managed S3 Bucket Consumer Pattern** (ADR 0397) to establish a reusable, declarative pattern for all services needing S3 access.
 
 ## Why This Matters
 
 **Current Problem:**
-- wiki.lv3.org doesn't load because S3 assets are unreachable
+- wiki.example.com doesn't load because S3 assets are unreachable
 - Outline hardcodes internal MinIO URL: `http://minio:9000`
 - This hostname only exists inside Outline's container network
 - Browsers cannot access it, breaking asset loading
@@ -41,10 +41,10 @@ Shared Platform MinIO (docker-runtime:9000)
 Outline Container (runtime-control)
 ├── Redis
 └── Outline app
-    └── AWS_S3_UPLOAD_BUCKET_URL=https://s3.lv3.org ✅
+    └── AWS_S3_UPLOAD_BUCKET_URL=https://s3.example.com ✅
 
 NGINX Edge
-└── s3.lv3.org → proxy to docker-runtime:9000 ✅
+└── s3.example.com → proxy to docker-runtime:9000 ✅
 ```
 
 ## Implementation Phases
@@ -101,7 +101,7 @@ minio_outline_policy_document: |
    - Remove: MinIO data directory path references
 
 4. `outline_runtime/templates/outline.env.j2`
-   - Change: `AWS_S3_UPLOAD_BUCKET_URL=http://minio:9000` → `https://s3.lv3.org`
+   - Change: `AWS_S3_UPLOAD_BUCKET_URL=http://minio:9000` → `https://s3.example.com`
    - Change: `AWS_ACCESS_KEY_ID=minio` → `outline`
    - Change: `AWS_SECRET_ACCESS_KEY` → Read from controller mirror
 
@@ -113,7 +113,7 @@ minio_outline_policy_document: |
 ### Phase 3: Configure S3 Gateway ✅
 **Status:** Not Started
 
-**What:** Add public NGINX route for `s3.lv3.org`
+**What:** Add public NGINX route for `s3.example.com`
 
 **Where:** `public_edge` or `nginx_edge_publication` role
 
@@ -121,7 +121,7 @@ minio_outline_policy_document: |
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name s3.lv3.org;
+    server_name s3.example.com;
 
     location / {
         proxy_pass http://docker-runtime:9000;
@@ -134,7 +134,7 @@ server {
 ```
 
 **Verification:**
-- `curl https://s3.lv3.org/` returns 200
+- `curl https://s3.example.com/` returns 200
 - NGINX logs show requests being routed to docker-runtime
 
 ### Phase 4: Test & Verify ✅
@@ -143,21 +143,21 @@ server {
 **Convergence order:**
 1. `minio_runtime` converges → buckets created
 2. `outline_runtime` converges → uses shared MinIO
-3. Access wiki.lv3.org → verify page loads
+3. Access wiki.example.com → verify page loads
 
 **Testing checklist:**
-- [ ] wiki.lv3.org homepage loads completely
+- [ ] wiki.example.com homepage loads completely
 - [ ] Static assets (JS, CSS) download successfully
 - [ ] File upload in Outline succeeds
 - [ ] Uploaded file is stored in shared MinIO bucket
-- [ ] Downloaded file is accessible via `s3.lv3.org`
+- [ ] Downloaded file is accessible via `s3.example.com`
 - [ ] No minio container running on runtime-control
 
 ## Critical Decisions
 
-1. **Public URL:** Use `https://s3.lv3.org` (not internal `http://docker-runtime:9000`)
+1. **Public URL:** Use `https://s3.example.com` (not internal `http://docker-runtime:9000`)
    - Enables browser downloads
-   - Requires TLS certificate for s3.lv3.org
+   - Requires TLS certificate for s3.example.com
    - NGINX handles routing and TLS termination
 
 2. **Credentials:** Service account `outline`, not root `minio`
@@ -189,7 +189,7 @@ server {
 - [ ] Phase 1: minio_runtime defaults updated and tested
 - [ ] Phase 2: outline_runtime updated and tested
 - [ ] Phase 3: NGINX S3 gateway deployed
-- [ ] Phase 4: wiki.lv3.org fully functional
+- [ ] Phase 4: wiki.example.com fully functional
 - [ ] Convergence: minio_runtime → outline_runtime → verify
 - [ ] Version bump and changelog entry
 - [ ] Live-apply: Outline to production
@@ -197,7 +197,7 @@ server {
 
 ## Success Criteria
 
-✅ wiki.lv3.org loads completely with all assets
+✅ wiki.example.com loads completely with all assets
 ✅ File upload/download works in wiki
 ✅ S3 bucket is shared with other services (pattern proven)
 ✅ No embedded MinIO containers running

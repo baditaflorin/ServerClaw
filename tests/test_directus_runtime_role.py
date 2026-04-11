@@ -20,7 +20,7 @@ def test_directus_defaults_define_runtime_and_publication_contract() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
 
     assert (
-        defaults["directus_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.directus_port }}"
+        defaults["directus_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.directus_port }}"
     )
     assert defaults["directus_internal_base_url"] == "http://127.0.0.1:{{ directus_internal_port }}"
     assert defaults["directus_public_base_url"] == "https://{{ directus_service_topology.public_hostname }}"
@@ -101,7 +101,7 @@ def test_directus_verify_and_publish_tasks_use_expected_contract_endpoints() -> 
         "--expected-service-name",
         "directus",
         "--expected-sso-host",
-        "sso.lv3.org",
+        "sso.example.com",
     ]
 
 

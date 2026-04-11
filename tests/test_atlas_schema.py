@@ -101,9 +101,9 @@ def test_validate_catalog_allows_bootstrap_snapshot_creation(tmp_path: Path) -> 
         "atlas_image_ref": "docker.io/arigaio/atlas:test",
         "dev_postgres_image": "docker.io/library/postgres:16",
         "runtime": {
-            "openbao_guest": "docker-runtime-lv3",
+            "openbao_guest": "docker-runtime",
             "openbao_url": "http://127.0.0.1:8201",
-            "postgres_guest": "postgres-lv3",
+            "postgres_guest": "postgres",
             "postgres_port": 5432,
         },
         "openbao": {
@@ -150,9 +150,9 @@ def test_validate_catalog_rejects_unknown_nats_subject(tmp_path: Path, monkeypat
         "atlas_image_ref": "docker.io/arigaio/atlas:test",
         "dev_postgres_image": "docker.io/library/postgres:16",
         "runtime": {
-            "openbao_guest": "docker-runtime-lv3",
+            "openbao_guest": "docker-runtime",
             "openbao_url": "http://127.0.0.1:8201",
-            "postgres_guest": "postgres-lv3",
+            "postgres_guest": "postgres",
             "postgres_port": 5432,
         },
         "openbao": {
@@ -209,9 +209,9 @@ def test_validate_catalog_rejects_incompatible_nats_payload_contract(
         "atlas_image_ref": "docker.io/arigaio/atlas:test",
         "dev_postgres_image": "docker.io/library/postgres:16",
         "runtime": {
-            "openbao_guest": "docker-runtime-lv3",
+            "openbao_guest": "docker-runtime",
             "openbao_url": "http://127.0.0.1:8201",
-            "postgres_guest": "postgres-lv3",
+            "postgres_guest": "postgres",
             "postgres_port": 5432,
         },
         "openbao": {
@@ -286,9 +286,9 @@ def test_run_drift_does_not_create_receipt_dir_when_schema_is_clean(monkeypatch,
         "atlas_image_ref": "docker.io/arigaio/atlas:test",
         "dev_postgres_image": "docker.io/library/postgres:16",
         "runtime": {
-            "openbao_guest": "docker-runtime-lv3",
+            "openbao_guest": "docker-runtime",
             "openbao_url": "http://127.0.0.1:8201",
-            "postgres_guest": "postgres-lv3",
+            "postgres_guest": "postgres",
             "postgres_port": 5432,
         },
         "openbao": {
@@ -580,7 +580,7 @@ def test_normalize_global_option_order_moves_repo_flags_before_subcommand() -> N
         [
             "drift",
             "--repo-root",
-            "/srv/proxmox_florin_server",
+            "/srv/proxmox-host_server",
             "--format",
             "json",
             "--write-receipts",
@@ -590,7 +590,7 @@ def test_normalize_global_option_order_moves_repo_flags_before_subcommand() -> N
 
     assert normalized == [
         "--repo-root",
-        "/srv/proxmox_florin_server",
+        "/srv/proxmox-host_server",
         "--format",
         "json",
         "drift",
@@ -776,11 +776,11 @@ def test_resolve_openbao_url_prefers_direct_guest_ip_before_ssh_tunnel(monkeypat
 
     catalog = {
         "runtime": {
-            "openbao_guest": "docker-runtime-lv3",
+            "openbao_guest": "docker-runtime",
             "openbao_url": "http://127.0.0.1:8201",
         }
     }
-    context = {"guests": {"docker-runtime-lv3": "10.10.10.20"}}
+    context = {"guests": {"docker-runtime": "10.10.10.20"}}
 
     with atlas_schema.resolve_openbao_url(catalog, context) as resolved_url:
         assert resolved_url == "http://10.10.10.20:8201"
@@ -810,11 +810,11 @@ def test_resolve_openbao_url_can_force_direct_guest_ip_without_reachability_prob
 
     catalog = {
         "runtime": {
-            "openbao_guest": "docker-runtime-lv3",
+            "openbao_guest": "docker-runtime",
             "openbao_url": "http://127.0.0.1:8201",
         }
     }
-    context = {"guests": {"docker-runtime-lv3": "10.10.10.20"}}
+    context = {"guests": {"docker-runtime": "10.10.10.20"}}
 
     with atlas_schema.resolve_openbao_url(catalog, context) as resolved_url:
         assert resolved_url == "http://10.10.10.20:8201"
@@ -839,11 +839,11 @@ def test_resolve_postgres_endpoint_can_force_direct_guest_ip_without_reachabilit
 
     catalog = {
         "runtime": {
-            "postgres_guest": "postgres-lv3",
+            "postgres_guest": "postgres",
             "postgres_port": 5432,
         }
     }
-    context = {"guests": {"postgres-lv3": "10.10.10.50"}}
+    context = {"guests": {"postgres": "10.10.10.50"}}
 
     with atlas_schema.resolve_postgres_endpoint(catalog, context) as (host, port):
         assert (host, port) == ("10.10.10.50", 5432)
@@ -931,11 +931,11 @@ def test_guest_tunnel_binds_on_all_interfaces_for_sibling_containers(monkeypatch
     monkeypatch.setattr(atlas_schema.subprocess, "Popen", fake_popen)
     monkeypatch.setattr(atlas_schema, "wait_for_tunnel", fake_wait_for_tunnel)
 
-    context = {"host_user": "ops", "host_addr": "100.64.0.1", "guests": {"postgres-lv3": "10.10.10.50"}}
-    with atlas_schema.guest_tunnel(context, "postgres-lv3", remote_bind="127.0.0.1:5432") as local_port:
+    context = {"host_user": "ops", "host_addr": "100.64.0.1", "guests": {"postgres": "10.10.10.50"}}
+    with atlas_schema.guest_tunnel(context, "postgres", remote_bind="127.0.0.1:5432") as local_port:
         assert local_port == 55432
 
-    assert captured["guest_name"] == "postgres-lv3"
+    assert captured["guest_name"] == "postgres"
     assert captured["local_bind"] == "0.0.0.0:55432"
     assert captured["remote_bind"] == "127.0.0.1:5432"
     assert captured["wait_port"] == 55432

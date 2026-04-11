@@ -42,6 +42,6 @@ The pipeline will include:
 ## Implementation Notes
 
 - `make validate` is now the top-level repository gate and fans out into syntax, YAML, Ansible lint, shell, and JSON validation stages.
-- Validation is implemented in [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and mirrored in CI through [.github/workflows/validate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.github/workflows/validate.yml).
-- The validation path installs required Ansible collections from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml) and uses repo-managed lint policies from [.ansible-lint](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.ansible-lint) and [.yamllint](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.yamllint).
+- Validation is implemented in [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repo.sh) and mirrored in CI through [.github/workflows/validate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.github/workflows/validate.yml).
+- The validation path installs required Ansible collections from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/requirements.yml) and uses repo-managed lint policies from [.ansible-lint](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.ansible-lint) and [.yamllint](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.yamllint).
 - The minimum merge gate is documented in the new validation runbook and referenced from the release and workstream guidance.

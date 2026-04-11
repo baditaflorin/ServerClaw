@@ -62,7 +62,7 @@ minio_<service>_policy_document: |
 
 **3. Service configures S3 access:**
 - Reads credentials from controller mirror or OpenBao injection
-- Uses the **public MinIO gateway URL** (e.g., `https://s3.lv3.org`) for browser access
+- Uses the **public MinIO gateway URL** (e.g., `https://s3.example.com`) for browser access
 - Uses the **internal MinIO URL** (e.g., `http://docker-runtime:9000`) for service-to-service access
 
 ### Naming conventions
@@ -82,7 +82,7 @@ Services that use this pattern should also declare their S3 configuration in the
 outline_s3_bucket_name: "{{ minio_outline_bucket_name }}"
 outline_s3_access_key_id: "{{ minio_outline_access_key_id }}"
 outline_s3_secret_key_local_file: "{{ minio_outline_secret_key_local_file }}"
-outline_s3_public_url: "{{ minio_public_base_url }}"  # e.g., https://s3.lv3.org
+outline_s3_public_url: "{{ minio_public_base_url }}"  # e.g., https://s3.example.com
 outline_s3_internal_url: "{{ minio_private_api_url }}"  # e.g., http://docker-runtime:9000
 ```
 
@@ -101,7 +101,7 @@ outline_s3_internal_url: "{{ minio_private_api_url }}"  # e.g., http://docker-ru
 5. Configure app to use internal MinIO URL for service-to-service API calls
 
 ### For public access (browser downloads):
-1. NGINX edge exposes MinIO API at public gateway URL (e.g., `s3.lv3.org`)
+1. NGINX edge exposes MinIO API at public gateway URL (e.g., `s3.example.com`)
 2. Routes to internal MinIO at `docker-runtime:9000`
 3. TLS termination at edge (ADR 0186)
 

@@ -9,7 +9,7 @@
 - Platform Version Observed During Replay: 0.130.49
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0252-live-apply-r4`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply-r4`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0252-live-apply-r4`
 - Owner: codex
 - Depends On: `ws-0252-live-apply`
 
@@ -35,11 +35,11 @@ original first-implementation truth recorded by ADR 0252.
 - `make generate-platform-vars` plus `uvx --from pyyaml --with jsonschema python scripts/subdomain_exposure_audit.py --write-registry` completed without committed contract drift.
 - `uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py tests/test_proxmox_tailscale_proxy_role.py tests/test_vaultwarden_runtime_role.py tests/test_edge_publication_makefile.py tests/test_nginx_edge_publication_role.py tests/test_security_headers_audit.py` returned `59 passed in 3.02s`.
 - `make route-dns-assertion-ledger` completed from the latest-main worktree with `localhost : ok=56 changed=0 failed=0 skipped=24`.
-- `make configure-edge-publication` completed from the same worktree with `nginx-lv3 : ok=61 changed=3 failed=0 skipped=14`.
-- `make converge-vaultwarden` completed successfully with `docker-runtime-lv3 : ok=106 changed=5 failed=0 skipped=10`, `postgres-lv3 : ok=42 changed=0 failed=0 skipped=7`, and `proxmox_florin : ok=37 changed=4 failed=0 skipped=15`.
-- `make subdomain-exposure-audit` wrote `receipts/subdomain-exposure-audit/20260329T112637Z.json`; the only remaining findings are the pre-existing `git.lv3.org` DNS warnings and the ADR 0252 governed apex, mail, database, and vault surfaces passed.
-- `dig +short lv3.org` and `dig +short mail.lv3.org` both returned `65.108.75.123`, while `dig +short database.lv3.org` and `dig +short vault.lv3.org` both returned `100.64.0.1`.
-- `curl -I https://mail.lv3.org` returned `HTTP/2 200`, `curl -I https://lv3.org` returned `HTTP/2 308` redirecting to `https://nginx.lv3.org/`, `tailscale ping -c 3 100.64.0.1` returned `pong`, and both `curl --http1.1 --insecure https://vault.lv3.org/alive` and `curl --http1.1 --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt --resolve vault.lv3.org:443:100.64.0.1 https://vault.lv3.org/alive` returned `200`.
+- `make configure-edge-publication` completed from the same worktree with `nginx-edge : ok=61 changed=3 failed=0 skipped=14`.
+- `make converge-vaultwarden` completed successfully with `docker-runtime : ok=106 changed=5 failed=0 skipped=10`, `postgres : ok=42 changed=0 failed=0 skipped=7`, and `proxmox-host : ok=37 changed=4 failed=0 skipped=15`.
+- `make subdomain-exposure-audit` wrote `receipts/subdomain-exposure-audit/20260329T112637Z.json`; the only remaining findings are the pre-existing `git.example.com` DNS warnings and the ADR 0252 governed apex, mail, database, and vault surfaces passed.
+- `dig +short example.com` and `dig +short mail.example.com` both returned `203.0.113.1`, while `dig +short database.example.com` and `dig +short vault.example.com` both returned `100.64.0.1`.
+- `curl -I https://mail.example.com` returned `HTTP/2 200`, `curl -I https://example.com` returned `HTTP/2 308` redirecting to `https://nginx.example.com/`, `tailscale ping -c 3 100.64.0.1` returned `pong`, and both `curl --http1.1 --insecure https://vault.example.com/alive` and `curl --http1.1 --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/step-ca/certs/root_ca.crt --resolve vault.example.com:443:100.64.0.1 https://vault.example.com/alive` returned `200`.
 
 ## Outcome
 

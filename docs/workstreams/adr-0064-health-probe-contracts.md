@@ -1,10 +1,10 @@
 # Workstream ADR 0064: Health Probe Contracts For All Services
 
-- ADR: [ADR 0064](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0064-health-probe-contracts-for-all-services.md)
+- ADR: [ADR 0064](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0064-health-probe-contracts-for-all-services.md)
 - Title: Standardised liveness and readiness probes per service with machine-readable catalog
 - Status: merged
 - Branch: `codex/adr-0064-health-probe-contracts`
-- Worktree: `../proxmox_florin_server-health-probe-contracts`
+- Worktree: `../proxmox-host_server-health-probe-contracts`
 - Owner: codex
 - Depends On: `adr-0027-uptime-kuma`, `adr-0062-role-composability`
 - Conflicts With: none

@@ -181,7 +181,7 @@ def assert_keycloak_circuit_behaviour(scenario: FaultScenario, pre_state: Platfo
 
     # Assert API gateway returns 503, not a timeout
     start = time.time()
-    resp = requests.get("https://api.lv3.org/v1/platform/health", headers={"Authorization": "Bearer invalid"})
+    resp = requests.get("https://api.example.com/v1/platform/health", headers={"Authorization": "Bearer invalid"})
     latency = time.time() - start
     if resp.status_code != 503:
         return AssertionResult(passed=False, reason=f"Expected 503, got {resp.status_code}")
@@ -237,7 +237,7 @@ A failure in the fault injection suite creates a GlitchTip incident (ADR 0061) w
 
 - The first shipped subset is intentionally narrow: `fault:keycloak-unavailable` and `fault:openbao-unavailable` run through the repo-managed Windmill wrapper and the `make fault-injection` operator entrypoint.
 - The OpenBao live scenario uses container pause/unpause rather than stop/start so the singleton secret authority does not come back sealed during routine validation.
-- The first production live apply completed on 2026-03-26 from `main`; both governed drills passed and the live evidence is recorded in [`receipts/live-applies/2026-03-26-adr-0171-fault-injection-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0171-fault-injection-live-apply.json).
+- The first production live apply completed on 2026-03-26 from `main`; both governed drills passed and the live evidence is recorded in [`receipts/live-applies/2026-03-26-adr-0171-fault-injection-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies/2026-03-26-adr-0171-fault-injection-live-apply.json).
 
 ## Related ADRs
 

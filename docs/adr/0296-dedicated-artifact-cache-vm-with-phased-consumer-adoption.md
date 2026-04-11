@@ -10,7 +10,7 @@
 ## Context
 
 The quickest landing point for an artifact cache is the existing
-`docker-build-lv3` guest because it already owns build-local caches and is the
+`docker-build` guest because it already owns build-local caches and is the
 first consumer that benefits from faster repeated pulls.
 
 That is useful for an initial phase, but it is not an ideal long-term home for
@@ -26,17 +26,17 @@ all shared artifact caches:
 
 We will adopt artifact caching in **two phases**.
 
-### Phase 1: land on `docker-build-lv3`
+### Phase 1: land on `docker-build`
 
 - the first repo-managed container-image cache runtime may land on
-  `docker-build-lv3`
+  `docker-build`
 - the build path may consume those cache endpoints first
 - this phase exists to reduce immediate pull fragility without waiting for a
   new VM integration
 
 ### Phase 2: move to a dedicated cache VM
 
-- the steady-state target is a dedicated `artifact-cache-lv3` guest
+- the steady-state target is a dedicated `artifact-cache` guest
 - the planned default slot is VMID `180` with internal address `10.10.10.80/24`
   unless later integration work assigns a different governed slot
 - the dedicated cache VM is internal-only and is not published through the

@@ -55,7 +55,7 @@ adrs:
       - llm
       - inference
       - api
-    summary: We run Ollama as a private, repo-managed runtime on docker-runtime-lv3.
+    summary: We run Ollama as a private, repo-managed runtime on docker-runtime.
     filename: 0145-ollama-for-local-llm-inference.md
     path: docs/adr/0145-ollama-for-local-llm-inference.md
     implemented_in_repo_version: 0.142.0

@@ -122,7 +122,7 @@ assertion check.
 
 - Atlas lints and detects drift; it does not execute migrations; each service's
   own migration runner remains the execution authority
-- Atlas covers the PostgreSQL instance on `postgres-lv3`; it does not cover
+- Atlas covers the PostgreSQL instance on `postgres`; it does not cover
   InfluxDB, Redis, or other non-relational data stores
 - Atlas does not replace pgaudit (ADR 0303) for query audit; pgaudit captures
   runtime DDL events while Atlas captures intent-to-migrate at design time

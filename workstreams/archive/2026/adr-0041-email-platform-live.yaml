@@ -12,11 +12,11 @@ depends_on:
   - adr-0023-docker-runtime
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
-  - monitoring-lv3
+  - docker-runtime
+  - monitoring
   - playbooks/mail-platform.yml
   - roles/proxmox_network
-  - lv3.org DNS
-  - mail.lv3.org
+  - example.com DNS
+  - mail.example.com
 ready_to_merge: false
 live_applied: true

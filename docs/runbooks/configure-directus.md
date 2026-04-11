@@ -1,8 +1,8 @@
 # Configure Directus
 
 Directus is the repo-managed REST and GraphQL operational data API published at
-`https://data.lv3.org`. The runtime lives on `docker-runtime-lv3`, stores its
-state in the dedicated PostgreSQL database `directus` on `postgres-lv3`, and
+`https://data.example.com`. The runtime lives on `docker-runtime`, stores its
+state in the dedicated PostgreSQL database `directus` on `postgres`, and
 delegates routine browser sign-in to Keycloak.
 
 ## Repo Surfaces
@@ -62,18 +62,18 @@ make converge-directus env=production
 
 - `BOOTSTRAP_KEY` or the default controller SSH key path
 - `HETZNER_DNS_API_TOKEN` in the environment so the playbook can publish
-  `data.lv3.org`
+  `data.example.com`
 - The Hetzner legacy `dns.hetzner.com` write API to be outside its scheduled
   brownout window during the DNS migration period, or the zone already migrated
   and managed through the newer Hetzner Console workflow
 
 The playbook performs these steps:
 
-1. Ensures the `data.lv3.org` Hetzner DNS record exists.
+1. Ensures the `data.example.com` Hetzner DNS record exists.
 2. Creates or reconciles the PostgreSQL role and dedicated `directus`
-   database on `postgres-lv3`.
+   database on `postgres`.
 3. Creates the Directus runtime secrets, Keycloak client secret mirror,
-   compose env, and runtime on `docker-runtime-lv3`.
+   compose env, and runtime on `docker-runtime`.
 4. Bootstraps the governed `service_registry` collection and restarts
    Directus once if schema changes were applied.
 5. Seeds the Directus access model in PostgreSQL.
@@ -85,7 +85,7 @@ The playbook performs these steps:
 Local runtime verification:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
@@ -95,18 +95,18 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 Public health verification:
 
 ```bash
-curl -fsS https://data.lv3.org/server/health
+curl -fsS https://data.example.com/server/health
 ```
 
 Public end-to-end API and OIDC verification:
 
 ```bash
 python3 scripts/directus_bootstrap.py verify-public \
-  --base-url https://data.lv3.org \
-  --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/service-registry-token.txt \
+  --base-url https://data.example.com \
+  --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/directus/service-registry-token.txt \
   --collection service_registry \
   --expected-service-name directus \
-  --expected-sso-host sso.lv3.org
+  --expected-sso-host sso.example.com
 ```
 
 The verification helper checks:
@@ -114,21 +114,21 @@ The verification helper checks:
 - `GET /server/health`
 - `GET /server/ping`
 - `GET /server/specs/oas`
-- `GET /auth/login/keycloak` redirects to `sso.lv3.org`
+- `GET /auth/login/keycloak` redirects to `sso.example.com`
 - token-authenticated `GET /items/service_registry`
 - token-authenticated GraphQL query on `/graphql`
 
 ## Recovery Notes
 
 - Re-run `make converge-directus` for drift correction or after rebuilding
-  `docker-runtime-lv3`, `postgres-lv3`, or the shared edge configuration.
+  `docker-runtime`, `postgres`, or the shared edge configuration.
 - If the converge fails on the localhost DNS task with a provider error that
   mentions the DNS Console brownout, wait for the current brownout window to
   end and rerun `make converge-directus env=production`. The role now reports
   the provider message directly so the brownout is distinguishable from a repo
   bug or a credential failure.
 - If a brownout blocks publication and the live change cannot wait, create the
-  exact missing `data.lv3.org` A record manually in Hetzner, record the
+  exact missing `data.example.com` A record manually in Hetzner, record the
   provider-side record id in the live-apply receipt, and rerun
   `make converge-directus env=production` so the repo-managed converge observes
   the canonical state again.

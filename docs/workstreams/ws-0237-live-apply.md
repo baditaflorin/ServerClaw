@@ -8,7 +8,7 @@
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0237-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0237-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0237-live-apply`
 - Owner: codex
 - Depends On: `adr-0108-operator-onboarding-and-offboarding`, `adr-0122-windmill-operator-access-admin`
 - Conflicts With: none
@@ -18,7 +18,7 @@
 
 - migrate the Windmill operator access admin raw app from hand-managed React state to schema-first forms backed by React Hook Form and Zod
 - commit the frontend dependency lockfile and make the Windmill runtime install raw-app frontend dependencies before `wmill sync push`
-- replay `make converge-windmill` from the rebased latest-`origin/main` worktree and verify the deployed app plus a live backend workflow on `docker-runtime-lv3`
+- replay `make converge-windmill` from the rebased latest-`origin/main` worktree and verify the deployed app plus a live backend workflow on `docker-runtime`
 - record enough branch-local evidence for a safe protected-file follow-up on `main`
 
 ## Expected Repo Surfaces
@@ -50,8 +50,8 @@
 - `python3 -m py_compile config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py` passed
 - `tmpdir=$(mktemp -d) && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir"/ && cd "$tmpdir" && if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-package-lock --no-audit --no-fund; fi && npx tsc --noEmit` passed
 - `make syntax-check-windmill` passed from the rebased latest-`origin/main` worktree
-- `make converge-windmill` completed successfully with final recap `docker-runtime-lv3 ok=229 changed=39 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`
-- guest-local Windmill API verification on `docker-runtime-lv3` returned `CE v1.662.0`, `superadmin_secret@windmill.dev`, app path `f/lv3/operator_access_admin`, file list including `/schemas.ts`, and runnables `create_operator`, `list_operators`, `offboard_operator`, `operator_inventory`, `sync_operators`, and `update_operator_notes`
+- `make converge-windmill` completed successfully with final recap `docker-runtime ok=229 changed=39 failed=0`, `postgres ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`
+- guest-local Windmill API verification on `docker-runtime` returned `CE v1.662.0`, `superadmin_secret@windmill.dev`, app path `f/lv3/operator_access_admin`, file list including `/schemas.ts`, and runnables `create_operator`, `list_operators`, `offboard_operator`, `operator_inventory`, `sync_operators`, and `update_operator_notes`
 - guest-local `jobs/run_wait_result` for `f/lv3/operator_roster` returned `status=ok`, `operator_count=1`, `active_count=1`, and `first_operator_id=florin-badita`
 - `./scripts/validate_repo.sh workstream-surfaces agent-standards` should pass after the branch-local workstream registration and ADR index refresh are committed
 

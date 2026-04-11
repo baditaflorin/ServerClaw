@@ -71,7 +71,7 @@ ready_to_merge: true
 live_applied: true
 canonical_truth:
   changelog_entry: implements ADR 0239 by publishing a Pagefind-backed
-    browser-local search experience for docs.lv3.org, including section,
+    browser-local search experience for docs.example.com, including section,
     audience, service, capability, sensitivity, and tag facets from the
     generated portal corpus
   release_bump: patch

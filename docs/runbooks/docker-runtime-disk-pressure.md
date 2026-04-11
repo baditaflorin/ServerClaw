@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Recover `docker-runtime-lv3` when `/` is full enough to break repo-managed
+Recover `docker-runtime` when `/` is full enough to break repo-managed
 package refreshes, container builds, or runtime converges.
 
 ## When To Use It
 
-Use this runbook when a live apply on `docker-runtime-lv3` starts failing with
+Use this runbook when a live apply on `docker-runtime` starts failing with
 symptoms such as:
 
 - `df -h /` showing `100%` usage or only a few megabytes free
@@ -25,7 +25,7 @@ automation and replaying the managed converge after the guest is healthy again.
 
 ## Recovery Steps
 
-Run the cleanup on `docker-runtime-lv3` as `ops` with `sudo`:
+Run the cleanup on `docker-runtime` as `ops` with `sudo`:
 
 ```bash
 df -h /
@@ -59,7 +59,7 @@ df -h /
 
 During the ADR 0244 exact-main replay on 2026-03-29:
 
-- before cleanup, `/` on `docker-runtime-lv3` was `95G used / 57M free` and
+- before cleanup, `/` on `docker-runtime` was `95G used / 57M free` and
   `100%`
 - after cleaning apt caches, old journal data, Docker images, and Docker
   builder cache, `/` recovered to about `24G free` and `apt-get update`
@@ -67,7 +67,7 @@ During the ADR 0244 exact-main replay on 2026-03-29:
 
 During the ADR 0292 Superset exact-main replay on 2026-04-01:
 
-- before cleanup, `/` on `docker-runtime-lv3` fell to roughly `15M free`,
+- before cleanup, `/` on `docker-runtime` fell to roughly `15M free`,
   MinIO verification uploads failed, and the live-apply Restic lock creation
   retried until timeout because MinIO refused writes below its free-drive floor
 - after Docker image pruning and removal of the repo-regenerable scanner caches

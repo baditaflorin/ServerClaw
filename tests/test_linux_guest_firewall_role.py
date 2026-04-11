@@ -144,7 +144,7 @@ def test_linux_guest_firewall_only_resets_ssh_when_the_rendered_policy_changes()
     assert post_bridge_wait_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
 
 
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -178,24 +178,24 @@ def test_linux_guest_firewall_defaults_cover_all_governed_docker_bridge_cidrs() 
 
 def test_coolify_guest_policy_enables_container_forwarding_for_published_ports() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    coolify_policy = host_vars["network_policy"]["guests"]["coolify-lv3"]
+    coolify_policy = host_vars["network_policy"]["guests"]["coolify"]
 
     assert coolify_policy["allow_container_forwarding"] is True
 
     published_sources = {
         rule["source"]: tuple(rule["ports"])
         for rule in coolify_policy["allowed_inbound"]
-        if rule["source"] == "nginx-lv3"
+        if rule["source"] == "nginx-edge"
     }
-    assert published_sources["nginx-lv3"] == (80, 443, 8000, 8096)
+    assert published_sources["nginx-edge"] == (80, 443, 8000, 8096)
 
 
 def test_livekit_guest_policy_allows_edge_signalling_and_public_media_ingress() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
 
     assert any(
-        rule["source"] == "nginx-lv3" and rule["protocol"] == "tcp" and 7880 in rule["ports"]
+        rule["source"] == "nginx-edge" and rule["protocol"] == "tcp" and 7880 in rule["ports"]
         for rule in docker_runtime_rules
     )
     assert any(

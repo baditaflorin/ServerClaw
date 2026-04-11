@@ -12,7 +12,7 @@ def test_declared_smoke_suites_fall_back_to_default_for_active_environment() -> 
         "id": "grafana",
         "name": "Grafana",
         "environments": {
-            "production": {"status": "active", "url": "https://grafana.lv3.org"},
+            "production": {"status": "active", "url": "https://grafana.example.com"},
         },
     }
 
@@ -30,7 +30,7 @@ def test_declared_smoke_suites_preserve_explicit_override() -> None:
         "environments": {
             "production": {
                 "status": "active",
-                "url": "https://ops.lv3.org",
+                "url": "https://ops.example.com",
                 "smoke_suites": [
                     {
                         "id": "portal-overview",

@@ -71,5 +71,5 @@
 - the first repository implementation is intentionally file-backed so it works in local tests and on the mounted Windmill worker checkout without a separate JetStream client dependency
 - if a later workstream introduces a JetStream KV backend, keep the current Python interfaces stable so the detector and wrapper do not need to change
 - the 2026-03-26 completion path used a temporary jump-based inventory through `ops@100.64.0.1` because the controller could not reach `10.10.10.20` and `10.10.10.50` directly
-- live recovery required realigning the `windmill_admin` PostgreSQL role password on `postgres-lv3` before Windmill could finish the ADR 0162 runtime verification path
-- `config/windmill/scripts/detect-deadlocks.py` now resolves imports from the mounted checkout default `/srv/proxmox_florin_server`, which is required for Windmill `run_wait_result` execution
+- live recovery required realigning the `windmill_admin` PostgreSQL role password on `postgres` before Windmill could finish the ADR 0162 runtime verification path
+- `config/windmill/scripts/detect-deadlocks.py` now resolves imports from the mounted checkout default `/srv/proxmox-host_server`, which is required for Windmill `run_wait_result` execution

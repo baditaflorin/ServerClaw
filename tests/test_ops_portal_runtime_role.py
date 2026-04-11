@@ -70,13 +70,13 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert 'ops_portal_state_dir: "{{ ops_portal_site_dir }}/state"' in defaults
     assert 'ops_portal_attention_state_file: "{{ ops_portal_state_dir }}/attention-state.json"' in defaults
     assert "ops_portal_gateway_service_topology" in defaults
-    assert "ops_portal_gateway_substrate_owner_vm: runtime-control-lv3" in defaults
+    assert "ops_portal_gateway_substrate_owner_vm: runtime-control" in defaults
     assert "ops_portal_gateway_substrate_port: 9080" in defaults
     assert "ops_portal_gateway_substrate_path: /api-gateway" in defaults
     assert "ops_portal_gateway_substrate_url" in defaults
     assert "ops_portal_gateway_service_topology.owning_vm" in defaults
     assert "ops_portal_gateway_service_topology.urls.internal" in defaults
-    assert "hostvars['proxmox_florin'].api_gateway_internal_url" in defaults
+    assert "hostvars['proxmox-host'].api_gateway_internal_url" in defaults
     assert "ops_portal_gateway_service_topology.private_ip" in defaults
     assert "~ ops_portal_gateway_substrate_path" in defaults
     assert "ops_portal_build_context_dir" in tasks

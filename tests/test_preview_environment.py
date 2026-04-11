@@ -75,7 +75,7 @@ def test_finalize_preview_evidence_writes_live_apply_receipt(tmp_path: Path, mon
     state = {
         "preview_id": "2026-03-27-adr-0185-ws-0185-live-apply-preview-live-apply",
         "status": "destroyed",
-        "preview_domain": "ws-0185-live-apply.preview.lv3.org",
+        "preview_domain": "ws-0185-live-apply.preview.example.com",
         "branch": "codex/ws-0185-live-apply",
         "workstream": "ws-0185-live-apply",
         "profile_id": "runtime-smoke",

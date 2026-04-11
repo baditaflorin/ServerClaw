@@ -2,12 +2,12 @@
 
 ## Purpose
 
-`docker-build-lv3` is the private build worker used for heavier repository validation, controlled image builds, and supporting telemetry that should not run on the public edge or the main runtime VM.
+`docker-build` is the private build worker used for heavier repository validation, controlled image builds, and supporting telemetry that should not run on the public edge or the main runtime VM.
 
 ## Inventory
 
 - VMID: `130`
-- Hostname: `docker-build-lv3`
+- Hostname: `docker-build`
 - Internal IP: `10.10.10.30`
 - Primary access path: `ops` over the Proxmox jump path
 
@@ -23,20 +23,20 @@
 Confirm the guest is reachable:
 
 ```bash
-ansible -i inventory/hosts.yml docker-build-lv3 -m command -a 'hostname' \
+ansible -i inventory/hosts.yml docker-build -m command -a 'hostname' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Confirm the VM is represented in the current platform status:
 
 ```bash
-rg -n "docker-build-lv3|10.10.10.30" versions/stack.yaml README.md
+rg -n "docker-build|10.10.10.30" versions/stack.yaml README.md
 ```
 
 Confirm monitoring surfaces exist for the VM:
 
 ```bash
-rg -n "docker-build-lv3" docs/runbooks/monitoring-stack.md versions/stack.yaml
+rg -n "docker-build" docs/runbooks/monitoring-stack.md versions/stack.yaml
 ```
 
 ## Notes

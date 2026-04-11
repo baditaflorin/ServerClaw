@@ -180,7 +180,7 @@ adrs:
       - cli
       - wrapper
       - events
-    summary: We will count Docker builds on docker-build-lv3 by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring
+    summary: We will count Docker builds on docker-build by using a repo-managed Docker CLI wrapper and the existing guest-to-monitoring
       telemetry path.
     filename: 0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
     path: docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
@@ -629,7 +629,7 @@ adrs:
       - dedicated
       - vm
       - separation
-    summary: We introduce a second dedicated guest, coolify-apps-lv3 (proposed VMID 171,
+    summary: We introduce a second dedicated guest, coolify-apps (proposed VMID 171,
     filename: 0340-dedicated-coolify-apps-vm-separation.md
     path: docs/adr/0340-dedicated-coolify-apps-vm-separation.md
     implemented_in_repo_version: 0.177.153
@@ -689,7 +689,7 @@ adrs:
       - runtime
       - workload
       - split
-    summary: Split docker-runtime-lv3 into three purpose-scoped VMs aligned to workload
+    summary: Split docker-runtime into three purpose-scoped VMs aligned to workload
     filename: 0347-docker-runtime-workload-split.md
     path: docs/adr/0347-docker-runtime-workload-split.md
     implemented_in_repo_version: 0.179.0
@@ -710,6 +710,6 @@ adrs:
       - health
       - reliability
       - core
-    summary: 'runtime-control-lv3 retains only the four identity-core services:'
+    summary: 'runtime-control retains only the four identity-core services:'
     filename: 0376-identity-core-vm-isolation-and-watchdog.md
     path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md

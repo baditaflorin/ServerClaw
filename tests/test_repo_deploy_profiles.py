@@ -31,7 +31,7 @@ def test_build_deploy_repo_args_from_dockercompose_profile(tmp_path: Path) -> No
                     "ports": "80",
                     "llm_assistance": "prohibited",
                     "docker_compose_location": "/compose.yaml",
-                    "compose_domains": [{"service": "catalog-web", "domain": "education-wemeshup.apps.lv3.org"}],
+                    "compose_domains": [{"service": "catalog-web", "domain": "education-wemeshup.apps.example.com"}],
                 }
             ],
         },
@@ -45,7 +45,7 @@ def test_build_deploy_repo_args_from_dockercompose_profile(tmp_path: Path) -> No
     assert "--docker-compose-location" in args
     assert "/compose.yaml" in args
     assert "--compose-domain" in args
-    assert "catalog-web=education-wemeshup.apps.lv3.org" in args
+    assert "catalog-web=education-wemeshup.apps.example.com" in args
     assert "--wait" in args
     assert "--timeout" in args
     assert "1800" in args

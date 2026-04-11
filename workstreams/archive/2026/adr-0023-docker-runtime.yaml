@@ -9,7 +9,7 @@ doc: docs/workstreams/adr-0023-docker-runtime.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
-  - docker-runtime-lv3
+  - docker-runtime
   - playbooks/docker-runtime.yml
   - roles/docker_runtime
 ready_to_merge: false

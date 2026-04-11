@@ -8,11 +8,11 @@
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0278-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0278-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0278-live-apply`
 - Owner: codex
 - Depends On: `adr-0092-unified-platform-api-gateway`, `adr-0151-n8n-as-the-external-app-connector-fabric`, `adr-0199-outline-living-knowledge-wiki`, `adr-0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3`, `adr-0274-minio-as-the-s3-compatible-object-storage-layer`, `adr-0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0278-live-apply.md`, `docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md`, `docs/runbooks/configure-gotenberg.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `Makefile`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/image-catalog.json`, `config/service-completeness.json`, `config/api-gateway-catalog.json`, `config/dependency-graph.json`, `config/slo-catalog.json`, `config/data-catalog.json`, `config/command-catalog.json`, `config/workflow-catalog.json`, `config/grafana/dashboards/gotenberg.json`, `config/alertmanager/rules/gotenberg.yml`, `playbooks/gotenberg.yml`, `playbooks/services/gotenberg.yml`, `collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/`, `tests/test_gotenberg_runtime_role.py`, `receipts/image-scans/`, `receipts/live-applies/`, `docs/adr/.index.yaml`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0278-live-apply.md`, `docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md`, `docs/runbooks/configure-gotenberg.md`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `Makefile`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/image-catalog.json`, `config/service-completeness.json`, `config/api-gateway-catalog.json`, `config/dependency-graph.json`, `config/slo-catalog.json`, `config/data-catalog.json`, `config/command-catalog.json`, `config/workflow-catalog.json`, `config/grafana/dashboards/gotenberg.json`, `config/alertmanager/rules/gotenberg.yml`, `playbooks/gotenberg.yml`, `playbooks/services/gotenberg.yml`, `collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/`, `tests/test_gotenberg_runtime_role.py`, `receipts/image-scans/`, `receipts/live-applies/`, `docs/adr/.index.yaml`
 
 ## Scope
 
@@ -35,11 +35,11 @@
 
 ## Live Apply Outcome
 
-- `make converge-gotenberg` completed successfully from source commit `8613ecf8fa4b5f43124bcc404acb1d7fd1213b36` with recap `docker-runtime-lv3 : ok=256 changed=113 unreachable=0 failed=0 skipped=28 rescued=1 ignored=0`
+- `make converge-gotenberg` completed successfully from source commit `8613ecf8fa4b5f43124bcc404acb1d7fd1213b36` with recap `docker-runtime : ok=256 changed=113 unreachable=0 failed=0 skipped=28 rescued=1 ignored=0`
 - the branch-local replay exposed and fixed four real defects before the successful run:
   missing `playbooks/gotenberg.yml` scope registration, wrong service-topology lookup scope inside the role defaults, Docker bridge-network creation failing on the guest because `DOCKER-FORWARD` was absent, and Chromium HTML uploads requiring `filename=index.html`
-- the private runtime now answers `http://127.0.0.1:3007/health` on `docker-runtime-lv3` and both local conversion paths return PDFs
-- the authenticated gateway route `https://api.lv3.org/v1/gotenberg` now proxies both the health endpoint and a Chromium conversion request with a real bearer token from the controller-local platform-context path
+- the private runtime now answers `http://127.0.0.1:3007/health` on `docker-runtime` and both local conversion paths return PDFs
+- the authenticated gateway route `https://api.example.com/v1/gotenberg` now proxies both the health endpoint and a Chromium conversion request with a real bearer token from the controller-local platform-context path
 
 ## Live Evidence
 

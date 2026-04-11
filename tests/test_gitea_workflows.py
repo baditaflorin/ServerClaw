@@ -13,7 +13,7 @@ VALIDATE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "validate.yml"
 RENOVATE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "renovate.yml"
 RELEASE_BUNDLE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "release-bundle.yml"
 PYTHON_RUNNER_IMAGE = (
-    "registry.lv3.org/check-runner/python:3.12.10"
+    "registry.example.com/check-runner/python:3.12.10"
     "@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff"
 )
 SHALLOW_MANUAL_CHECKOUT_FETCH = (
@@ -230,8 +230,8 @@ def test_renovate_clone_relay_streams_large_http_response() -> None:
             wait_for_port(relay_port, timeout_seconds=5)
             with socket.create_connection(("127.0.0.1", relay_port), timeout=5) as client:
                 client.sendall(
-                    b"GET /ops/proxmox_florin_server.git/info/refs?service=git-upload-pack HTTP/1.1\r\n"
-                    b"Host: git.lv3.org\r\n"
+                    b"GET /ops/proxmox-host_server.git/info/refs?service=git-upload-pack HTTP/1.1\r\n"
+                    b"Host: git.example.com\r\n"
                     b"Connection: close\r\n\r\n"
                 )
                 response_chunks: list[bytes] = []

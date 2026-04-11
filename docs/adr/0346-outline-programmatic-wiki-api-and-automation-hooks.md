@@ -81,7 +81,7 @@ All collections are created with `permission: "read"` and `sharing: True` so eve
 
 ### 4. Link rewriting
 
-Repository markdown contains relative file links (`docs/release-notes/0.178.3.md`) that break in the wiki context. The tool rewrites relative links to absolute GitHub URLs (`https://github.com/baditaflorin/proxmox_florin_server/blob/main/...`) before publishing. Links to `build/` artifacts and `.local/` paths are stripped to plain text. The `--rewrite-links` flag on `document.publish` enables this for ad-hoc publishes; `changelog.push` always rewrites.
+Repository markdown contains relative file links (`docs/release-notes/0.178.3.md`) that break in the wiki context. The tool rewrites relative links to absolute GitHub URLs (`https://github.com/baditaflorin/proxmox-host_server/blob/main/...`) before publishing. Links to `build/` artifacts and `.local/` paths are stripped to plain text. The `--rewrite-links` flag on `document.publish` enables this for ad-hoc publishes; `changelog.push` always rewrites.
 
 ### 5. API token scope expansion
 

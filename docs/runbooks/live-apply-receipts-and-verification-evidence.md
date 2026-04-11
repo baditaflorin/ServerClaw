@@ -6,9 +6,9 @@ This runbook defines the structured receipt format used to record live platform 
 
 ## Canonical Sources
 
-- receipt directory: [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)
-- receipt CLI: [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/live_apply_receipts.py)
-- current evidence index in platform state: [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
+- receipt directory: [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies)
+- receipt CLI: [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/live_apply_receipts.py)
+- current evidence index in platform state: [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml)
 
 ## Primary Commands
 
@@ -65,8 +65,8 @@ must not depend on those objects remaining fetchable forever.
 After a live apply from the repository:
 
 1. verify the real platform state
-2. add or update the receipt under [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)
-3. update [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) if merged truth or observed state changed
+2. add or update the receipt under [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies)
+3. update [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml) if merged truth or observed state changed
 4. update the relevant runbook and README summary when integrated current state changed
 
 Backfilled receipts are allowed when older live changes were verified but not recorded in structured form at the time. Note that explicitly in the receipt.

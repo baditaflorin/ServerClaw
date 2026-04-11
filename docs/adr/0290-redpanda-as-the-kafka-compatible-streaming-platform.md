@@ -52,7 +52,7 @@ lightweight pub/sub and notification workloads.
     schema management)
 - Persistent log data is stored on a named Docker volume on fast local
   storage; recovery currently relies on the governed VM-level backup coverage
-  for `docker-runtime-lv3` under ADR 0086, while finer-grained Redpanda
+  for `docker-runtime` under ADR 0086, while finer-grained Redpanda
   partition snapshot automation remains a follow-on hardening step
 - Secrets (SASL credentials for authenticated topics) are stored in OpenBao
   (ADR 0077) and injected at startup

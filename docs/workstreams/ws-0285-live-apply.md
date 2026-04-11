@@ -1,7 +1,7 @@
 # Workstream ws-0285-live-apply: Live Apply ADR 0285 From Latest `origin/main`
 
 - ADR: [ADR 0285](../adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md)
-- Title: Deploy Paperless-ngx as the repo-managed document archive API on `docker-runtime-lv3`
+- Title: Deploy Paperless-ngx as the repo-managed document archive API on `docker-runtime`
 - Status: live_applied
 - Included In Repo Version: 0.177.121
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0285-paperless-live-apply.json`
@@ -10,18 +10,18 @@
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
 - Branch: `codex/ws-0285-main-integration-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0285-main-integration-r2`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secret-injection-pattern`, `adr-0086-backup-and-recovery-for-stateful-services`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0285`, `docs/adr/.index.yaml`, `docs/workstreams/ws-0285-live-apply.md`, `docs/runbooks/configure-paperless.md`, `docs/runbooks/restic-config-backups.md`, `docs/release-notes/`, `docs/diagrams/*.excalidraw`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/paperless.yml`, `playbooks/services/paperless.yml`, `roles/paperless_postgres/`, `roles/paperless_runtime/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/*.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/**`, `collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**`, `collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/**`, `collections/ansible_collections/lv3/platform/roles/restic_config_backup/**`, `config/*catalog*.json`, `config/prometheus/**`, `config/grafana/dashboards/`, `config/alertmanager/rules/`, `scripts/generate_platform_vars.py`, `scripts/paperless_sync.py`, `scripts/restic_config_backup.py`, `scripts/trigger_restic_live_apply.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `tests/`, `receipts/image-scans/`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0285`, `docs/adr/.index.yaml`, `docs/workstreams/ws-0285-live-apply.md`, `docs/runbooks/configure-paperless.md`, `docs/runbooks/restic-config-backups.md`, `docs/release-notes/`, `docs/diagrams/*.excalidraw`, `inventory/host_vars/proxmox-host.yml`, `inventory/group_vars/platform.yml`, `playbooks/paperless.yml`, `playbooks/services/paperless.yml`, `roles/paperless_postgres/`, `roles/paperless_runtime/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/*.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/**`, `collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/**`, `collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/**`, `collections/ansible_collections/lv3/platform/roles/restic_config_backup/**`, `config/*catalog*.json`, `config/prometheus/**`, `config/grafana/dashboards/`, `config/alertmanager/rules/`, `scripts/generate_platform_vars.py`, `scripts/paperless_sync.py`, `scripts/restic_config_backup.py`, `scripts/trigger_restic_live_apply.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `tests/`, `receipts/image-scans/`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
-- deploy Paperless-ngx on `docker-runtime-lv3` with repo-managed PostgreSQL,
+- deploy Paperless-ngx on `docker-runtime` with repo-managed PostgreSQL,
   Redis, OpenBao-backed runtime secrets, and a backup-covered media volume
-- publish the service through the shared NGINX edge at `paperless.lv3.org`
-  while preserving the existing `docs.lv3.org` developer portal
+- publish the service through the shared NGINX edge at `paperless.example.com`
+  while preserving the existing `docs.example.com` developer portal
 - delegate human sign-in to Keycloak OIDC, keep a local break-glass admin for
   bootstrap and recovery, and store the durable API token under repo-managed
   secret paths
@@ -32,7 +32,7 @@
 
 ## Non-Goals
 
-- replacing the existing `docs.lv3.org` docs portal
+- replacing the existing `docs.example.com` docs portal
 - making Paperless a public anonymous surface
 - updating protected release surfaces on this branch before the final
   merge-to-`main` step
@@ -41,7 +41,7 @@
 
 - `docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md`
 - `docs/runbooks/configure-paperless.md`
-- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/host_vars/proxmox-host.yml`
 - `inventory/group_vars/platform.yml`
 - `playbooks/paperless.yml`
 - `playbooks/services/paperless.yml`
@@ -82,9 +82,9 @@
 
 ## Expected Live Surfaces
 
-- a healthy Paperless runtime on `docker-runtime-lv3`
-- public hostname `paperless.lv3.org`
-- authenticated document API at `https://paperless.lv3.org/api/`
+- a healthy Paperless runtime on `docker-runtime`
+- public hostname `paperless.example.com`
+- authenticated document API at `https://paperless.example.com/api/`
 - reconciled correspondents, document types, and tags declared from repo state
 - a verified upload and search path using the durable API token
 
@@ -92,7 +92,7 @@
 
 - this workstream owns the Paperless runtime, taxonomy sync path, and
   branch-local live-apply evidence
-- `docker-runtime-lv3`, `nginx-lv3`, `postgres-lv3`, and `keycloak` are shared
+- `docker-runtime`, `nginx-edge`, `postgres`, and `keycloak` are shared
   live surfaces, so replay must stay narrow and preserve unrelated state
 - protected integration files remain deferred on this branch until the final
   exact-main replay and merge step
@@ -105,8 +105,8 @@
   so each synthetic PDF now contains unique content instead of only unique
   metadata.
 - The live replay exposed a transient shared-edge drift where
-  `paperless.lv3.org` briefly served the `nginx.lv3.org` certificate; a narrow
-  `nginx-lv3,localhost` replay restored the correct `paperless.lv3.org` server
+  `paperless.example.com` briefly served the `nginx.example.com` certificate; a narrow
+  `nginx-edge,localhost` replay restored the correct `paperless.example.com` server
   block and certificate without disturbing unrelated edge publications.
 - The same replay surfaced a real verifier defect: deleted smoke documents stay
   in Paperless trash, and the old constant PDF bytes made later probes fail as
@@ -128,13 +128,13 @@
 - Guest-local runtime verification preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0285-guest-runtime-r3.txt`
   confirmed `paperless`, `paperless-openbao-agent`, and `paperless-redis` all
-  stayed healthy on `docker-runtime-lv3`, and the authenticated local API
+  stayed healthy on `docker-runtime`, and the authenticated local API
   returned a clean documents listing.
 - Public endpoint verification preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0285-public-head-r2.txt` and
   `receipts/live-applies/evidence/2026-03-31-ws-0285-public-verify-r3.txt`
-  confirmed the correct `paperless.lv3.org` TLS publication and a no-drift
-  taxonomy verification result through `https://paperless.lv3.org/api/`.
+  confirmed the correct `paperless.example.com` TLS publication and a no-drift
+  taxonomy verification result through `https://paperless.example.com/api/`.
 - Public smoke-upload verification preserved in
   `receipts/live-applies/evidence/2026-03-31-ws-0285-public-smoke-r3.txt` and
   `receipts/live-applies/evidence/2026-03-31-ws-0285-task-log-r1.json`
@@ -160,14 +160,14 @@
   `receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-outline-recovery-r1-0.177.118.txt`,
   and the authoritative restic trigger then passed in
   `receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-restic-trigger-r11-0.177.118.txt`.
-- The authoritative wrapper is governed by ADR 0191 on `docker-runtime-lv3`.
+- The authoritative wrapper is governed by ADR 0191 on `docker-runtime`.
   `make immutable-guest-replacement-plan service=paperless` confirmed that the
   final replay must use the documented narrow exception:
   `ALLOW_IN_PLACE_MUTATION=true HETZNER_DNS_API_TOKEN=... make live-apply-service service=paperless env=production`.
 - The first exact-main wrapper replay with the ADR 0191 exception is preserved
   in `receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-live-apply-r9-0.177.118.txt`.
   It converged most of the runtime but failed during the authenticated taxonomy
-  wait after an unrelated concurrent Docker restart on `docker-runtime-lv3`.
+  wait after an unrelated concurrent Docker restart on `docker-runtime`.
 - Guest logs and journal evidence show the failure was environmental, not a
   Paperless config regression: `paperless` and `paperless-redis` both exited
   cleanly after broker disconnects, and the Docker journal recorded another
@@ -175,7 +175,7 @@
   already in progress.
 - As of `2026-03-31T16:52:32Z`, other agents are still actively running
   `playbooks/windmill.yml` and `playbooks/monitoring-stack.yml` against
-  `docker-runtime-lv3`, so the final exact-main replay is waiting for a quiet
+  `docker-runtime`, so the final exact-main replay is waiting for a quiet
   window to avoid another false-negative verification failure.
 
 ## Mainline Completion

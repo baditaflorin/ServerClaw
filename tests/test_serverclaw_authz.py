@@ -93,7 +93,7 @@ def test_build_report_marks_failed_checks() -> None:
 
 def test_declared_principal_verification_uses_the_stable_keycloak_username_reference() -> None:
     report = serverclaw_authz.verify_keycloak_principal(
-        "https://sso.lv3.org",
+        "https://sso.example.com",
         serverclaw_authz.KeycloakPrincipal(
             name="operator",
             principal="principal:keycloak-user__florin.badita",

@@ -44,8 +44,8 @@ uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_m
 Inspect internal platform health:
 
 ```bash
-curl -H "Authorization: Bearer <token>" https://api.lv3.org/v1/platform/health
-curl -H "Authorization: Bearer <token>" https://api.lv3.org/v1/platform/health/windmill
+curl -H "Authorization: Bearer <token>" https://api.example.com/v1/platform/health
+curl -H "Authorization: Bearer <token>" https://api.example.com/v1/platform/health/windmill
 ```
 
 ## Update Flow

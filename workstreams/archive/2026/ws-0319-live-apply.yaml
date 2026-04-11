@@ -26,7 +26,7 @@ shared_surfaces:
   - inventory/hosts.yml
   - inventory/group_vars/all.yml
   - inventory/group_vars/platform.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - playbooks/runtime-ai-pool.yml
   - playbooks/services/runtime-ai-pool.yml
   - playbooks/gotenberg.yml
@@ -115,7 +115,7 @@ ownership_manifest:
         - inventory/hosts.yml
         - inventory/group_vars/all.yml
         - inventory/group_vars/platform.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - playbooks/runtime-ai-pool.yml
         - playbooks/services/runtime-ai-pool.yml
         - playbooks/gotenberg.yml
@@ -185,7 +185,7 @@ live_applied: true
 canonical_truth:
   changelog_entry: introduced the first dedicated runtime-ai pool on production
     with Nomad, Traefik, and Dapr, moving Apache Tika, Gotenberg, and Tesseract
-    OCR off docker-runtime-lv3 while preserving the authenticated /v1/gotenberg
+    OCR off docker-runtime while preserving the authenticated /v1/gotenberg
     route
   release_bump: patch
   included_in_repo_version: 0.177.142

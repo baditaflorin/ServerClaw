@@ -36,7 +36,7 @@ Initial scope:
 
 Initial placement:
 
-- host: `docker-runtime-lv3`
+- host: `docker-runtime`
 - exposure: private-only, not published on the public edge
 - trust bootstrap: repo-documented CA URL and fingerprint, with secrets kept outside git
 
@@ -88,8 +88,8 @@ Provisioners must be separated by identity class:
 
 ## Implementation Notes
 
-- The repo now defines a dedicated `step-ca` automation surface through [playbooks/step-ca.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/step-ca.yml), [roles/step_ca_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/step_ca_runtime), and [roles/step_ca_ssh_trust](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/step_ca_ssh_trust).
-- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now exposes `converge-step-ca` as the canonical entry point with explicit preflight, validation, and verification metadata.
-- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the controller-local secret material generated and consumed by the `step-ca` workflow.
-- Operator usage is documented in [docs/runbooks/configure-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md).
+- The repo now defines a dedicated `step-ca` automation surface through [playbooks/step-ca.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/step-ca.yml), [roles/step_ca_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/step_ca_runtime), and [roles/step_ca_ssh_trust](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/step_ca_ssh_trust).
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/workflow-catalog.json) now exposes `converge-step-ca` as the canonical entry point with explicit preflight, validation, and verification metadata.
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/controller-local-secrets.json) now records the controller-local secret material generated and consumed by the `step-ca` workflow.
+- Operator usage is documented in [docs/runbooks/configure-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/runbooks/configure-step-ca.md).
 - Live application was completed from `main` on 2026-03-22, including proxied CA health verification, short-lived SSH certificate login for `ops`, and private X.509 issuance through the Tailscale-published controller URL.

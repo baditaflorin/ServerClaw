@@ -74,4 +74,4 @@
 - added the repo-managed raw app bundle under `config/windmill/apps/f/lv3/operator_access_admin.raw_app/`
 - extended `windmill_runtime` to seed the existing operator workflow wrappers and push repo-managed raw apps with the Windmill CLI
 - added focused tests for the new app bundle, wrapper scripts, and Windmill seed metadata
-- completed the live rollout on `docker-runtime-lv3`, including bootstrap admin repair, raw-app sync, and password-login verification for the private Windmill admin surface
+- completed the live rollout on `docker-runtime`, including bootstrap admin repair, raw-app sync, and password-login verification for the private Windmill admin surface

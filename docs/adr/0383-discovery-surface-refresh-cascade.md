@@ -11,21 +11,21 @@ The platform maintains multiple operator-facing discovery surfaces:
 
 | Surface | URL | Source | Update Mechanism |
 |---------|-----|--------|-----------------|
-| Homepage | home.lv3.org | service-capability-catalog.json | converge-homepage playbook |
-| Ops Portal | ops.lv3.org | service-capability-catalog.json | converge-ops-portal playbook |
-| Wiki | wiki.lv3.org | docs/adr/*.md, docs/runbooks/*.md | sync_docs_to_outline.py |
+| Homepage | home.example.com | service-capability-catalog.json | converge-homepage playbook |
+| Ops Portal | ops.example.com | service-capability-catalog.json | converge-ops-portal playbook |
+| Wiki | wiki.example.com | docs/adr/*.md, docs/runbooks/*.md | sync_docs_to_outline.py |
 | Platform Manifest | build/platform-manifest.json | Multiple catalogs | platform_manifest.py |
 
 These surfaces share a common data source (the service catalog and ADR corpus) but
 each requires its own explicit convergence run.  When a new service is deployed
-(e.g., Neko at browser.lv3.org), the service catalog is updated but the downstream
+(e.g., Neko at browser.example.com), the service catalog is updated but the downstream
 surfaces are not refreshed.  This creates **drift** where operators see stale
 service listings and missing ADRs.
 
 ### Observed drift (2026-04-08)
 
-- browser.lv3.org (neko) deployed but absent from home.lv3.org and ops.lv3.org
-- wiki.lv3.org missing approximately 60 ADRs (last synced around ADR 0320)
+- browser.example.com (neko) deployed but absent from home.example.com and ops.example.com
+- wiki.example.com missing approximately 60 ADRs (last synced around ADR 0320)
 - Platform manifest timestamps stale
 
 ### Root cause
@@ -44,9 +44,9 @@ automation) invoke one command to propagate changes to all discovery surfaces.
 
 ```
 Phase 0 (local):   Regenerate platform-manifest.json and discovery artifacts
-Phase 1 (local):   Sync ADRs + docs to Outline wiki (wiki.lv3.org)
-Phase 2 (remote):  Converge homepage (home.lv3.org on runtime-general-lv3)
-Phase 2 (remote):  Converge ops portal (ops.lv3.org on docker-runtime-lv3)
+Phase 1 (local):   Sync ADRs + docs to Outline wiki (wiki.example.com)
+Phase 2 (remote):  Converge homepage (home.example.com on runtime-general)
+Phase 2 (remote):  Converge ops portal (ops.example.com on docker-runtime)
 Phase 2 (remote):  Refresh NGINX edge configs
 ```
 

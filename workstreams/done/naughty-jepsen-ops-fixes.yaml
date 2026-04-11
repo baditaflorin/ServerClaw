@@ -6,7 +6,7 @@ ready_to_merge: true
 live_applied: false
 canonical_truth:
   changelog_entry: 'Operational fixes: OpenBao persistent unseal watcher service,
-    Keycloak VM corrected to runtime-control-lv3, oauth2-proxy internal URL updated,
+    Keycloak VM corrected to runtime-control, oauth2-proxy internal URL updated,
     dozzle-agent healthcheck disabled (scratch image).
 
     '
@@ -25,7 +25,7 @@ shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/openbao_runtime/
 - collections/ansible_collections/lv3/platform/roles/dozzle_runtime/
 - config/health-probe-catalog.json
-- inventory/host_vars/proxmox_florin.yml
+- inventory/host_vars/proxmox-host.yml
 - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
 - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
 - workstreams/archive/2026/**
@@ -44,7 +44,7 @@ ownership_manifest:
     mode: exclusive
   - id: keycloak_vm_topology
     paths:
-    - inventory/host_vars/proxmox_florin.yml
+    - inventory/host_vars/proxmox-host.yml
     - config/health-probe-catalog.json
     - config/service-capability-catalog.json
     - config/capacity-model.json

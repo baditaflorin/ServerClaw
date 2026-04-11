@@ -24,7 +24,7 @@ def test_lago_runtime_defaults_reference_service_topology_images_and_local_secre
 
     assert (
         defaults["lago_service_topology"]
-        == "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('lago') }}"
+        == "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('lago') }}"
     )
     assert defaults["lago_api_image"] == "{{ container_image_catalog.images.lago_api_runtime.ref }}"
     assert defaults["lago_front_image"] == "{{ container_image_catalog.images.lago_front_runtime.ref }}"

@@ -2,16 +2,16 @@
 
 ## Purpose
 
-This runbook converges the dedicated `coolify-lv3` PaaS VM, publishes the protected dashboard at `https://coolify.lv3.org`, enables the private API path through the Proxmox host Tailscale proxy, and verifies both public and private repo-driven application deployment through the `*.apps.lv3.org` wildcard ingress lane.
+This runbook converges the dedicated `coolify` PaaS VM, publishes the protected dashboard at `https://coolify.example.com`, enables the private API path through the Proxmox host Tailscale proxy, and verifies both public and private repo-driven application deployment through the `*.apps.example.com` wildcard ingress lane.
 
 ## Managed Surfaces
 
 - runtime role: `collections/ansible_collections/lv3/platform/roles/coolify_runtime`
 - playbook: `playbooks/coolify.yml`
 - live-apply wrapper: `playbooks/services/coolify.yml`
-- dashboard hostname: `https://coolify.lv3.org`
-- app hostname space: `https://apps.lv3.org`, `https://*.apps.lv3.org`
-- controller-local artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify/`
+- dashboard hostname: `https://coolify.example.com`
+- app hostname space: `https://apps.example.com`, `https://*.apps.example.com`
+- controller-local artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/coolify/`
 
 ## Preconditions
 
@@ -34,8 +34,8 @@ HETZNER_DNS_API_TOKEN=... make converge-coolify
 
 This workflow:
 
-- provisions or updates the `coolify-lv3` guest on Proxmox
-- publishes the managed `apps.lv3.org` and `*.apps.lv3.org` Hetzner DNS A records
+- provisions or updates the `coolify` guest on Proxmox
+- publishes the managed `apps.example.com` and `*.apps.example.com` Hetzner DNS A records
 - converges Docker and the Coolify runtime stack on the guest
 - bootstraps the initial Coolify root account, enables the API, and mints the durable API token
 - registers the local deployment server inside Coolify using the repo-managed SSH key
@@ -52,7 +52,7 @@ python3 scripts/coolify_tool.py whoami
 Dashboard auth boundary:
 
 ```bash
-curl -ksSI --resolve coolify.lv3.org:443:65.108.75.123 https://coolify.lv3.org/
+curl -ksSI --resolve coolify.example.com:443:203.0.113.1 https://coolify.example.com/
 ```
 
 Repo deployment:
@@ -81,7 +81,7 @@ python3 scripts/coolify_tool.py deploy-repo \
   --environment production \
   --build-pack dockercompose \
   --docker-compose-location /compose.yaml \
-  --compose-domain catalog-web=education-wemeshup.apps.lv3.org \
+  --compose-domain catalog-web=education-wemeshup.apps.example.com \
   --ports 80 \
   --wait \
   --timeout 1800
@@ -96,7 +96,7 @@ python3 scripts/lv3_cli.py deploy-repo \
   --app-name education-wemeshup \
   --build-pack dockercompose \
   --docker-compose-location /compose.yaml \
-  --compose-domain catalog-web=education-wemeshup.apps.lv3.org \
+  --compose-domain catalog-web=education-wemeshup.apps.example.com \
   --wait \
   --dry-run
 ```
@@ -116,20 +116,20 @@ python3 scripts/lv3_cli.py deploy-repo-profile education-wemeshup-production --w
 App reachability:
 
 ```bash
-curl -ksSI --resolve repo-smoke.apps.lv3.org:443:65.108.75.123 https://repo-smoke.apps.lv3.org/
+curl -ksSI --resolve repo-smoke.apps.example.com:443:203.0.113.1 https://repo-smoke.apps.example.com/
 ```
 
 Wildcard apex behavior without a default app:
 
 ```bash
-curl -ksSI --resolve apps.lv3.org:443:65.108.75.123 https://apps.lv3.org/
+curl -ksSI --resolve apps.example.com:443:203.0.113.1 https://apps.example.com/
 ```
 
 Expected results:
 
-- `coolify.lv3.org` returns `302` to the shared oauth2-proxy sign-in flow
-- `repo-smoke.apps.lv3.org` returns `200`
-- public app hostnames under `*.apps.lv3.org` resolve through Hetzner DNS without manual per-app record creation
+- `coolify.example.com` returns `302` to the shared oauth2-proxy sign-in flow
+- `repo-smoke.apps.example.com` returns `200`
+- public app hostnames under `*.apps.example.com` resolve through Hetzner DNS without manual per-app record creation
 - the private GitHub wrapper run creates or reuses a local SSH keypair, a GitHub
   repo deploy key, and a Coolify private key before triggering the deployment
 - the governed deploy wrapper cancels stale queued or in-progress deployments
@@ -137,7 +137,7 @@ Expected results:
 - the governed deploy wrapper retries transient Docker registry and Alpine
   package-mirror failures up to three total attempts by default while preserving
   one command entry point for the operator
-- the `coolify-lv3` Docker daemon now pins explicit public resolvers plus the
+- the `coolify` Docker daemon now pins explicit public resolvers plus the
   approved Docker Hub mirror `https://mirror.gcr.io` so fresh repo deployments
   do not depend on the guest resolver state or anonymous origin pulls alone
 - the approved repo-deploy base-image set now renders into
@@ -146,15 +146,15 @@ Expected results:
   `/opt/repo-deploy-image-cache/warm-status.json`
 - Docker Compose applications must use `--compose-domain SERVICE=DOMAIN`
   instead of the top-level `--domain` or `--subdomain` flags
-- the wildcard `*.apps.lv3.org` edge must proxy to the Coolify VM over
+- the wildcard `*.apps.example.com` edge must proxy to the Coolify VM over
   `https://<coolify-vm>:443`; proxying to plain HTTP causes an infinite `307`
   loop for healthy apps
-- the `coolify-lv3` guest firewall must allow `nginx-lv3` to reach TCP `443`,
+- the `coolify` guest firewall must allow `nginx-edge` to reach TCP `443`,
   not just `80` and `8000`, or the public edge will time out while connecting
   upstream
-- `apps.lv3.org` returns `404` until an apex app is assigned
+- `apps.example.com` returns `404` until an apex app is assigned
 
-If public DNS has not propagated to the controller yet, keep using `--resolve` against `65.108.75.123` for verification and record that separately from DNS visibility.
+If public DNS has not propagated to the controller yet, keep using `--resolve` against `203.0.113.1` for verification and record that separately from DNS visibility.
 
 If you replay `make configure-edge-publication` from a fresh worktree, generate
 the shared static site inputs first with `make generate-changelog-portal docs`.
@@ -174,7 +174,7 @@ These files are generated or refreshed by the repo-managed automation and are no
 
 ## Repo-Deploy Base Image Cache
 
-ADR 0274 is now implemented on `coolify-lv3` through the approved profile
+ADR 0274 is now implemented on `coolify` through the approved profile
 catalog and scheduled warm-cache surface documented in
 `docs/runbooks/repo-deploy-base-image-cache.md`.
 
@@ -182,20 +182,20 @@ Use that runbook when:
 
 - changing the approved base-image set for governed repo deployments
 - checking whether the warm receipt is still inside the freshness bound
-- verifying that `coolify-lv3` is ready for the next repo-backed deployment
+- verifying that `coolify` is ready for the next repo-backed deployment
 
 ## Access Model
 
-- `coolify.lv3.org` is protected by the shared oauth2-proxy and Keycloak edge flow.
+- `coolify.example.com` is protected by the shared oauth2-proxy and Keycloak edge flow.
 - the Coolify API is consumed from the controller through the Proxmox host Tailscale TCP proxy, not over the public edge
-- `*.apps.lv3.org` is intentionally public because it is the published application ingress lane
+- `*.apps.example.com` is intentionally public because it is the published application ingress lane
 
 ## Operator Surfaces
 
 Current non-chat operator entry points:
 
 ```bash
-make coolify-manage ACTION=deploy-repo COOLIFY_ARGS='--repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --build-pack dockercompose --docker-compose-location /compose.yaml --compose-domain catalog-web=education-wemeshup.apps.lv3.org --wait'
+make coolify-manage ACTION=deploy-repo COOLIFY_ARGS='--repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --build-pack dockercompose --docker-compose-location /compose.yaml --compose-domain catalog-web=education-wemeshup.apps.example.com --wait'
 ```
 
 ```bash
@@ -205,7 +205,7 @@ python3 scripts/lv3_cli.py deploy-repo \
   --app-name education-wemeshup \
   --build-pack dockercompose \
   --docker-compose-location /compose.yaml \
-  --compose-domain catalog-web=education-wemeshup.apps.lv3.org \
+  --compose-domain catalog-web=education-wemeshup.apps.example.com \
   --wait
 ```
 
@@ -233,7 +233,7 @@ engine or depending on an assistant session.
 ADR 0274 now closes the supply-path hardening gap exposed by repeated
 public-registry flakeouts: the approved deployment catalog maps to a governed
 base-image profile set in `config/repo-deploy-base-image-profiles.json`, and
-`coolify-lv3` keeps that set warm through the cache-first contract documented
+`coolify` keeps that set warm through the cache-first contract documented
 in `docs/runbooks/repo-deploy-base-image-cache.md`.
 ## Rollback
 

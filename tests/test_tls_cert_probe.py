@@ -57,7 +57,7 @@ def test_evaluate_certificate_warns_on_expiry(monkeypatch) -> None:
         "service_id": "grafana",
         "summary": "Grafana public certificate",
         "expected_issuer": "letsencrypt",
-        "endpoint": {"host": "grafana.lv3.org", "port": 443, "server_name": "grafana.lv3.org"},
+        "endpoint": {"host": "grafana.example.com", "port": 443, "server_name": "grafana.example.com"},
         "policy": {"warn_days": 21, "critical_days": 14},
     }
 
@@ -65,7 +65,7 @@ def test_evaluate_certificate_warns_on_expiry(monkeypatch) -> None:
         probe,
         "probe_tls_certificate",
         lambda host, port, server_name=None, ca_bundle_path=None, timeout_seconds=5.0: {
-            "subject": "commonName=grafana.lv3.org",
+            "subject": "commonName=grafana.example.com",
             "issuer": "commonName=Let's Encrypt",
             "not_after": datetime(2026, 4, 10, tzinfo=UTC),
         },

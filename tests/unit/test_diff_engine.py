@@ -103,23 +103,23 @@ adapters:
                     {
                         "id": "netbox",
                         "name": "NetBox",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "image_catalog_ids": ["netbox_runtime", "netbox_redis_runtime"],
                         "internal_url": "http://100.118.189.95:8004",
                     },
                     {
                         "id": "windmill",
                         "name": "Windmill",
-                        "vm": "docker-runtime-lv3",
+                        "vm": "docker-runtime",
                         "internal_url": "http://127.0.0.1:18081",
                         "environments": {"production": {"status": "active", "url": "http://127.0.0.1:18081"}},
                     },
                     {
                         "id": "grafana",
                         "name": "Grafana",
-                        "vm": "monitoring-lv3",
-                        "subdomain": "grafana.lv3.org",
-                        "public_url": "https://grafana.lv3.org",
+                        "vm": "monitoring",
+                        "subdomain": "grafana.example.com",
+                        "public_url": "https://grafana.example.com",
                     },
                 ]
             },
@@ -145,14 +145,14 @@ adapters:
                     "netbox_runtime": {
                         "service_id": "netbox",
                         "container_name": "netbox-netbox-1",
-                        "runtime_host": "docker-runtime-lv3",
+                        "runtime_host": "docker-runtime",
                         "ref": "docker.io/netboxcommunity/netbox:v4.5.4",
                         "apply_targets": ["converge-netbox"],
                     },
                     "netbox_redis_runtime": {
                         "service_id": "netbox",
                         "container_name": "netbox-redis-1",
-                        "runtime_host": "docker-runtime-lv3",
+                        "runtime_host": "docker-runtime",
                         "ref": "docker.io/valkey/valkey:8.1.5-alpine",
                         "apply_targets": ["converge-netbox"],
                     },
@@ -167,7 +167,7 @@ adapters:
             {
                 "subdomains": [
                     {
-                        "fqdn": "grafana.lv3.org",
+                        "fqdn": "grafana.example.com",
                         "service_id": "grafana",
                         "target": "10.10.10.40",
                         "target_port": 443,
@@ -188,7 +188,7 @@ adapters:
                         "id": "grafana-edge",
                         "service_id": "grafana",
                         "expected_issuer": "letsencrypt",
-                        "endpoint": {"host": "grafana.lv3.org", "port": 443, "server_name": "grafana.lv3.org"},
+                        "endpoint": {"host": "grafana.example.com", "port": 443, "server_name": "grafana.example.com"},
                         "policy": {"warn_days": 21, "critical_days": 14},
                     }
                 ]
@@ -213,7 +213,7 @@ def test_ansible_adapter_parses_changed_tasks(diff_repo: Path, monkeypatch: pyte
                         {
                             "task": {"name": "netbox_runtime : render compose file"},
                             "hosts": {
-                                "docker-runtime-lv3": {
+                                "docker-runtime": {
                                     "changed": True,
                                     "diff": [{"before": "image: old", "after": "image: new"}],
                                 }
@@ -241,14 +241,14 @@ def test_ansible_adapter_parses_changed_tasks(diff_repo: Path, monkeypatch: pyte
         runner=runner,
     )
     changes = adapter.compute_diff(
-        {"workflow_id": "converge-netbox", "target_vm": "docker-runtime-lv3"},
+        {"workflow_id": "converge-netbox", "target_vm": "docker-runtime"},
         world_state=None,
         workflow={"implementation_refs": ["playbooks/netbox.yml"]},
-        service={"vm": "docker-runtime-lv3"},
+        service={"vm": "docker-runtime"},
     )
 
     assert len(changes) == 1
-    assert changes[0].object_id == "docker-runtime-lv3:render compose file"
+    assert changes[0].object_id == "docker-runtime:render compose file"
     assert changes[0].confidence == "exact"
     assert captured_env["LV3_RUN_ID"].startswith("ansible-diff-")
     assert captured_env["ANSIBLE_LOCAL_TEMP"].startswith(str(diff_repo / ".local" / "runs"))
@@ -371,7 +371,7 @@ def test_dns_adapter_detects_catalog_drift(diff_repo: Path) -> None:
         {
             "dns_records": [
                 {
-                    "fqdn": "grafana.lv3.org",
+                    "fqdn": "grafana.example.com",
                     "target": "10.10.10.41",
                     "target_port": 443,
                     "status": "active",
@@ -384,12 +384,12 @@ def test_dns_adapter_detects_catalog_drift(diff_repo: Path) -> None:
         {"workflow_id": "converge-grafana", "target_service_id": "grafana"},
         world_state=world_state,
         workflow={},
-        service={"id": "grafana", "subdomain": "grafana.lv3.org", "public_url": "https://grafana.lv3.org"},
+        service={"id": "grafana", "subdomain": "grafana.example.com", "public_url": "https://grafana.example.com"},
     )
 
     assert len(changes) == 1
     assert changes[0].change_kind == "update"
-    assert changes[0].object_id == "grafana.lv3.org"
+    assert changes[0].object_id == "grafana.example.com"
 
 
 def test_cert_adapter_detects_issuer_drift(diff_repo: Path) -> None:
@@ -399,7 +399,7 @@ def test_cert_adapter_detects_issuer_drift(diff_repo: Path) -> None:
             "tls_cert_expiry": {
                 "certificates": [
                     {
-                        "fqdn": "grafana.lv3.org",
+                        "fqdn": "grafana.example.com",
                         "status": "ok",
                         "issuer": [[["organizationName", "step-ca"]]],
                         "not_after": "2099-01-01T00:00:00+00:00",
@@ -412,7 +412,7 @@ def test_cert_adapter_detects_issuer_drift(diff_repo: Path) -> None:
         {"workflow_id": "converge-grafana", "target_service_id": "grafana"},
         world_state=world_state,
         workflow={},
-        service={"id": "grafana", "subdomain": "grafana.lv3.org", "public_url": "https://grafana.lv3.org"},
+        service={"id": "grafana", "subdomain": "grafana.example.com", "public_url": "https://grafana.example.com"},
     )
 
     assert len(changes) == 1
@@ -512,7 +512,7 @@ def test_compiled_intent_ledger_event_stores_semantic_diff() -> None:
         arguments={},
         live_impact="guest_live",
         target_service_id="netbox",
-        target_vm="docker-runtime-lv3",
+        target_vm="docker-runtime",
         rule_risk_class=RiskClass.MEDIUM,
         computed_risk_class=RiskClass.LOW,
         final_risk_class=RiskClass.MEDIUM,

@@ -6,10 +6,10 @@ This runbook covers the ADR 0154 execution-lane model that serialises or queues 
 
 ## Canonical Inputs
 
-- lane catalog: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml)
-- scheduler integration: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py)
-- lane registry: [platform/execution_lanes/registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/execution_lanes/registry.py)
-- Windmill dispatcher: [config/windmill/scripts/lane-scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/lane-scheduler.py)
+- lane catalog: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/execution-lanes.yaml)
+- scheduler integration: [platform/scheduler/scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/scheduler/scheduler.py)
+- lane registry: [platform/execution_lanes/registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/platform/execution_lanes/registry.py)
+- Windmill dispatcher: [config/windmill/scripts/lane-scheduler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/windmill/scripts/lane-scheduler.py)
 
 ## Local Validation
 

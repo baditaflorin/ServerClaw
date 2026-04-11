@@ -40,7 +40,7 @@ shared_surfaces:
   - docs/runbooks/sbom-cve-scanning.md
   - docs/site-generated/architecture/dependency-graph.md
   - inventory/group_vars/all.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - scripts/generate_platform_vars.py
   - Makefile
@@ -164,7 +164,7 @@ ownership_manifest:
     - id: ntfy_platform_contract
       paths:
         - inventory/group_vars/all.yml
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - tests/test_generate_platform_vars.py
@@ -259,7 +259,7 @@ ownership_manifest:
         - receipts/live-applies/evidence/2026-04-03-adr-0299-*
         - receipts/restic-backups/20260403T080214Z.json
         - receipts/restic-snapshots-latest.json
-        - receipts/sbom/host-docker-runtime-lv3-2026-04-03.cdx.json
+        - receipts/sbom/host-docker-runtime-2026-04-03.cdx.json
       mode: shared_contract
       contract: live-apply-receipts-v1
 blockers: []

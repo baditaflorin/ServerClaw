@@ -121,7 +121,7 @@ def write_conflict_repo(repo_root: Path) -> None:
                 "schema_version": "1.0.0",
                 "nodes": [
                     {"id": "netbox", "service": "netbox", "name": "NetBox", "vm": "netbox-lv3", "tier": 1},
-                    {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
+                    {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres", "tier": 1},
                 ],
                 "edges": [
                     {"from": "netbox", "to": "postgres", "type": "hard", "description": "NetBox depends on Postgres"}

@@ -179,7 +179,7 @@ def test_callback_emits_ntfy_notification_for_mutation_failures() -> None:
             _uuid="task-uuid-1",
             get_name=lambda: "Render ntfy config",
         )
-        host = types.SimpleNamespace(get_name=lambda: "docker-runtime-lv3")
+        host = types.SimpleNamespace(get_name=lambda: "docker-runtime")
         result = types.SimpleNamespace(_task=task, _result={"changed": True}, _host=host)
 
         callback.v2_runner_on_failed(result)

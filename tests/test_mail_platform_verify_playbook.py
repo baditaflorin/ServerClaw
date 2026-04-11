@@ -25,15 +25,12 @@ def test_collection_playbook_keeps_environment_aware_runtime_targeting() -> None
 
     assert (
         prepare_play["hosts"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-control' }}"
     )
-    assert (
-        send_play["hosts"]
-        == "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
-    )
+    assert send_play["hosts"] == "{{ 'monitoring' if (env | default('production')) == 'staging' else 'monitoring' }}"
     assert (
         verify_play["hosts"]
-        == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
+        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-control' }}"
     )
 
 
@@ -52,7 +49,7 @@ def test_collection_playbook_adds_staging_mailpit_probe_flow() -> None:
     assert clear_task["when"] == "playbook_execution_env == 'staging'"
 
     send_task = next(task for task in send_tasks if task["name"] == "Send a staging SMTP probe to Mailpit")
-    assert "mailpit-staging@lv3.org" in send_task["ansible.builtin.shell"]
+    assert "mailpit-staging@example.com" in send_task["ansible.builtin.shell"]
     assert "mailpit_smtp_port" in send_task["ansible.builtin.shell"]
     assert send_task["when"] == "playbook_execution_env == 'staging'"
 
@@ -66,4 +63,4 @@ def test_collection_playbook_adds_staging_mailpit_probe_flow() -> None:
         "hostvars[playbook_execution_host_patterns.monitoring[playbook_execution_env]].mailpit_staging_probe.stdout == 'sent'"
         in assert_task["ansible.builtin.assert"]["that"]
     )
-    assert "'mailpit-staging@lv3.org'" in str(assert_task["ansible.builtin.assert"]["that"])
+    assert "'mailpit-staging@example.com'" in str(assert_task["ansible.builtin.assert"]["that"])

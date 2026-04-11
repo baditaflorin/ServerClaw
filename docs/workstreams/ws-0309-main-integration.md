@@ -8,7 +8,7 @@
 - Release Date: 2026-04-03
 - Live Applied On: 2026-04-03
 - Branch: `codex/ws-0309-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0309-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0309-main-integration`
 - Source Branch: `codex/ws-0309-live-apply`
 - Owner: codex
 
@@ -42,7 +42,7 @@ the governed branch replay stopped at the protected canonical-truth refresh.
 - merged the ws-0309 branch onto the latest `origin/main`, resolved the
   overlapping ADR 0310 and ADR 0312 `ops_portal` surfaces, and cut release
   `0.177.148`
-- verified the live `ops_portal` runtime on `docker-runtime-lv3` with
+- verified the live `ops_portal` runtime on `docker-runtime` with
   guest-local health checks, lane/help marker assertions, deployed file checks,
   container inspection, and edge-auth redirect verification
 - recorded the recovery loop where the first exact-main replay failed on a

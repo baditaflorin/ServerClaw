@@ -33,7 +33,7 @@ shared_surfaces:
   - docs/runbooks/configure-lago.md
   - docs/runbooks/restic-config-backups.md
   - docs/site-generated/architecture/dependency-graph.md
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - inventory/group_vars/platform.yml
   - playbooks/lago.yml
   - playbooks/services/lago.yml
@@ -140,7 +140,7 @@ ownership_manifest:
       contract: canonical-truth-v1
     - id: topology_contract
       paths:
-        - inventory/host_vars/proxmox_florin.yml
+        - inventory/host_vars/proxmox-host.yml
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
       mode: shared_contract
@@ -194,7 +194,7 @@ ownership_manifest:
       contract: generated-views-v1
 canonical_truth:
   changelog_entry: integrates the refreshed ADR 0292 latest-main replay by
-    preserving the protected billing.lv3.org edge, verifying gateway-backed
+    preserving the protected billing.example.com edge, verifying gateway-backed
     public smoke ingest and current-usage aggregation on production, and
     capturing the explicit Lago ADR catalog mapping plus regenerated exposure
     registry state required by the final replay

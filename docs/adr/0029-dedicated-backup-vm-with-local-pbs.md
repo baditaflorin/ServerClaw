@@ -30,7 +30,7 @@ We will create a dedicated internal backup VM and run Proxmox Backup Server insi
 
 Initial shape:
 
-1. Create VM `160` named `backup-lv3` on `10.10.10.60`.
+1. Create VM `160` named `backup` on `10.10.10.60`.
 2. Run Proxmox Backup Server from Debian packages inside that VM.
 3. Give the backup VM:
    - a small system disk for the guest OS

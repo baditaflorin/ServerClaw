@@ -16,7 +16,7 @@ shared_surfaces:
   - config/windmill/scripts/packer-template-rebuild.py
   - roles/proxmox_guests/
   - inventory/group_vars/all.yml
-  - inventory/host_vars/proxmox_florin.yml
+  - inventory/host_vars/proxmox-host.yml
   - Makefile
   - config/build-server.json
 ready_to_merge: false

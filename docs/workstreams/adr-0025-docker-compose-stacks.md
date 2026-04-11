@@ -1,14 +1,14 @@
 # Workstream ADR 0025: Compose-Managed Runtime Stacks
 
-- ADR: [ADR 0025](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0025-compose-managed-runtime-stacks.md)
+- ADR: [ADR 0025](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0025-compose-managed-runtime-stacks.md)
 - Title: Compose-managed runtime stacks
 - Status: ready
 - Branch: `codex/adr-0025-docker-compose-stacks`
-- Worktree: `../proxmox_florin_server-docker-compose-stacks`
+- Worktree: `../proxmox-host_server-docker-compose-stacks`
 - Owner: codex
 - Depends On: none
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `playbooks/docker-compose-stacks.yml`, `roles/docker_compose_stack`, `/srv`
+- Shared Surfaces: `docker-runtime`, `playbooks/docker-compose-stacks.yml`, `roles/docker_compose_stack`, `/srv`
 
 ## Scope
 
@@ -40,8 +40,8 @@
 
 ## Verification
 
-- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/docker-compose-stacks.yml --syntax-check`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.20 'systemctl list-unit-files | grep docker-compose || true'`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/docker-compose-stacks.yml --syntax-check`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@203.0.113.1 ops@10.10.10.20 'systemctl list-unit-files | grep docker-compose || true'`
 
 ## Merge Criteria
 

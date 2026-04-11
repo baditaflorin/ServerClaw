@@ -7,7 +7,7 @@
 - Platform Version Observed During Merge: 0.130.49
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0228-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0228-main-merge`
 - Owner: codex
 - Depends On: `ws-0228-live-apply`
 - Conflicts With: none
@@ -52,11 +52,11 @@ fully integrated result to `origin/main`.
 
 - `git fetch origin --prune` confirmed the integration worktree still contained the latest published `origin/main`, and the exact-main replay candidate for ADR 0228 was branch head `afb96649`
 - commit `afb96649` fixed one last worker-only validation defect by making `scripts/generate_ops_portal.py` parse cleanly on Python `3.11`, with the empty-state coverage added in `tests/test_ops_portal.py`
-- `make converge-windmill` replay `r25` then completed successfully from the merged worktree, including `Verify the Windmill default operations scripts are seeded` and `Assert the Windmill default operations scripts exist`, with final recap `docker-runtime-lv3 ok=248 changed=50`, `postgres-lv3 ok=64 changed=1`, and `proxmox_florin ok=37 changed=4`
-- the direct worker-local validation subset now passes from `/srv/proxmox_florin_server`: `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals`
+- `make converge-windmill` replay `r25` then completed successfully from the merged worktree, including `Verify the Windmill default operations scripts are seeded` and `Assert the Windmill default operations scripts exist`, with final recap `docker-runtime ok=248 changed=50`, `postgres ok=64 changed=1`, and `proxmox-host ok=37 changed=4`
+- the direct worker-local validation subset now passes from `/srv/proxmox-host_server`: `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals`
 - the final repo-validation sweep passed for `agent-standards`, `generated-docs`, `generated-portals`, `live_apply_receipts.py --validate`, `platform_manifest.py --check`, `generate_status_docs.py --check`, `generate_diagrams.py --check`, `python3.11 -m py_compile scripts/generate_ops_portal.py`, `pytest tests/test_ops_portal.py -q`, and `git diff --check`
 - the live Windmill proof bundle recorded `CE v1.662.0`, `9` healthy workers, a successful `windmill_healthcheck`, `weekly_capacity_report: ok`, `audit_token_inventory: attention_required` only because `local-platform-cli` expires on `2026-03-31`, dry-run `token_exposure_response: completed`, and overall `post_merge_gate: ok`
-- the green `post_merge_gate` result currently depends on the intended worker-local fallback because the primary Docker-runner validation path still cannot pull `registry.lv3.org/check-runner/*` images on the worker and returns `502 Bad Gateway`
+- the green `post_merge_gate` result currently depends on the intended worker-local fallback because the primary Docker-runner validation path still cannot pull `registry.example.com/check-runner/*` images on the worker and returns `502 Bad Gateway`
 - `./scripts/validate_repo.sh workstream-surfaces` was also exercised and only hit the expected terminal-workstream guard for running from `codex/ws-0228-main-merge` instead of `main`
 - the canonical integrated proof is receipt `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply`, which advances the protected mainline surfaces to repository version `0.177.71` and platform version `0.130.49`
 

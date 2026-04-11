@@ -23,7 +23,7 @@ We will define SLOs in a canonical catalog, derive Prometheus rules and Grafana 
 
 ### Canonical SLO catalog
 
-SLOs live in [`config/slo-catalog.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/slo-catalog.json). Each entry binds:
+SLOs live in [`config/slo-catalog.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/slo-catalog.json). Each entry binds:
 
 - a `service_id`
 - an `indicator` (`availability` or `latency`)
@@ -37,12 +37,12 @@ The initial catalog covers the public and control-plane-adjacent surfaces that a
 
 ### Generated Prometheus assets
 
-[`scripts/generate_slo_rules.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_slo_rules.py) reads the catalog and commits four generated assets:
+[`scripts/generate_slo_rules.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/generate_slo_rules.py) reads the catalog and commits four generated assets:
 
-- [`config/prometheus/rules/slo_rules.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/slo_rules.yml)
-- [`config/prometheus/rules/slo_alerts.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/slo_alerts.yml)
-- [`config/prometheus/file_sd/slo_targets.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/file_sd/slo_targets.yml)
-- [`config/grafana/dashboards/slo-overview.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/grafana/dashboards/slo-overview.json)
+- [`config/prometheus/rules/slo_rules.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/prometheus/rules/slo_rules.yml)
+- [`config/prometheus/rules/slo_alerts.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/prometheus/rules/slo_alerts.yml)
+- [`config/prometheus/file_sd/slo_targets.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/prometheus/file_sd/slo_targets.yml)
+- [`config/grafana/dashboards/slo-overview.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/grafana/dashboards/slo-overview.json)
 
 The monitoring role now copies those assets to the monitoring VM, enables a local `prometheus-blackbox-exporter`, and configures Prometheus to:
 
@@ -59,11 +59,11 @@ Grafana now imports a dedicated `LV3 SLO Overview` dashboard built from the same
 - 1-hour burn rate
 - projected days to budget exhaustion
 
-The static ops portal generator now renders an `SLO Status` section, and the platform context service exposes [`/v1/platform/slos`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_service.py) so the ADR 0093 interactive portal can consume the same machine-readable view.
+The static ops portal generator now renders an `SLO Status` section, and the platform context service exposes [`/v1/platform/slos`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/platform_context_service.py) so the ADR 0093 interactive portal can consume the same machine-readable view.
 
 ### Promotion gate integration
 
-[`scripts/promotion_pipeline.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/promotion_pipeline.py) now evaluates SLO posture before approving a production promotion. The gate rejects when:
+[`scripts/promotion_pipeline.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/promotion_pipeline.py) now evaluates SLO posture before approving a production promotion. The gate rejects when:
 
 - the SLO query path cannot be evaluated
 - required SLO metric samples are missing
@@ -105,5 +105,5 @@ This keeps the promotion contract aligned with platform reliability instead of o
 
 - repository implementation became true on `main` in repo release `0.106.0`
 - live platform implementation became true on `2026-03-25` in platform version `0.130.3`
-- `monitoring-lv3` now runs the repo-managed `prometheus-blackbox-exporter`, the generated `slo-rules.yml` and `slo-alerts.yml` rule sets, and the `LV3 SLO Overview` Grafana dashboard verification contract
-- the public Grafana edge verification that protects the SLO dashboard path is aligned live again: dashboard URLs redirect unauthenticated viewers to login and `https://grafana.lv3.org/api/health` returns `404`
+- `monitoring` now runs the repo-managed `prometheus-blackbox-exporter`, the generated `slo-rules.yml` and `slo-alerts.yml` rule sets, and the `LV3 SLO Overview` Grafana dashboard verification contract
+- the public Grafana edge verification that protects the SLO dashboard path is aligned live again: dashboard URLs redirect unauthenticated viewers to login and `https://grafana.example.com/api/health` returns `404`

@@ -36,9 +36,9 @@ def compiler_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
             {
                 "services": [
                     {"id": "netbox", "name": "NetBox", "vm": "netbox-lv3"},
-                    {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"},
-                    {"id": "loki", "name": "Loki", "vm": "monitoring-lv3"},
-                    {"id": "prometheus", "name": "Prometheus", "vm": "monitoring-lv3"},
+                    {"id": "grafana", "name": "Grafana", "vm": "monitoring"},
+                    {"id": "loki", "name": "Loki", "vm": "monitoring"},
+                    {"id": "prometheus", "name": "Prometheus", "vm": "monitoring"},
                 ]
             }
         )
@@ -155,7 +155,7 @@ all:
       hosts:
         netbox-lv3:
           ansible_host: 10.10.10.30
-        monitoring-lv3:
+        monitoring:
           ansible_host: 10.10.10.40
 """.strip()
         + "\n",
@@ -166,7 +166,7 @@ all:
             {
                 "items": [
                     {"service_id": "netbox", "name": "netbox-lv3", "vmid": 130},
-                    {"service_id": "grafana", "name": "monitoring-lv3", "vmid": 140},
+                    {"service_id": "grafana", "name": "monitoring", "vmid": 140},
                 ]
             }
         )

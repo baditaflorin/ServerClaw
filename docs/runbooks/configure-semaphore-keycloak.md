@@ -6,7 +6,7 @@ Configure Semaphore to support Keycloak SSO authentication while maintaining fal
 
 ## Prerequisites
 
-- Keycloak is deployed and accessible at `https://auth.lv3.org`
+- Keycloak is deployed and accessible at `https://auth.example.com`
 - Semaphore database and runtime are deployed
 - Administrator access to Keycloak admin console
 
@@ -14,7 +14,7 @@ Configure Semaphore to support Keycloak SSO authentication while maintaining fal
 
 ### 1. Create Keycloak Client for Semaphore
 
-1. Log into Keycloak admin console: `https://auth.lv3.org/admin`
+1. Log into Keycloak admin console: `https://auth.example.com/admin`
 2. Navigate to **Clients** in the left sidebar
 3. Click **Create client**
 4. Set the following values:
@@ -45,7 +45,7 @@ In Keycloak, create or verify a user account:
 1. Navigate to **Users**
 2. Click **Create new user**
 3. Set **Username**: `ops` (or desired username)
-4. Set **Email**: `ops@lv3.org` (or desired email)
+4. Set **Email**: `ops@example.com` (or desired email)
 5. Toggle **Email verified**: ON
 6. Click **Create**
 7. Go to the **Credentials** tab
@@ -62,14 +62,14 @@ semaphore_enable_oidc: true
 # Keycloak configuration
 semaphore_oidc_provider: keycloak
 semaphore_oidc_client_id: semaphore
-semaphore_oidc_issuer_url: "https://auth.lv3.org/realms/lv3"
+semaphore_oidc_issuer_url: "https://auth.example.com/realms/lv3"
 semaphore_oidc_callback_url: "http://100.64.0.1:8020/auth/oidc/callback"
 semaphore_oidc_scopes: "openid profile email"
 semaphore_oidc_auto_provision_user: true
 
 # Fallback username/password auth
 semaphore_admin_username: ops-semaphore
-semaphore_admin_email: ops-semaphore@lv3.org
+semaphore_admin_email: ops-semaphore@example.com
 ```
 
 ### 5. Deploy Semaphore with Keycloak
@@ -108,7 +108,7 @@ make converge-semaphore env=production
 1. Verify `SEMAPHORE_OIDC_PROVIDER` environment variable is set
 2. Check Keycloak is reachable from Semaphore container:
    ```bash
-   docker exec semaphore curl -v https://auth.lv3.org/.well-known/openid-configuration
+   docker exec semaphore curl -v https://auth.example.com/.well-known/openid-configuration
    ```
 3. Review Semaphore container logs: `docker logs semaphore`
 

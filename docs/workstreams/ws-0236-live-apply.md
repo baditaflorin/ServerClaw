@@ -9,7 +9,7 @@
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0236-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0236-live-apply`
 - Owner: codex
 - Depends On: `adr-0122-windmill-operator-access-admin`, `adr-0209-use-case-services-and-thin-delivery-adapters`, `adr-0234-human-user-experience-architecture-bundle`
 - Conflicts With: none
@@ -61,7 +61,7 @@
 - `make syntax-check-windmill` passed
 - `./scripts/validate_repo.sh agent-standards` passed
 - `make pre-push-gate` passed every branch-local check after the ownership and generated-diagram fixes; the only remaining failure was `schema-validation` reporting `build/platform-manifest.json` out of date, which is intentionally deferred to the protected mainline integration step
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make converge-windmill` passed with final recap `docker-runtime-lv3 ok=226 changed=30 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 make converge-windmill` passed with final recap `docker-runtime ok=226 changed=30 failed=0`, `postgres ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`
 - authenticated Windmill API verification reported raw app path `f/lv3/operator_access_admin`, live app version `20`, and edit timestamp `2026-03-28T22:50:09.339380Z`
 - authenticated Windmill app payload verification confirmed `@tanstack/react-query`, `QueryClientProvider`, `useQuery`, `useMutation`, and the expected `60s` plus `45s` refetch cadence markers in the deployed raw app files
 - the private roster backend replay returned `{status: "ok", operator_count: 1, active_count: 1, inactive_count: 0}`
