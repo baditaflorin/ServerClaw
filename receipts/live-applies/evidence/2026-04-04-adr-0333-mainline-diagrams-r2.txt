@@ -1,1 +1,0 @@
-Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0333-mainline-integration-r2/docs/diagrams

@@ -1,4 +1,0 @@
-subject=CN=errors.lv3.org
-issuer=C=US, O=Let's Encrypt, CN=E8
-notBefore=Mar 31 04:41:34 2026 GMT
-notAfter=Jun 29 04:41:33 2026 GMT

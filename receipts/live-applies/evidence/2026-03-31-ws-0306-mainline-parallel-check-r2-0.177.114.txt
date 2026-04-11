@@ -1,9 +1,0 @@
-
-CHECK          STATUS    DURATION(s)
-iac-policy-scan timed_out 300.02
-type-check      passed    15.07
-
-[iac-policy-scan] docker command
-docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0306-mainline-v2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0306-mainline-v2:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/security:2026.03.23 sh -c python3 scripts/iac_policy_scan.py
-[iac-policy-scan] stderr
-WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested

@@ -1,5 +1,0 @@
-docker-runtime-lv3 | UNREACHABLE! => {
-    "changed": false,
-    "msg": "Data could not be sent to remote host \"10.10.10.20\". Make sure this host can be reached over ssh: ",
-    "unreachable": true
-}

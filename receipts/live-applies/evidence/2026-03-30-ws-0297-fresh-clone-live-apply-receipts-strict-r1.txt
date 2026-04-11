@@ -1,1 +1,0 @@
-Live apply receipt error: 2026-03-23-adr-0021-edge-publication-portal-hostnames-live-apply.json: source_commit '2e06905fb431af9419c4d7ec21212aa446619e5a' is not available in the current git object database

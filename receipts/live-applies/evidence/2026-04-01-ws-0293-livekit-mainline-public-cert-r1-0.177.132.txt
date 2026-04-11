@@ -1,3 +1,0 @@
-subject=CN=livekit.lv3.org
-X509v3 Subject Alternative Name:
-    DNS:livekit.lv3.org

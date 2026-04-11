@@ -1,4 +1,0 @@
-workstreams.yaml is current.
-Root summary documents OK
-Generated status docs OK
-Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/receipts/live-applies

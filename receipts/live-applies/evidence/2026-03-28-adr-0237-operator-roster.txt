@@ -1,8 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-{
-  "status": "ok",
-  "operator_count": 1,
-  "active_count": 1,
-  "inactive_count": 0,
-  "first_operator_id": "florin-badita"
-}

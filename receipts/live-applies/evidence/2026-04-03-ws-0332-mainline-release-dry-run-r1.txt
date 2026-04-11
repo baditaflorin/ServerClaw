@@ -1,5 +1,0 @@
-Current version: 0.178.1
-Next version: 0.178.2
-Unreleased notes: 1
-Platform impact: platform version advances to 0.130.98 after the exact-main ws-0332 replay re-verifies runtime-general Homepage and Uptime Kuma recovery on top of the 0.130.97 baseline, restoring the authenticated home.lv3.org route and the uptime/status surfaces without bypassing the fail-closed retirement guard
-Release notes index: docs/release-notes/README.md

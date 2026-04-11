@@ -1,5 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=2 >>
-Installed 2 packages in 3ms
-SBOM refresh error: failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker.sock: connect: no such file or directory
-Shared connection to 10.10.10.20 closed.
-non-zero return code

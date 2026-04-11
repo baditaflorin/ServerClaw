@@ -1,3 +1,0 @@
-Workstream surface ownership validation
-Workstream surface ownership validation failed: workstream surface ownership validation failed:
-- tests/test_loki_log_agent_role.py: outside declared owned surfaces for ws-0300-live-apply

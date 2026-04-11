@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-28T01:21:25.188900+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "Mainline ADR 0186 merge and 0.177.21 release push; the remote pre-push gate hung in repeated SSH handoff to 10.10.10.30 while local py_compile, repository data-model validation, live-apply receipt validation, Windmill syntax, workflow-info, agent-standards, and 105 focused pytest checks all passed on the integrated branch.",
-  "source": "pre-push-hook",
-  "branch": "codex/ws-0186-main-merge",
-  "commit": "90e6b6d808d9a713b285d5c80d0d395323c0161f"
-}

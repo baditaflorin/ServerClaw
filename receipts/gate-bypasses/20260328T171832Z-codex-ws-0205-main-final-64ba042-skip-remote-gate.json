@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-28T17:18:32.299064+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "remote pre-push gate local fallback misrouted into ws-0207-main-recut while ADR 0205 validation and live-apply replay had already passed in ws-0205-main-final",
-  "source": "pre-push-hook",
-  "branch": "codex/ws-0205-main-final",
-  "commit": "64ba04234d982a6436feb138a4f9041e4f3b30d0"
-}

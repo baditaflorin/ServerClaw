@@ -1,1 +1,0 @@
-waiting_for_subject=platform.security.pgaudit_unknown_role

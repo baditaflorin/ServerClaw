@@ -1,2 +1,0 @@
-
-playbook: playbooks/services/grist.yml

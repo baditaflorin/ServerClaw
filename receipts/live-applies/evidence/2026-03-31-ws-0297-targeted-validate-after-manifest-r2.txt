@@ -1,3 +1,0 @@
-Workstream surface ownership validation
-Repository data model validation
-Generated status document validation

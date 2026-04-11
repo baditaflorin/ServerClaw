@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T06:08:21.257899+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "Local fallback gate timed out across Docker-based checks on the controller after repository validations and live apply verification had already passed.",
-  "source": "pre-push-gate",
-  "branch": "codex/reintegrate-0153-main-v2",
-  "commit": "7586a2cd35a13f420d449314056f96242cf10085"
-}

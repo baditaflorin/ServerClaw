@@ -1,5 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-ERROR: Playbooks/roles missing metadata headers (ADR 0165):
-  - playbooks/openbao.yml
-  Copy header from: playbooks/.metadata-template.yml
-  Reference: docs/adr/0165-playbook-role-metadata-standard.md

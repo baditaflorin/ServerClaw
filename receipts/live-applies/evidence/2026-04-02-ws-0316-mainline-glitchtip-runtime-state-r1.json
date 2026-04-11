@@ -1,5 +1,0 @@
-{
-  "returncode": 1,
-  "stderr": "Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.\nTraceback (most recent call last):\n  File \"<stdin>\", line 8, in <module>\n  File \"/usr/lib/python3.13/pathlib/_abc.py\", line 450, in exists\n    self.stat(follow_symlinks=follow_symlinks)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/pathlib/_local.py\", line 517, in stat\n    return os.stat(self, follow_symlinks=follow_symlinks)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nPermissionError: [Errno 13] Permission denied: '/srv/proxmox_florin_server/.local/glitchtip/platform-findings-event-url.txt'\n",
-  "stdout": ""
-}

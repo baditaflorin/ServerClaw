@@ -1,7 +1,0 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/scripts/validate_repo.sh ansible-idempotency
-Ansible role idempotency policy
-Validated Ansible role idempotency policy: 3 enforced, 117 tracked, 3 exempt.
-Tracked roles remain on the migration inventory until they gain a CI-safe scenario.
-PASSED  preflight: zero changes on second run
-PASSED  secret_fact: zero changes on second run
-PASSED  wait_for_healthy: zero changes on second run

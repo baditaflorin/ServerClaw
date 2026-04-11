@@ -1,9 +1,0 @@
-{
-  "path": "f/lv3/operator_access_admin",
-  "latest_version": 58,
-  "has_command_palette_import": true,
-  "has_command_palette_backend": true,
-  "has_command_palette_cta": true,
-  "has_command_palette_file": true,
-  "policy_has_command_palette_search": true
-}

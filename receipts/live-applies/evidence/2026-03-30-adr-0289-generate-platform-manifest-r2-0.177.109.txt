@@ -1,1 +1,0 @@
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/scripts/platform_manifest.py --write

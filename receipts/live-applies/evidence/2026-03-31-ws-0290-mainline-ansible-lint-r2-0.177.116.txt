@@ -1,5 +1,0 @@
-WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
-Ansible lint
-
-Passed: 0 failure(s), 0 warning(s) on 1137 files. Last profile that met the validation criteria was 'production'.
-A new release of ansible-lint is available: 24.12.2 → 26.3.0[/] Upgrade by running: pip install --upgrade ansible-lint

@@ -1,5 +1,0 @@
-origin/main ad0050483c76e6eba2f516cbb6d4e4f4a6843476
-origin/main VERSION 0.177.115
-origin/main platform_version 0.130.75
-branch codex/ws-0285-live-apply
-head 779a8cab0c21ebac878104ee9ee373949a447d12

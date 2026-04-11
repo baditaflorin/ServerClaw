@@ -1,4 +1,0 @@
-runtime-control-lv3 | CHANGED | rc=0 >>
-{
-  "server_list_item": null
-}

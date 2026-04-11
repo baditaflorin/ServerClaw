@@ -1,8 +1,0 @@
-{
-  "status": "error",
-  "target": "docker-runtime-lv3",
-  "command": "sudo python3 /srv/proxmox_florin_server/scripts/restic_config_backup.py --repo-root /srv/proxmox_florin_server --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by manual-backup --print-report-json",
-  "returncode": 2,
-  "stdout": "",
-  "stderr": "Restic config backup error: restic --option s3.region=eu-central-1 --option s3.bucket-lookup=path forget --prune --group-by host,tags,paths --tag source:receipts --keep-daily 90 --keep-monthly 12: unable to create lock in backend: repository is already locked by PID 1876358 on docker-runtime-lv3 by root (UID 0, GID 0)\nlock was created at 2026-03-31 05:48:32 (452.358181ms ago)\nstorage ID eb11e188\nthe `unlock` command can be used to remove stale locks"
-}

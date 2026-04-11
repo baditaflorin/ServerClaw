@@ -1,9 +1,0 @@
-Semgrep SAST and secret-pattern validation
-Semgrep gate summary
-  repo: /workspace
-  source sha: manual
-  sarif: /workspace/receipts/sast/manual.sarif.json
-  findings: error=0 warning=2 note=0 total=2
-  net new findings: 0
-  baseline comparison: skipped (checkout has no git metadata)
-  mutation audit events emitted: 0

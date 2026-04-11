@@ -1,9 +1,0 @@
-{
-  "id": 143,
-  "status": "completed",
-  "conclusion": "failure",
-  "event": "workflow_dispatch",
-  "head_branch": "codex/ws-0297-live-apply",
-  "head_sha": "b07b31b5425b7b742ce0115dcbfb4025a708ec7d",
-  "html_url": "http://git.lv3.org:3009/ops/proxmox_florin_server/actions/runs/139"
-}

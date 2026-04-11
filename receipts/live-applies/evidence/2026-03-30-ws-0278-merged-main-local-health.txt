@@ -1,2 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-{"status":"up","details":{"chromium":{"status":"up","timestamp":"2026-03-30T00:29:41.824154119Z"},"libreoffice":{"status":"up","timestamp":"2026-03-30T00:29:41.823936367Z"}}}

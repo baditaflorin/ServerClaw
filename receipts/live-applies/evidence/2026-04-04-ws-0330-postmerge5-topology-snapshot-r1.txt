@@ -1,4 +1,0 @@
-YAML backend: pyyaml
-Inventory:    /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout/inventory
-Output:       /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout/scripts/topology-snapshot.json
-Wrote: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout/scripts/topology-snapshot.json

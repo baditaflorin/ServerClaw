@@ -1,1 +1,0 @@
-{"installed":true,"maintenance":false,"needsDbUpgrade":false,"version":"33.0.1.2","versionstring":"33.0.1","edition":"","productname":"Nextcloud","extendedSupport":false}

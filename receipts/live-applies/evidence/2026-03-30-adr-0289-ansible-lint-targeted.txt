@@ -1,6 +1,0 @@
-WARNING  Skipped installing collection dependencies due to running in offline mode.
-WARNING  Listing 1 violation(s) marked as ignored, likely already known
-
-Passed: 0 failure(s), 1 warning(s) in 55 files processed of 58 encountered. Last profile that met the validation criteria was 'production'.
-complexity[tasks]: File contains 104 tasks, exceeding the maximum of 100. Consider using `ansible.builtin.include_tasks` to split the tasks into smaller files. (warning) # ignored
-collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml:1

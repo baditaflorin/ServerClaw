@@ -1,1 +1,0 @@
-{"status":"up","details":{"chromium":{"status":"up","timestamp":"2026-03-30T00:29:38.820291871Z"},"libreoffice":{"status":"up","timestamp":"2026-03-30T00:29:38.819924577Z"}}}

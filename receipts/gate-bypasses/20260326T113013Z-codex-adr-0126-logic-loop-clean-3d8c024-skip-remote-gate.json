@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T11:30:13.229307+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "Remote pre-push gate hung syncing .git-remote/common to build-lv3 after earlier stale dependency graph and .git-remote/worktree schema-validation failures; ADR-0126 targeted tests, repository data validation, and live apply verification passed.",
-  "source": "manual",
-  "branch": "codex/adr-0126-logic-loop-clean",
-  "commit": "3d8c024349495842f48c7917d7f4664a0683d97f"
-}

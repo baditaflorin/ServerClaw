@@ -1,191 +1,0 @@
-2026-03-30T21:41:09.2290515Z docker-build-lv3(version:v0.2.12) received task 121 of job validate, be triggered by event: push
-2026-03-30T21:41:09.2294208Z workflow prepared
-2026-03-30T21:41:09.2294969Z evaluating expression 'success()'
-2026-03-30T21:41:09.2295901Z expression 'success()' evaluated to 'true'
-2026-03-30T21:41:09.2296083Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-30T21:41:09.2359193Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-30T21:41:09.2359486Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-30T21:41:09.2371553Z Image exists? true
-2026-03-30T21:41:09.2398770Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-03-30T21:41:09.2458552Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-30T21:41:09.2458927Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-30T21:41:09.2459394Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038cec8 OomKillDisable:0xc00038cdc3 PidsLimit:0xc00038cf28 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-30T21:41:09.2459759Z --network and --net in the options will be ignored.
-2026-03-30T21:41:09.2460055Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038cec8 OomKillDisable:0xc00038cdc3 PidsLimit:0xc00038cf28 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-30T21:41:09.2644795Z Created container name=GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate id=ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
-2026-03-30T21:41:09.2645202Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-30T21:41:09.2645350Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-03-30T21:41:09.2645634Z Starting container: ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229
-2026-03-30T21:41:09.3694774Z Started container: ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229
-2026-03-30T21:41:09.4429249Z Writing entry to tarball workflow/event.json len:5950
-2026-03-30T21:41:09.4430266Z Writing entry to tarball workflow/envs.txt len:0
-2026-03-30T21:41:09.4433001Z Extracting content to '/var/run/act/'
-2026-03-30T21:41:09.4598733Z expression '${{ github.sha }}' rewritten to 'format('{0}', github.sha)'
-2026-03-30T21:41:09.4599059Z evaluating expression 'format('{0}', github.sha)'
-2026-03-30T21:41:09.4599382Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=b378e61a9976fa0c9217ad7c4ea7d06e077917fe)'
-2026-03-30T21:41:09.4599523Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
-2026-03-30T21:41:09.4599599Z evaluating expression 'format('{0}', github.token)'
-2026-03-30T21:41:09.4599741Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
-2026-03-30T21:41:09.4599873Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
-2026-03-30T21:41:09.4599942Z evaluating expression 'format('{0}', github.repository)'
-2026-03-30T21:41:09.4600069Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
-2026-03-30T21:41:09.4600169Z expression '${{ github.server_url }}' rewritten to 'format('{0}', github.server_url)'
-2026-03-30T21:41:09.4600239Z evaluating expression 'format('{0}', github.server_url)'
-2026-03-30T21:41:09.4600401Z expression 'format('{0}', github.server_url)' evaluated to '%!t(string=http://10.10.10.20:3003)'
-2026-03-30T21:41:09.4600512Z expression '${{ github.ref }}' rewritten to 'format('{0}', github.ref)'
-2026-03-30T21:41:09.4600578Z evaluating expression 'format('{0}', github.ref)'
-2026-03-30T21:41:09.4600705Z expression 'format('{0}', github.ref)' evaluated to '%!t(string=refs/heads/codex/ws-0297-live-apply)'
-2026-03-30T21:41:09.4757086Z evaluating expression ''
-2026-03-30T21:41:09.4757617Z expression '' evaluated to 'true'
-2026-03-30T21:41:09.4757721Z ⭐ Run Main Checkout
-2026-03-30T21:41:09.4757939Z Writing entry to tarball workflow/outputcmd.txt len:0
-2026-03-30T21:41:09.4758208Z Writing entry to tarball workflow/statecmd.txt len:0
-2026-03-30T21:41:09.4758367Z Writing entry to tarball workflow/pathcmd.txt len:0
-2026-03-30T21:41:09.4758458Z Writing entry to tarball workflow/envs.txt len:0
-2026-03-30T21:41:09.4758535Z Writing entry to tarball workflow/SUMMARY.md len:0
-2026-03-30T21:41:09.4758629Z Extracting content to '/var/run/act'
-2026-03-30T21:41:09.4967515Z Wrote command \n\nset -euo pipefail\ngit config --global --add safe.directory "$PWD"\ngit init .\nif git remote get-url origin >/dev/null 2>&1; then\n  git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nelse\n  git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nfi\ngit -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"\ngit checkout --force "${WORKFLOW_SHA}"\n\n\n to 'workflow/0.sh'
-2026-03-30T21:41:09.4968042Z Writing entry to tarball workflow/0.sh len:439
-2026-03-30T21:41:09.4968268Z Extracting content to '/var/run/act'
-2026-03-30T21:41:09.4982699Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
-2026-03-30T21:41:09.4983089Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-30T21:41:09.4983492Z Working directory '/workspace/ops/proxmox_florin_server'
-2026-03-30T21:41:09.5722863Z hint: Using 'master' as the name for the initial branch. This default branch name
-2026-03-30T21:41:09.5723515Z hint: is subject to change. To configure the initial branch name to use in all
-2026-03-30T21:41:09.5723683Z hint: of your new repositories, which will suppress this warning, call:
-2026-03-30T21:41:09.5723860Z hint:
-2026-03-30T21:41:09.5723940Z hint: 	git config --global init.defaultBranch <name>
-2026-03-30T21:41:09.5724018Z hint:
-2026-03-30T21:41:09.5724098Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
-2026-03-30T21:41:09.5724177Z hint: 'development'. The just-created branch can be renamed via this command:
-2026-03-30T21:41:09.5724283Z hint:
-2026-03-30T21:41:09.5724361Z hint: 	git branch -m <name>
-2026-03-30T21:41:09.5724576Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-30T21:41:13.6404205Z From http://10.10.10.20:3003/ops/proxmox_florin_server
-2026-03-30T21:41:13.6404997Z  * branch            codex/ws-0297-live-apply -> FETCH_HEAD
-2026-03-30T21:41:13.6406135Z  * [new branch]      codex/ws-0297-live-apply -> origin/codex/ws-0297-live-apply
-2026-03-30T21:41:14.0785649Z Note: switching to 'b378e61a9976fa0c9217ad7c4ea7d06e077917fe'.
-2026-03-30T21:41:14.0786122Z
-2026-03-30T21:41:14.0786238Z You are in 'detached HEAD' state. You can look around, make experimental
-2026-03-30T21:41:14.0786385Z changes and commit them, and you can discard any commits you make in this
-2026-03-30T21:41:14.0786506Z state without impacting any branches by switching back to a branch.
-2026-03-30T21:41:14.0786592Z
-2026-03-30T21:41:14.0786681Z If you want to create a new branch to retain commits you create, you may
-2026-03-30T21:41:14.0786775Z do so (now or later) by using -c with the switch command. Example:
-2026-03-30T21:41:14.0786864Z
-2026-03-30T21:41:14.0786943Z   git switch -c <new-branch-name>
-2026-03-30T21:41:14.0787013Z
-2026-03-30T21:41:14.0787092Z Or undo this operation with:
-2026-03-30T21:41:14.0787166Z
-2026-03-30T21:41:14.0787238Z   git switch -
-2026-03-30T21:41:14.0787305Z
-2026-03-30T21:41:14.0787382Z Turn off this advice by setting config variable advice.detachedHead to false
-2026-03-30T21:41:14.0787458Z
-2026-03-30T21:41:14.0787556Z HEAD is now at b378e61 [renovate] Align validate workflow with Gitea runner reality
-2026-03-30T21:41:14.2978359Z Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
-2026-03-30T21:41:14.3230857Z Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
-2026-03-30T21:41:14.3339152Z Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
-2026-03-30T21:41:14.3451310Z Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
-2026-03-30T21:41:14.5241570Z Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
-2026-03-30T21:41:14.5244473Z Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [114 kB]
-2026-03-30T21:41:15.1082006Z Fetched 10.0 MB in 1s (11.5 MB/s)
-2026-03-30T21:41:15.6272847Z Reading package lists...
-2026-03-30T21:41:16.1198059Z Reading package lists...
-2026-03-30T21:41:16.2709928Z Building dependency tree...
-2026-03-30T21:41:16.2710321Z Reading state information...
-2026-03-30T21:41:16.5068299Z The following additional packages will be installed:
-2026-03-30T21:41:16.5076808Z   containerd iptables libip4tc2 libip6tc2 libmnl0 libnetfilter-conntrack3
-2026-03-30T21:41:16.5081680Z   libnfnetlink0 libnftnl11 libxtables12 runc tini
-2026-03-30T21:41:16.5095738Z Suggested packages:
-2026-03-30T21:41:16.5096001Z   containernetworking-plugins docker-doc aufs-tools btrfs-progs cgroupfs-mount
-2026-03-30T21:41:16.5096168Z   debootstrap e2fsprogs rinse rootlesskit xfsprogs zfs-fuse | zfsutils-linux
-2026-03-30T21:41:16.5096336Z   firewalld kmod
-2026-03-30T21:41:16.5096442Z Recommended packages:
-2026-03-30T21:41:16.5096557Z   apparmor dbus-user-session docker-cli needrestart xz-utils nftables criu
-2026-03-30T21:41:16.5818327Z The following NEW packages will be installed:
-2026-03-30T21:41:16.5821768Z   containerd docker.io iptables libip4tc2 libip6tc2 libmnl0
-2026-03-30T21:41:16.5830912Z   libnetfilter-conntrack3 libnfnetlink0 libnftnl11 libxtables12 runc tini
-2026-03-30T21:41:16.6638179Z 0 upgraded, 12 newly installed, 0 to remove and 0 not upgraded.
-2026-03-30T21:41:16.6638628Z Need to get 59.9 MB of archives.
-2026-03-30T21:41:16.6638769Z After this operation, 234 MB of additional disk space will be used.
-2026-03-30T21:41:16.6638959Z Get:1 http://deb.debian.org/debian trixie/main amd64 runc amd64 1.1.15+ds1-2+b4 [3230 kB]
-2026-03-30T21:41:16.7400747Z Get:2 http://deb.debian.org/debian trixie/main amd64 containerd amd64 1.7.24~ds1-6+deb13u1 [32.8 MB]
-2026-03-30T21:41:17.0460065Z Get:3 http://deb.debian.org/debian trixie/main amd64 libip4tc2 amd64 1.8.11-2 [20.0 kB]
-2026-03-30T21:41:17.0461942Z Get:4 http://deb.debian.org/debian trixie/main amd64 libip6tc2 amd64 1.8.11-2 [20.3 kB]
-2026-03-30T21:41:17.0473279Z Get:5 http://deb.debian.org/debian trixie/main amd64 libxtables12 amd64 1.8.11-2 [31.9 kB]
-2026-03-30T21:41:17.0474330Z Get:6 http://deb.debian.org/debian trixie/main amd64 libmnl0 amd64 1.0.5-3 [11.9 kB]
-2026-03-30T21:41:17.0474526Z Get:7 http://deb.debian.org/debian trixie/main amd64 libnfnetlink0 amd64 1.0.2-3 [14.4 kB]
-2026-03-30T21:41:17.0474917Z Get:8 http://deb.debian.org/debian trixie/main amd64 libnetfilter-conntrack3 amd64 1.1.0-1 [42.1 kB]
-2026-03-30T21:41:17.0475237Z Get:9 http://deb.debian.org/debian trixie/main amd64 libnftnl11 amd64 1.2.9-1 [65.0 kB]
-2026-03-30T21:41:17.0535124Z Get:10 http://deb.debian.org/debian trixie/main amd64 iptables amd64 1.8.11-2 [361 kB]
-2026-03-30T21:41:17.0637445Z Get:11 http://deb.debian.org/debian trixie/main amd64 tini amd64 0.19.0-3+b6 [280 kB]
-2026-03-30T21:41:17.0738193Z Get:12 http://deb.debian.org/debian trixie/main amd64 docker.io amd64 26.1.5+dfsg1-9+b12 [23.0 MB]
-2026-03-30T21:41:17.9904185Z Fetched 59.9 MB in 1s (79.5 MB/s)
-2026-03-30T21:41:18.0066207Z Selecting previously unselected package runc.
-2026-03-30T21:41:18.0111436Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
-2026-03-30T21:41:18.0118541Z Preparing to unpack .../00-runc_1.1.15+ds1-2+b4_amd64.deb ...
-2026-03-30T21:41:18.0137485Z Unpacking runc (1.1.15+ds1-2+b4) ...
-2026-03-30T21:41:18.1465478Z Selecting previously unselected package containerd.
-2026-03-30T21:41:18.1477834Z Preparing to unpack .../01-containerd_1.7.24~ds1-6+deb13u1_amd64.deb ...
-2026-03-30T21:41:18.1492463Z Unpacking containerd (1.7.24~ds1-6+deb13u1) ...
-2026-03-30T21:41:18.6022255Z Selecting previously unselected package libip4tc2:amd64.
-2026-03-30T21:41:18.6033169Z Preparing to unpack .../02-libip4tc2_1.8.11-2_amd64.deb ...
-2026-03-30T21:41:18.6054053Z Unpacking libip4tc2:amd64 (1.8.11-2) ...
-2026-03-30T21:41:18.6209043Z Selecting previously unselected package libip6tc2:amd64.
-2026-03-30T21:41:18.6219464Z Preparing to unpack .../03-libip6tc2_1.8.11-2_amd64.deb ...
-2026-03-30T21:41:18.6231211Z Unpacking libip6tc2:amd64 (1.8.11-2) ...
-2026-03-30T21:41:18.6382145Z Selecting previously unselected package libxtables12:amd64.
-2026-03-30T21:41:18.6393256Z Preparing to unpack .../04-libxtables12_1.8.11-2_amd64.deb ...
-2026-03-30T21:41:18.6405519Z Unpacking libxtables12:amd64 (1.8.11-2) ...
-2026-03-30T21:41:18.6559805Z Selecting previously unselected package libmnl0:amd64.
-2026-03-30T21:41:18.6570668Z Preparing to unpack .../05-libmnl0_1.0.5-3_amd64.deb ...
-2026-03-30T21:41:18.6580933Z Unpacking libmnl0:amd64 (1.0.5-3) ...
-2026-03-30T21:41:18.6731426Z Selecting previously unselected package libnfnetlink0:amd64.
-2026-03-30T21:41:18.6742554Z Preparing to unpack .../06-libnfnetlink0_1.0.2-3_amd64.deb ...
-2026-03-30T21:41:18.6752432Z Unpacking libnfnetlink0:amd64 (1.0.2-3) ...
-2026-03-30T21:41:18.6902384Z Selecting previously unselected package libnetfilter-conntrack3:amd64.
-2026-03-30T21:41:18.6913490Z Preparing to unpack .../07-libnetfilter-conntrack3_1.1.0-1_amd64.deb ...
-2026-03-30T21:41:18.6924799Z Unpacking libnetfilter-conntrack3:amd64 (1.1.0-1) ...
-2026-03-30T21:41:18.7072360Z Selecting previously unselected package libnftnl11:amd64.
-2026-03-30T21:41:18.7083004Z Preparing to unpack .../08-libnftnl11_1.2.9-1_amd64.deb ...
-2026-03-30T21:41:18.7093609Z Unpacking libnftnl11:amd64 (1.2.9-1) ...
-2026-03-30T21:41:18.7263299Z Selecting previously unselected package iptables.
-2026-03-30T21:41:18.7274875Z Preparing to unpack .../09-iptables_1.8.11-2_amd64.deb ...
-2026-03-30T21:41:18.7288102Z Unpacking iptables (1.8.11-2) ...
-2026-03-30T21:41:18.7588736Z Selecting previously unselected package tini.
-2026-03-30T21:41:18.7601008Z Preparing to unpack .../10-tini_0.19.0-3+b6_amd64.deb ...
-2026-03-30T21:41:18.7613605Z Unpacking tini (0.19.0-3+b6) ...
-2026-03-30T21:41:18.7898192Z Selecting previously unselected package docker.io.
-2026-03-30T21:41:18.7908891Z Preparing to unpack .../11-docker.io_26.1.5+dfsg1-9+b12_amd64.deb ...
-2026-03-30T21:41:18.8095717Z Unpacking docker.io (26.1.5+dfsg1-9+b12) ...
-2026-03-30T21:41:19.1654842Z Setting up libip4tc2:amd64 (1.8.11-2) ...
-2026-03-30T21:41:19.1696687Z Setting up libip6tc2:amd64 (1.8.11-2) ...
-2026-03-30T21:41:19.1729465Z Setting up runc (1.1.15+ds1-2+b4) ...
-2026-03-30T21:41:19.1758146Z Setting up libmnl0:amd64 (1.0.5-3) ...
-2026-03-30T21:41:19.1795525Z Setting up tini (0.19.0-3+b6) ...
-2026-03-30T21:41:19.1826927Z Setting up libxtables12:amd64 (1.8.11-2) ...
-2026-03-30T21:41:19.1862223Z Setting up libnfnetlink0:amd64 (1.0.2-3) ...
-2026-03-30T21:41:19.1898746Z Setting up containerd (1.7.24~ds1-6+deb13u1) ...
-2026-03-30T21:41:19.3314530Z Setting up libnftnl11:amd64 (1.2.9-1) ...
-2026-03-30T21:41:19.3510868Z Setting up libnetfilter-conntrack3:amd64 (1.1.0-1) ...
-2026-03-30T21:41:19.3718696Z Setting up iptables (1.8.11-2) ...
-2026-03-30T21:41:19.3788528Z update-alternatives: using /usr/sbin/iptables-legacy to provide /usr/sbin/iptables (iptables) in auto mode
-2026-03-30T21:41:19.4345190Z update-alternatives: using /usr/sbin/ip6tables-legacy to provide /usr/sbin/ip6tables (ip6tables) in auto mode
-2026-03-30T21:41:19.5003317Z update-alternatives: using /usr/sbin/iptables-nft to provide /usr/sbin/iptables (iptables) in auto mode
-2026-03-30T21:41:19.5024328Z update-alternatives: using /usr/sbin/ip6tables-nft to provide /usr/sbin/ip6tables (ip6tables) in auto mode
-2026-03-30T21:41:19.5212871Z update-alternatives: using /usr/sbin/arptables-nft to provide /usr/sbin/arptables (arptables) in auto mode
-2026-03-30T21:41:19.5370042Z update-alternatives: using /usr/sbin/ebtables-nft to provide /usr/sbin/ebtables (ebtables) in auto mode
-2026-03-30T21:41:19.5503455Z Setting up docker.io (26.1.5+dfsg1-9+b12) ...
-2026-03-30T21:41:19.6472663Z invoke-rc.d: could not determine current runlevel
-2026-03-30T21:41:19.6501462Z invoke-rc.d: policy-rc.d denied execution of start.
-2026-03-30T21:41:19.8324558Z Processing triggers for libc-bin (2.41-12+deb13u2) ...
-2026-03-30T21:41:19.8572847Z /var/run/act/workflow/1.sh: 10: docker: not found
-2026-03-30T21:41:19.8582149Z   ❌  Failure - Main Bootstrap validation toolchain
-2026-03-30T21:41:19.8640730Z exitcode '127': command not found, please refer to https://github.com/nektos/act/issues/107 for more information
-2026-03-30T21:41:19.9767501Z No validation artifacts found to bundle.
-2026-03-30T21:41:19.9847559Z Cleaning up container for job validate
-2026-03-30T21:41:20.0714178Z Removed container: ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229
-2026-03-30T21:41:20.0724714Z   🐳  docker volume rm GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate
-2026-03-30T21:41:20.1586523Z   🐳  docker volume rm GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate-env
-2026-03-30T21:41:20.1603203Z 🏁  Job failed
-2026-03-30T21:41:20.1666814Z Job 'validate' failed

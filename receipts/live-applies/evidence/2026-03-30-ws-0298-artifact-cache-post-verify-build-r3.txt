@@ -1,5 +1,0 @@
-docker-build-lv3 | FAILED | rc=7 >>
-curl: (7) Failed to connect to 10.10.10.30 port 80 after 0 ms: Could not connect to server
-curl: (7) Failed to connect to 10.10.10.30 port 80 after 0 ms: Could not connect to server
-curl: (7) Failed to connect to 10.10.10.30 port 80 after 0 ms: Could not connect to server
-curl: (7) Failed to connect to 10.10.10.30 port 80 after 0 ms: Could not connect to servernon-zero return code

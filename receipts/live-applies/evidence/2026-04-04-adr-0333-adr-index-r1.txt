@@ -1,1 +1,0 @@
-Written /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0333-private-overlay/docs/adr/.index.yaml and 26 ADR shard files (365 ADRs indexed)

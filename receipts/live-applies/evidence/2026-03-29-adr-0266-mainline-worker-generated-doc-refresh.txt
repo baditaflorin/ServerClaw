@@ -1,2 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-Updated dependency diagram: /srv/proxmox_florin_server/docs/site-generated/architecture/dependency-graph.md

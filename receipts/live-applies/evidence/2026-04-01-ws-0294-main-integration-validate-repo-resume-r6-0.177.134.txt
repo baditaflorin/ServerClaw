@@ -1,2 +1,0 @@
-Alert rule validation
-generate-slo-rules error: generated SLO assets are out of date; run scripts/generate_slo_rules.py --write

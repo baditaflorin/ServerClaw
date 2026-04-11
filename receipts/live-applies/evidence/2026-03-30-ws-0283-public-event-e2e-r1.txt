@@ -1,4 +1,0 @@
-{"post_status": 202, "path": "/plausible-e2e-1774861457", "body": "ok"}
-{"path":"/plausible-e2e-1774861457","seen":false}
-{"path":"/plausible-e2e-1774861457","seen":true}
-{"attempt": 2, "path": "/plausible-e2e-1774861457", "seen": true}

@@ -1,4 +1,0 @@
-Workstream surface ownership validation
-Workstream surface ownership validation failed: workstream surface ownership validation failed:
-- docs/site-generated/architecture/dependency-graph.md: outside declared owned surfaces for ws-0296-live-apply
-- receipts/ops-portal-snapshot.html: outside declared owned surfaces for ws-0296-live-apply

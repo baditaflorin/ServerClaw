@@ -1,5 +1,0 @@
-Current version: 0.177.143
-Next version: 0.177.144
-Unreleased notes: 1
-Platform impact: Live-applies the merged interactive ops portal journey routing, activation checklist, shared attention center, and resilient search-fabric runtime sync.
-Release notes index: docs/release-notes/README.md

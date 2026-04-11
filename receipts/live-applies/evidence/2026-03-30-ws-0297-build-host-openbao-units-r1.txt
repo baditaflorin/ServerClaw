@@ -1,2 +1,0 @@
-Unit gitea-runner-renovate-openbao-agent.service could not be found.
-Unit gitea-runner-renovate-openbao-env.service could not be found.

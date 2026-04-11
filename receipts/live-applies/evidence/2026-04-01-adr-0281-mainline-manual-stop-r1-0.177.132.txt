@@ -1,5 +1,0 @@
-Stopped the exact-main GlitchTip replay after the first 30-minute quiet-window wait timed out and the playbook entered a second 30-minute quiet-window retry.
-Reason: concurrent ansible-playbook processes from ws-0303-main-integration and ws-0286-live-apply-r2 kept mutating docker-runtime-lv3 and/or nginx-lv3 for the entire first wait budget, so continuing would have held shared-host capacity open without a realistic chance of fresh public verification.
-Stopped by: codex
-Stopped on: 2026-04-01T17:37:15+03:00
-Source transcript: receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-live-apply-r2-0.177.132.txt

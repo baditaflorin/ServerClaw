@@ -1,5 +1,0 @@
-Validated Ansible role idempotency policy: 3 enforced, 129 tracked, 3 exempt.
-Tracked roles remain on the migration inventory until they gain a CI-safe scenario.
-PASSED  preflight: zero changes on second run
-PASSED  secret_fact: zero changes on second run
-PASSED  wait_for_healthy: zero changes on second run

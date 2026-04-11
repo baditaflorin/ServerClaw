@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-27T05:10:02.643885+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "unspecified",
-  "source": "pre-push-hook",
-  "branch": "codex/adr-0179-mainline",
-  "commit": "be6fdb2db91665ecc410ab3630e69f1be8dd2702"
-}

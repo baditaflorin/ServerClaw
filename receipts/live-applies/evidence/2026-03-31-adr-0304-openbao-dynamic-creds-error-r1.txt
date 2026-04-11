@@ -1,2 +1,0 @@
-status 500
-{"errors":["1 error occurred:\n\t* \"postgres-atlas-readonly\" is not an allowed role\n\n"]}

@@ -1,9 +1,0 @@
-2026-03-30T09:44:55Z
-plausible Up About an hour
-plausible-db Up About an hour (healthy)
-plausible-events-db Up About an hour (healthy)
-plausible-openbao-agent Up About an hour (healthy)
-
-{"sessions":"ok","postgres":"ok","clickhouse":"ok","sites_cache":"ok"}
-LISTEN 0      4096     10.10.10.20:8016       0.0.0.0:*
-LISTEN 0      4096       127.0.0.1:8016       0.0.0.0:*

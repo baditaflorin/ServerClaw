@@ -1,1 +1,0 @@
-Wrote generated platform vars to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/group_vars/platform.yml

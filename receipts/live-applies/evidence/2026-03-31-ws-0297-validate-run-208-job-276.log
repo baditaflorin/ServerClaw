@@ -1,526 +1,0 @@
-2026-03-31T23:13:21.1921989Z docker-build-lv3(version:v0.2.12) received task 261 of job validate, be triggered by event: workflow_dispatch
-2026-03-31T23:13:21.1925186Z workflow prepared
-2026-03-31T23:13:21.1925927Z evaluating expression 'success()'
-2026-03-31T23:13:21.1926719Z expression 'success()' evaluated to 'true'
-2026-03-31T23:13:21.1926912Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-31T23:13:21.1998296Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-31T23:13:21.1998587Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-31T23:13:21.2011183Z Image exists? true
-2026-03-31T23:13:21.2037814Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-03-31T23:13:21.2095396Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-31T23:13:21.2095710Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-31T23:13:21.2096154Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000194948 OomKillDisable:0xc000194843 PidsLimit:0xc0001949a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-31T23:13:21.2096624Z --network and --net in the options will be ignored.
-2026-03-31T23:13:21.2096918Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000194948 OomKillDisable:0xc000194843 PidsLimit:0xc0001949a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:GITEA-ACTIONS-TASK-261_WORKFLOW-validate_JOB-validate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-261_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-31T23:13:21.3561110Z Created container name=GITEA-ACTIONS-TASK-261_WORKFLOW-validate_JOB-validate id=3f1b898f293ee59cc4ebdde85c7161095ce3b28c449204b98c268a61a92bec00 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
-2026-03-31T23:13:21.3561485Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-31T23:13:21.3561660Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-03-31T23:13:21.3561787Z Starting container: 3f1b898f293ee59cc4ebdde85c7161095ce3b28c449204b98c268a61a92bec00
-2026-03-31T23:13:21.4475605Z Started container: 3f1b898f293ee59cc4ebdde85c7161095ce3b28c449204b98c268a61a92bec00
-2026-03-31T23:13:21.5454546Z Writing entry to tarball workflow/event.json len:2927
-2026-03-31T23:13:21.5455089Z Writing entry to tarball workflow/envs.txt len:0
-2026-03-31T23:13:21.5455245Z Extracting content to '/var/run/act/'
-2026-03-31T23:13:21.5600378Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
-2026-03-31T23:13:21.5600707Z evaluating expression 'format('{0}', github.repository)'
-2026-03-31T23:13:21.5601070Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
-2026-03-31T23:13:21.5601257Z expression '${{ github.ref }}' rewritten to 'format('{0}', github.ref)'
-2026-03-31T23:13:21.5601355Z evaluating expression 'format('{0}', github.ref)'
-2026-03-31T23:13:21.5601563Z expression 'format('{0}', github.ref)' evaluated to '%!t(string=refs/heads/codex/ws-0297-live-apply-r2)'
-2026-03-31T23:13:21.5601732Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
-2026-03-31T23:13:21.5601825Z evaluating expression 'format('{0}', github.token)'
-2026-03-31T23:13:21.5602014Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
-2026-03-31T23:13:21.5602181Z expression '${{ github.server_url }}' rewritten to 'format('{0}', github.server_url)'
-2026-03-31T23:13:21.5602290Z evaluating expression 'format('{0}', github.server_url)'
-2026-03-31T23:13:21.5602514Z expression 'format('{0}', github.server_url)' evaluated to '%!t(string=http://10.10.10.20:3003)'
-2026-03-31T23:13:21.5602654Z expression '${{ github.sha }}' rewritten to 'format('{0}', github.sha)'
-2026-03-31T23:13:21.5602745Z evaluating expression 'format('{0}', github.sha)'
-2026-03-31T23:13:21.5602918Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=63f9aebcd8fb58eb6a114296ee3306200eca84cf)'
-2026-03-31T23:13:21.5727685Z evaluating expression ''
-2026-03-31T23:13:21.5728142Z expression '' evaluated to 'true'
-2026-03-31T23:13:21.5728252Z ⭐ Run Main Checkout
-2026-03-31T23:13:21.5728414Z Writing entry to tarball workflow/outputcmd.txt len:0
-2026-03-31T23:13:21.5728606Z Writing entry to tarball workflow/statecmd.txt len:0
-2026-03-31T23:13:21.5730159Z Writing entry to tarball workflow/pathcmd.txt len:0
-2026-03-31T23:13:21.5731815Z Writing entry to tarball workflow/envs.txt len:0
-2026-03-31T23:13:21.5732231Z Writing entry to tarball workflow/SUMMARY.md len:0
-2026-03-31T23:13:21.5732429Z Extracting content to '/var/run/act'
-2026-03-31T23:13:21.5951735Z Wrote command \n\nset -euo pipefail\ngit config --global --add safe.directory "$PWD"\ngit init .\nif git remote get-url origin >/dev/null 2>&1; then\n  git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nelse\n  git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nfi\ngit -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin "${WORKFLOW_REF}"\ngit -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin main\ngit checkout --force "${WORKFLOW_SHA}"\n\n\n to 'workflow/0.sh'
-2026-03-31T23:13:21.5952227Z Writing entry to tarball workflow/0.sh len:512
-2026-03-31T23:13:21.5952395Z Extracting content to '/var/run/act'
-2026-03-31T23:13:21.5966417Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
-2026-03-31T23:13:21.5966706Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-31T23:13:21.5966984Z Working directory '/workspace/ops/proxmox_florin_server'
-2026-03-31T23:13:21.6541127Z hint: Using 'master' as the name for the initial branch. This default branch name
-2026-03-31T23:13:21.6541894Z hint: is subject to change. To configure the initial branch name to use in all
-2026-03-31T23:13:21.6542041Z hint: of your new repositories, which will suppress this warning, call:
-2026-03-31T23:13:21.6542192Z hint:
-2026-03-31T23:13:21.6542303Z hint: 	git config --global init.defaultBranch <name>
-2026-03-31T23:13:21.6542424Z hint:
-2026-03-31T23:13:21.6542531Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
-2026-03-31T23:13:21.6542648Z hint: 'development'. The just-created branch can be renamed via this command:
-2026-03-31T23:13:21.6542767Z hint:
-2026-03-31T23:13:21.6542878Z hint: 	git branch -m <name>
-2026-03-31T23:13:21.6543145Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-31T23:13:25.9378424Z From http://10.10.10.20:3003/ops/proxmox_florin_server
-2026-03-31T23:13:25.9378948Z  * branch              codex/ws-0297-live-apply-r2 -> FETCH_HEAD
-2026-03-31T23:13:25.9382515Z  * [new branch]        codex/ws-0297-live-apply-r2 -> origin/codex/ws-0297-live-apply-r2
-2026-03-31T23:13:29.7018851Z From http://10.10.10.20:3003/ops/proxmox_florin_server
-2026-03-31T23:13:29.7019296Z  * branch              main       -> FETCH_HEAD
-2026-03-31T23:13:29.7020613Z  * [new branch]        main       -> origin/main
-2026-03-31T23:13:30.4435233Z Note: switching to '63f9aebcd8fb58eb6a114296ee3306200eca84cf'.
-2026-03-31T23:13:30.4435711Z
-2026-03-31T23:13:30.4435836Z You are in 'detached HEAD' state. You can look around, make experimental
-2026-03-31T23:13:30.4435975Z changes and commit them, and you can discard any commits you make in this
-2026-03-31T23:13:30.4436096Z state without impacting any branches by switching back to a branch.
-2026-03-31T23:13:30.4436209Z
-2026-03-31T23:13:30.4436315Z If you want to create a new branch to retain commits you create, you may
-2026-03-31T23:13:30.4436428Z do so (now or later) by using -c with the switch command. Example:
-2026-03-31T23:13:30.4436911Z
-2026-03-31T23:13:30.4437234Z   git switch -c <new-branch-name>
-2026-03-31T23:13:30.4437392Z
-2026-03-31T23:13:30.4437466Z Or undo this operation with:
-2026-03-31T23:13:30.4437547Z
-2026-03-31T23:13:30.4437615Z   git switch -
-2026-03-31T23:13:30.4437696Z
-2026-03-31T23:13:30.4437813Z Turn off this advice by setting config variable advice.detachedHead to false
-2026-03-31T23:13:30.4437887Z
-2026-03-31T23:13:30.4437953Z HEAD is now at 63f9aebc [workstreams] register k6 validation surface
-2026-03-31T23:13:30.6118239Z Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
-2026-03-31T23:13:30.6353696Z Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
-2026-03-31T23:13:30.6424152Z Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
-2026-03-31T23:13:30.6561533Z Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
-2026-03-31T23:13:30.7714949Z Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
-2026-03-31T23:13:30.7721136Z Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [114 kB]
-2026-03-31T23:13:31.3413538Z Fetched 10.0 MB in 1s (13.5 MB/s)
-2026-03-31T23:13:31.8509156Z Reading package lists...
-2026-03-31T23:13:32.3536148Z Reading package lists...
-2026-03-31T23:13:32.5135855Z Building dependency tree...
-2026-03-31T23:13:32.5136293Z Reading state information...
-2026-03-31T23:13:32.7479038Z Suggested packages:
-2026-03-31T23:13:32.7479457Z   docker-doc
-2026-03-31T23:13:32.7479561Z Recommended packages:
-2026-03-31T23:13:32.7479642Z   docker-buildx
-2026-03-31T23:13:32.7691002Z The following NEW packages will be installed:
-2026-03-31T23:13:32.7699810Z   docker-cli
-2026-03-31T23:13:32.8036263Z 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
-2026-03-31T23:13:32.8036726Z Need to get 7338 kB of archives.
-2026-03-31T23:13:32.8036810Z After this operation, 31.1 MB of additional disk space will be used.
-2026-03-31T23:13:32.8036912Z Get:1 http://deb.debian.org/debian trixie/main amd64 docker-cli amd64 26.1.5+dfsg1-9+b12 [7338 kB]
-2026-03-31T23:13:33.5398594Z Fetched 7338 kB in 0s (65.2 MB/s)
-2026-03-31T23:13:33.5527316Z Selecting previously unselected package docker-cli.
-2026-03-31T23:13:33.5569743Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
-2026-03-31T23:13:33.5575301Z Preparing to unpack .../docker-cli_26.1.5+dfsg1-9+b12_amd64.deb ...
-2026-03-31T23:13:33.5591873Z Unpacking docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-03-31T23:13:33.7963280Z Setting up docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-03-31T23:13:33.8726376Z Docker version 26.1.5+dfsg1, build a72d7cd
-2026-03-31T23:13:33.9192172Z Hit:1 http://deb.debian.org/debian trixie InRelease
-2026-03-31T23:13:33.9229124Z Hit:2 http://deb.debian.org/debian trixie-updates InRelease
-2026-03-31T23:13:33.9341691Z Hit:3 http://deb.debian.org/debian-security trixie-security InRelease
-2026-03-31T23:13:34.4401041Z Reading package lists...
-2026-03-31T23:13:34.9318854Z Reading package lists...
-2026-03-31T23:13:35.0872305Z Building dependency tree...
-2026-03-31T23:13:35.0872741Z Reading state information...
-2026-03-31T23:13:35.3472027Z Suggested packages:
-2026-03-31T23:13:35.3472381Z   make-doc
-2026-03-31T23:13:35.3734120Z The following NEW packages will be installed:
-2026-03-31T23:13:35.3737306Z   make
-2026-03-31T23:13:35.4131632Z 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
-2026-03-31T23:13:35.4132052Z Need to get 463 kB of archives.
-2026-03-31T23:13:35.4132165Z After this operation, 1808 kB of additional disk space will be used.
-2026-03-31T23:13:35.4132266Z Get:1 http://deb.debian.org/debian trixie/main amd64 make amd64 4.4.1-2 [463 kB]
-2026-03-31T23:13:36.0663385Z Fetched 463 kB in 0s (9687 kB/s)
-2026-03-31T23:13:36.0758854Z Selecting previously unselected package make.
-2026-03-31T23:13:36.0792453Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9201 files and directories currently installed.)
-2026-03-31T23:13:36.0795715Z Preparing to unpack .../make_4.4.1-2_amd64.deb ...
-2026-03-31T23:13:36.0808583Z Unpacking make (4.4.1-2) ...
-2026-03-31T23:13:36.1099663Z Setting up make (4.4.1-2) ...
-2026-03-31T23:13:36.1598095Z Hit:1 http://deb.debian.org/debian trixie InRelease
-2026-03-31T23:13:36.1598481Z Hit:2 http://deb.debian.org/debian trixie-updates InRelease
-2026-03-31T23:13:36.1668716Z Hit:3 http://deb.debian.org/debian-security trixie-security InRelease
-2026-03-31T23:13:36.6822661Z Reading package lists...
-2026-03-31T23:13:37.2065438Z Reading package lists...
-2026-03-31T23:13:37.3679534Z Building dependency tree...
-2026-03-31T23:13:37.3679992Z Reading state information...
-2026-03-31T23:13:37.6068746Z The following additional packages will be installed:
-2026-03-31T23:13:37.6073216Z   libpython3-stdlib libpython3.13-minimal libpython3.13-stdlib media-types
-2026-03-31T23:13:37.6073497Z   python3 python3-minimal python3-pip-whl python3-setuptools-whl python3.13
-2026-03-31T23:13:37.6075006Z   python3.13-minimal python3.13-venv
-2026-03-31T23:13:37.6086020Z Suggested packages:
-2026-03-31T23:13:37.6086256Z   python3-doc python3-tk python3.13-doc binutils binfmt-support
-2026-03-31T23:13:37.7133947Z The following NEW packages will be installed:
-2026-03-31T23:13:37.7138154Z   libpython3-stdlib libpython3.13-minimal libpython3.13-stdlib media-types
-2026-03-31T23:13:37.7138524Z   python3 python3-minimal python3-pip-whl python3-setuptools-whl python3-venv
-2026-03-31T23:13:37.7139032Z   python3.13 python3.13-minimal python3.13-venv
-2026-03-31T23:13:37.7489016Z 0 upgraded, 12 newly installed, 0 to remove and 0 not upgraded.
-2026-03-31T23:13:37.7489364Z Need to get 8676 kB of archives.
-2026-03-31T23:13:37.7489471Z After this operation, 25.7 MB of additional disk space will be used.
-2026-03-31T23:13:37.7489576Z Get:1 http://deb.debian.org/debian trixie/main amd64 libpython3.13-minimal amd64 3.13.5-2 [862 kB]
-2026-03-31T23:13:37.7869874Z Get:2 http://deb.debian.org/debian trixie/main amd64 python3.13-minimal amd64 3.13.5-2 [2224 kB]
-2026-03-31T23:13:37.8187964Z Get:3 http://deb.debian.org/debian trixie/main amd64 python3-minimal amd64 3.13.5-1 [27.2 kB]
-2026-03-31T23:13:37.8189555Z Get:4 http://deb.debian.org/debian trixie/main amd64 media-types all 13.0.0 [29.3 kB]
-2026-03-31T23:13:37.8191788Z Get:5 http://deb.debian.org/debian trixie/main amd64 libpython3.13-stdlib amd64 3.13.5-2 [1956 kB]
-2026-03-31T23:13:37.8253239Z Get:6 http://deb.debian.org/debian trixie/main amd64 python3.13 amd64 3.13.5-2 [757 kB]
-2026-03-31T23:13:37.8339040Z Get:7 http://deb.debian.org/debian trixie/main amd64 libpython3-stdlib amd64 3.13.5-1 [10.2 kB]
-2026-03-31T23:13:37.8340268Z Get:8 http://deb.debian.org/debian trixie/main amd64 python3 amd64 3.13.5-1 [28.2 kB]
-2026-03-31T23:13:37.8413528Z Get:9 http://deb.debian.org/debian trixie/main amd64 python3-pip-whl all 25.1.1+dfsg-1 [1507 kB]
-2026-03-31T23:13:37.8718731Z Get:10 http://deb.debian.org/debian trixie/main amd64 python3-setuptools-whl all 78.1.1-0.1 [1268 kB]
-2026-03-31T23:13:37.8891511Z Get:11 http://deb.debian.org/debian trixie/main amd64 python3.13-venv amd64 3.13.5-2 [5472 B]
-2026-03-31T23:13:37.8891795Z Get:12 http://deb.debian.org/debian trixie/main amd64 python3-venv amd64 3.13.5-1 [1180 B]
-2026-03-31T23:13:38.5493125Z Fetched 8676 kB in 0s (53.3 MB/s)
-2026-03-31T23:13:38.5629253Z Selecting previously unselected package libpython3.13-minimal:amd64.
-2026-03-31T23:13:38.5663625Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9250 files and directories currently installed.)
-2026-03-31T23:13:38.5667082Z Preparing to unpack .../libpython3.13-minimal_3.13.5-2_amd64.deb ...
-2026-03-31T23:13:38.5683042Z Unpacking libpython3.13-minimal:amd64 (3.13.5-2) ...
-2026-03-31T23:13:38.6215905Z Selecting previously unselected package python3.13-minimal.
-2026-03-31T23:13:38.6227335Z Preparing to unpack .../python3.13-minimal_3.13.5-2_amd64.deb ...
-2026-03-31T23:13:38.6276979Z Unpacking python3.13-minimal (3.13.5-2) ...
-2026-03-31T23:13:38.7238067Z Setting up libpython3.13-minimal:amd64 (3.13.5-2) ...
-2026-03-31T23:13:38.7290879Z Setting up python3.13-minimal (3.13.5-2) ...
-2026-03-31T23:13:39.3191874Z Selecting previously unselected package python3-minimal.
-2026-03-31T23:13:39.3231301Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9575 files and directories currently installed.)
-2026-03-31T23:13:39.3238792Z Preparing to unpack .../python3-minimal_3.13.5-1_amd64.deb ...
-2026-03-31T23:13:39.3251178Z Unpacking python3-minimal (3.13.5-1) ...
-2026-03-31T23:13:39.3424671Z Selecting previously unselected package media-types.
-2026-03-31T23:13:39.3438405Z Preparing to unpack .../media-types_13.0.0_all.deb ...
-2026-03-31T23:13:39.3452288Z Unpacking media-types (13.0.0) ...
-2026-03-31T23:13:39.3628035Z Selecting previously unselected package libpython3.13-stdlib:amd64.
-2026-03-31T23:13:39.3639826Z Preparing to unpack .../libpython3.13-stdlib_3.13.5-2_amd64.deb ...
-2026-03-31T23:13:39.3652035Z Unpacking libpython3.13-stdlib:amd64 (3.13.5-2) ...
-2026-03-31T23:13:39.4555542Z Selecting previously unselected package python3.13.
-2026-03-31T23:13:39.4567938Z Preparing to unpack .../python3.13_3.13.5-2_amd64.deb ...
-2026-03-31T23:13:39.4578773Z Unpacking python3.13 (3.13.5-2) ...
-2026-03-31T23:13:39.4772985Z Selecting previously unselected package libpython3-stdlib:amd64.
-2026-03-31T23:13:39.4784508Z Preparing to unpack .../libpython3-stdlib_3.13.5-1_amd64.deb ...
-2026-03-31T23:13:39.4795909Z Unpacking libpython3-stdlib:amd64 (3.13.5-1) ...
-2026-03-31T23:13:39.4946254Z Setting up python3-minimal (3.13.5-1) ...
-2026-03-31T23:13:39.6008665Z Selecting previously unselected package python3.
-2026-03-31T23:13:39.6045942Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 10029 files and directories currently installed.)
-2026-03-31T23:13:39.6055042Z Preparing to unpack .../python3_3.13.5-1_amd64.deb ...
-2026-03-31T23:13:39.6093740Z Unpacking python3 (3.13.5-1) ...
-2026-03-31T23:13:39.6259303Z Selecting previously unselected package python3-pip-whl.
-2026-03-31T23:13:39.6270108Z Preparing to unpack .../python3-pip-whl_25.1.1+dfsg-1_all.deb ...
-2026-03-31T23:13:39.6289136Z Unpacking python3-pip-whl (25.1.1+dfsg-1) ...
-2026-03-31T23:13:39.6707680Z Selecting previously unselected package python3-setuptools-whl.
-2026-03-31T23:13:39.6718992Z Preparing to unpack .../python3-setuptools-whl_78.1.1-0.1_all.deb ...
-2026-03-31T23:13:39.6731465Z Unpacking python3-setuptools-whl (78.1.1-0.1) ...
-2026-03-31T23:13:39.7195695Z Selecting previously unselected package python3.13-venv.
-2026-03-31T23:13:39.7207298Z Preparing to unpack .../python3.13-venv_3.13.5-2_amd64.deb ...
-2026-03-31T23:13:39.7221842Z Unpacking python3.13-venv (3.13.5-2) ...
-2026-03-31T23:13:39.7349972Z Selecting previously unselected package python3-venv.
-2026-03-31T23:13:39.7361790Z Preparing to unpack .../python3-venv_3.13.5-1_amd64.deb ...
-2026-03-31T23:13:39.7373795Z Unpacking python3-venv (3.13.5-1) ...
-2026-03-31T23:13:39.7508268Z Setting up media-types (13.0.0) ...
-2026-03-31T23:13:39.7551780Z Setting up python3-setuptools-whl (78.1.1-0.1) ...
-2026-03-31T23:13:39.7582315Z Setting up python3-pip-whl (25.1.1+dfsg-1) ...
-2026-03-31T23:13:39.7613437Z Setting up libpython3.13-stdlib:amd64 (3.13.5-2) ...
-2026-03-31T23:13:39.7641333Z Setting up libpython3-stdlib:amd64 (3.13.5-1) ...
-2026-03-31T23:13:39.7673173Z Setting up python3.13 (3.13.5-2) ...
-2026-03-31T23:13:40.3982187Z Setting up python3 (3.13.5-1) ...
-2026-03-31T23:13:40.4693189Z Setting up python3.13-venv (3.13.5-2) ...
-2026-03-31T23:13:40.5067114Z Setting up python3-venv (3.13.5-1) ...
-2026-03-31T23:13:42.7143887Z Requirement already satisfied: pip in /opt/uv/lib/python3.12/site-packages (25.0.1)
-2026-03-31T23:13:42.7809088Z Collecting pip
-2026-03-31T23:13:42.8167128Z   Downloading pip-26.0.1-py3-none-any.whl.metadata (4.7 kB)
-2026-03-31T23:13:43.0561784Z Collecting uv
-2026-03-31T23:13:43.0653313Z   Downloading uv-0.11.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
-2026-03-31T23:13:43.0776070Z Downloading pip-26.0.1-py3-none-any.whl (1.8 MB)
-2026-03-31T23:13:43.1238578Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 77.3 MB/s eta 0:00:00
-2026-03-31T23:13:43.1328832Z Downloading uv-0.11.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (24.6 MB)
-2026-03-31T23:13:43.3568248Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.6/24.6 MB 110.3 MB/s eta 0:00:00
-2026-03-31T23:13:43.3931113Z Installing collected packages: uv, pip
-2026-03-31T23:13:43.6547328Z   Attempting uninstall: pip
-2026-03-31T23:13:43.6569382Z     Found existing installation: pip 25.0.1
-2026-03-31T23:13:43.6867534Z     Uninstalling pip-25.0.1:
-2026-03-31T23:13:43.6913937Z       Successfully uninstalled pip-25.0.1
-2026-03-31T23:13:44.4695568Z Successfully installed pip-26.0.1 uv-0.11.2
-2026-03-31T23:15:00.7202248Z {
-2026-03-31T23:15:00.7202883Z   "changed_images": [
-2026-03-31T23:15:00.7203001Z     {
-2026-03-31T23:15:00.7203089Z       "image_id": "crawl4ai_runtime",
-2026-03-31T23:15:00.7203191Z       "image_ref": "docker.io/unclecode/crawl4ai:0.8.0@sha256:4d8b065bf185962733cb5f9701f4122d03383fa1ab6b5f6a9873f04fa0416a84",
-2026-03-31T23:15:00.7203313Z       "cve_receipt": ".local/managed-image-gate/cve/4d8b065bf185-20260331T231344Z.grype.json",
-2026-03-31T23:15:00.7203419Z       "summary": {
-2026-03-31T23:15:00.7203522Z         "critical": 15,
-2026-03-31T23:15:00.7203595Z         "high": 214,
-2026-03-31T23:15:00.7203667Z         "medium": 379,
-2026-03-31T23:15:00.7203737Z         "low": 70,
-2026-03-31T23:15:00.7203813Z         "unknown": 756,
-2026-03-31T23:15:00.7203894Z         "blocking_findings_with_fix": 0,
-2026-03-31T23:15:00.7203970Z         "total_matches": 1434
-2026-03-31T23:15:00.7204046Z       }
-2026-03-31T23:15:00.7204128Z     },
-2026-03-31T23:15:00.7204200Z     {
-2026-03-31T23:15:00.7204310Z       "image_id": "k6_runtime",
-2026-03-31T23:15:00.7204387Z       "image_ref": "docker.io/grafana/k6:1.7.1@sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5",
-2026-03-31T23:15:00.7204484Z       "cve_receipt": ".local/managed-image-gate/cve/44bd1d66c2b0-20260331T231432Z.grype.json",
-2026-03-31T23:15:00.7204571Z       "summary": {
-2026-03-31T23:15:00.7204652Z         "critical": 0,
-2026-03-31T23:15:00.7204720Z         "high": 2,
-2026-03-31T23:15:00.7204789Z         "medium": 4,
-2026-03-31T23:15:00.7204861Z         "low": 0,
-2026-03-31T23:15:00.7204945Z         "unknown": 0,
-2026-03-31T23:15:00.7205024Z         "blocking_findings_with_fix": 0,
-2026-03-31T23:15:00.7205098Z         "total_matches": 6
-2026-03-31T23:15:00.7205189Z       }
-2026-03-31T23:15:00.7205260Z     },
-2026-03-31T23:15:00.7205339Z     {
-2026-03-31T23:15:00.7205416Z       "image_id": "paperless_runtime",
-2026-03-31T23:15:00.7205499Z       "image_ref": "ghcr.io/paperless-ngx/paperless-ngx:2.20.4@sha256:0dd610e06781c9ffafe413eaccdacd7305bcba54ab3457fe080ed3071315e27c",
-2026-03-31T23:15:00.7205610Z       "cve_receipt": ".local/managed-image-gate/cve/0dd610e06781-20260331T231436Z.grype.json",
-2026-03-31T23:15:00.7205693Z       "summary": {
-2026-03-31T23:15:00.7205771Z         "critical": 55,
-2026-03-31T23:15:00.7205849Z         "high": 260,
-2026-03-31T23:15:00.7205920Z         "medium": 298,
-2026-03-31T23:15:00.7206005Z         "low": 35,
-2026-03-31T23:15:00.7206076Z         "unknown": 218,
-2026-03-31T23:15:00.7206156Z         "blocking_findings_with_fix": 0,
-2026-03-31T23:15:00.7206236Z         "total_matches": 866
-2026-03-31T23:15:00.7206309Z       }
-2026-03-31T23:15:00.7206378Z     },
-2026-03-31T23:15:00.7206559Z     {
-2026-03-31T23:15:00.7206635Z       "image_id": "redpanda_runtime",
-2026-03-31T23:15:00.7206716Z       "image_ref": "docker.redpanda.com/redpandadata/redpanda:v25.3.11@sha256:c61d4eb370917127ae379b060bdb38b864ff8e4d13bdbe406365559805a0b16f",
-2026-03-31T23:15:00.7206815Z       "cve_receipt": ".local/managed-image-gate/cve/c61d4eb37091-20260331T231451Z.grype.json",
-2026-03-31T23:15:00.7206898Z       "summary": {
-2026-03-31T23:15:00.7206979Z         "critical": 3,
-2026-03-31T23:15:00.7207051Z         "high": 27,
-2026-03-31T23:15:00.7207121Z         "medium": 41,
-2026-03-31T23:15:00.7207195Z         "low": 2,
-2026-03-31T23:15:00.7207292Z         "unknown": 109,
-2026-03-31T23:15:00.7207388Z         "blocking_findings_with_fix": 0,
-2026-03-31T23:15:00.7207472Z         "total_matches": 182
-2026-03-31T23:15:00.7207561Z       }
-2026-03-31T23:15:00.7207634Z     }
-2026-03-31T23:15:00.7207727Z   ],
-2026-03-31T23:15:00.7207807Z   "blocking_images": []
-2026-03-31T23:15:00.7207880Z }
-2026-03-31T23:18:24.9877535Z Validation lane selection
-2026-03-31T23:18:24.9878270Z   mode: all_lanes
-2026-03-31T23:18:24.9878369Z   branch: HEAD
-2026-03-31T23:18:24.9878586Z   selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
-2026-03-31T23:18:24.9878735Z   blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
-2026-03-31T23:18:24.9878898Z
-2026-03-31T23:18:24.9878982Z CHECK                STATUS DURATION(s)
-2026-03-31T23:18:24.9879083Z agent-standards       passed 0.95
-2026-03-31T23:18:24.9879321Z alert-rule-validation passed 1.83
-2026-03-31T23:18:24.9879403Z ansible-lint          passed 203.83
-2026-03-31T23:18:24.9879479Z ansible-syntax        passed 124.11
-2026-03-31T23:18:24.9879554Z artifact-secret-scan  passed 3.85
-2026-03-31T23:18:24.9879635Z dependency-direction  passed 1.90
-2026-03-31T23:18:24.9879714Z dependency-graph      passed 4.43
-2026-03-31T23:18:24.9879799Z documentation-index   passed 1.59
-2026-03-31T23:18:24.9879885Z generated-docs        passed 9.21
-2026-03-31T23:18:24.9880099Z generated-portals     passed 34.06
-2026-03-31T23:18:24.9880183Z iac-policy-scan       passed 39.39
-2026-03-31T23:18:24.9880265Z integration-tests     passed 2.32
-2026-03-31T23:18:24.9880352Z packer-validate       passed 6.03
-2026-03-31T23:18:24.9880429Z policy-validation     passed 1.36
-2026-03-31T23:18:24.9880515Z schema-validation     passed 19.39
-2026-03-31T23:18:24.9880588Z security-scan         passed 30.53
-2026-03-31T23:18:24.9880662Z semgrep-sast          passed 71.71
-2026-03-31T23:18:24.9915575Z service-completeness  passed 1.54
-2026-03-31T23:18:24.9915846Z tofu-validate         passed 1.39
-2026-03-31T23:18:24.9915979Z type-check            passed 5.39
-2026-03-31T23:18:24.9916077Z workstream-surfaces   passed 3.76
-2026-03-31T23:18:24.9916167Z yaml-lint             passed 17.05
-2026-03-31T23:18:25.2205901Z /bin/sh: 1: ruby: not found
-2026-03-31T23:18:25.2901924Z uv run --with pyyaml --with nats-py python /workspace/ops/proxmox_florin_server/scripts/k6_load_testing.py --repo-root /workspace/ops/proxmox_florin_server --scenario smoke --runner-context gitea-actions --environment production --service keycloak --service openfga
-2026-03-31T23:18:25.4277290Z Using CPython 3.12.13 interpreter at: /usr/local/bin/python3
-2026-03-31T23:18:25.4278524Z Creating virtual environment at: .venv
-2026-03-31T23:18:25.6174533Z    Building lv3-platform-cli @ file:///workspace/ops/proxmox_florin_server
-2026-03-31T23:18:26.6844510Z       Built lv3-platform-cli @ file:///workspace/ops/proxmox_florin_server
-2026-03-31T23:18:26.6867206Z warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
-2026-03-31T23:18:26.6867746Z          If the cache and target directories are on different filesystems, hardlinking may not be supported.
-2026-03-31T23:18:26.6868661Z          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
-2026-03-31T23:18:26.6941025Z Installed 2 packages in 7ms
-2026-03-31T23:18:26.7820573Z Installed 2 packages in 2ms
-2026-03-31T23:19:36.7780907Z time="2026-03-31T23:18:27Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7781350Z time="2026-03-31T23:18:27Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7781520Z time="2026-03-31T23:18:28Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7781675Z time="2026-03-31T23:18:28Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7781825Z time="2026-03-31T23:18:29Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7781982Z time="2026-03-31T23:18:29Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7782137Z time="2026-03-31T23:18:30Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7786232Z time="2026-03-31T23:18:30Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7786970Z time="2026-03-31T23:18:31Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7787200Z time="2026-03-31T23:18:31Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7787433Z time="2026-03-31T23:18:32Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7787732Z time="2026-03-31T23:18:32Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7788099Z time="2026-03-31T23:18:33Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7788382Z time="2026-03-31T23:18:33Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7788782Z time="2026-03-31T23:18:34Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7789129Z time="2026-03-31T23:18:34Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7789439Z time="2026-03-31T23:18:35Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7792709Z time="2026-03-31T23:18:35Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793155Z time="2026-03-31T23:18:36Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793293Z time="2026-03-31T23:18:36Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793412Z time="2026-03-31T23:18:37Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793534Z time="2026-03-31T23:18:37Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793641Z time="2026-03-31T23:18:38Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793759Z time="2026-03-31T23:18:38Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793871Z time="2026-03-31T23:18:39Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7793978Z time="2026-03-31T23:18:39Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7794096Z time="2026-03-31T23:18:40Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7794339Z time="2026-03-31T23:18:40Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7794450Z time="2026-03-31T23:18:41Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7794763Z time="2026-03-31T23:18:41Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7794880Z time="2026-03-31T23:18:42Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7794988Z time="2026-03-31T23:18:42Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795114Z time="2026-03-31T23:18:43Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795244Z time="2026-03-31T23:18:43Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795353Z time="2026-03-31T23:18:44Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795482Z time="2026-03-31T23:18:44Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795587Z time="2026-03-31T23:18:45Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795698Z time="2026-03-31T23:18:45Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795803Z time="2026-03-31T23:18:46Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7795918Z time="2026-03-31T23:18:46Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796020Z time="2026-03-31T23:18:47Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796114Z time="2026-03-31T23:18:47Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796207Z time="2026-03-31T23:18:48Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796293Z time="2026-03-31T23:18:48Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796456Z time="2026-03-31T23:18:49Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796544Z time="2026-03-31T23:18:49Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796634Z time="2026-03-31T23:18:50Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796727Z time="2026-03-31T23:18:50Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796812Z time="2026-03-31T23:18:51Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796898Z time="2026-03-31T23:18:51Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7796982Z time="2026-03-31T23:18:52Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797082Z time="2026-03-31T23:18:52Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797173Z time="2026-03-31T23:18:53Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797268Z time="2026-03-31T23:18:53Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797354Z time="2026-03-31T23:18:54Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797480Z time="2026-03-31T23:18:54Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797594Z time="2026-03-31T23:18:55Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797683Z time="2026-03-31T23:18:55Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7797832Z time="2026-03-31T23:18:56Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798038Z time="2026-03-31T23:18:56Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798194Z time="2026-03-31T23:18:57Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798283Z time="2026-03-31T23:18:57Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798375Z time="2026-03-31T23:18:58Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798469Z time="2026-03-31T23:18:58Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798610Z time="2026-03-31T23:18:59Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798745Z time="2026-03-31T23:18:59Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798858Z time="2026-03-31T23:19:00Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7798973Z time="2026-03-31T23:19:00Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799100Z time="2026-03-31T23:19:01Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799227Z time="2026-03-31T23:19:01Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799386Z time="2026-03-31T23:19:02Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799484Z time="2026-03-31T23:19:02Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799584Z time="2026-03-31T23:19:03Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799683Z time="2026-03-31T23:19:03Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799783Z time="2026-03-31T23:19:04Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799873Z time="2026-03-31T23:19:04Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7799965Z time="2026-03-31T23:19:05Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800062Z time="2026-03-31T23:19:05Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800150Z time="2026-03-31T23:19:06Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800238Z time="2026-03-31T23:19:06Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800369Z time="2026-03-31T23:19:07Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800457Z time="2026-03-31T23:19:07Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800545Z time="2026-03-31T23:19:08Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800629Z time="2026-03-31T23:19:08Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800722Z time="2026-03-31T23:19:09Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800804Z time="2026-03-31T23:19:09Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800885Z time="2026-03-31T23:19:10Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7800975Z time="2026-03-31T23:19:10Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801065Z time="2026-03-31T23:19:11Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801228Z time="2026-03-31T23:19:11Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801415Z time="2026-03-31T23:19:12Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801566Z time="2026-03-31T23:19:12Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801678Z time="2026-03-31T23:19:13Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801772Z time="2026-03-31T23:19:13Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801854Z time="2026-03-31T23:19:14Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7801939Z time="2026-03-31T23:19:14Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7802080Z time="2026-03-31T23:19:15Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7802231Z time="2026-03-31T23:19:15Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7802373Z time="2026-03-31T23:19:16Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7802487Z time="2026-03-31T23:19:16Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7802613Z time="2026-03-31T23:19:17Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7802738Z time="2026-03-31T23:19:17Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7802873Z time="2026-03-31T23:19:18Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7803014Z time="2026-03-31T23:19:18Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7803146Z time="2026-03-31T23:19:19Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7803288Z time="2026-03-31T23:19:19Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7803416Z time="2026-03-31T23:19:20Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7803552Z time="2026-03-31T23:19:20Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7803742Z time="2026-03-31T23:19:21Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7803895Z time="2026-03-31T23:19:21Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7804051Z time="2026-03-31T23:19:22Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7804220Z time="2026-03-31T23:19:22Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7804369Z time="2026-03-31T23:19:23Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7804532Z time="2026-03-31T23:19:23Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7804706Z time="2026-03-31T23:19:24Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7804895Z time="2026-03-31T23:19:24Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": dial tcp 10.10.10.20:8098: connect: connection refused"
-2026-03-31T23:19:36.7805079Z time="2026-03-31T23:19:35Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": request timeout"
-2026-03-31T23:19:36.7805251Z time="2026-03-31T23:19:35Z" level=warning msg="Request Failed" error="Get \"http://10.10.10.20:8098/healthz\": request timeout"
-2026-03-31T23:19:36.7805421Z time="2026-03-31T23:19:36Z" level=error msg="thresholds on metrics 'checks{service_id:keycloak}, checks{service_id:openfga}, http_req_failed{service_id:keycloak}, http_req_failed{service_id:openfga}' have been crossed"
-2026-03-31T23:19:36.7805975Z {
-2026-03-31T23:19:36.7806119Z   "status": "failed",
-2026-03-31T23:19:36.7806259Z   "scenario": "smoke",
-2026-03-31T23:19:36.7806516Z   "runner_context": "gitea-actions",
-2026-03-31T23:19:36.7806632Z   "services": [
-2026-03-31T23:19:36.7806770Z     "keycloak",
-2026-03-31T23:19:36.7806897Z     "openfga"
-2026-03-31T23:19:36.7806990Z   ],
-2026-03-31T23:19:36.7807069Z   "receipts": [
-2026-03-31T23:19:36.7807150Z     "receipts/k6/smoke-keycloak-20260331T231827Z.json",
-2026-03-31T23:19:36.7807236Z     "receipts/k6/smoke-openfga-20260331T231827Z.json"
-2026-03-31T23:19:36.7807318Z   ],
-2026-03-31T23:19:36.7807393Z   "summary_export": "receipts/k6/raw/20260331T231827Z-smoke-summary.json"
-2026-03-31T23:19:36.7807482Z }
-2026-03-31T23:19:36.8095521Z make: *** [Makefile:1216: k6-smoke] Error 99
-2026-03-31T23:19:36.8111812Z   ❌  Failure - Main Run k6 smoke gate
-2026-03-31T23:19:36.8172313Z exitcode '2': failure
-2026-03-31T23:19:36.9390027Z Bundled validation artifacts:
-2026-03-31T23:19:36.9395898Z .local/validation-gate/gitea-last-run.json
-2026-03-31T23:19:36.9396063Z .local/validation-gate/semgrep-summary.json
-2026-03-31T23:19:36.9396172Z receipts/checkov/63f9aebcd8fb58eb6a114296ee3306200eca84cf.json
-2026-03-31T23:19:36.9396307Z receipts/checkov/63f9aebcd8fb58eb6a114296ee3306200eca84cf.sarif.json
-2026-03-31T23:19:36.9396506Z receipts/k6/load-keycloak-20260331T101930Z.json
-2026-03-31T23:19:36.9396591Z receipts/k6/load-keycloak-20260331T105720Z.json
-2026-03-31T23:19:36.9396700Z receipts/k6/load-keycloak-20260331T133416Z.json
-2026-03-31T23:19:36.9396839Z receipts/k6/load-keycloak-20260331T145555Z.json
-2026-03-31T23:19:36.9396944Z receipts/k6/load-openfga-20260331T101930Z.json
-2026-03-31T23:19:36.9397053Z receipts/k6/load-openfga-20260331T105720Z.json
-2026-03-31T23:19:36.9397133Z receipts/k6/load-openfga-20260331T133416Z.json
-2026-03-31T23:19:36.9397208Z receipts/k6/load-openfga-20260331T145555Z.json
-2026-03-31T23:19:36.9397291Z receipts/k6/raw/20260331T094543Z-smoke-summary.json
-2026-03-31T23:19:36.9397389Z receipts/k6/raw/20260331T094813Z-smoke-summary.json
-2026-03-31T23:19:36.9397466Z receipts/k6/raw/20260331T101930Z-load-summary.json
-2026-03-31T23:19:36.9397541Z receipts/k6/raw/20260331T103411Z-smoke-summary.json
-2026-03-31T23:19:36.9397617Z receipts/k6/raw/20260331T103558Z-load-summary.json
-2026-03-31T23:19:36.9397695Z receipts/k6/raw/20260331T105720Z-load-summary.json
-2026-03-31T23:19:36.9397768Z receipts/k6/raw/20260331T114952Z-smoke-summary.json
-2026-03-31T23:19:36.9397849Z receipts/k6/raw/20260331T120025Z-smoke-summary.json
-2026-03-31T23:19:36.9397922Z receipts/k6/raw/20260331T120412Z-load-summary.json
-2026-03-31T23:19:36.9398021Z receipts/k6/raw/20260331T131522Z-smoke-summary.json
-2026-03-31T23:19:36.9398095Z receipts/k6/raw/20260331T133226Z-smoke-summary.json
-2026-03-31T23:19:36.9398169Z receipts/k6/raw/20260331T133416Z-load-summary.json
-2026-03-31T23:19:36.9398269Z receipts/k6/raw/20260331T145155Z-smoke-summary.json
-2026-03-31T23:19:36.9398442Z receipts/k6/raw/20260331T145555Z-load-summary.json
-2026-03-31T23:19:36.9398559Z receipts/k6/raw/20260331T231827Z-smoke-summary.json
-2026-03-31T23:19:36.9398664Z receipts/k6/smoke-keycloak-20260331T094543Z.json
-2026-03-31T23:19:36.9398770Z receipts/k6/smoke-keycloak-20260331T094813Z.json
-2026-03-31T23:19:36.9398871Z receipts/k6/smoke-keycloak-20260331T103411Z.json
-2026-03-31T23:19:36.9398989Z receipts/k6/smoke-keycloak-20260331T114952Z.json
-2026-03-31T23:19:36.9399106Z receipts/k6/smoke-keycloak-20260331T120025Z.json
-2026-03-31T23:19:36.9399216Z receipts/k6/smoke-keycloak-20260331T131522Z.json
-2026-03-31T23:19:36.9399324Z receipts/k6/smoke-keycloak-20260331T133226Z.json
-2026-03-31T23:19:36.9399422Z receipts/k6/smoke-keycloak-20260331T145155Z.json
-2026-03-31T23:19:36.9399534Z receipts/k6/smoke-keycloak-20260331T231827Z.json
-2026-03-31T23:19:36.9399635Z receipts/k6/smoke-openfga-20260331T094543Z.json
-2026-03-31T23:19:36.9399739Z receipts/k6/smoke-openfga-20260331T094813Z.json
-2026-03-31T23:19:36.9399837Z receipts/k6/smoke-openfga-20260331T103411Z.json
-2026-03-31T23:19:36.9400029Z receipts/k6/smoke-openfga-20260331T114952Z.json
-2026-03-31T23:19:36.9400152Z receipts/k6/smoke-openfga-20260331T120025Z.json
-2026-03-31T23:19:36.9400271Z receipts/k6/smoke-openfga-20260331T131522Z.json
-2026-03-31T23:19:36.9400408Z receipts/k6/smoke-openfga-20260331T133226Z.json
-2026-03-31T23:19:36.9400517Z receipts/k6/smoke-openfga-20260331T145155Z.json
-2026-03-31T23:19:36.9400646Z receipts/k6/smoke-openfga-20260331T231827Z.json
-2026-03-31T23:19:36.9400769Z receipts/sast/63f9aebcd8fb58eb6a114296ee3306200eca84cf.sarif.json
-2026-03-31T23:19:36.9408457Z -rw-r--r-- 1 root root 116K Mar 31 23:19 .local/validation-gate/gitea-validation-receipts.tar.gz
-2026-03-31T23:19:36.9484978Z Cleaning up container for job validate
-2026-03-31T23:19:37.1044055Z Removed container: 3f1b898f293ee59cc4ebdde85c7161095ce3b28c449204b98c268a61a92bec00
-2026-03-31T23:19:37.1056997Z   🐳  docker volume rm GITEA-ACTIONS-TASK-261_WORKFLOW-validate_JOB-validate
-2026-03-31T23:19:37.3785282Z   🐳  docker volume rm GITEA-ACTIONS-TASK-261_WORKFLOW-validate_JOB-validate-env
-2026-03-31T23:19:37.3800415Z 🏁  Job failed
-2026-03-31T23:19:37.3858450Z Job 'validate' failed

@@ -1,5 +1,0 @@
-Current version: 0.177.118
-Next version: 0.177.119
-Unreleased notes: 1
-Platform impact: Platform version remains 0.130.77 while ADR 0306 is integrated on main with repo-managed Checkov IaC policy scanning and the earlier exact-main hosted verification proof first established on 0.130.75.
-Release notes index: docs/release-notes/README.md

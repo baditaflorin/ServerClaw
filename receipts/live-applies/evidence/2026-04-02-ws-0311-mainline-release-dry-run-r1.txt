@@ -1,5 +1,0 @@
-Current version: 0.177.141
-Next version: 0.177.142
-Unreleased notes: 1
-Platform impact: platform version advances to 0.130.90 after the exact-main ADR 0311 replay re-verifies the repo-managed cmdk command palette, ADR and runbook search helper, and governed Windmill operator-admin open flows on top of the 0.130.89 baseline while preserving the ADR 0316 journey analytics surfaces already live on main
-Release notes index: docs/release-notes/README.md

@@ -1,2 +1,0 @@
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/scripts/canonical_truth.py --check
-Canonical truth OK

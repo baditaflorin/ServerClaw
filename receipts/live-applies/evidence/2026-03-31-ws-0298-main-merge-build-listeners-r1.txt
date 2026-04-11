@@ -1,5 +1,0 @@
-docker-build-lv3 | UNREACHABLE! => {
-    "changed": false,
-    "msg": "Failed to connect to the host via ssh: ops@10.10.10.30: Permission denied (publickey).",
-    "unreachable": true
-}

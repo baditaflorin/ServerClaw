@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-29T22:11:09.552642+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "unspecified",
-  "source": "pre-push-hook",
-  "branch": "codex/ws-0296-education-refresh",
-  "commit": "3df431e130bf4b42b55553a2b4f18ef2d668743a"
-}

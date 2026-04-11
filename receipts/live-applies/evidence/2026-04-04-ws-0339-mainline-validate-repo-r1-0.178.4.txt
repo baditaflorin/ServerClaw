@@ -1,9 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-WARNING: Branch 'codex/ws-0339-live-apply' not found in workstreams.yaml (ADR 0167)
-  Add an entry: docs/adr/0167-agent-handoff-and-context-preservation.md
-WARNING: Inventory changed since topology snapshot was generated (ADR 0344).
-  Newer file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0339-live-apply/inventory/group_vars/all.yml
-  Run: python3 scripts/generate_topology_snapshot.py
-  Then: git add scripts/topology-snapshot.json
-Workstream surface ownership validation
-Workstream surface ownership validation failed: branch 'codex/ws-0339-live-apply' is not registered in workstreams.yaml

@@ -1,9 +1,0 @@
-{
-  "setup_step": "finished",
-  "login_result": "success",
-  "app_id": "096672ae-3bae-41d9-8bca-e4093711ee18",
-  "tool_provider": "updated",
-  "tool_count": 12,
-  "trace_configured": true,
-  "export_path": "receipts/live-applies/evidence/2026-03-30-adr-0261-0262-release-0.177.95-dify-smoke-export.yml"
-}

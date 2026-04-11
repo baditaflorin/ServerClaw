@@ -1,4 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-234:  local galaxy_server_args=()
-292:    galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")
-296:    "${galaxy_server_args[@]}" \

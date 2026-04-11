@@ -1,2 +1,0 @@
-runtime-control-lv3 | FAILED | rc=2 >>
-/bin/sh: 5: cannot create : Directory nonexistentnon-zero return code

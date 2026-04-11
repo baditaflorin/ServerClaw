@@ -1,2 +1,0 @@
-shallow_lookup=128
-full_lookup=0

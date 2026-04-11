@@ -1,5 +1,0 @@
-Current version: 0.177.140
-Next version: 0.177.141
-Unreleased notes: 1
-Platform impact: platform version advances to 0.130.89 after the exact-main ADR 0316 replay re-verifies live journey milestone capture, durable worker scorecard rendering, and Plausible route aggregation for the Windmill operator admin surface; the bounded Glitchtip failure-signal path now normalizes DSN-style secrets, but shared ADR 0281 publication/runtime repair for errors.lv3.org is still required before glitchtip_events can verify above 0
-Release notes index: docs/release-notes/README.md

@@ -1,6 +1,0 @@
-1615270      64 bash -lc rm -f /tmp/ws-0298-full-wrapper-r16.out /tmp/ws-0298-full-wrapper-r16.rc; docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r16.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r16.rc
-   2093      64 sh -lc cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server
-   2101      64 python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server
-   2102      64 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-   2125      64 /tmp/windmill/cache/uv/builds-v0/.tmpc22qMc/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-   2402       5 /usr/local/bin/grype sbom:/srv/proxmox_florin_server/receipts/sbom/0bf773413570.cdx.json --add-cpes-if-none -o json

@@ -1,2 +1,0 @@
-runtime-control-lv3 | FAILED | rc=1 >>
-unable to get image 'goharbor/harbor-registryctl:v2.15.0': Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?non-zero return code

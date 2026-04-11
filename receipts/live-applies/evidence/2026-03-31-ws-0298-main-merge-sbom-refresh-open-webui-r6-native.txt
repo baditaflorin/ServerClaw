@@ -1,3 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=2 >>
-Installed 2 packages in 20ms
-/tmp/windmill/cache/uv/builds-v0/.tmpGHXYHk/bin/python: can't open file '/srv/proxmox_florin_server/scripts/sbom_refresh.py': [Errno 2] No such file or directorynon-zero return code

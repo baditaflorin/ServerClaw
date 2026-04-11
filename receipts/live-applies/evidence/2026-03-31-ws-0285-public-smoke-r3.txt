@@ -1,1 +1,0 @@
-{"archive_serial_number": 68791217, "base_url": "https://paperless.lv3.org", "changed": false, "cleanup": true, "document_id": 2, "task_id": "7e0fb57a-2fe7-421d-bd71-3edf81069c87", "title": "LV3 Paperless Smoke 68791217"}

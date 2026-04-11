@@ -1,3 +1,0 @@
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0311-live-apply/scripts/generate_changelog_portal.py --write
-uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0311-live-apply/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0311-live-apply --path build/changelog-portal
-Published artifact secret scan passed: 1081 file(s) checked with builtin.

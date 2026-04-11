@@ -1,3 +1,0 @@
-runtime-control-lv3 | CHANGED | rc=0 >>
-FEATURES={'smtputf8': '', 'size': '104857600', 'requiretls': '', 'pipelining': '', 'no-soliciting': '', 'enhancedstatuscodes': '', 'chunking': '', 'binarymime': '', 'auth': ' PLAIN LOGIN', '8bitmime': ''}
-LOGIN=(235, b'2.7.0 Authentication succeeded.')

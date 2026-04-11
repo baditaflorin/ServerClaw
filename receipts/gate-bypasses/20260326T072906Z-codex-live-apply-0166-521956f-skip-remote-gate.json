@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T07:29:06.588945+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "Docker daemon unavailable on controller; targeted ADR 0166 tests and syntax gates passed locally but the remote pre-push gate local fallback could not start check-runner containers.",
-  "source": "manual",
-  "branch": "codex/live-apply-0166",
-  "commit": "521956fc50e5f1b4906f4a116e9e45d4016ab712"
-}

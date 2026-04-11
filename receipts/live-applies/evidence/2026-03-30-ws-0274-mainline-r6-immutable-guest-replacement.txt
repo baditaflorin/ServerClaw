@@ -1,1 +1,0 @@
-No ADR 0191 immutable guest replacement policy blocks the requested live apply for coolify.

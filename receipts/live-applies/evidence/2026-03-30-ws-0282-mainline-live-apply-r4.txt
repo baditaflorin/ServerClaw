@@ -1,4 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=live-apply-service
-Manifest error: workflow 'converge-openfga' references unknown Make target 'converge-openfga'
-make[1]: *** [preflight] Error 2
-make: *** [live-apply-service] Error 2

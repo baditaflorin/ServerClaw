@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-24T23:02:29.567992+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "ADR 0142 mainline push after current-main rebases; focused ADR 0142 checks and scan-report generation passed locally while the shared pre-push gate remains unreliable on unrelated repository checks.",
-  "source": "manual-pre-push",
-  "branch": "codex/adr-0142-public-surface-scan",
-  "commit": "6a2f7fd78ec9f8372dc77158c68812e59794d0fd"
-}

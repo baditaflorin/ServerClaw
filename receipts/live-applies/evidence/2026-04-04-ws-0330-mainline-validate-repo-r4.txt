@@ -1,4 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-Workstream surface ownership validation
-Workstream surface ownership validation failed: workstream surface ownership validation failed:
-- tests/test_controller_automation_toolkit.py: outside declared owned surfaces for ws-0330-main-closeout

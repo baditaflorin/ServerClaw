@@ -1,5 +1,0 @@
-Current version: 0.177.104
-Next version: 0.177.105
-Unreleased notes: 1
-Platform impact: platform version advances to 0.130.70 after the exact-main ADR 0267 replay re-verifies governed validation-gate waivers on the 0.177.104 baseline and fixes the latest-main Docker runtime nftables forward-compat insertion regression
-Release notes index: docs/release-notes/README.md

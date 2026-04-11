@@ -1,9 +1,0 @@
-{
-  "job_id": "019d4b2b-a00f-b7aa-fbd4-9b4dee1fe75f",
-  "script_path": "f/lv3/gate-status",
-  "success": false,
-  "error": {
-    "name": "InternalErr",
-    "message": "Internal: Result of job is invalid json (empty) @jobs.rs:835:20"
-  }
-}

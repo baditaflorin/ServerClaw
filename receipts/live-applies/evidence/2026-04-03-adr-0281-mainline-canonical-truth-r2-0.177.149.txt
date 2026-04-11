@@ -1,2 +1,0 @@
-Updated canonical truth:
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/README.md

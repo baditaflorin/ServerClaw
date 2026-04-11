@@ -1,1 +1,0 @@
-Updated dependency diagram: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge/docs/site-generated/architecture/dependency-graph.md

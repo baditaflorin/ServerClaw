@@ -1,2 +1,0 @@
-NAME          IMAGE                                                                                                     COMMAND                  SERVICE   CREATED         STATUS         PORTS
-lv3-openbao   docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b   "docker-entrypoint.s…"   openbao   3 minutes ago   Up 3 minutes   0.0.0.0:8200->8200/tcp, 127.0.0.1:8201->8201/tcp

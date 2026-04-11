@@ -1,5 +1,0 @@
-./scripts/validate_repo.sh json health-probes data-models agent-standards
-JSON validation
-Health probe contract validation
-Repository data model validation
-Agent standards validation (ADR 0163-0168)

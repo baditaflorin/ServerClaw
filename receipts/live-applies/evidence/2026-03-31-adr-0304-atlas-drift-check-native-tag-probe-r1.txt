@@ -1,6 +1,0 @@
-CREATED="0c8eac8789143a34"
-SCRIPT={"archived": false, "created_at": "2026-03-31T18:24:07.874331Z", "created_by": "superadmin_secret", "deleted": false, "description": "Temporary probe for native worker routing", "extra_perms": {}, "hash": "0c8eac8789143a34", "is_template": false, "kind": "script", "language": "python3", "lock_error_logs": null, "parent_hashes": null, "path": "f/lv3/atlas_drift_check_probe", "schema": null, "summary": "Atlas native tag probe", "tag": "postgresql", "workspace_id": "lv3", "ws_error_handler_muted": false}
-SUBMISSION={"job_id": "019d4523-82a9-960b-f3c9-fc9cd04b9071", "running": true}
-STATUS={"completed": true, "result": {"error": {"message": "Worker is in native mode and cannot execute non-native job with language 'python3'", "name": "ExecutionErr"}}, "started": true, "success": false}
-JOB={"logs": "Unexpected error during job execution:\nExecutionErr: Worker is in native mode and cannot execute non-native job with language 'python3'", "result": {"error": {"message": "Worker is in native mode and cannot execute non-native job with language 'python3'", "name": "ExecutionErr"}}, "script_hash": "0c8eac8789143a34", "script_path": "f/lv3/atlas_drift_check_probe", "success": false, "tag": "postgresql", "worker": "wk-native-lv3-vbGR9"}
-DELETED="f/lv3/atlas_drift_check_probe"

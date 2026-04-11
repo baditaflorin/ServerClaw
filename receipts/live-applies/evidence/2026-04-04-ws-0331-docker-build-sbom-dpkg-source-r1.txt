@@ -1,9 +1,0 @@
-Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-HOST docker-build-lv3
-
-real	0m1.567s
-user	0m1.381s
-sys	0m0.118s
--rw-r--r-- 1 root root 441K Apr  4 17:53 /var/tmp/lv3-security-posture/docker-build-lv3-host-sbom-from-dpkg.cdx.json
-components 455
-metadata_component True

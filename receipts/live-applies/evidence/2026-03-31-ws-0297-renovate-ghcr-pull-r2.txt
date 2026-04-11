@@ -1,1 +1,0 @@
-Error response from daemon: error from registry: denied

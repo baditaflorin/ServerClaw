@@ -1,3 +1,0 @@
-make validate-generated-vars
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply/scripts/validate_repo.sh generated-vars
-Generated platform vars validation

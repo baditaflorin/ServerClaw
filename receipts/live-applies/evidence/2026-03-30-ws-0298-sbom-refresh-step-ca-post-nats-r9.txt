@@ -1,3 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-Scanned 1 managed images
-REPORT_JSON={"schema_version":"1.0.0","generated_at":"2026-03-30T16:52:06Z","image_count":1,"delta_event_count":0,"images":[{"image_id":"step_ca_runtime","image_ref":"docker.io/smallstep/step-ca:0.30.1@sha256:fddf37513b8b00d5e3cd2ccbf997ef6cc8519060fd74eaed2cde4284e4a7cfa9","runtime_host":"docker-runtime-lv3","sbom_receipt":"receipts/sbom/fddf37513b8b.cdx.json","cve_receipt":".local/ws0298-stepca-cve/fddf37513b8b-20260330T165206Z.grype.json","summary":{"critical":2,"high":4,"medium":11,"low":1,"unknown":0,"blocking_findings_with_fix":0,"total_matches":18},"new_high_or_critical_findings":0}]}

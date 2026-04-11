@@ -1,5 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-SOCKET_FAIL:5001:timed out
-SOCKET_FAIL:5002:timed out
-SOCKET_FAIL:5003:timed out
-SOCKET_FAIL:5004:timed out

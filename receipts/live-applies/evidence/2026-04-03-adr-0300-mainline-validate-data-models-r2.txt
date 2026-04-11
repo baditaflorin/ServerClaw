@@ -1,3 +1,0 @@
-Repository data model error: config/service-capability-catalog.json.services[8].runtime_pool='dedicated-coolify' is not mirrored in config/contracts/service-partitions/catalog.json
-Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/receipts/live-applies
-Promotion receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/receipts/promotions (0 file(s))

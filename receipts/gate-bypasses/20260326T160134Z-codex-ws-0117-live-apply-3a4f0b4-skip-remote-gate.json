@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T16:01:34.337032+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "pre-existing remote gate failure: docs/adr/.index.yaml yaml-lint baseline and remote worktree git metadata issue in schema-validation",
-  "source": "pre-push-hook",
-  "branch": "codex/ws-0117-live-apply",
-  "commit": "3a4f0b4bae6c26b067de008ec9721bafd4f82b2f"
-}

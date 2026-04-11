@@ -1,1 +1,0 @@
-Existing platform owner documented when ADR 0108 was implemented.

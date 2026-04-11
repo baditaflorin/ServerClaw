@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T10:35:15Z",
-  "bypass": "skip-remote-gate",
-  "reason": "remote pre-push gate stalled during build-server handoff while ADR 0171 had already passed focused syntax, pytest, workflow-catalog validation, and the governed Keycloak plus OpenBao live drill",
-  "source": "manual-main-push",
-  "branch": "codex/integration-0171-main-v3",
-  "commit": "a110c409ecfa9a034320e5f1bc4d8a0d8745066f"
-}

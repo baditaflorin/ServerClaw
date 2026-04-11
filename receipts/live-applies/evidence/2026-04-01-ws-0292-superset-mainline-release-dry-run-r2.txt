@@ -1,5 +1,0 @@
-Current version: 0.177.128
-Next version: 0.177.129
-Unreleased notes: 0
-Platform impact: no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
-Release notes index: docs/release-notes/README.md

@@ -1,340 +1,0 @@
-2026-04-01T07:05:12.2743633Z docker-build-lv3(version:v0.2.12) received task 288 of job validate, be triggered by event: pull_request
-2026-04-01T07:05:12.2747796Z workflow prepared
-2026-04-01T07:05:12.2748390Z evaluating expression 'success()'
-2026-04-01T07:05:12.2748892Z expression 'success()' evaluated to 'true'
-2026-04-01T07:05:12.2749039Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-04-01T07:05:12.2816391Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-04-01T07:05:12.2816569Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-04-01T07:05:12.2827896Z Image exists? true
-2026-04-01T07:05:12.2859869Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-04-01T07:05:12.2920816Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-04-01T07:05:12.2921309Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-04-01T07:05:12.2921854Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc0001ce3c8 OomKillDisable:0xc0001ce2c3 PidsLimit:0xc0001ce428 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-04-01T07:05:12.2922361Z --network and --net in the options will be ignored.
-2026-04-01T07:05:12.2922760Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc0001ce3c8 OomKillDisable:0xc0001ce2c3 PidsLimit:0xc0001ce428 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-288_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-288_WORKFLOW-validate_JOB-validate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-04-01T07:05:12.5292828Z Created container name=GITEA-ACTIONS-TASK-288_WORKFLOW-validate_JOB-validate id=a30e1e6109804a84e82f11d30556881a4116042fd8e36b7dcce89e225c8629e6 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
-2026-04-01T07:05:12.5293444Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-04-01T07:05:12.5293590Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
-2026-04-01T07:05:12.5293760Z Starting container: a30e1e6109804a84e82f11d30556881a4116042fd8e36b7dcce89e225c8629e6
-2026-04-01T07:05:12.6456139Z Started container: a30e1e6109804a84e82f11d30556881a4116042fd8e36b7dcce89e225c8629e6
-2026-04-01T07:05:12.7480851Z Writing entry to tarball workflow/event.json len:10436
-2026-04-01T07:05:12.7481448Z Writing entry to tarball workflow/envs.txt len:0
-2026-04-01T07:05:12.7481644Z Extracting content to '/var/run/act/'
-2026-04-01T07:05:12.7629316Z expression '${{ github.server_url }}' rewritten to 'format('{0}', github.server_url)'
-2026-04-01T07:05:12.7629653Z evaluating expression 'format('{0}', github.server_url)'
-2026-04-01T07:05:12.7629968Z expression 'format('{0}', github.server_url)' evaluated to '%!t(string=http://10.10.10.20:3003)'
-2026-04-01T07:05:12.7630128Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
-2026-04-01T07:05:12.7630205Z evaluating expression 'format('{0}', github.repository)'
-2026-04-01T07:05:12.7630341Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
-2026-04-01T07:05:12.7630444Z expression '${{ github.ref }}' rewritten to 'format('{0}', github.ref)'
-2026-04-01T07:05:12.7630511Z evaluating expression 'format('{0}', github.ref)'
-2026-04-01T07:05:12.7630659Z expression 'format('{0}', github.ref)' evaluated to '%!t(string=refs/pull/7/head)'
-2026-04-01T07:05:12.7630758Z expression '${{ github.sha }}' rewritten to 'format('{0}', github.sha)'
-2026-04-01T07:05:12.7630825Z evaluating expression 'format('{0}', github.sha)'
-2026-04-01T07:05:12.7630966Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=d05498e004c59aaf17249c6f775588a3e99185e1)'
-2026-04-01T07:05:12.7631073Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
-2026-04-01T07:05:12.7631138Z evaluating expression 'format('{0}', github.token)'
-2026-04-01T07:05:12.7631271Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
-2026-04-01T07:05:12.7755573Z evaluating expression ''
-2026-04-01T07:05:12.7756159Z expression '' evaluated to 'true'
-2026-04-01T07:05:12.7756332Z ⭐ Run Main Checkout
-2026-04-01T07:05:12.7756552Z Writing entry to tarball workflow/outputcmd.txt len:0
-2026-04-01T07:05:12.7756697Z Writing entry to tarball workflow/statecmd.txt len:0
-2026-04-01T07:05:12.7756779Z Writing entry to tarball workflow/pathcmd.txt len:0
-2026-04-01T07:05:12.7756877Z Writing entry to tarball workflow/envs.txt len:0
-2026-04-01T07:05:12.7756953Z Writing entry to tarball workflow/SUMMARY.md len:0
-2026-04-01T07:05:12.7757047Z Extracting content to '/var/run/act'
-2026-04-01T07:05:12.7972809Z Wrote command \n\nset -euo pipefail\ngit config --global --add safe.directory "$PWD"\ngit init .\nif git remote get-url origin >/dev/null 2>&1; then\n  git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nelse\n  git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"\nfi\ngit -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin "${WORKFLOW_REF}"\ngit -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin main\ngit checkout --force "${WORKFLOW_SHA}"\n\n\n to 'workflow/0.sh'
-2026-04-01T07:05:12.7973367Z Writing entry to tarball workflow/0.sh len:512
-2026-04-01T07:05:12.7973530Z Extracting content to '/var/run/act'
-2026-04-01T07:05:12.7994150Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
-2026-04-01T07:05:12.7994956Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-04-01T07:05:12.7995697Z Working directory '/workspace/ops/proxmox_florin_server'
-2026-04-01T07:05:12.8572764Z hint: Using 'master' as the name for the initial branch. This default branch name
-2026-04-01T07:05:12.8573776Z hint: is subject to change. To configure the initial branch name to use in all
-2026-04-01T07:05:12.8573939Z hint: of your new repositories, which will suppress this warning, call:
-2026-04-01T07:05:12.8574093Z hint:
-2026-04-01T07:05:12.8574201Z hint: 	git config --global init.defaultBranch <name>
-2026-04-01T07:05:12.8574281Z hint:
-2026-04-01T07:05:12.8574350Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
-2026-04-01T07:05:12.8574433Z hint: 'development'. The just-created branch can be renamed via this command:
-2026-04-01T07:05:12.8574523Z hint:
-2026-04-01T07:05:12.8574594Z hint: 	git branch -m <name>
-2026-04-01T07:05:12.8574820Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-04-01T07:05:19.8723775Z From http://10.10.10.20:3003/ops/proxmox_florin_server
-2026-04-01T07:05:19.8724179Z  * branch              refs/pull/7/head -> FETCH_HEAD
-2026-04-01T07:05:20.0495926Z From http://10.10.10.20:3003/ops/proxmox_florin_server
-2026-04-01T07:05:20.0496494Z  * branch              main       -> FETCH_HEAD
-2026-04-01T07:05:20.0500427Z  * [new branch]        main       -> origin/main
-2026-04-01T07:05:20.7936817Z Note: switching to 'd05498e004c59aaf17249c6f775588a3e99185e1'.
-2026-04-01T07:05:20.7937311Z
-2026-04-01T07:05:20.7937427Z You are in 'detached HEAD' state. You can look around, make experimental
-2026-04-01T07:05:20.7937566Z changes and commit them, and you can discard any commits you make in this
-2026-04-01T07:05:20.7937685Z state without impacting any branches by switching back to a branch.
-2026-04-01T07:05:20.7937877Z
-2026-04-01T07:05:20.7937979Z If you want to create a new branch to retain commits you create, you may
-2026-04-01T07:05:20.7938102Z do so (now or later) by using -c with the switch command. Example:
-2026-04-01T07:05:20.7938218Z
-2026-04-01T07:05:20.7938328Z   git switch -c <new-branch-name>
-2026-04-01T07:05:20.7938442Z
-2026-04-01T07:05:20.7938548Z Or undo this operation with:
-2026-04-01T07:05:20.7938645Z
-2026-04-01T07:05:20.7938748Z   git switch -
-2026-04-01T07:05:20.7938852Z
-2026-04-01T07:05:20.7938947Z Turn off this advice by setting config variable advice.detachedHead to false
-2026-04-01T07:05:20.7939074Z
-2026-04-01T07:05:20.7939188Z HEAD is now at d05498e0 Merge branch 'main' into renovate/docker.io-clickhouse-clickhouse-server-25.8
-2026-04-01T07:05:21.0042423Z Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
-2026-04-01T07:05:21.0278991Z Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
-2026-04-01T07:05:21.0343106Z Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
-2026-04-01T07:05:21.0472288Z Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
-2026-04-01T07:05:21.1621594Z Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
-2026-04-01T07:05:21.1622225Z Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [114 kB]
-2026-04-01T07:05:21.7464844Z Fetched 10.0 MB in 1s (12.5 MB/s)
-2026-04-01T07:05:22.2807947Z Reading package lists...
-2026-04-01T07:05:22.8247227Z Reading package lists...
-2026-04-01T07:05:23.0111537Z Building dependency tree...
-2026-04-01T07:05:23.0112063Z Reading state information...
-2026-04-01T07:05:23.2981229Z Suggested packages:
-2026-04-01T07:05:23.2981717Z   docker-doc
-2026-04-01T07:05:23.2981873Z Recommended packages:
-2026-04-01T07:05:23.2981987Z   docker-buildx
-2026-04-01T07:05:23.3260817Z The following NEW packages will be installed:
-2026-04-01T07:05:23.3268052Z   docker-cli
-2026-04-01T07:05:23.4119968Z 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
-2026-04-01T07:05:23.4120443Z Need to get 7338 kB of archives.
-2026-04-01T07:05:23.4120583Z After this operation, 31.1 MB of additional disk space will be used.
-2026-04-01T07:05:23.4120789Z Get:1 http://deb.debian.org/debian trixie/main amd64 docker-cli amd64 26.1.5+dfsg1-9+b12 [7338 kB]
-2026-04-01T07:05:24.2075062Z Fetched 7338 kB in 0s (47.0 MB/s)
-2026-04-01T07:05:24.2205945Z Selecting previously unselected package docker-cli.
-2026-04-01T07:05:24.2243197Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
-2026-04-01T07:05:24.2246219Z Preparing to unpack .../docker-cli_26.1.5+dfsg1-9+b12_amd64.deb ...
-2026-04-01T07:05:24.2261892Z Unpacking docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-04-01T07:05:24.4700033Z Setting up docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-04-01T07:05:24.5361746Z Docker version 26.1.5+dfsg1, build a72d7cd
-2026-04-01T07:05:24.6158638Z Hit:1 http://deb.debian.org/debian trixie InRelease
-2026-04-01T07:05:24.6161795Z Hit:2 http://deb.debian.org/debian trixie-updates InRelease
-2026-04-01T07:05:24.6235595Z Hit:3 http://deb.debian.org/debian-security trixie-security InRelease
-2026-04-01T07:05:25.1594094Z Reading package lists...
-2026-04-01T07:05:25.6851658Z Reading package lists...
-2026-04-01T07:05:25.8412213Z Building dependency tree...
-2026-04-01T07:05:25.8412661Z Reading state information...
-2026-04-01T07:05:26.1868848Z Suggested packages:
-2026-04-01T07:05:26.1869365Z   make-doc
-2026-04-01T07:05:26.2186270Z The following NEW packages will be installed:
-2026-04-01T07:05:26.2191133Z   make
-2026-04-01T07:05:26.3098055Z 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
-2026-04-01T07:05:26.3098909Z Need to get 463 kB of archives.
-2026-04-01T07:05:26.3099040Z After this operation, 1808 kB of additional disk space will be used.
-2026-04-01T07:05:26.3099142Z Get:1 http://deb.debian.org/debian trixie/main amd64 make amd64 4.4.1-2 [463 kB]
-2026-04-01T07:05:27.2607511Z Fetched 463 kB in 0s (3835 kB/s)
-2026-04-01T07:05:27.2880310Z Selecting previously unselected package make.
-2026-04-01T07:05:27.2955659Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9201 files and directories currently installed.)
-2026-04-01T07:05:27.2958781Z Preparing to unpack .../make_4.4.1-2_amd64.deb ...
-2026-04-01T07:05:27.2991957Z Unpacking make (4.4.1-2) ...
-2026-04-01T07:05:27.3720503Z Setting up make (4.4.1-2) ...
-2026-04-01T07:05:27.4999159Z Hit:1 http://deb.debian.org/debian trixie InRelease
-2026-04-01T07:05:27.4999633Z Hit:2 http://deb.debian.org/debian trixie-updates InRelease
-2026-04-01T07:05:27.5065693Z Hit:3 http://deb.debian.org/debian-security trixie-security InRelease
-2026-04-01T07:05:28.2652566Z Reading package lists...
-2026-04-01T07:05:29.1715423Z Reading package lists...
-2026-04-01T07:05:29.4483692Z Building dependency tree...
-2026-04-01T07:05:29.4484129Z Reading state information...
-2026-04-01T07:05:29.8597777Z The following additional packages will be installed:
-2026-04-01T07:05:29.8599957Z   libpython3-stdlib libpython3.13-minimal libpython3.13-stdlib media-types
-2026-04-01T07:05:29.8600365Z   python3 python3-minimal python3-pip-whl python3-setuptools-whl python3.13
-2026-04-01T07:05:29.8600767Z   python3.13-minimal python3.13-venv
-2026-04-01T07:05:29.8601049Z Suggested packages:
-2026-04-01T07:05:29.8601295Z   python3-doc python3-tk python3.13-doc binutils binfmt-support
-2026-04-01T07:05:29.9833804Z The following NEW packages will be installed:
-2026-04-01T07:05:29.9841062Z   libpython3-stdlib libpython3.13-minimal libpython3.13-stdlib media-types
-2026-04-01T07:05:29.9842088Z   python3 python3-minimal python3-pip-whl python3-setuptools-whl python3-venv
-2026-04-01T07:05:29.9844003Z   python3.13 python3.13-minimal python3.13-venv
-2026-04-01T07:05:30.1323652Z 0 upgraded, 12 newly installed, 0 to remove and 0 not upgraded.
-2026-04-01T07:05:30.1324542Z Need to get 8676 kB of archives.
-2026-04-01T07:05:30.1324694Z After this operation, 25.7 MB of additional disk space will be used.
-2026-04-01T07:05:30.1325002Z Get:1 http://deb.debian.org/debian trixie/main amd64 libpython3.13-minimal amd64 3.13.5-2 [862 kB]
-2026-04-01T07:05:30.1871551Z Get:2 http://deb.debian.org/debian trixie/main amd64 python3.13-minimal amd64 3.13.5-2 [2224 kB]
-2026-04-01T07:05:30.2053324Z Get:3 http://deb.debian.org/debian trixie/main amd64 python3-minimal amd64 3.13.5-1 [27.2 kB]
-2026-04-01T07:05:30.2054870Z Get:4 http://deb.debian.org/debian trixie/main amd64 media-types all 13.0.0 [29.3 kB]
-2026-04-01T07:05:30.2055144Z Get:5 http://deb.debian.org/debian trixie/main amd64 libpython3.13-stdlib amd64 3.13.5-2 [1956 kB]
-2026-04-01T07:05:30.2266721Z Get:6 http://deb.debian.org/debian trixie/main amd64 python3.13 amd64 3.13.5-2 [757 kB]
-2026-04-01T07:05:30.2318337Z Get:7 http://deb.debian.org/debian trixie/main amd64 libpython3-stdlib amd64 3.13.5-1 [10.2 kB]
-2026-04-01T07:05:30.2319275Z Get:8 http://deb.debian.org/debian trixie/main amd64 python3 amd64 3.13.5-1 [28.2 kB]
-2026-04-01T07:05:30.2323451Z Get:9 http://deb.debian.org/debian trixie/main amd64 python3-pip-whl all 25.1.1+dfsg-1 [1507 kB]
-2026-04-01T07:05:30.3465765Z Get:10 http://deb.debian.org/debian trixie/main amd64 python3-setuptools-whl all 78.1.1-0.1 [1268 kB]
-2026-04-01T07:05:30.4352993Z Get:11 http://deb.debian.org/debian trixie/main amd64 python3.13-venv amd64 3.13.5-2 [5472 B]
-2026-04-01T07:05:30.4353642Z Get:12 http://deb.debian.org/debian trixie/main amd64 python3-venv amd64 3.13.5-1 [1180 B]
-2026-04-01T07:05:31.4924850Z Fetched 8676 kB in 0s (22.4 MB/s)
-2026-04-01T07:05:31.5217026Z Selecting previously unselected package libpython3.13-minimal:amd64.
-2026-04-01T07:05:31.5299740Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9250 files and directories currently installed.)
-2026-04-01T07:05:31.5317051Z Preparing to unpack .../libpython3.13-minimal_3.13.5-2_amd64.deb ...
-2026-04-01T07:05:31.5362078Z Unpacking libpython3.13-minimal:amd64 (3.13.5-2) ...
-2026-04-01T07:05:31.6850277Z Selecting previously unselected package python3.13-minimal.
-2026-04-01T07:05:31.6862682Z Preparing to unpack .../python3.13-minimal_3.13.5-2_amd64.deb ...
-2026-04-01T07:05:31.7021459Z Unpacking python3.13-minimal (3.13.5-2) ...
-2026-04-01T07:05:31.8997899Z Setting up libpython3.13-minimal:amd64 (3.13.5-2) ...
-2026-04-01T07:05:31.9198751Z Setting up python3.13-minimal (3.13.5-2) ...
-2026-04-01T07:05:32.7857653Z Selecting previously unselected package python3-minimal.
-2026-04-01T07:05:32.7907156Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9575 files and directories currently installed.)
-2026-04-01T07:05:32.7915714Z Preparing to unpack .../python3-minimal_3.13.5-1_amd64.deb ...
-2026-04-01T07:05:32.7938089Z Unpacking python3-minimal (3.13.5-1) ...
-2026-04-01T07:05:32.8171416Z Selecting previously unselected package media-types.
-2026-04-01T07:05:32.8186247Z Preparing to unpack .../media-types_13.0.0_all.deb ...
-2026-04-01T07:05:32.8202453Z Unpacking media-types (13.0.0) ...
-2026-04-01T07:05:32.8448986Z Selecting previously unselected package libpython3.13-stdlib:amd64.
-2026-04-01T07:05:32.8449914Z Preparing to unpack .../libpython3.13-stdlib_3.13.5-2_amd64.deb ...
-2026-04-01T07:05:32.8461290Z Unpacking libpython3.13-stdlib:amd64 (3.13.5-2) ...
-2026-04-01T07:05:32.9779119Z Selecting previously unselected package python3.13.
-2026-04-01T07:05:32.9779614Z Preparing to unpack .../python3.13_3.13.5-2_amd64.deb ...
-2026-04-01T07:05:32.9815266Z Unpacking python3.13 (3.13.5-2) ...
-2026-04-01T07:05:33.0076386Z Selecting previously unselected package libpython3-stdlib:amd64.
-2026-04-01T07:05:33.0101540Z Preparing to unpack .../libpython3-stdlib_3.13.5-1_amd64.deb ...
-2026-04-01T07:05:33.0128954Z Unpacking libpython3-stdlib:amd64 (3.13.5-1) ...
-2026-04-01T07:05:33.0552105Z Setting up python3-minimal (3.13.5-1) ...
-2026-04-01T07:05:33.2131551Z Selecting previously unselected package python3.
-2026-04-01T07:05:33.2230485Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 10029 files and directories currently installed.)
-2026-04-01T07:05:33.2249217Z Preparing to unpack .../python3_3.13.5-1_amd64.deb ...
-2026-04-01T07:05:33.2316924Z Unpacking python3 (3.13.5-1) ...
-2026-04-01T07:05:33.2636087Z Selecting previously unselected package python3-pip-whl.
-2026-04-01T07:05:33.2649642Z Preparing to unpack .../python3-pip-whl_25.1.1+dfsg-1_all.deb ...
-2026-04-01T07:05:33.2666742Z Unpacking python3-pip-whl (25.1.1+dfsg-1) ...
-2026-04-01T07:05:33.3217000Z Selecting previously unselected package python3-setuptools-whl.
-2026-04-01T07:05:33.3240307Z Preparing to unpack .../python3-setuptools-whl_78.1.1-0.1_all.deb ...
-2026-04-01T07:05:33.3261718Z Unpacking python3-setuptools-whl (78.1.1-0.1) ...
-2026-04-01T07:05:33.3823721Z Selecting previously unselected package python3.13-venv.
-2026-04-01T07:05:33.3841297Z Preparing to unpack .../python3.13-venv_3.13.5-2_amd64.deb ...
-2026-04-01T07:05:33.3857136Z Unpacking python3.13-venv (3.13.5-2) ...
-2026-04-01T07:05:33.4105532Z Selecting previously unselected package python3-venv.
-2026-04-01T07:05:33.4108517Z Preparing to unpack .../python3-venv_3.13.5-1_amd64.deb ...
-2026-04-01T07:05:33.4132668Z Unpacking python3-venv (3.13.5-1) ...
-2026-04-01T07:05:33.4439764Z Setting up media-types (13.0.0) ...
-2026-04-01T07:05:33.4506145Z Setting up python3-setuptools-whl (78.1.1-0.1) ...
-2026-04-01T07:05:33.4542270Z Setting up python3-pip-whl (25.1.1+dfsg-1) ...
-2026-04-01T07:05:33.4581025Z Setting up libpython3.13-stdlib:amd64 (3.13.5-2) ...
-2026-04-01T07:05:33.4617870Z Setting up libpython3-stdlib:amd64 (3.13.5-1) ...
-2026-04-01T07:05:33.4648928Z Setting up python3.13 (3.13.5-2) ...
-2026-04-01T07:05:34.3383482Z Setting up python3 (3.13.5-1) ...
-2026-04-01T07:05:34.4232245Z Setting up python3.13-venv (3.13.5-2) ...
-2026-04-01T07:05:34.4957544Z Setting up python3-venv (3.13.5-1) ...
-2026-04-01T07:05:37.3232419Z Requirement already satisfied: pip in /opt/uv/lib/python3.12/site-packages (25.0.1)
-2026-04-01T07:05:37.4267852Z Collecting pip
-2026-04-01T07:05:37.4895074Z   Downloading pip-26.0.1-py3-none-any.whl.metadata (4.7 kB)
-2026-04-01T07:05:37.7597514Z Collecting uv
-2026-04-01T07:05:37.7688271Z   Downloading uv-0.11.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
-2026-04-01T07:05:37.7824544Z Downloading pip-26.0.1-py3-none-any.whl (1.8 MB)
-2026-04-01T07:05:37.8289530Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 74.0 MB/s eta 0:00:00
-2026-04-01T07:05:37.8389720Z Downloading uv-0.11.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (24.6 MB)
-2026-04-01T07:05:38.0571981Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.6/24.6 MB 113.9 MB/s eta 0:00:00
-2026-04-01T07:05:38.0960762Z Installing collected packages: uv, pip
-2026-04-01T07:05:38.3846693Z   Attempting uninstall: pip
-2026-04-01T07:05:38.3872939Z     Found existing installation: pip 25.0.1
-2026-04-01T07:05:38.4253938Z     Uninstalling pip-25.0.1:
-2026-04-01T07:05:38.4340374Z       Successfully uninstalled pip-25.0.1
-2026-04-01T07:05:39.4372157Z Successfully installed pip-26.0.1 uv-0.11.2
-2026-04-01T07:05:55.2847288Z {
-2026-04-01T07:05:55.2847886Z   "changed_images": [
-2026-04-01T07:05:55.2848013Z     {
-2026-04-01T07:05:55.2848095Z       "image_id": "langfuse_clickhouse_runtime",
-2026-04-01T07:05:55.2848199Z       "image_ref": "docker.io/clickhouse/clickhouse-server:25.8@sha256:db071f375ff5396f306985464f52a666fdd99d766b961e47394fc81e7e5c0d77",
-2026-04-01T07:05:55.2849536Z       "cve_receipt": ".local/managed-image-gate/cve/db071f375ff5-20260401T070539Z.grype.json",
-2026-04-01T07:05:55.2849817Z       "summary": {
-2026-04-01T07:05:55.2849940Z         "critical": 0,
-2026-04-01T07:05:55.2850946Z         "high": 0,
-2026-04-01T07:05:55.2851096Z         "medium": 28,
-2026-04-01T07:05:55.2851229Z         "low": 27,
-2026-04-01T07:05:55.2851340Z         "unknown": 1,
-2026-04-01T07:05:55.2851477Z         "blocking_findings_with_fix": 0,
-2026-04-01T07:05:55.2852328Z         "total_matches": 56
-2026-04-01T07:05:55.2852453Z       }
-2026-04-01T07:05:55.2852580Z     }
-2026-04-01T07:05:55.2852705Z   ],
-2026-04-01T07:05:55.2852818Z   "blocking_images": []
-2026-04-01T07:05:55.2852944Z }
-2026-04-01T07:10:46.4506786Z Validation lane selection
-2026-04-01T07:10:46.4507334Z   mode: all_lanes
-2026-04-01T07:10:46.4507437Z   branch: HEAD
-2026-04-01T07:10:46.4507545Z   selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
-2026-04-01T07:10:46.4507719Z   blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
-2026-04-01T07:10:46.4507888Z
-2026-04-01T07:10:46.4507961Z CHECK                STATUS DURATION(s)
-2026-04-01T07:10:46.4508041Z agent-standards       passed 1.57
-2026-04-01T07:10:46.4508125Z alert-rule-validation passed 3.32
-2026-04-01T07:10:46.4508203Z ansible-lint          passed 290.64
-2026-04-01T07:10:46.4508282Z ansible-syntax        passed 181.91
-2026-04-01T07:10:46.4508356Z artifact-secret-scan  passed 9.01
-2026-04-01T07:10:46.4508436Z dependency-direction  passed 5.14
-2026-04-01T07:10:46.4508510Z dependency-graph      passed 3.90
-2026-04-01T07:10:46.4508584Z documentation-index   passed 2.32
-2026-04-01T07:10:46.4508658Z generated-docs        passed 11.88
-2026-04-01T07:10:46.4508732Z generated-portals     passed 48.01
-2026-04-01T07:10:46.4508828Z iac-policy-scan       passed 77.27
-2026-04-01T07:10:46.4508903Z integration-tests     passed 3.08
-2026-04-01T07:10:46.4508985Z packer-validate       passed 9.93
-2026-04-01T07:10:46.4509075Z policy-validation     passed 2.76
-2026-04-01T07:10:46.4509146Z schema-validation     failed 3.05
-2026-04-01T07:10:46.4509261Z security-scan         passed 75.95
-2026-04-01T07:10:46.4509349Z semgrep-sast          passed 122.62
-2026-04-01T07:10:46.4509427Z service-completeness  passed 2.35
-2026-04-01T07:10:46.4509528Z tofu-validate         passed 2.88
-2026-04-01T07:10:46.4509680Z type-check            passed 6.80
-2026-04-01T07:10:46.4509877Z workstream-surfaces   passed 4.12
-2026-04-01T07:10:46.4510003Z yaml-lint             passed 22.92
-2026-04-01T07:10:46.4510123Z
-2026-04-01T07:10:46.4510249Z [schema-validation] docker command
-2026-04-01T07:10:46.4510342Z /usr/bin/docker run --rm --cpus=4 -v /var/lib/docker/volumes/GITEA-ACTIONS-TASK-288_WORKFLOW-validate_JOB-validate/_data:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_DOCKER_WORKSPACE_PATH=/var/lib/docker/volumes/GITEA-ACTIONS-TASK-288_WORKFLOW-validate_JOB-validate/_data -e LV3_VALIDATION_BASE_REF=origin/main -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
-2026-04-01T07:10:46.4510604Z [schema-validation] stderr
-2026-04-01T07:10:46.4510681Z Repository data model error: images.langfuse_clickhouse_runtime.ref must equal 'docker.io/clickhouse/clickhouse-server:25.8@sha256:6c7ac0ba8cc97f7f7895addc7312b3c7e4860877b81bf83d5a11231ebf2af8de'
-2026-04-01T07:10:46.4612956Z   ❌  Failure - Main Run authoritative validation gate
-2026-04-01T07:10:46.4683635Z exitcode '1': failure
-2026-04-01T07:10:46.6187144Z Bundled validation artifacts:
-2026-04-01T07:10:46.6192786Z .local/validation-gate/gitea-last-run.json
-2026-04-01T07:10:46.6192914Z .local/validation-gate/semgrep-summary.json
-2026-04-01T07:10:46.6192996Z receipts/checkov/d05498e004c59aaf17249c6f775588a3e99185e1.json
-2026-04-01T07:10:46.6193086Z receipts/checkov/d05498e004c59aaf17249c6f775588a3e99185e1.sarif.json
-2026-04-01T07:10:46.6193195Z receipts/k6/load-keycloak-20260331T101930Z.json
-2026-04-01T07:10:46.6193273Z receipts/k6/load-keycloak-20260331T105720Z.json
-2026-04-01T07:10:46.6193350Z receipts/k6/load-keycloak-20260331T133416Z.json
-2026-04-01T07:10:46.6193425Z receipts/k6/load-keycloak-20260331T145555Z.json
-2026-04-01T07:10:46.6193511Z receipts/k6/load-openfga-20260331T101930Z.json
-2026-04-01T07:10:46.6193586Z receipts/k6/load-openfga-20260331T105720Z.json
-2026-04-01T07:10:46.6193679Z receipts/k6/load-openfga-20260331T133416Z.json
-2026-04-01T07:10:46.6193776Z receipts/k6/load-openfga-20260331T145555Z.json
-2026-04-01T07:10:46.6193864Z receipts/k6/raw/20260331T094543Z-smoke-summary.json
-2026-04-01T07:10:46.6193940Z receipts/k6/raw/20260331T094813Z-smoke-summary.json
-2026-04-01T07:10:46.6194016Z receipts/k6/raw/20260331T101930Z-load-summary.json
-2026-04-01T07:10:46.6194094Z receipts/k6/raw/20260331T103411Z-smoke-summary.json
-2026-04-01T07:10:46.6194175Z receipts/k6/raw/20260331T103558Z-load-summary.json
-2026-04-01T07:10:46.6194251Z receipts/k6/raw/20260331T105720Z-load-summary.json
-2026-04-01T07:10:46.6194419Z receipts/k6/raw/20260331T114952Z-smoke-summary.json
-2026-04-01T07:10:46.6194537Z receipts/k6/raw/20260331T120025Z-smoke-summary.json
-2026-04-01T07:10:46.6195508Z receipts/k6/raw/20260331T120412Z-load-summary.json
-2026-04-01T07:10:46.6195602Z receipts/k6/raw/20260331T131522Z-smoke-summary.json
-2026-04-01T07:10:46.6195680Z receipts/k6/raw/20260331T133226Z-smoke-summary.json
-2026-04-01T07:10:46.6195753Z receipts/k6/raw/20260331T133416Z-load-summary.json
-2026-04-01T07:10:46.6195868Z receipts/k6/raw/20260331T145155Z-smoke-summary.json
-2026-04-01T07:10:46.6195941Z receipts/k6/raw/20260331T145555Z-load-summary.json
-2026-04-01T07:10:46.6196015Z receipts/k6/smoke-keycloak-20260331T094543Z.json
-2026-04-01T07:10:46.6196092Z receipts/k6/smoke-keycloak-20260331T094813Z.json
-2026-04-01T07:10:46.6196165Z receipts/k6/smoke-keycloak-20260331T103411Z.json
-2026-04-01T07:10:46.6196259Z receipts/k6/smoke-keycloak-20260331T114952Z.json
-2026-04-01T07:10:46.6196333Z receipts/k6/smoke-keycloak-20260331T120025Z.json
-2026-04-01T07:10:46.6196406Z receipts/k6/smoke-keycloak-20260331T131522Z.json
-2026-04-01T07:10:46.6196484Z receipts/k6/smoke-keycloak-20260331T133226Z.json
-2026-04-01T07:10:46.6196568Z receipts/k6/smoke-keycloak-20260331T145155Z.json
-2026-04-01T07:10:46.6196642Z receipts/k6/smoke-openfga-20260331T094543Z.json
-2026-04-01T07:10:46.6196715Z receipts/k6/smoke-openfga-20260331T094813Z.json
-2026-04-01T07:10:46.6196787Z receipts/k6/smoke-openfga-20260331T103411Z.json
-2026-04-01T07:10:46.6196862Z receipts/k6/smoke-openfga-20260331T114952Z.json
-2026-04-01T07:10:46.6196942Z receipts/k6/smoke-openfga-20260331T120025Z.json
-2026-04-01T07:10:46.6197019Z receipts/k6/smoke-openfga-20260331T131522Z.json
-2026-04-01T07:10:46.6197092Z receipts/k6/smoke-openfga-20260331T133226Z.json
-2026-04-01T07:10:46.6197177Z receipts/k6/smoke-openfga-20260331T145155Z.json
-2026-04-01T07:10:46.6197252Z receipts/sast/d05498e004c59aaf17249c6f775588a3e99185e1.sarif.json
-2026-04-01T07:10:46.6203002Z -rw-r--r-- 1 root root 117K Apr  1 07:10 .local/validation-gate/gitea-validation-receipts.tar.gz
-2026-04-01T07:10:46.6280489Z Cleaning up container for job validate
-2026-04-01T07:10:46.7209944Z Removed container: a30e1e6109804a84e82f11d30556881a4116042fd8e36b7dcce89e225c8629e6
-2026-04-01T07:10:46.7218941Z   🐳  docker volume rm GITEA-ACTIONS-TASK-288_WORKFLOW-validate_JOB-validate
-2026-04-01T07:10:46.9949787Z   🐳  docker volume rm GITEA-ACTIONS-TASK-288_WORKFLOW-validate_JOB-validate-env
-2026-04-01T07:10:46.9965823Z 🏁  Job failed
-2026-04-01T07:10:47.0034268Z Job 'validate' failed

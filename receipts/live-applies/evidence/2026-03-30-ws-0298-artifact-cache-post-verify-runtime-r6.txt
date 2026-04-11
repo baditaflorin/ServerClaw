@@ -1,5 +1,0 @@
-docker-runtime-lv3 | FAILED | rc=3 >>
-curl: (3) URL rejected: Port number was not a decimal number between 0 and 65535
-curl: (3) URL rejected: Port number was not a decimal number between 0 and 65535
-curl: (3) URL rejected: Port number was not a decimal number between 0 and 65535
-curl: (3) URL rejected: Port number was not a decimal number between 0 and 65535non-zero return code

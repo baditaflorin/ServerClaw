@@ -1,9 +1,0 @@
-# runtime-control post-openbao reboot state
-captured_at=2026-04-05T01:23:54Z
-runtime-control-lv3
- 01:23:56 up 1 min,  1 user,  load average: 0.24, 0.11, 0.04
-2026-04-05T01:23:56Z
-         system boot  2026-04-05 01:22
-
-running
-inactive

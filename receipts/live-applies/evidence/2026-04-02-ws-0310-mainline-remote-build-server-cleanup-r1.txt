@@ -1,7 +1,0 @@
-BEFORE
-789M	/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0281-mainline-v2-f38128993e
-581M	/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0292-live-apply-r2-408a77fb90
-AFTER
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/sda1       158G  106G   46G  71% /
-75G	/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces

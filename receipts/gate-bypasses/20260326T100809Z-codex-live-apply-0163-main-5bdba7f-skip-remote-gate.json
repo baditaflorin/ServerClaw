@@ -1,8 +1,0 @@
-{
-  "created_at": "2026-03-26T10:08:09.168986+00:00",
-  "bypass": "skip_remote_gate",
-  "reason": "Main push for ADR 0163 live apply; the remote pre-push gate fell back locally after a build-worker worktree git-metadata error during schema-validation, then the local fallback remote_exec process terminated. Focused retry, publication, receipt, and repository validation checks passed in the dedicated worktree.",
-  "source": "pre-push-gate",
-  "branch": "codex/live-apply-0163-main",
-  "commit": "5bdba7f68bff2491a3a8535842dee96a26d2be24"
-}

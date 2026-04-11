@@ -1,7 +1,0 @@
-HTTP/2 308
-server: nginx
-date: Tue, 31 Mar 2026 09:27:54 GMT
-content-type: text/html
-content-length: 164
-location: https://nginx.lv3.org/api/health
-x-robots-tag: noindex, nofollow

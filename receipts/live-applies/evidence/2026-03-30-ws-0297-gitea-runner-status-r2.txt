@@ -1,2 +1,0 @@
-NAMES                                       STATUS
-gitea-runner-renovate-openbao-agent         Up 15 minutes

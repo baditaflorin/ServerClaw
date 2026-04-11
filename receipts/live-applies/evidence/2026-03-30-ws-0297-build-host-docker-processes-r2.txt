@@ -1,2 +1,0 @@
-An exception occurred during task execution. To see the full traceback, use -vvv. The error was:   line 1
-docker-build-lv3 | FAILED | rc=-1 >>

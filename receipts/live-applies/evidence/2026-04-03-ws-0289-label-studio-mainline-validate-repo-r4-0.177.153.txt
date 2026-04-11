@@ -1,5 +1,0 @@
-Agent standards validation (ADR 0163-0168)
-WARNING: ADR files changed but docs/adr/.index.yaml not updated (ADR 0164)
-  Run: uv run --with pyyaml python3 scripts/generate_adr_index.py --write
-  Then: git add docs/adr/.index.yaml
-WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)

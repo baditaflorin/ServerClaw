@@ -1,8 +1,0 @@
-{
-  "has_editor_content": true,
-  "has_insert_table": true,
-  "has_task_list": true,
-  "has_tiptap": true,
-  "has_update_notes_backend": true,
-  "path": "f/lv3/operator_access_admin"
-}

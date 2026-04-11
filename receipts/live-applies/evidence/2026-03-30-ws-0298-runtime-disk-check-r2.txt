@@ -1,7 +1,0 @@
-docker-runtime-lv3 | CHANGED | rc=0 >>
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/sda1        95G   91G  112M 100% /
-/dev/sda1        95G   91G  112M 100% /
-Filesystem      Inodes   IUsed   IFree IUse% Mounted on
-/dev/sda1      6283264 2134224 4149040   34% /
-/dev/sda1      6283264 2134224 4149040   34% /

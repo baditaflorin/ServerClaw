@@ -1,1 +1,0 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/run_python_with_packages.sh docker nats-py pyyaml -- scripts/atlas_schema.py drift --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline --write-receipts --publish-nats --publish-ntfy

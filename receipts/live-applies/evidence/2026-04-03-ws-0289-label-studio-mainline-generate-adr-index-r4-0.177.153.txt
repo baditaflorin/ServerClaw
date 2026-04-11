@@ -1,1 +1,0 @@
-Written /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/docs/adr/.index.yaml (360 ADRs indexed)
