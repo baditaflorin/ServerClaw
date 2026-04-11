@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.109",
+  "repo_version": "0.178.111",
   "platform_version": "0.178.77",
-  "generated_at": "2026-04-11T17:02:43Z",
-  "next_refresh_at": "2026-04-11T18:02:43Z",
+  "generated_at": "2026-04-11T18:32:06Z",
+  "next_refresh_at": "2026-04-11T19:32:06Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.108",
+    "last_version": "0.178.110",
     "deployed_at": "2026-04-11",
-    "summary": "[adr-0408] Remove -lv3 suffix from 24 inventory hostnames \u2014 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config [adr-0407] DRY round 2: Centralize WINDMILL_WORKSPACE, GITHUB_REPO_BASE_URL, and remaining TOPOLOGY_HOST \u2014 3 new env-overridable constants in platform/repo.py; Windmill workspace, GitHub URL, and 20+ more \"proxmox-host\" literals consolidated; only 4 intentional references remain across entire Python codebase",
-    "release_notes_url": "docs/release-notes/0.178.109.md"
+    "summary": "[docs] IoC value-flow architecture diagrams \u2014 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline [adr-0409] Zero-sanitization publication \u2014 committed code fully generic; 129 files, 2,581 replacements; identity.yml uses example.com (real values in .local/identity.yml); topology host renamed to proxmox-host; public IPs\u2192RFC 5737; 6 generated files gitignored; publication Tier C sanitization reduced from 128 to **0 files**",
+    "release_notes_url": "docs/release-notes/0.178.111.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

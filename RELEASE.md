@@ -1,8 +1,9 @@
-# Release 0.178.110
+# Release 0.178.111
 
 - Date: 2026-04-11
 
 ## Summary
+- [docs] IoC value-flow architecture diagrams — 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline
 - [adr-0409] Zero-sanitization publication — committed code fully generic; 129 files, 2,581 replacements; identity.yml uses example.com (real values in .local/identity.yml); topology host renamed to proxmox-host; public IPs→RFC 5737; 6 generated files gitignored; publication Tier C sanitization reduced from 128 to **0 files**
 - [adr-0408] Remove -lv3 suffix from 24 inventory hostnames — 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config
 - [adr-0407] DRY round 2: Centralize WINDMILL_WORKSPACE, GITHUB_REPO_BASE_URL, and remaining TOPOLOGY_HOST — 3 new env-overridable constants in platform/repo.py; Windmill workspace, GitHub URL, and 20+ more "proxmox-host" literals consolidated; only 4 intentional references remain across entire Python codebase
@@ -39,23 +40,7 @@
 - fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
 - fix: Escape Prometheus template syntax in alert rules for Jinja2 rendering compatibility
 - verified: Phase 6 cosmetic cleanup stable in production (118/118 convergence tasks passing)
-- fix: Harbor OIDC client secret fallback — when Keycloak bootstrap is unavailable, read cached client secret from previous successful run instead of failing with empty secret; enables Harbor OIDC to work even if Keycloak bootstrap fails transiently
-- ADR 0387 Phase 2: Harbor OIDC login fixed — keycloak_realm_name hardcoded to "lv3" in harbor_runtime defaults; NGINX logout variable refactored to use $http_authorization (load-time variable) instead of $lv3_logout_authorization (runtime auth_request_set); solves Nginx map evaluation order constraints and enables Harbor registry login via Keycloak
-- Public release readiness: MIT LICENSE, rewritten README, identity.yml as single edit point; eliminated 119 hardcoded absolute paths, 11 hardcoded emails, and 15+ hardcoded hostnames/repo names from role defaults; added platform_repo_name/platform_gitea_org/platform_repo_checkout_path to identity.yml; parameterized packer variables; removed .idea/ from git; added .github/SECURITY.md, PR template, issue templates; zero operator-specific values remain in deployable Ansible code
-- ADR 0388: Centralize Keycloak realm name and OIDC issuer URLs — keycloak_realm_name derived from platform_domain in identity.yml; 8 central OIDC URL variables (issuer, auth, token, userinfo, jwks, logout, discovery); 34 hardcoded `realms/lv3` literals replaced across 20 role defaults and 2 task files; fork operators changing platform_domain automatically get correct SSO configuration with zero additional edits; also fixes semaphore_runtime using wrong SSO hostname (auth vs sso)
-- ADR 0386: Unified disk space monitoring — shared Telegraf base inputs on all VMs, disk_metrics.py query module, agent tool (get-disk-usage), platform-context API endpoint (GET /v1/platform/disk-usage), and Windmill disk-space-monitor workflow; auto-propagates when VMs are added/removed via capacity-model.json
-- ADR 0387: Harbor OIDC Keycloak protocol mappers and client configuration fixed — Harbor login via `registry.example.com/c/oidc/login` now works with proper email, username, and groups claims extraction; client secret authenticator and backchannel logout configured; idempotent client update task ensures protocol mappers always match repo truth
-- [ADR 0386/0387] Zero-to-platform bootstrap and Docker development environment: init_local_overlay.py generates .local/ from secret manifest with SSH keys and 237 auto-generated secrets; local-overlay-template/ provides 63-dir scaffold; Docker dev environment (vm-base container, Tier 1 minimal 4-container / Tier 2 full 7-container compose); inventory templates for forks and Docker dev; provider bootstrap profiles (Hetzner, generic Debian, homelab); verification playbooks for Proxmox, guests, and platform health; unified bootstrap-from-scratch runbook; Makefile targets: init-local, bootstrap, bootstrap-minimal, docker-dev-up/down/converge/verify/reset
-- [ADR 0385] IoC hostvars migration complete: last 13 hostvars['proxmox-host'] replaced with hostvars[platform_topology_host] across platform_services.yml, host_vars, api_gateway_runtime, and grist_runtime; 494 redundant variable declarations removed from 109 role defaults (now derived by derive_service_defaults); zero hardcoded topology host references remain
-- ADR 0386 agent cross-host execution: all 7 platform hosts reachable via execute-host-command tool; local nsenter for runtime-control, direct SSH for Proxmox, SSH→Proxmox→qm guest exec for VMs (nftables blocks inter-VM SSH); agent SSH key provisioned at /etc/lv3/api-gateway/agent-ssh-key; mempalace>=0.3.0 added to container image
-- [ADR 0385] IoC refactor: single identity.yml replaces all hardcoded operator values; fork operators edit one file to rebrand; 281 files converted from hardcoded example.com/proxmox-host to template expressions; generators and validators updated to resolve identity vars; IoC regression test added
-- ADR 0373 Phase 4: unified service registry pattern for 74 services with derive_service_defaults
-- LibreChat v0.8.4, LiteLLM Proxy, and Neko multi-instance deployment
-- ADR 0376/0380/0386: identity-core watchdog, Neko remote desktop, unified disk monitoring
-- ADR 0346 semantic search with Ollama + Qdrant; ADR 0364 native gate execution
-- ADR 0317/0318 operator provisioning via Keycloak + Headscale + step-ca
-- Operational fixes: OpenBao unseal watcher, Keycloak VM correction, oauth2-proxy, dozzle-agent, ServerClaw OIDC, hairpin NAT, Plausible OIDC removal
-- PatternFly v5 CSS removal from ops portal; repowise semantic code search (Ollama + Qdrant)
+- Harbor OIDC fix, public release readiness, ADR 0385-0388 IoC + OIDC centralization, bootstrap and Docker dev, ADR 0373 Phase 4, multi-instance deployment, operator provisioning, operational fixes
 
 ## Platform Impact
 - no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
