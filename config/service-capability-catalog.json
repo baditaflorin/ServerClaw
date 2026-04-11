@@ -2618,7 +2618,7 @@
       "adr": "0346",
       "adr_file": "docs/adr/0346-repowise-semantic-search.md",
       "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/repowise.yml",
+      "deployment_surface": "playbooks/services/repowise.yml",
       "restart_domain": "runtime-general-automation",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
       "mobility_tier": "movable_singleton",

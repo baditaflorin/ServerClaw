@@ -1,0 +1,8 @@
+---
+# Purpose: Provide the stable live-apply service wrapper for Repowise.
+# Use case: Used by make live-apply-service service=repowise env=<environment>.
+# Outputs: Imports the full Repowise converge playbook without duplicating service logic.
+# Idempotency: Matches playbooks/repowise.yml.
+# Dependencies: ADR 0346 and playbooks/repowise.yml.
+
+- import_playbook: ../repowise.yml

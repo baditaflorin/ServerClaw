@@ -6,6 +6,16 @@ import re
 import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
+
 from api_publication import ALLOWED_PUBLICATION_TIERS, load_api_publication_catalog
 from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog
 from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml, repo_path

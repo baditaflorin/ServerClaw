@@ -7,8 +7,19 @@ import datetime as dt
 import io
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
 
 from capability_contracts import load_capability_contract_catalog, summarize_capability_contracts
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json

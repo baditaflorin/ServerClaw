@@ -1,0 +1,8 @@
+---
+# Purpose: Provide the stable live-apply service wrapper for LiteLLM.
+# Use case: Used by make live-apply-service service=litellm env=<environment>.
+# Outputs: Imports the full LiteLLM converge playbook without duplicating service logic.
+# Idempotency: Matches playbooks/litellm.yml.
+# Dependencies: ADR 0381 and playbooks/litellm.yml.
+
+- import_playbook: ../litellm.yml
