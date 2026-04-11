@@ -1,8 +1,9 @@
-# Release 0.178.117
+# Release 0.178.118
 
 - Date: 2026-04-12
 
 ## Summary
+- [fix] Generator now loads `.local/identity.yml` as high-priority overlay — `make generate-platform-vars` bakes real IPs/domains into `platform.yml` instead of the sanitised `203.0.113.1`/`example.com` placeholders; Makefile target updated to use `PYTHONPATH=.`; AGENTS.md and CLAUDE.md updated with critical rule and incident reference (headscale DNS → wrong IP broke Tailscale VPN)
 - [docker-dev] Fix subnet collision and Debian base — move docker-dev subnet from 172.30.10.0/24 to 10.99.10.0/24 (avoids 172.x network exhaustion on dev machines); switch base image from Ubuntu to debian:bookworm-slim (matches playbook Debian assertion); remove pre-baked Docker from base image (Ansible role installs it during convergence); gate reserved_connections PG param on version ≥ 16 (fixes postgres convergence on Docker PG15); validated guest-access converges 7/7 containers to completion
 - [adr-0410] IoC inventory generation + self-generating README — `inventory/hosts.yml` now fully generated from `proxmox_guests` in `proxmox-host.yml` (VMID%100 formula, 30 unit+integration tests); ~30 hardcoded IPs in proxmox-host.yml replaced with selectattr lookups; `README.md` generated from `docs/templates/README.md.j2` with live counts (roles, ADRs, runbooks, scripts) + Makefile `## ` annotations auto-populating the Make Targets table; `make generate-inventory` and `make generate-readme` added
 - fix: Correct postmortem RAM claims — 5 MB/container reflects idle SSH only, not converged services; ADR 0410 estimates (4–32 GB) remain valid projections; measurement meaningless without service deployment

@@ -172,6 +172,7 @@
       {% endfor %}
     state: present
   when:
+    - platform_environment | default('production') != 'docker-dev'
     - docker_runtime_public_edge_ipv4 | default('') | length > 0
     - docker_runtime_public_edge_host_aliases | default([]) | reject('equalto', '') | list | length > 0
 
@@ -215,11 +216,20 @@
     group: root
     mode: "0755"
 
+- name: Disable nftables management in docker-dev (nft binary absent, config file bind-mount)
+  ansible.builtin.set_fact:
+    docker_runtime_nftables_config_stat:
+      stat:
+        exists: false
+  when: platform_environment | default('production') == 'docker-dev'
+
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"
   register: docker_runtime_nftables_config_stat
-  when: docker_runtime_container_forward_compat_enabled | bool
+  when:
+    - platform_environment | default('production') != 'docker-dev'
+    - docker_runtime_container_forward_compat_enabled | bool
 
 - name: Read the existing nftables config
   ansible.builtin.slurp:

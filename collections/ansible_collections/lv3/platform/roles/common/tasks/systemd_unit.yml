@@ -6,12 +6,18 @@
     fail_msg: "common.systemd_unit requires a systemd unit name."
     quiet: true
 
+- name: Skip systemd management — systemd not available on this host
+  ansible.builtin.debug:
+    msg: "Skipping systemd unit management for {{ common_systemd_unit_name }} — ansible_service_mgr={{ ansible_service_mgr }} (systemd required)"
+  when: ansible_service_mgr != 'systemd'
+
 - name: Ensure the managed systemd unit matches the requested state
   ansible.builtin.systemd_service:
     name: "{{ common_systemd_unit_name }}"
     enabled: "{{ common_systemd_unit_enabled }}"
     state: "{{ common_systemd_unit_state }}"
     daemon_reload: "{{ common_systemd_unit_daemon_reload }}"
+  when: ansible_service_mgr == 'systemd'
 
 - name: Verify the managed systemd unit active state
   ansible.builtin.command:
@@ -22,4 +28,6 @@
   register: common_systemd_unit_active_state
   changed_when: false
   failed_when: common_systemd_unit_active_state.stdout | trim != common_systemd_unit_expected_active_state
-  when: common_systemd_unit_verify_active | bool
+  when:
+    - common_systemd_unit_verify_active | bool
+    - ansible_service_mgr == 'systemd'

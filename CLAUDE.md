@@ -226,6 +226,28 @@ private↔public diff small and reviewable.
 **The pipeline currently sanitizes ~588 files per publish (down from 6,482).**
 Every file you write with generic values is one fewer file it needs to touch.
 
+### ⚠️ platform.yml exception — generated file MUST have real values
+
+`inventory/group_vars/platform.yml` is **generated** — it is NOT a file you
+hand-edit with `example.com` placeholders. It must contain real deployment IPs
+and domains because it encodes deeply-nested derived structures (e.g.
+`platform_host.management.ipv4`, DNS scrape targets) that Ansible extra-vars
+cannot override at runtime.
+
+**Run `make generate-platform-vars` whenever:**
+- `.local/identity.yml` changes
+- `inventory/host_vars/proxmox-host.yml` changes
+- You see `203.0.113.1` or `example.com` inside `platform.yml` — that is a bug
+
+The generator reads `.local/identity.yml` as a high-priority overlay and bakes
+real values into `platform.yml`. The publish pipeline sanitises the real values
+when syncing to the public mirror. The private repo's `platform.yml` must
+always reflect actual deployment reality.
+
+> **Incident**: This gap caused `headscale.lv3.org` DNS to point at `203.0.113.1`
+> (a non-routable documentation IP), breaking Tailscale VPN for the entire
+> deployment.
+
 ---
 
 ## 10. Common Pitfalls
@@ -241,3 +263,5 @@ Every file you write with generic values is one fewer file it needs to touch.
 **Pre-push gate snapshot** — The gate validates a point-in-time snapshot of committed code. Fixes committed after a push attempt starts apply to the *next* push, not the current one.
 
 **`.local/` is sacred** — NEVER symlink, copy, or `git add` the `.local` directory. Worktrees intentionally lack `.local/`; read credentials from the main worktree path if needed. Never generate placeholder secrets that could overwrite real ones. Never use `git add -A` or `git add .` in a directory containing `.local`. A pre-commit hook blocks `.local` from the index but defense in depth matters. See ADR 0376 for the full incident analysis.
+
+**`platform.yml` fake IPs = broken deployment** — If `inventory/group_vars/platform.yml` contains `203.0.113.1` or `example.com`, every downstream artifact (DNS records, monitoring targets, Tailscale config) will be misconfigured. Always run `make generate-platform-vars` after changing `.local/identity.yml` or `inventory/host_vars/proxmox-host.yml`. The generator now loads `.local/identity.yml` as a high-priority overlay; without it, fake IPs propagate silently into production DNS.

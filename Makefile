@@ -417,7 +417,7 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 	uv run --with pyyaml --with jinja2 python $(REPO_ROOT)/scripts/generate_readme.py --check
 
 generate-platform-vars:
-	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write
+	PYTHONPATH=$(REPO_ROOT) python3 $(REPO_ROOT)/scripts/generate_platform_vars.py --write
 
 generate-slo-rules:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --write
