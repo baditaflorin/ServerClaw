@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-11T08:33:30Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "fcae97bd031fdb172f66eade80b248c7a2736cbb",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "build server 10.10.10.30 unreachable, local fallback hung",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "local pre-commit hooks passed",
+      "audit-sanitization passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-13",
+    "remediation_ref": "ADR-0400"
+  }
+}

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.102",
+  "repo_version": "0.178.103",
   "platform_version": "0.178.76",
-  "generated_at": "2026-04-11T06:35:05Z",
-  "next_refresh_at": "2026-04-11T07:35:05Z",
+  "generated_at": "2026-04-11T10:05:59Z",
+  "next_refresh_at": "2026-04-11T11:05:59Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.101",
+    "last_version": "0.178.102",
     "deployed_at": "2026-04-11",
-    "summary": "static analysis gate: ruff/bandit/pyright pre-commit hooks; three new validation-gate lanes (python-type-safety, cross-catalog-integrity, waiver-escalation-proofs); Z3 formal verification of waiver escalation state machine (6 proofs + 19 test vectors); cross-catalog referential integrity checker; full ruff format pass across scripts/ and tests/ [publish] Prepare repository for public GitHub release at baditaflorin/ServerClaw \u2014 scrub PII, replace identity.yml with placeholders, remove credential files, add AI-native README positioning, clean CLAUDE.md for public consumption",
-    "release_notes_url": "docs/release-notes/0.178.102.md"
+    "summary": "[security] Emergency credential rotation after public release \u2014 rotated all 220 platform-generated credentials (ADR 0405), 3 postmortems, rotation script, runbook; removed inline OIDC secret from ws-0362; converged 42 services with zero rotation-caused failures static analysis gate: ruff/bandit/pyright pre-commit hooks; three new validation-gate lanes (python-type-safety, cross-catalog-integrity, waiver-escalation-proofs); Z3 formal verification of waiver escalation state machine (6 proofs + 19 test vectors); cross-catalog referential integrity checker; full ruff format pass across scripts/ and tests/",
+    "release_notes_url": "docs/release-notes/0.178.103.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

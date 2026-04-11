@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-11T09:07:53Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "49bea2416d1cb1df4ee936d4e08dd807ffd15917",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "Docs-only commit; no logic changed. Pre-existing gate failures unchanged from prior push.",
+    "impacted_lanes": [
+      "documentation-and-adr"
+    ],
+    "substitute_evidence": [
+      "prior-gate-run:ef57ebbc4 cross-catalog-integrity:passed python-type-safety:passed waiver-escalation-proofs:passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-12",
+    "remediation_ref": "pre-existing failures tracked separately"
+  }
+}

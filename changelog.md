@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [security] Emergency credential rotation after public release — rotated all 220 platform-generated credentials (ADR 0405), 3 postmortems, rotation script, runbook; removed inline OIDC secret from ws-0362; converged 42 services with zero rotation-caused failures
 - static analysis gate: ruff/bandit/pyright pre-commit hooks; three new validation-gate lanes (python-type-safety, cross-catalog-integrity, waiver-escalation-proofs); Z3 formal verification of waiver escalation state machine (6 proofs + 19 test vectors); cross-catalog referential integrity checker; full ruff format pass across scripts/ and tests/
 - [publish] Prepare repository for public GitHub release at baditaflorin/ServerClaw — scrub PII, replace identity.yml with placeholders, remove credential files, add AI-native README positioning, clean CLAUDE.md for public consumption
 - fix: Remove duplicate excalidraw topology block in proxmox_florin.yml that caused exposure_model to be overridden to private-only; changelog portal generation unblocked
@@ -39,9 +40,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - chore: regenerate ADR index with 0392 (renamed from duplicate 0382)
 - fix: Resolve Jinja2 template values in subdomain validation scripts (subdomain_catalog.py uses load_yaml_with_identity for host_vars/edge defaults)
 - fix: Add neko to lv3_service_topology (browser.lv3.org) with edge.kind=custom and certificate catalog entry
-- fix: Add tasks symlink in playbooks/_includes for Ansible import_playbook path resolution
-- fix: Remove Jinja2 var from dns_publication.yml play name to prevent import_playbook parse-time failure
-- verified: IoC changes convergence-tested — ntfy playbook reaches 54/55 tasks (blocked only by unrelated missing local secret)
 
 ## 0.178.78 (2026-04-10)
 
@@ -77,10 +75,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.102 release notes](docs/release-notes/0.178.102.md)
+- [0.178.103 release notes](docs/release-notes/0.178.103.md)
 
 ## Previous Releases
 
+- [0.178.102 release notes](docs/release-notes/0.178.102.md)
 - [0.178.101 release notes](docs/release-notes/0.178.101.md)
 - [0.178.100 release notes](docs/release-notes/0.178.100.md)
 - [0.178.99 release notes](docs/release-notes/0.178.99.md)
@@ -92,9 +91,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.93 release notes](docs/release-notes/0.178.93.md)
 - [0.178.92 release notes](docs/release-notes/0.178.92.md)
 - [0.178.91 release notes](docs/release-notes/0.178.91.md)
-- [0.178.90 release notes](docs/release-notes/0.178.90.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (437 releases)](docs/release-notes/index/2026.md)
+- [2026 (438 releases)](docs/release-notes/index/2026.md)

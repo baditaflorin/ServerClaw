@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-11T06:26:45Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "877df1845dc1af411ab37e5edd99740b4bf0b3c7",
+  "waiver": {
+    "reason_code": "build_server_unreachable",
+    "reason_summary": "The remote build-server gate could not be reached or stayed unavailable long enough to block the governed pre-push path.",
+    "detail": "CSP/OIDC regression fix - build server not reachable",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "pre-commit hooks passed"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-13",
+    "remediation_ref": "ADR-0385"
+  }
+}
