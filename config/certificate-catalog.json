@@ -341,7 +341,7 @@
     {
       "id": "data-edge",
       "service_id": "directus",
-      "status": "active",
+      "status": "tls_pending",
       "summary": "Shared NGINX edge certificate served for data.lv3.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
@@ -1000,7 +1000,7 @@
     {
       "id": "realtime-edge",
       "service_id": "realtime",
-      "status": "active",
+      "status": "tls_pending",
       "summary": "Shared NGINX edge certificate served for realtime.lv3.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
