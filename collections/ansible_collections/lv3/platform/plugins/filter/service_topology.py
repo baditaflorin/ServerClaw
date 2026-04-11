@@ -87,6 +87,10 @@ def service_topology_edge_sites(catalog):
             ):
                 if optional_field in edge:
                     site[optional_field] = edge[optional_field]
+        elif kind == "custom":
+            # Services with kind=custom use a dedicated NGINX config template
+            # and are not rendered through the standard edge site loop.
+            continue
         else:
             raise AnsibleFilterError(
                 f"service {service_id} has unsupported edge kind: {kind}"
