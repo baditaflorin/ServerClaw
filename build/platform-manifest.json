@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.111",
+  "repo_version": "0.178.112",
   "platform_version": "0.178.77",
-  "generated_at": "2026-04-11T18:32:06Z",
-  "next_refresh_at": "2026-04-11T19:32:06Z",
+  "generated_at": "2026-04-11T18:47:40Z",
+  "next_refresh_at": "2026-04-11T19:47:40Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.110",
+    "last_version": "0.178.111",
     "deployed_at": "2026-04-11",
-    "summary": "[docs] IoC value-flow architecture diagrams \u2014 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline [adr-0409] Zero-sanitization publication \u2014 committed code fully generic; 129 files, 2,581 replacements; identity.yml uses example.com (real values in .local/identity.yml); topology host renamed to proxmox-host; public IPs\u2192RFC 5737; 6 generated files gitignored; publication Tier C sanitization reduced from 128 to **0 files**",
-    "release_notes_url": "docs/release-notes/0.178.111.md"
+    "summary": "fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars; postmortem documents 6 findings from Docker inception IoC test [docs] IoC value-flow architecture diagrams \u2014 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline",
+    "release_notes_url": "docs/release-notes/0.178.112.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

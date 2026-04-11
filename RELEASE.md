@@ -1,8 +1,9 @@
-# Release 0.178.111
+# Release 0.178.112
 
 - Date: 2026-04-11
 
 ## Summary
+- fix: Docker dev entrypoint creates /run/sshd at start (tmpfs mount wiped build-time directory); edge ports now configurable via EDGE_HTTP_PORT/EDGE_HTTPS_PORT env vars; postmortem documents 6 findings from Docker inception IoC test
 - [docs] IoC value-flow architecture diagrams — 5 Mermaid diagrams documenting end-to-end value flow, Ansible variable precedence, bootstrap sequence, 8 operator values, and publication pipeline
 - [adr-0409] Zero-sanitization publication — committed code fully generic; 129 files, 2,581 replacements; identity.yml uses example.com (real values in .local/identity.yml); topology host renamed to proxmox-host; public IPs→RFC 5737; 6 generated files gitignored; publication Tier C sanitization reduced from 128 to **0 files**
 - [adr-0408] Remove -lv3 suffix from 24 inventory hostnames — 337 files, 3,240 replacements; publication sanitization drops from 412 to 126 files (69% reduction); inventory-only rename, actual Proxmox VMs unchanged; 18 VM name patterns removed from sanitization config

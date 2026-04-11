@@ -15,6 +15,9 @@ if [ -f /home/ops/.ssh/authorized_keys ]; then
     chown ops:ops /home/ops/.ssh/authorized_keys
 fi
 
+# Create /run/sshd (tmpfs mount clears it on start)
+mkdir -p /run/sshd
+
 # Generate SSH host keys if missing (first boot)
 ssh-keygen -A 2>/dev/null || true
 
