@@ -1,4 +1,4 @@
-<!-- =============================================================================
+{% raw %}<!-- =============================================================================
      GENERATED — do not edit README.md directly.
 
      Source:    docs/templates/README.md.j2
@@ -16,11 +16,11 @@
        2. Add the target name to KEY_MAKE_TARGETS in scripts/generate_readme.py
        3. Run: make generate-readme
      ============================================================================= -->
-
+{% endraw %}
 # ServerClaw Platform
 
 Forkable infrastructure-as-code for taking a bare Debian 13 server to a
-fully managed Proxmox VE platform with 75+ self-hosted services — deployed,
+fully managed Proxmox VE platform with {{ counts.services }}+ self-hosted services — deployed,
 monitored, and recoverable from a single repository.
 
 ## Quick Start
@@ -59,8 +59,8 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
-- **443+ ADRs** — Every architectural decision documented and indexed
-- **269+ runbooks** — Step-by-step procedures an AI agent can follow
+- **{{ counts.adrs }}+ ADRs** — Every architectural decision documented and indexed
+- **{{ counts.runbooks }}+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -73,11 +73,11 @@ self-hosted platform:
 
 | Layer | What | Count |
 |-------|------|-------|
-| Architecture decisions | `docs/adr/` | 443+ ADRs |
-| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 160 roles |
-| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 61 playbooks |
-| Operational runbooks | `docs/runbooks/` | 269+ runbooks |
-| Automation scripts | `scripts/` | 307+ scripts |
+| Architecture decisions | `docs/adr/` | {{ counts.adrs }}+ ADRs |
+| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | {{ counts.roles }} roles |
+| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | {{ counts.playbooks }} playbooks |
+| Operational runbooks | `docs/runbooks/` | {{ counts.runbooks }}+ runbooks |
+| Automation scripts | `scripts/` | {{ counts.scripts }}+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
 ### Services included
@@ -176,8 +176,8 @@ variables from it — no manual IP editing.
 ```
 .
 ├── collections/ansible_collections/lv3/platform/
-│   ├── roles/           # 160 Ansible roles
-│   ├── playbooks/       # 61 playbooks
+│   ├── roles/           # {{ counts.roles }} Ansible roles
+│   ├── playbooks/       # {{ counts.playbooks }} playbooks
 │   └── plugins/         # Custom filters and callbacks
 ├── inventory/
 │   ├── hosts.yml        # GENERATED — see scripts/generate_inventory.py
@@ -191,12 +191,12 @@ variables from it — no manual IP editing.
 │   ├── minimal/         # Tier 1 compose (4 containers)
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
-│   ├── adr/             # 443+ architecture decision records
-│   ├── runbooks/        # 269+ operational runbooks
+│   ├── adr/             # {{ counts.adrs }}+ architecture decision records
+│   ├── runbooks/        # {{ counts.runbooks }}+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
-├── scripts/             # 307+ automation scripts
+├── scripts/             # {{ counts.scripts }}+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
-└── Makefile             # 27+ automation targets
+└── Makefile             # {{ counts.make_targets }}+ automation targets
 ```
 
 Full layout: [.repo-structure.yaml](.repo-structure.yaml)
@@ -204,23 +204,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 ## Make Targets
 
 <!-- Generated from Makefile '## ' annotations by scripts/generate_readme.py -->
-| Target | Description |
-|--------|-------------|
-| `make init-local` | Initialize .local/ overlay with SSH keys and secrets |
-| `make generate-inventory` | Regenerate inventory/hosts.yml from proxmox_guests in host_vars/proxmox-host.yml |
-| `make validate-generated-inventory` | Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests |
-| `make bootstrap` | Full platform bootstrap from bare Debian 13 (ADR 0386) |
-| `make bootstrap-minimal` | Bootstrap critical path only (PG + Keycloak + Nginx + OpenBao) |
-| `make docker-dev-up` | Start minimal Docker dev environment (Tier 1) |
-| `make docker-dev-converge` | Run Ansible convergence against Docker dev containers |
-| `make converge-<service>` | Deploy a specific service |
-| `make verify-platform` | Verify critical platform services are healthy |
-| `make validate` | Run full validation suite (YAML, syntax, lint, cross-catalog, types) |
-| `make validate-types` | Pyright type-check + bandit SAST on Python scripts and Ansible plugins |
-| `make validate-cross-catalog` | Cross-catalog referential integrity check |
-| `make generate-readme` | Regenerate README.md from docs/templates/README.md.j2 |
-| `make validate-generated-readme` | Exit 1 if README.md is out of sync with template |
-| `make publish-serverclaw` | Dry-run: sanitize repo and check for leaks (no push) |
+{{ make_targets_table }}
 
 ## Documentation
 
@@ -258,6 +242,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-04-11 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated {{ generated_on }} by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

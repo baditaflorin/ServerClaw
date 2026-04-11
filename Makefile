@@ -129,7 +129,7 @@ push-local:
 	GATE_BYPASS_OWNER="$$(git config user.name)" \
 	git push origin $$(git rev-parse --abbrev-ref HEAD)
 
-validate:
+validate: ## Run full validation suite (YAML, syntax, lint, cross-catalog, types)
 	$(REPO_ROOT)/scripts/validate_repo.sh
 
 validate-generated-vars:
@@ -165,7 +165,7 @@ validate-compose-runtime-envs:
 validate-data-models:
 	$(REPO_ROOT)/scripts/validate_repo.sh data-models
 
-validate-cross-catalog:
+validate-cross-catalog: ## Cross-catalog referential integrity check
 	$(REPO_ROOT)/scripts/validate_repo.sh cross-catalog
 
 verify-waiver-escalation:
@@ -173,7 +173,7 @@ verify-waiver-escalation:
 	uvx --from z3-solver python scripts/verify_waiver_escalation.py
 	@echo "=== Z3 proofs passed ==="
 
-validate-types:
+validate-types: ## Pyright type-check + bandit SAST on Python scripts and Ansible plugins
 	@echo "=== Python type safety validation ==="
 	@echo "--- pyright: catalog-integrity and proof scripts + Ansible plugins ---"
 	uvx --quiet pyright --pythonversion 3.12 \
@@ -409,6 +409,12 @@ generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in hos
 
 validate-generated-inventory: ## Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --check
+
+generate-readme: ## Regenerate README.md from docs/templates/README.md.j2 and live repo data
+	uv run --with pyyaml --with jinja2 python $(REPO_ROOT)/scripts/generate_readme.py --write
+
+validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templates/README.md.j2
+	uv run --with pyyaml --with jinja2 python $(REPO_ROOT)/scripts/generate_readme.py --check
 
 generate-platform-vars:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write
