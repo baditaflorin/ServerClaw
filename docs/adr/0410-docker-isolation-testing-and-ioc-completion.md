@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| **Status** | Proposed |
+| **Status** | Partially Implemented |
 | **Date** | 2026-04-11 |
 | **Concerns** | testing, IoC, Docker dev, TLS, security |
 | **Depends on** | ADR 0387, ADR 0407, ADR 0409 |
-| **Implementation** | — |
+| **Implementation** | Phase 1 (subnet isolation), Phase 4a (cert validator), Phase 4c (docker identity) — complete. Phases 2, 3, 4b, 4d, 5 pending. |
 
 ## Context
 

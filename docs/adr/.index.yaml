@@ -141,7 +141,7 @@ reservation_ledger:
 latest_adrs:
   - adr: '0410'
     title: — Docker Isolation Testing and IoC Completion
-    implementation_status: Proposed
+    implementation_status: Partially Implemented
     concern: testing
     path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md
   - adr: 0409

@@ -130,7 +130,7 @@ proxmox_tailscale_tags: []
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"
   - "{{ proxmox_staging_network }}"
-proxmox_tailscale_operator_target_guest: 10.10.10.30
+proxmox_tailscale_operator_target_guest: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-build') | list | first).ipv4 }}"
 proxmox_public_ingress_tcp_ports:
   - 25
   - 80
@@ -141,33 +141,35 @@ proxmox_public_ingress_tcp_ports:
   - 8080
 proxmox_public_ingress_tcp_forwards:
   - listen_port: 25
-    target_host: 10.10.10.92
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     target_port: 25
   - listen_port: 80
-    target_host: 10.10.10.10
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'nginx') | list | first).ipv4 }}"
     target_port: 80
   - listen_port: 443
-    target_host: 10.10.10.10
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'nginx') | list | first).ipv4 }}"
     target_port: 443
   - listen_port: 587
-    target_host: 10.10.10.92
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     target_port: 587
   - listen_port: 993
-    target_host: 10.10.10.92
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     target_port: 993
   - listen_port: 7881
-    target_host: 10.10.10.20
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     target_port: 7881
+  # TODO: Add neko_vm to proxmox_guests when provisioned (planned VMID 141 → 10.10.10.41)
   - listen_port: 8080
-    target_host: 10.10.10.41
+    target_host: "{{ neko_vm_ipv4 | default('10.10.10.41') }}"
     target_port: 8080
     description: Neko remote desktop signalling (proxied via NGINX edge as browser.{{ platform_domain }})
 proxmox_public_ingress_udp_forwards:
   - listen_port: 7882
-    target_host: 10.10.10.20
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     target_port: 7882
+  # TODO: Add neko_vm to proxmox_guests when provisioned (planned VMID 141 → 10.10.10.41)
   - listen_port_range: 50000-60000
-    target_host: 10.10.10.41
+    target_host: "{{ neko_vm_ipv4 | default('10.10.10.41') }}"
     target_port_start: 50000
     target_port_range: 50000-60000
     description: Neko WebRTC media streams (UDP RTP/STUN for browser.{{ platform_domain }})
@@ -191,100 +193,99 @@ proxmox_tailscale_tcp_proxies:
   - name: postgres
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 5432
-    upstream_host: 10.10.10.50
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'postgres') | list | first).ipv4 }}"
     upstream_port: 5432
   - name: windmill
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"
-    upstream_host: 10.10.10.92
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     upstream_port: 8000
   - name: nomad
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.nomad_host_proxy_port }}"
-    upstream_host: 10.10.10.40
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.nomad_server_port }}"
   - name: mattermost
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: 8065
   - name: matrix-synapse
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.matrix_synapse_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.matrix_synapse_port }}"
   - name: gitea
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.gitea_host_proxy_port }}"
-    upstream_host: 10.10.10.92
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.gitea_http_port }}"
   - name: netbox
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.netbox_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: 8082
   - name: typesense
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.typesense_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.typesense_port }}"
   - name: step-ca
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.step_ca_proxy_port }}"
-    upstream_host: 10.10.10.92
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.step_ca_api_port }}"
   - name: openbao
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.openbao_proxy_port }}"
-    upstream_host: 10.10.10.92
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.openbao_proxy_port }}"
   - name: openfga
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.openfga_host_proxy_port }}"
-    upstream_host: 10.10.10.92
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.openfga_http_port }}"
   - name: semaphore
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.semaphore_host_proxy_port }}"
-    upstream_host: 10.10.10.92
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.semaphore_server_port }}"
   - name: plane
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.plane_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.plane_port }}"
   - name: woodpecker
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.woodpecker_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.woodpecker_http_port }}"
-    listen_address: "{{ management_tailscale_ipv4 }}"
-    upstream_host: 10.10.10.20
   - name: platform-context-api
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.platform_context_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: 8010
   - name: portainer
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.portainer_host_proxy_port }}"
-    upstream_host: 10.10.10.20
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
     upstream_port: 9443
   - name: vaultwarden
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 443
-    upstream_host: 10.10.10.92
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.vaultwarden_https_port }}"
   - name: coolify
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.coolify_host_proxy_port }}"
-    upstream_host: 10.10.10.70
+    upstream_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify') | list | first).ipv4 }}"
     upstream_port: "{{ platform_port_assignments.coolify_dashboard_port }}"
 
 proxmox_guests:
   - vmid: 110
     name: nginx
     role: nginx
+    has_staging: true
     proxmox_firewall_enabled: false
     template_key: lv3-debian-base
     ipv4: 10.10.10.10
@@ -308,6 +309,7 @@ proxmox_guests:
   - vmid: 120
     name: docker-runtime
     role: docker-runtime
+    has_staging: true
     proxmox_firewall_enabled: false
     template_key: lv3-docker-host
     ipv4: 10.10.10.20
@@ -331,6 +333,7 @@ proxmox_guests:
   - vmid: 130
     name: docker-build
     role: docker-build
+    has_staging: true
     template_key: lv3-docker-host
     ipv4: 10.10.10.30
     cidr: 24
@@ -357,6 +360,7 @@ proxmox_guests:
   - vmid: 140
     name: monitoring
     role: monitoring
+    has_staging: true
     template_key: lv3-debian-base
     ipv4: 10.10.10.40
     cidr: 24
@@ -379,6 +383,7 @@ proxmox_guests:
   - vmid: 150
     name: postgres
     role: postgres
+    has_staging: true
     template_key: lv3-postgres-host
     ipv4: 10.10.10.50
     cidr: 24
@@ -432,6 +437,7 @@ proxmox_guests:
   - vmid: 160
     name: backup
     role: backup
+    has_staging: true
     template_key: lv3-ops-base
     ipv4: 10.10.10.60
     cidr: 24
@@ -507,6 +513,7 @@ proxmox_guests:
   - vmid: 180
     name: artifact-cache
     role: artifact-cache
+    has_staging: true
     template_key: lv3-debian-base
     ipv4: 10.10.10.80
     cidr: 24
@@ -697,8 +704,8 @@ proxmox_guests:
 network_policy:
   guest_management_sources:
     - 100.64.0.0/10
-    - 10.10.10.1/32
-  host_source: 10.10.10.1/32
+    - "{{ proxmox_internal_ipv4 }}/32"
+  host_source: "{{ proxmox_internal_ipv4 }}/32"
   guests:
     nginx:
       allowed_inbound:
@@ -1867,11 +1874,11 @@ postgres_ha:
     token: postgres-ha-etcd
     members:
       - name: postgres
-        host: 10.10.10.50
+        host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'postgres') | list | first).ipv4 }}"
       - name: postgres-replica
-        host: 10.10.10.51
+        host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'postgres-replica') | list | first).ipv4 }}"
       - name: monitoring
-        host: 10.10.10.40
+        host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | list | first).ipv4 }}"
   patroni:
     ttl: 30
     loop_wait: 10
@@ -1904,9 +1911,9 @@ postgres_apps_ha:
     token: postgres-apps-etcd
     members:
       - name: postgres-apps
-        host: 10.10.10.52
+        host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'postgres-apps') | list | first).ipv4 }}"
       - name: monitoring
-        host: 10.10.10.40
+        host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | list | first).ipv4 }}"
   patroni:
     ttl: 30
     loop_wait: 10
@@ -1939,9 +1946,9 @@ postgres_data_ha:
     token: postgres-data-etcd
     members:
       - name: postgres-data
-        host: 10.10.10.54
+        host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'postgres-data') | list | first).ipv4 }}"
       - name: monitoring
-        host: 10.10.10.40
+        host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | list | first).ipv4 }}"
   patroni:
     ttl: 30
     loop_wait: 10
@@ -2821,10 +2828,10 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://10.10.10.20:{{ platform_port_assignments.excalidraw_port }}"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.excalidraw_port }}"
       prefix_proxy_routes:
         - path: /socket.io/
-          upstream: "http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port }}"
+          upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.excalidraw_room_port }}"
   gotenberg:
     service_name: gotenberg
     owning_vm: runtime-ai
@@ -3108,7 +3115,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.ops_portal_port }}"
   homepage:
     service_name: homepage
     owning_vm: runtime-general

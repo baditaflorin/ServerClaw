@@ -21,6 +21,7 @@ import ssl
 import socket
 import argparse
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass, field
 from enum import Enum
@@ -249,6 +250,31 @@ def format_text(results: list) -> str:
     return "\n".join(lines)
 
 
+def _get_real_domain() -> Optional[str]:
+    """Read platform_domain from .local/identity.yml — returns None if unconfigured.
+
+    ADR 0410 Phase 4a: validators must not try to connect to example.com
+    (the generic committed placeholder). If .local/identity.yml is absent or
+    contains the default, return None so the caller can skip validation.
+    """
+    try:
+        import yaml
+    except ImportError:
+        return None
+    repo_root = Path(__file__).resolve().parent.parent
+    local_identity = repo_root / ".local" / "identity.yml"
+    if not local_identity.is_file():
+        return None
+    try:
+        identity = yaml.safe_load(local_identity.read_text())
+        domain = (identity or {}).get("platform_domain", "")
+        if domain and domain != "example.com":
+            return domain
+    except Exception:
+        pass
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description="Validate SSL certificates for platform domains (ADR 0375)")
     parser.add_argument(
@@ -273,6 +299,26 @@ def main():
     if not entries:
         print("No active domains found to validate.", file=sys.stderr)
         sys.exit(2)
+
+    # ADR 0410 Phase 4a: skip example.com (generic committed placeholder).
+    # Only validate if .local/identity.yml has a real domain configured.
+    if not args.fqdn:
+        real_domain = _get_real_domain()
+        if real_domain is None:
+            print(
+                "[info] No real platform_domain in .local/identity.yml — skipping TLS validation "
+                "(committed catalog uses example.com placeholder). Configure .local/identity.yml "
+                "with your real domain to enable certificate checks.",
+                file=sys.stderr,
+            )
+            sys.exit(0)
+        entries = [e for e in entries if real_domain in e["fqdn"]]
+        if not entries:
+            print(
+                f"[info] No catalog entries match configured domain '{real_domain}' — skipping.",
+                file=sys.stderr,
+            )
+            sys.exit(0)
 
     if args.fqdn:
         entries = [e for e in entries if e["fqdn"] == args.fqdn]
