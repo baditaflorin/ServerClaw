@@ -1,8 +1,9 @@
-# Release 0.178.100
+# Release 0.178.101
 
-- Date: 2026-04-10
+- Date: 2026-04-11
 
 ## Summary
+- [publish] Prepare repository for public GitHub release at baditaflorin/ServerClaw — scrub PII, replace identity.yml with placeholders, remove credential files, add AI-native README positioning, clean CLAUDE.md for public consumption
 - fix: Remove duplicate excalidraw topology block in proxmox_florin.yml that caused exposure_model to be overridden to private-only; changelog portal generation unblocked
 - NetBox infrastructure deployment converged successfully — preflight hang fixed (follow: false on find task), token provisioning retry timeout increased to 300s, verification tasks conditionalized on token definition, ops/password credentials provisioned to .local/netbox/
 - [adr-0404] Service lifecycle contract — BEGIN/END SERVICE markers as platform standard; platform_services.yml + keycloak_runtime defaults/tasks migrated (3 one-time migration scripts); decommission_service.py adds yaml_marker_block/json_array_flat/yaml_var_prefix/AST test-removal handlers; scaffold_service.py auto-populates platform_services, keycloak defaults, and uptime-kuma monitors on commission; monitors.json service_id field added (39/47 monitors mapped); closes ADR 0402 gaps 2, 3, 6, 7
