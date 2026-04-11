@@ -14,15 +14,25 @@
     fail_msg: "common.docker_bridge_chains requires a service name plus non-negative retry settings."
     quiet: true
 
-- name: Detect whether the Docker service is active
+- name: Detect whether the Docker service is active (systemd hosts only)
   ansible.builtin.command:
     argv:
       - systemctl
       - is-active
       - "{{ common_docker_bridge_chains_service_name }}"
-  register: common_docker_bridge_chains_active_state
+  register: _common_docker_bridge_chains_systemctl
   changed_when: false
-  failed_when: common_docker_bridge_chains_active_state.rc not in [0, 3, 4]
+  failed_when: _common_docker_bridge_chains_systemctl.rc not in [0, 3, 4]
+  when: ansible_service_mgr == 'systemd'
+
+- name: Resolve Docker service active state (non-systemd hosts report inactive)
+  ansible.builtin.set_fact:
+    common_docker_bridge_chains_active_state: >-
+      {{
+        _common_docker_bridge_chains_systemctl
+        if (ansible_service_mgr == 'systemd' and _common_docker_bridge_chains_systemctl is defined and not (_common_docker_bridge_chains_systemctl.skipped | default(false)))
+        else {'rc': 1}
+      }}
 
 - name: Warm the Docker control socket before chain health checks
   ansible.builtin.command:

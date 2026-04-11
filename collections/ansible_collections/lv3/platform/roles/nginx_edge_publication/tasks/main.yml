@@ -256,6 +256,7 @@
   ansible.builtin.systemd:
     name: nginx
     state: reloaded
+  when: ansible_service_mgr == 'systemd'
 
 - name: Obtain the public edge Let's Encrypt certificate
   ansible.builtin.command:
@@ -283,7 +284,9 @@
   retries: "{{ public_edge_certbot_retries }}"
   delay: "{{ public_edge_certbot_delay_seconds }}"
   until: public_edge_certbot_issue.rc == 0
-  when: not public_edge_certificate.stat.exists
+  when:
+    - platform_environment | default('production') != 'docker-dev'
+    - not public_edge_certificate.stat.exists
   changed_when: true
 
 - name: Check whether site-local certificates already exist for hostnames missing from the shared certificate
@@ -430,6 +433,7 @@
     name: nginx
     enabled: true
     state: reloaded
+  when: ansible_service_mgr == 'systemd'
 
 - name: Verify NGINX edge health probes
   ansible.builtin.import_tasks: verify.yml

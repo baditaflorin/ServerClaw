@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [docker-dev] Fix all Docker convergence blockers — public-edge (58 tasks, 0 failures) and docker-runtime (65 tasks, 0 failures) now converge cleanly; guards added for: systemd not available (ansible_service_mgr != systemd), /etc/hosts bind-mount locked, nftables config present but nft binary absent, modprobe unavailable, certbot skipped with placeholder domain, static portal rsync skipped; common/docker_bridge_chains uses dual-task pattern to avoid register-overwrite on non-systemd hosts
+
 - [adr-0368] Macro library adoption complete — 16 service docker-compose templates now import from shared roles/common/templates/compose_macros.j2; stale role-local copies deleted from keycloak, netbox, plane, semaphore; generate_platform_vars.py fresh-worktree import fix; live-apply blocked by network (documented in ws-0368 handoff)
 
 - [fix] Revert tracked catalog files to 203.0.113.1 placeholder (ADR 0407) — v0.178.119 incorrectly committed real IPs into config/subdomain-catalog.json, config/subdomain-exposure-registry.json, config/environment-topology.json, config/workflow-catalog.json, versions/stack.yaml; reverted to generic placeholder so real IPs never touch git; runtime substitution handles real IP resolution from .local/identity.yml
