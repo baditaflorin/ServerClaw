@@ -79,10 +79,12 @@ proxmox_guest_nameserver: 1.1.1.1
 proxmox_guest_ssh_connection_mode: tailscale_direct
 proxmox_guest_ssh_jump_host: >-
   {{ lookup('env', 'LV3_PROXMOX_HOST_ADDR') | default(hostvars[platform_topology_host].ansible_host, true) }}
+proxmox_guest_ssh_jump_port: >-
+  {{ lookup('env', 'LV3_PROXMOX_HOST_PORT') | default(22, true) }}
 proxmox_guest_ssh_bootstrap_key_path: >-
   {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PRIVATE_KEY') | default(repo_shared_bootstrap_private_key_path, true) }}
 proxmox_guest_ssh_proxy_command: >-
-  -o ProxyJump={{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }}
+  -o ProxyJump={{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }}:{{ proxmox_guest_ssh_jump_port }}
 proxmox_guest_ssh_public_proxy_command: >-
   -o ProxyJump={{ proxmox_host_admin_user }}@{{ hostvars[platform_topology_host].management_ipv4 }}
 proxmox_guest_ssh_common_args:

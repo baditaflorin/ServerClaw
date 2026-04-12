@@ -70,6 +70,8 @@
     - tier-2
     - automation
     - service-gitea
+  vars:
+    keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
 
   pre_tasks:
     - name: Run shared preflight checks
