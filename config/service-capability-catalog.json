@@ -1061,8 +1061,8 @@
       "vm": "coolify",
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
-      "public_url": "https://librechat.example.com",
-      "subdomain": "librechat.example.com",
+      "public_url": "https://chat.example.com",
+      "subdomain": "chat.example.com",
       "exposure": "edge-published",
       "image_catalog_ids": [],
       "secret_catalog_ids": [],
@@ -1081,8 +1081,8 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://librechat.example.com",
-          "subdomain": "librechat.example.com"
+          "url": "https://chat.example.com",
+          "subdomain": "chat.example.com"
         }
       }
     },

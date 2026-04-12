@@ -50,7 +50,6 @@ Checking paperless.lv3.org...
 ========================================================================
 SSL CERTIFICATE VALIDATION REPORT
 ========================================================================
-
 Total Domains : 47
   Valid       : 46
   Expiring    : 0

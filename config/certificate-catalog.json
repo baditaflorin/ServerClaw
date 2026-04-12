@@ -268,7 +268,7 @@
     },
     {
       "id": "chat-edge",
-      "service_id": "serverclaw",
+      "service_id": "librechat",
       "status": "active",
       "summary": "Shared NGINX edge certificate served for chat.example.com.",
       "expected_issuer": "letsencrypt",

@@ -1,2 +1,1 @@
-WARN Broken interpreter cache entry at /Users/live/.cache/uv/interpreter-v4/690e8bc5fc3a5e7e/2daabe090b255c12.msgpack, removing: array had incorrect length, expected 16
 Written /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/docs/adr/.index.yaml and 29 ADR shard files (443 ADRs indexed)

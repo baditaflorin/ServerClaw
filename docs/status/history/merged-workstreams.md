@@ -166,6 +166,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0381` | ADR 0381 live apply from latest origin/main | `merged` | [ws-0381-live-apply.md](../../workstreams/ws-0381-live-apply.md) |
 | `0380` | Neko remote desktop exact-main live apply and regression hardening | `merged` | [ws-0380-live-apply.md](../../workstreams/ws-0380-live-apply.md) |
 | `0025` | Live apply ADR 0025 compose-managed runtime stacks from latest origin/main | `live_applied` | [ws-0025-live-apply.md](../../workstreams/ws-0025-live-apply.md) |
 | `0319` | Guarded live apply for the remaining runtime pool transition | `live_applied` | [ws-0331-runtime-pool-live-apply.md](../../workstreams/ws-0331-runtime-pool-live-apply.md) |

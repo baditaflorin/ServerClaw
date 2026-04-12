@@ -8,7 +8,7 @@
   "recorded_by": "codex",
   "source_commit": "0de2267bf7e42af98389ee48de92e595b7ed0c4e",
   "repo_version_context": "0.178.126",
-  "workflow_id": "converge-librechat+litellm",
+  "workflow_id": "converge-librechat",
   "adr": "0374",
   "summary": "Replay ADR 0374 cross-cutting service manifest updates from the latest origin/main and re-apply the affected runtime services.",
   "targets": [

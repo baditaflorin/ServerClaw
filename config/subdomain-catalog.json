@@ -277,7 +277,7 @@
     },
     {
       "fqdn": "chat.example.com",
-      "service_id": "serverclaw",
+      "service_id": "librechat",
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",

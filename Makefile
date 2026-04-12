@@ -26,6 +26,7 @@ WARNING_DAYS ?= 45
 INACTIVE_DAYS ?= 60
 HTTPS_TLS_TIMEOUT_SECONDS ?= 60
 OPS_PORTAL_PROBE_TIMEOUT ?= 0
+OPS_PORTAL_GATE_PROBE_TIMEOUT ?= 2
 FAULT_INJECTION_ARGS ?=
 STAGING_RECEIPT ?=
 BRANCH ?=
@@ -548,7 +549,7 @@ validate-generated-docs:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_diagrams.py --check
 
 validate-generated-portals:
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --check
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --check --probe-timeout $(OPS_PORTAL_GATE_PROBE_TIMEOUT)
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --check
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --check
 	$(MAKE) docs

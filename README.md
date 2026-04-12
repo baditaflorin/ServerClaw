@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.126` |
-| Platform version | `0.178.78` |
+| Repository version | `0.178.127` |
+| Platform version | `0.178.126` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -61,6 +61,8 @@ monitored, and recoverable from a single repository.
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `litellm` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
+| `librechat` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
 | `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
@@ -76,10 +78,8 @@ monitored, and recoverable from a single repository.
 | `openfga` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `mailpit` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 
-Showing 20 of 175 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 177 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 ## Version Summary
@@ -89,8 +89,8 @@ Showing 20 of 175 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.126` |
-| Platform version | `0.178.78` |
+| Repository version | `0.178.127` |
+| Platform version | `0.178.126` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 301 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 302 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |

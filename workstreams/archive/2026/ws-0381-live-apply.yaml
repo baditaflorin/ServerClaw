@@ -1,7 +1,7 @@
 id: ws-0381-live-apply
 adr: 0381
 title: ADR 0381 live apply from latest origin/main
-status: live_applied
+status: merged
 ready_to_merge: true
 live_applied: true
 owner: codex
@@ -92,11 +92,12 @@ ownership_manifest:
     - receipts/live-applies/evidence/2026-04-12-ws-0381-*
     mode: exclusive
 canonical_truth:
-  changelog_entry: automates stale OIDC session recovery at the shared edge, verifies
-    the ops and tasks login redirect contract end to end, and records the verified
-    ADR 0381 live apply evidence
+  changelog_entry: merges the ADR 0381 login-service session-recovery live apply
+    onto main, revalidates the ops and tasks login redirect contract end to end,
+    and repairs latest-main validation drift in the shared edge catalogs and repo
+    automation uncovered during closeout
   release_bump: patch
-  included_in_repo_version: 0.178.126
+  included_in_repo_version: 0.178.127
   latest_receipts:
     identity_core_watchdog: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
     keycloak: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
@@ -122,7 +123,11 @@ notes: 'Replays ADR 0381 from the latest realistic origin/main baseline. Scope c
   import bootstrap bug in `scripts/control_plane_lanes.py`; the final workstream
   state carries that fix and a CLI regression test so `scripts/generate_status_docs.py`
   can run from the repo root without shadowing against the standard-library
-  `platform` module.
+  `platform` module. The merge closeout rebased onto reachable `origin/main`
+  commit `9afc6d691a9b99e40e8af1cdb2b61005ae8e266c`, corrected the final
+  `librechat` capability/certificate bindings, and bounded the ops-portal gate
+  probe timeout so the repo automation path completes predictably in a fresh
+  worktree.
 
   '
 plane_issue_id: 2952a63d-4f05-4118-a15b-81d807c34614

@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0381](../adr/0381-login-service-contracts-and-session-recovery-automation.md)
 - Title: Complete the login-service recovery rollout, validate the auth path end to end, and integrate the verified result onto `main`
-- Status: live_applied
-- Implemented In Repo Version: 0.178.126
+- Status: merged
+- Implemented In Repo Version: 0.178.127
 - Live Applied In Platform Version: 0.178.78
 - Implemented On: 2026-04-12
 - Live Applied On: 2026-04-12
@@ -98,7 +98,8 @@
 
 ## Mainline Integration Outcome
 
-- ADR 0381 is now stamped as implemented in repo version `0.178.126` and live-applied on platform version `0.178.78`.
+- ADR 0381 remains stamped as implemented in repo version `0.178.126`, and this exact-main closeout merged on `main` in repo version `0.178.127` after the live-applied platform verification on version `0.178.78`.
+- The exact-main live replay ran against `18dfb4ea01cd6c3787a61eaa5cceff7cfd496543`, the latest realistic mainline revision at apply time. While the closeout was being integrated, `origin/main` advanced to `9afc6d691a9b99e40e8af1cdb2b61005ae8e266c`, so the final merge was rebased onto that newer commit and revalidated without adding further ADR 0381 runtime changes.
 - The archived workstream carries canonical-truth metadata for `keycloak`, `public_edge_publication`, `ops_portal`, and `identity_core_watchdog`, allowing the merged registry to advertise the new canonical receipt safely.
 - The exact-main replay and follow-on validation repair also cleared five latest-main drifts that would otherwise have blocked truthful live apply or repo automation from a fresh worktree: the missing compose macro loader, the Plane OIDC client reconciliation path, the shared-edge `librechat` versus `chat` catalog mismatch, certificate validation resolving `.local` from worktrees, and the `control_plane_lanes.py` import bootstrap needed by `generate_status_docs.py`.
 - The only runtime anomaly that remained after the replay was outside ADR 0381 itself: `vault.lv3.org` still reset TLS connections against `100.64.0.1:443` during the certificate sweep.

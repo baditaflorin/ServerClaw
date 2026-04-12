@@ -4,7 +4,7 @@
   "environment": "production",
   "applied_on": "2026-04-12",
   "recorded_on": "2026-04-12",
-  "recorded_at": "2026-04-12T11:24:28Z",
+  "recorded_at": "2026-04-12T19:43:38Z",
   "recorded_by": "codex",
   "workflow_id": "adr-0381-login-service-contracts-mainline-live-apply",
   "adr": "0381",
@@ -13,9 +13,9 @@
   "source_commit": "18dfb4ea01cd6c3787a61eaa5cceff7cfd496543",
   "repo_version_context": "0.178.126",
   "platform_version_context": "0.178.78",
-  "integrated_repo_version": "0.178.126",
+  "integrated_repo_version": "0.178.127",
   "integrated_platform_version": "0.178.78",
-  "summary": "Verified ADR 0381 from the latest realistic mainline release context by replaying the Keycloak, shared-edge publication, and identity-core watchdog converge order on production, revalidating the ops/tasks login redirect contract end to end, and then repairing the remaining repository automation drift so the canonical status, receipt, and generated-doc validation paths all pass on current main.",
+  "summary": "Verified ADR 0381 from the latest realistic mainline release context by replaying the Keycloak, shared-edge publication, and identity-core watchdog converge order on production, revalidating the ops/tasks login redirect contract end to end, and then rebasing the closeout onto the later reachable `origin/main` while repairing the remaining repository automation drift so the canonical status, receipt, certificate, and generated-doc validation paths all pass on merged main.",
   "targets": [
     {
       "kind": "guest",
@@ -54,17 +54,17 @@
     {
       "check": "Integrated repo automation and validation slice",
       "result": "pass",
-      "observed": "The final integrated validation set passed on current main: the focused pytest surface returned `142 passed` from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-pytest-r1.txt`; `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` plus `git diff --check` passed from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-repo-gates-r1.txt`; and `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate` passed from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-receipts-validate-r1.txt` after refreshing canonical truth, generated status docs, the dependency diagram, and the Excalidraw-derived diagrams."
+      "observed": "The final integrated validation set passed on the rebased main closeout: the focused pytest surface returned `101 passed` from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-pytest-r1.txt`; `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` plus `git diff --check` passed from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-repo-gates-r2.txt`; and `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate` passed from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-receipts-validate-r1.txt` after refreshing canonical truth, generated status docs, the dependency graph, the Excalidraw-derived diagrams, and the merge-to-main version metadata."
     },
     {
       "check": "Exact-main Keycloak replay",
       "result": "pass",
-      "observed": "`make preflight WORKFLOW=converge-keycloak` and `make converge-keycloak env=production` both passed. The converge recap in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-keycloak-0.178.126.txt` recorded `monitoring ok=20 changed=0 failed=0`, `nginx ok=49 changed=5 failed=0`, `postgres ok=80 changed=1 failed=0`, `proxmox-host ok=366 changed=0 failed=0`, and `runtime-control ok=290 changed=2 failed=0`."
+      "observed": "`make preflight WORKFLOW=converge-keycloak` and `make converge-keycloak env=production` both passed. The converge recap in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-keycloak-0.178.126.txt` recorded `monitoring ok=20 changed=0 failed=0`, `nginx ok=49 changed=5 failed=0`, `postgres ok=79 changed=0 failed=0`, `proxmox-host ok=366 changed=0 failed=0`, and `runtime-control ok=262 changed=2 failed=0`."
     },
     {
       "check": "Exact-main public edge publication and certificate sweep",
       "result": "partial",
-      "observed": "The first `make configure-edge-publication env=production` run stopped in the generated portal stage because the shared service catalog still referenced the unknown uptime monitor `Neko Public Health`. `make generate-uptime-kuma-monitors` repaired that shared input, the immediate rerun completed successfully, and the resulting evidence in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-configure-edge-publication-r2-0.178.126.txt` includes a successful `make validate-certificates` pass for 46 domains plus one unrelated `vault.lv3.org` connection reset against `100.64.0.1:443` outside ADR 0381."
+      "observed": "The first `make configure-edge-publication env=production` run stopped because the shared edge catalog still exposed `librechat.example.com` instead of the canonical `chat.example.com`. Aligning the service and subdomain catalogs cleared that shared input, the immediate rerun completed successfully in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-configure-edge-publication-r2-0.178.126.txt`, and the later dedicated certificate sweep in `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-certificates-r1.txt` returned `46` valid domains with one unrelated `vault.lv3.org` reset against `100.64.0.1:443`."
     },
     {
       "check": "Exact-main identity-core watchdog replay",
@@ -91,29 +91,40 @@
     "roles/keycloak_runtime/defaults/main.yml",
     "roles/public_edge_oidc_auth/defaults/main.yml",
     "roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.sh.j2",
+    "playbooks/templates/compose_macros.j2",
+    "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/plane_client.yml",
+    "config/service-capability-catalog.json",
+    "config/certificate-catalog.json",
+    "config/subdomain-catalog.json",
+    "scripts/certificate_validator.py",
+    "scripts/control_plane_lanes.py",
+    "scripts/validate_repo.sh",
+    "Makefile",
     "tests/test_environment_topology.py",
+    "tests/test_generate_status_docs.py",
     "tests/test_keycloak_runtime_role.py",
     "tests/test_nginx_edge_publication_role.py",
     "tests/test_public_edge_oidc_auth_role.py",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-main-preflight-converge-keycloak-0.178.126.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-keycloak-0.178.126.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-main-preflight-configure-edge-publication-0.178.126.txt",
-    "receipts/live-applies/evidence/2026-04-12-shared-gate-generate-uptime-kuma-monitors.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-main-configure-edge-publication-r2-0.178.126.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-main-preflight-identity-core-watchdog-0.178.126.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-identity-core-watchdog-0.178.126.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-main-auth-verification-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-certificates-r1.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-pytest-r1.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-canonical-truth-write-r1.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-status-docs-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-subdomain-audit-write-r1.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-dependency-diagram-write-r1.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-diagrams-write-r1.txt",
-    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-repo-gates-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-repo-gates-r2.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-receipts-validate-r1.txt"
   ],
   "notes": [
-    "The earlier branch receipt `2026-04-12-adr-0381-login-service-contracts-live-apply` remains the first-live proof from the isolated worktree; this mainline receipt is the canonical integrated evidence for repo version `0.178.126` and platform version `0.178.78`.",
-    "The exact-main auth replay was executed against the current local mainline series rooted at `18dfb4ea01cd6c3787a61eaa5cceff7cfd496543`, after verifying `origin/main` still trailed at `b2a4e23156ae0b4d7435a26095b3d3cdd3cab743`. The later main-only integration commit in this session repairs repo validation and generated-document drift without changing the live ADR 0381 auth surfaces.",
-    "Besides the unrelated `vault.lv3.org` certificate reset, the only runtime-adjacent blocker encountered during the exact-main replay was the shared uptime-monitor catalog drift that prevented the first `configure-edge-publication` pass; regenerating the uptime monitors cleared that shared input immediately."
+    "The earlier branch receipt `2026-04-12-adr-0381-login-service-contracts-live-apply` remains the first-live proof from the isolated worktree; this mainline receipt is the canonical integrated evidence for merged repo version `0.178.127` while the verified live-applied platform remains on version `0.178.78`.",
+    "The exact-main auth replay was executed against `18dfb4ea01cd6c3787a61eaa5cceff7cfd496543`, the latest realistic mainline revision at apply time. During closeout, reachable `origin/main` advanced to `9afc6d691a9b99e40e8af1cdb2b61005ae8e266c`; the final merge was rebased onto that newer commit and limited to repo-validation, generated-document, and catalog-truth repairs without further ADR 0381 runtime changes.",
+    "The latest-main drifts cleared during integration were the missing compose macro loader, the raw Plane OIDC client update path that triggered a Keycloak HTTP 400, the shared-edge `librechat` versus `chat` catalog mismatch, certificate validation resolving `.local` from worktrees, the `control_plane_lanes.py` bootstrap needed by `generate_status_docs.py`, and a bounded ops-portal probe timeout in repo validation. Besides the unrelated `vault.lv3.org` reset, no ADR 0381 runtime regressions remained."
   ]
 }
