@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [adr-0374] Cross-cutting service manifest live-apply repairs — registry/validator fixes, generated cross-cutting data now surfaced in platform vars, worktree bootstrap adds image scan receipts, syntax-check live-apply gates skip integration-only checks, and new redundancy entries for librechat/litellm/neko with a LibreChat service entrypoint
+
 - [fix] Placeholder IP guard + iptables-correct pve-firewall restart guard — proxmox_network aborts if management_ipv4 matches RFC 5737 placeholders (203.0.113.x etc.) preventing /etc/network/interfaces lockout; proxmox_security guard checks iptables PVEFW-HOST-IN (correct backend, not nftables); root cause 2026-04-12 outage: wrong IP in interfaces without .local/identity.yml overlay
 
 - [docker-dev] Fix all Docker convergence blockers — public-edge (58 tasks, 0 failures) and docker-runtime (65 tasks, 0 failures) now converge cleanly; guards added for: systemd not available (ansible_service_mgr != systemd), /etc/hosts bind-mount locked, nftables config present but nft binary absent, modprobe unavailable, certbot skipped with placeholder domain, static portal rsync skipped; common/docker_bridge_chains uses dual-task pattern to avoid register-overwrite on non-systemd hosts
