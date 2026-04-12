@@ -1101,7 +1101,7 @@
       "adr": "0381",
       "runbook": "docs/runbooks/configure-litellm.md",
       "runtime_pool": "runtime-ai",
-      "deployment_surface": "playbooks/services/litellm.yml",
+      "deployment_surface": "playbooks/litellm.yml",
       "restart_domain": "runtime-ai-inference",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
       "mobility_tier": "elastic_stateless",

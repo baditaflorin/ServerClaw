@@ -8,8 +8,10 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
+| `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
+| `0364` | Live apply native build server gate execution from latest origin/main | `merged` | [ws-0364-live-apply.md](../../workstreams/ws-0364-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
-| `0328` | Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse | `merged` | [0093-interactive-ops-portal.md](../../adr/0093-interactive-ops-portal.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
@@ -150,7 +152,6 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0046` | Identity classes for humans, services, agents, and break-glass | `live_applied` | [adr-0046-identity-classes.md](../../workstreams/adr-0046-identity-classes.md) |
 | `0045` | Control-plane communication lanes | `live_applied` | [adr-0045-communication-lanes.md](../../workstreams/adr-0045-communication-lanes.md) |
 | `0044` | Windmill for agent and operator workflows | `live_applied` | [adr-0044-windmill.md](../../workstreams/adr-0044-windmill.md) |
-| `0043` | Operational fixes — OpenBao unseal watcher, Keycloak VM migration, oauth2-proxy | `merged` | [naughty-jepsen-ops-fixes.md](../../workstreams/naughty-jepsen-ops-fixes.md) |
 | `0043` | OpenBao for secrets, transit, and dynamic credentials | `live_applied` | [adr-0043-openbao.md](../../workstreams/adr-0043-openbao.md) |
 | `0042` | step-ca for SSH and internal TLS | `live_applied` | [adr-0042-step-ca.md](../../workstreams/adr-0042-step-ca.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](../../workstreams/adr-0041-email-platform-live.md) |
@@ -166,6 +167,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0380` | Neko remote desktop exact-main live apply and regression hardening | `merged` | [ws-0380-live-apply.md](../../workstreams/ws-0380-live-apply.md) |
 | `0319` | Guarded live apply for the remaining runtime pool transition | `live_applied` | [ws-0331-runtime-pool-live-apply.md](../../workstreams/ws-0331-runtime-pool-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](../../workstreams/ws-0330-main-closeout.md) |
 | `0314` | Live apply resumable multi-step flows and return-to-task reentry from latest origin/main | `live_applied` | [ws-0314-live-apply.md](../../workstreams/ws-0314-live-apply.md) |

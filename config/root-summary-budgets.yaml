@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 readme:
-  max_lines: 320
+  max_lines: 450
   live_apply_evidence:
     recent_entries: 20
     history_path: docs/status/history/live-apply-evidence.md

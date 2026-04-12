@@ -1130,10 +1130,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-04-12-litellm-runtime.json",
       "exception": {
-        "reason": "Digest pin for the initial LiteLLM runtime rollout while the vulnerability scan exception remains open.",
         "owner": "Platform operations",
+        "justification": "The approved LiteLLM database image still reports critical and high Grype findings; keep it digest-pinned and review it at the next image rotation window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service stays behind the managed internal platform edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-04-12",
-        "review_by": "2026-04-19"
+        "expires_on": "2026-04-26",
+        "remediation_plan": "Re-scan and refresh litellm_runtime with make upgrade-container-image IMAGE_ID=litellm_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2",
@@ -1150,17 +1155,22 @@
       "container_name": "librechat",
       "registry_ref": "ghcr.io/danny-avila/librechat",
       "tag": "v0.8.4",
-      "digest": "sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
-      "ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
+      "digest": "sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b",
+      "ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b",
       "platform": "linux/amd64",
       "pinned_on": "2026-04-08",
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-04-12-librechat-runtime.json",
       "exception": {
-        "reason": "Digest pin for the initial LibreChat runtime rollout while the vulnerability scan exception remains open.",
         "owner": "Platform operations",
+        "justification": "The approved LibreChat image still reports critical and high Trivy findings; keep it digest-pinned and review it at the next image rotation window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains behind the managed internal platform edge while the upstream image is being remediated."
+        ],
         "approved_on": "2026-04-12",
-        "review_by": "2026-04-19"
+        "expires_on": "2026-04-26",
+        "remediation_plan": "Re-scan and refresh librechat_runtime with make upgrade-container-image IMAGE_ID=librechat_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2",
