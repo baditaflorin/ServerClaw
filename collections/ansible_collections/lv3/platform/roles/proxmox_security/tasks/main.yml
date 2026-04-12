@@ -79,15 +79,18 @@
   when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
   changed_when: true
 
-# Guard: after any restart, verify pve-firewall actually applied ACCEPT rules.
-# pve-firewall can crash between applying DROP policy and adding ACCEPT rules,
-# leaving the host completely unreachable. If this guard detects that state,
-# it flushes the ruleset (restores open access) and fails loudly so the
-# operator knows the firewall must be fixed before re-running convergence.
-- name: Wait for pve-firewall to populate ACCEPT rules (up to 30s)
+# Guard: after any restart, verify pve-firewall actually populated ACCEPT rules in the
+# PVEFW-HOST-IN iptables chain. pve-firewall uses iptables (not nftables) for host
+# INPUT policy. If it crashes after setting DROP policy but before adding ACCEPT rules,
+# the host becomes unreachable. This guard detects that state, stops pve-firewall, and
+# aborts convergence so the operator can investigate.
+# Incident reference: 2026-04-12 — 6h outage on 65.108.75.123; root cause was
+# placeholder IP in /etc/network/interfaces (wrong IP, not firewall), but this guard
+# provides defence-in-depth against the firewall-crash scenario.
+- name: Wait for pve-firewall to populate ACCEPT rules in PVEFW-HOST-IN (up to 30s)
   ansible.builtin.shell: |
     for i in $(seq 1 30); do
-      if nft list ruleset 2>/dev/null | grep -qE 'accept|ACCEPT'; then
+      if iptables -L PVEFW-HOST-IN -n 2>/dev/null | grep -qE '\bACCEPT\b'; then
         echo "OK"
         exit 0
       fi
@@ -100,19 +103,19 @@
   when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
   failed_when: false
 
-- name: Emergency recovery — flush nftables if pve-firewall stuck in DROP-all
+- name: Emergency recovery — stop pve-firewall if PVEFW-HOST-IN has no ACCEPT rules
   ansible.builtin.shell: |
     set -euo pipefail
     systemctl stop pve-firewall || true
-    nft flush ruleset
-    echo "EMERGENCY RECOVERY: pve-firewall left ruleset in DROP-all state."
-    echo "nftables flushed; host is now fully open. Fix cluster.fw and rerun."
+    echo "EMERGENCY RECOVERY: pve-firewall left PVEFW-HOST-IN with no ACCEPT rules."
+    echo "pve-firewall stopped; host iptables INPUT now falls through to ACCEPT."
+    echo "Fix cluster.fw / host.fw and rerun convergence."
   when:
     - proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
     - _pve_fw_accept_check.rc is defined
     - _pve_fw_accept_check.rc != 0
   changed_when: true
-  failed_when: true   # abort convergence; operator must investigate
+  failed_when: true
 
 - name: Render break-glass sshd port drop-in
   ansible.builtin.copy:
