@@ -33,9 +33,9 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     )
     nat_verify = next(task for task in tasks if task["name"] == "Verify Docker nat chain after retry loop")
     forward_verify = next(task for task in tasks if task["name"] == "Verify Docker forward chain after retry loop")
-    nat_final = next(task for task in tasks if task["name"] == "Probe final Docker nat chain state after retry loop")
+    nat_final = next(task for task in tasks if task["name"] == "Capture final Docker nat chain state after retry loop")
     forward_final = next(
-        task for task in tasks if task["name"] == "Probe final Docker forward chain state after retry loop"
+        task for task in tasks if task["name"] == "Capture final Docker forward chain state after retry loop"
     )
     nat_assert = next(
         task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation"
@@ -60,10 +60,12 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     assert forward_verify["retries"] == "{{ common_docker_bridge_chains_retries }}"
     assert forward_verify["delay"] == "{{ common_docker_bridge_chains_delay }}"
     assert forward_verify["until"] == "common_docker_bridge_chains_forward_verify.rc == 0"
-    assert nat_final["register"] == "common_docker_bridge_chains_nat_final"
-    assert nat_final["failed_when"] == "common_docker_bridge_chains_nat_final.rc not in [0, 1]"
-    assert forward_final["register"] == "common_docker_bridge_chains_forward_final"
-    assert forward_final["failed_when"] == "common_docker_bridge_chains_forward_final.rc not in [0, 1]"
+    assert nat_final["ansible.builtin.set_fact"] == {
+        "common_docker_bridge_chains_nat_final": "{{ common_docker_bridge_chains_nat_verify }}"
+    }
+    assert forward_final["ansible.builtin.set_fact"] == {
+        "common_docker_bridge_chains_forward_final": "{{ common_docker_bridge_chains_forward_verify }}"
+    }
     assert forward_verify["when"] == [
         "common_docker_bridge_chains_active_state.rc == 0",
         "common_docker_bridge_chains_expect_forward_chain | default(false)",

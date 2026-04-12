@@ -90,6 +90,7 @@ workstreams:
   - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
   - collections/ansible_collections/lv3/platform/roles/ollama_runtime/defaults/main.yml
   - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml
   - collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml
   - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml
   - collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml
@@ -190,6 +191,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/ollama_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/repowise_runtime/templates/docker-compose.yml.j2
       - inventory/host_vars/proxmox-host.yml
       - playbooks/repowise.yml
