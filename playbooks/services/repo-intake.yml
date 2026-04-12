@@ -1,0 +1,11 @@
+# Playbook: playbooks/services/repo-intake.yml
+# Purpose: Re-export the top-level repo-intake playbook through the hyphenated services namespace used by live-apply targets.
+# Use case: Run when service-scoped orchestration addresses `service=repo-intake`.
+# Inputs: Inventory targeting and any variables consumed by `playbooks/repo-intake.yml`.
+# Outputs: Delegates execution to the canonical repo-intake playbook without adding new runtime behavior.
+# Idempotency: Fully idempotent because this file only imports another playbook.
+# Dependencies: ADR 0165 and playbooks/repo-intake.yml.
+# depends_on:
+#   - playbooks/repo-intake.yml
+---
+- import_playbook: ../repo-intake.yml

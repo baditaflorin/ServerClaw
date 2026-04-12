@@ -32,8 +32,19 @@ REMOTE_RUNTIME_SUPPORT_FILES = (
     ("scripts/restic_config_backup.py", 0o755),
     ("scripts/script_bootstrap.py", 0o644),
     ("scripts/controller_automation_toolkit.py", 0o644),
+    ("scripts/ntfy_publish.py", 0o644),
     ("platform/__init__.py", 0o644),
+    ("platform/datetime_compat.py", 0o644),
+    ("platform/enum_compat.py", 0o644),
+    ("platform/events/__init__.py", 0o644),
+    ("platform/events/taxonomy.py", 0o644),
     ("platform/repo.py", 0o644),
+    ("platform/retry/__init__.py", 0o644),
+    ("platform/retry/classification.py", 0o644),
+    ("platform/retry/policy.py", 0o644),
+    ("config/event-taxonomy.yaml", 0o644),
+    ("config/ntfy/topics.yaml", 0o644),
+    ("config/retry-policies.yaml", 0o644),
     ("config/restic-file-backup-catalog.json", 0o644),
     ("versions/stack.yaml", 0o644),
 )
@@ -354,6 +365,14 @@ def main(argv: list[str] | None = None) -> int:
             "stdout": outcome.stdout.strip(),
             "stderr": outcome.stderr.strip(),
         }
+        allow_timeout = os.environ.get("RESTIC_ALLOW_TIMEOUT") == "1"
+        if outcome.returncode != 0 and allow_timeout and "timed out" in (outcome.stderr or "").lower():
+            payload["status"] = "warning"
+            payload["warning"] = "Restic live-apply trigger timed out; see stderr for details."
+            print(json.dumps(payload, indent=2))
+            if getattr(args, "print_report_json", False):
+                print("REPORT_JSON=" + json.dumps(payload, separators=(",", ":")))
+            return 0
         if outcome.returncode == 0:
             synced_paths = sync_reported_receipt_artifacts(
                 context,

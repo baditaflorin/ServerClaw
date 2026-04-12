@@ -6,32 +6,46 @@
   "applied_on": "2026-04-12",
   "applied_at": "2026-04-12T07:07:22Z",
   "recorded_at": "2026-04-12T07:31:55Z",
+  "recorded_on": "2026-04-12",
   "recorded_by": "codex",
   "source_commit": "a540068124c6b7308a5fe3319209aa04f0d0c2ef",
+  "repo_version_context": "0.178.125",
   "workflow_id": "live-apply-service",
+  "summary": "Live-apply replay of the build-server gate tools on docker-build, including restic backup artifacts and validation gate evidence.",
   "targets": [
     {
-      "host": "docker-build",
-      "playbook": "playbooks/services/build-server-gate-tools.yml"
+      "kind": "vm",
+      "name": "docker-build",
+      "address": "10.10.10.30"
     }
   ],
   "verification": [
     {
       "check": "make check-build-server",
-      "status": "ok",
+      "result": "pass",
+      "observed": "Build-server gate checks completed successfully.",
       "evidence": "receipts/live-applies/evidence/2026-04-12-ws-0364-check-build-server.txt"
     },
     {
       "check": "make remote-validate",
-      "status": "failed",
+      "result": "fail",
+      "observed": "Remote validation could not fetch runner images; local fallback timed out on docker info.",
       "details": "Runner images unavailable on build server; local fallback runner_unavailable (docker info timeout).",
       "evidence": "receipts/live-applies/evidence/2026-04-12-ws-0364-remote-validate.txt"
     },
     {
       "check": "make pre-push-gate",
-      "status": "not_completed",
+      "result": "partial",
+      "observed": "Remote pre-push gate hung awaiting runner registry availability.",
       "details": "Remote pre-push gate hung; rerun needed once build server runner registry is reachable."
     }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/evidence/2026-04-12-ws-0364-build-server-gate-tools-apply.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0364-restic-backup.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0364-check-build-server.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0364-remote-validate.txt",
+    "versions/stack.yaml"
   ],
   "artifacts": [
     "receipts/restic-backups/20260412T072059Z.json",

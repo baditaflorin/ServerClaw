@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-12T11:22:21Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "codex/ws-0346-live-apply",
+  "commit": "aa5fbc2058576ef428ac565073c07756b804a80d",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "Remote pre-push gate timed out with pre-existing validation failures (ansible lint/syntax, security scan, registry connectivity).",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "receipts/live-applies/evidence/2026-04-12-ws-0346-repowise-live-apply-r1.txt"
+    ],
+    "owner": "codex",
+    "expires_on": "2026-04-13",
+    "remediation_ref": "ws-0346-live-apply"
+  }
+}

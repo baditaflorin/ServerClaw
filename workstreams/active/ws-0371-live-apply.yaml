@@ -86,7 +86,7 @@ shared_surfaces:
 - tests/test_vulnerability_budget.py
 - workstreams/active/ws-0371-live-apply.yaml
 - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-- workstreams/archive/2026/ws-0364-live-apply.yaml
+- workstreams/done/ws-0364-live-apply.yaml
 - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
@@ -201,7 +201,7 @@ ownership_manifest:
     paths:
     - workstreams/active/ws-0371-live-apply.yaml
     - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-    - workstreams/archive/2026/ws-0364-live-apply.yaml
+    - workstreams/done/ws-0364-live-apply.yaml
     - workstreams.yaml
     mode: shared_contract
     contract: workstream-registry-v1

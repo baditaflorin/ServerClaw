@@ -250,14 +250,6 @@
       "next_failure_lane": "recover"
     },
     {
-      "primary_lane": "observe",
-      "secondary_lanes": [
-        "recover"
-      ],
-      "next_success_lane": "change",
-      "next_failure_lane": "recover"
-    },
-    {
       "service_id": "status_page",
       "primary_lane": "observe",
       "secondary_lanes": [

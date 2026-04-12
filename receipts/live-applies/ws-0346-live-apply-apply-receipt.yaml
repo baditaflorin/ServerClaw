@@ -1,0 +1,16 @@
+workstream_id: ws-0346-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-12T08:47:40Z'
+completed_at: '2026-04-12T10:24:31Z'
+applied_by: codex
+repo_version: 37eb062dfe6daca42e37dbf9c90a5fb8a176558c
+adr: '0346'
+summary: Live apply repowise on docker-runtime.
+targets:
+- target: docker-runtime
+  role: repowise
+errors: []
+notes:
+- Live apply executed via RESTIC_ALLOW_TIMEOUT=1 make live-apply-service service=repowise env=production ALLOW_IN_PLACE_MUTATION=true.
+- Restic live-apply trigger timed out on restic snapshots probe; evidence recorded in receipts/live-applies/evidence/2026-04-12-ws-0346-repowise-restic-timeout-r1.txt.

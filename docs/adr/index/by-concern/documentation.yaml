@@ -396,9 +396,9 @@ adrs:
     implemented_on: '2026-04-04'
   - adr: '0346'
     title: '— Repowise: local semantic code search over the git repo'
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
     concern: documentation
     keywords:
       - repowise
@@ -412,3 +412,6 @@ adrs:
     summary: 'Deploy repowise — a local semantic code search service — using:'
     filename: 0346-repowise-semantic-search.md
     path: docs/adr/0346-repowise-semantic-search.md
+    implemented_in_repo_version: 0.178.125
+    implemented_in_platform_version: 0.178.77
+    implemented_on: '2026-04-12'

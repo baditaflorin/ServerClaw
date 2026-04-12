@@ -14,6 +14,7 @@ def test_generated_monitors_match_repo_file() -> None:
     assert rendered == uptime_contract.UPTIME_MONITORS_PATH.read_text(encoding="utf-8")
     assert any(monitor["name"] == "Windmill Private" for monitor in monitors)
     assert any(monitor["name"] == "Homepage Public" for monitor in monitors)
+    assert any(monitor["name"] == "Neko Public" for monitor in monitors)
 
 
 def test_outputs_match_detects_stale_file(tmp_path: Path) -> None:

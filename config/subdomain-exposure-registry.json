@@ -741,7 +741,7 @@
     },
     {
       "fqdn": "chat.example.com",
-      "service_id": "librechat",
+      "service_id": "serverclaw",
       "environment": "production",
       "status": "active",
       "owner_adr": "0254",
@@ -809,7 +809,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "LibreChat is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
+      "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to the Keycloak-backed auth flow."
     },
     {
       "fqdn": "librechat.example.com",

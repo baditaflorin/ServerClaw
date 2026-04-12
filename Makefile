@@ -405,7 +405,7 @@ install-cli:
 
 update-cli: install-cli
 
-generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/proxmox-host.yml
+generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write
 
 validate-generated-inventory: ## Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests

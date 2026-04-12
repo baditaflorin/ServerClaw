@@ -22,6 +22,7 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
 from validation_toolkit import (
     require_bool,
     require_enum,
+    require_http_url,
     require_identifier,
     require_int,
     require_list,
@@ -173,6 +174,7 @@ HOSTNAME_PATTERN = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)*$")
 IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 DNS_LABEL_PATTERN = re.compile(r"^[a-z0-9-]+$")
 MAC_PATTERN = re.compile(r"^[0-9A-F]{2}(:[0-9A-F]{2}){5}$")
+PORT_RANGE_PATTERN = re.compile(r"^\d+:\d+$")
 SERVICE_EXPOSURE_MODELS = {
     "edge-static",
     "edge-published",
@@ -182,7 +184,7 @@ SERVICE_EXPOSURE_MODELS = {
 DNS_VISIBILITIES = {"public", "tailnet"}
 DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
 EXTRA_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME", "MX", "TXT"}
-EDGE_KINDS = {"static", "proxy"}
+EDGE_KINDS = {"static", "proxy", "custom"}
 MONITOR_TYPES = {"http", "port"}
 PROBE_KINDS = {"http", "tcp", "command", "systemd"}
 HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
@@ -211,8 +213,30 @@ def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
     result: dict[str, int] = {}
     for key, item in value.items():
         key = require_identifier(key, f"{path} key '{key}'")
-        result[key] = require_int(item, f"{path}.{key}", 1)
+        result[key] = require_int(item, f"{path}.{key}", minimum=1)
     return result
+
+
+def require_int_list(value: Any, path: str, minimum: int | None = None) -> list[int]:
+    items = require_list(value, path)
+    output: list[int] = []
+    for index, item in enumerate(items):
+        output.append(require_int(item, f"{path}[{index}]", minimum=minimum))
+    return output
+
+
+def require_port_list(value: Any, path: str) -> list[int | str]:
+    items = require_list(value, path)
+    output: list[int | str] = []
+    for index, item in enumerate(items):
+        if isinstance(item, int):
+            output.append(item)
+            continue
+        if isinstance(item, str) and PORT_RANGE_PATTERN.match(item):
+            output.append(item)
+            continue
+        output.append(require_int(item, f"{path}[{index}]"))
+    return output
 
 
 def require_repo_relative_path(value: Any, path: str) -> str:
@@ -225,7 +249,7 @@ def require_int_or_template(value: Any, path: str, minimum: int | None = None) -
         if value.startswith("{{") and value.endswith("}}"):
             return value
         raise ValueError(f"{path} must be an integer or a Jinja template expression")
-    return require_int(value, path, minimum)
+    return require_int(value, path, minimum=minimum)
 
 
 def require_date(value: Any, path: str) -> str:
@@ -255,8 +279,30 @@ def require_ipv4(value: Any, path: str) -> str:
     return value
 
 
+def require_ipv4_or_template(value: Any, path: str) -> str:
+    value = require_str(value, path)
+    if "{{" in value and "}}" in value:
+        return value
+    try:
+        ipaddress.IPv4Address(value)
+    except ipaddress.AddressValueError as exc:
+        raise ValueError(f"{path} must be a valid IPv4 address") from exc
+    return value
+
+
 def require_network(value: Any, path: str) -> str:
     value = require_str(value, path)
+    try:
+        ipaddress.ip_network(value, strict=False)
+    except ValueError as exc:
+        raise ValueError(f"{path} must be a valid network or CIDR") from exc
+    return value
+
+
+def require_network_or_template(value: Any, path: str) -> str:
+    value = require_str(value, path)
+    if "{{" in value and "}}" in value:
+        return value
     try:
         ipaddress.ip_network(value, strict=False)
     except ValueError as exc:
@@ -368,16 +414,16 @@ def guest_plan_key(role: str) -> str:
 
 def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str, str]:
     guest = require_mapping(guest, path)
-    vmid = require_int(guest.get("vmid"), f"{path}.vmid", 1)
+    vmid = require_int(guest.get("vmid"), f"{path}.vmid", minimum=1)
     name = require_hostname(guest.get("name"), f"{path}.name")
     require_identifier(guest.get("role"), f"{path}.role")
     template_key = require_identifier(guest.get("template_key"), f"{path}.template_key")
     ipv4 = require_ipv4(guest.get("ipv4"), f"{path}.ipv4")
-    require_int(guest.get("cidr"), f"{path}.cidr", 1)
+    require_int(guest.get("cidr"), f"{path}.cidr", minimum=1)
     require_ipv4(guest.get("gateway4"), f"{path}.gateway4")
-    require_int(guest.get("cores"), f"{path}.cores", 1)
-    require_int(guest.get("memory_mb"), f"{path}.memory_mb", 1)
-    require_int(guest.get("disk_gb"), f"{path}.disk_gb", 1)
+    require_int(guest.get("cores"), f"{path}.cores", minimum=1)
+    require_int(guest.get("memory_mb"), f"{path}.memory_mb", minimum=1)
+    require_int(guest.get("disk_gb"), f"{path}.disk_gb", minimum=1)
     require_string_list(guest.get("tags"), f"{path}.tags")
     require_string_list(guest.get("packages"), f"{path}.packages")
 
@@ -392,7 +438,7 @@ def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str, str]:
         disk = require_mapping(disk, f"{path}.extra_disks[{index}]")
         require_str(disk.get("interface"), f"{path}.extra_disks[{index}].interface")
         require_str(disk.get("storage"), f"{path}.extra_disks[{index}].storage")
-        require_int(disk.get("size_gb"), f"{path}.extra_disks[{index}].size_gb", 1)
+        require_int(disk.get("size_gb"), f"{path}.extra_disks[{index}].size_gb", minimum=1)
 
     return vmid, name, ipv4, template_key
 
@@ -450,7 +496,7 @@ def validate_service_topology_entry(
                 DNS_RECORD_TYPES,
             )
             require_str(dns.get("target"), f"lv3_service_topology.{service_id}.dns.target")
-            require_int(dns.get("ttl"), f"lv3_service_topology.{service_id}.dns.ttl", 1)
+            require_int(dns.get("ttl"), f"lv3_service_topology.{service_id}.dns.ttl", minimum=1)
             if "additional_records" in dns:
                 validate_extra_dns_records(
                     [
@@ -522,9 +568,9 @@ def validate_public_ingress_forwards(value: Any, path: str, allowed_ports: list[
     seen_ports: set[int] = set()
     for index, forward in enumerate(forwards):
         forward = require_mapping(forward, f"{path}[{index}]")
-        listen_port = require_int(forward.get("listen_port"), f"{path}[{index}].listen_port", 1)
-        require_ipv4(forward.get("target_host"), f"{path}[{index}].target_host")
-        require_int(forward.get("target_port"), f"{path}[{index}].target_port", 1)
+        listen_port = require_int(forward.get("listen_port"), f"{path}[{index}].listen_port", minimum=1)
+        require_ipv4_or_template(forward.get("target_host"), f"{path}[{index}].target_host")
+        require_int(forward.get("target_port"), f"{path}[{index}].target_port", minimum=1)
         if listen_port in seen_ports:
             raise ValueError(f"{path}[{index}].listen_port duplicates an earlier public ingress forward")
         if listen_port not in allowed_ports:
@@ -541,7 +587,7 @@ def validate_extra_dns_records(value: Any, path: str) -> None:
         require_str(record.get("name"), f"{path}[{index}].name")
         require_enum(record.get("type"), f"{path}[{index}].type", EXTRA_DNS_RECORD_TYPES)
         require_str(record.get("value"), f"{path}[{index}].value")
-        require_int(record.get("ttl"), f"{path}[{index}].ttl", 1)
+        require_int(record.get("ttl"), f"{path}[{index}].ttl", minimum=1)
 
 
 def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> None:
@@ -553,9 +599,9 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
     if not guest_management_sources:
         raise ValueError(f"{path}.guest_management_sources must not be empty")
     for index, source in enumerate(guest_management_sources):
-        require_network(source, f"{path}.guest_management_sources[{index}]")
+        require_network_or_template(source, f"{path}.guest_management_sources[{index}]")
 
-    require_network(policy.get("host_source"), f"{path}.host_source")
+    require_network_or_template(policy.get("host_source"), f"{path}.host_source")
 
     guest_policies = require_mapping(policy.get("guests"), f"{path}.guests")
     if set(guest_policies.keys()) != guest_names:
@@ -579,7 +625,7 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
             )
             ports = rule.get("ports", [])
             if rule.get("protocol") != "vrrp":
-                ports = require_int_list(
+                ports = require_port_list(
                     ports,
                     f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",
                 )
@@ -630,7 +676,7 @@ def validate_host_vars() -> dict[str, Any]:
         )
         template = require_mapping(template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}")
         template_vmid = require_int(
-            template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1
+            template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", minimum=1
         )
         template_name = require_hostname(
             template.get("name"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.name"
@@ -682,7 +728,10 @@ def validate_host_vars() -> dict[str, Any]:
     if backup_guest_key is None:
         raise ValueError("host_vars.proxmox_guests must include a backup guest with role key backup_vm")
 
-    if require_int(host_vars.get("backup_vm_vmid"), "host_vars.backup_vm_vmid", 1) != guest_vmids_by_key["backup_vm"]:
+    if (
+        require_int(host_vars.get("backup_vm_vmid"), "host_vars.backup_vm_vmid", minimum=1)
+        != guest_vmids_by_key["backup_vm"]
+    ):
         raise ValueError("host_vars.backup_vm_vmid must match the backup guest vmid")
     backup_vm_name = require_hostname(host_vars.get("backup_vm_name"), "host_vars.backup_vm_name")
     if backup_vm_name not in guest_names:
@@ -698,7 +747,9 @@ def validate_host_vars() -> dict[str, Any]:
         require_int_or_template(
             proxy.get("listen_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].listen_port", 1
         )
-        require_ipv4(proxy.get("upstream_host"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_host")
+        require_ipv4_or_template(
+            proxy.get("upstream_host"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_host"
+        )
         require_int_or_template(
             proxy.get("upstream_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_port", 1
         )
@@ -763,10 +814,10 @@ def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
             templates.get(template_key), f"config/vm-template-manifest.json.templates.{template_key}"
         )
         manifest_vmid = require_int(
-            manifest_entry.get("vmid"), f"config/vm-template-manifest.json.templates.{template_key}.vmid", 1
+            manifest_entry.get("vmid"), f"config/vm-template-manifest.json.templates.{template_key}.vmid", minimum=1
         )
         inventory_vmid = require_int(
-            template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1
+            template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", minimum=1
         )
         if manifest_vmid != inventory_vmid:
             raise ValueError(
@@ -822,9 +873,9 @@ def validate_monitor(monitor: Any, path: str) -> str:
     name = require_str(monitor.get("name"), f"{path}.name")
     monitor_type = require_enum(monitor.get("type"), f"{path}.type", MONITOR_TYPES)
     require_str(monitor.get("description"), f"{path}.description")
-    require_int(monitor.get("interval"), f"{path}.interval", 1)
-    require_int(monitor.get("retryInterval"), f"{path}.retryInterval", 1)
-    require_int(monitor.get("maxretries"), f"{path}.maxretries", 0)
+    require_int(monitor.get("interval"), f"{path}.interval", minimum=1)
+    require_int(monitor.get("retryInterval"), f"{path}.retryInterval", minimum=1)
+    require_int(monitor.get("maxretries"), f"{path}.maxretries", minimum=0)
     accepted = require_string_list(monitor.get("accepted_statuscodes"), f"{path}.accepted_statuscodes")
     if not accepted:
         raise ValueError(f"{path}.accepted_statuscodes must not be empty")
@@ -833,11 +884,11 @@ def validate_monitor(monitor: Any, path: str) -> str:
         url = require_str(monitor.get("url"), f"{path}.url")
         if not (url.startswith("http://") or url.startswith("https://")):
             raise ValueError(f"{path}.url must start with http:// or https://")
-        require_int(monitor.get("maxredirects"), f"{path}.maxredirects", 0)
+        require_int(monitor.get("maxredirects"), f"{path}.maxredirects", minimum=0)
 
     if monitor_type == "port":
         require_str(monitor.get("hostname"), f"{path}.hostname")
-        require_int(monitor.get("port"), f"{path}.port", 1)
+        require_int(monitor.get("port"), f"{path}.port", minimum=1)
 
     return name
 
@@ -858,9 +909,9 @@ def validate_probe_definition(probe: Any, path: str) -> None:
     probe = require_mapping(probe, path)
     kind = require_enum(probe.get("kind"), f"{path}.kind", PROBE_KINDS)
     require_str(probe.get("description"), f"{path}.description")
-    require_int(probe.get("timeout_seconds"), f"{path}.timeout_seconds", 1)
-    require_int(probe.get("retries"), f"{path}.retries", 1)
-    require_int(probe.get("delay_seconds"), f"{path}.delay_seconds", 0)
+    require_int(probe.get("timeout_seconds"), f"{path}.timeout_seconds", minimum=1)
+    require_int(probe.get("retries"), f"{path}.retries", minimum=1)
+    require_int(probe.get("delay_seconds"), f"{path}.delay_seconds", minimum=0)
 
     if "headers" in probe:
         headers = require_mapping(probe.get("headers"), f"{path}.headers")
@@ -885,14 +936,14 @@ def validate_probe_definition(probe: Any, path: str) -> None:
 
     if kind == "tcp":
         require_str(probe.get("host"), f"{path}.host")
-        require_int(probe.get("port"), f"{path}.port", 1)
+        require_int(probe.get("port"), f"{path}.port", minimum=1)
 
     if kind == "command":
         argv = require_string_list(probe.get("argv"), f"{path}.argv")
         if not argv:
             raise ValueError(f"{path}.argv must not be empty")
         if "success_rc" in probe:
-            require_int(probe.get("success_rc"), f"{path}.success_rc", 0)
+            require_int(probe.get("success_rc"), f"{path}.success_rc", minimum=0)
 
     if kind == "systemd":
         require_str(probe.get("unit"), f"{path}.unit")
@@ -910,7 +961,7 @@ def validate_probe_definition(probe: Any, path: str) -> None:
             for index, binding in enumerate(bindings):
                 binding = require_mapping(binding, f"{path}.docker_publication.bindings[{index}]")
                 require_str(binding.get("host"), f"{path}.docker_publication.bindings[{index}].host")
-                require_int(binding.get("port"), f"{path}.docker_publication.bindings[{index}].port", 1)
+                require_int(binding.get("port"), f"{path}.docker_publication.bindings[{index}].port", minimum=1)
         if "derive_bindings_from_probes" in docker_publication:
             require_bool(
                 docker_publication.get("derive_bindings_from_probes"),
@@ -1075,7 +1126,7 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
 
         endpoint = require_mapping(item.get("endpoint"), f"{path}.endpoint")
         require_str(endpoint.get("host"), f"{path}.endpoint.host")
-        require_int(endpoint.get("port"), f"{path}.endpoint.port", 1)
+        require_int(endpoint.get("port"), f"{path}.endpoint.port", minimum=1)
         require_str(endpoint.get("server_name"), f"{path}.endpoint.server_name")
 
         policy = require_mapping(item.get("policy"), f"{path}.policy")
@@ -1086,13 +1137,13 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         if not has_day_window and not has_hour_window:
             raise ValueError(f"{path}.policy must define either warn_days/critical_days or warn_hours/critical_hours")
         if has_day_window:
-            warn_days = require_int(policy.get("warn_days"), f"{path}.policy.warn_days", 1)
-            critical_days = require_int(policy.get("critical_days"), f"{path}.policy.critical_days", 1)
+            warn_days = require_int(policy.get("warn_days"), f"{path}.policy.warn_days", minimum=1)
+            critical_days = require_int(policy.get("critical_days"), f"{path}.policy.critical_days", minimum=1)
             if warn_days <= critical_days:
                 raise ValueError(f"{path}.policy.warn_days must be greater than {path}.policy.critical_days")
         if has_hour_window:
-            warn_hours = require_int(policy.get("warn_hours"), f"{path}.policy.warn_hours", 1)
-            critical_hours = require_int(policy.get("critical_hours"), f"{path}.policy.critical_hours", 1)
+            warn_hours = require_int(policy.get("warn_hours"), f"{path}.policy.warn_hours", minimum=1)
+            critical_hours = require_int(policy.get("critical_hours"), f"{path}.policy.critical_hours", minimum=1)
             if warn_hours <= critical_hours:
                 raise ValueError(f"{path}.policy.warn_hours must be greater than {path}.policy.critical_hours")
 
@@ -1103,7 +1154,7 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
             require_str(renewal.get("host"), f"{path}.renewal.host")
             require_str(renewal.get("unit_name"), f"{path}.renewal.unit_name")
             require_str(renewal.get("on_calendar"), f"{path}.renewal.on_calendar")
-            require_int(renewal.get("randomized_delay_seconds"), f"{path}.renewal.randomized_delay_seconds", 0)
+            require_int(renewal.get("randomized_delay_seconds"), f"{path}.renewal.randomized_delay_seconds", minimum=0)
             material = require_mapping(item.get("material"), f"{path}.material")
             require_str(material.get("certificate_file"), f"{path}.material.certificate_file")
             require_str(material.get("key_file"), f"{path}.material.key_file")
@@ -1136,8 +1187,8 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
         storage_ref = require_identifier(secret.get("storage_ref"), f"{path}.storage_ref")
         if storage_ref not in manifest_secrets:
             raise ValueError(f"{path}.storage_ref references unknown controller-local secret '{storage_ref}'")
-        require_int(secret.get("rotation_period_days"), f"{path}.rotation_period_days", 1)
-        require_int(secret.get("warning_window_days"), f"{path}.warning_window_days", 0)
+        require_int(secret.get("rotation_period_days"), f"{path}.rotation_period_days", minimum=1)
+        require_int(secret.get("warning_window_days"), f"{path}.warning_window_days", minimum=0)
         require_date(secret.get("last_rotated_at"), f"{path}.last_rotated_at")
         require_str(secret.get("rotation_mode"), f"{path}.rotation_mode")
 
@@ -1215,8 +1266,10 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
             raise ValueError(f"{path}.approval_mode must be approval_required for high-risk secrets")
 
         require_identifier(secret.get("command_contract"), f"{path}.command_contract")
-        rotation_period_days = require_int(secret.get("rotation_period_days"), f"{path}.rotation_period_days", 1)
-        warning_window_days = require_int(secret.get("warning_window_days"), f"{path}.warning_window_days", 0)
+        rotation_period_days = require_int(
+            secret.get("rotation_period_days"), f"{path}.rotation_period_days", minimum=1
+        )
+        warning_window_days = require_int(secret.get("warning_window_days"), f"{path}.warning_window_days", minimum=0)
         if warning_window_days >= rotation_period_days:
             raise ValueError(f"{path}.warning_window_days must be smaller than rotation_period_days")
 
@@ -1304,7 +1357,7 @@ def validate_seed_data_catalog(secret_manifest: dict[str, Any]) -> None:
                 f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets must define exactly {sorted(expected_datasets)}"
             )
         for dataset_name, count in datasets.items():
-            require_int(count, f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets.{dataset_name}", 1)
+            require_int(count, f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets.{dataset_name}", minimum=1)
 
 
 def validate_token_policy() -> set[str]:
@@ -1322,9 +1375,9 @@ def validate_token_policy() -> set[str]:
         if class_name in class_names:
             raise ValueError(f"duplicate token policy class: {class_name}")
         class_names.add(class_name)
-        max_ttl_days = require_int(item.get("max_ttl_days"), f"{path}.max_ttl_days", 1)
-        warning_window_days = require_int(item.get("warning_window_days"), f"{path}.warning_window_days", 0)
-        require_int(item.get("enforcement_grace_days"), f"{path}.enforcement_grace_days", 0)
+        max_ttl_days = require_int(item.get("max_ttl_days"), f"{path}.max_ttl_days", minimum=1)
+        warning_window_days = require_int(item.get("warning_window_days"), f"{path}.warning_window_days", minimum=0)
+        require_int(item.get("enforcement_grace_days"), f"{path}.enforcement_grace_days", minimum=0)
         if warning_window_days > max_ttl_days:
             raise ValueError(f"{path}.warning_window_days must not exceed max_ttl_days")
         require_str(item.get("rotation_trigger"), f"{path}.rotation_trigger")
@@ -1392,9 +1445,9 @@ def validate_circuit_policies() -> None:
     for name, policy in policies.items():
         require_identifier(name, f"config/circuit-policies.yaml {name}.name")
         require_str(policy.service, f"config/circuit-policies.yaml {name}.service")
-        require_int(policy.failure_threshold, f"config/circuit-policies.yaml {name}.failure_threshold", 1)
-        require_int(policy.recovery_window_s, f"config/circuit-policies.yaml {name}.recovery_window_s", 1)
-        require_int(policy.success_threshold, f"config/circuit-policies.yaml {name}.success_threshold", 1)
+        require_int(policy.failure_threshold, f"config/circuit-policies.yaml {name}.failure_threshold", minimum=1)
+        require_int(policy.recovery_window_s, f"config/circuit-policies.yaml {name}.recovery_window_s", minimum=1)
+        require_int(policy.success_threshold, f"config/circuit-policies.yaml {name}.success_threshold", minimum=1)
         if policy.timeout_s is not None and float(policy.timeout_s) <= 0:
             raise ValueError(f"config/circuit-policies.yaml {name}.timeout_s must be > 0 when set")
 
@@ -1432,7 +1485,7 @@ def validate_legacy_image_catalog(host_vars_context: dict[str, Any]) -> None:
         pinned_at = image.get("pinned_at")
         if pinned_at is not None:
             require_date(pinned_at, f"{path}.pinned_at")
-        require_int(image.get("freshness_window_days"), f"{path}.freshness_window_days", 1)
+        require_int(image.get("freshness_window_days"), f"{path}.freshness_window_days", minimum=1)
 
 
 def validate_platform_finding_schema() -> None:
@@ -1618,9 +1671,9 @@ def validate_restore_readiness_profiles() -> None:
         path = f"config/restore-readiness-profiles.json.profiles.{profile_id}"
         profile = require_mapping(raw_profile, path)
         require_str(profile.get("description"), f"{path}.description")
-        require_int(profile.get("initial_wait_seconds"), f"{path}.initial_wait_seconds", 0)
-        require_int(profile.get("max_attempts"), f"{path}.max_attempts", 1)
-        require_int(profile.get("retry_delay_seconds"), f"{path}.retry_delay_seconds", 0)
+        require_int(profile.get("initial_wait_seconds"), f"{path}.initial_wait_seconds", minimum=0)
+        require_int(profile.get("max_attempts"), f"{path}.max_attempts", minimum=1)
+        require_int(profile.get("retry_delay_seconds"), f"{path}.retry_delay_seconds", minimum=0)
         network_checks = require_string_list(
             profile.get("network_dependency_checks"), f"{path}.network_dependency_checks"
         )
@@ -1751,8 +1804,12 @@ def validate_version_semantics() -> None:
         readiness.get("adr_window"),
         "config/version-semantics.json.readiness_targets.1.0.0.adr_window",
     )
-    require_int(adr_window.get("start"), "config/version-semantics.json.readiness_targets.1.0.0.adr_window.start", 1)
-    require_int(adr_window.get("end"), "config/version-semantics.json.readiness_targets.1.0.0.adr_window.end", 1)
+    require_int(
+        adr_window.get("start"), "config/version-semantics.json.readiness_targets.1.0.0.adr_window.start", minimum=1
+    )
+    require_int(
+        adr_window.get("end"), "config/version-semantics.json.readiness_targets.1.0.0.adr_window.end", minimum=1
+    )
     require_string_list(
         adr_window.get("required_statuses"),
         "config/version-semantics.json.readiness_targets.1.0.0.adr_window.required_statuses",
@@ -1813,7 +1870,7 @@ def validate_version_semantics() -> None:
     require_int(
         restore.get("required_consecutive_passes"),
         "config/version-semantics.json.readiness_targets.1.0.0.restore_verification.required_consecutive_passes",
-        1,
+        minimum=1,
     )
     dr_review = require_mapping(
         readiness.get("dr_table_top_review"),
@@ -2160,7 +2217,7 @@ def validate_agent_policies(workflow_catalog: dict[str, Any]) -> None:
         require_int(
             autonomous_actions.get("max_daily_autonomous_executions"),
             f"{path}.autonomous_actions.max_daily_autonomous_executions",
-            0,
+            minimum=0,
         )
 
         escalation = require_mapping(entry.get("escalation"), f"{path}.escalation")
@@ -2381,11 +2438,11 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
 
     base_os = require_mapping(desired_state.get("base_os"), "versions/stack.yaml.desired_state.base_os")
     require_hostname(base_os.get("family"), "versions/stack.yaml.desired_state.base_os.family")
-    require_int(base_os.get("major"), "versions/stack.yaml.desired_state.base_os.major", 1)
+    require_int(base_os.get("major"), "versions/stack.yaml.desired_state.base_os.major", minimum=1)
     require_hostname(base_os.get("codename"), "versions/stack.yaml.desired_state.base_os.codename")
 
     proxmox = require_mapping(desired_state.get("proxmox"), "versions/stack.yaml.desired_state.proxmox")
-    require_int(proxmox.get("major"), "versions/stack.yaml.desired_state.proxmox.major", 1)
+    require_int(proxmox.get("major"), "versions/stack.yaml.desired_state.proxmox.major", minimum=1)
     require_hostname(proxmox.get("channel"), "versions/stack.yaml.desired_state.proxmox.channel")
     require_bool(proxmox.get("installed"), "versions/stack.yaml.desired_state.proxmox.installed")
 
@@ -2429,7 +2486,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
                 require_int(
                     guest_vmids.get(key),
                     f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}",
-                    1,
+                    minimum=1,
                 )
                 != host_vars_context["guest_vmids_by_key"][key]
             ):
@@ -2442,7 +2499,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
             require_ipv4(value, f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
         for key, value in guest_vmids.items():
             require_identifier(key, f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}")
-            require_int(value, f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}", 1)
+            require_int(value, f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}", minimum=1)
 
     guest_provisioning = require_mapping(
         desired_state.get("guest_provisioning"), "versions/stack.yaml.desired_state.guest_provisioning"
@@ -2450,7 +2507,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     require_int(
         guest_provisioning.get("template_vmid"),
         "versions/stack.yaml.desired_state.guest_provisioning.template_vmid",
-        1,
+        minimum=1,
     )
     require_str(
         guest_provisioning.get("template_name"),
@@ -2595,14 +2652,14 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     require_str(os_state.get("banner"), "versions/stack.yaml.observed_state.os.banner")
     require_str(os_state.get("kernel"), "versions/stack.yaml.observed_state.os.kernel")
     require_str(os_state.get("distribution"), "versions/stack.yaml.observed_state.os.distribution")
-    require_int(os_state.get("major"), "versions/stack.yaml.observed_state.os.major", 1)
+    require_int(os_state.get("major"), "versions/stack.yaml.observed_state.os.major", minimum=1)
     require_str(os_state.get("codename"), "versions/stack.yaml.observed_state.os.codename")
 
     proxmox_state = require_mapping(observed_state.get("proxmox"), "versions/stack.yaml.observed_state.proxmox")
     require_bool(proxmox_state.get("installed"), "versions/stack.yaml.observed_state.proxmox.installed")
     require_str(proxmox_state.get("version"), "versions/stack.yaml.observed_state.proxmox.version")
     require_str(proxmox_state.get("ve_version"), "versions/stack.yaml.observed_state.proxmox.ve_version")
-    require_int(proxmox_state.get("api_ui_port"), "versions/stack.yaml.observed_state.proxmox.api_ui_port", 1)
+    require_int(proxmox_state.get("api_ui_port"), "versions/stack.yaml.observed_state.proxmox.api_ui_port", minimum=1)
     require_hostname(proxmox_state.get("tls_hostname"), "versions/stack.yaml.observed_state.proxmox.tls_hostname")
 
     network_state = require_mapping(observed_state.get("network"), "versions/stack.yaml.observed_state.network")
@@ -2644,7 +2701,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
 
     guests_state = require_mapping(observed_state.get("guests"), "versions/stack.yaml.observed_state.guests")
     template = require_mapping(guests_state.get("template"), "versions/stack.yaml.observed_state.guests.template")
-    require_int(template.get("vmid"), "versions/stack.yaml.observed_state.guests.template.vmid", 1)
+    require_int(template.get("vmid"), "versions/stack.yaml.observed_state.guests.template.vmid", minimum=1)
     require_str(template.get("name"), "versions/stack.yaml.observed_state.guests.template.name")
     require_bool(template.get("exists"), "versions/stack.yaml.observed_state.guests.template.exists")
 
@@ -2652,7 +2709,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     instance_names: set[str] = set()
     for index, guest in enumerate(instances):
         guest = require_mapping(guest, f"versions/stack.yaml.observed_state.guests.instances[{index}]")
-        require_int(guest.get("vmid"), f"versions/stack.yaml.observed_state.guests.instances[{index}].vmid", 1)
+        require_int(guest.get("vmid"), f"versions/stack.yaml.observed_state.guests.instances[{index}].vmid", minimum=1)
         name = require_hostname(guest.get("name"), f"versions/stack.yaml.observed_state.guests.instances[{index}].name")
         require_ipv4(guest.get("ipv4"), f"versions/stack.yaml.observed_state.guests.instances[{index}].ipv4")
         require_bool(guest.get("running"), f"versions/stack.yaml.observed_state.guests.instances[{index}].running")
@@ -2683,7 +2740,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         require_int(
             dashboard.get("panels"),
             f"versions/stack.yaml.observed_state.monitoring.grafana_dashboards[{index}].panels",
-            1,
+            minimum=1,
         )
 
     docker_runtime = require_mapping(
@@ -2717,7 +2774,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     require_int(
         uptime_kuma.get("seeded_monitors"),
         "versions/stack.yaml.observed_state.uptime_kuma.seeded_monitors",
-        1,
+        minimum=1,
     )
 
     publication_state = require_mapping(
@@ -2928,6 +2985,30 @@ def validate_workbench_information_architecture(
             raise ValueError(f"{path}.workflow_id references unknown workflow '{workflow_id}'")
         validate_contract(item, path)
 
+    workbench_surfaces = require_list(
+        payload.get("workbench_surfaces"),
+        "config/workbench-information-architecture.json.workbench_surfaces",
+    )
+    workbench_surface_ids: set[str] = set()
+    for index, item in enumerate(workbench_surfaces):
+        path = f"config/workbench-information-architecture.json.workbench_surfaces[{index}]"
+        item = require_mapping(item, path)
+        surface_id = require_identifier(item.get("id"), f"{path}.id")
+        if surface_id in workbench_surface_ids:
+            raise ValueError(f"{path}.id duplicates '{surface_id}'")
+        workbench_surface_ids.add(surface_id)
+        require_str(item.get("title"), f"{path}.title")
+        require_http_url(item.get("url"), f"{path}.url")
+        require_identifier(item.get("role"), f"{path}.role")
+        require_str(item.get("role_description"), f"{path}.role_description")
+        primary_lane = normalize_task_lane(item.get("primary_lane"), default="")
+        if primary_lane not in TASK_LANE_IDS:
+            raise ValueError(f"{path}.primary_lane must be one of {sorted(TASK_LANE_IDS)}")
+        audience = require_string_list(item.get("audience"), f"{path}.audience")
+        for audience_id in audience:
+            if audience_id not in {"viewer", "operator", "admin"}:
+                raise ValueError(f"{path}.audience contains unsupported audience '{audience_id}'")
+
     pages = require_list(payload.get("pages"), "config/workbench-information-architecture.json.pages")
     page_ids: set[str] = set()
     section_ids: set[str] = set()
@@ -2937,7 +3018,7 @@ def validate_workbench_information_architecture(
         item = require_mapping(item, path)
         page_id = require_identifier(item.get("id"), f"{path}.id")
         section_id = require_identifier(item.get("section_id"), f"{path}.section_id")
-        nav_order = require_int(item.get("nav_order"), f"{path}.nav_order", 1)
+        nav_order = require_int(item.get("nav_order"), f"{path}.nav_order", minimum=1)
         if page_id in page_ids:
             raise ValueError(f"{path}.id duplicates '{page_id}'")
         if section_id in section_ids:
@@ -2948,7 +3029,9 @@ def validate_workbench_information_architecture(
         section_ids.add(section_id)
         nav_orders.add(nav_order)
         require_str(item.get("title"), f"{path}.title")
-        require_identifier(item.get("surface"), f"{path}.surface")
+        surface_id = require_identifier(item.get("surface"), f"{path}.surface")
+        if surface_id not in workbench_surface_ids:
+            raise ValueError(f"{path}.surface references unknown workbench surface '{surface_id}'")
         require_str(item.get("route"), f"{path}.route")
         require_identifier(item.get("fragment"), f"{path}.fragment")
         require_str(item.get("nav_label"), f"{path}.nav_label")

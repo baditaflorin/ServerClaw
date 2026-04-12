@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 304
+  total_workstreams: 303
   by_year:
-    '2026': 304
+    '2026': 303
 workstreams:
 - id: ws-0375-certificate-validation
   adr: '0375'
@@ -154,7 +154,7 @@ workstreams:
   - tests/test_vulnerability_budget.py
   - workstreams/active/ws-0371-live-apply.yaml
   - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-  - workstreams/archive/2026/ws-0364-live-apply.yaml
+  - workstreams/done/ws-0364-live-apply.yaml
   - workstreams.yaml
   ownership_manifest:
     owned_surfaces:
@@ -269,7 +269,7 @@ workstreams:
       paths:
       - workstreams/active/ws-0371-live-apply.yaml
       - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-      - workstreams/archive/2026/ws-0364-live-apply.yaml
+      - workstreams/done/ws-0364-live-apply.yaml
       - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1

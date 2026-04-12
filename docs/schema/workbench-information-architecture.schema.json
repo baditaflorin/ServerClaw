@@ -14,7 +14,8 @@
     "workflow_overrides",
     "runbook_defaults",
     "runbook_overrides",
-    "pages"
+    "pages",
+    "workbench_surfaces"
   ],
   "properties": {
     "$schema": {
@@ -122,6 +123,13 @@
       "minItems": 1,
       "items": {
         "$ref": "#/$defs/pageDefinition"
+      }
+    },
+    "workbench_surfaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/workbenchSurfaceDefinition"
       }
     }
   },
@@ -351,6 +359,56 @@
         },
         "next_failure_lane": {
           "$ref": "#/$defs/laneId"
+        }
+      }
+    },
+    "workbenchSurfaceDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "url",
+        "role",
+        "role_description",
+        "primary_lane",
+        "audience"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/entityId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_lane": {
+          "$ref": "#/$defs/laneId"
+        },
+        "audience": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "operator",
+              "admin"
+            ]
+          }
         }
       }
     }

@@ -1,0 +1,10 @@
+Command: RESTIC_ALLOW_TIMEOUT=1 make live-apply-service service=repowise env=production ALLOW_IN_PLACE_MUTATION=true
+
+Result: success (restic live-apply timeout tolerated via RESTIC_ALLOW_TIMEOUT=1)
+
+Play recap:
+  docker-runtime : ok=14 changed=2 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0
+
+Notes:
+- Immutable guest replacement gate acknowledged for docker-runtime (ALLOW_IN_PLACE_MUTATION=true).
+- Restic live-apply trigger timed out and was recorded separately for follow-up.

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")

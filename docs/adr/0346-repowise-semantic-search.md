@@ -1,7 +1,11 @@
 # ADR 0346 — Repowise: local semantic code search over the git repo
 
-**Status:** proposed
-**Date:** 2026-04-05
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.125
+- Implemented In Platform Version: 0.178.77
+- Implemented On: 2026-04-12
+- Date: 2026-04-05
 
 ## Context
 

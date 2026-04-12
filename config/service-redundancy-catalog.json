@@ -734,13 +734,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_121"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime",
-        "failover_trigger": "Restore docker-runtime when Neko or its browser session runtime cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime, then rerun the Neko converge from git."
+        "location": "runtime-comms",
+        "failover_trigger": "Restore runtime-comms when Neko or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-comms, then rerun the Neko converge from git."
       }
     },
     "nginx_edge": {
@@ -845,28 +845,12 @@
         "failback_method": "Restore or rebuild docker-runtime, then rerun the Piper converge and synthesis verification workflow from git."
       }
     },
-    "tier": "R1",
-    "recovery_objective": {
-      "rto_minutes": 120,
-      "rpo_minutes": 1440
-    },
-    "backup_sources": [
-      "git_repository",
-      "pbs_vm_120"
-    ],
-    "standby": {
-      "kind": "cold",
-      "location": "docker-runtime",
-      "failover_trigger": "Restore docker-runtime when ServerClaw or its runtime state cannot be recovered in place.",
-      "failback_method": "Restore or rebuild docker-runtime, then rerun the ServerClaw converge from git."
-    }
-  },
-  "serverclaw": {
-    "tier": "R1",
-    "recovery_objective": {
-      "rto_minutes": 120,
-      "rpo_minutes": 1440
-    },
+    "serverclaw": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
     "backup_sources": [
       "git_repository",
       "pbs_vm_170"
@@ -1344,4 +1328,5 @@
       "failback_method": "Restore or rebuild docker-runtime, then rerun the Repowise converge and rebuild the vector index from the git repository."
     }
   }
+}
 }
