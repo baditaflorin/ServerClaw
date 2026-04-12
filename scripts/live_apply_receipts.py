@@ -28,7 +28,16 @@ from workflow_catalog import (
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
-LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
+HISTORICAL_WORKFLOW_ID_PATTERNS = (
+    re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$"),
+    re.compile(r"^ws-\d{4}-[a-z0-9-]+-live-apply$"),
+)
+# Historical receipts can legitimately reference workflow ids that were later
+# retired or renamed out of the active workflow catalog.
+RETIRED_WORKFLOW_IDS = {
+    "converge-open-webui",
+    "converge-realtime",
+}
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
 ALLOWED_SMOKE_SUITE_STATUSES = {"passed", "failed", "skipped"}
 ALLOWED_ENVIRONMENTS = set(receipt_environment_ids())
@@ -50,6 +59,14 @@ def git_commit_exists(commit: str) -> bool:
     return command_succeeds(["git", "rev-parse", "--verify", f"{commit}^{{commit}}"])
 
 
+def git_path_exists_in_commit(commit: str, repo_path_ref: str) -> bool:
+    return command_succeeds(["git", "cat-file", "-e", f"{commit}:{repo_path_ref}"])
+
+
+def git_path_exists_in_history(repo_path_ref: str) -> bool:
+    return command_succeeds(["git", "log", "--all", "--format=%H", "-1", "--", repo_path_ref])
+
+
 def git_metadata_available() -> bool:
     return (REPO_ROOT / ".git").exists() and command_succeeds(["git", "rev-parse", "--is-inside-work-tree"])
 
@@ -58,6 +75,14 @@ def git_commit_lookup_available() -> bool:
     if not git_metadata_available():
         return False
     return command_succeeds(["git", "cat-file", "-e", "HEAD^{commit}"])
+
+
+def workflow_id_is_known_or_historical(workflow_id: str, workflow_catalog: dict) -> bool:
+    if workflow_id in workflow_catalog["workflows"]:
+        return True
+    if workflow_id in RETIRED_WORKFLOW_IDS:
+        return True
+    return any(pattern.fullmatch(workflow_id) for pattern in HISTORICAL_WORKFLOW_ID_PATTERNS)
 
 
 def strict_source_commit_object_validation_enabled() -> bool:
@@ -83,6 +108,18 @@ def validate_source_commit(commit: str, path: Path) -> None:
 
     if strict_source_commit_object_validation_enabled():
         raise ValueError(f"{path.name}: source_commit '{commit}' is not available in the current git object database")
+
+
+def evidence_ref_exists(ref: str, *, source_commit: str) -> bool:
+    if (REPO_ROOT / ref).exists():
+        return True
+    if not git_commit_lookup_available():
+        return False
+    if not git_commit_exists(source_commit):
+        return git_path_exists_in_history(ref)
+    if git_path_exists_in_commit(source_commit, ref):
+        return True
+    return git_path_exists_in_history(ref)
 
 
 def iter_receipt_paths(receipts_dir: Path = RECEIPTS_DIR) -> list[Path]:
@@ -139,7 +176,6 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
         "source_commit",
         "repo_version_context",
         "workflow_id",
-        "adr",
         "summary",
     )
     for field in required_string_fields:
@@ -174,12 +210,14 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
             f"{path.name}: environment '{environment}' does not match receipt path environment '{derived_environment}'"
         )
 
-    if receipt["workflow_id"] not in workflow_catalog["workflows"] and not LEGACY_WORKFLOW_ID_PATTERN.fullmatch(
-        receipt["workflow_id"]
-    ):
+    if not workflow_id_is_known_or_historical(receipt["workflow_id"], workflow_catalog):
         raise ValueError(f"{path.name}: workflow_id '{receipt['workflow_id']}' is not in {WORKFLOW_CATALOG_PATH.name}")
 
     validate_source_commit(receipt["source_commit"], path)
+
+    adr = receipt.get("adr")
+    if adr is not None and (not isinstance(adr, str) or not adr.strip()):
+        raise ValueError(f"{path.name}: missing or invalid string field 'adr'")
 
     targets = receipt.get("targets")
     if not isinstance(targets, list) or not targets:
@@ -241,7 +279,7 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
     for ref in evidence_refs:
         if not isinstance(ref, str) or not ref:
             raise ValueError(f"{path.name}: evidence_refs entries must be non-empty strings")
-        if not (REPO_ROOT / ref).exists():
+        if not evidence_ref_exists(ref, source_commit=receipt["source_commit"]):
             raise ValueError(f"{path.name}: evidence ref '{ref}' does not exist")
 
     notes = receipt.get("notes")
@@ -335,7 +373,7 @@ def show_receipt(receipt_id: str) -> int:
     print(f"Source commit: {receipt['source_commit']}")
     print(f"Repo version context: {receipt['repo_version_context']}")
     print(f"Workflow: {receipt['workflow_id']}")
-    print(f"ADR: {receipt['adr']}")
+    print(f"ADR: {receipt.get('adr', 'n/a')}")
     print(f"Summary: {receipt['summary']}")
     print("Targets:")
     for target in receipt["targets"]:

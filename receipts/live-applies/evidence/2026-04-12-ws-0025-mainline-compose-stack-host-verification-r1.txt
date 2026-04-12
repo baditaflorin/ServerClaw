@@ -1,0 +1,162 @@
+# ws-0025 compose stack host verification
+generated_at=2026-04-12T10:26:23Z
+
+## docker-runtime 10.10.10.20
+hostname=docker-runtime-lv3
+compose_target enabled=disabled active=inactive
+enabled_lv3_services:
+lv3-anthropic-compat-proxy.service
+lv3-api-gateway.service
+lv3-browser-runner.service
+lv3-changedetection.service
+lv3-control-plane-backup-openbao-agent.service
+lv3-crawl4ai.service
+lv3-data.service
+lv3-dify.service
+lv3-directus.service
+lv3-dozzle.service
+lv3-excalidraw.service
+lv3-falco-event-bridge.service
+lv3-flagsmith.service
+lv3-gitea.service
+lv3-glitchtip.service
+lv3-gotenberg.service
+lv3-grist.service
+lv3-harbor-compose-reconcile.service
+lv3-homepage.service
+lv3-jupyterhub.service
+lv3-keycloak.service
+lv3-label-studio.service
+lv3-lago.service
+lv3-langfuse.service
+lv3-litellm.service
+lv3-livekit.service
+lv3-mail-platform.service
+lv3-mailpit.service
+lv3-matrix-synapse.service
+lv3-mattermost.service
+lv3-minio.service
+lv3-n8n.service
+lv3-nats-jetstream.service
+lv3-netbox.service
+lv3-nextcloud.service
+lv3-nomad.service
+lv3-ntfy.service
+lv3-ollama.service
+lv3-one-api.service
+lv3-open-webui.service
+active_lv3_services:
+lv3-anthropic-compat-proxy.service
+lv3-browser-runner.service
+lv3-changedetection.service
+lv3-control-plane-backup-openbao-agent.service
+lv3-dozzle.service
+lv3-falco-event-bridge.service
+lv3-livekit.service
+lv3-mail-platform.service
+lv3-matrix-synapse.service
+lv3-mattermost.service
+lv3-minio.service
+lv3-n8n.service
+lv3-nats-jetstream.service
+lv3-nextcloud.service
+lv3-nomad.service
+lv3-openbao-unseal-watcher.service
+lv3-openbao.service
+lv3-outline.service
+lv3-paperless.service
+lv3-plane.service
+lv3-plausible.service
+lv3-rag-context.service
+lv3-redpanda.service
+lv3-repo-intake.service
+lv3-repowise.service
+lv3-restic-config-backup-openbao-agent.service
+lv3-searxng.service
+lv3-superset.service
+lv3-typesense.service
+lv3-vikunja.service
+lv3-woodpecker.service
+
+## coolify 10.10.10.70
+hostname=coolify-lv3
+compose_target enabled=disabled active=inactive
+enabled_lv3_services:
+lv3-coolify.service
+lv3-librechat.service
+active_lv3_services:
+lv3-librechat.service
+
+## artifact-cache 10.10.10.80
+hostname=artifact-cache-lv3
+compose_target enabled=disabled active=inactive
+enabled_lv3_services:
+lv3-artifact-cache.service
+active_lv3_services:
+lv3-artifact-cache.service
+
+## runtime-ai 10.10.10.90
+hostname=runtime-ai-lv3
+compose_target enabled=disabled active=inactive
+enabled_lv3_services:
+lv3-nomad.service
+lv3-ollama.service
+lv3-piper.service
+lv3-tesseract-ocr.service
+lv3-tika.service
+active_lv3_services:
+lv3-nomad.service
+lv3-tesseract-ocr.service
+lv3-tika.service
+
+## runtime-general 10.10.10.91
+hostname=runtime-general-lv3
+compose_target enabled=disabled active=inactive
+enabled_lv3_services:
+lv3-homepage.service
+lv3-mailpit.service
+lv3-nomad.service
+active_lv3_services:
+lv3-homepage.service
+lv3-mailpit.service
+lv3-nomad.service
+
+## runtime-control 10.10.10.92
+hostname=runtime-control-lv3
+compose_target enabled=disabled active=inactive
+enabled_lv3_services:
+lv3-api-gateway.service
+lv3-harbor.service
+lv3-nats-jetstream.service
+lv3-nomad.service
+lv3-openbao-unseal-watcher.service
+lv3-redpanda.service
+lv3-step-ca.service
+active_lv3_services:
+lv3-nats-jetstream.service
+lv3-nomad.service
+lv3-openbao-unseal-watcher.service
+lv3-step-ca.service
+
+## docker-runtime detailed checks
+unit=lv3-mail-platform.service enabled=enabled active=active
+unit=lv3-woodpecker.service enabled=enabled active=active
+unit=lv3-rag-context.service enabled=enabled active=active
+named_service_presence:
+lv3-api-gateway.service                        enabled  enabled
+lv3-homepage.service                           enabled  enabled
+lv3-mail-platform.service                      enabled  enabled
+lv3-ollama.service                             enabled  enabled
+lv3-rag-context.service                        enabled  enabled
+lv3-step-ca.service                            enabled  enabled
+lv3-woodpecker.service                         enabled  enabled
+woodpecker_compose_matches:
+38:    networks:
+55:    networks:
+58:networks:
+mail_port_shadow_packages:
+woodpecker_compose_ps:
+NAME                       IMAGE                                                                                                                      COMMAND                  SERVICE             CREATED          STATUS                             PORTS
+woodpecker-agent           docker.io/woodpeckerci/woodpecker-agent:v3.13.0@sha256:92e1729d00334828ea6d0dc1762e55a0b93b72e01e8e2d4435fe2d91e4a30783    "/bin/woodpecker-age…"   woodpecker-agent    52 minutes ago   Up 2 seconds (health: starting)    3000/tcp
+woodpecker-openbao-agent   docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b                    "docker-entrypoint.s…"   openbao-agent       8 days ago       Up 2 minutes (healthy)
+woodpecker-server          docker.io/woodpeckerci/woodpecker-server:v3.13.0@sha256:268f891dd63f2e86f912fc3fbdff0b26552a79c4290b4be66b7c04acbe81fbb9   "/bin/woodpecker-ser…"   woodpecker-server   52 minutes ago   Up 14 seconds (health: starting)   80/tcp, 443/tcp, 8000/tcp, 9000/tcp, 0.0.0.0:8102->8102/tcp, [::]:8102->8102/tcp

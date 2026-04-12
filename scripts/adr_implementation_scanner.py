@@ -37,6 +37,12 @@ INDEX_PATH = ADR_DIR / ".index.yaml"
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 COLLECTIONS_DIR = REPO_ROOT / "collections"
 PLAYBOOKS_DIR = REPO_ROOT / "playbooks"
+AUXILIARY_ADR_FILENAME_TOKENS = (
+    "implementation-roadmap",
+    "gap-analysis",
+    "matrix",
+    "deep-dive",
+)
 
 
 # ==============================================================================
@@ -111,6 +117,19 @@ def load_adr_index() -> dict[str, ADRMetadata]:
 
     metadata: dict[str, ADRMetadata] = {}
 
+    def preference(entry: dict[str, Any]) -> tuple[int, int, int, int]:
+        filename = str(entry.get("filename") or "").strip().lower()
+        title = str(entry.get("title") or "").strip().lower()
+        is_auxiliary = any(token in filename or token in title for token in AUXILIARY_ADR_FILENAME_TOKENS)
+        implementation_status = str(entry.get("implementation_status") or "").strip().lower()
+        status = str(entry.get("status") or "").strip().lower()
+        return (
+            0 if is_auxiliary else 1,
+            0 if implementation_status in {"", "unknown", "proposed"} else 1,
+            0 if status in {"", "unknown", "proposed"} else 1,
+            -len(filename),
+        )
+
     # Load the range-based index shards
     index_dir = ADR_DIR / "index" / "by-range"
     for shard_file in sorted(index_dir.glob("*.yaml")):
@@ -122,7 +141,7 @@ def load_adr_index() -> dict[str, ADRMetadata]:
 
         for adr_entry in shard["adrs"]:
             adr_num = str(adr_entry["adr"]).zfill(4)
-            metadata[adr_num] = ADRMetadata(
+            candidate = ADRMetadata(
                 adr_number=adr_num,
                 title=adr_entry.get("title", ""),
                 filename=adr_entry.get("filename", ""),
@@ -135,6 +154,9 @@ def load_adr_index() -> dict[str, ADRMetadata]:
                 concern=adr_entry.get("concern"),
                 date=adr_entry.get("date"),
             )
+            existing = metadata.get(adr_num)
+            if existing is None or preference(adr_entry) > preference(existing.__dict__):
+                metadata[adr_num] = candidate
 
     return metadata
 

@@ -1,0 +1,86 @@
+id: ws-0025-live-apply
+adr: '0025'
+title: Live apply ADR 0025 compose-managed runtime stacks from latest origin/main
+status: live_applied
+owner: codex
+branch: codex/ws-0025-live-apply-r2
+worktree_path: .worktrees/ws-0025-live-apply-r2
+doc: docs/workstreams/ws-0025-live-apply.md
+depends_on:
+- adr-0025-compose-managed-runtime-stacks
+- adr-0373-service-registry-and-derived-defaults
+- adr-0168-automated-enforcement-of-agent-standards
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/archive/2026/ws-0025-live-apply.yaml
+- docs/workstreams/ws-0025-live-apply.md
+- docs/adr/0025-compose-managed-runtime-stacks.md
+- docs/adr/0025-implementation-roadmap.md
+- docs/adr/implementation-status/adr-0025.md
+- docs/adr/implementation-status/adr-0025.yaml
+- docs/runbooks/compose-runtime-resilience.md
+- docs/runbooks/configure-docker-runtime.md
+- collections/ansible_collections/lv3/platform/playbooks/docker-runtime.yml
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/templates/*
+- scripts/validate_repo.sh
+- tests/test_docker_runtime_role.py
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0025_live_apply_source
+    paths:
+    - workstreams/archive/2026/ws-0025-live-apply.yaml
+    mode: exclusive
+  - id: ws_0025_live_apply_doc
+    paths:
+    - docs/workstreams/ws-0025-live-apply.md
+    mode: exclusive
+  - id: ws_0025_docker_runtime_contract
+    paths:
+    - collections/ansible_collections/lv3/platform/playbooks/docker-runtime.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/templates/*
+    - tests/test_docker_runtime_role.py
+    mode: exclusive
+  - id: ws_0025_adr_status
+    paths:
+    - docs/adr/0025-compose-managed-runtime-stacks.md
+    - docs/adr/0025-implementation-roadmap.md
+    - docs/adr/implementation-status/adr-0025.md
+    - docs/adr/implementation-status/adr-0025.yaml
+    mode: shared_contract
+    contract: adr-0025-lifecycle-v1
+  - id: ws_0025_runbook_contract
+    paths:
+    - docs/runbooks/compose-runtime-resilience.md
+    - docs/runbooks/configure-docker-runtime.md
+    mode: shared_contract
+    contract: compose-runtime-ops-v1
+  - id: ws_0025_validation_contract
+    paths:
+    - scripts/validate_repo.sh
+    mode: shared_contract
+    contract: validation-gate-v1
+canonical_truth:
+  changelog_entry: installs repo-managed systemd lifecycle units for compose stacks
+    on Docker hosts, validates the contract in repo automation, and records the verified
+    ADR 0025 live apply evidence
+  release_bump: patch
+  included_in_repo_version: 0.178.126
+  latest_receipts:
+    docker_runtime: 2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply
+    mail_platform: 2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply
+    woodpecker: 2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply
+blockers: []
+ready_to_merge: true
+live_applied: true
+plane_issue_id: 7cbd6a9a-872f-468b-b274-ad728b36dcaf

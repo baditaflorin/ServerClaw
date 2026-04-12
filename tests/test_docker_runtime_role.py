@@ -72,6 +72,19 @@ def load_tasks() -> list[dict]:
     return yaml.safe_load(ROLE_TASKS.read_text())
 
 
+def iter_tasks(tasks: list[dict]) -> list[dict]:
+    for task in tasks:
+        yield task
+        for nested_key in ("block", "rescue", "always"):
+            nested_tasks = task.get(nested_key)
+            if isinstance(nested_tasks, list):
+                yield from iter_tasks(nested_tasks)
+
+
+def load_all_tasks() -> list[dict]:
+    return list(iter_tasks(load_tasks()))
+
+
 def load_defaults() -> dict:
     return yaml.safe_load(ROLE_DEFAULTS.read_text())
 
@@ -85,7 +98,7 @@ def load_common_docker_bridge_chains() -> list[dict]:
 
 
 def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
-    tasks = load_tasks()
+    tasks = load_all_tasks()
     task_names = [task["name"] for task in tasks]
     assert task_names.index("Inspect Docker repository prerequisite package status") < task_names.index(
         "Record missing Docker repository prerequisites"
@@ -1135,7 +1148,7 @@ def test_common_docker_bridge_chains_warms_control_socket_before_failing_safe() 
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
-    tasks = load_tasks()
+    tasks = load_all_tasks()
     daemon_stat = next(
         task for task in tasks if task["name"] == "Check whether the current Docker daemon config exists"
     )
@@ -1195,6 +1208,7 @@ def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
     )
     assert "{{ docker_runtime_public_edge_ipv4 }} {{ alias }}" in config["block"]
     assert pin_hosts["when"] == [
+        "platform_environment | default('production') != 'docker-dev'",
         "docker_runtime_public_edge_ipv4 | default('') | length > 0",
         "docker_runtime_public_edge_host_aliases | default([]) | reject('equalto', '') | list | length > 0",
     ]
@@ -1244,7 +1258,7 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
 
 
 def test_docker_runtime_installs_publication_assurance_helper_before_chain_checks() -> None:
-    tasks = load_tasks()
+    tasks = load_all_tasks()
     install_task = next(task for task in tasks if task["name"] == "Install the Docker publication assurance helper")
     nftables_check_task = next(task for task in tasks if task["name"] == "Check whether nftables config exists")
 

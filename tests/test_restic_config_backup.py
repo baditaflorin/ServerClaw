@@ -908,14 +908,32 @@ def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_
 
 
 def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: Path, monkeypatch) -> None:
-    scripts_dir = tmp_path / "scripts"
-    config_dir = tmp_path / "config"
-    scripts_dir.mkdir(parents=True)
-    config_dir.mkdir(parents=True)
-    (scripts_dir / "restic_config_backup.py").write_text("#!/usr/bin/env python3\nprint('restic')\n", encoding="utf-8")
-    (scripts_dir / "script_bootstrap.py").write_text("print('bootstrap')\n", encoding="utf-8")
-    (scripts_dir / "controller_automation_toolkit.py").write_text("print('toolkit')\n", encoding="utf-8")
-    (config_dir / "restic-file-backup-catalog.json").write_text('{"schema_version":"1.0.0"}\n', encoding="utf-8")
+    support_file_contents = {
+        "scripts/restic_config_backup.py": "#!/usr/bin/env python3\nprint('restic')\n",
+        "scripts/script_bootstrap.py": "print('bootstrap')\n",
+        "scripts/controller_automation_toolkit.py": "print('toolkit')\n",
+        "scripts/ntfy_publish.py": "print('ntfy')\n",
+        "platform/__init__.py": "",
+        "platform/repo.py": "REPO_ROOT = '/srv/proxmox-host_server'\n",
+        "config/event-taxonomy.yaml": "events: []\n",
+        "config/ntfy/topics.yaml": "topics: {}\n",
+        "config/retry-policies.yaml": "policies: {}\n",
+        "config/restic-file-backup-catalog.json": '{"schema_version":"1.0.0"}\n',
+        "versions/stack.yaml": "repo_version: 0.178.126\n",
+    }
+    for relative_path, _mode in trigger.REMOTE_RUNTIME_SUPPORT_FILES:
+        file_path = tmp_path / relative_path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        content = support_file_contents.get(relative_path)
+        if content is None:
+            suffix = Path(relative_path).suffix
+            if suffix == ".json":
+                content = "{}\n"
+            elif suffix in {".yaml", ".yml"}:
+                content = "{}\n"
+            else:
+                content = "# fixture\n"
+        file_path.write_text(content, encoding="utf-8")
 
     captured: list[tuple[str, str]] = []
 
@@ -937,16 +955,21 @@ def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: P
     remote_commands = [entry for entry in captured if entry[0] != "stdin"]
     stdin_payloads = [entry[1] for entry in captured if entry[0] == "stdin"]
 
-    assert len(remote_commands) == 4
-    assert len(stdin_payloads) == 4
+    assert len(remote_commands) == len(trigger.REMOTE_RUNTIME_SUPPORT_FILES)
+    assert len(stdin_payloads) == len(trigger.REMOTE_RUNTIME_SUPPORT_FILES)
     assert any("/srv/proxmox-host_server/scripts/restic_config_backup.py" in command for _, command in remote_commands)
     assert any("/srv/proxmox-host_server/scripts/script_bootstrap.py" in command for _, command in remote_commands)
     assert any(
         "/srv/proxmox-host_server/scripts/controller_automation_toolkit.py" in command for _, command in remote_commands
     )
+    assert any("/srv/proxmox-host_server/scripts/ntfy_publish.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox-host_server/platform/datetime_compat.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox-host_server/platform/__init__.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox-host_server/platform/repo.py" in command for _, command in remote_commands)
     assert any(
         "/srv/proxmox-host_server/config/restic-file-backup-catalog.json" in command for _, command in remote_commands
     )
+    assert any("/srv/proxmox-host_server/versions/stack.yaml" in command for _, command in remote_commands)
     assert all("sudo tee" in command for _, command in remote_commands)
     assert stdin_payloads[0].startswith("#!/usr/bin/env python3")
 
