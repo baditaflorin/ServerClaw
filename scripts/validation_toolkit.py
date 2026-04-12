@@ -54,7 +54,7 @@ def require_bool(value: Any, path: str) -> bool:
     return value
 
 
-def require_int(value: Any, path: str, *, minimum: int | None = None, maximum: int | None = None) -> int:
+def require_int(value: Any, path: str, minimum: int | None = None, maximum: int | None = None) -> int:
     """Validate that value is an integer (not a bool). Optionally enforce bounds."""
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{path} must be an integer")

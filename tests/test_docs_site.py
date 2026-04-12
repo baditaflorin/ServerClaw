@@ -28,6 +28,12 @@ class DocsSiteTests(unittest.TestCase):
             minio_md = (temp_dir / "services" / "minio.md").read_text(encoding="utf-8")
             ports_md = (temp_dir / "reference" / "ports.md").read_text(encoding="utf-8")
             api_md = (temp_dir / "api" / "index.md").read_text(encoding="utf-8")
+            changelog_md = (temp_dir / "changelog.md").read_text(encoding="utf-8")
+            latest_release = sorted(
+                docs_site.RELEASE_NOTES_DIR.glob("[0-9]*.md"),
+                key=docs_site.version_key,
+                reverse=True,
+            )[0].stem
 
             self.assertIn("LV3 Platform Docs", index_md)
             self.assertIn("https://sso.example.com", keycloak_md)
@@ -40,7 +46,7 @@ class DocsSiteTests(unittest.TestCase):
                 "0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md",
                 minio_md,
             )
-            self.assertIn("18080", ports_md)
+            self.assertIn("| Service | Surface | Port | Endpoint |", ports_md)
             self.assertIn("docs.example.com", ports_md)
             self.assertIn("OpenAPI browser", api_md)
             self.assertIn("sensitivity: INTERNAL", keycloak_md)
@@ -64,6 +70,7 @@ class DocsSiteTests(unittest.TestCase):
             self.assertIn("# Service Dependency Graph", dependency_graph_md)
             self.assertIn("```mermaid", dependency_graph_md)
             self.assertEqual(dependency_graph_md.count("portal_display: full"), 1)
+            self.assertIn(f"Latest release notes: [{latest_release}](releases/{latest_release}.md)", changelog_md)
         finally:
             shutil.rmtree(temp_dir)
 

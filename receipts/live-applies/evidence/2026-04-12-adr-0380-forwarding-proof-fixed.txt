@@ -1,0 +1,3 @@
+proxmox-host | CHANGED | rc=0 >>
+		iifname "vmbr0" ip daddr 10.10.10.21 udp dport 50000-60000 accept
+		iifname "vmbr0" udp dport 50000-60000 dnat to 10.10.10.21

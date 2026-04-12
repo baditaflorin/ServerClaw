@@ -6225,6 +6225,29 @@ adrs:
     summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
     filename: 0378-serverclaw-tool-surface-in-open-webui.md
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+  - adr: 0380
+    title: Neko Remote Desktop for Interactive Operator Browser Access
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: identity
+    keywords:
+      - browser
+      - remote-desktop
+      - webrtc
+      - operator-access
+      - runtime-comms
+      - neko
+      - remote
+      - desktop
+      - interactive
+      - operator
+    summary: We will provide interactive operator browser access through multi-instance Neko
+    filename: 0380-neko-for-operator-remote-browser-access.md
+    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
   - adr: 0389
     title: Standard Procedure for Decommissioning a Platform Service
     status: Accepted

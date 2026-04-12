@@ -172,23 +172,6 @@ adrs:
       what it needs from DNS, nginx, TLS, and SSO — in '
     filename: 0374-cross-cutting-service-manifest.md
     path: docs/adr/0374-cross-cutting-service-manifest.md
-  - adr: 0380
-    title: Neko Remote Desktop for Interactive Operator Browser Access
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: identity
-    keywords:
-      - neko
-      - remote
-      - desktop
-      - interactive
-      - operator
-      - browser
-      - access
-    summary: Neko Remote Desktop for Interactive Operator Browser Access
-    filename: 0380-neko-for-operator-remote-browser-access.md
-    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
   - adr: 0381
     title: Login Service Contracts and Session Recovery Automation
     status: Proposed

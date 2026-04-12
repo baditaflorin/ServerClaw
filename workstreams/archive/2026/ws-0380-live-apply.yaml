@@ -1,0 +1,144 @@
+id: ws-0380-live-apply
+adr: "0380"
+title: "Neko remote desktop exact-main live apply and regression hardening"
+status: merged
+owner: codex
+branch: codex/ws-0380-main-integration
+worktree_path: .worktrees/ws-0380-main-integration
+doc: docs/workstreams/ws-0380-live-apply.md
+depends_on:
+  - adr-0153-file-domain-locking
+  - adr-0170-timeout-hierarchy
+  - adr-0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents
+  - adr-0347-docker-runtime-workload-split
+  - adr-0380-neko-remote-desktop-for-interactive-operator-browser-access
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0380-live-apply.yaml
+  - docs/workstreams/ws-0380-live-apply.md
+  - docs/runbooks/configure-neko-browser-access.md
+  - docs/adr/0380-neko-for-operator-remote-browser-access.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/by-concern/*.yaml
+  - docs/adr/index/by-range/*.yaml
+  - docs/adr/index/by-status/*.yaml
+  - docs/adr/implementation-status/adr-0380.yaml
+  - playbooks/neko.yml
+  - playbooks/_includes/dns_publication.yml
+  - playbooks/provision-subdomain.yml
+  - Makefile
+  - build/platform-manifest.json
+  - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+  - collections/ansible_collections/lv3/platform/playbooks/neko.yml
+  - collections/ansible_collections/lv3/platform/playbooks/provision-subdomain.yml
+  - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+  - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml
+  - config/health-probe-catalog.json
+  - config/workflow-catalog.json
+  - config/worktree-bootstrap-manifests.json
+  - inventory/host_vars/proxmox-host.yml
+  - platform/ansible/execution_scopes.py
+  - publication/templates/proxmox-host.yml
+  - receipts/live-applies/*
+  - receipts/live-applies/evidence/*
+  - scripts/generate_diagrams.py
+  - scripts/generate_ops_portal.py
+  - scripts/generate_status_docs.py
+  - scripts/generate_topology_snapshot.py
+  - scripts/materialize_shared_edge_portals.py
+  - scripts/materialize_worktree_receipts.py
+  - scripts/neko_tool.py
+  - scripts/platform_manifest.py
+  - scripts/preflight_controller_local.py
+  - scripts/validate_repo.sh
+  - scripts/verify_neko_webrtc_session.py
+  - tests/test_ansible_execution_scopes.py
+  - tests/test_derive_service_defaults.py
+  - tests/test_dns_publication_include.py
+  - tests/test_docker_runtime_role.py
+  - tests/test_neko_firewall_concurrency.py
+  - tests/test_neko_ingress_contract.py
+  - tests/test_neko_timeout_hierarchy.py
+  - tests/test_neko_verification_contract.py
+  - tests/test_provision_subdomain_playbook.py
+  - tests/test_uptime_contract.py
+ownership_manifest:
+  owned_surfaces:
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0380_tracking
+      paths:
+        - workstreams/active/ws-0380-live-apply.yaml
+        - docs/workstreams/ws-0380-live-apply.md
+      mode: exclusive
+    - id: ws0380_neko_live_apply
+      paths:
+        - docs/runbooks/configure-neko-browser-access.md
+        - docs/adr/0380-neko-for-operator-remote-browser-access.md
+        - docs/adr/.index.yaml
+        - docs/adr/index/by-concern/*.yaml
+        - docs/adr/index/by-range/*.yaml
+        - docs/adr/index/by-status/*.yaml
+        - docs/adr/implementation-status/adr-0380.yaml
+        - playbooks/neko.yml
+        - playbooks/_includes/dns_publication.yml
+        - playbooks/provision-subdomain.yml
+        - Makefile
+        - build/platform-manifest.json
+        - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+        - collections/ansible_collections/lv3/platform/playbooks/neko.yml
+        - collections/ansible_collections/lv3/platform/playbooks/provision-subdomain.yml
+        - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+        - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml
+        - config/health-probe-catalog.json
+        - config/workflow-catalog.json
+        - config/worktree-bootstrap-manifests.json
+        - inventory/host_vars/proxmox-host.yml
+        - platform/ansible/execution_scopes.py
+        - publication/templates/proxmox-host.yml
+        - receipts/live-applies/*
+        - receipts/live-applies/evidence/*
+        - scripts/generate_diagrams.py
+        - scripts/generate_ops_portal.py
+        - scripts/generate_status_docs.py
+        - scripts/generate_topology_snapshot.py
+        - scripts/materialize_shared_edge_portals.py
+        - scripts/materialize_worktree_receipts.py
+        - scripts/neko_tool.py
+        - scripts/platform_manifest.py
+        - scripts/preflight_controller_local.py
+        - scripts/validate_repo.sh
+        - scripts/verify_neko_webrtc_session.py
+        - tests/test_ansible_execution_scopes.py
+        - tests/test_derive_service_defaults.py
+        - tests/test_dns_publication_include.py
+        - tests/test_docker_runtime_role.py
+        - tests/test_neko_firewall_concurrency.py
+        - tests/test_neko_ingress_contract.py
+        - tests/test_neko_timeout_hierarchy.py
+        - tests/test_neko_verification_contract.py
+        - tests/test_provision_subdomain_playbook.py
+        - tests/test_uptime_contract.py
+      mode: exclusive
+canonical_truth:
+  changelog_entry: ADR 0380 exact-main live apply now replays the Proxmox UDP forwarding contract, multi-instance runtime-comms deployment, shared-edge browser route, and clean-worktree bootstrap repairs needed for Neko WebRTC verification
+  release_bump: patch
+  included_in_repo_version: 0.178.126
+  latest_receipts:
+    neko: 2026-04-12-adr-0380-neko-exact-main-live-apply
+blockers: []
+ready_to_merge: true
+live_applied: true
+notes: |
+  Executes the missing exact-main live apply for ADR 0380 from a clean
+  origin/main worktree, closes regressions in the Neko automation path,
+  and records the exact follow-up that remains before protected mainline
+  release files can be updated. Verified live on 2026-04-12 with a
+  clean-cache `make converge-neko env=production`, controller-side
+  oauth2-protected browser edge probe, and end-to-end WebRTC handshake.

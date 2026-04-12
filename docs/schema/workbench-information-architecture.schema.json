@@ -129,7 +129,7 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "$ref": "#/$defs/workbenchSurfaceDefinition"
+        "$ref": "#/$defs/workbenchSurface"
       }
     }
   },
@@ -362,7 +362,24 @@
         }
       }
     },
-    "workbenchSurfaceDefinition": {
+    "surfaceRole": {
+      "type": "string",
+      "enum": [
+        "home",
+        "product_native",
+        "reference",
+        "task"
+      ]
+    },
+    "surfaceAudience": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "operator",
+        "viewer"
+      ]
+    },
+    "workbenchSurface": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -387,8 +404,7 @@
           "pattern": "^https://"
         },
         "role": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/surfaceRole"
         },
         "role_description": {
           "type": "string",
@@ -400,15 +416,10 @@
         "audience": {
           "type": "array",
           "minItems": 1,
-          "uniqueItems": true,
           "items": {
-            "type": "string",
-            "enum": [
-              "viewer",
-              "operator",
-              "admin"
-            ]
-          }
+            "$ref": "#/$defs/surfaceAudience"
+          },
+          "uniqueItems": true
         }
       }
     }

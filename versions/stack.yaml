@@ -5,7 +5,7 @@ platform_version: 0.178.78
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    platform: 2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply
+    platform: 2026-04-09-adr-0373-phases-5-6-100-percent-adoption-live-apply
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
@@ -14,11 +14,11 @@ live_apply_evidence:
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
-    headscale: 2026-03-25-adr-0144-headscale-live-apply
-    vikunja: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
+    headscale: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
+    vikunja: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     semaphore: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    identity_core_watchdog: 2026-04-06-adr-0376-identity-core-watchdog-live-apply
+    identity_core_watchdog: 2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
@@ -63,6 +63,7 @@ live_apply_evidence:
     control_metadata_witness: 2026-03-27-adr-0181-control-metadata-witness-live-apply
     local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
+    neko: 2026-04-12-adr-0380-neko-exact-main-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     keycloak: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -76,7 +77,7 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     ops_portal: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
-    ollama: 2026-04-07-ollama-serverclaw-gemma4-live-apply
+    ollama: 2026-04-07-ollama-0.20.2-gemma4-e4b-upgrade-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
@@ -179,7 +180,6 @@ live_apply_evidence:
     open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
-    repowise: 2026-04-12-adr-0346-repowise-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -367,17 +367,6 @@ desired_state:
         shared_credential_material: false
         surfaces:
           - grafana_oauth
-      - id: localhost-service
-        class: service
-        principal: server@localhost
-        owner: Platform services
-        purpose: Localhost-only service identity for internal service-to-service calls on the Proxmox host.
-        scope_boundary: Loopback-only authentication on the Proxmox host; not used for human access or external APIs.
-        rotation_or_expiry: Rotate credentials on bootstrap changes, compromise, or when replacing local-only auth paths.
-        credential_storage: Controller-local secret material under .local/identity with loopback-scoped runtime config.
-        shared_credential_material: false
-        surfaces:
-          - localhost_service
       - id: mail-platform-server-mailbox
         class: service
         principal: server@example.com
@@ -577,7 +566,6 @@ observed_state:
       - florin.badita
       - lv3-agent-hub
       - grafana-oauth
-      - server@localhost
       - server@example.com
       - alerts@example.com
       - platform@example.com
