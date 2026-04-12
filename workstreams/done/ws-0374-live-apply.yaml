@@ -1,7 +1,7 @@
 id: ws-0374-live-apply
 adr: '0374'
 title: Live apply ADR 0374 cross-cutting service manifest from the latest origin/main
-status: ready_for_merge
+status: merged
 owner: codex
 branch: codex/ws-0374-live-apply
 worktree_path: .worktrees/ws-0374-live-apply
@@ -34,13 +34,13 @@ shared_surfaces:
 - tests/test_adr_0374_hairpin_runtime_templates.py
 - tests/test_generate_cross_cutting_artifacts.py
 - tests/test_generate_platform_vars_cross_cutting.py
-- workstreams/active/ws-0374-live-apply.yaml
+- workstreams/done/ws-0374-live-apply.yaml
 - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
   - id: ws_0374_live_apply_workstream
     paths:
-    - workstreams/active/ws-0374-live-apply.yaml
+    - workstreams/done/ws-0374-live-apply.yaml
     - docs/workstreams/ws-0374-live-apply.md
     mode: shared_contract
     contract: workstream-registry-v1
@@ -81,7 +81,7 @@ ownership_manifest:
     - versions/stack.yaml
     mode: shared_contract
     contract: mainline-release-integration-v1
-ready_to_merge: true
+ready_to_merge: false
 live_applied: false
 notes: |
   Live-apply workstream for ADR 0374 on the latest origin/main. Scope is to

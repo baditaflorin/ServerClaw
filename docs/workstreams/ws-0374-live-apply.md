@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0374](../adr/0374-cross-cutting-service-manifest.md)
 - Title: repair and live-apply the ADR 0374 cross-cutting manifest on the latest `origin/main`
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/ws-0374-live-apply`
 - Worktree: `.worktrees/ws-0374-live-apply`
 - Owner: codex
