@@ -1,8 +1,8 @@
 id: ws-0364-live-apply
 adr: '0364'
 title: Live apply native build server gate execution from latest origin/main
-status: in_progress
-ready_to_merge: false
+status: merged
+ready_to_merge: true
 live_applied: true
 owner: codex
 branch: codex/ws-0364-live-apply

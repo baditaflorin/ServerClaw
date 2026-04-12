@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [adr-0364] Native build server gate execution live-apply — apply-gate-tools target, gate tool wrapper playbook, workflow contract fixes, restic evidence capture, and validation-gate runtime hardening for build-server checks
+
 - [adr-0374] Cross-cutting service manifest live-apply repairs — registry/validator fixes, generated cross-cutting data now surfaced in platform vars, worktree bootstrap adds image scan receipts, syntax-check live-apply gates skip integration-only checks, and new redundancy entries for librechat/litellm/neko with a LibreChat service entrypoint
 
 - [fix] Placeholder IP guard + iptables-correct pve-firewall restart guard — proxmox_network aborts if management_ipv4 matches RFC 5737 placeholders (203.0.113.x etc.) preventing /etc/network/interfaces lockout; proxmox_security guard checks iptables PVEFW-HOST-IN (correct backend, not nftables); root cause 2026-04-12 outage: wrong IP in interfaces without .local/identity.yml overlay

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0364](../adr/0364-native-build-server-gate-execution.md)
 - Title: native build server gate execution
-- Status: live_applied
+- Status: merged
 - Branch: `codex/ws-0364-live-apply`
 - Worktree: `.worktrees/ws-0364-live-apply`
 - Owner: codex
@@ -64,3 +64,4 @@
 
 - The repo already contains the ADR 0364 implementation; this workstream exists to perform and document the live apply from latest `origin/main`.
 - README generation is currently skipped via `CANONICAL_TRUTH_SKIP_README=1` because README lacks `platform-status` markers; fix template + regenerate before final mainline gate passes.
+- Workstream status is merged; rerun remote validation and pre-push gate once runner registry and local Docker are available.
