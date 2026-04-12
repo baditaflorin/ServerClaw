@@ -1,10 +1,10 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://draw.example.com",
+  "source": "https://draw.localhost",
   "elements": [
     {
-      "id": "9633a4fd11eaae64",
+      "id": "06bc1e6321c59308",
       "type": "rectangle",
       "x": 80,
       "y": 60,
@@ -33,7 +33,7 @@
       "locked": false
     },
     {
-      "id": "ef91c8f8421a7d8a",
+      "id": "b12c4bff5816d80e",
       "type": "text",
       "x": 100,
       "y": 82,
@@ -60,18 +60,18 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Public Edge\nnginx.example.com",
+      "text": "Public Edge\nnginx.localhost",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Public Edge\nnginx.example.com",
+      "originalText": "Public Edge\nnginx.localhost",
       "lineHeight": 1.25
     },
     {
-      "id": "9260e189d124a80b",
+      "id": "72f47588dbd3a89c",
       "type": "rectangle",
       "x": 420,
       "y": 60,
@@ -100,7 +100,7 @@
       "locked": false
     },
     {
-      "id": "df17e7f017c1f772",
+      "id": "0cffff31c4ea51e6",
       "type": "text",
       "x": 440,
       "y": 82,
@@ -127,14 +127,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Authenticated Edge\ndraw.example.com\nhome.example.com\nlangfuse.example.com\nlogs.example.com",
+      "text": "Authenticated Edge\n",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Authenticated Edge\ndraw.example.com\nhome.example.com\nlangfuse.example.com\nlogs.example.com",
+      "originalText": "Authenticated Edge\n",
       "lineHeight": 1.25
     },
     {
@@ -272,7 +272,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "1eddc9a200476859",
+      "id": "ad0f187b95a1421b",
       "type": "rectangle",
       "x": 420,
       "y": 300,
@@ -301,7 +301,7 @@
       "locked": false
     },
     {
-      "id": "574df63cd0279201",
+      "id": "0103567b8cc118fa",
       "type": "text",
       "x": 440,
       "y": 322,
@@ -328,14 +328,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "draw.example.com\nshared oauth2-proxy auth\n/socket.io/ split route",
+      "text": "draw.localhost\nshared oauth2-proxy auth\n/socket.io/ split route",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "draw.example.com\nshared oauth2-proxy auth\n/socket.io/ split route",
+      "originalText": "draw.localhost\nshared oauth2-proxy auth\n/socket.io/ split route",
       "lineHeight": 1.25
     },
     {

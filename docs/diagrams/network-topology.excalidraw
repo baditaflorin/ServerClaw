@@ -1,7 +1,7 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://draw.example.com",
+  "source": "https://draw.localhost",
   "elements": [
     {
       "id": "dd325709dc6d4e64",
@@ -71,7 +71,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "4775a26cb696acd6",
+      "id": "3e6fcbc0ce1222a3",
       "type": "rectangle",
       "x": 360,
       "y": 40,
@@ -100,7 +100,7 @@
       "locked": false
     },
     {
-      "id": "a6c76ec40cde8b72",
+      "id": "e41638ce4bd68c37",
       "type": "text",
       "x": 380,
       "y": 62,
@@ -272,7 +272,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "38d15c8c1707bd07",
+      "id": "e420f1b3439b250b",
       "type": "rectangle",
       "x": 80,
       "y": 420,
@@ -301,7 +301,7 @@
       "locked": false
     },
     {
-      "id": "29210abe9ea40b9e",
+      "id": "9730c0c727d571db",
       "type": "text",
       "x": 100,
       "y": 442,
@@ -328,18 +328,18 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "nginx-edge\n10.10.10.10",
+      "text": "nginx\n10.10.10.10",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "nginx-edge\n10.10.10.10",
+      "originalText": "nginx\n10.10.10.10",
       "lineHeight": 1.25
     },
     {
-      "id": "fb1709a072cb46c0",
+      "id": "b64c89ced7f66adf",
       "type": "rectangle",
       "x": 360,
       "y": 420,
@@ -368,7 +368,7 @@
       "locked": false
     },
     {
-      "id": "40369cc9e5467c7e",
+      "id": "5ccb7c7ccd6bb4d9",
       "type": "text",
       "x": 380,
       "y": 442,
@@ -406,7 +406,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "7e9245bc84bf7926",
+      "id": "b639c8c404561846",
       "type": "rectangle",
       "x": 640,
       "y": 420,
@@ -435,7 +435,7 @@
       "locked": false
     },
     {
-      "id": "41566a5090ea280c",
+      "id": "f70d3295c846f5d9",
       "type": "text",
       "x": 660,
       "y": 442,
@@ -473,7 +473,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "2047230eda896eb6",
+      "id": "27906af2c025c917",
       "type": "rectangle",
       "x": 920,
       "y": 420,
@@ -502,7 +502,7 @@
       "locked": false
     },
     {
-      "id": "c894b2b9f0ef3f2b",
+      "id": "dd49e48d0419285c",
       "type": "text",
       "x": 940,
       "y": 442,

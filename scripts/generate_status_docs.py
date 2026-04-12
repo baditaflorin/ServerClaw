@@ -36,6 +36,7 @@ WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 RUNBOOKS_DIR = repo_path("docs", "runbooks")
 ADR_DIR = repo_path("docs", "adr")
 WORKSTREAM_DOCS_DIR = repo_path("docs", "workstreams")
+HOST_VARS_PATH = TOPOLOGY_HOST_VARS_PATH
 
 GENERATED_NOTICE = (
     "> Generated from canonical repository state by "
@@ -87,7 +88,7 @@ def render_table(headers: list[str], rows: list[list[str]]) -> str:
 def render_platform_status() -> str:
     budgets = load_root_summary_budgets()
     stack = load_yaml(STACK_PATH)
-    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+    host_vars = load_yaml(HOST_VARS_PATH)
 
     version_rows = [
         ["Repository version", f"`{stack['repo_version']}`"],
@@ -208,7 +209,7 @@ def render_document_index() -> str:
 
 def render_version_summary() -> str:
     stack = load_yaml(STACK_PATH)
-    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+    host_vars = load_yaml(HOST_VARS_PATH)
     version_rows = [
         ["Repository version", f"`{stack['repo_version']}`"],
         ["Platform version", f"`{stack['platform_version']}`"],

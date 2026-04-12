@@ -8,8 +8,9 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
+| `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
-| `0328` | Remove PatternFly v5 CSS from ops portal templates — eliminate layout collapse | `merged` | [0093-interactive-ops-portal.md](../../adr/0093-interactive-ops-portal.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
@@ -150,7 +151,6 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0046` | Identity classes for humans, services, agents, and break-glass | `live_applied` | [adr-0046-identity-classes.md](../../workstreams/adr-0046-identity-classes.md) |
 | `0045` | Control-plane communication lanes | `live_applied` | [adr-0045-communication-lanes.md](../../workstreams/adr-0045-communication-lanes.md) |
 | `0044` | Windmill for agent and operator workflows | `live_applied` | [adr-0044-windmill.md](../../workstreams/adr-0044-windmill.md) |
-| `0043` | Operational fixes — OpenBao unseal watcher, Keycloak VM migration, oauth2-proxy | `merged` | [naughty-jepsen-ops-fixes.md](../../workstreams/naughty-jepsen-ops-fixes.md) |
 | `0043` | OpenBao for secrets, transit, and dynamic credentials | `live_applied` | [adr-0043-openbao.md](../../workstreams/adr-0043-openbao.md) |
 | `0042` | step-ca for SSH and internal TLS | `live_applied` | [adr-0042-step-ca.md](../../workstreams/adr-0042-step-ca.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](../../workstreams/adr-0041-email-platform-live.md) |

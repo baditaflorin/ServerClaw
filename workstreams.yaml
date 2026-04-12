@@ -96,6 +96,7 @@ workstreams:
   - config/ansible-execution-scopes.yaml
   - config/health-probe-catalog.json
   - config/image-catalog.json
+  - config/root-summary-budgets.yaml
   - config/service-capability-catalog.json
   - config/subdomain-catalog.json
   - config/worktree-bootstrap-manifests.json
@@ -104,6 +105,18 @@ workstreams:
   - docs/adr/0371-parameterized-verify-tasks.md
   - docs/workstreams/ws-0371-live-apply.md
   - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+  - docs/status/history/live-apply-evidence.md
+  - docs/status/history/merged-workstreams.md
+  - docs/site-generated/architecture/dependency-graph.md
+  - docs/diagrams/network-topology.excalidraw
+  - docs/diagrams/service-dependency-graph.excalidraw
+  - docs/diagrams/trust-tier-model.excalidraw
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - changelog.md
+  - docs/release-notes/0.178.126.md
+  - docs/release-notes/README.md
+  - docs/release-notes/index/README.md
+  - docs/release-notes/index/2026.md
   - inventory/host_vars/proxmox-host.yml
   - playbooks/tasks/security-scan.yml
   - playbooks/repowise.yml
@@ -114,6 +127,7 @@ workstreams:
   - playbooks/templates/compose_macros.j2
   - platform/ansible/execution_scopes.py
   - receipts/live-applies/*adr-0371*
+  - receipts/live-applies/evidence/*ws0371*
   - receipts/live-applies/evidence/*ws-0371*
   - receipts/image-scans/2026-04-12-librechat-runtime.json
   - receipts/image-scans/2026-04-12-librechat-runtime.trivy.json
@@ -196,6 +210,7 @@ workstreams:
       - playbooks/services/repowise.yml
       - platform/ansible/execution_scopes.py
       - receipts/live-applies/*adr-0371*
+      - receipts/live-applies/evidence/*ws0371*
       - receipts/live-applies/evidence/*ws-0371*
       - tests/test_ansible_execution_scopes.py
       - tests/test_service_live_apply_wrappers.py
@@ -203,6 +218,7 @@ workstreams:
     - id: ws_0371_image_policy
       paths:
       - config/image-catalog.json
+      - config/root-summary-budgets.yaml
       - receipts/image-scans/2026-04-12-librechat-runtime.json
       - receipts/image-scans/2026-04-12-librechat-runtime.trivy.json
       - receipts/image-scans/2026-04-12-litellm-runtime.json
@@ -241,6 +257,24 @@ workstreams:
       - scripts/validate_portal_auth.py
       - scripts/validation_toolkit.py
       mode: exclusive
+    - id: ws_0371_generated_docs_shared
+      paths:
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/diagrams/network-topology.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/diagrams/trust-tier-model.excalidraw
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-docs-v1
+    - id: ws_0371_release_root_summaries
+      paths:
+      - changelog.md
+      - docs/release-notes/0.178.126.md
+      - docs/release-notes/README.md
+      - docs/release-notes/index/README.md
+      - docs/release-notes/index/2026.md
+      mode: shared_contract
+      contract: root-summaries-v1
     - id: ws_0371_docs
       paths:
       - docs/adr/.index.yaml
@@ -248,6 +282,8 @@ workstreams:
       - docs/adr/0371-parameterized-verify-tasks.md
       - docs/workstreams/ws-0371-live-apply.md
       - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+      - docs/status/history/live-apply-evidence.md
+      - docs/status/history/merged-workstreams.md
       mode: shared_contract
       contract: adr-index-v1
     - id: ws_0371_tests
