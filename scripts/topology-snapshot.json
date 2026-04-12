@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-04-06T18:12:25Z",
+  "generated_at": "2026-04-12T07:28:12Z",
   "generated_from": [
     "inventory/hosts.yml",
     "inventory/host_vars/proxmox-host.yml",
@@ -9,7 +9,7 @@
   "environments": {
     "prod": {
       "node": "debian-base-template",
-      "api_url": "https://proxmox.example.com:8006/api2/json",
+      "api_url": "https://proxmox.localhost:8006/api2/json",
       "vms": {
         "nginx": {
           "vmid": 110,

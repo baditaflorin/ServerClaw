@@ -98,3 +98,17 @@ def test_makefile_routes_live_apply_through_contract_check() -> None:
     assert 'scripts/interface_contracts.py --check-live-apply "service:$(service)"' in makefile
     assert 'scripts/interface_contracts.py --check-live-apply "group:$(group)"' in makefile
     assert 'scripts/interface_contracts.py --check-live-apply "site:site"' in makefile
+
+
+def test_collection_playbook_refs_count_as_workflow_playbooks() -> None:
+    assert interface_contracts._is_playbook_ref("playbooks/services/n8n.yml") is True
+    assert (
+        interface_contracts._is_playbook_ref("collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml")
+        is True
+    )
+    assert (
+        interface_contracts._is_playbook_ref(
+            "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml"
+        )
+        is False
+    )

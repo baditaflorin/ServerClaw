@@ -44,8 +44,12 @@ services:
         condition: service_healthy
     env_file:
       - {{ langfuse_env_file }}
+{% if platform_hairpin_nat_hosts | default([]) | length > 0 %}
     extra_hosts:
-      - "sso.{{ platform_domain }}:{{ hostvars['nginx'].ansible_host }}"
+{% for entry in platform_hairpin_nat_hosts %}
+      - "{{ entry.hostname }}:{{ entry.address }}"
+{% endfor %}
+{% endif %}
 
   langfuse-web:
     image: {{ langfuse_web_image }}
@@ -62,8 +66,12 @@ services:
         condition: service_healthy
     env_file:
       - {{ langfuse_env_file }}
+{% if platform_hairpin_nat_hosts | default([]) | length > 0 %}
     extra_hosts:
-      - "sso.{{ platform_domain }}:{{ hostvars['nginx'].ansible_host }}"
+{% for entry in platform_hairpin_nat_hosts %}
+      - "{{ entry.hostname }}:{{ entry.address }}"
+{% endfor %}
+{% endif %}
     ports:
       - "{{ ansible_host }}:{{ langfuse_internal_port }}:3000"
       - "127.0.0.1:{{ langfuse_internal_port }}:3000"

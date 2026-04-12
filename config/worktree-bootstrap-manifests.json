@@ -61,6 +61,60 @@
           "description": "Generated documentation portal required by shared edge publication."
         }
       ]
+    },
+    "live-apply-generated-artifacts": {
+      "description": "Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.",
+      "generated_artifacts": [
+        {
+          "id": "platform_vars",
+          "kind": "file",
+          "path": "inventory/group_vars/platform.yml",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact platform_vars",
+          "description": "Generated platform facts library and ADR 0374 derived inputs required before scoped live applies run."
+        },
+        {
+          "id": "gate_bypass_keep",
+          "kind": "file",
+          "path": "receipts/gate-bypasses/.gitkeep",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact gate_bypass_keep",
+          "description": "Non-empty gate-bypass sentinel required by fresh-worktree canonical-truth checks."
+        },
+        {
+          "id": "drift_reports_dir",
+          "kind": "directory",
+          "path": "receipts/drift-reports",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact drift_reports_dir",
+          "description": "Generated drift-reports directory consumed by generated portal and canonical-truth surfaces."
+        },
+        {
+          "id": "image_scan_receipts",
+          "kind": "directory",
+          "path": "receipts/image-scans",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact image_scan_receipts",
+          "description": "Latest container image scan receipts required by vulnerability budget gates in fresh worktrees."
+        },
+        {
+          "id": "https_tls_targets",
+          "kind": "file",
+          "path": "config/prometheus/file_sd/https_tls_targets.yml",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact https_tls_targets",
+          "description": "Generated HTTPS/TLS target catalog required by live-apply canonical-truth checks."
+        },
+        {
+          "id": "https_tls_alerts",
+          "kind": "file",
+          "path": "config/prometheus/rules/https_tls_alerts.yml",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact https_tls_alerts",
+          "description": "Generated HTTPS/TLS alert rules required to keep the live-apply repo snapshot internally consistent."
+        },
+        {
+          "id": "uptime_kuma_monitors",
+          "kind": "file",
+          "path": "config/uptime-kuma/monitors.json",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact uptime_kuma_monitors",
+          "description": "Generated Uptime Kuma monitor catalog required before the changelog and ops portals render from a fresh worktree."
+        }
+      ]
     }
   }
 }

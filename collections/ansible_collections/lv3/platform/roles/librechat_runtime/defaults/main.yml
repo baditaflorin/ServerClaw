@@ -114,8 +114,3 @@ librechat_chat_prompt_src_absolute: "{{ repo_shared_root }}/config/serverclaw/sy
 # Web search
 librechat_enable_web_search: true
 librechat_searxng_query_url: "http://host.docker.internal:8888/search?q=%s&format=json"
-# Extra hosts for hairpin NAT — Docker bridge can't reach public IPs of these
-# services, so we route through the NGINX edge internal IP.
-librechat_extra_hosts:
-  - "sso.{{ platform_domain }}:{{ hostvars[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ansible_host }}"
-  - "chat.{{ platform_domain }}:{{ hostvars[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ansible_host }}"

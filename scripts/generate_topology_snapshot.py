@@ -20,9 +20,17 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from platform.repo import TOPOLOGY_HOST
 import sys
 from datetime import datetime
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
+from platform.repo import TOPOLOGY_HOST
 
 try:
     from datetime import UTC
@@ -30,7 +38,6 @@ except ImportError:  # Python < 3.11
     from datetime import timezone
 
     UTC = timezone.utc  # type: ignore[assignment]
-from pathlib import Path
 from typing import Any
 
 # ---------------------------------------------------------------------------

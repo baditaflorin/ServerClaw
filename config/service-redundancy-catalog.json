@@ -487,6 +487,40 @@
         "failback_method": "Restore or rebuild docker-runtime, then rerun the Langfuse converge from git."
       }
     },
+    "librechat": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime",
+        "failover_trigger": "Restore docker-runtime when LibreChat or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime, then rerun the LibreChat converge from git."
+      }
+    },
+    "litellm": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime",
+        "failover_trigger": "Restore docker-runtime when LiteLLM or its proxy runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime, then rerun the LiteLLM converge from git."
+      }
+    },
     "lago": {
       "tier": "R1",
       "recovery_objective": {
@@ -690,6 +724,23 @@
         "location": "docker-runtime",
         "failover_trigger": "Restore docker-runtime when NetBox or its persistent state cannot be recovered in place.",
         "failback_method": "Restore or rebuild docker-runtime, then rerun the NetBox converge from git."
+      }
+    },
+    "neko": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime",
+        "failover_trigger": "Restore docker-runtime when Neko or its browser session runtime cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime, then rerun the Neko converge from git."
       }
     },
     "nginx_edge": {

@@ -1,4 +1,4 @@
-{% from 'compose_macros.j2' import openbao_sidecar %}
+{% from 'compose_macros.j2' import hairpin_hosts, openbao_sidecar %}
 services:
 {{ openbao_sidecar("directus") }}
 
@@ -9,10 +9,7 @@ services:
     depends_on:
       openbao-agent:
         condition: service_healthy
-    extra_hosts:
-{% for item in directus_public_hostname_overrides %}
-      - "{{ item.hostname }}:{{ item.address }}"
-{% endfor %}
+{{ hairpin_hosts() }}
     env_file:
       - {{ directus_env_file }}
     ports:

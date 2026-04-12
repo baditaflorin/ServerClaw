@@ -1235,6 +1235,9 @@ def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
             next_target = len(makefile)
         block = makefile[start:next_target]
         assert "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py" in block
+        assert "--syntax-check" in block
+        assert "skipping canonical truth gate for syntax-check run" in block
+        assert "skipping restic live-apply trigger for syntax-check run" in block
 
 
 def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:

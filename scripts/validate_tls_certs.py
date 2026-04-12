@@ -64,11 +64,10 @@ def _load_dns_declarations() -> set[str]:
         data = yaml.safe_load(f)
     if not isinstance(data, dict):
         return set()
-    fqdns: set[str] = set()
-    for record in data.get("dns_declarations", []):
-        if isinstance(record, dict) and "fqdn" in record:
-            fqdns.add(record["fqdn"])
-    return fqdns
+    dns_records = data.get("dns_records", {})
+    if isinstance(dns_records, dict):
+        return {str(fqdn) for fqdn in dns_records}
+    return set()
 
 
 def _load_subdomain_catalog() -> dict[str, dict]:

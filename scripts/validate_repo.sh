@@ -341,8 +341,12 @@ validate_ansible_syntax() {
 validate_generated_vars() {
   echo "Generated platform vars validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
-  # ADR 0374 Phase 1: validate hairpin NAT declarations
-  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_cross_cutting_artifacts.py" --check --only hairpin
+  # ADR 0374: validate the full cross-cutting manifest surface
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_cross_cutting_artifacts.py" --check
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_dns_declarations.py" --check
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_tls_certs.py" --check
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_sso_clients.py" --check
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_nginx_config.py" --check
 }
 
 validate_yaml() {

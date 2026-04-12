@@ -61,10 +61,10 @@ services:
       - {{ librechat_tools_openapi_remote_dir }}:/app/client/public/tools-openapi:ro
       - {{ librechat_data_dir }}/images:/app/client/public/images
       - {{ librechat_data_dir }}/logs:/app/api/logs
-{% if librechat_extra_hosts | length > 0 %}
+{% if platform_hairpin_nat_hosts | default([]) | length > 0 %}
     extra_hosts:
-{% for host in librechat_extra_hosts %}
-      - "{{ host }}"
+{% for entry in platform_hairpin_nat_hosts %}
+      - "{{ entry.hostname }}:{{ entry.address }}"
 {% endfor %}
 {% endif %}
     healthcheck:

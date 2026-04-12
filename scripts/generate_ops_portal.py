@@ -14,8 +14,19 @@ from dataclasses import dataclass
 from functools import lru_cache
 import os
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
+
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -33,6 +44,7 @@ from release_manager import build_release_status_snapshot
 from service_catalog import load_service_catalog, validate_service_catalog
 from slo_tracking import build_slo_status_entries
 from subdomain_catalog import (
+    load_host_vars,
     load_public_edge_defaults,
     load_subdomain_catalog,
     validate_subdomain_catalog,
@@ -1063,7 +1075,7 @@ def render_portal(
     public_edge_defaults = load_public_edge_defaults()
     agent_registry, _workflow_catalog = load_agent_registry_best_effort()
     stack = load_yaml(STACK_PATH)
-    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+    host_vars = load_host_vars()
 
     validate_environment_topology(environment_catalog, host_vars)
     validate_service_catalog(service_catalog)

@@ -1,4 +1,4 @@
-{% from 'compose_macros.j2' import openbao_sidecar, redis_service %}
+{% from 'compose_macros.j2' import hairpin_hosts, openbao_sidecar, redis_service %}
 services:
 {{ openbao_sidecar("paperless") }}
 
@@ -20,10 +20,7 @@ services:
         condition: service_healthy
       openbao-agent:
         condition: service_healthy
-    extra_hosts:
-{% for item in paperless_public_hostname_overrides %}
-      - "{{ item.hostname }}:{{ item.address }}"
-{% endfor %}
+{{ hairpin_hosts() }}
     env_file:
       - {{ paperless_env_file }}
     ports:

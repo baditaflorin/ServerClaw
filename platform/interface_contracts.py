@@ -84,6 +84,23 @@ def _resolve_repo_path(path: str) -> Path:
     return repo_path(path)
 
 
+def _is_playbook_ref(path: str) -> bool:
+    candidate = Path(path)
+    return candidate.suffix == ".yml" and "playbooks" in candidate.parts
+
+
+def _workflow_playbook_candidates(workflow_id: str) -> list[Path]:
+    if not workflow_id.startswith("converge-"):
+        return []
+    slug = workflow_id.removeprefix("converge-")
+    return [
+        repo_path("playbooks", f"{slug}.yml"),
+        repo_path("playbooks", "services", f"{slug}.yml"),
+        repo_path("collections", "ansible_collections", "lv3", "platform", "playbooks", f"{slug}.yml"),
+        repo_path("collections", "ansible_collections", "lv3", "platform", "playbooks", "services", f"{slug}.yml"),
+    ]
+
+
 def _validate_declared_paths(paths: list[str], *, field: str, contract_id: str) -> None:
     for index, raw_path in enumerate(paths):
         resolved = _resolve_repo_path(raw_path)
@@ -293,8 +310,9 @@ def validate_converge_workflow_contract(contract: dict[str, Any]) -> None:
         referenced_playbooks = [
             _resolve_repo_path(path)
             for path in implementation_refs
-            if path.startswith("playbooks/") and path.endswith(".yml")
+            if _is_playbook_ref(path)
         ]
+        referenced_playbooks.extend(_workflow_playbook_candidates(workflow_id))
         if not referenced_playbooks or not any(path.exists() for path in referenced_playbooks):
             raise ValueError(
                 f"workflow '{workflow_id}' must reference at least one existing playbook in implementation_refs"

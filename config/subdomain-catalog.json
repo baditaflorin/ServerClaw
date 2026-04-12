@@ -277,7 +277,7 @@
     },
     {
       "fqdn": "chat.example.com",
-      "service_id": "serverclaw",
+      "service_id": "librechat",
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
@@ -290,7 +290,7 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       },
-      "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
+      "notes": "LibreChat is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
     },
     {
       "fqdn": "ci.example.com",
