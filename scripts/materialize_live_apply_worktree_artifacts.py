@@ -8,6 +8,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from shutil import copy2, copytree
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -51,6 +52,11 @@ ARTIFACTS: dict[str, ArtifactSpec] = {
         relative_path="config/uptime-kuma/monitors.json",
         description="Generated Uptime Kuma monitor catalog consumed by the changelog portal.",
     ),
+    "image_scan_receipts": ArtifactSpec(
+        kind="directory",
+        relative_path="receipts/image-scans",
+        description="Latest container image scan receipts required by vulnerability budget gates.",
+    ),
 }
 
 
@@ -80,6 +86,36 @@ def run_command(argv: list[str], *, repo_root: Path = REPO_ROOT) -> None:
         raise RuntimeError(f"{' '.join(argv)} exited {completed.returncode}: {detail.splitlines()[-1]}")
 
 
+def find_primary_worktree(repo_root: Path) -> Path:
+    result = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        cwd=str(repo_root),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return repo_root
+
+    current_worktree: dict[str, str] = {}
+    candidates: list[dict[str, str]] = []
+    for line in result.stdout.splitlines():
+        if not line.strip():
+            if current_worktree:
+                candidates.append(current_worktree)
+                current_worktree = {}
+            continue
+        key, _, value = line.partition(" ")
+        current_worktree[key] = value.strip()
+    if current_worktree:
+        candidates.append(current_worktree)
+
+    for entry in candidates:
+        if entry.get("branch") == "refs/heads/main":
+            return Path(entry["worktree"])
+    return repo_root
+
+
 def materialize_artifact(artifact_id: str, *, repo_root: Path = REPO_ROOT) -> Path:
     path = artifact_path(artifact_id, repo_root=repo_root)
 
@@ -95,6 +131,18 @@ def materialize_artifact(artifact_id: str, *, repo_root: Path = REPO_ROOT) -> Pa
             path.write_text("# fresh-worktree bootstrap sentinel\n", encoding="utf-8")
     elif artifact_id == "drift_reports_dir":
         path.mkdir(parents=True, exist_ok=True)
+    elif artifact_id == "image_scan_receipts":
+        source_root = find_primary_worktree(repo_root)
+        source = source_root / "receipts" / "image-scans"
+        if not source.exists():
+            raise RuntimeError(f"missing source image scan receipts at {source}")
+        path.mkdir(parents=True, exist_ok=True)
+        for entry in source.iterdir():
+            target = path / entry.name
+            if entry.is_dir():
+                copytree(entry, target, dirs_exist_ok=True)
+            else:
+                copy2(entry, target)
     else:
         raise KeyError(f"unknown artifact '{artifact_id}'")
 

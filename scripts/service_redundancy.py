@@ -6,11 +6,21 @@ import argparse
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
-if str(Path(__file__).resolve().parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+existing_platform = sys.modules.get("platform")
+if existing_platform is not None and not hasattr(existing_platform, "__path__"):
+    del sys.modules["platform"]
+
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 
 from validation_toolkit import require_int, require_list, require_mapping, require_str
 
@@ -71,6 +81,58 @@ def load_redundancy_catalog() -> dict[str, Any]:
     payload = load_json(SERVICE_REDUNDANCY_PATH)
     if not isinstance(payload, dict):
         raise ValueError(f"{SERVICE_REDUNDANCY_PATH} must be an object")
+    return normalize_redundancy_catalog(payload)
+
+
+def normalize_redundancy_catalog(payload: dict[str, Any]) -> dict[str, Any]:
+    allowed_root = {"$schema", "schema_version", "platform", "services"}
+    extras = {key: value for key, value in payload.items() if key not in allowed_root}
+    if not extras:
+        return payload
+
+    services = payload.get("services")
+    if not isinstance(services, dict):
+        services = {}
+
+    collided = []
+    for key, value in extras.items():
+        if key in services:
+            collided.append(key)
+            continue
+        services[key] = value
+
+    if collided:
+        print(
+            "WARN service redundancy catalog: duplicate legacy service entries ignored: " + ", ".join(sorted(collided)),
+            file=sys.stderr,
+        )
+
+    for key in extras:
+        payload.pop(key, None)
+    payload["services"] = services
+
+    legacy_service_keys = {
+        "tier",
+        "recovery_objective",
+        "backup_sources",
+        "standby",
+        "notes",
+        "rehearsal",
+    }
+    leaked_keys = legacy_service_keys.intersection(services)
+    if leaked_keys:
+        for key in leaked_keys:
+            services.pop(key, None)
+        print(
+            "WARN service redundancy catalog: removed legacy inline keys from services: "
+            + ", ".join(sorted(leaked_keys)),
+            file=sys.stderr,
+        )
+
+    print(
+        "WARN service redundancy catalog: normalized legacy top-level service entries into 'services'",
+        file=sys.stderr,
+    )
     return payload
 
 

@@ -1547,8 +1547,16 @@ live-apply-group:
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "group:$(group)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:group:$(group):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
-	@if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
-		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
+	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-group: skipping vulnerability budget gate for syntax-check run"; \
+	elif [ "$(env)" = "production" ]; then \
+		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; \
+	fi
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-group: skipping service redundancy gate for syntax-check run"; \
+	else \
+		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply; \
+	fi
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/groups/$(group).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
 		printf '%s\n' "INFO live-apply-group: skipping restic live-apply trigger for syntax-check run"; \
@@ -1570,10 +1578,22 @@ live-apply-service:
 	fi
 	@if uv run --with pyyaml python $(REPO_ROOT)/scripts/service_id_resolver.py --exists-in-catalog "$(service)" >/dev/null; then \
 		set -e; \
-		if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(service)"; fi; \
+	if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-service: skipping vulnerability budget gate for syntax-check run"; \
+	elif [ "$(env)" = "production" ]; then \
+		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(service)"; \
+	fi; \
 		uv run --with pyyaml python $(REPO_ROOT)/scripts/standby_capacity.py --service "$(service)"; \
-		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"; \
-		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(service)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,); \
+		if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+			printf '%s\n' "INFO live-apply-service: skipping service redundancy gate for syntax-check run"; \
+		else \
+			uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"; \
+		fi; \
+		if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+			printf '%s\n' "INFO live-apply-service: skipping immutable guest replacement gate for syntax-check run"; \
+		else \
+			uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(service)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,); \
+		fi; \
 	else \
 		printf '%s\n' "INFO live-apply-service: skipping service-catalog gates for non-catalog playbook '$(service)'"; \
 	fi
@@ -1595,8 +1615,16 @@ live-apply-site:
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "site" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:site:$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
-	@if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
+	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-site: skipping vulnerability budget gate for syntax-check run"; \
+	elif [ "$(env)" = "production" ]; then \
+		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; \
+	fi
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-site: skipping service redundancy gate for syntax-check run"; \
+	else \
+		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply; \
+	fi
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
 		printf '%s\n' "INFO live-apply-site: skipping restic live-apply trigger for syntax-check run"; \

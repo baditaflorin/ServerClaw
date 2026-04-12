@@ -87,6 +87,13 @@
           "description": "Generated drift-reports directory consumed by generated portal and canonical-truth surfaces."
         },
         {
+          "id": "image_scan_receipts",
+          "kind": "directory",
+          "path": "receipts/image-scans",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact image_scan_receipts",
+          "description": "Latest container image scan receipts required by vulnerability budget gates in fresh worktrees."
+        },
+        {
           "id": "https_tls_targets",
           "kind": "file",
           "path": "config/prometheus/file_sd/https_tls_targets.yml",

@@ -106,7 +106,7 @@ make live-apply-service service=grafana env=staging EXTRA_ARGS=--syntax-check
 make live-apply-group group=observability env=staging EXTRA_ARGS=--syntax-check
 ```
 
-When a live-apply wrapper runs with `EXTRA_ARGS=--syntax-check`, it now skips the integration-only canonical-truth gate and the post-apply Restic trigger. That keeps branch-safe syntax-check replays runnable from isolated worktrees without forcing protected release files or pretending a live mutation happened.
+When a live-apply wrapper runs with `EXTRA_ARGS=--syntax-check`, it now skips integration-only gates (canonical truth, vulnerability budget, service redundancy, immutable guest replacement) and the post-apply Restic trigger. That keeps branch-safe syntax-check replays runnable from isolated worktrees without forcing protected release files or pretending a live mutation happened.
 
 ## Notes
 
