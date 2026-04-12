@@ -49,40 +49,19 @@
     owner: root
     group: root
     mode: "0644"
+  register: uptime_kuma_compose_render
 
-- name: Pull the Uptime Kuma image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ uptime_kuma_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ uptime_kuma_site_dir }}"
-  register: uptime_kuma_pull
-  changed_when: >-
-    'Downloaded newer image' in uptime_kuma_pull.stdout
-    or 'Pull complete' in uptime_kuma_pull.stdout
-    or 'Pulling' in uptime_kuma_pull.stdout
-
-- name: Start the Uptime Kuma stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ uptime_kuma_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ uptime_kuma_site_dir }}"
-  register: uptime_kuma_up
-  changed_when: >-
-    'Creating' in uptime_kuma_up.stdout
-    or 'Recreating' in uptime_kuma_up.stdout
-    or 'Starting' in uptime_kuma_up.stdout
+- name: Converge the Uptime Kuma compose stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ uptime_kuma_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ uptime_kuma_site_dir }}"
+    common_docker_compose_converge_service_name: uptime-kuma
+    common_docker_compose_converge_template_results:
+      - "{{ uptime_kuma_compose_render }}"
+    common_docker_compose_converge_health_port: "{{ uptime_kuma_port }}"
 
 - name: Wait for Uptime Kuma to listen locally
   ansible.builtin.include_role:
