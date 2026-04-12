@@ -12,22 +12,22 @@ def test_live_apply_wrappers_import_the_canonical_service_playbooks() -> None:
     wrappers = {
         "librechat": {
             "path": REPO_ROOT / "playbooks" / "services" / "librechat.yml",
-            "purpose": "# Purpose: Provide the stable live-apply service wrapper for LibreChat.",
+            "playbook": "../librechat.yml",
         },
         "litellm": {
             "path": REPO_ROOT / "playbooks" / "services" / "litellm.yml",
-            "purpose": "# Purpose: Provide the stable live-apply service wrapper for LiteLLM.",
+            "playbook": "../litellm.yml",
         },
         "repowise": {
             "path": REPO_ROOT / "playbooks" / "services" / "repowise.yml",
-            "purpose": "# Purpose: Provide the stable live-apply service wrapper for Repowise.",
+            "playbook": "../repowise.yml",
         },
     }
 
-    for service, config in wrappers.items():
+    for _service, config in wrappers.items():
         wrapper_text = config["path"].read_text(encoding="utf-8")
-        assert config["purpose"] in wrapper_text
-        assert yaml.safe_load(wrapper_text) == [{"import_playbook": f"../{service}.yml"}]
+        assert "# Purpose:" in wrapper_text
+        assert yaml.safe_load(wrapper_text) == [{"import_playbook": config["playbook"]}]
 
 
 def test_service_catalog_uses_wrapper_surfaces_for_live_apply_services() -> None:

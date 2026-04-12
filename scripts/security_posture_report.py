@@ -399,6 +399,10 @@ def post_glitchtip_events(events: list[dict[str, Any]], webhook_url: str) -> Non
         )
 
 
+def warn_optional_delivery_failure(sink: str, exc: Exception) -> None:
+    print(f"security posture warning: failed to publish {sink}: {exc}", file=sys.stderr)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0102 security posture workflow and write a receipt.")
     parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
@@ -471,19 +475,28 @@ def main(argv: list[str] | None = None) -> int:
         receipt_path = write_receipt(args.receipt_dir, report)
         events = build_security_events(report)
         maybe_publish_nats(events, publish=args.publish_nats, context=context)
-        maybe_write_metrics(report)
+        try:
+            maybe_write_metrics(report)
+        except Exception as exc:
+            warn_optional_delivery_failure("metrics", exc)
 
         mattermost_url = args.mattermost_webhook_url or maybe_read_secret_path(
             context["secret_manifest"], "mattermost_platform_findings_webhook_url"
         )
         if mattermost_url:
-            post_mattermost_summary(report, mattermost_url)
+            try:
+                post_mattermost_summary(report, mattermost_url)
+            except Exception as exc:
+                warn_optional_delivery_failure("mattermost", exc)
 
         glitchtip_url = args.glitchtip_event_url or maybe_read_secret_path(
             context["secret_manifest"], "glitchtip_platform_findings_event_url"
         )
         if glitchtip_url:
-            post_glitchtip_events(events, glitchtip_url)
+            try:
+                post_glitchtip_events(events, glitchtip_url)
+            except Exception as exc:
+                warn_optional_delivery_failure("glitchtip", exc)
 
         emit_event_best_effort(
             build_event(

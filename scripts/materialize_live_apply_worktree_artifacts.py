@@ -57,6 +57,21 @@ ARTIFACTS: dict[str, ArtifactSpec] = {
         relative_path="receipts/image-scans",
         description="Latest container image scan receipts required by vulnerability budget gates.",
     ),
+    "image_scan_sboms": ArtifactSpec(
+        kind="directory",
+        relative_path="receipts/sbom",
+        description="Image SBOM receipts referenced by grype-backed container image scan summaries.",
+    ),
+    "image_scan_cves": ArtifactSpec(
+        kind="directory",
+        relative_path="receipts/cve",
+        description="Image CVE receipts referenced by grype-backed container image scan summaries.",
+    ),
+    "security_reports": ArtifactSpec(
+        kind="directory",
+        relative_path="receipts/security-reports",
+        description="Latest host security posture receipts required by vulnerability budget service gates.",
+    ),
 }
 
 
@@ -131,11 +146,11 @@ def materialize_artifact(artifact_id: str, *, repo_root: Path = REPO_ROOT) -> Pa
             path.write_text("# fresh-worktree bootstrap sentinel\n", encoding="utf-8")
     elif artifact_id == "drift_reports_dir":
         path.mkdir(parents=True, exist_ok=True)
-    elif artifact_id == "image_scan_receipts":
+    elif artifact_id in {"image_scan_receipts", "image_scan_sboms", "image_scan_cves", "security_reports"}:
         source_root = find_primary_worktree(repo_root)
-        source = source_root / "receipts" / "image-scans"
+        source = source_root / ARTIFACTS[artifact_id].relative_path
         if not source.exists():
-            raise RuntimeError(f"missing source image scan receipts at {source}")
+            raise RuntimeError(f"missing source artifact directory at {source}")
         path.mkdir(parents=True, exist_ok=True)
         for entry in source.iterdir():
             target = path / entry.name

@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 303
+  total_workstreams: 304
   by_year:
-    '2026': 303
+    '2026': 304
 workstreams:
 - id: ws-0375-certificate-validation
   adr: '0375'
@@ -95,15 +95,19 @@ workstreams:
   - collections/ansible_collections/lv3/platform/roles/repowise_runtime/templates/docker-compose.yml.j2
   - config/ansible-execution-scopes.yaml
   - config/health-probe-catalog.json
+  - config/image-catalog.json
   - config/service-capability-catalog.json
   - config/subdomain-catalog.json
+  - config/worktree-bootstrap-manifests.json
   - docs/adr/.index.yaml
   - docs/adr/index/**
   - docs/adr/0371-parameterized-verify-tasks.md
   - docs/workstreams/ws-0371-live-apply.md
   - docs/runbooks/live-apply-receipts-and-verification-evidence.md
   - inventory/host_vars/proxmox-host.yml
+  - playbooks/tasks/security-scan.yml
   - playbooks/repowise.yml
+  - collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml
   - playbooks/services/librechat.yml
   - playbooks/services/litellm.yml
   - playbooks/services/repowise.yml
@@ -111,29 +115,46 @@ workstreams:
   - platform/ansible/execution_scopes.py
   - receipts/live-applies/*adr-0371*
   - receipts/live-applies/evidence/*ws-0371*
+  - receipts/image-scans/2026-04-12-librechat-runtime.json
+  - receipts/image-scans/2026-04-12-librechat-runtime.trivy.json
+  - receipts/image-scans/2026-04-12-litellm-runtime.json
+  - receipts/image-scans/2026-04-12-litellm-runtime.trivy.json
+  - receipts/image-scans/2026-04-12-ntfy-runtime.json
+  - receipts/image-scans/2026-04-12-ntfy-runtime.trivy.json
+  - receipts/image-scans/2026-04-12-openbao-runtime.json
+  - receipts/image-scans/2026-04-12-openbao-runtime.trivy.json
+  - receipts/security-reports/20260412T120210Z.json
   - scripts/environment_topology.py
   - scripts/generate_diagrams.py
   - scripts/generate_ops_portal.py
   - scripts/generate_status_docs.py
+  - scripts/materialize_live_apply_worktree_artifacts.py
   - scripts/platform_manifest.py
+  - scripts/security_posture_report.py
   - scripts/service_catalog.py
   - scripts/subdomain_catalog.py
   - scripts/validate_portal_auth.py
   - scripts/validation_toolkit.py
+  - scripts/vulnerability_budget.py
   - tests/test_ansible_execution_scopes.py
   - tests/test_common_docker_bridge_chains_helper.py
+  - tests/test_live_apply_worktree_bootstrap.py
   - tests/test_litellm_runtime_role.py
   - tests/test_ollama_runtime_role.py
   - tests/test_ops_portal.py
   - tests/test_rag_context_runtime_role.py
   - tests/test_repowise_playbook.py
+  - tests/test_security_scan_task.py
+  - tests/test_security_posture_report.py
   - tests/test_service_compose_macro_resolution.py
   - tests/test_service_live_apply_wrappers.py
   - tests/test_subdomain_catalog.py
   - tests/test_validate_portal_auth.py
   - tests/test_validation_toolkit.py
+  - tests/test_vulnerability_budget.py
   - workstreams/active/ws-0371-live-apply.yaml
   - workstreams/active/ws-0377-repo-intake-subdomain.yaml
+  - workstreams/archive/2026/ws-0364-live-apply.yaml
   - workstreams.yaml
   ownership_manifest:
     owned_surfaces:
@@ -149,17 +170,21 @@ workstreams:
     - id: ws_0371_runtime_followups
       paths:
       - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
-      - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
-      - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
       - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/main.yml
-      - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
       - collections/ansible_collections/lv3/platform/roles/ollama_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/repowise_runtime/templates/docker-compose.yml.j2
       - inventory/host_vars/proxmox-host.yml
       - playbooks/repowise.yml
-      - playbooks/templates/compose_macros.j2
       mode: exclusive
+    - id: ws_0371_compose_macro_contract
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
+      - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
+      - playbooks/templates/compose_macros.j2
+      mode: shared_contract
+      contract: compose-macro-library-v1
     - id: ws_0371_service_wrappers
       paths:
       - config/ansible-execution-scopes.yaml
@@ -174,6 +199,35 @@ workstreams:
       - receipts/live-applies/evidence/*ws-0371*
       - tests/test_ansible_execution_scopes.py
       - tests/test_service_live_apply_wrappers.py
+      mode: exclusive
+    - id: ws_0371_image_policy
+      paths:
+      - config/image-catalog.json
+      - receipts/image-scans/2026-04-12-librechat-runtime.json
+      - receipts/image-scans/2026-04-12-librechat-runtime.trivy.json
+      - receipts/image-scans/2026-04-12-litellm-runtime.json
+      - receipts/image-scans/2026-04-12-litellm-runtime.trivy.json
+      - receipts/image-scans/2026-04-12-ntfy-runtime.json
+      - receipts/image-scans/2026-04-12-ntfy-runtime.trivy.json
+      - receipts/image-scans/2026-04-12-openbao-runtime.json
+      - receipts/image-scans/2026-04-12-openbao-runtime.trivy.json
+      - scripts/vulnerability_budget.py
+      - tests/test_vulnerability_budget.py
+      mode: exclusive
+    - id: ws_0371_worktree_bootstrap
+      paths:
+      - config/worktree-bootstrap-manifests.json
+      - scripts/materialize_live_apply_worktree_artifacts.py
+      - tests/test_live_apply_worktree_bootstrap.py
+      mode: exclusive
+    - id: ws_0371_security_posture_refresh
+      paths:
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml
+      - playbooks/tasks/security-scan.yml
+      - receipts/security-reports/20260412T120210Z.json
+      - scripts/security_posture_report.py
+      - tests/test_security_posture_report.py
+      - tests/test_security_scan_task.py
       mode: exclusive
     - id: ws_0371_generator_bootstrap
       paths:
@@ -215,6 +269,7 @@ workstreams:
       paths:
       - workstreams/active/ws-0371-live-apply.yaml
       - workstreams/active/ws-0377-repo-intake-subdomain.yaml
+      - workstreams/archive/2026/ws-0364-live-apply.yaml
       - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
@@ -428,122 +483,6 @@ workstreams:
   notes: "Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py\n\
     step was skipped. Run it to register in Plane once the service recovers:\n  python\
     \ scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools\n"
-- id: ws-0364-live-apply
-  adr: '0364'
-  title: Live apply native build server gate execution from latest origin/main
-  status: merged
-  ready_to_merge: true
-  live_applied: true
-  owner: codex
-  branch: codex/ws-0364-live-apply
-  worktree_path: .worktrees/ws-0364-live-apply
-  doc: docs/workstreams/ws-0364-live-apply.md
-  depends_on:
-  - adr-0082-remote-build-execution-gateway
-  - adr-0083-docker-based-check-runner
-  - adr-0087-repository-validation-gate
-  - adr-0264-failure-domain-isolated-validation-lanes
-  - adr-0266-validation-runner-capability-contracts
-  conflicts_with: []
-  shared_surfaces:
-  - workstreams.yaml
-  - workstreams/active/ws-0364-live-apply.yaml
-  - docs/workstreams/ws-0364-live-apply.md
-  - docs/workstreams/ws-0377-repo-intake-subdomain.md
-  - docs/adr/0364-native-build-server-gate-execution.md
-  - docs/adr/.index.yaml
-  - docs/runbooks/validation-gate.md
-  - docs/runbooks/remote-build-gateway.md
-  - docs/runbooks/live-apply-receipts-and-verification-evidence.md
-  - Makefile
-  - config/build-server.json
-  - config/ansible-execution-scopes.yaml
-  - config/validation-gate.json
-  - config/workflow-catalog.json
-  - inventory/build_server.yml
-  - scripts/parallel_check.py
-  - scripts/remote_exec.sh
-  - scripts/live_apply_receipts.py
-  - scripts/canonical_truth.py
-  - scripts/trigger_restic_live_apply.py
-  - scripts/drift_lib.py
-  - platform/interface_contracts.py
-  - collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
-  - playbooks/services/build-server-gate-tools.yml
-  - playbooks/services/repo_intake.yml
-  - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-  - receipts/live-applies/
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws_0364_live_apply_tracking
-      paths:
-      - workstreams/active/ws-0364-live-apply.yaml
-      - docs/workstreams/ws-0364-live-apply.md
-      mode: exclusive
-    - id: adr_0364_live_apply_docs
-      paths:
-      - docs/adr/0364-native-build-server-gate-execution.md
-      - docs/runbooks/validation-gate.md
-      - docs/runbooks/remote-build-gateway.md
-      - docs/runbooks/live-apply-receipts-and-verification-evidence.md
-      mode: exclusive
-    - id: adr_0364_live_apply_gate
-      paths:
-      - Makefile
-      - config/build-server.json
-      - config/ansible-execution-scopes.yaml
-      - config/validation-gate.json
-      - config/workflow-catalog.json
-      - inventory/build_server.yml
-      - scripts/parallel_check.py
-      - scripts/remote_exec.sh
-      - scripts/live_apply_receipts.py
-      - scripts/canonical_truth.py
-      - scripts/trigger_restic_live_apply.py
-      - scripts/drift_lib.py
-      - platform/interface_contracts.py
-      - collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
-      - playbooks/services/build-server-gate-tools.yml
-      - playbooks/services/repo_intake.yml
-      mode: shared_contract
-      contract: validation-gate-runtime-v1
-    - id: ws_0377_metadata_fix
-      paths:
-      - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-      - docs/workstreams/ws-0377-repo-intake-subdomain.md
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_index_generation
-      paths:
-      - docs/adr/.index.yaml
-      - docs/adr/index/*
-      mode: shared_contract
-      contract: adr-index-generator-v1
-    - id: live_apply_receipts
-      paths:
-      - receipts/live-applies/**
-      mode: exclusive
-  notes: 'Live-apply workstream for ADR 0364. Start from latest origin/main in an
-    isolated
-
-    worktree, converge the build-server gate toolchain onto docker-build, verify the
-
-    native remote gate end to end, and record durable receipt/evidence artifacts before
-
-    exact-main integration.
-
-    '
-  blockers:
-  - Remote validation failed because build-server check runner images were unavailable
-    (registry.example.com DNS failure) and local Docker fallback timed out.
-  - Pre-push gate did not complete (remote gate hang); rerun once runner registry
-    and Docker are reachable.
-  plane_issue_id: 5cf6ccfd-dd7b-46d8-b7eb-8b445936bf9f
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"

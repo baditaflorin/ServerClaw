@@ -1066,7 +1066,9 @@
       "subdomain": "chat.example.com",
       "exposure": "edge-published",
       "health_probe_id": "librechat",
-      "image_catalog_ids": [],
+      "image_catalog_ids": [
+        "librechat_runtime"
+      ],
       "secret_catalog_ids": [],
       "adr": "0380",
       "runbook": "docs/runbooks/configure-librechat.md",
@@ -1099,7 +1101,9 @@
       "internal_url": "http://10.10.10.20:4000",
       "exposure": "private-only",
       "health_probe_id": "litellm",
-      "image_catalog_ids": [],
+      "image_catalog_ids": [
+        "litellm_runtime"
+      ],
       "secret_catalog_ids": [],
       "adr": "0381",
       "runbook": "docs/runbooks/configure-litellm.md",

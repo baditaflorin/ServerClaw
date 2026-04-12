@@ -40,12 +40,25 @@
         state: directory
         mode: "0755"
 
-    - name: Ensure Lynis is installed
+    - name: Check whether Lynis is already installed
+      ansible.builtin.command:
+        argv:
+          - dpkg-query
+          - -W
+          - -f=${Status}
+          - lynis
+      register: security_scan_lynis_installed
+      changed_when: false
+      failed_when: false
+
+    - name: Ensure Lynis is installed when missing
       ansible.builtin.apt:
         name: lynis
         state: present
         update_cache: true
         force_apt_get: true
+      when:
+      - security_scan_lynis_installed.rc != 0 or "install ok installed" not in security_scan_lynis_installed.stdout
 
     - name: Remove a stale Lynis pid file before starting a new audit
       ansible.builtin.shell: |

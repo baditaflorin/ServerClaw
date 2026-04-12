@@ -10,6 +10,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 import drift_lib  # noqa: E402
 import security_posture_report as report  # noqa: E402
+import platform.repo as platform_repo  # noqa: E402
 
 
 def test_build_report_detects_new_lynis_findings_and_hardening_delta() -> None:
@@ -158,14 +159,14 @@ def test_resolve_repo_local_path_maps_inaccessible_controller_local_secret(
     mirrored_secret.parent.mkdir(parents=True)
     mirrored_secret.write_text("secret", encoding="utf-8")
     inaccessible = "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/worker.id_ed25519"
-    original = drift_lib._path_exists
+    original = platform_repo._path_exists
 
     def fake_path_exists(path: Path) -> bool:
         if str(path) == inaccessible:
             return False
         return original(path)
 
-    monkeypatch.setattr(drift_lib, "_path_exists", fake_path_exists)
+    monkeypatch.setattr(platform_repo, "_path_exists", fake_path_exists)
 
     resolved = drift_lib.resolve_repo_local_path(
         inaccessible,
@@ -243,13 +244,11 @@ def test_resolve_nats_tunnel_target_falls_back_to_docker_runtime() -> None:
 
 
 def test_inventory_guest_proxy_command_is_non_interactive() -> None:
-    group_vars = (REPO_ROOT / "inventory" / "group_vars" / "all.yml").read_text(encoding="utf-8")
+    group_vars = (REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml").read_text(encoding="utf-8")
 
     assert "proxmox_guest_ssh_proxy_command" in group_vars
-    assert "-o BatchMode=yes" in group_vars
-    assert "-o LogLevel=ERROR" in group_vars
-    assert "-o StrictHostKeyChecking=no" in group_vars
-    assert "-o UserKnownHostsFile=/dev/null" in group_vars
+    assert "-o ProxyJump={{ proxmox_host_admin_user }}@" in group_vars
+    assert 'proxmox_host_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_proxy_command }}"' in group_vars
 
 
 def test_inventory_proxmox_host_is_env_overridable() -> None:
@@ -286,3 +285,50 @@ def test_skip_lynis_reuses_cached_reports(monkeypatch, tmp_path: Path) -> None:
     )
 
     assert exit_code in {0, 1, 2}
+
+
+def test_main_treats_optional_publish_failures_as_warnings(monkeypatch, tmp_path: Path, capsys) -> None:
+    cached_dir = tmp_path / "lynis"
+    cached_dir.mkdir()
+    fixture = REPO_ROOT / "tests" / "fixtures" / "security_posture_docker_runtime.dat"
+    (cached_dir / "docker-runtime-lynis-report.dat").write_text(fixture.read_text(), encoding="utf-8")
+
+    monkeypatch.setattr(report, "load_controller_context", lambda: {"bootstrap_key": None, "host_addr": "100.64.0.1"})
+    monkeypatch.setattr(report, "load_previous_report", lambda _path: None)
+    monkeypatch.setattr(report, "run_remote_script", lambda **_kwargs: {})
+    monkeypatch.setattr(report, "write_receipt", lambda _dir, _report: tmp_path / "receipt.json")
+    monkeypatch.setattr(
+        report,
+        "build_security_events",
+        lambda _report: [{"event": "platform.security.critical-finding", "kind": "security-finding"}],
+    )
+    monkeypatch.setattr(report, "maybe_publish_nats", lambda *args, **kwargs: None)
+    monkeypatch.setattr(report, "maybe_write_metrics", lambda _report: (_ for _ in ()).throw(RuntimeError("metrics")))
+    monkeypatch.setattr(report, "emit_event_best_effort", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        report, "post_mattermost_summary", lambda *_args, **_kwargs: (_ for _ in ()).throw(ValueError("mattermost"))
+    )
+    monkeypatch.setattr(
+        report, "post_glitchtip_events", lambda *_args, **_kwargs: (_ for _ in ()).throw(ValueError("glitchtip"))
+    )
+
+    exit_code = report.main(
+        [
+            "--env",
+            "production",
+            "--skip-lynis",
+            "--skip-trivy",
+            "--lynis-dir",
+            str(cached_dir),
+            "--mattermost-webhook-url",
+            "https://example.com/hooks/security",
+            "--glitchtip-event-url",
+            "https://example.com/api/events",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code in {0, 1, 2}
+    assert "failed to publish metrics: metrics" in captured.err
+    assert "failed to publish mattermost: mattermost" in captured.err
+    assert "failed to publish glitchtip: glitchtip" in captured.err

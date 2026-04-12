@@ -1,3 +1,29 @@
+# Purpose: Run the shared Lynis-based security scan workflow and refresh host SBOM evidence for the selected hosts.
+# Use case: Included by security-posture and exact-main verification flows when host-level hardening evidence must be refreshed.
+#
+# Inputs (required):
+#   - inventory_hostname (implicit Ansible host target): Host to audit with Lynis.
+#
+# Inputs (optional):
+#   - security_scan_output_dir (string, optional): Controller-local output directory for fetched Lynis artifacts.
+#   - security_scan_remote_dir (string, optional, default=/var/tmp/lv3-security-posture): Remote working directory for the scan.
+#
+# Outputs:
+#   - Fresh Lynis report data, exit-code artifacts, and a refreshed host SBOM for each selected host.
+#
+# Idempotency: Partially idempotent
+#              The scan itself is read-mostly, but it intentionally refreshes report artifacts and SBOM evidence on each run.
+#
+# Dependencies:
+#   - ADR 0102: Security posture reporting depends on recurring host scan evidence.
+#   - ADR 0165: Requires metadata headers on shared playbooks and tasks.
+#   - Task: playbooks/tasks/generate-host-sbom.yml — refreshes the host SBOM after the scan completes.
+#
+# Related ADRs: 0102, 0165, 0298
+# Related Runbooks: docs/runbooks/security-posture-reporting.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-31
 ---
 - name: Run Lynis security scans on the selected hosts
   hosts: all
@@ -14,12 +40,40 @@
         state: directory
         mode: "0755"
 
-    - name: Ensure Lynis is installed
+    - name: Check whether Lynis is already installed
+      ansible.builtin.command:
+        argv:
+          - dpkg-query
+          - -W
+          - -f=${Status}
+          - lynis
+      register: security_scan_lynis_installed
+      changed_when: false
+      failed_when: false
+
+    - name: Ensure Lynis is installed when missing
       ansible.builtin.apt:
         name: lynis
         state: present
         update_cache: true
         force_apt_get: true
+      when:
+      - security_scan_lynis_installed.rc != 0 or "install ok installed" not in security_scan_lynis_installed.stdout
+
+    - name: Remove a stale Lynis pid file before starting a new audit
+      ansible.builtin.shell: |
+        if [ ! -f /var/run/lynis.pid ]; then
+          exit 0
+        fi
+        if pgrep -x lynis >/dev/null 2>&1; then
+          exit 0
+        fi
+        rm -f /var/run/lynis.pid
+        echo removed
+      args:
+        executable: /bin/bash
+      register: security_scan_lynis_pid_cleanup
+      changed_when: "'removed' in security_scan_lynis_pid_cleanup.stdout"
 
     - name: Run the Lynis system audit
       ansible.builtin.command:

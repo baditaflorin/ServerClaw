@@ -1084,7 +1084,7 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-04-01",
       "scan_status": "pass_no_critical",
-      "scan_receipt": "receipts/image-scans/2026-04-01-ntfy-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-04-12-ntfy-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/ntfy_runtime/tasks/main.yml",
         "scripts/upgrade_container_image.py",
@@ -1123,14 +1123,27 @@
       "container_name": "litellm",
       "registry_ref": "ghcr.io/berriai/litellm-database",
       "tag": "main-v1.26.9",
-      "digest": "sha256:placeholder-scan-before-deploy",
-      "ref": "ghcr.io/berriai/litellm-database:main-v1.26.9",
+      "digest": "sha256:cbeba3f1b93ba518f1ee3d687ca14bf00dc4ebbd78a827e6cdc4bf1251104fe6",
+      "ref": "ghcr.io/berriai/litellm-database:main-v1.26.9@sha256:cbeba3f1b93ba518f1ee3d687ca14bf00dc4ebbd78a827e6cdc4bf1251104fe6",
       "platform": "linux/amd64",
-      "pinned_on": "2026-04-07",
-      "scan_status": "pending",
+      "pinned_on": "2026-04-12",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-04-12-litellm-runtime.json",
+      "exception": {
+        "owner": "Platform operations",
+        "justification": "The approved LiteLLM database image still reports critical and high findings in bundled Debian, Node.js, and Python components at the current upstream digest; keep it digest-pinned while the next upstream image refresh is evaluated.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed LiteLLM image fixed to the reviewed upstream artifact while the exception is open.",
+          "LiteLLM remains private-only on the runtime-ai network and is not published through the shared public edge."
+        ],
+        "approved_on": "2026-04-12",
+        "expires_on": "2026-04-26",
+        "remediation_plan": "Re-scan and refresh litellm_runtime with make upgrade-container-image IMAGE_ID=litellm_runtime WRITE=true APPLY=true before the exception expires."
+      },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2",
-        "scripts/upgrade_container_image.py"
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
       ],
       "apply_targets": [
         "converge-litellm"
@@ -1143,14 +1156,27 @@
       "container_name": "librechat",
       "registry_ref": "ghcr.io/danny-avila/librechat",
       "tag": "v0.8.4",
-      "digest": "sha256:placeholder-scan-before-deploy",
-      "ref": "ghcr.io/danny-avila/librechat:v0.8.4",
+      "digest": "sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
+      "ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
       "platform": "linux/amd64",
-      "pinned_on": "2026-04-08",
-      "scan_status": "pending",
+      "pinned_on": "2026-04-12",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-04-12-librechat-runtime.json",
+      "exception": {
+        "owner": "Platform operations",
+        "justification": "The approved LibreChat image still reports critical and high findings in bundled Node.js components at the current upstream digest; keep it digest-pinned while the next upstream image refresh is evaluated.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed LibreChat image fixed to the reviewed upstream artifact while the exception is open.",
+          "LibreChat remains published only through the managed NGINX edge with Keycloak-backed access instead of direct container exposure."
+        ],
+        "approved_on": "2026-04-12",
+        "expires_on": "2026-04-26",
+        "remediation_plan": "Re-scan and refresh librechat_runtime with make upgrade-container-image IMAGE_ID=librechat_runtime WRITE=true APPLY=true before the exception expires."
+      },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2",
-        "scripts/upgrade_container_image.py"
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
       ],
       "apply_targets": [
         "converge-librechat"
@@ -1168,16 +1194,16 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-04-05",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-04-05-openbao-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-04-12-openbao-runtime.json",
       "exception": {
-        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "justification": "The approved OpenBao image still reports critical and high findings in bundled Alpine packages and the compiled bao binary at the current upstream digest; keep it digest-pinned while the next upstream image refresh is evaluated.",
         "owner": "Platform operations",
         "compensating_controls": [
           "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
           "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
         ],
-        "approved_on": "2026-04-05",
-        "expires_on": "2026-04-05",
+        "approved_on": "2026-04-12",
+        "expires_on": "2026-04-26",
         "remediation_plan": "Re-scan and refresh openbao_runtime with make upgrade-container-image IMAGE_ID=openbao_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [

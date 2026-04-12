@@ -31,6 +31,35 @@ def test_materialize_drift_reports_dir_creates_directory(tmp_path: Path) -> None
     assert materializer.artifact_ready("drift_reports_dir", repo_root=tmp_path) is True
 
 
+@pytest.mark.parametrize(
+    ("artifact_id", "relative_path"),
+    [
+        ("image_scan_receipts", "receipts/image-scans/example.json"),
+        ("image_scan_sboms", "receipts/sbom/example.cdx.json"),
+        ("image_scan_cves", "receipts/cve/example.grype.json"),
+        ("security_reports", "receipts/security-reports/example.json"),
+    ],
+)
+def test_materialize_receipt_directories_copy_from_primary_worktree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    artifact_id: str,
+    relative_path: str,
+) -> None:
+    primary_root = tmp_path / "primary"
+    source = primary_root / relative_path
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(materializer, "find_primary_worktree", lambda repo_root: primary_root)
+
+    target = materializer.materialize_artifact(artifact_id, repo_root=tmp_path)
+
+    assert target == tmp_path / Path(relative_path).parent
+    assert (tmp_path / relative_path).read_text(encoding="utf-8") == "{}"
+    assert materializer.artifact_ready(artifact_id, repo_root=tmp_path) is True
+
+
 def test_materialize_platform_vars_invokes_make_generate_platform_vars(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -115,6 +144,10 @@ def test_live_apply_generated_artifacts_manifest_declares_expected_entries() -> 
     assert generated_by_id["platform_vars"]["path"] == "inventory/group_vars/platform.yml"
     assert generated_by_id["gate_bypass_keep"]["path"] == "receipts/gate-bypasses/.gitkeep"
     assert generated_by_id["drift_reports_dir"]["path"] == "receipts/drift-reports"
+    assert generated_by_id["image_scan_receipts"]["path"] == "receipts/image-scans"
+    assert generated_by_id["image_scan_sboms"]["path"] == "receipts/sbom"
+    assert generated_by_id["image_scan_cves"]["path"] == "receipts/cve"
+    assert generated_by_id["security_reports"]["path"] == "receipts/security-reports"
     assert generated_by_id["https_tls_targets"]["path"] == "config/prometheus/file_sd/https_tls_targets.yml"
     assert generated_by_id["https_tls_alerts"]["path"] == "config/prometheus/rules/https_tls_alerts.yml"
     assert generated_by_id["uptime_kuma_monitors"]["path"] == "config/uptime-kuma/monitors.json"

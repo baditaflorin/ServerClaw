@@ -94,6 +94,27 @@
           "description": "Latest container image scan receipts required by vulnerability budget gates in fresh worktrees."
         },
         {
+          "id": "image_scan_sboms",
+          "kind": "directory",
+          "path": "receipts/sbom",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact image_scan_sboms",
+          "description": "Image SBOM receipts required when a managed image still uses grype-backed scan summaries."
+        },
+        {
+          "id": "image_scan_cves",
+          "kind": "directory",
+          "path": "receipts/cve",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact image_scan_cves",
+          "description": "Image CVE receipts required when a managed image still uses grype-backed scan summaries."
+        },
+        {
+          "id": "security_reports",
+          "kind": "directory",
+          "path": "receipts/security-reports",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact security_reports",
+          "description": "Latest host security posture receipts required by vulnerability budget service gates in fresh worktrees."
+        },
+        {
           "id": "https_tls_targets",
           "kind": "file",
           "path": "config/prometheus/file_sd/https_tls_targets.yml",
