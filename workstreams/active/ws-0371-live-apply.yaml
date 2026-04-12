@@ -1,7 +1,7 @@
 id: ws-0371-live-apply
 adr: '0371'
 title: Re-verify parameterized service verification tasks from the latest origin/main
-status: ready
+status: ready_for_merge
 owner: codex
 branch: codex/ws-0371-live-apply
 worktree_path: .worktrees/ws-0371-live-apply
@@ -11,6 +11,7 @@ depends_on:
 - adr-0289-label-studio-service-stack
 conflicts_with: []
 shared_surfaces:
+- README.md
 - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
@@ -71,6 +72,7 @@ shared_surfaces:
 - receipts/image-scans/2026-04-12-openbao-runtime.trivy.json
 - receipts/security-reports/20260412T120210Z.json
 - scripts/environment_topology.py
+- scripts/generate_release_notes.py
 - scripts/generate_diagrams.py
 - scripts/generate_ops_portal.py
 - scripts/generate_status_docs.py
@@ -84,6 +86,7 @@ shared_surfaces:
 - scripts/vulnerability_budget.py
 - tests/test_ansible_execution_scopes.py
 - tests/test_common_docker_bridge_chains_helper.py
+- tests/test_generate_release_notes.py
 - tests/test_live_apply_worktree_bootstrap.py
 - tests/test_litellm_runtime_role.py
 - tests/test_ollama_runtime_role.py
@@ -180,6 +183,7 @@ ownership_manifest:
   - id: ws_0371_generator_bootstrap
     paths:
     - scripts/environment_topology.py
+    - scripts/generate_release_notes.py
     - scripts/generate_diagrams.py
     - scripts/generate_ops_portal.py
     - scripts/generate_status_docs.py
@@ -200,6 +204,7 @@ ownership_manifest:
     contract: generated-docs-v1
   - id: ws_0371_release_root_summaries
     paths:
+    - README.md
     - changelog.md
     - docs/release-notes/0.178.126.md
     - docs/release-notes/README.md
@@ -222,6 +227,7 @@ ownership_manifest:
     paths:
     - tests/test_ansible_execution_scopes.py
     - tests/test_common_docker_bridge_chains_helper.py
+    - tests/test_generate_release_notes.py
     - tests/test_litellm_runtime_role.py
     - tests/test_ollama_runtime_role.py
     - tests/test_ops_portal.py
@@ -241,6 +247,18 @@ ownership_manifest:
     - workstreams.yaml
     mode: shared_contract
     contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: replayed ADR 0371 from exact mainline by migrating the remaining
+    LibreChat, LiteLLM, and Repowise verifier wrappers onto the shared
+    `verify_service_health` contract, validating the fresh-worktree automation
+    paths, and recording governed end-to-end live-apply evidence for the affected
+    services
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    librechat: 2026-04-12-ws-0371-parameterized-service-verification-mainline-live-apply
+    litellm: 2026-04-12-ws-0371-parameterized-service-verification-mainline-live-apply
+    repowise: 2026-04-12-ws-0371-parameterized-service-verification-mainline-live-apply
 blockers: []
 ready_to_merge: true
 live_applied: true

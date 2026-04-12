@@ -160,6 +160,44 @@ def test_update_changelog_preserves_historical_release_links_without_note_files(
     assert "0.0.9 release notes" in updated
 
 
+def test_refresh_changelog_release_sections_strips_inline_release_sections(monkeypatch, tmp_path: Path) -> None:
+    changelog = """# Changelog
+
+## Unreleased
+
+- replayed exact-main verification
+
+## 0.1.3 (2026-01-03)
+
+- stale historical note that should live only in release notes
+
+## Latest Release
+
+- [0.1.3 release notes](docs/release-notes/0.1.3.md)
+
+## Previous Releases
+
+- [0.1.2 release notes](docs/release-notes/0.1.2.md)
+"""
+
+    budget_path = tmp_path / "config" / "root-summary-budgets.yaml"
+    write_budget(budget_path, previous_release_entries=5, recent_release_entries=5)
+    monkeypatch.setattr(root_summary, "ROOT_SUMMARY_BUDGETS_PATH", budget_path)
+    monkeypatch.setattr(notes, "RELEASE_NOTES_DIR", tmp_path / "docs" / "release-notes")
+    monkeypatch.setattr(notes, "REPO_ROOT", tmp_path)
+
+    write(notes.RELEASE_NOTES_DIR / "0.1.2.md", "# Release 0.1.2\n\n- Date: 2026-01-02\n")
+    write(notes.RELEASE_NOTES_DIR / "0.1.3.md", "# Release 0.1.3\n\n- Date: 2026-01-03\n")
+
+    updated = notes.refresh_changelog_release_sections(changelog)
+
+    assert "## Unreleased\n\n- replayed exact-main verification\n\n## Latest Release" in updated
+    assert "## 0.1.3 (2026-01-03)" not in updated
+    assert "stale historical note" not in updated
+    assert "- [0.1.3 release notes](docs/release-notes/0.1.3.md)" in updated
+    assert "- [0.1.2 release notes](docs/release-notes/0.1.2.md)" in updated
+
+
 def test_render_release_index_documents_rolls_older_versions_into_year_pages(monkeypatch, tmp_path: Path) -> None:
     budget_path = tmp_path / "config" / "root-summary-budgets.yaml"
     write_budget(budget_path, previous_release_entries=3, recent_release_entries=2)

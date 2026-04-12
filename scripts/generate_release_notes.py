@@ -29,6 +29,7 @@ UNRELEASED_PATTERN = re.compile(
     r"(^## Unreleased\n)(.*?)(^\s*## Latest Release\s*$)",
     re.MULTILINE | re.DOTALL,
 )
+INLINE_RELEASE_SECTION_PATTERN = re.compile(r"^## \d+\.\d+\.\d+(?:\s*\([^)]+\))?\s*$", re.MULTILINE)
 RELEASES_HEADER = "## Releases\n"
 
 
@@ -293,10 +294,19 @@ def refresh_changelog_release_sections(
     include_version: str | None = None,
     include_released_on: str | None = None,
 ) -> str:
+    unreleased_match = re.search(r"^## Unreleased\s*$", changelog_text, re.MULTILINE)
+    if not unreleased_match:
+        raise ValueError("changelog.md must contain a '## Unreleased' section")
     match = re.search(r"^## Latest Release\s*$", changelog_text, re.MULTILINE)
     if not match:
         raise ValueError("changelog.md must contain a '## Latest Release' section")
-    updated = changelog_text[: match.start()] + render_changelog_release_sections(
+    inline_release_match = INLINE_RELEASE_SECTION_PATTERN.search(
+        changelog_text,
+        unreleased_match.end(),
+        match.start(),
+    )
+    release_sections_start = inline_release_match.start() if inline_release_match else match.start()
+    updated = changelog_text[:release_sections_start] + render_changelog_release_sections(
         include_version=include_version,
         include_released_on=include_released_on,
         legacy_versions=collect_changelog_release_versions(changelog_text),

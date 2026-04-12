@@ -12,21 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-## 0.178.126 (2026-04-12)
-
-- closes the ADR 0346 live-apply gap by recording a governed Repowise semantic search replay and evidence from the latest origin/main
-
-## 0.178.78 (2026-04-10)
-
-- fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
-- fix: Remove duplicate repo_intake entry in platform_services.yml registry
-- fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
-- fix: Escape Prometheus template syntax in alert rules for Jinja2 rendering compatibility
-- verified: Phase 6 cosmetic cleanup stable in production (118/118 convergence tasks passing)
-
-## 0.178.77
-
-- Harbor OIDC fix, public release readiness, ADR 0385-0388 IoC + OIDC centralization, bootstrap and Docker dev, ADR 0373 Phase 4, multi-instance deployment, operator provisioning, operational fixes
+- replayed ADR 0371 from exact mainline by migrating the remaining LibreChat, LiteLLM, and Repowise verifier wrappers onto the shared `verify_service_health` contract, validating the fresh-worktree automation paths, and recording governed end-to-end live-apply evidence for the affected services
 
 ## Latest Release
 
