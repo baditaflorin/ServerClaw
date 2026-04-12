@@ -1084,7 +1084,7 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-04-01",
       "scan_status": "pass_no_critical",
-      "scan_receipt": "receipts/image-scans/2026-04-12-ntfy-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-04-01-ntfy-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/ntfy_runtime/tasks/main.yml",
         "scripts/upgrade_container_image.py",
@@ -1126,15 +1126,15 @@
       "digest": "sha256:cbeba3f1b93ba518f1ee3d687ca14bf00dc4ebbd78a827e6cdc4bf1251104fe6",
       "ref": "ghcr.io/berriai/litellm-database:main-v1.26.9@sha256:cbeba3f1b93ba518f1ee3d687ca14bf00dc4ebbd78a827e6cdc4bf1251104fe6",
       "platform": "linux/amd64",
-      "pinned_on": "2026-04-12",
+      "pinned_on": "2026-04-07",
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-04-12-litellm-runtime.json",
       "exception": {
         "owner": "Platform operations",
-        "justification": "The approved LiteLLM database image still reports critical and high findings in bundled Debian, Node.js, and Python components at the current upstream digest; keep it digest-pinned while the next upstream image refresh is evaluated.",
+        "justification": "The approved LiteLLM database image still reports critical and high Grype findings; keep it digest-pinned and review it at the next image rotation window.",
         "compensating_controls": [
-          "Digest pin keeps the deployed LiteLLM image fixed to the reviewed upstream artifact while the exception is open.",
-          "LiteLLM remains private-only on the runtime-ai network and is not published through the shared public edge."
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service stays behind the managed internal platform edge instead of exposing the container directly on the public host."
         ],
         "approved_on": "2026-04-12",
         "expires_on": "2026-04-26",
@@ -1142,8 +1142,7 @@
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2",
-        "scripts/upgrade_container_image.py",
-        "docs/runbooks/container-image-policy.md"
+        "scripts/upgrade_container_image.py"
       ],
       "apply_targets": [
         "converge-litellm"
@@ -1156,18 +1155,18 @@
       "container_name": "librechat",
       "registry_ref": "ghcr.io/danny-avila/librechat",
       "tag": "v0.8.4",
-      "digest": "sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
-      "ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
+      "digest": "sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b",
+      "ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b",
       "platform": "linux/amd64",
-      "pinned_on": "2026-04-12",
+      "pinned_on": "2026-04-08",
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-04-12-librechat-runtime.json",
       "exception": {
         "owner": "Platform operations",
-        "justification": "The approved LibreChat image still reports critical and high findings in bundled Node.js components at the current upstream digest; keep it digest-pinned while the next upstream image refresh is evaluated.",
+        "justification": "The approved LibreChat image still reports critical and high Trivy findings; keep it digest-pinned and review it at the next image rotation window.",
         "compensating_controls": [
-          "Digest pin keeps the deployed LibreChat image fixed to the reviewed upstream artifact while the exception is open.",
-          "LibreChat remains published only through the managed NGINX edge with Keycloak-backed access instead of direct container exposure."
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains behind the managed internal platform edge while the upstream image is being remediated."
         ],
         "approved_on": "2026-04-12",
         "expires_on": "2026-04-26",
@@ -1175,8 +1174,7 @@
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2",
-        "scripts/upgrade_container_image.py",
-        "docs/runbooks/container-image-policy.md"
+        "scripts/upgrade_container_image.py"
       ],
       "apply_targets": [
         "converge-librechat"
@@ -1194,16 +1192,16 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-04-05",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-04-12-openbao-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-04-05-openbao-runtime.json",
       "exception": {
-        "justification": "The approved OpenBao image still reports critical and high findings in bundled Alpine packages and the compiled bao binary at the current upstream digest; keep it digest-pinned while the next upstream image refresh is evaluated.",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
         "compensating_controls": [
           "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
           "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
         ],
-        "approved_on": "2026-04-12",
-        "expires_on": "2026-04-26",
+        "approved_on": "2026-04-05",
+        "expires_on": "2026-04-05",
         "remediation_plan": "Re-scan and refresh openbao_runtime with make upgrade-container-image IMAGE_ID=openbao_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [

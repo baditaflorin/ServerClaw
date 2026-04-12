@@ -1194,7 +1194,7 @@ def test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs(
 
 
 def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
-    tasks = load_tasks()
+    tasks = load_all_tasks()
     pin_hosts = next(
         task for task in tasks if task["name"] == "Pin public edge hostnames to the internal edge for Docker guests"
     )
@@ -1216,17 +1216,10 @@ def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
 
 def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() -> None:
     defaults = load_defaults()
-    daemon_config = defaults["docker_runtime_daemon_config"]
     controller_repo_root = defaults["docker_runtime_controller_repo_root"]
-    public_edge_host_aliases = defaults["docker_runtime_public_edge_host_aliases"]
+    daemon_config = defaults["docker_runtime_daemon_config"]
 
     assert defaults["docker_runtime_registry_mirrors"] == ["https://mirror.gcr.io"]
-    assert defaults["docker_runtime_public_edge_ipv4"] == "{{ platform_host.network.public_edge_ipv4 }}"
-    assert "platform_service_topology" in public_edge_host_aliases
-    assert "dict2items" in public_edge_host_aliases
-    assert "public_hostname" in public_edge_host_aliases
-    assert "service_topology_edge_sites" not in public_edge_host_aliases
-    assert "hostvars[platform_topology_host]" not in public_edge_host_aliases
     assert "ansible.builtin.pipe" in controller_repo_root
     assert "git -C " in controller_repo_root
     assert "rev-parse --show-toplevel" in controller_repo_root

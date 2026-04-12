@@ -15,6 +15,13 @@ import validation_toolkit  # noqa: E402
 
 
 class ValidationToolkitTests(unittest.TestCase):
+    def test_require_int_accepts_legacy_positional_bounds(self) -> None:
+        self.assertEqual(validation_toolkit.require_int(5, "field", 1, 10), 5)
+
+    def test_require_int_rejects_out_of_range_legacy_positional_bounds(self) -> None:
+        with self.assertRaisesRegex(ValueError, "field must be <= 10"):
+            validation_toolkit.require_int(11, "field", 1, 10)
+
     def test_load_identity_vars_prefers_repo_platform_package_when_stdlib_platform_is_preloaded(self) -> None:
         code = f"""
 import importlib

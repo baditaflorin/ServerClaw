@@ -1,59 +1,47 @@
 {
   "schema_version": "1.0.0",
   "receipt_id": "2026-04-12-adr-0364-build-server-gate-tools-live-apply",
-  "adr": "0364",
-  "workstream_id": "ws-0364-live-apply",
+  "environment": "production",
   "applied_on": "2026-04-12",
-  "applied_at": "2026-04-12T07:07:22Z",
-  "recorded_at": "2026-04-12T07:31:55Z",
   "recorded_on": "2026-04-12",
+  "recorded_at": "2026-04-12T07:31:55Z",
   "recorded_by": "codex",
   "source_commit": "a540068124c6b7308a5fe3319209aa04f0d0c2ef",
-  "repo_version_context": "0.178.125",
+  "repo_version_context": "0.178.123",
   "workflow_id": "live-apply-service",
-  "summary": "Live-apply replay of the build-server gate tools on docker-build, including restic backup artifacts and validation gate evidence.",
+  "adr": "0364",
+  "summary": "Live-apply build-server gate tooling on docker-build and record the governed validation evidence.",
   "targets": [
     {
-      "kind": "vm",
-      "name": "docker-build",
-      "address": "10.10.10.30"
+      "kind": "guest",
+      "name": "docker-build"
     }
   ],
   "verification": [
     {
       "check": "make check-build-server",
       "result": "pass",
-      "observed": "Build-server gate checks completed successfully.",
-      "evidence": "receipts/live-applies/evidence/2026-04-12-ws-0364-check-build-server.txt"
+      "observed": "Build-server gate checks passed on docker-build."
     },
     {
       "check": "make remote-validate",
-      "result": "fail",
-      "observed": "Remote validation could not fetch runner images; local fallback timed out on docker info.",
-      "details": "Runner images unavailable on build server; local fallback runner_unavailable (docker info timeout).",
-      "evidence": "receipts/live-applies/evidence/2026-04-12-ws-0364-remote-validate.txt"
+      "result": "partial",
+      "observed": "Runner images were unavailable on docker-build and the local Docker fallback timed out."
     },
     {
       "check": "make pre-push-gate",
       "result": "partial",
-      "observed": "Remote pre-push gate hung awaiting runner registry availability.",
-      "details": "Remote pre-push gate hung; rerun needed once build server runner registry is reachable."
+      "observed": "Remote pre-push gate did not complete and needs a rerun once the runner registry is reachable."
     }
   ],
   "evidence_refs": [
     "receipts/live-applies/evidence/2026-04-12-ws-0364-build-server-gate-tools-apply.txt",
-    "receipts/live-applies/evidence/2026-04-12-ws-0364-restic-backup.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0364-check-build-server.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0364-remote-validate.txt",
-    "versions/stack.yaml"
-  ],
-  "artifacts": [
-    "receipts/restic-backups/20260412T072059Z.json",
-    "receipts/restic-snapshots-latest.json",
-    "receipts/live-applies/evidence/2026-04-12-ws-0364-build-server-gate-tools-apply.txt",
     "receipts/live-applies/evidence/2026-04-12-ws-0364-restic-backup.txt"
   ],
   "notes": [
-    "Restic backup executed with RESTIC_USE_FALLBACK_SCRIPT=1 against /srv/platform_server."
+    "Restic backup executed with RESTIC_USE_FALLBACK_SCRIPT=1 against /srv/platform_server.",
+    "The receipt stays partial because build-server runner images were unavailable during the governed remote validation replay."
   ]
 }

@@ -9,13 +9,14 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | Capability | Receipt |
 | --- | --- |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `repowise` | `2026-04-12-adr-0346-repowise-live-apply` |
+| `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
 | `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
-| `identity_core_watchdog` | `2026-04-06-adr-0376-identity-core-watchdog-live-apply` |
 | `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
@@ -166,7 +167,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `config_merge` | `2026-03-26-adr-0158-config-merge-live-apply` |
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
-| `headscale` | `2026-03-25-adr-0144-headscale-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |

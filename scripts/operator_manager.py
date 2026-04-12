@@ -61,6 +61,8 @@ SSH_PUBKEY_PREFIXES = {"ssh-ed25519", "ssh-rsa", "ecdsa-sha2-nistp256", "ecdsa-s
 PLACEHOLDER_PUBLIC_KEY_TOKEN = "REPLACE_WITH_YOUR_PUBLIC_KEY"
 PLACEHOLDER_FINGERPRINT_TOKEN = "REPLACE_WITH_YOUR_FINGERPRINT"
 
+require_string = require_str
+
 
 @dataclass(frozen=True)
 class RoleDefinition:

@@ -23,6 +23,80 @@ Forkable infrastructure-as-code for taking a bare Debian 13 server to a
 fully managed Proxmox VE platform with 75+ self-hosted services — deployed,
 monitored, and recoverable from a single repository.
 
+## Platform Status
+
+<!-- BEGIN GENERATED: platform-status -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
+
+### Current Values
+| Field | Value |
+| --- | --- |
+| Repository version | `0.178.126` |
+| Platform version | `0.178.78` |
+| Observed check date | `2026-04-03` |
+| Observed OS | `Debian 13` |
+| Observed Proxmox version | `9.1.6` |
+| Observed kernel | `6.17.13-2-pve` |
+
+### Topology Summary
+| Field | Value |
+| --- | --- |
+| Managed guest count | 17 |
+| Running guest count | 10 |
+| Template VM present | `true` |
+| Declared services | 70 |
+| Publicly published services | 46 |
+
+### Service Exposure Summary
+| Exposure Model | Services |
+| --- | --- |
+| `edge-published` | 37 |
+| `edge-static` | 1 |
+| `informational-only` | 4 |
+| `private-only` | 28 |
+
+### Latest Live-Apply Evidence
+| Capability | Receipt |
+| --- | --- |
+| `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
+| `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
+| `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
+| `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `temporal` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `step_ca` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `semaphore` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `openfga` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `mailpit` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+
+Showing 20 of 175 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+<!-- END GENERATED: platform-status -->
+
+## Version Summary
+
+<!-- BEGIN GENERATED: version-summary -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
+
+| Field | Value |
+| --- | --- |
+| Repository version | `0.178.126` |
+| Platform version | `0.178.78` |
+| Observed OS | `Debian 13` |
+| Observed Proxmox installed | `true` |
+| Observed PVE manager version | `9.1.6` |
+| Declared services | 70 |
+<!-- END GENERATED: version-summary -->
+
 ## Quick Start
 
 ### Try it locally (Docker, no server needed)
@@ -66,87 +140,7 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
 every service.
 
-## What This Is
-
-A single Git repository that contains everything needed to operate a
-self-hosted platform:
-
-| Layer | What | Count |
-|-------|------|-------|
-| Architecture decisions | `docs/adr/` | 443+ ADRs |
-| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 160 roles |
-| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 61 playbooks |
-| Operational runbooks | `docs/runbooks/` | 270+ runbooks |
-| Automation scripts | `scripts/` | 308+ scripts |
-| Validation tests | `tests/` | Automated regression suite |
-
-### Services included
-
-SSO (Keycloak), secrets (OpenBao), databases (PostgreSQL), reverse proxy (Nginx),
-monitoring (Grafana + Prometheus), CI/CD (Woodpecker, Semaphore), Git hosting (Gitea),
-object storage (MinIO), container registry (Harbor), AI/LLM (Ollama, Dify, LiteLLM,
-LibreChat, Open WebUI), project management (Plane, Vikunja), communication
-(Mattermost, Matrix), wiki (Outline), analytics (Plausible, Superset), workflow
-automation (n8n, Windmill, Temporal), and many more.
-
-## Platform Status
-
-<!-- BEGIN GENERATED: platform-status -->
-> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
-
-### Current Values
-| Field | Value |
-| --- | --- |
-| Repository version | `0.178.126` |
-| Platform version | `0.178.78` |
-| Observed check date | `2026-04-03` |
-| Observed OS | `Debian 13` |
-| Observed Proxmox version | `9.1.6` |
-| Observed kernel | `6.17.13-2-pve` |
-
-### Topology Summary
-| Field | Value |
-| --- | --- |
-| Managed guest count | 17 |
-| Running guest count | 10 |
-| Template VM present | `true` |
-| Declared services | 70 |
-| Publicly published services | 46 |
-
-### Service Exposure Summary
-| Exposure Model | Services |
-| --- | --- |
-| `edge-published` | 37 |
-| `edge-static` | 1 |
-| `informational-only` | 4 |
-| `private-only` | 28 |
-
-### Latest Live-Apply Evidence
-| Capability | Receipt |
-| --- | --- |
-| `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `repowise` | `2026-04-12-adr-0346-repowise-live-apply` |
-| `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
-| `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
-| `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
-| `identity_core_watchdog` | `2026-04-06-adr-0376-identity-core-watchdog-live-apply` |
-| `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `temporal` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `step_ca` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `semaphore` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `openfga` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `mailpit` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `homepage` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-
-Showing 20 of 175 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
-<!-- END GENERATED: platform-status -->
+## Control Plane Lanes
 
 <!-- BEGIN GENERATED: control-plane-lanes -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -167,72 +161,28 @@ Showing 20 of 175 capability receipts. Full history: [live-apply evidence histor
 | `public-edge` | Public Edge | 3 | Intentionally published on a public domain through the named edge model. |
 <!-- END GENERATED: control-plane-lanes -->
 
-<!-- BEGIN GENERATED: document-index -->
-> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
+## What This Is
 
-### Core Documents
-- [Changelog](changelog.md)
-- [Release notes](docs/release-notes/README.md)
-- [Repository map](docs/repository-map.md)
-- [Assistant operator guide](docs/assistant-operator-guide.md)
-- [Release process](docs/release-process.md)
-- [Workstreams registry](workstreams.yaml)
-- [Workstreams guide](docs/workstreams/README.md)
+A single Git repository that contains everything needed to operate a
+self-hosted platform:
 
-### Discovery Indexes
-- [ADR index](docs/adr/.index.yaml)
-- [Runbooks directory](docs/runbooks)
-- [Workstreams directory](docs/workstreams)
-- [Release notes index](docs/release-notes/README.md)
-- [Generated docs directory](docs/site-generated)
-<!-- END GENERATED: document-index -->
+| Layer | What | Count |
+|-------|------|-------|
+| Architecture decisions | `docs/adr/` | 443+ ADRs |
+| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 160 roles |
+| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 61 playbooks |
+| Operational runbooks | `docs/runbooks/` | 270+ runbooks |
+| Automation scripts | `scripts/` | 309+ scripts |
+| Validation tests | `tests/` | Automated regression suite |
 
-<!-- BEGIN GENERATED: version-summary -->
-> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
+### Services included
 
-| Field | Value |
-| --- | --- |
-| Repository version | `0.178.126` |
-| Platform version | `0.178.78` |
-| Observed OS | `Debian 13` |
-| Observed Proxmox installed | `true` |
-| Observed PVE manager version | `9.1.6` |
-| Declared services | 70 |
-<!-- END GENERATED: version-summary -->
-
-<!-- BEGIN GENERATED: merged-workstreams -->
-> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
-
-Showing 25 of 300 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
-
-| ADR | Title | Status | Doc |
-| --- | --- | --- | --- |
-| `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
-| `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
-| `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
-| `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
-| `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
-| `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
-| `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](docs/workstreams/ws-0293-main-integration.md) |
-| `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](docs/workstreams/ws-0259-main-merge.md) |
-| `0252` | Integrate ADR 0252 exact-main replay onto current origin/main | `merged` | [ws-0252-main-merge.md](docs/workstreams/ws-0252-main-merge.md) |
-| `0238` | Integrate ADR 0238 operator grid into origin/main | `merged` | [ws-0238-main-integration.md](docs/workstreams/ws-0238-main-integration.md) |
-| `0237` | Live apply schema-first human forms via React Hook Form and Zod | `live_applied` | [ws-0237-live-apply.md](docs/workstreams/ws-0237-live-apply.md) |
-| `0236` | Live apply TanStack Query server-state conventions on the Windmill operator admin app | `live_applied` | [ws-0236-live-apply.md](docs/workstreams/ws-0236-live-apply.md) |
-| `0232` | Integrate ADR 0232 live apply into origin/main | `merged` | [ws-0232-main-merge.md](docs/workstreams/ws-0232-main-merge.md) |
-| `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](docs/workstreams/ws-0206-main-merge.md) |
-| `0181` | Off-host witness and control metadata replication | `live_applied` | [adr-0181-off-host-witness-replication.md](docs/workstreams/adr-0181-off-host-witness-replication.md) |
-| `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |
-| `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](docs/workstreams/adr-0178-dependency-wave-manifests.md) |
-| `0176` | Inventory sharding and host-scoped Ansible execution | `live_applied` | [adr-0176-inventory-sharding.md](docs/workstreams/adr-0176-inventory-sharding.md) |
-| `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
-| `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
-| `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
-| `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
-| `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
-| `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
-| `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
-<!-- END GENERATED: merged-workstreams -->
+SSO (Keycloak), secrets (OpenBao), databases (PostgreSQL), reverse proxy (Nginx),
+monitoring (Grafana + Prometheus), CI/CD (Woodpecker, Semaphore), Git hosting (Gitea),
+object storage (MinIO), container registry (Harbor), AI/LLM (Ollama, Dify, LiteLLM,
+LibreChat, Open WebUI), project management (Plane, Vikunja), communication
+(Mattermost, Matrix), wiki (Outline), analytics (Plausible, Superset), workflow
+automation (n8n, Windmill, Temporal), and many more.
 
 ## Forking This Repo
 
@@ -339,7 +289,7 @@ variables from it — no manual IP editing.
 │   ├── adr/             # 443+ architecture decision records
 │   ├── runbooks/        # 270+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
-├── scripts/             # 308+ automation scripts
+├── scripts/             # 309+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
 └── Makefile             # 27+ automation targets
 ```
@@ -379,6 +329,64 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 | Agent guide | [AGENTS.md](AGENTS.md) |
 | Release notes | [docs/release-notes/README.md](docs/release-notes/README.md) |
 | Changelog | [changelog.md](changelog.md) |
+
+## Document Index
+
+<!-- BEGIN GENERATED: document-index -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
+
+### Core Documents
+- [Changelog](changelog.md)
+- [Release notes](docs/release-notes/README.md)
+- [Repository map](docs/repository-map.md)
+- [Assistant operator guide](docs/assistant-operator-guide.md)
+- [Release process](docs/release-process.md)
+- [Workstreams registry](workstreams.yaml)
+- [Workstreams guide](docs/workstreams/README.md)
+
+### Discovery Indexes
+- [ADR index](docs/adr/.index.yaml)
+- [Runbooks directory](docs/runbooks)
+- [Workstreams directory](docs/workstreams)
+- [Release notes index](docs/release-notes/README.md)
+- [Generated docs directory](docs/site-generated)
+<!-- END GENERATED: document-index -->
+
+## Recently Merged Workstreams
+
+<!-- BEGIN GENERATED: merged-workstreams -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
+
+Showing 25 of 301 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+
+| ADR | Title | Status | Doc |
+| --- | --- | --- | --- |
+| `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
+| `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
+| `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
+| `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
+| `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
+| `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](docs/workstreams/ws-0293-main-integration.md) |
+| `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](docs/workstreams/ws-0259-main-merge.md) |
+| `0252` | Integrate ADR 0252 exact-main replay onto current origin/main | `merged` | [ws-0252-main-merge.md](docs/workstreams/ws-0252-main-merge.md) |
+| `0238` | Integrate ADR 0238 operator grid into origin/main | `merged` | [ws-0238-main-integration.md](docs/workstreams/ws-0238-main-integration.md) |
+| `0237` | Live apply schema-first human forms via React Hook Form and Zod | `live_applied` | [ws-0237-live-apply.md](docs/workstreams/ws-0237-live-apply.md) |
+| `0236` | Live apply TanStack Query server-state conventions on the Windmill operator admin app | `live_applied` | [ws-0236-live-apply.md](docs/workstreams/ws-0236-live-apply.md) |
+| `0232` | Integrate ADR 0232 live apply into origin/main | `merged` | [ws-0232-main-merge.md](docs/workstreams/ws-0232-main-merge.md) |
+| `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](docs/workstreams/ws-0206-main-merge.md) |
+| `0181` | Off-host witness and control metadata replication | `live_applied` | [adr-0181-off-host-witness-replication.md](docs/workstreams/adr-0181-off-host-witness-replication.md) |
+| `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |
+| `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](docs/workstreams/adr-0178-dependency-wave-manifests.md) |
+| `0176` | Inventory sharding and host-scoped Ansible execution | `live_applied` | [adr-0176-inventory-sharding.md](docs/workstreams/adr-0176-inventory-sharding.md) |
+| `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
+| `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
+| `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
+| `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
+| `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
+| `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
+| `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
+<!-- END GENERATED: merged-workstreams -->
 
 ## Requirements
 

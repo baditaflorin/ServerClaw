@@ -1,0 +1,20 @@
+workstream_id: ws-0380-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-12T10:24:00Z'
+completed_at: '2026-04-12T10:46:32Z'
+applied_by: codex
+repo_version: 478832b99b6f5c13d5b0afab9eef5950dca7dc53
+adr: '0380'
+summary: Live-apply ADR 0380 exact-main Neko browser access on proxmox-host, runtime-comms, and nginx.
+targets:
+- target: proxmox-host
+  role: proxmox_network
+- target: runtime-comms
+  role: neko_runtime
+- target: nginx
+  role: nginx_edge_publication
+errors: []
+notes:
+- Exact-main converge replayed the Proxmox UDP forwarding contract, runtime-comms Neko deployment, and browser edge publication from latest origin/main.
+- Final verification passed for controller-side instance validation, public WebRTC handshake, runtime listener coverage, and Proxmox forwarding state.

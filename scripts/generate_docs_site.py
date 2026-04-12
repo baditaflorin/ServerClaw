@@ -1163,13 +1163,16 @@ def render_api_pages(output_dir: Path, openapi_url: str | None) -> None:
 
 def render_changelog_page(output_dir: Path, releases: list[dict[str, str]]) -> None:
     changelog_text = CHANGELOG_PATH.read_text(encoding="utf-8")
+    current_version = VERSION_PATH.read_text(encoding="utf-8").strip()
+    latest_release_version = releases[0]["version"] if releases else current_version
     write_generated(
         output_dir,
         "changelog.md",
         wrap_generated_page(
             render_template(
                 "changelog.md.j2",
-                current_version=VERSION_PATH.read_text(encoding="utf-8").strip(),
+                current_version=current_version,
+                latest_release_version=latest_release_version,
                 releases=releases,
                 unreleased=extract_unreleased_section(changelog_text),
             ),
