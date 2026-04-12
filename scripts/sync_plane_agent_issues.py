@@ -51,7 +51,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import emit_cli_error, load_json, write_json
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
 from platform.ansible.plane import (
     PlaneClient,
     PlaneError,
@@ -65,14 +65,14 @@ from platform.ansible.plane import (
 # Constants
 # ---------------------------------------------------------------------------
 
-DEFAULT_AUTH_FILE = REPO_ROOT / ".local" / "plane" / "admin-auth.json"
+DEFAULT_AUTH_FILE = repo_path(".local", "plane", "admin-auth.json")
 DEFAULT_AW_IDENTIFIER = "AW"
 DEFAULT_AW_NAME = "Agent Work"
 DEFAULT_AW_DESCRIPTION = (
     "Live task board for all LLM agent sessions. One issue per worktree. See ADR 0360 for the full protocol."
 )
 WORKSTREAMS_ACTIVE = REPO_ROOT / "workstreams" / "active"
-AW_AUTH_FILE = REPO_ROOT / ".local" / "plane" / "aw-auth.json"
+AW_AUTH_FILE = repo_path(".local", "plane", "aw-auth.json")
 ALL_LABELS = list(AW_LABEL_COLORS.keys())
 
 

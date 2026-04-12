@@ -287,6 +287,7 @@
       "deployment_surface": "playbooks/services/coolify.yml",
       "restart_domain": "dedicated-coolify-core",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/dedicated-coolify",
+      "uptime_monitor_name": "LibreChat Public",
       "mobility_tier": "anchor",
       "tags": [
         "paas",
@@ -1608,6 +1609,7 @@
       "public_url": "https://browser.example.com",
       "subdomain": "browser.example.com",
       "exposure": "edge-published",
+      "uptime_monitor_name": "Neko Public",
       "health_probe_id": "neko",
       "adr": "0380",
       "adr_file": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
@@ -2786,7 +2788,6 @@
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
       "public_url": "https://chat.example.com",
-      "subdomain": "chat.example.com",
       "exposure": "edge-published",
       "uptime_monitor_name": "ServerClaw",
       "health_probe_id": "serverclaw",
@@ -2813,7 +2814,6 @@
         "production": {
           "status": "active",
           "url": "https://chat.example.com",
-          "subdomain": "chat.example.com",
           "notes": "ServerClaw uses in-app Keycloak OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
         }
       }

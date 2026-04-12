@@ -417,6 +417,7 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 	uv run --with pyyaml --with jinja2 python $(REPO_ROOT)/scripts/generate_readme.py --check
 
 generate-platform-vars:
+	$(MAKE) generate-cross-cutting-artifacts
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write
 
 generate-slo-rules:
@@ -438,10 +439,14 @@ validate-generated-uptime-kuma-monitors:
 	python3 $(REPO_ROOT)/scripts/uptime_contract.py --check
 
 generate-cross-cutting-artifacts:
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write --only hairpin
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write
 
 validate-generated-cross-cutting:
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --check --only hairpin
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --check
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/validate_dns_declarations.py --check
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/validate_tls_certs.py --check
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/validate_sso_clients.py --check
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/validate_nginx_config.py --check
 
 show-platform-facts:
 	uvx --from ansible-core ansible-inventory -i $(ANSIBLE_INVENTORY) --host $(HOST) --yaml
@@ -1533,20 +1538,32 @@ promote:
 live-apply-group:
 	@test -n "$(group)" || (echo "set group=<group-id>"; exit 1)
 	$(MAKE) preflight WORKFLOW=live-apply-group
-	$(MAKE) check-canonical-truth
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-group: skipping canonical truth gate for syntax-check run"; \
+	else \
+		$(MAKE) check-canonical-truth; \
+	fi
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "group:$(group)"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "group:$(group)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:group:$(group):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
 	@if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
+		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/groups/$(group).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-group --live-apply-trigger
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-group: skipping restic live-apply trigger for syntax-check run"; \
+	else \
+		uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-group --live-apply-trigger; \
+	fi
 
 live-apply-service:
 	@test -n "$(service)" || (echo "set service=<service-id>"; exit 1)
 	$(MAKE) preflight WORKFLOW=live-apply-service
-	$(MAKE) check-canonical-truth
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-service: skipping canonical truth gate for syntax-check run"; \
+	else \
+		$(MAKE) check-canonical-truth; \
+	fi
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "service:$(service)"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "$(service)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:service:$(service):$$(date -u +%Y%m%dT%H%M%SZ)"; \
@@ -1561,11 +1578,19 @@ live-apply-service:
 		printf '%s\n' "INFO live-apply-service: skipping service-catalog gates for non-catalog playbook '$(service)'"; \
 	fi
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(if $(filter ops_portal,$(service)),-e ops_portal_repo_root=$(REPO_ROOT),) $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-service --live-apply-trigger
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-service: skipping restic live-apply trigger for syntax-check run"; \
+	else \
+		uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-service --live-apply-trigger; \
+	fi
 
 live-apply-site:
 	$(MAKE) preflight WORKFLOW=live-apply-site
-	$(MAKE) check-canonical-truth
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-site: skipping canonical truth gate for syntax-check run"; \
+	else \
+		$(MAKE) check-canonical-truth; \
+	fi
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "site:site"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "site" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:site:$$(date -u +%Y%m%dT%H%M%SZ)"; \
@@ -1573,13 +1598,26 @@ live-apply-site:
 	@if [ "$(env)" = "production" ]; then $(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-site --live-apply-trigger
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-site: skipping restic live-apply trigger for syntax-check run"; \
+	else \
+		uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by live-apply-site --live-apply-trigger; \
+	fi
 
 live-apply-waves:
 	@test -n "$(manifest)" || (echo "set manifest=config/dependency-waves/<plan>.yaml"; exit 1)
 	$(MAKE) preflight WORKFLOW=live-apply-waves
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-waves: skipping canonical truth gate for syntax-check run"; \
+	else \
+		$(MAKE) check-canonical-truth; \
+	fi
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/dependency_wave_apply.py --manifest "$(manifest)" --env "$(or $(env),production)" $(if $(CATALOG),--catalog "$(CATALOG)",) $(if $(EXTRA_ARGS),--extra-args "$(EXTRA_ARGS)",) $(WAVE_ARGS)
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger
+	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
+		printf '%s\n' "INFO live-apply-waves: skipping restic live-apply trigger for syntax-check run"; \
+	else \
+		uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env "$(or $(env),production)" --mode backup --triggered-by live-apply-waves --live-apply-trigger; \
+	fi
 
 live-apply-train-status:
 	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) status

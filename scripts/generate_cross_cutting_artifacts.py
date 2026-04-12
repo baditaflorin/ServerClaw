@@ -55,6 +55,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
 SUBDOMAIN_CATALOG_PATH = REPO_ROOT / "config" / "subdomain-catalog.json"
 DNS_OUTPUT_PATH = REPO_ROOT / "config" / "generated" / "dns-declarations.yaml"
+PLATFORM_YML_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
+TOPOLOGY_HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 VALID_CONCERNS = ("hairpin", "dns", "tls", "proxy", "sso")
 VALID_SSO_PROVIDERS = {"keycloak", "oauth2-proxy"}
@@ -448,18 +450,6 @@ def generate_tls_certificates(
 # Proxy concern (Phase 4)
 # ---------------------------------------------------------------------------
 
-# Host-group to internal IP mapping (from inventory/hosts.yml production section)
-_HOST_GROUP_IPS: dict[str, str] = {
-    "docker-runtime": "10.10.10.20",
-    "runtime-control": "10.10.10.92",
-    "runtime-general": "10.10.10.91",
-    "runtime-ai": "10.10.10.90",
-    "coolify": "10.10.10.70",
-    "coolify-apps": "10.10.10.71",
-    "artifact-cache": "10.10.10.50",
-    "backup-vm-lv3": "10.10.10.51",
-}
-
 
 def generate_nginx_upstreams(
     registry: dict,
@@ -478,6 +468,7 @@ def generate_nginx_upstreams(
     """
     upstreams: list[dict] = []
     fqdn_owners: dict[str, str] = {}
+    catalog = _load_guest_catalog(repo_root)
 
     for service_name, service_config in sorted(registry.items()):
         service_config = require_mapping(service_config, f"platform_service_registry.{service_name}")
@@ -508,12 +499,7 @@ def generate_nginx_upstreams(
             proxy_config.get("upstream_host") or service_config.get("host_group", ""),
             f"{path_prefix}.upstream_host",
         )
-        upstream_ip = _HOST_GROUP_IPS.get(upstream_host)
-        if upstream_ip is None:
-            raise ValueError(
-                f"{path_prefix}.upstream_host: unknown host group '{upstream_host}'. "
-                f"Known groups: {', '.join(sorted(_HOST_GROUP_IPS))}"
-            )
+        upstream_ip = _resolve_catalog_ip(upstream_host, catalog, f"{path_prefix}.upstream_host")
 
         auth_proxy = proxy_config.get("auth_proxy", False)
         require_bool(auth_proxy, f"{path_prefix}.auth_proxy")
@@ -617,18 +603,42 @@ def _write_nginx_upstreams_conf(upstreams: list[dict], out_path: Path) -> None:
 # Hairpin concern (Phase 1)
 # ---------------------------------------------------------------------------
 
-PLATFORM_YML_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
 HAIRPIN_OUTPUT_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_hairpin.yml"
 
 
 def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
-    """Return platform_guest_catalog.by_name (inventory_hostname -> {ipv4, ...})."""
-    with (repo_root / "inventory" / "group_vars" / "platform.yml").open() as f:
-        data = yaml.safe_load(f)
-    catalog = data.get("platform_guest_catalog", {})
-    by_name = catalog.get("by_name", {})
+    """Return platform_guest_catalog.by_name (inventory_hostname -> {ipv4, ...}).
+
+    Fresh worktrees intentionally do not carry the ignored generated
+    inventory/group_vars/platform.yml. Fall back to the tracked topology source
+    when the generated file is absent so ADR 0374 validation can run from a
+    clean checkout.
+    """
+    platform_path = repo_root / "inventory" / "group_vars" / "platform.yml"
+    if platform_path.exists():
+        with platform_path.open() as f:
+            data = yaml.safe_load(f)
+        catalog = data.get("platform_guest_catalog", {})
+        by_name = catalog.get("by_name", {})
+        if by_name:
+            return by_name
+
+    host_vars = load_yaml_with_identity(repo_root / "inventory" / "host_vars" / "proxmox-host.yml")
+    host_vars = require_mapping(host_vars, str(TOPOLOGY_HOST_VARS_PATH))
+    guests_raw = require_list(host_vars.get("proxmox_guests", []), "host_vars.proxmox_guests", min_length=1)
+
+    by_name: dict[str, dict[str, str]] = {}
+    for idx, guest in enumerate(guests_raw):
+        guest = require_mapping(guest, f"host_vars.proxmox_guests[{idx}]")
+        name = require_str(guest.get("name"), f"host_vars.proxmox_guests[{idx}].name")
+        ipv4 = require_str(guest.get("ipv4"), f"host_vars.proxmox_guests[{idx}].ipv4")
+        by_name[name] = {"ipv4": ipv4}
+
     if not by_name:
-        raise ValueError("platform_guest_catalog.by_name is empty or missing in inventory/group_vars/platform.yml")
+        raise ValueError(
+            "platform_guest_catalog.by_name is empty and proxmox-host.yml did not "
+            "yield any proxmox_guests for fallback resolution"
+        )
     return by_name
 
 

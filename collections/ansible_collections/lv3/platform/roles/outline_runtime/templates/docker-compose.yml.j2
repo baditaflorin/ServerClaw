@@ -1,4 +1,4 @@
-{% from 'compose_macros.j2' import openbao_sidecar %}
+{% from 'compose_macros.j2' import hairpin_hosts, openbao_sidecar %}
 services:
 {{ openbao_sidecar("outline") }}
 
@@ -29,10 +29,7 @@ services:
         condition: service_healthy
       openbao-agent:
         condition: service_healthy
-    extra_hosts:
-{% for item in outline_public_hostname_overrides %}
-      - "{{ item.hostname }}:{{ item.address }}"
-{% endfor %}
+{{ hairpin_hosts() }}
     env_file:
       - {{ outline_env_file }}
     ports:

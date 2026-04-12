@@ -71,11 +71,19 @@ Some controller-local files are created by repo automation and are not required 
 
 The preflight command reports these as generated outputs for the relevant workflow instead of failing on them up front.
 
-The bootstrap manifest also allows generated worktree artifacts to be materialized automatically before the main workflow continues. The current shared example is the edge-publication portal set:
+The bootstrap manifest also allows generated worktree artifacts to be materialized automatically before the main workflow continues. Shared examples now include the edge-publication portal set:
 
 - `build/ops-portal/`
 - `build/changelog-portal/`
 - `build/docs-portal/`
+
+Live-apply wrappers also repair the generated and ignored repo surfaces they depend on in fresh worktrees:
+
+- `inventory/group_vars/platform.yml`
+- `config/prometheus/file_sd/https_tls_targets.yml`
+- `config/prometheus/rules/https_tls_alerts.yml`
+- `receipts/gate-bypasses/.gitkeep`
+- `receipts/drift-reports/`
 
 When a governed workflow declares those artifacts, `make preflight` repairs them automatically from the current worktree instead of letting the apply fail later inside `nginx_edge_publication`.
 

@@ -120,6 +120,24 @@ def test_validate_workflow_catalog_rejects_invalid_health_check(tmp_path: Path) 
         workflow_catalog.validate_workflow_catalog(catalog, secret_manifest, bootstrap_catalog)
 
 
+def test_implementation_ref_exists_allows_gitignored_generated_paths(tmp_path: Path) -> None:
+    subprocess_result = __import__("subprocess").run(
+        ["git", "init"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert subprocess_result.returncode == 0
+
+    (tmp_path / ".gitignore").write_text("receipts/\n", encoding="utf-8")
+
+    assert workflow_catalog.implementation_ref_exists(
+        "receipts/gate-bypasses/.gitkeep",
+        repo_root=tmp_path,
+    )
+
+
 def test_run_workflow_materializes_missing_generated_artifact(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     repo_root = tmp_path
     key_path = repo_root / ".local" / "ssh" / "id_ed25519"

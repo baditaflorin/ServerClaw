@@ -24,7 +24,7 @@ make live-apply-site env=production
 
 The legacy top-level playbooks remain in place and still work. They now either import the decomposed service playbooks or use the shared task files directly.
 
-Before the generic `live-apply-group`, `live-apply-service`, `live-apply-site`, and `live-apply-waves` wrappers enter their interface, redundancy, or Ansible execution checks, they now call the controller-local bootstrap preflight. That bootstrap step can materialize declared generated artifacts such as the shared edge portal directories before the live replay starts.
+Before the generic `live-apply-group`, `live-apply-service`, `live-apply-site`, and `live-apply-waves` wrappers enter their interface, redundancy, or Ansible execution checks, they now call the controller-local bootstrap preflight. That bootstrap step can materialize declared generated artifacts such as the shared edge portal directories, generated `inventory/group_vars/platform.yml`, the HTTPS/TLS assurance files, and fresh-worktree receipt scaffolding before the live replay starts.
 
 For `live-apply-service`, the vulnerability-budget, standby-capacity,
 service-redundancy, and immutable-guest-replacement gates apply only when the
@@ -105,6 +105,8 @@ make syntax-check
 make live-apply-service service=grafana env=staging EXTRA_ARGS=--syntax-check
 make live-apply-group group=observability env=staging EXTRA_ARGS=--syntax-check
 ```
+
+When a live-apply wrapper runs with `EXTRA_ARGS=--syntax-check`, it now skips the integration-only canonical-truth gate and the post-apply Restic trigger. That keeps branch-safe syntax-check replays runnable from isolated worktrees without forcing protected release files or pretending a live mutation happened.
 
 ## Notes
 

@@ -1,169 +1,176 @@
 # GENERATED — do not edit. Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only tls
 platform_tls_certs:
-  agents.{{ platform_domain }}:
+  agents.example.com:
     cert_validity_days: 90
     service: dify
     source: letsencrypt
     wildcard: false
-  analytics.{{ platform_domain }}:
+  analytics.example.com:
     cert_validity_days: 90
     service: plausible
     source: letsencrypt
     wildcard: false
-  annotate.{{ platform_domain }}:
+  annotate.example.com:
     cert_validity_days: 90
     service: label_studio
     source: letsencrypt
     wildcard: false
-  api.{{ platform_domain }}:
+  api.example.com:
     cert_validity_days: 90
     service: api_gateway
     source: letsencrypt
     wildcard: false
-  bi.{{ platform_domain }}:
+  bi.example.com:
     cert_validity_days: 90
     service: superset
     source: letsencrypt
     wildcard: false
-  billing.{{ platform_domain }}:
+  billing.example.com:
     cert_validity_days: 90
     service: lago
     source: letsencrypt
     wildcard: false
-  chat.{{ platform_domain }}:
+  chat.example.com:
     cert_validity_days: 90
+    service: librechat
     source: letsencrypt
     wildcard: false
-  ci.{{ platform_domain }}:
+  ci.example.com:
     cert_validity_days: 90
     service: woodpecker
     source: letsencrypt
     wildcard: false
-  cloud.{{ platform_domain }}:
+  cloud.example.com:
     cert_validity_days: 90
     service: nextcloud
     source: letsencrypt
     wildcard: false
-  data.{{ platform_domain }}:
+  data.example.com:
     cert_validity_days: 90
     service: directus
     source: letsencrypt
     wildcard: false
-  draw.{{ platform_domain }}:
+  draw.example.com:
     cert_validity_days: 90
     service: excalidraw
     source: letsencrypt
     wildcard: false
-  errors.{{ platform_domain }}:
+  errors.example.com:
     cert_validity_days: 90
     service: glitchtip
     source: letsencrypt
     wildcard: false
-  files.{{ platform_domain }}:
+  files.example.com:
     cert_validity_days: 90
     service: sftpgo
     source: letsencrypt
     wildcard: false
-  flags.{{ platform_domain }}:
+  flags.example.com:
     cert_validity_days: 90
     service: flagsmith
     source: letsencrypt
     wildcard: false
-  grist.{{ platform_domain }}:
+  grist.example.com:
     cert_validity_days: 90
     service: grist
     source: letsencrypt
     wildcard: false
-  langfuse.{{ platform_domain }}:
+  langfuse.example.com:
     cert_validity_days: 90
     service: langfuse
     source: letsencrypt
     wildcard: false
-  livekit.{{ platform_domain }}:
+  livekit.example.com:
     cert_validity_days: 90
     service: livekit
     source: letsencrypt
     wildcard: false
-  logs.{{ platform_domain }}:
+  logs.example.com:
     cert_validity_days: 90
     service: dozzle
     source: letsencrypt
     wildcard: false
-  mail.{{ platform_domain }}:
+  mail.example.com:
     cert_validity_days: 90
     service: mail_platform
     source: letsencrypt
     wildcard: false
-  matrix.{{ platform_domain }}:
+  matrix.example.com:
     cert_validity_days: 90
     service: matrix_synapse
     source: letsencrypt
     wildcard: false
-  minio-console.{{ platform_domain }}:
+  minio-console.example.com:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  minio.{{ platform_domain }}:
+  minio.example.com:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  n8n.{{ platform_domain }}:
+  n8n.example.com:
     cert_validity_days: 90
     service: n8n
     source: letsencrypt
     wildcard: false
-  notebooks.{{ platform_domain }}:
-    cert_validity_days: 90
-    source: letsencrypt
-    wildcard: false
-  ntfy.{{ platform_domain }}:
+  ntfy.example.com:
     cert_validity_days: 90
     service: ntfy
     source: letsencrypt
     wildcard: false
-  ops.{{ platform_domain }}:
+  ops.example.com:
     cert_validity_days: 90
     service: ops_portal
     source: letsencrypt
     wildcard: false
-  paperless.{{ platform_domain }}:
+  paperless.example.com:
     cert_validity_days: 90
     service: paperless
     source: letsencrypt
     wildcard: false
-  registry.{{ platform_domain }}:
+  registry.example.com:
     cert_validity_days: 90
     service: harbor
     source: letsencrypt
     wildcard: false
-  repowise.{{ platform_domain }}:
+  repo-intake.example.com:
+    cert_validity_days: 90
+    service: repo_intake
+    source: letsencrypt
+    wildcard: false
+  repowise.example.com:
     cert_validity_days: 90
     service: repowise
     source: letsencrypt
     wildcard: false
-  sso.{{ platform_domain }}:
+  s3.example.com:
+    cert_validity_days: 90
+    service: minio
+    source: letsencrypt
+    wildcard: false
+  sso.example.com:
     cert_validity_days: 90
     service: keycloak
     source: letsencrypt
     wildcard: false
-  tasks.{{ platform_domain }}:
+  tasks.example.com:
     cert_validity_days: 90
     service: plane
     source: letsencrypt
     wildcard: false
-  uptime.{{ platform_domain }}:
+  uptime.example.com:
     cert_validity_days: 90
     service: uptime_kuma
     source: letsencrypt
     wildcard: false
-  vault.{{ platform_domain }}:
+  vault.example.com:
     cert_validity_days: 90
     service: vaultwarden
     source: step-ca
     wildcard: false
-  wiki.{{ platform_domain }}:
+  wiki.example.com:
     cert_validity_days: 90
     service: outline
     source: letsencrypt

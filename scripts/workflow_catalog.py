@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -44,6 +45,22 @@ ALLOWED_RESOURCE_CLAIM_ACCESS = {"read", "write", "exclusive"}
 WORKFLOW_SECRET_FIELDS = ("required_secret_ids", "generated_secret_ids", "blocked_secret_ids")
 EXECUTION_LANES_PATH = repo_path("config", "execution-lanes.yaml")
 DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS = 15
+
+
+def implementation_ref_exists(path_str: str, *, repo_root: Path = REPO_ROOT) -> bool:
+    candidate = repo_root / path_str
+    if candidate.exists():
+        return True
+
+    result = subprocess.run(
+        ["git", "check-ignore", "-q", path_str],
+        cwd=str(repo_root),
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    return result.returncode == 0
 
 
 def load_json(path: Path) -> dict:
@@ -351,7 +368,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
         if not isinstance(implementation_refs, list) or not implementation_refs:
             raise ValueError(f"workflow '{workflow_id}' must define a non-empty implementation_refs list")
         for path_str in implementation_refs:
-            if not (REPO_ROOT / path_str).exists():
+            if not implementation_ref_exists(path_str):
                 raise ValueError(f"workflow '{workflow_id}' references missing implementation path '{path_str}'")
 
         outputs = workflow.get("outputs")

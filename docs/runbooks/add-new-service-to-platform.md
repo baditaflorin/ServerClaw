@@ -167,14 +167,34 @@ argument_specs:
           - Host where the database is running.
 ```
 
-## Step 3: Update Service Topology (if needed)
+## Step 3: Regenerate Cross-Cutting And Platform Facts
 
-If the service needs to be discovered or referenced by other services, update:
-- `inventory/group_vars/platform_services.yml` → add DNS, proxy, SSO configs
-- `scripts/generate_platform_vars.py` → add to service topology
-- `scripts/generate_discovery_artifacts.py` → add to AGENTS.md
+After updating `inventory/group_vars/platform_services.yml`, regenerate the derived ADR 0374 and platform-facts outputs:
 
-## Step 4: Create Convergence Playbook
+```bash
+make generate-cross-cutting-artifacts
+make generate-platform-vars
+```
+
+This refreshes:
+
+- `config/generated/dns-declarations.yaml`
+- `config/generated/nginx-upstreams.yaml`
+- `config/generated/sso-clients.yaml`
+- `inventory/group_vars/platform_hairpin.yml`
+- `inventory/group_vars/platform_tls_certs.yml`
+- `inventory/group_vars/platform.yml`
+
+Only update `scripts/generate_platform_vars.py` when the new service needs a brand-new derived fact shape that cannot already be expressed from the registry inputs.
+
+## Step 4: Update Service Topology Consumers (if needed)
+
+If the service needs to be discovered or referenced by other services beyond the standard registry-derived outputs, update:
+
+- `scripts/generate_discovery_artifacts.py` → add to AGENTS.md or generated discovery surfaces
+- any service-specific topology consumer that reads `platform.yml`
+
+## Step 5: Create Convergence Playbook
 
 Create: `collections/ansible_collections/lv3/platform/playbooks/my_new_service.yml`
 
@@ -207,7 +227,7 @@ Create: `collections/ansible_collections/lv3/platform/playbooks/services/my_new_
 - import_playbook: ../my_new_service.yml
 ```
 
-## Step 5: Add to Makefile (convenience)
+## Step 6: Add to Makefile (convenience)
 
 Edit: `Makefile`
 
@@ -218,7 +238,7 @@ converge-my_new_service:
 		-e "playbook_execution_env=$(env)"
 ```
 
-## Step 6: Add to Workstream (if significant)
+## Step 7: Add to Workstream (if significant)
 
 If this is a multi-session feature, register it:
 
@@ -243,19 +263,25 @@ Then regenerate:
 python3 scripts/workstream_registry.py --write
 ```
 
-## Step 7: Verify and Test
+## Step 8: Verify and Test
 
 1. **Validate service registry:**
    ```bash
    python scripts/validate_service_registry.py
    ```
 
-2. **Run convergence:**
+2. **Validate generated cross-cutting outputs:**
+   ```bash
+   make validate-generated-cross-cutting
+   make validate-generated-vars
+   ```
+
+3. **Run convergence:**
    ```bash
    make converge-my_new_service env=production
    ```
 
-3. **Verify service:**
+4. **Verify service:**
    ```bash
    # Check convergence logs
    # Check health endpoint: curl http://docker-runtime:8123/health

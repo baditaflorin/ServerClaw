@@ -1078,6 +1078,7 @@
         ],
         "bootstrap_manifest_ids": [
           "controller-local-base",
+          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -6337,6 +6338,7 @@
         "required_secret_ids": [],
         "bootstrap_manifest_ids": [
           "controller-local-base",
+          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -6387,6 +6389,7 @@
         "required_secret_ids": [],
         "bootstrap_manifest_ids": [
           "controller-local-base",
+          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -6438,6 +6441,7 @@
         "required_secret_ids": [],
         "bootstrap_manifest_ids": [
           "controller-local-base",
+          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -6491,6 +6495,7 @@
         ],
         "bootstrap_manifest_ids": [
           "controller-local-base",
+          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },

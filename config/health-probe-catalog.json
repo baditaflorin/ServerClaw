@@ -2219,19 +2219,19 @@
       },
       "uptime_kuma": {
         "enabled": true,
-        "monitor_type": "http",
-        "url": "https://chat.example.com",
-        "expected_status": [
-          200,
-          302
-        ],
-        "interval": 60,
-        "retryInterval": 60,
-        "maxretries": 0,
-        "maxredirects": 10,
-        "accepted_statuscodes": [
-          "200-302"
-        ]
+        "monitor": {
+          "name": "LibreChat Public",
+          "type": "http",
+          "url": "https://chat.example.com",
+          "description": "Public LibreChat reachability on the shared edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-302"
+          ]
+        }
       }
     },
     "openbao": {
@@ -3807,7 +3807,19 @@
       },
       "uptime_kuma": {
         "enabled": true,
-        "reason": "Neko is operator-facing and published through the edge at browser.example.com; public health monitoring is essential for remote access availability."
+        "monitor": {
+          "name": "Neko Public",
+          "type": "http",
+          "url": "https://browser.example.com",
+          "description": "Public Neko reachability on the shared edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-302"
+          ]
+        }
       }
     }
   }

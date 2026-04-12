@@ -999,33 +999,6 @@ platform_service_registry:
     needs_openbao: false
   # END SERVICE: ollama
 
-    service_type: docker_compose
-    internal_port: 8088
-    host_group: docker-runtime
-    needs_openbao: true
-    dns:
-      records:
-        - fqdn: "chat.{{ platform_domain }}"
-          type: public
-          target_host: nginx
-          ttl: 3600
-    tls:
-      domains:
-        - "chat.{{ platform_domain }}"
-      cert_source: letsencrypt
-      wildcard: false
-      cert_validity_days: 90
-    sso:
-      enabled: true
-      provider: keycloak
-      redirect_uris:
-        - "https://chat.{{ platform_domain }}/oauth/oidc/callback"
-      scopes:
-        - openid
-        - profile
-        - email
-      public_client: false
-
   # BEGIN SERVICE: openbao
   openbao:
     service_type: docker_compose
@@ -1772,27 +1745,48 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: librechat_runtime
     internal_port: 8096
-    host_group: docker-runtime
+    host_group: coolify
+    site_dir: /opt/librechat
     container_name: librechat
     needs_openbao: true
-    needs_postgres: true
+    needs_postgres: false
+    hairpin:
+      publish:
+        - hostname: "chat.{{ platform_domain }}"
+          address_host: nginx
+        - hostname: "sso.{{ platform_domain }}"
+          address_host: nginx
     proxy:
       enabled: true
       upstream_port: 8096
-      upstream_host: docker-runtime
-      public_fqdn: agents.{{ platform_domain }}
-      auth_proxy: true
+      upstream_host: coolify
+      public_fqdn: chat.{{ platform_domain }}
+      auth_proxy: false             # upstream handles OIDC directly
       websocket: true
     dns:
       records:
-        - fqdn: "agents.{{ platform_domain }}"
+        - fqdn: "chat.{{ platform_domain }}"
           type: public
           target_host: nginx
           ttl: 3600
     tls:
       domains:
-        - "agents.{{ platform_domain }}"
+        - "chat.{{ platform_domain }}"
       cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    sso:
+      enabled: true
+      provider: keycloak
+      client_id: serverclaw
+      client_secret_local_file: .local/keycloak/serverclaw-client-secret.txt
+      redirect_uris:
+        - "https://chat.{{ platform_domain }}/oauth/oidc/callback"
+      scopes:
+        - openid
+        - profile
+        - email
+      public_client: false
   # END SERVICE: librechat
 
   # BEGIN SERVICE: litellm
