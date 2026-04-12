@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0346](../adr/0346-repowise-semantic-search.md)
 - Title: live apply Repowise semantic code search from the latest `origin/main`
-- Status: merged
+- Status: ready
 - Branch: `codex/ws-0346-live-apply`
 - Worktree: `.worktrees/ws-0346-live-apply`
 - Owner: codex
