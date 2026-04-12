@@ -241,75 +241,23 @@
     ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: plane_compose_render
 
-- name: Check if Plane stack is already running
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ plane_compose_file }}"
-      - ps
-      - --quiet
-  args:
-    chdir: "{{ plane_site_dir }}"
-  register: plane_running_check
-  changed_when: false
-  failed_when: false
-
-- name: Determine if Plane convergence is needed
-  ansible.builtin.set_fact:
-    plane_needs_converge: >-
-      {{
-        plane_env_render is changed
-        or plane_compose_render is changed
-        or plane_running_check.rc != 0
-        or plane_running_check.stdout | trim | length == 0
-        or (plane_force_converge | default(false) | bool)
-      }}
-
-- name: Pull the Plane images
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ plane_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ plane_site_dir }}"
-  register: plane_pull
-  retries: 3
-  delay: 15
-  until: plane_pull.rc == 0
-  changed_when: >-
-    'Pulling' in plane_pull.stdout
-    or 'Downloaded newer image' in plane_pull.stdout
-    or 'Pull complete' in plane_pull.stdout
-  when: plane_needs_converge
-
-- name: Start the Plane stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ plane_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ plane_site_dir }}"
-  register: plane_up
-  changed_when: >-
-    'Creating' in plane_up.stdout
-    or 'Recreating' in plane_up.stdout
-    or 'Starting' in plane_up.stdout
-  when: plane_needs_converge
-
-- name: Report Plane convergence skipped (no changes detected)
-  ansible.builtin.debug:
-    msg: "Plane stack unchanged and running — skipped pull and recreate (saved ~2-4 min)"
-  when: not plane_needs_converge
+- name: Converge the Plane compose stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ plane_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ plane_site_dir }}"
+    common_docker_compose_converge_service_name: plane
+    common_docker_compose_converge_template_results:
+      - "{{ plane_env_render }}"
+      - "{{ plane_compose_render }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_pull_retries: 3
+    common_docker_compose_converge_pull_delay: 15
+    common_docker_compose_converge_force_recreate: "{{ plane_force_converge | default(false) | bool }}"
+    common_docker_compose_converge_health_port: "{{ plane_internal_port }}"
+    common_docker_compose_converge_health_url: "{{ plane_internal_base_url }}{{ plane_healthcheck_path }}"
 
 - name: Wait for Plane to listen locally
   ansible.builtin.wait_for:

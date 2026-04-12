@@ -85,25 +85,26 @@
     - path: "{{ netbox_secret_dir }}"
       mode: "0700"
 
-- name: Generate the NetBox runtime secret files
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.generator }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ netbox_secret_key_file }}"
-      generator: "openssl rand -hex 64"
-    - path: "{{ netbox_redis_password_file }}"
-      generator: "openssl rand -hex 24"
-    - path: "{{ netbox_redis_cache_password_file }}"
-      generator: "openssl rand -hex 24"
-  register: netbox_runtime_secret_generation
-  changed_when: "'changed' in netbox_runtime_secret_generation.stdout"
+- name: Manage the NetBox runtime secret files
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ netbox_secret_key_file }}"
+        command: "openssl rand -hex 64"
+        label: "netbox-secret-key"
+      - path: "{{ netbox_redis_password_file }}"
+        command: "openssl rand -hex 24"
+        label: "netbox-redis-password"
+      - path: "{{ netbox_redis_cache_password_file }}"
+        command: "openssl rand -hex 24"
+        label: "netbox-redis-cache-password"
+    common_manage_service_secrets_read:
+      - "{{ netbox_secret_key_file }}"
+      - "{{ netbox_redis_password_file }}"
+      - "{{ netbox_redis_cache_password_file }}"
+    common_manage_service_secrets_fact_name: "netbox_decoded_secrets"
   no_log: true
 
 - name: Read the NetBox bootstrap secrets from the control machine
@@ -117,28 +118,18 @@
   register: netbox_local_secret_payloads
   no_log: true
 
-- name: Read the NetBox runtime secret files
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  loop:
-    - "{{ netbox_secret_key_file }}"
-    - "{{ netbox_redis_password_file }}"
-    - "{{ netbox_redis_cache_password_file }}"
-  register: netbox_runtime_secret_payloads
-  no_log: true
-
 - name: Record the NetBox secret facts
   ansible.builtin.set_fact:
     netbox_database_password: "{{ netbox_local_secret_payloads.results[0].content | b64decode | trim }}"
     netbox_superuser_password: "{{ netbox_local_secret_payloads.results[1].content | b64decode | trim }}"
-    netbox_secret_key: "{{ netbox_runtime_secret_payloads.results[0].content | b64decode | trim }}"
-    netbox_redis_password: "{{ netbox_runtime_secret_payloads.results[1].content | b64decode | trim }}"
-    netbox_redis_cache_password: "{{ netbox_runtime_secret_payloads.results[2].content | b64decode | trim }}"
+    netbox_secret_key: "{{ netbox_decoded_secrets[0] }}"
+    netbox_redis_password: "{{ netbox_decoded_secrets[1] }}"
+    netbox_redis_cache_password: "{{ netbox_decoded_secrets[2] }}"
     netbox_runtime_secret_payload:
       DB_PASSWORD: "{{ netbox_local_secret_payloads.results[0].content | b64decode | trim }}"
-      REDIS_PASSWORD: "{{ netbox_runtime_secret_payloads.results[1].content | b64decode | trim }}"
-      REDIS_CACHE_PASSWORD: "{{ netbox_runtime_secret_payloads.results[2].content | b64decode | trim }}"
-      SECRET_KEY: "{{ netbox_runtime_secret_payloads.results[0].content | b64decode | trim }}"
+      REDIS_PASSWORD: "{{ netbox_decoded_secrets[1] }}"
+      REDIS_CACHE_PASSWORD: "{{ netbox_decoded_secrets[2] }}"
+      SECRET_KEY: "{{ netbox_decoded_secrets[0] }}"
       SUPERUSER_PASSWORD: "{{ netbox_local_secret_payloads.results[1].content | b64decode | trim }}"
   no_log: true
 
@@ -185,6 +176,7 @@
     group: root
     mode: "0600"
   no_log: true
+  register: netbox_env_render
 
 - name: Render the NetBox compose file
   ansible.builtin.template:
@@ -195,6 +187,7 @@
     mode: "0644"
   vars:
     ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
+  register: netbox_compose_render
 
 - name: Render the NetBox housekeeping script
   ansible.builtin.template:
@@ -220,39 +213,20 @@
     group: root
     mode: "0644"
 
-- name: Pull the NetBox images
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ netbox_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ netbox_site_dir }}"
-  register: netbox_pull
-  changed_when: >-
-    'Pulling' in netbox_pull.stdout
-    or 'Downloaded newer image' in netbox_pull.stdout
-    or 'Pull complete' in netbox_pull.stdout
-
-- name: Start the NetBox stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ netbox_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ netbox_site_dir }}"
-  register: netbox_up
-  changed_when: >-
-    'Creating' in netbox_up.stdout
-    or 'Recreating' in netbox_up.stdout
-    or 'Starting' in netbox_up.stdout
+- name: Converge the NetBox compose stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ netbox_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ netbox_site_dir }}"
+    common_docker_compose_converge_service_name: netbox
+    common_docker_compose_converge_template_results:
+      - "{{ netbox_env_render }}"
+      - "{{ netbox_compose_render }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_health_port: "{{ netbox_server_port }}"
+    common_docker_compose_converge_health_url: "{{ netbox_private_base_url }}/login/"
 
 - name: Enable the NetBox housekeeping timer
   ansible.builtin.systemd:
