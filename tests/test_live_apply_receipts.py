@@ -127,6 +127,102 @@ def test_validate_receipt_accepts_legacy_live_apply_workflow_ids(
     )
 
 
+def test_validate_receipt_accepts_workstream_live_apply_workflow_ids(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+
+    receipt = build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99")
+    receipt["receipt_id"] = "2026-04-12-ws-0381-branch-live-apply"
+    receipt["workflow_id"] = "ws-0381-branch-live-apply"
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-04-12-ws-0381-branch-live-apply.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
+def test_validate_receipt_accepts_retired_workflow_ids(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+
+    receipt = build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99")
+    receipt["workflow_id"] = "converge-open-webui"
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
+def test_validate_receipt_accepts_historical_receipt_without_adr(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+
+    receipt = build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99")
+    receipt.pop("adr")
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
+def test_validate_receipt_accepts_historical_evidence_ref_from_source_commit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: True)
+    monkeypatch.setattr(
+        live_apply_receipts,
+        "git_path_exists_in_commit",
+        lambda _commit, ref: ref == "docs/adr/historical-evidence.md",
+    )
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+
+    receipt = build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99")
+    receipt["evidence_refs"] = ["docs/adr/historical-evidence.md"]
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
+def test_validate_receipt_accepts_historical_evidence_ref_from_git_history(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: True)
+    monkeypatch.setattr(live_apply_receipts, "git_path_exists_in_commit", lambda _commit, _ref: False)
+    monkeypatch.setattr(
+        live_apply_receipts,
+        "git_path_exists_in_history",
+        lambda ref: ref == "docs/adr/historical-evidence.md",
+    )
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+
+    receipt = build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99")
+    receipt["evidence_refs"] = ["docs/adr/historical-evidence.md"]
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
 def test_receipt_id_with_session_appends_normalized_suffix(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("LV3_SESSION_RECEIPT_SUFFIX", "ADR 0156 / Test")
 

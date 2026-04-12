@@ -1,9 +1,13 @@
 # ADR 0025 Implementation Roadmap: Compose-Managed Runtime Stacks
 
-**Status**: Deep Dive & Roadmap
+**Status**: Implemented via ws-0025 live apply
 **Created**: 2026-04-06
 **Roadmap Scope**: WS-0403 Analysis Phase
-**Target Completion**: 4 phases over next 6-8 weeks
+**Target Completion**: Completed on 2026-04-12
+
+> Closeout: ws-0025 completed the compose stack lifecycle contract, verified the
+> live systemd-managed units from `main`, and recorded the mainline replay
+> evidence plus the remaining ADR 0302 restic probe timeout follow-up.
 
 ---
 

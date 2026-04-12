@@ -1,0 +1,50 @@
+# ws-0025 restic trigger status
+generated_at=2026-04-12T10:25:03Z
+
+## local_processes
+  PID  PPID ELAPSED STAT COMMAND
+
+## remote_processes
+964916 sudo /bin/bash -lc set -euo pipefail script_path=/srv/platform_server/scripts/restic_config_backup.py fallback_script_path=/opt/api-gateway/service/scripts/restic_config_backup.py catalog_path=/srv/platform_server/config/restic-file-backup-catalog.json fallback_catalog_path=/etc/lv3/restic-config-backup/restic-file-backup-catalog.json  if [ ! -f "$script_path" ] && [ -f "$fallback_script_path" ]; then   script_path="$fallback_script_path" fi if [ ! -f "$script_path" ]; then   echo "restic_config_backup.py is missing from both $script_path and $fallback_script_path" >&2   exit 2 fi if [ ! -f "$catalog_path" ] && [ -f "$fallback_catalog_path" ]; then   catalog_path="$fallback_catalog_path" fi if [ ! -f "$catalog_path" ]; then   echo "restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path" >&2   exit 2 fi export PYTHONPATH="/srv/platform_server:${PYTHONPATH:-}" exec python3 "$script_path" --repo-root /srv/platform_server --catalog "$catalog_path" --backup-receipts-dir /srv/platform_server/receipts/restic-backups --latest-snapshot-receipt /srv/platform_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/platform_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by ws-0025-restic-retry --print-report-json --live-apply-trigger
+964918 python3 /srv/platform_server/scripts/restic_config_backup.py --repo-root /srv/platform_server --catalog /srv/platform_server/config/restic-file-backup-catalog.json --backup-receipts-dir /srv/platform_server/receipts/restic-backups --latest-snapshot-receipt /srv/platform_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/platform_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by ws-0025-restic-retry --print-report-json --live-apply-trigger
+967370 restic --option s3.region=eu-central-1 --option s3.bucket-lookup=path snapshots --json
+981523 /usr/bin/docker run --rm --name lv3-restic-config-backup-openbao-agent --network host --user 0:0 --cap-drop ALL --security-opt no-new-privileges:true --read-only --tmpfs /tmp:mode=1777,exec --entrypoint /bin/vault -v /etc/lv3/restic-config-backup/openbao-agent:/openbao-agent:ro -v /run/lv3-systemd-credentials/restic-config-backup:/run/lv3-systemd-credentials/restic-config-backup:rw docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b agent -config=/openbao-agent/agent.hcl
+994314 sudo bash -lc set -euo pipefail pgrep -af "restic|restic_config_backup|python3 .*restic_config_backup" || true echo ls -lt /srv/platform_server/receipts/restic-backups | head -n 5 echo python3 - <<"INNER" from pathlib import Path p = Path("/srv/platform_server/receipts/restic-snapshots-latest.json") print(f"{p.stat().st_mtime_ns} {p}") INNER
+994319 bash -lc set -euo pipefail pgrep -af "restic|restic_config_backup|python3 .*restic_config_backup" || true echo ls -lt /srv/platform_server/receipts/restic-backups | head -n 5 echo python3 - <<"INNER" from pathlib import Path p = Path("/srv/platform_server/receipts/restic-snapshots-latest.json") print(f"{p.stat().st_mtime_ns} {p}") INNER
+
+total 4
+-rw-r--r-- 1 root root 3069 Apr 12 07:21 20260412T072059Z.json
+
+1775978465683843947 /srv/platform_server/receipts/restic-snapshots-latest.json
+
+## mainline_replay_recap_tail
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Skip systemd management \u2014 systemd not available on this host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T10:13:13.369Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Skip systemd management \u2014 systemd not available on this host","service_id":"ansible","target":"docker-runtime","task_status":"skipped","trace_id":"background","ts":"2026-04-12T10:13:13.399Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Ensure the managed systemd unit matches the requested state] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T10:13:13.416Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-12T10:13:14.299Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify the managed systemd unit active state] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T10:13:14.312Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-12T10:13:15.071Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+artifact-cache             : ok=39   changed=0    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+coolify                    : ok=27   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+docker-runtime             : ok=142  changed=1    unreachable=0    failed=0    skipped=25   rescued=0    ignored=0
+runtime-ai                 : ok=32   changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+runtime-control            : ok=32   changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+runtime-general            : ok=31   changed=0    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+
+{
+  "status": "error",
+  "target": "docker-runtime",
+  "command": "sudo /bin/bash -lc 'set -euo pipefail\nscript_path=/srv/platform_server/scripts/restic_config_backup.py\nfallback_script_path=/opt/api-gateway/service/scripts/restic_config_backup.py\ncatalog_path=/srv/platform_server/config/restic-file-backup-catalog.json\nfallback_catalog_path=/etc/lv3/restic-config-backup/restic-file-backup-catalog.json\n\nif [ ! -f \"$script_path\" ] && [ -f \"$fallback_script_path\" ]; then\n  script_path=\"$fallback_script_path\"\nfi\nif [ ! -f \"$script_path\" ]; then\n  echo \"restic_config_backup.py is missing from both $script_path and $fallback_script_path\" >&2\n  exit 2\nfi\nif [ ! -f \"$catalog_path\" ] && [ -f \"$fallback_catalog_path\" ]; then\n  catalog_path=\"$fallback_catalog_path\"\nfi\nif [ ! -f \"$catalog_path\" ]; then\n  echo \"restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path\" >&2\n  exit 2\nfi\nexport PYTHONPATH=\"/srv/platform_server:${PYTHONPATH:-}\"\nexec python3 \"$script_path\" --repo-root /srv/platform_server --catalog \"$catalog_path\" --backup-receipts-dir /srv/platform_server/receipts/restic-backups --latest-snapshot-receipt /srv/platform_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/platform_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-service --print-report-json --live-apply-trigger'",
+  "returncode": 2,
+  "stdout": "",
+  "stderr": "Restic config backup error: restic --option s3.region=eu-central-1 --option s3.bucket-lookup=path snapshots --json timed out after 180 seconds"
+}

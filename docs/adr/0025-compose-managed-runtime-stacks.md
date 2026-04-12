@@ -2,9 +2,9 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: detected
-- Implemented In Platform Version: 0.23.0
-- Implemented On: 2026-03-22
+- Implemented In Repo Version: 0.178.126
+- Implemented In Platform Version: 0.178.78
+- Implemented On: 2026-04-12
 - Date: 2026-03-22
 
 ## Context

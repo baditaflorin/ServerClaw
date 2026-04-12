@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-12",
+  "recorded_on": "2026-04-12",
+  "recorded_at": "2026-04-12T10:29:10Z",
+  "recorded_by": "codex",
+  "workflow_id": "live-apply-service",
+  "adr": "0025",
+  "workstream": "ws-0025-live-apply",
+  "service": "compose-stack-lifecycle",
+  "source_branch": "main",
+  "source_commit": "b6b4c636eb17e16bbbaacac89e022cd7c8ad2b25",
+  "repo_version_context": "0.178.126",
+  "platform_version_context": "0.178.78",
+  "integrated_repo_version": "0.178.126",
+  "integrated_platform_version": "0.178.78",
+  "result": "partial",
+  "summary": "Verified the ADR 0025 compose stack lifecycle contract from the latest realistic mainline release context by replaying the governed service wrapper across the six Docker hosts, confirming the repo-managed per-service systemd units on the live platform, and recording the still-open ADR 0302 restic snapshot probe timeout that occurs only after the successful replay completes.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "guest",
+      "name": "artifact-cache-lv3",
+      "vmid": 180,
+      "address": "10.10.10.80"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-ai-lv3",
+      "vmid": 190,
+      "address": "10.10.10.90"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-general-lv3",
+      "vmid": 191,
+      "address": "10.10.10.91"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control-lv3",
+      "vmid": 192,
+      "address": "10.10.10.92"
+    }
+  ],
+  "play_recap": {
+    "artifact-cache": {
+      "ok": 39,
+      "changed": 0,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 4,
+      "rescued": 0,
+      "ignored": 0
+    },
+    "coolify": {
+      "ok": 27,
+      "changed": 0,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 2,
+      "rescued": 0,
+      "ignored": 0
+    },
+    "docker-runtime": {
+      "ok": 142,
+      "changed": 1,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 25,
+      "rescued": 0,
+      "ignored": 0
+    },
+    "runtime-ai": {
+      "ok": 32,
+      "changed": 0,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 3,
+      "rescued": 0,
+      "ignored": 0
+    },
+    "runtime-control": {
+      "ok": 32,
+      "changed": 0,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 3,
+      "rescued": 0,
+      "ignored": 0
+    },
+    "runtime-general": {
+      "ok": 31,
+      "changed": 0,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 4,
+      "rescued": 0,
+      "ignored": 0
+    }
+  },
+  "verification": [
+    {
+      "check": "Exact-main compose stack lifecycle replay",
+      "result": "pass",
+      "observed": "The governed `make live-apply-service service=compose-stack-lifecycle env=production` replay preserved in `receipts/live-applies/evidence/2026-04-12-ws-0025-mainline-compose-stack-lifecycle-live-apply-r1-0.178.126.txt` completed the Ansible recap with `failed=0` and `unreachable=0` across `artifact-cache`, `coolify`, `docker-runtime`, `runtime-ai`, `runtime-control`, and `runtime-general`; the only host-side mutation in that replay was `docker-runtime changed=1` while enabling the `lv3-rag-context.service` lifecycle unit."
+    },
+    {
+      "check": "Docker-runtime lifecycle units and repaired woodpecker stack",
+      "result": "pass",
+      "observed": "`receipts/live-applies/evidence/2026-04-12-ws-0025-mainline-compose-stack-host-verification-r1.txt` shows `lv3-mail-platform.service`, `lv3-woodpecker.service`, and `lv3-rag-context.service` all `enabled` and `active` on `docker-runtime-lv3`; the same proof set shows no installed `exim4` or `postfix` packages shadowing the mail ports, the live `/opt/woodpecker/docker-compose.yml` no longer references the stale external Gitea network, and `docker compose -f /opt/woodpecker/docker-compose.yml ps` reports the repaired Woodpecker services up with their expected health transitions."
+    },
+    {
+      "check": "Multi-host repo-managed systemd footprint",
+      "result": "pass",
+      "observed": "The host verification transcript in `receipts/live-applies/evidence/2026-04-12-ws-0025-mainline-compose-stack-host-verification-r1.txt` records the post-replay `lv3-*.service` unit inventory on `docker-runtime-lv3`, `coolify-lv3`, `artifact-cache-lv3`, `runtime-ai-lv3`, `runtime-general-lv3`, and `runtime-control-lv3`, demonstrating that the repo-managed compose lifecycle units are installed and enabled where those hosts carry compose-managed services."
+    },
+    {
+      "check": "Governed post-apply config backup trigger",
+      "result": "partial",
+      "observed": "The wrapper finished the successful compose replay but the automatic restic follow-up still failed in the known ADR 0302 probe path: `restic --option s3.region=eu-central-1 --option s3.bucket-lookup=path snapshots --json timed out after 180 seconds`. `receipts/live-applies/evidence/2026-04-12-ws-0025-mainline-restic-trigger-status-r1.txt` shows that no new restic receipt was written beyond `receipts/restic-backups/20260412T072059Z.json` and `receipts/restic-snapshots-latest.json` remained unchanged."
+    }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/evidence/2026-04-12-ws-0025-mainline-compose-stack-lifecycle-live-apply-r1-0.178.126.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0025-mainline-compose-stack-host-verification-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0025-mainline-restic-trigger-status-r1.txt"
+  ],
+  "notes": [
+    "The authoritative exact-main replay was launched from mainline commit `b6b4c636eb17e16bbbaacac89e022cd7c8ad2b25` after the ws-0025 merge and before later repo-only mainline advances to `721307de64d26b5d5146568416fe2417d463a7da`; the live platform proof here is therefore tied to repo version `0.178.126` rather than the newer local integration head.",
+    "The grouping `lv3-compose-stacks.target` unit is present on the hosts but remains `disabled` and `inactive`; the durable ADR 0025 contract is the per-service `lv3-*.service` lifecycle units that the replay enables and verifies.",
+    "This receipt should replace the previous canonical receipts for `docker_runtime`, `mail_platform`, and `woodpecker` in `versions/stack.yaml.live_apply_evidence.latest_receipts` because it verifies those surfaces from the merged mainline tree after the repaired Woodpecker replay.",
+    "The post-apply restic timeout matches the earlier exact-main ADR 0302 behavior recorded during ws-0292; ws-0025 remains live-applied because the platform mutation completed successfully before the shared backup probe failed."
+  ]
+}
