@@ -35,7 +35,7 @@
 {%- set env_dir = env_file | dirname -%}
 {%- set env_dir_mount_target = env_dir_mount_target or env_dir -%}
 {%- set command = command or ['agent', '-config=' ~ config_path] -%}
-{%- set healthcheck_command = healthcheck_command or ('test -s ' ~ env_file) -%}
+{%- set healthcheck_command = healthcheck_command or ('test -s ' ~ env_file) %}
   {{ service_name }}:
     image: {{ image }}
     container_name: {{ container_name }}
