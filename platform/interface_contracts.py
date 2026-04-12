@@ -108,6 +108,17 @@ def _validate_declared_paths(paths: list[str], *, field: str, contract_id: str) 
             raise ValueError(f"{contract_id}.{field}[{index}] references missing path '{raw_path}'")
 
 
+def _is_playbook_implementation_ref(path: str) -> bool:
+    if not path.endswith(".yml"):
+        return False
+    normalized = path.strip()
+    if normalized.startswith("playbooks/"):
+        return True
+    if "/playbooks/" not in normalized:
+        return False
+    return "/playbooks/tasks/" not in normalized
+
+
 def _validate_schema_block(value: Any, path: str) -> dict[str, Any]:
     schema = _require_mapping(value, path)
     _require_non_empty_string(schema.get("type"), f"{path}.type")
@@ -310,7 +321,7 @@ def validate_converge_workflow_contract(contract: dict[str, Any]) -> None:
         referenced_playbooks = [
             _resolve_repo_path(path)
             for path in implementation_refs
-            if _is_playbook_ref(path)
+            if _is_playbook_implementation_ref(path)
         ]
         referenced_playbooks.extend(_workflow_playbook_candidates(workflow_id))
         if not referenced_playbooks or not any(path.exists() for path in referenced_playbooks):

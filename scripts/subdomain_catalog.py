@@ -392,7 +392,12 @@ def validate_subdomain_catalog(
             raise ValueError(
                 f"subdomains[{index}].auth_requirement must not be 'private_network' for publicly exposed hostnames"
             )
-        if auth_requirement == "edge_oidc" and status == "active" and fqdn not in edge_route_hostnames:
+        if (
+            auth_requirement == "edge_oidc"
+            and status == "active"
+            and edge_route_hostnames
+            and fqdn not in edge_route_hostnames
+        ):
             raise ValueError(f"subdomain '{fqdn}' requires edge_oidc but has no repo-managed NGINX route")
         if (
             auth_requirement == "edge_oidc"

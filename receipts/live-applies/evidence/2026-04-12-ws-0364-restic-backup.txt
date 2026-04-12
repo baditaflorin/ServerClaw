@@ -1,0 +1,7 @@
+Command: RESTIC_USE_FALLBACK_SCRIPT=1 uv run --with pyyaml python scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by live-apply-service --live-apply-trigger
+
+Result: ok
+- Receipt: receipts/restic-backups/20260412T072059Z.json
+- Snapshot manifest refreshed: receipts/restic-snapshots-latest.json
+- Protected sources: config, versions_stack
+- Optional source skipped: falco_overrides

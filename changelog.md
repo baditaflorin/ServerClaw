@@ -69,7 +69,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - chore: regenerate ADR index with 0392 (renamed from duplicate 0382)
 - fix: Resolve Jinja2 template values in subdomain validation scripts (subdomain_catalog.py uses load_yaml_with_identity for host_vars/edge defaults)
 - fix: Add neko to lv3_service_topology (browser.example.com) with edge.kind=custom and certificate catalog entry
-
 ## 0.178.78 (2026-04-10)
 
 - fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety

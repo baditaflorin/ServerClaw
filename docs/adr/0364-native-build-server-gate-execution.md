@@ -2,6 +2,8 @@
 
 **Status**: Accepted
 **Implementation Status**: Implemented
+**Implemented On**: 2026-04-12
+**Implemented In Platform Version**: 0.178.77
 **Date**: 2026-04-06
 **Tags**: ci-cd, automation, platform
 **First repo version**: 0.179.0

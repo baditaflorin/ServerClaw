@@ -1,0 +1,33 @@
+---
+# Playbook: services/build-server-gate-tools.yml
+# Purpose: Provide a governed live-apply leaf for the ADR 0364 native build-server
+#   gate toolchain so operators can converge the build VM through the standard
+#   service workflow.
+# Use case: Run after tool version bumps or initial build-server provision to
+#   ensure the remote validation and pre-push gates can execute natively.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - Same optional inputs as the imported collection playbook.
+#
+# Outputs:
+#   - Imports the build-server gate-tools playbook that installs and attests the
+#     native validation toolchain on docker-build.
+#
+# Idempotency: Fully idempotent
+#              This file is a pure import wrapper around the collection playbook.
+#
+# Dependencies:
+#   - ADR 0364: Native Build Server Gate Execution.
+#   - ADR 0082: Remote Build Execution Gateway.
+#   - ADR 0087: Repository Validation Gate.
+#
+# Related ADRs: 0082, 0087, 0364
+# Related Runbooks: docs/runbooks/remote-build-gateway.md, docs/runbooks/validation-gate.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-11
+
+- import_playbook: ../../collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml

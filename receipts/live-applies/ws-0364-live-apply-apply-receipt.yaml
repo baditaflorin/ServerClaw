@@ -1,0 +1,16 @@
+workstream_id: ws-0364-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-12T06:34:42Z'
+completed_at: '2026-04-12T07:33:01Z'
+applied_by: codex
+repo_version: a540068124c6b7308a5fe3319209aa04f0d0c2ef
+adr: '0364'
+summary: Live apply build-server gate tooling on docker-build.
+targets:
+- target: docker-build
+  role: build-server-gate-tools
+errors: []
+notes:
+- Live apply executed via make apply-gate-tools env=production (CANONICAL_TRUTH_SKIP_README=1).
+- Restic backup triggered with RESTIC_USE_FALLBACK_SCRIPT=1 and synced receipts locally.
