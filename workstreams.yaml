@@ -394,7 +394,95 @@ workstreams:
       paths:
       - receipts/live-applies/2026-04-12-adr-0346-repowise-*.json
       - receipts/live-applies/evidence/2026-04-12-ws-0346-*
+      - receipts/live-applies/ws-0346-live-apply-apply-receipt.yaml
       mode: exclusive
+    - id: ws0346_release_integration
+      paths:
+      - AGENTS.md
+      - Makefile
+      - README.md
+      - VERSION
+      - changelog.md
+      - docs/adr/.index.yaml
+      - docs/adr/index/by-concern/documentation.yaml
+      - docs/adr/index/by-range/0300-0399.yaml
+      - docs/adr/index/by-status/implemented.yaml
+      - docs/adr/index/by-status/proposed.yaml
+      - versions/stack.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: ws0346_discovery_artifacts
+      paths:
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/agent-core.yaml
+      - build/onboarding/automation.yaml
+      - build/onboarding/service-catalog.yaml
+      - build/onboarding/fork-bootstrap.yaml
+      mode: shared_contract
+      contract: discovery-artifacts-v1
+    - id: ws0346_platform_catalogs
+      paths:
+      - config/certificate-catalog.json
+      - config/contracts/service-partitions/catalog.json
+      - config/correction-loops.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/service-redundancy-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/workbench-information-architecture.json
+      - config/workflow-catalog.json
+      - docs/schema/workbench-information-architecture.schema.json
+      - docs/templates/README.md.j2
+      - scripts/service_catalog.py
+      - scripts/subdomain_catalog.py
+      - scripts/vulnerability_budget.py
+      mode: shared_contract
+      contract: platform-catalogs-v1
+    - id: ws0346_repo_automation_support
+      paths:
+      - scripts/environment_topology.py
+      - scripts/generate_ops_portal.py
+      - scripts/generate_platform_vars.py
+      - scripts/operator_manager.py
+      - scripts/security_posture_report.py
+      - scripts/topology-snapshot.json
+      - scripts/validate_ephemeral_vmid.py
+      - scripts/validate_repository_data_models.py
+      mode: shared_contract
+      contract: repo-automation-support-v1
+    - id: ws0346_restic_live_apply_support
+      paths:
+      - scripts/restic_config_backup.py
+      - scripts/trigger_restic_live_apply.py
+      mode: shared_contract
+      contract: restic-live-apply-support-v1
+    - id: ws0346_service_lanes
+      paths:
+      - playbooks/services/litellm.yml
+      - playbooks/services/repo-intake.yml
+      - playbooks/services/repo_intake.yml
+      mode: shared_contract
+      contract: service-lane-wrappers-v1
+    - id: ws0346_cross_receipts
+      paths:
+      - receipts/live-applies/2026-04-12-adr-0364-build-server-gate-tools-live-apply.json
+      mode: shared_contract
+      contract: validation-gate-receipts-v1
+    - id: ws0346_validation_tests
+      paths:
+      - tests/test_uptime_contract.py
+      mode: shared_contract
+      contract: validation-contract-tests-v1
+    - id: ws0346_prior_workstream_migration
+      paths:
+      - workstreams/done/ws-0364-live-apply.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
   blockers: []
   ready_to_merge: true
   live_applied: true
