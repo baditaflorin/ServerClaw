@@ -12,6 +12,12 @@ playbooks:
     shared_surfaces:
       - service:browser-runner
       - inventory/host_vars/proxmox-host.yml
+  playbooks/repo-intake.yml:
+    playbook_id: repo-intake
+    mutation_scope: host
+    shared_surfaces:
+      - service:repo-intake
+      - inventory/host_vars/proxmox-host.yml
   playbooks/backup-vm.yml:
     playbook_id: backup-vm
     mutation_scope: platform
@@ -37,6 +43,39 @@ playbooks:
     shared_surfaces:
       - service:restic-config-backup
       - config/restic-file-backup-catalog.json
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/provision_adr_governance.yml:
+    playbook_id: provision-adr-governance
+    mutation_scope: host
+    shared_surfaces:
+      - service:plane
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/refresh-discovery-surfaces.yml:
+    playbook_id: refresh-discovery-surfaces
+    mutation_scope: host
+    shared_surfaces:
+      - build/platform-manifest.json
+      - build/onboarding
+      - config/service-capability-catalog.json
+      - docs/runbooks/refresh-discovery-surfaces.md
+  playbooks/verify-bootstrap-proxmox.yml:
+    playbook_id: verify-bootstrap-proxmox
+    mutation_scope: host
+    execution_class: diagnostic
+    shared_surfaces:
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-bootstrap-guests.yml:
+    playbook_id: verify-bootstrap-guests
+    mutation_scope: platform
+    execution_class: diagnostic
+    shared_surfaces:
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-platform.yml:
+    playbook_id: verify-platform
+    mutation_scope: platform
+    execution_class: diagnostic
+    shared_surfaces:
+      - config/health-probe-catalog.json
       - inventory/host_vars/proxmox-host.yml
   playbooks/coolify.yml:
     playbook_id: coolify
@@ -223,6 +262,24 @@ playbooks:
       - inventory/host_vars/proxmox-host.yml
       - config/execution-lanes.yaml
       - config/api-gateway-catalog.json
+      - config/service-capability-catalog.json
+  playbooks/runtime-apps-pool.yml:
+    playbook_id: runtime-apps-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-apps-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
+      - config/execution-lanes.yaml
+      - config/service-capability-catalog.json
+  playbooks/runtime-comms-pool.yml:
+    playbook_id: runtime-comms-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-comms-pool
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
+      - config/execution-lanes.yaml
       - config/service-capability-catalog.json
   playbooks/runtime-pool-capacity-rebalance.yml:
     playbook_id: runtime-pool-capacity-rebalance
@@ -556,6 +613,13 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:build-artifact-cache
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/services/build-server-gate-tools.yml:
+    playbook_id: build-server-gate-tools
+    mutation_scope: host
+    shared_surfaces:
+      - config/build-server.json
+      - config/validation-gate.json
       - inventory/host_vars/proxmox-host.yml
   playbooks/services/docker-build-observability.yml:
     playbook_id: docker-build-observability

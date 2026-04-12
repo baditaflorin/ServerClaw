@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- [adr-0364] Native build server gate execution live-apply — apply-gate-tools target, gate tool wrapper playbook, workflow contract fixes, restic evidence capture, and validation-gate runtime hardening for build-server checks
+
 - [adr-0374] Cross-cutting service manifest live-apply repairs — registry/validator fixes, generated cross-cutting data now surfaced in platform vars, worktree bootstrap adds image scan receipts, syntax-check live-apply gates skip integration-only checks, and new redundancy entries for librechat/litellm/neko with a LibreChat service entrypoint
 
 - [fix] Placeholder IP guard + iptables-correct pve-firewall restart guard — proxmox_network aborts if management_ipv4 matches RFC 5737 placeholders (203.0.113.x etc.) preventing /etc/network/interfaces lockout; proxmox_security guard checks iptables PVEFW-HOST-IN (correct backend, not nftables); root cause 2026-04-12 outage: wrong IP in interfaces without .local/identity.yml overlay
@@ -69,7 +71,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - chore: regenerate ADR index with 0392 (renamed from duplicate 0382)
 - fix: Resolve Jinja2 template values in subdomain validation scripts (subdomain_catalog.py uses load_yaml_with_identity for host_vars/edge defaults)
 - fix: Add neko to lv3_service_topology (browser.example.com) with edge.kind=custom and certificate catalog entry
-
 ## 0.178.78 (2026-04-10)
 
 - fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety

@@ -30,6 +30,12 @@ from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+from script_bootstrap import ensure_repo_root_on_path
+
+REPO_ROOT = ensure_repo_root_on_path(__file__)
+
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
+
 from adr_catalog import resolve_service_adr_path
 from dependency_graph import dependency_summary, load_dependency_graph
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
@@ -1079,7 +1085,14 @@ def render_portal(
 
     validate_environment_topology(environment_catalog, host_vars)
     validate_service_catalog(service_catalog)
-    validate_subdomain_catalog(subdomain_catalog, service_catalog, host_vars, public_edge_defaults)
+    subdomain_entries = subdomain_catalog.get("subdomains", [])
+    uses_placeholder_domain = any(
+        isinstance(entry, dict) and str(entry.get("fqdn", "")).endswith(".example.com") for entry in subdomain_entries
+    )
+    if uses_placeholder_domain:
+        validate_subdomain_catalog(subdomain_catalog, service_catalog)
+    else:
+        validate_subdomain_catalog(subdomain_catalog, service_catalog, host_vars, public_edge_defaults)
     validate_environment_references(environment_catalog, service_catalog, subdomain_catalog, host_vars)
 
     services = service_catalog["services"]

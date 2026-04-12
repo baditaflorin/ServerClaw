@@ -82,7 +82,10 @@ def parse_datetime(value: str) -> datetime:
 
 def load_controller_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
-    group_vars = load_yaml(GROUP_VARS_PATH)
+    group_vars_path = GROUP_VARS_PATH
+    if not group_vars_path.exists():
+        group_vars_path = repo_path("inventory", "group_vars", "all", "main.yml")
+    group_vars = load_yaml(group_vars_path)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
     bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])
     repo_local_secret_root = REPO_ROOT / ".local"

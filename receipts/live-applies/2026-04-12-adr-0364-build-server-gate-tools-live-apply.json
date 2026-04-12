@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-12-adr-0364-build-server-gate-tools-live-apply",
+  "adr": "0364",
+  "workstream_id": "ws-0364-live-apply",
+  "applied_on": "2026-04-12",
+  "applied_at": "2026-04-12T07:07:22Z",
+  "recorded_at": "2026-04-12T07:31:55Z",
+  "recorded_by": "codex",
+  "source_commit": "a540068124c6b7308a5fe3319209aa04f0d0c2ef",
+  "workflow_id": "live-apply-service",
+  "targets": [
+    {
+      "host": "docker-build",
+      "playbook": "playbooks/services/build-server-gate-tools.yml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "make check-build-server",
+      "status": "ok",
+      "evidence": "receipts/live-applies/evidence/2026-04-12-ws-0364-check-build-server.txt"
+    },
+    {
+      "check": "make remote-validate",
+      "status": "failed",
+      "details": "Runner images unavailable on build server; local fallback runner_unavailable (docker info timeout).",
+      "evidence": "receipts/live-applies/evidence/2026-04-12-ws-0364-remote-validate.txt"
+    },
+    {
+      "check": "make pre-push-gate",
+      "status": "not_completed",
+      "details": "Remote pre-push gate hung; rerun needed once build server runner registry is reachable."
+    }
+  ],
+  "artifacts": [
+    "receipts/restic-backups/20260412T072059Z.json",
+    "receipts/restic-snapshots-latest.json",
+    "receipts/live-applies/evidence/2026-04-12-ws-0364-build-server-gate-tools-apply.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0364-restic-backup.txt"
+  ],
+  "notes": [
+    "Restic backup executed with RESTIC_USE_FALLBACK_SCRIPT=1 against /srv/platform_server."
+  ]
+}

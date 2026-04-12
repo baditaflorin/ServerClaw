@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -270,6 +271,7 @@ def render_expected_files() -> dict[Path, str]:
 
     workstreams = load_workstream_canonical_truth()
     version = VERSION_PATH.read_text(encoding="utf-8").strip()
+    skip_readme = os.environ.get("CANONICAL_TRUTH_SKIP_README") == "1"
     expected_changelog = assemble_changelog_text(
         CHANGELOG_PATH.read_text(encoding="utf-8"),
         workstreams=workstreams,
@@ -284,6 +286,12 @@ def render_expected_files() -> dict[Path, str]:
     current_changelog = CHANGELOG_PATH.read_text(encoding="utf-8")
     stack_changed = current_stack != expected_stack
     changelog_changed = current_changelog != expected_changelog
+
+    if skip_readme:
+        return {
+            CHANGELOG_PATH: expected_changelog,
+            STACK_PATH: expected_stack,
+        }
 
     expected_readme = README_PATH.read_text(encoding="utf-8")
     if not stack_changed and not changelog_changed:
@@ -428,7 +436,8 @@ def main(argv: list[str] | None = None) -> int:
                 print(bump)
             return 0
         if args.write:
-            changed = write_assembled_truth()
+            skip_readme = os.environ.get("CANONICAL_TRUTH_SKIP_README") == "1"
+            changed = write_assembled_truth(update_readme=not skip_readme)
             if changed:
                 print("Updated canonical truth:")
                 for path in changed:

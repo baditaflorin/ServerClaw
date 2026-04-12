@@ -263,6 +263,122 @@ workstreams:
   notes: "Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py\n\
     step was skipped. Run it to register in Plane once the service recovers:\n  python\
     \ scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools\n"
+- id: ws-0364-live-apply
+  adr: '0364'
+  title: Live apply native build server gate execution from latest origin/main
+  status: merged
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/ws-0364-live-apply
+  worktree_path: .worktrees/ws-0364-live-apply
+  doc: docs/workstreams/ws-0364-live-apply.md
+  depends_on:
+  - adr-0082-remote-build-execution-gateway
+  - adr-0083-docker-based-check-runner
+  - adr-0087-repository-validation-gate
+  - adr-0264-failure-domain-isolated-validation-lanes
+  - adr-0266-validation-runner-capability-contracts
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0364-live-apply.yaml
+  - docs/workstreams/ws-0364-live-apply.md
+  - docs/workstreams/ws-0377-repo-intake-subdomain.md
+  - docs/adr/0364-native-build-server-gate-execution.md
+  - docs/adr/.index.yaml
+  - docs/runbooks/validation-gate.md
+  - docs/runbooks/remote-build-gateway.md
+  - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+  - Makefile
+  - config/build-server.json
+  - config/ansible-execution-scopes.yaml
+  - config/validation-gate.json
+  - config/workflow-catalog.json
+  - inventory/build_server.yml
+  - scripts/parallel_check.py
+  - scripts/remote_exec.sh
+  - scripts/live_apply_receipts.py
+  - scripts/canonical_truth.py
+  - scripts/trigger_restic_live_apply.py
+  - scripts/drift_lib.py
+  - platform/interface_contracts.py
+  - collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
+  - playbooks/services/build-server-gate-tools.yml
+  - playbooks/services/repo_intake.yml
+  - workstreams/active/ws-0377-repo-intake-subdomain.yaml
+  - receipts/live-applies/
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0364_live_apply_tracking
+      paths:
+      - workstreams/active/ws-0364-live-apply.yaml
+      - docs/workstreams/ws-0364-live-apply.md
+      mode: exclusive
+    - id: adr_0364_live_apply_docs
+      paths:
+      - docs/adr/0364-native-build-server-gate-execution.md
+      - docs/runbooks/validation-gate.md
+      - docs/runbooks/remote-build-gateway.md
+      - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+      mode: exclusive
+    - id: adr_0364_live_apply_gate
+      paths:
+      - Makefile
+      - config/build-server.json
+      - config/ansible-execution-scopes.yaml
+      - config/validation-gate.json
+      - config/workflow-catalog.json
+      - inventory/build_server.yml
+      - scripts/parallel_check.py
+      - scripts/remote_exec.sh
+      - scripts/live_apply_receipts.py
+      - scripts/canonical_truth.py
+      - scripts/trigger_restic_live_apply.py
+      - scripts/drift_lib.py
+      - platform/interface_contracts.py
+      - collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
+      - playbooks/services/build-server-gate-tools.yml
+      - playbooks/services/repo_intake.yml
+      mode: shared_contract
+      contract: validation-gate-runtime-v1
+    - id: ws_0377_metadata_fix
+      paths:
+      - workstreams/active/ws-0377-repo-intake-subdomain.yaml
+      - docs/workstreams/ws-0377-repo-intake-subdomain.md
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index_generation
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/*
+      mode: shared_contract
+      contract: adr-index-generator-v1
+    - id: live_apply_receipts
+      paths:
+      - receipts/live-applies/**
+      mode: exclusive
+  notes: 'Live-apply workstream for ADR 0364. Start from latest origin/main in an
+    isolated
+
+    worktree, converge the build-server gate toolchain onto docker-build, verify the
+
+    native remote gate end to end, and record durable receipt/evidence artifacts before
+
+    exact-main integration.
+
+    '
+  blockers:
+  - Remote validation failed because build-server check runner images were unavailable
+    (registry.example.com DNS failure) and local Docker fallback timed out.
+  - Pre-push gate did not complete (remote gate hang); rerun once runner registry
+    and Docker are reachable.
+  plane_issue_id: 5cf6ccfd-dd7b-46d8-b7eb-8b445936bf9f
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"

@@ -1,0 +1,9 @@
+Applied build-server gate tooling via:
+CANONICAL_TRUTH_SKIP_README=1 make apply-gate-tools env=production
+
+Playbook: playbooks/services/build-server-gate-tools.yml
+Target: docker-build
+Play recap: ok=7 changed=2 skipped=4 failed=0
+Notes:
+- Inventory warnings about duplicate keys in inventory/group_vars/all/platform_services.yml.
+- Ansible deprecation warning for INJECT_FACTS_AS_VARS.

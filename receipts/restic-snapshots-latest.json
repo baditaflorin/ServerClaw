@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "recorded_at": "2026-04-12T07:20:59Z",
+  "recorded_on": "2026-04-12",
+  "recorded_by": "codex",
+  "repository": {
+    "bucket": "restic-config-backup",
+    "endpoint": "http://10.200.25.3:9000"
+  },
+  "summary": {
+    "governed_sources": 3,
+    "protected": 2,
+    "uncovered": 0,
+    "inactive": 1,
+    "uncovered_sources": [],
+    "inactive_sources": [
+      "falco_overrides"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "config",
+      "label": "config",
+      "paths": [
+        "config"
+      ],
+      "state": "protected",
+      "expected_schedule": "successful_live_apply",
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "retention": {
+        "keep_daily": 30,
+        "keep_monthly": 6
+      },
+      "latest_snapshot": {
+        "snapshot_id": "76275707ec0c89959e74450e1ac3964e5bd74264d02c46f4949ab40ff81d597e",
+        "recorded_at": "2026-04-12T07:20:59Z",
+        "host": "docker-runtime",
+        "paths": [
+          "config"
+        ],
+        "files": 1
+      },
+      "last_restore_verification": null,
+      "reasons": [
+        "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
+      ]
+    },
+    {
+      "source_id": "versions_stack",
+      "label": "versions_stack",
+      "paths": [
+        "versions/stack.yaml"
+      ],
+      "state": "protected",
+      "expected_schedule": "successful_live_apply",
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "retention": {
+        "keep_daily": 30
+      },
+      "latest_snapshot": {
+        "snapshot_id": "1324bcb58243e98b6a30e5805724b6b1698600d73231a654edbd128eb0de33b4",
+        "recorded_at": "2026-04-12T07:20:59Z",
+        "host": "docker-runtime",
+        "paths": [
+          "versions/stack.yaml"
+        ],
+        "files": 1
+      },
+      "last_restore_verification": null,
+      "reasons": [
+        "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
+      ]
+    },
+    {
+      "source_id": "falco_overrides",
+      "label": "falco_overrides",
+      "paths": [
+        "config/falco"
+      ],
+      "state": "inactive",
+      "expected_schedule": "successful_live_apply",
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "retention": {
+        "keep_daily": 30
+      },
+      "latest_snapshot": null,
+      "last_restore_verification": null,
+      "reasons": [
+        "No live path currently exists for optional source falco_overrides backup path."
+      ]
+    }
+  ]
+}
