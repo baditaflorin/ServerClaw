@@ -35,7 +35,7 @@
 {%- set env_dir = env_file | dirname -%}
 {%- set env_dir_mount_target = env_dir_mount_target or env_dir -%}
 {%- set command = command or ['agent', '-config=' ~ config_path] -%}
-{%- set healthcheck_command = healthcheck_command or ('test -s ' ~ env_file) -%}
+{%- set healthcheck_command = healthcheck_command or ('test -s ' ~ env_file) %}
   {{ service_name }}:
     image: {{ image }}
     container_name: {{ container_name }}
@@ -87,8 +87,8 @@
 {% endfor %}
 {% endif %}
     volumes:
-      - {{ agent_dir }}:{{ agent_dir_mount_target }}{% if agent_dir_mount_mode %}:{{ agent_dir_mount_mode }}{% endif %}
-      - {{ env_dir }}:{{ env_dir_mount_target }}{% if env_dir_mount_mode %}:{{ env_dir_mount_mode }}{% endif %}
+      - {{ agent_dir }}:{{ agent_dir_mount_target }}{{ (':' + agent_dir_mount_mode) if agent_dir_mount_mode else '' }}
+      - {{ env_dir }}:{{ env_dir_mount_target }}{{ (':' + env_dir_mount_mode) if env_dir_mount_mode else '' }}
 {% endmacro %}
 
 {% macro redis_service(
