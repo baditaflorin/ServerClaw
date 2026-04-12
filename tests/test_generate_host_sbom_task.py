@@ -52,3 +52,12 @@ def test_generate_host_sbom_defaults_include_timeout_seconds() -> None:
 
     assert "security_sbom_timeout_seconds" in load_task["ansible.builtin.set_fact"]
     assert "default(900, true)" in load_task["ansible.builtin.set_fact"]["security_sbom_timeout_seconds"]
+
+
+def test_generate_host_sbom_defaults_report_date_without_gathered_facts() -> None:
+    tasks = load_tasks(COLLECTION_TASKS)
+    load_task = next(task for task in tasks if task["name"] == "Load the shared SBOM scanner config")
+
+    assert "security_sbom_report_date" in load_task["ansible.builtin.set_fact"]
+    assert "now(utc=true, fmt='%Y-%m-%d')" in load_task["ansible.builtin.set_fact"]["security_sbom_report_date"]
+    assert "ansible_date_time" not in load_task["ansible.builtin.set_fact"]["security_sbom_report_date"]
