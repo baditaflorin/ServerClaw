@@ -148,6 +148,7 @@ ownership_manifest:
     paths:
     - receipts/live-applies/2026-04-12-adr-0364-build-server-gate-tools-live-apply.json
     - receipts/gate-bypasses/20260412T112221Z-codex-ws-0346-live-apply-aa5fbc2-skip-remote-gate.json
+    - receipts/gate-bypasses/20260412T112340Z-codex-ws-0346-live-apply-3e25e24-skip-remote-gate.json
     mode: shared_contract
     contract: validation-gate-receipts-v1
   - id: ws0346_validation_tests
