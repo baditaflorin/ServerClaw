@@ -1,0 +1,59 @@
+adr_number: 0381
+title: Login Service Contracts and Session Recovery Automation
+canonical_status: Accepted
+canonical_implementation_status: Implemented
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0381
+  location: git:134f0bcad
+  evidence: 134f0bcad [main] Integrate ws-0381 live apply evidence and closeout state
+  confidence: 0.6
+  detected_on: '2026-04-12T21:56:41.012275'
+- marker_type: git-commit
+  adr_number: 0381
+  location: git:e90ae543c
+  evidence: e90ae543c [receipts] Record ADR 0381 branch live-apply evidence
+  confidence: 1.0
+  detected_on: '2026-04-12T21:56:41.012591'
+- marker_type: git-commit
+  adr_number: 0381
+  location: git:4081385b5
+  evidence: 4081385b5 [auth] Finalize ADR 0381 branch validation and repo truth
+  confidence: 1.0
+  detected_on: '2026-04-12T21:56:41.012595'
+- marker_type: git-commit
+  adr_number: 0381
+  location: git:8cfd423b2
+  evidence: 8cfd423b2 [coordination] Register ws-0381 in Plane
+  confidence: 0.6
+  detected_on: '2026-04-12T21:56:41.012621'
+- marker_type: git-commit
+  adr_number: 0381
+  location: git:960db2075
+  evidence: 960db2075 [auth] Unblock ADR 0381 repo validation and workstream state
+  confidence: 1.0
+  detected_on: '2026-04-12T21:56:41.012624'
+- marker_type: git-commit
+  adr_number: 0381
+  location: git:2272ff22c
+  evidence: '2272ff22c chore: regenerate ADR index with ADR 0381'
+  confidence: 1.0
+  detected_on: '2026-04-12T21:56:41.016217'
+- marker_type: git-commit
+  adr_number: 0381
+  location: git:8730ae705
+  evidence: '8730ae705 docs(ADR 0381): login service contracts and session recovery
+    automation'
+  confidence: 1.0
+  detected_on: '2026-04-12T21:56:41.016231'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Implemented
+
+  Inferred Status: Likely Implemented
+
+  Markers Found: 7
+
+  Breakdown: git-commit=7
+
+  Implemented On: 2026-04-12'

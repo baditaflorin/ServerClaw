@@ -1,0 +1,12 @@
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_release_notes.py --write-root-summaries
+Updated root summary documents: changelog.md, docs/release-notes/README.md, docs/release-notes/index/2026.md, docs/release-notes/index/README.md
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_status_docs.py --write
+Traceback (most recent call last):
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_status_docs.py", line 9, in <module>
+    from api_publication import ALLOWED_PUBLICATION_TIERS, load_api_publication_catalog
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/api_publication.py", line 14, in <module>
+    from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog, require_identifier
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/control_plane_lanes.py", line 8, in <module>
+    from platform.repo import TOPOLOGY_HOST_VARS_PATH
+ModuleNotFoundError: No module named 'platform.repo'; 'platform' is not a package
+make: *** [generate-status-docs] Error 1

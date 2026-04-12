@@ -1,0 +1,5 @@
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/canonical_truth.py --write
+WARN Broken interpreter cache entry at /Users/live/.cache/uv/interpreter-v4/690e8bc5fc3a5e7e/db96087e7e6677f4.msgpack, removing: array had incorrect length, expected 16
+Updated canonical truth:
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/versions/stack.yaml
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/README.md

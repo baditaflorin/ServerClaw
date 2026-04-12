@@ -61,7 +61,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["public_edge_certbot_plugin_path"],
             "{{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages",
         )
-        self.assertEqual(self.defaults["public_edge_apex_hostname"], "example.com")
+        self.assertEqual(self.defaults["public_edge_apex_hostname"], "{{ platform_domain }}")
         self.assertEqual(
             self.defaults["public_edge_additional_certificate_domains"], ["{{ public_edge_apex_hostname }}"]
         )
@@ -87,33 +87,38 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         extra_hostnames = [site["hostname"] for site in self.defaults["public_edge_extra_sites"]]
         protected_sites = self.defaults["public_edge_authenticated_sites"]
 
-        self.assertNotIn("ops.example.com", extra_hostnames)
+        self.assertIsNone(self.defaults.get("public_edge_ops_portal_publication"))
+        self.assertNotIn("ops.{{ platform_domain }}", extra_hostnames)
         self.assertEqual(
             sorted(protected_sites),
             [
-                "agents.example.com",
-                "analytics.example.com",
-                "annotate.example.com",
-                "billing.example.com",
-                "changelog.example.com",
-                "coolify.example.com",
-                "docs.example.com",
-                "draw.example.com",
-                "flags.example.com",
-                "home.example.com",
-                "langfuse.example.com",
-                "logs.example.com",
-                "minio-console.example.com",
-                "n8n.example.com",
-                "ops.example.com",
-                "tasks.example.com",
+                "agents.{{ platform_domain }}",
+                "analytics.{{ platform_domain }}",
+                "annotate.{{ platform_domain }}",
+                "billing.{{ platform_domain }}",
+                "changelog.{{ platform_domain }}",
+                "coolify.{{ platform_domain }}",
+                "docs.{{ platform_domain }}",
+                "draw.{{ platform_domain }}",
+                "flags.{{ platform_domain }}",
+                "home.{{ platform_domain }}",
+                "langfuse.{{ platform_domain }}",
+                "logs.{{ platform_domain }}",
+                "minio-console.{{ platform_domain }}",
+                "n8n.{{ platform_domain }}",
+                "ops.{{ platform_domain }}",
+                "tasks.{{ platform_domain }}",
             ],
         )
-        self.assertEqual(protected_sites["analytics.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertEqual(protected_sites["annotate.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertNotIn("unauthenticated_paths", protected_sites["annotate.example.com"])
         self.assertEqual(
-            protected_sites["analytics.example.com"]["unauthenticated_paths"],
+            protected_sites["analytics.{{ platform_domain }}"]["auth_proxy_upstream"], "http://127.0.0.1:4180"
+        )
+        self.assertEqual(
+            protected_sites["annotate.{{ platform_domain }}"]["auth_proxy_upstream"], "http://127.0.0.1:4180"
+        )
+        self.assertNotIn("unauthenticated_paths", protected_sites["annotate.{{ platform_domain }}"])
+        self.assertEqual(
+            protected_sites["analytics.{{ platform_domain }}"]["unauthenticated_paths"],
             [
                 "/api/error",
                 "/api/event",
@@ -123,35 +128,38 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            protected_sites["analytics.example.com"]["unauthenticated_prefix_paths"],
+            protected_sites["analytics.{{ platform_domain }}"]["unauthenticated_prefix_paths"],
             ["/js/"],
         )
-        self.assertEqual(protected_sites["flags.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertEqual(protected_sites["flags.example.com"]["unauthenticated_paths"], ["/health"])
+        self.assertEqual(protected_sites["flags.{{ platform_domain }}"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(protected_sites["flags.{{ platform_domain }}"]["unauthenticated_paths"], ["/health"])
         self.assertEqual(
-            protected_sites["billing.example.com"]["unauthenticated_proxy_routes"],
+            protected_sites["billing.{{ platform_domain }}"]["unauthenticated_proxy_routes"],
             [
                 {"path": "/api/health", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/health"},
                 {"path": "/api/v1/events", "upstream": "{{ public_edge_api_gateway_upstream }}/v1/billing/events"},
             ],
         )
-        self.assertEqual(protected_sites["agents.example.com"]["unauthenticated_paths"], ["/healthz"])
-        self.assertEqual(protected_sites["agents.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
-        self.assertNotIn("unauthenticated_paths", protected_sites["coolify.example.com"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["draw.example.com"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.example.com"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["minio-console.example.com"])
-        self.assertEqual(protected_sites["n8n.example.com"]["unauthenticated_paths"], ["/healthz"])
+        self.assertEqual(protected_sites["agents.{{ platform_domain }}"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
-            protected_sites["n8n.example.com"]["unauthenticated_prefix_paths"],
+            protected_sites["agents.{{ platform_domain }}"]["auth_proxy_upstream"], "http://127.0.0.1:4180"
+        )
+        self.assertNotIn("unauthenticated_paths", protected_sites["coolify.{{ platform_domain }}"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["draw.{{ platform_domain }}"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.{{ platform_domain }}"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["minio-console.{{ platform_domain }}"])
+        self.assertEqual(protected_sites["n8n.{{ platform_domain }}"]["unauthenticated_paths"], ["/healthz"])
+        self.assertEqual(
+            protected_sites["n8n.{{ platform_domain }}"]["unauthenticated_prefix_paths"],
             ["/webhook/", "/webhook-test/", "/webhook-waiting/"],
         )
-        self.assertEqual(protected_sites["ops.example.com"]["unauthenticated_paths"], ["/health"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["docs.example.com"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["changelog.example.com"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["logs.example.com"])
-        self.assertNotIn("unauthenticated_paths", protected_sites["home.example.com"])
-        self.assertEqual(protected_sites["tasks.example.com"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(protected_sites["ops.{{ platform_domain }}"]["unauthenticated_paths"], ["/health"])
+        self.assertEqual(protected_sites["ops.{{ platform_domain }}"]["unauthenticated_prefix_paths"], ["/static/"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["docs.{{ platform_domain }}"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["changelog.{{ platform_domain }}"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["logs.{{ platform_domain }}"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["home.{{ platform_domain }}"])
+        self.assertEqual(protected_sites["tasks.{{ platform_domain }}"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
@@ -223,7 +231,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_defaults_include_public_docs_site(self) -> None:
         docs_site = next(
-            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "docs.example.com"
+            site
+            for site in self.defaults["public_edge_extra_sites"]
+            if site["hostname"] == "docs.{{ platform_domain }}"
         )
         self.assertEqual(docs_site["source_dir"], "docs-portal")
         self.assertNotIn("noindex", docs_site)
@@ -239,38 +249,58 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(security_defaults["cross_origin_resource_policy"], "same-origin")
         self.assertEqual(security_defaults["x_content_type_options"], "nosniff")
         self.assertIn("frame-ancestors 'none'", security_defaults["content_security_policy"])
-        self.assertIn("annotate.example.com", security_overrides)
-        self.assertIn("coolify.example.com", security_overrides)
-        self.assertIn("draw.example.com", security_overrides)
-        self.assertIn("grafana.example.com", security_overrides)
-        self.assertIn("logs.example.com", security_overrides)
-        self.assertIn("tasks.example.com", security_overrides)
+        self.assertIn("annotate.{{ platform_domain }}", security_overrides)
+        self.assertIn("coolify.{{ platform_domain }}", security_overrides)
+        self.assertIn("draw.{{ platform_domain }}", security_overrides)
+        self.assertIn("grafana.{{ platform_domain }}", security_overrides)
+        self.assertIn("logs.{{ platform_domain }}", security_overrides)
+        self.assertIn("tasks.{{ platform_domain }}", security_overrides)
         self.assertIn(
-            "https://annotate.example.com", security_overrides["annotate.example.com"]["content_security_policy"]
+            "https://annotate.{{ platform_domain }}",
+            security_overrides["annotate.{{ platform_domain }}"]["content_security_policy"],
         )
-        self.assertIn("'unsafe-eval'", security_overrides["coolify.example.com"]["content_security_policy"])
-        self.assertIn("wss://draw.example.com", security_overrides["draw.example.com"]["content_security_policy"])
-        self.assertIn("'unsafe-eval'", security_overrides["grafana.example.com"]["content_security_policy"])
-        self.assertIn("wss://n8n.example.com", security_overrides["n8n.example.com"]["content_security_policy"])
-        self.assertIn("https://fonts.googleapis.com", security_overrides["docs.example.com"]["content_security_policy"])
-        self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.example.com"]["content_security_policy"])
-        self.assertIn("https://unpkg.com", security_overrides["ops.example.com"]["content_security_policy"])
+        self.assertIn("'unsafe-eval'", security_overrides["coolify.{{ platform_domain }}"]["content_security_policy"])
+        self.assertIn(
+            "wss://draw.{{ platform_domain }}",
+            security_overrides["draw.{{ platform_domain }}"]["content_security_policy"],
+        )
+        self.assertIn("'unsafe-eval'", security_overrides["grafana.{{ platform_domain }}"]["content_security_policy"])
+        self.assertIn(
+            "wss://n8n.{{ platform_domain }}",
+            security_overrides["n8n.{{ platform_domain }}"]["content_security_policy"],
+        )
+        self.assertIn(
+            "https://fonts.googleapis.com",
+            security_overrides["docs.{{ platform_domain }}"]["content_security_policy"],
+        )
+        self.assertIn(
+            "https://cdn.jsdelivr.net",
+            security_overrides["logs.{{ platform_domain }}"]["content_security_policy"],
+        )
+        self.assertIn("https://unpkg.com", security_overrides["ops.{{ platform_domain }}"]["content_security_policy"])
         self.assertIn(
             "style-src 'self' 'unsafe-inline' https://unpkg.com",
-            security_overrides["ops.example.com"]["content_security_policy"],
+            security_overrides["ops.{{ platform_domain }}"]["content_security_policy"],
         )
         self.assertIn(
-            "font-src 'self' data: https://unpkg.com", security_overrides["ops.example.com"]["content_security_policy"]
+            "font-src 'self' data: https://unpkg.com",
+            security_overrides["ops.{{ platform_domain }}"]["content_security_policy"],
         )
-        self.assertIn("wiki.example.com", security_overrides)
-        self.assertIn("'unsafe-inline'", security_overrides["wiki.example.com"]["content_security_policy"])
-        self.assertIn("https://wiki.example.com", security_overrides["wiki.example.com"]["content_security_policy"])
-        self.assertIn("wss://tasks.example.com", security_overrides["tasks.example.com"]["content_security_policy"])
+        self.assertIn("wiki.{{ platform_domain }}", security_overrides)
+        self.assertIn("'unsafe-inline'", security_overrides["wiki.{{ platform_domain }}"]["content_security_policy"])
+        self.assertIn(
+            "https://wiki.{{ platform_domain }}",
+            security_overrides["wiki.{{ platform_domain }}"]["content_security_policy"],
+        )
+        self.assertIn(
+            "wss://tasks.{{ platform_domain }}",
+            security_overrides["tasks.{{ platform_domain }}"]["content_security_policy"],
+        )
 
     def test_template_supports_root_proxy_path_override(self) -> None:
         self.assertIn("site.root_proxy_path is defined", self.template)
         self.assertIn("location = / {", self.template)
-        self.assertIn("site.hostname in public_edge_authenticated_sites", self.template)
+        self.assertIn("_raw_key in public_edge_authenticated_sites", self.template)
         self.assertIn("protected_site.unauthenticated_proxy_routes | default([])", self.template)
         self.assertIn('add_header X-Robots-Tag "{{ public_edge_robots_meta_content }}" always;', self.template)
         self.assertIn("location = /robots.txt {", self.template)
@@ -290,12 +320,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_minio_console_is_published_with_large_upload_and_header_passthrough_overrides(self) -> None:
         minio_console = next(
-            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "minio-console.example.com"
+            site
+            for site in self.defaults["public_edge_extra_sites"]
+            if site["hostname"] == "minio-console.{{ platform_domain }}"
         )
 
         self.assertEqual(
             minio_console["upstream"],
-            "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}",
+            "http://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:{{ platform_port_assignments.minio_console_port }}",
         )
         self.assertEqual(minio_console["client_max_body_size"], 0)
         self.assertFalse(minio_console["security_headers_enabled"])
@@ -356,17 +388,27 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("public_edge_session_authority.shared_logout_path", self.template)
         self.assertIn("public_edge_session_authority.shared_proxy_cleanup_path", self.template)
         self.assertIn("public_edge_session_authority.shared_logged_out_path", self.template)
-        self.assertIn("public_edge_session_authority.oauth2_proxy_sign_out_url", self.template)
-        self.assertIn("public_edge_session_authority.keycloak_logout_url", self.template)
+        self.assertIn("public_edge_session_authority.ops_portal_client_id", self.template)
+        self.assertIn("oauth2_proxy_sign_out_url(", self.template)
+        self.assertIn("keycloak_logout_url(", self.template)
         self.assertIn("site.hostname == public_edge_session_authority.authority_hostname", self.template)
-        self.assertIn("map $lv3_logout_authorization $lv3_logout_id_token", self.template)
-        self.assertIn("auth_request_set $lv3_logout_authorization $upstream_http_authorization;", self.template)
+        self.assertIn("map $http_authorization $lv3_logout_id_token", self.template)
         self.assertIn("location @lv3_shared_logout_without_session {", self.template)
         self.assertIn("id_token_hint={{ id_token_hint }}", self.template)
         self.assertIn("id_token_hint={id_token}", self.template)
         self.assertIn("'$lv3_logout_id_token'", self.template)
         self.assertIn('add_header Cache-Control "no-store" always;', self.template)
         self.assertIn('add_header Clear-Site-Data "\\"cache\\", \\"cookies\\", \\"storage\\"" always;', self.template)
+
+    def test_template_renders_stale_session_recovery_contract(self) -> None:
+        self.assertIn("location = /oauth2/callback {", self.template)
+        self.assertIn("proxy_intercept_errors on;", self.template)
+        self.assertIn("error_page 500 = @oauth2_stale_session_reset;", self.template)
+        self.assertIn("location @oauth2_stale_session_reset {", self.template)
+        self.assertIn("public_edge_session_authority.cookie_name }}_csrf", self.template)
+        self.assertIn('add_header Cache-Control "no-store" always;', self.template)
+        self.assertIn('public_edge_session_authority.authority_hostname ~ "/"', self.template)
+        self.assertIn("public_edge_session_authority.ops_portal_client_id | urlencode", self.template)
 
 
 if __name__ == "__main__":

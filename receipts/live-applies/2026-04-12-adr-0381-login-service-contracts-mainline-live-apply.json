@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-12-adr-0381-login-service-contracts-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-12",
+  "recorded_on": "2026-04-12",
+  "recorded_at": "2026-04-12T11:24:28Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0381-login-service-contracts-mainline-live-apply",
+  "adr": "0381",
+  "workstream": "ws-0381-live-apply",
+  "source_branch": "main",
+  "source_commit": "18dfb4ea01cd6c3787a61eaa5cceff7cfd496543",
+  "repo_version_context": "0.178.126",
+  "platform_version_context": "0.178.78",
+  "integrated_repo_version": "0.178.126",
+  "integrated_platform_version": "0.178.78",
+  "summary": "Verified ADR 0381 from the latest realistic mainline release context by replaying the Keycloak, shared-edge publication, and identity-core watchdog converge order on production, revalidating the ops/tasks login redirect contract end to end, and then repairing the remaining repository automation drift so the canonical status, receipt, and generated-doc validation paths all pass on current main.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control-lv3",
+      "vmid": 192,
+      "address": "10.10.10.92"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ops login entrypoint",
+      "address": "https://ops.lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "tasks login entrypoint",
+      "address": "https://tasks.lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Keycloak realm broker",
+      "address": "https://sso.lv3.org/realms/lv3"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Integrated repo automation and validation slice",
+      "result": "pass",
+      "observed": "The final integrated validation set passed on current main: the focused pytest surface returned `142 passed` from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-pytest-r1.txt`; `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` plus `git diff --check` passed from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-repo-gates-r1.txt`; and `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate` passed from `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-receipts-validate-r1.txt` after refreshing canonical truth, generated status docs, the dependency diagram, and the Excalidraw-derived diagrams."
+    },
+    {
+      "check": "Exact-main Keycloak replay",
+      "result": "pass",
+      "observed": "`make preflight WORKFLOW=converge-keycloak` and `make converge-keycloak env=production` both passed. The converge recap in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-keycloak-0.178.126.txt` recorded `monitoring ok=20 changed=0 failed=0`, `nginx ok=49 changed=5 failed=0`, `postgres ok=80 changed=1 failed=0`, `proxmox-host ok=366 changed=0 failed=0`, and `runtime-control ok=290 changed=2 failed=0`."
+    },
+    {
+      "check": "Exact-main public edge publication and certificate sweep",
+      "result": "partial",
+      "observed": "The first `make configure-edge-publication env=production` run stopped in the generated portal stage because the shared service catalog still referenced the unknown uptime monitor `Neko Public Health`. `make generate-uptime-kuma-monitors` repaired that shared input, the immediate rerun completed successfully, and the resulting evidence in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-configure-edge-publication-r2-0.178.126.txt` includes a successful `make validate-certificates` pass for 46 domains plus one unrelated `vault.lv3.org` connection reset against `100.64.0.1:443` outside ADR 0381."
+    },
+    {
+      "check": "Exact-main identity-core watchdog replay",
+      "result": "pass",
+      "observed": "`make preflight WORKFLOW=converge-identity-core-watchdog` and `make converge-identity-core-watchdog env=production` both passed, with `runtime-control ok=31 changed=0 failed=0` in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-identity-core-watchdog-0.178.126.txt`."
+    },
+    {
+      "check": "End-to-end auth redirect contract",
+      "result": "pass",
+      "observed": "`receipts/live-applies/evidence/2026-04-12-ws-0381-main-auth-verification-r1.txt` shows `https://ops.lv3.org/` and `https://tasks.lv3.org/` returning `302` to `/oauth2/sign_in`, and both sign-in entrypoints returning `302` into the shared Keycloak authorize flow with `client_id=ops-portal-oauth`."
+    },
+    {
+      "check": "Live watchdog and stale-session reset contract",
+      "result": "pass",
+      "observed": "The same auth-verification transcript confirms `lv3-ops-portal-oauth2-proxy-watchdog.timer` and `lv3-identity-watchdog.timer` active, `grep -c _lv3_ops_portal_proxy_csrf /etc/nginx/sites-available/lv3-edge.conf` returning `16`, `grep -c @oauth2_stale_session_reset ...` returning `32`, and `grep -c oauth2/sign_in\\&client_id ...` returning `0` on the live edge host."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0381-live-apply.md",
+    "docs/adr/0381-login-service-contracts-and-session-recovery-automation.md",
+    "docs/runbooks/keycloak-session-invalidation.md",
+    "docs/runbooks/identity-core-watchdog.md",
+    "roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+    "roles/keycloak_runtime/defaults/main.yml",
+    "roles/public_edge_oidc_auth/defaults/main.yml",
+    "roles/public_edge_oidc_auth/templates/lv3-ops-portal-oauth2-proxy-watchdog.sh.j2",
+    "tests/test_environment_topology.py",
+    "tests/test_keycloak_runtime_role.py",
+    "tests/test_nginx_edge_publication_role.py",
+    "tests/test_public_edge_oidc_auth_role.py",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-main-preflight-converge-keycloak-0.178.126.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-keycloak-0.178.126.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-main-preflight-configure-edge-publication-0.178.126.txt",
+    "receipts/live-applies/evidence/2026-04-12-shared-gate-generate-uptime-kuma-monitors.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-main-configure-edge-publication-r2-0.178.126.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-main-preflight-identity-core-watchdog-0.178.126.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-main-converge-identity-core-watchdog-0.178.126.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-main-auth-verification-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-pytest-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-canonical-truth-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-status-docs-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-dependency-diagram-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-diagrams-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-repo-gates-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-receipts-validate-r1.txt"
+  ],
+  "notes": [
+    "The earlier branch receipt `2026-04-12-adr-0381-login-service-contracts-live-apply` remains the first-live proof from the isolated worktree; this mainline receipt is the canonical integrated evidence for repo version `0.178.126` and platform version `0.178.78`.",
+    "The exact-main auth replay was executed against the current local mainline series rooted at `18dfb4ea01cd6c3787a61eaa5cceff7cfd496543`, after verifying `origin/main` still trailed at `b2a4e23156ae0b4d7435a26095b3d3cdd3cab743`. The later main-only integration commit in this session repairs repo validation and generated-document drift without changing the live ADR 0381 auth surfaces.",
+    "Besides the unrelated `vault.lv3.org` certificate reset, the only runtime-adjacent blocker encountered during the exact-main replay was the shared uptime-monitor catalog drift that prevented the first `configure-edge-publication` pass; regenerating the uptime monitors cleared that shared input immediately."
+  ]
+}

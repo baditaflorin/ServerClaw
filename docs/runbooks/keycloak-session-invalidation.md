@@ -24,11 +24,16 @@ This is not a bug — it is expected behaviour after any Keycloak restart.
 
 Tell the affected user:
 
-1. Clear cookies for `sso.example.com` (or all cookies for `*.example.com`)
-2. Navigate back to the service URL
-3. Login again from scratch
+1. Close the current error tab
+2. Navigate back to the service root URL (for example `https://ops.example.com/`)
+3. Retry the login flow once from a clean navigation
 
-In Chrome: Settings → Privacy → Cookies → See all site data → search `example.com` → Delete all.
+With ADR 0381 deployed, NGINX should automatically expire both oauth2-proxy
+cookies and redirect through Keycloak logout on the first failing callback. The
+user should not need to clear cookies manually in the normal case.
+
+Only fall back to manual cookie clearing if the same 500 persists after a fresh
+retry and you have confirmed the platform is still serving an older edge config.
 
 ## Operator Diagnosis
 
@@ -41,6 +46,10 @@ journalctl -u 'docker-*' --since '1 hour ago' | grep -i "keycloak.*start\|restar
 ssh ops@10.10.10.10
 journalctl -u lv3-ops-portal-oauth2-proxy.service --since '30 minutes ago' \
   | grep -i "invalid_grant\|code not valid\|error"
+
+# Verify the stale-session reset block is deployed on nginx-edge
+ssh ops@10.10.10.10 \
+  'grep -n "_lv3_ops_portal_proxy_csrf\|@oauth2_stale_session_reset\|oauth2/sign_in&client_id" /etc/nginx/sites-available/lv3-edge.conf'
 ```
 
 ## Why Keycloak Keeps Restarting
@@ -71,7 +80,13 @@ curl -s http://10.10.10.92:18080/realms/lv3/.well-known/openid-configuration \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print('OK:', d['issuer'])"
 ```
 
-If Keycloak is healthy but users still get 500: they have stale cookies — user-facing fix above.
+If Keycloak is healthy but users still get 500 after a fresh retry, treat that
+as stale-session recovery drift:
+
+1. verify `@oauth2_stale_session_reset` is present on `nginx-edge`
+2. verify both `_lv3_ops_portal_proxy` and `_lv3_ops_portal_proxy_csrf` are expired in that block
+3. verify the redirect target is `https://ops.example.com/`, not `/oauth2/sign_in`
+4. replay the repo-managed auth converge order from ADR 0381
 
 ## Preventing Restart-Triggered Invalidations
 
@@ -79,6 +94,10 @@ The only way to prevent this entirely is to avoid Keycloak restarts during activ
 The watchdog's rate limit (6/hr) and the `KC_CACHE=local` setting are the current
 mitigations. Future option: Keycloak session persistence to DB (already enabled via
 postgres-vm — sessions survive container restart if Keycloak drains cleanly).
+
+ADR 0381 adds the server-side stale-session reset path so restart-triggered
+invalidations recover automatically instead of defaulting to browser cookie
+clearing.
 
 ## Related
 

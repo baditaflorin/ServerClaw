@@ -1,0 +1,128 @@
+id: ws-0381-live-apply
+adr: 0381
+title: ADR 0381 live apply from latest origin/main
+status: live_applied
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/ws-0381-origin-main
+worktree_path: .worktrees/ws-0381-origin-main
+doc: docs/workstreams/ws-0381-live-apply.md
+depends_on:
+- adr-0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-app-surfaces
+- adr-0376-identity-core-vm-isolation-and-aggressive-health-watchdog
+- adr-0381-login-service-contracts-and-session-recovery-automation
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/archive/2026/ws-0381-live-apply.yaml
+- docs/workstreams/ws-0381-live-apply.md
+- docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+- docs/adr/implementation-status/adr-0381.md
+- docs/adr/implementation-status/adr-0381.yaml
+- docs/adr/implementation-status/INDEX.yaml
+- docs/adr/.index.yaml
+- docs/adr/index/by-range/0300-0399.yaml
+- docs/adr/index/by-concern/automation.yaml
+- docs/adr/index/by-status/implemented.yaml
+- docs/adr/index/by-status/proposed.yaml
+- docs/runbooks/keycloak-session-invalidation.md
+- docs/runbooks/identity-core-watchdog.md
+- playbooks/templates/compose_macros.j2
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/plane_client.yml
+- config/subdomain-catalog.json
+- config/subdomain-exposure-registry.json
+- scripts/certificate_validator.py
+- scripts/control_plane_lanes.py
+- tests/test_generate_status_docs.py
+- tests/test_public_edge_oidc_auth_role.py
+- tests/test_nginx_edge_publication_role.py
+- tests/test_keycloak_runtime_role.py
+- tests/test_subdomain_exposure_audit.py
+- receipts/live-applies/2026-04-12-adr-0381-login-service-contracts-mainline-live-apply.json
+- receipts/live-applies/evidence/2026-04-12-ws-0381-*
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0381_live_apply_source
+    paths:
+    - workstreams/archive/2026/ws-0381-live-apply.yaml
+    mode: exclusive
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: adr_index_generation
+    paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-range/0300-0399.yaml
+    - docs/adr/index/by-concern/automation.yaml
+    - docs/adr/index/by-status/implemented.yaml
+    - docs/adr/index/by-status/proposed.yaml
+    mode: shared_contract
+    contract: adr-index-generator-v1
+  - id: ws_0381_docs
+    paths:
+    - docs/workstreams/ws-0381-live-apply.md
+    - docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+    - docs/adr/implementation-status/adr-0381.md
+    - docs/adr/implementation-status/adr-0381.yaml
+    - docs/adr/implementation-status/INDEX.yaml
+    - docs/runbooks/keycloak-session-invalidation.md
+    - docs/runbooks/identity-core-watchdog.md
+    mode: exclusive
+  - id: ws_0381_latest_main_repairs
+    paths:
+    - playbooks/templates/compose_macros.j2
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/plane_client.yml
+    - config/subdomain-catalog.json
+    - config/subdomain-exposure-registry.json
+    - scripts/certificate_validator.py
+    - scripts/control_plane_lanes.py
+    - tests/test_generate_status_docs.py
+    - tests/test_public_edge_oidc_auth_role.py
+    - tests/test_nginx_edge_publication_role.py
+    - tests/test_keycloak_runtime_role.py
+    - tests/test_subdomain_exposure_audit.py
+    mode: shared_contract
+    contract: adr-0381-latest-main-live-apply-v1
+  - id: ws_0381_live_apply_receipts
+    paths:
+    - receipts/live-applies/2026-04-12-adr-0381-login-service-contracts-mainline-live-apply.json
+    - receipts/live-applies/evidence/2026-04-12-ws-0381-*
+    mode: exclusive
+canonical_truth:
+  changelog_entry: automates stale OIDC session recovery at the shared edge, verifies
+    the ops and tasks login redirect contract end to end, and records the verified
+    ADR 0381 live apply evidence
+  release_bump: patch
+  included_in_repo_version: 0.178.126
+  latest_receipts:
+    identity_core_watchdog: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
+    keycloak: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
+    ops_portal: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
+    public_edge_publication: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
+blockers: []
+notes: 'Replays ADR 0381 from the latest realistic origin/main baseline. Scope covers
+
+  the remaining repo truth gaps around session-recovery automation, workstream
+
+  state, focused regression coverage, live apply evidence, and final mainline
+
+  integration after the login path is verified end to end. The exact-main replay
+  on 2026-04-12 converged `keycloak`, `configure-edge-publication`, and
+  `identity-core-watchdog`, reverified the ops/tasks redirect chain, and
+  recorded the canonical mainline receipt against repo version 0.178.126 and
+  platform version 0.178.78. Truthful replay from a fresh worktree also repaired
+  four latest-main drifts discovered during execution: a missing playbook compose
+  macro loader, a Plane OIDC raw Keycloak client update that returned HTTP 400,
+  a `librechat.example.com` versus `chat.example.com` shared-edge catalog mismatch,
+  and certificate validation resolving `.local` incorrectly when run from worktrees.
+  Generated-doc validation on the same fresh worktree also surfaced a repo-root
+  import bootstrap bug in `scripts/control_plane_lanes.py`; the final workstream
+  state carries that fix and a CLI regression test so `scripts/generate_status_docs.py`
+  can run from the repo root without shadowing against the standard-library
+  `platform` module.
+
+  '
+plane_issue_id: 2952a63d-4f05-4118-a15b-81d807c34614

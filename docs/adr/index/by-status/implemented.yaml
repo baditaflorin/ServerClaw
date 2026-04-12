@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 346
+total_adrs: 347
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6245,6 +6245,30 @@ adrs:
     summary: We will provide interactive operator browser access through multi-instance Neko
     filename: 0380-neko-for-operator-remote-browser-access.md
     path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
+  - adr: 0381
+    title: Login Service Contracts and Session Recovery Automation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-07'
+    concern: automation
+    keywords:
+      - login
+      - session-recovery
+      - oauth2-proxy
+      - nginx
+      - watchdog
+      - automation
+      - service
+      - contracts
+      - session
+      - recovery
+    summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
+      .example.com.
+    filename: 0381-login-service-contracts-and-session-recovery-automation.md
+    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
     implemented_in_repo_version: 0.178.126
     implemented_in_platform_version: 0.178.78
     implemented_on: '2026-04-12'
