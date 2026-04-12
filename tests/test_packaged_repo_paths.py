@@ -41,3 +41,18 @@ def test_load_event_type_registry_reads_packaged_sibling_config(monkeypatch, tmp
         "execution.completed",
         "execution.failed",
     ]
+
+
+def test_repo_path_prefers_materialized_worktree_receipts_over_shared_receipts(monkeypatch, tmp_path: Path) -> None:
+    shared_root = tmp_path / "repo"
+    worktree_root = shared_root / ".worktrees" / "ws-0371"
+    shared_receipt = shared_root / "receipts" / "security-reports" / "latest.json"
+    worktree_receipt = worktree_root / "receipts" / "security-reports" / "latest.json"
+    shared_receipt.parent.mkdir(parents=True, exist_ok=True)
+    worktree_receipt.parent.mkdir(parents=True, exist_ok=True)
+    shared_receipt.write_text("shared", encoding="utf-8")
+    worktree_receipt.write_text("worktree", encoding="utf-8")
+
+    monkeypatch.setattr(repo_module, "REPO_ROOT", worktree_root)
+
+    assert repo_module.repo_path("receipts", "security-reports", "latest.json") == worktree_receipt

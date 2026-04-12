@@ -95,6 +95,9 @@ def repo_path(*parts: str) -> Path:
 
     head = parts[0]
     if head == "receipts":
+        candidate = REPO_ROOT.joinpath(*parts)
+        if _path_exists(candidate):
+            return candidate
         return receipts_root(REPO_ROOT).joinpath(*parts[1:])
 
     candidate = REPO_ROOT.joinpath(*parts)
