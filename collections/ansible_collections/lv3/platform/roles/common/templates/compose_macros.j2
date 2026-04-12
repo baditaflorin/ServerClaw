@@ -87,8 +87,8 @@
 {% endfor %}
 {% endif %}
     volumes:
-      - {{ agent_dir }}:{{ agent_dir_mount_target }}{% if agent_dir_mount_mode %}:{{ agent_dir_mount_mode }}{% endif %}
-      - {{ env_dir }}:{{ env_dir_mount_target }}{% if env_dir_mount_mode %}:{{ env_dir_mount_mode }}{% endif %}
+      - {{ agent_dir }}:{{ agent_dir_mount_target }}{{ (':' + agent_dir_mount_mode) if agent_dir_mount_mode else '' }}
+      - {{ env_dir }}:{{ env_dir_mount_target }}{{ (':' + env_dir_mount_mode) if env_dir_mount_mode else '' }}
 {% endmacro %}
 
 {% macro redis_service(
