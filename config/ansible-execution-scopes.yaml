@@ -386,6 +386,20 @@ playbooks:
     shared_surfaces:
       - service:plausible
       - inventory/host_vars/proxmox-host.yml
+  playbooks/repowise.yml:
+    playbook_id: repowise
+    mutation_scope: host
+    shared_surfaces:
+      - service:repowise
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/refresh-discovery-surfaces.yml:
+    playbook_id: refresh-discovery-surfaces
+    mutation_scope: host
+    shared_surfaces:
+      - build/platform-manifest.json
+      - build/onboarding
+      - docs/adr
+      - config/service-capability-catalog.json
   playbooks/livekit.yml:
     playbook_id: livekit
     mutation_scope: platform
@@ -411,12 +425,45 @@ playbooks:
       - vm:121/service:neko
       - config/subdomain-catalog.json
       - inventory/host_vars/proxmox-host.yml
+  playbooks/runtime-apps-pool.yml:
+    playbook_id: runtime-apps-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-apps-pool
+      - host:proxmox-host
+      - host:proxmox-host/service:proxmox_network
+      - vm:122
+      - vm:122/service:docker_runtime
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/runtime-comms-pool.yml:
+    playbook_id: runtime-comms-pool
+    mutation_scope: platform
+    shared_surfaces:
+      - service:runtime-comms-pool
+      - host:proxmox-host
+      - host:proxmox-host/service:proxmox_network
+      - vm:121
+      - vm:121/service:docker_runtime
+      - inventory/host_vars/proxmox-host.yml
   playbooks/serverclaw.yml:
     playbook_id: serverclaw
     mutation_scope: platform
     shared_surfaces:
       - service:serverclaw
       - inventory/host_vars/proxmox-host.yml
+  playbooks/repo-intake.yml:
+    playbook_id: repo-intake
+    mutation_scope: platform
+    shared_surfaces:
+      - service:repo-intake
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/provision_adr_governance.yml:
+    playbook_id: provision-adr-governance
+    mutation_scope: platform
+    shared_surfaces:
+      - service:adr-governance
+      - docs/adr
+      - .local/plane
   playbooks/outline.yml:
     playbook_id: outline
     mutation_scope: platform
@@ -519,6 +566,27 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:proxmox-install
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-bootstrap-proxmox.yml:
+    playbook_id: verify-bootstrap-proxmox
+    mutation_scope: host
+    execution_class: diagnostic
+    shared_surfaces:
+      - host:proxmox-host
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-bootstrap-guests.yml:
+    playbook_id: verify-bootstrap-guests
+    mutation_scope: platform
+    execution_class: diagnostic
+    shared_surfaces:
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/verify-platform.yml:
+    playbook_id: verify-platform
+    mutation_scope: platform
+    execution_class: diagnostic
+    shared_surfaces:
+      - inventory/hosts.yml
       - inventory/host_vars/proxmox-host.yml
   playbooks/rag-context.yml:
     playbook_id: rag-context

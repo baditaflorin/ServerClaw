@@ -1,0 +1,94 @@
+id: ws-0346-live-apply
+adr: '0346'
+title: Live apply Repowise semantic code search from the latest origin/main
+status: ready
+owner: codex
+branch: codex/ws-0346-live-apply
+worktree_path: .worktrees/ws-0346-live-apply
+doc: docs/workstreams/ws-0346-live-apply.md
+depends_on:
+- adr-0167-agent-handoff-and-context-preservation
+- adr-0198-qdrant-vector-search-semantic-rag
+- adr-0346-repowise-semantic-search
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0346-live-apply.yaml
+- docs/workstreams/ws-0346-live-apply.md
+- docs/adr/0346-repowise-semantic-search.md
+- docs/adr/implementation-status/adr-0346.yaml
+- docs/runbooks/configure-repowise.md
+- config/service-capability-catalog.json
+- config/ansible-execution-scopes.yaml
+- playbooks/repowise.yml
+- playbooks/services/repowise.yml
+- collections/ansible_collections/lv3/platform/roles/repowise_runtime/**
+- scripts/repowise_corpus.py
+- scripts/repowise_index.py
+- scripts/repowise_service.py
+- platform/ansible/execution_scopes.py
+- tests/test_repowise_playbook.py
+- tests/test_ansible_execution_scopes.py
+- receipts/live-applies/2026-04-12-adr-0346-repowise-*.json
+- receipts/live-applies/evidence/2026-04-12-ws-0346-*
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws0346_registry_source
+    paths:
+    - workstreams/active/ws-0346-live-apply.yaml
+    mode: exclusive
+  - id: ws0346_docs
+    paths:
+    - docs/workstreams/ws-0346-live-apply.md
+    - docs/runbooks/configure-repowise.md
+    - docs/adr/0346-repowise-semantic-search.md
+    - docs/adr/implementation-status/adr-0346.yaml
+    mode: exclusive
+  - id: ws0346_repowise_runtime
+    paths:
+    - playbooks/repowise.yml
+    - playbooks/services/repowise.yml
+    - collections/ansible_collections/lv3/platform/roles/repowise_runtime/**
+    - scripts/repowise_corpus.py
+    - scripts/repowise_index.py
+    - scripts/repowise_service.py
+    - config/service-capability-catalog.json
+    - config/ansible-execution-scopes.yaml
+    mode: exclusive
+  - id: ws0346_worktree_live_apply_support
+    paths:
+    - platform/ansible/execution_scopes.py
+    - tests/test_ansible_execution_scopes.py
+    - tests/test_repowise_playbook.py
+    mode: exclusive
+  - id: ws0346_live_apply_receipts
+    paths:
+    - receipts/live-applies/2026-04-12-adr-0346-repowise-*.json
+    - receipts/live-applies/evidence/2026-04-12-ws-0346-*
+    mode: exclusive
+blockers: []
+ready_to_merge: true
+live_applied: true
+canonical_truth:
+  changelog_entry: closes the ADR 0346 live-apply gap by recording a governed Repowise
+    semantic search replay and evidence from the latest origin/main
+  release_bump: patch
+  included_in_repo_version: 0.178.126
+  latest_receipts:
+    repowise: 2026-04-12-adr-0346-repowise-live-apply
+description: 'Close the remaining ADR 0346 live-apply gap from a fresh worktree on
+  top of
+
+  the latest origin/main. This workstream verifies the governed repowise
+
+  service replay, records branch-local evidence, and fixes any repo automation
+
+  regressions that prevent a clean worktree-based live apply.
+
+  '
+plane_issue_id: 2c89147c-b2f9-42ac-b03e-748fd976d8a4

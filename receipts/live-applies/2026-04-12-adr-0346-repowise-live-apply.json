@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-12-adr-0346-repowise-live-apply",
+  "applied_on": "2026-04-12",
+  "recorded_on": "2026-04-12",
+  "recorded_by": "codex",
+  "source_commit": "37eb062dfe6daca42e37dbf9c90a5fb8a176558c",
+  "repo_version_context": "0.178.125",
+  "workflow_id": "live-apply-service",
+  "adr": "0346",
+  "summary": "Repowise semantic code search replayed on docker-runtime from the exact-main worktree.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime",
+      "address": "10.10.10.20"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repowise live-apply replay",
+      "result": "pass",
+      "observed": "docker-runtime ok=14 changed=2 failed=0 via the live-apply-service wrapper; repowise service restarted and cron schedule retained."
+    }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/evidence/2026-04-12-ws-0346-repowise-live-apply-r1.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0346-repowise-restic-timeout-r1.txt",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Immutable guest replacement gate acknowledged with ALLOW_IN_PLACE_MUTATION=true.",
+    "Restic live-apply trigger timed out on snapshots probe; timeout tolerated via RESTIC_ALLOW_TIMEOUT=1 and tracked for follow-up."
+  ]
+}

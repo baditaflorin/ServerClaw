@@ -2130,110 +2130,6 @@
         "reason": "Piper is intentionally private-only and is verified through the repo-managed health, voice-catalog, and WAV synthesis probes instead of a public monitor."
       }
     },
-    "litellm": {
-      "service_name": "litellm",
-      "owning_vm": "docker-runtime",
-      "role": "litellm_runtime",
-      "verify_file": "roles/litellm_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "LiteLLM Proxy startup completes once the liveliness endpoint answers.",
-        "timeout_seconds": 180,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:4000/health/liveliness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The LiteLLM Proxy liveliness endpoint continues to answer.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:4000/health/liveliness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The LiteLLM Proxy health endpoint confirms readiness.",
-        "timeout_seconds": 120,
-        "retries": 12,
-        "delay_seconds": 2,
-        "url": "http://127.0.0.1:4000/health/readiness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The private LiteLLM Proxy surface is verified through repo-managed local health probes."
-      }
-    },
-    "librechat": {
-      "service_name": "librechat",
-      "owning_vm": "coolify",
-      "role": "librechat_runtime",
-      "verify_file": "roles/librechat_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "LibreChat startup completes once the health API endpoint answers.",
-        "timeout_seconds": 180,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The LibreChat health API endpoint continues to answer.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "LibreChat is ready to serve requests.",
-        "timeout_seconds": 120,
-        "retries": 12,
-        "delay_seconds": 2,
-        "url": "http://127.0.0.1:8096/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "LibreChat Public",
-          "type": "http",
-          "url": "https://chat.example.com",
-          "description": "Public LibreChat reachability on the shared edge.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-302"
-          ]
-        }
-      }
-    },
     "openbao": {
       "service_name": "openbao",
       "owning_vm": "runtime-control",
@@ -3111,8 +3007,8 @@
     "serverclaw": {
       "service_name": "serverclaw",
       "owning_vm": "coolify",
-      "role": "serverclaw_runtime",
-      "verify_file": "roles/serverclaw_runtime/tasks/verify.yml",
+      "role": null,
+      "verify_file": null,
       "startup": {
         "kind": "http",
         "description": "ServerClaw startup completes once the local HTTP surface answers on the runtime VM.",

@@ -263,122 +263,6 @@ workstreams:
   notes: "Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py\n\
     step was skipped. Run it to register in Plane once the service recovers:\n  python\
     \ scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools\n"
-- id: ws-0364-live-apply
-  adr: '0364'
-  title: Live apply native build server gate execution from latest origin/main
-  status: merged
-  ready_to_merge: true
-  live_applied: true
-  owner: codex
-  branch: codex/ws-0364-live-apply
-  worktree_path: .worktrees/ws-0364-live-apply
-  doc: docs/workstreams/ws-0364-live-apply.md
-  depends_on:
-  - adr-0082-remote-build-execution-gateway
-  - adr-0083-docker-based-check-runner
-  - adr-0087-repository-validation-gate
-  - adr-0264-failure-domain-isolated-validation-lanes
-  - adr-0266-validation-runner-capability-contracts
-  conflicts_with: []
-  shared_surfaces:
-  - workstreams.yaml
-  - workstreams/active/ws-0364-live-apply.yaml
-  - docs/workstreams/ws-0364-live-apply.md
-  - docs/workstreams/ws-0377-repo-intake-subdomain.md
-  - docs/adr/0364-native-build-server-gate-execution.md
-  - docs/adr/.index.yaml
-  - docs/runbooks/validation-gate.md
-  - docs/runbooks/remote-build-gateway.md
-  - docs/runbooks/live-apply-receipts-and-verification-evidence.md
-  - Makefile
-  - config/build-server.json
-  - config/ansible-execution-scopes.yaml
-  - config/validation-gate.json
-  - config/workflow-catalog.json
-  - inventory/build_server.yml
-  - scripts/parallel_check.py
-  - scripts/remote_exec.sh
-  - scripts/live_apply_receipts.py
-  - scripts/canonical_truth.py
-  - scripts/trigger_restic_live_apply.py
-  - scripts/drift_lib.py
-  - platform/interface_contracts.py
-  - collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
-  - playbooks/services/build-server-gate-tools.yml
-  - playbooks/services/repo_intake.yml
-  - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-  - receipts/live-applies/
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws_0364_live_apply_tracking
-      paths:
-      - workstreams/active/ws-0364-live-apply.yaml
-      - docs/workstreams/ws-0364-live-apply.md
-      mode: exclusive
-    - id: adr_0364_live_apply_docs
-      paths:
-      - docs/adr/0364-native-build-server-gate-execution.md
-      - docs/runbooks/validation-gate.md
-      - docs/runbooks/remote-build-gateway.md
-      - docs/runbooks/live-apply-receipts-and-verification-evidence.md
-      mode: exclusive
-    - id: adr_0364_live_apply_gate
-      paths:
-      - Makefile
-      - config/build-server.json
-      - config/ansible-execution-scopes.yaml
-      - config/validation-gate.json
-      - config/workflow-catalog.json
-      - inventory/build_server.yml
-      - scripts/parallel_check.py
-      - scripts/remote_exec.sh
-      - scripts/live_apply_receipts.py
-      - scripts/canonical_truth.py
-      - scripts/trigger_restic_live_apply.py
-      - scripts/drift_lib.py
-      - platform/interface_contracts.py
-      - collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml
-      - playbooks/services/build-server-gate-tools.yml
-      - playbooks/services/repo_intake.yml
-      mode: shared_contract
-      contract: validation-gate-runtime-v1
-    - id: ws_0377_metadata_fix
-      paths:
-      - workstreams/active/ws-0377-repo-intake-subdomain.yaml
-      - docs/workstreams/ws-0377-repo-intake-subdomain.md
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_index_generation
-      paths:
-      - docs/adr/.index.yaml
-      - docs/adr/index/*
-      mode: shared_contract
-      contract: adr-index-generator-v1
-    - id: live_apply_receipts
-      paths:
-      - receipts/live-applies/**
-      mode: exclusive
-  notes: 'Live-apply workstream for ADR 0364. Start from latest origin/main in an
-    isolated
-
-    worktree, converge the build-server gate toolchain onto docker-build, verify the
-
-    native remote gate end to end, and record durable receipt/evidence artifacts before
-
-    exact-main integration.
-
-    '
-  blockers:
-  - Remote validation failed because build-server check runner images were unavailable
-    (registry.example.com DNS failure) and local Docker fallback timed out.
-  - Pre-push gate did not complete (remote gate hang); rerun once runner registry
-    and Docker are reachable.
-  plane_issue_id: 5cf6ccfd-dd7b-46d8-b7eb-8b445936bf9f
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
@@ -438,6 +322,100 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0346-live-apply
+  adr: '0346'
+  title: Live apply Repowise semantic code search from the latest origin/main
+  status: ready
+  owner: codex
+  branch: codex/ws-0346-live-apply
+  worktree_path: .worktrees/ws-0346-live-apply
+  doc: docs/workstreams/ws-0346-live-apply.md
+  depends_on:
+  - adr-0167-agent-handoff-and-context-preservation
+  - adr-0198-qdrant-vector-search-semantic-rag
+  - adr-0346-repowise-semantic-search
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0346-live-apply.yaml
+  - docs/workstreams/ws-0346-live-apply.md
+  - docs/adr/0346-repowise-semantic-search.md
+  - docs/adr/implementation-status/adr-0346.yaml
+  - docs/runbooks/configure-repowise.md
+  - config/service-capability-catalog.json
+  - config/ansible-execution-scopes.yaml
+  - playbooks/repowise.yml
+  - playbooks/services/repowise.yml
+  - collections/ansible_collections/lv3/platform/roles/repowise_runtime/**
+  - scripts/repowise_corpus.py
+  - scripts/repowise_index.py
+  - scripts/repowise_service.py
+  - platform/ansible/execution_scopes.py
+  - tests/test_repowise_playbook.py
+  - tests/test_ansible_execution_scopes.py
+  - receipts/live-applies/2026-04-12-adr-0346-repowise-*.json
+  - receipts/live-applies/evidence/2026-04-12-ws-0346-*
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws0346_registry_source
+      paths:
+      - workstreams/active/ws-0346-live-apply.yaml
+      mode: exclusive
+    - id: ws0346_docs
+      paths:
+      - docs/workstreams/ws-0346-live-apply.md
+      - docs/runbooks/configure-repowise.md
+      - docs/adr/0346-repowise-semantic-search.md
+      - docs/adr/implementation-status/adr-0346.yaml
+      mode: exclusive
+    - id: ws0346_repowise_runtime
+      paths:
+      - playbooks/repowise.yml
+      - playbooks/services/repowise.yml
+      - collections/ansible_collections/lv3/platform/roles/repowise_runtime/**
+      - scripts/repowise_corpus.py
+      - scripts/repowise_index.py
+      - scripts/repowise_service.py
+      - config/service-capability-catalog.json
+      - config/ansible-execution-scopes.yaml
+      mode: exclusive
+    - id: ws0346_worktree_live_apply_support
+      paths:
+      - platform/ansible/execution_scopes.py
+      - tests/test_ansible_execution_scopes.py
+      - tests/test_repowise_playbook.py
+      mode: exclusive
+    - id: ws0346_live_apply_receipts
+      paths:
+      - receipts/live-applies/2026-04-12-adr-0346-repowise-*.json
+      - receipts/live-applies/evidence/2026-04-12-ws-0346-*
+      mode: exclusive
+  blockers: []
+  ready_to_merge: true
+  live_applied: true
+  canonical_truth:
+    changelog_entry: closes the ADR 0346 live-apply gap by recording a governed Repowise
+      semantic search replay and evidence from the latest origin/main
+    release_bump: patch
+    included_in_repo_version: 0.178.126
+    latest_receipts:
+      repowise: 2026-04-12-adr-0346-repowise-live-apply
+  description: 'Close the remaining ADR 0346 live-apply gap from a fresh worktree
+    on top of
+
+    the latest origin/main. This workstream verifies the governed repowise
+
+    service replay, records branch-local evidence, and fixes any repo automation
+
+    regressions that prevent a clean worktree-based live apply.
+
+    '
+  plane_issue_id: 2c89147c-b2f9-42ac-b03e-748fd976d8a4
 - id: ws-0377-repo-intake-subdomain
   adr: '0224'
   title: Repo Intake as First-Class Subdomain

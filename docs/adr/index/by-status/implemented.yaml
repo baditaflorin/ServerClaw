@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 344
+total_adrs: 345
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6036,6 +6036,27 @@ adrs:
     path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
     implemented_in_platform_version: 0.178.4
     implemented_on: '2026-04-05'
+  - adr: '0346'
+    title: '— Repowise: local semantic code search over the git repo'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: documentation
+    keywords:
+      - repowise
+      - local
+      - semantic
+      - code
+      - search
+      - over
+      - git
+      - repo
+    summary: 'Deploy repowise — a local semantic code search service — using:'
+    filename: 0346-repowise-semantic-search.md
+    path: docs/adr/0346-repowise-semantic-search.md
+    implemented_in_repo_version: 0.178.125
+    implemented_in_platform_version: 0.178.77
+    implemented_on: '2026-04-12'
   - adr: '0360'
     title: OpenBao TLS Cert Lifetime And Renewal Hardening
     status: Accepted

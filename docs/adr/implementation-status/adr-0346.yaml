@@ -1,7 +1,7 @@
 adr_number: '0346'
 title: "\u2014 Repowise: local semantic code search over the git repo"
-canonical_status: Proposed
-canonical_implementation_status: Proposed
+canonical_status: Accepted
+canonical_implementation_status: Implemented
 detected_markers:
 - marker_type: git-commit
   adr_number: '0346'

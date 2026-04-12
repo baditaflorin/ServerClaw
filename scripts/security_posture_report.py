@@ -399,6 +399,11 @@ def post_glitchtip_events(events: list[dict[str, Any]], webhook_url: str) -> Non
         )
 
 
+def is_valid_webhook_url(value: str) -> bool:
+    parsed = urllib.parse.urlparse(value)
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0102 security posture workflow and write a receipt.")
     parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
@@ -476,12 +481,18 @@ def main(argv: list[str] | None = None) -> int:
         mattermost_url = args.mattermost_webhook_url or maybe_read_secret_path(
             context["secret_manifest"], "mattermost_platform_findings_webhook_url"
         )
+        if mattermost_url and not is_valid_webhook_url(mattermost_url):
+            print("WARN: skipping mattermost webhook notification due to invalid URL", file=sys.stderr)
+            mattermost_url = ""
         if mattermost_url:
             post_mattermost_summary(report, mattermost_url)
 
         glitchtip_url = args.glitchtip_event_url or maybe_read_secret_path(
             context["secret_manifest"], "glitchtip_platform_findings_event_url"
         )
+        if glitchtip_url and not is_valid_webhook_url(glitchtip_url):
+            print("WARN: skipping glitchtip event notification due to invalid URL", file=sys.stderr)
+            glitchtip_url = ""
         if glitchtip_url:
             post_glitchtip_events(events, glitchtip_url)
 

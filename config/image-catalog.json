@@ -1123,11 +1123,18 @@
       "container_name": "litellm",
       "registry_ref": "ghcr.io/berriai/litellm-database",
       "tag": "main-v1.26.9",
-      "digest": "sha256:placeholder-scan-before-deploy",
-      "ref": "ghcr.io/berriai/litellm-database:main-v1.26.9",
+      "digest": "sha256:cbeba3f1b93ba518f1ee3d687ca14bf00dc4ebbd78a827e6cdc4bf1251104fe6",
+      "ref": "ghcr.io/berriai/litellm-database:main-v1.26.9@sha256:cbeba3f1b93ba518f1ee3d687ca14bf00dc4ebbd78a827e6cdc4bf1251104fe6",
       "platform": "linux/amd64",
       "pinned_on": "2026-04-07",
-      "scan_status": "pending",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-04-12-litellm-runtime.json",
+      "exception": {
+        "reason": "Digest pin for the initial LiteLLM runtime rollout while the vulnerability scan exception remains open.",
+        "owner": "Platform operations",
+        "approved_on": "2026-04-12",
+        "review_by": "2026-04-19"
+      },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py"
@@ -1143,11 +1150,18 @@
       "container_name": "librechat",
       "registry_ref": "ghcr.io/danny-avila/librechat",
       "tag": "v0.8.4",
-      "digest": "sha256:placeholder-scan-before-deploy",
-      "ref": "ghcr.io/danny-avila/librechat:v0.8.4",
+      "digest": "sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
+      "ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:7154811ae271c8096e08b12b8d64090f68c2b9f0ec448aec47b6191ed2fd7b28",
       "platform": "linux/amd64",
       "pinned_on": "2026-04-08",
-      "scan_status": "pending",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-04-12-librechat-runtime.json",
+      "exception": {
+        "reason": "Digest pin for the initial LibreChat runtime rollout while the vulnerability scan exception remains open.",
+        "owner": "Platform operations",
+        "approved_on": "2026-04-12",
+        "review_by": "2026-04-19"
+      },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py"

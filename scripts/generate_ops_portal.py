@@ -15,10 +15,9 @@ from functools import lru_cache
 import os
 from pathlib import Path
 from typing import Any
+from script_bootstrap import ensure_repo_root_on_path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+REPO_ROOT = ensure_repo_root_on_path(__file__)
 
 loaded_platform = sys.modules.get("platform")
 if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
@@ -29,13 +28,6 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
-
-from script_bootstrap import ensure_repo_root_on_path
-
-REPO_ROOT = ensure_repo_root_on_path(__file__)
-
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
-
 from adr_catalog import resolve_service_adr_path
 from dependency_graph import dependency_summary, load_dependency_graph
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
@@ -1078,10 +1070,10 @@ def render_portal(
     environment_catalog = load_environment_topology()
     service_catalog = load_service_catalog()
     subdomain_catalog = load_subdomain_catalog()
+    host_vars = load_host_vars()
     public_edge_defaults = load_public_edge_defaults()
     agent_registry, _workflow_catalog = load_agent_registry_best_effort()
     stack = load_yaml(STACK_PATH)
-    host_vars = load_host_vars()
 
     validate_environment_topology(environment_catalog, host_vars)
     validate_service_catalog(service_catalog)

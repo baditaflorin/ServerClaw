@@ -22,6 +22,8 @@ from script_bootstrap import ensure_repo_root_on_path
 ensure_repo_root_on_path(__file__)
 
 from validation_toolkit import require_mapping, require_str, require_string_list
+
+require_string = require_str
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from mutation_audit import build_event, emit_event
 from platform.operator_access import (
@@ -56,6 +58,8 @@ ISO8601_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 OPERATOR_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 KEYCLOAK_USERNAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 SSH_PUBKEY_PREFIXES = {"ssh-ed25519", "ssh-rsa", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521"}
+PLACEHOLDER_PUBLIC_KEY_TOKEN = "REPLACE_WITH_YOUR_PUBLIC_KEY"
+PLACEHOLDER_FINGERPRINT_TOKEN = "REPLACE_WITH_YOUR_FINGERPRINT"
 
 
 @dataclass(frozen=True)
@@ -312,7 +316,11 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
             require_string(public_key_payload.get("public_key"), f"{key_path}.public_key")
         )
         fingerprint = require_string(public_key_payload.get("fingerprint"), f"{key_path}.fingerprint")
-        if fingerprint != ssh_public_key_fingerprint(public_key):
+        if (
+            PLACEHOLDER_PUBLIC_KEY_TOKEN not in public_key
+            and PLACEHOLDER_FINGERPRINT_TOKEN not in fingerprint
+            and fingerprint != ssh_public_key_fingerprint(public_key)
+        ):
             raise OperatorManagerError(f"{key_path}.fingerprint does not match the declared public key.")
         public_keys.append(
             {
