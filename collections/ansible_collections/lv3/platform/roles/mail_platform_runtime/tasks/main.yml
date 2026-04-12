@@ -503,6 +503,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: mail_platform_compose
 
 - name: Pull the Stalwart image

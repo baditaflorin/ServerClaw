@@ -1265,6 +1265,7 @@
   vars:
     mutation_audit_action: render.windmill_compose
     mutation_audit_target: windmill-runtime
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ windmill_compose_file }}"
