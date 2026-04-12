@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-12T07:53:29Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "codex/ws-0364-live-apply",
+  "commit": "84832a3e74b7f3a51681467e1f9b2eed89f13800",
+  "waiver": {
+    "reason_code": "runner_image_pull_failure",
+    "reason_summary": "The gate runner images or their registry path could not be pulled even though the surrounding gate contract was otherwise healthy.",
+    "detail": "Remote pre-push gate hung; registry.example.com DNS failures and local Docker fallback timeouts on 2026-04-12. Using substitute evidence from live-apply validation.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "receipts/live-applies/evidence/2026-04-12-ws-0364-remote-validate.txt",
+      "receipts/live-applies/evidence/2026-04-12-ws-0364-check-build-server.txt"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-14",
+    "remediation_ref": "ws-0364-live-apply"
+  }
+}
