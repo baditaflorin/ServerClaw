@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0374](../adr/0374-cross-cutting-service-manifest.md)
 - Title: repair and live-apply the ADR 0374 cross-cutting manifest on the latest `origin/main`
-- Status: in_progress
+- Status: ready_for_merge
 - Branch: `codex/ws-0374-live-apply`
 - Worktree: `.worktrees/ws-0374-live-apply`
 - Owner: codex
@@ -29,3 +29,4 @@
 
 - `config/generated/` and `inventory/group_vars/platform_hairpin.yml` remain ignored by design under ADR 0407, so this workstream records live-apply evidence and generated-platform integration rather than forcing those artifacts into Git.
 - The generated validators still surface pre-existing catalog drift warnings for services outside the current ADR 0374 registry coverage. Those warnings are kept visible in the evidence rather than hidden.
+- Live apply is still blocked until image scan receipts and real digests are recorded for `librechat_runtime` and `litellm_runtime` (the image catalog currently uses placeholder digests, so the vulnerability budget gate fails on production runs).

@@ -1,7 +1,7 @@
 id: ws-0374-live-apply
 adr: '0374'
 title: Live apply ADR 0374 cross-cutting service manifest from the latest origin/main
-status: in_progress
+status: ready_for_merge
 owner: codex
 branch: codex/ws-0374-live-apply
 worktree_path: .worktrees/ws-0374-live-apply
@@ -81,7 +81,7 @@ ownership_manifest:
     - versions/stack.yaml
     mode: shared_contract
     contract: mainline-release-integration-v1
-ready_to_merge: false
+ready_to_merge: true
 live_applied: false
 notes: |
   Live-apply workstream for ADR 0374 on the latest origin/main. Scope is to
@@ -89,3 +89,8 @@ notes: |
   platform.yml, switch runtime hairpin consumers to the shared manifest, replay
   the affected production services, and capture exact-main verification
   evidence without touching protected release files on the branch.
+blockers:
+  - Vulnerability budget gate still fails for production runs because
+    config/image-catalog.json uses placeholder digests and lacks scan receipts
+    for librechat_runtime and litellm_runtime. Live apply remains blocked until
+    real digests and receipts are recorded.
