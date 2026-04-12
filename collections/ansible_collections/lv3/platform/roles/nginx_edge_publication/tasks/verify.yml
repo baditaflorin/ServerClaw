@@ -4,6 +4,7 @@
   register: public_edge_verify_service
   changed_when: false
   failed_when: public_edge_verify_service.stdout | trim != "active"
+  when: ansible_service_mgr == 'systemd'
 
 - name: Verify the HTTP edge entrypoint responds for the probe hostname
   ansible.builtin.uri:
@@ -19,6 +20,7 @@
     follow_redirects: none
   register: public_edge_verify_http
   changed_when: false
+  when: ansible_service_mgr == 'systemd'
 
 - name: Verify the HTTPS edge entrypoint responds for the probe hostname
   ansible.builtin.uri:

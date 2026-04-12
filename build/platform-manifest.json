@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.116",
+  "repo_version": "0.178.118",
   "platform_version": "0.178.77",
-  "generated_at": "2026-04-11T20:37:22Z",
-  "next_refresh_at": "2026-04-11T21:37:22Z",
+  "generated_at": "2026-04-11T23:26:01Z",
+  "next_refresh_at": "2026-04-12T00:26:01Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.115",
+    "last_version": "0.178.117",
     "deployed_at": "2026-04-11",
-    "summary": "[adr-0410] IoC inventory generation + self-generating README \u2014 `inventory/hosts.yml` now fully generated from `proxmox_guests` in `proxmox-host.yml` (VMID%100 formula, 30 unit+integration tests); ~30 hardcoded IPs in proxmox-host.yml replaced with selectattr lookups; `README.md` generated from `docs/templates/README.md.j2` with live counts (roles, ADRs, runbooks, scripts) + Makefile `## ` annotations auto-populating the Make Targets table; `make generate-inventory` and `make generate-readme` added fix: Correct postmortem RAM claims \u2014 5 MB/container reflects idle SSH only, not converged services; ADR 0410 estimates (4\u201332 GB) remain valid projections; measurement meaningless without service deployment",
-    "release_notes_url": "docs/release-notes/0.178.116.md"
+    "summary": "[docker-dev] Fix all Docker convergence blockers \u2014 public-edge (58 tasks, 0 failures) and docker-runtime (65 tasks, 0 failures) now converge cleanly; guards added for: systemd not available (ansible_service_mgr != systemd), /etc/hosts bind-mount locked, nftables config present but nft binary absent, modprobe unavailable, certbot skipped with placeholder domain, static portal rsync skipped; common/docker_bridge_chains uses dual-task pattern to avoid register-overwrite on non-systemd hosts [adr-0368] Macro library adoption complete \u2014 16 service docker-compose templates now import from shared roles/common/templates/compose_macros.j2; stale role-local copies deleted from keycloak, netbox, plane, semaphore; generate_platform_vars.py fresh-worktree import fix; live-apply blocked by network (documented in ws-0368 handoff)",
+    "release_notes_url": "docs/release-notes/0.178.118.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

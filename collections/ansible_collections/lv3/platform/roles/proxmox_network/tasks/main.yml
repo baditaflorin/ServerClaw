@@ -17,6 +17,30 @@
       - proxmox_internal_network | length > 0
     fail_msg: "proxmox_network requires management and internal bridge topology inputs."
 
+# SAFETY GUARD: Writing a placeholder IP to /etc/network/interfaces causes total host
+# lockout on the next reboot or ifreload — the host gets the wrong IP and all traffic
+# to the real IP is dropped at the network level. This guard aborts convergence before
+# any file is written. Root cause incident: 2026-04-12, 6+ hours of downtime.
+#
+# Real values must come from .local/identity.yml via -e @.local/identity.yml.
+# The committed codebase uses RFC 5737 (203.0.113.x) and RFC 3849 (2001:db8::/32)
+# placeholder addresses; the identity overlay replaces them at runtime.
+- name: SAFETY GUARD — Reject RFC 5737 / placeholder management IP before writing host network config
+  ansible.builtin.assert:
+    that:
+      - not (management_ipv4 | regex_search('^203\.0\.113\.'))
+      - not (management_ipv4 | regex_search('^192\.0\.2\.'))
+      - not (management_ipv4 | regex_search('^198\.51\.100\.'))
+      - not (management_gateway4 | regex_search('^203\.0\.113\.'))
+      - not (management_ipv4 | regex_search('^2001:db8:'))
+    fail_msg: >-
+      SAFETY GUARD TRIGGERED: management_ipv4={{ management_ipv4 }} or
+      management_gateway4={{ management_gateway4 }} is an RFC 5737/3849 documentation
+      placeholder. Writing this to /etc/network/interfaces causes TOTAL HOST LOCKOUT
+      on the next reboot (wrong IP — server unreachable). Aborting convergence.
+      Fix: ensure .local/identity.yml is injected via -e @.local/identity.yml.
+      See incident postmortem 2026-04-12 (6h outage on 65.108.75.123).
+
 - name: Validate optional staging bridge inputs
   ansible.builtin.assert:
     that:

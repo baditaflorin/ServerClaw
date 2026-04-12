@@ -2,7 +2,9 @@
 listen_addresses = '{{ postgres_vm_listen_addresses | join(",") }}'
 max_connections = {{ postgres_vm_max_connections }}
 superuser_reserved_connections = {{ postgres_vm_superuser_reserved_connections }}
+{% if postgres_vm_cluster_major_version | default('16') | int >= 16 %}
 reserved_connections = {{ postgres_vm_reserved_connections }}
+{% endif %}
 shared_preload_libraries = '{{ postgres_vm_shared_preload_libraries | join(",") }}'
 password_encryption = 'scram-sha-256'
 log_line_prefix = '{{ postgres_vm_log_line_prefix }}'

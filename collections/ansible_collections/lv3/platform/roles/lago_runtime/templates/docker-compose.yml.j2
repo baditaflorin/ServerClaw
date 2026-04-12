@@ -1,23 +1,12 @@
+{% from 'compose_macros.j2' import redis_service %}
 services:
-  redis:
-    image: {{ lago_redis_image }}
-    container_name: {{ lago_redis_container_name }}
-    restart: unless-stopped
-    command:
-      - redis-server
-      - --appendonly
-      - "yes"
-      - --requirepass
-      - {{ lago_redis_password }}
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - redis-cli -a "{{ lago_redis_password }}" ping | grep PONG
-      interval: 10s
-      timeout: 5s
-      retries: 12
-    volumes:
-      - {{ lago_redis_data_dir }}:/data
+{{ redis_service(
+  "lago",
+  data_dir_key="redis_data_dir",
+  healthcheck_interval=10,
+  healthcheck_retries=12,
+  healthcheck_grep="PONG"
+) }}
 
   migrate:
     image: {{ lago_api_image }}

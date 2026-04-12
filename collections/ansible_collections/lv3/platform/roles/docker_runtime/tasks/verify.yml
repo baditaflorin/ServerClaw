@@ -18,7 +18,7 @@
 #   - ADR 0023: Docker runtime VM baseline.
 #   - ADR 0270: Docker publication self-healing and port-programming assertions.
 #   - Role: lv3.platform.docker_runtime - owns the managed Docker runtime state.
-- name: Verify Docker service is active
+- name: Verify Docker service is active (systemd hosts only)
   ansible.builtin.command: systemctl is-active docker
   register: docker_runtime_service_status
   retries: 12
@@ -28,6 +28,7 @@
   failed_when: >-
     docker_runtime_service_status.rc not in [0, 3]
     or docker_runtime_service_status.stdout | trim not in ["active", "activating"]
+  when: ansible_service_mgr == 'systemd'
 
 - name: Verify Docker Engine responds on the local control socket
   ansible.builtin.command:
@@ -39,6 +40,7 @@
   register: docker_runtime_info
   changed_when: false
   failed_when: docker_runtime_info.stdout | trim == ""
+  when: ansible_service_mgr == 'systemd'
 
 - name: Verify the Docker publication assurance helper is installed
   ansible.builtin.command:

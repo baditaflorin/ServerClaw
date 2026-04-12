@@ -14,15 +14,15 @@ adr_number_range:
   last: '0410'
   next_available: '0411'
 implementation_status_summary:
-  Implemented: 343
+  Implemented: 344
   Partial: 3
   Not Implemented: 33
   Deprecated: 5
   Accepted: 25
-  Proposed: 34
+  Proposed: 33
 decision_status_summary:
-  Accepted: 340
-  Proposed: 40
+  Accepted: 341
+  Proposed: 39
   Deprecated: 14
   Implemented: 49
 facets:
@@ -88,7 +88,7 @@ facets:
       count: 27
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 146
+      count: 145
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -106,12 +106,12 @@ facets:
       count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 38
+      count: 39
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 343
+      count: 344
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -131,7 +131,7 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 34
+      count: 33
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
@@ -141,7 +141,7 @@ reservation_ledger:
 latest_adrs:
   - adr: '0410'
     title: — Docker Isolation Testing and IoC Completion
-    implementation_status: Partially Implemented
+    implementation_status: Proposed
     concern: testing
     path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md
   - adr: 0409

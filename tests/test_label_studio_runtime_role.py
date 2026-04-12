@@ -190,7 +190,11 @@ def test_label_studio_templates_bind_private_port_and_render_expected_env_contra
     openbao_env_template = OPENBAO_ENV_TEMPLATE_PATH.read_text(encoding="utf-8")
     project_template = PROJECT_TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    assert "image: {{ label_studio_openbao_agent_image }}" in compose_template
+    assert "{% from 'compose_macros.j2' import openbao_sidecar %}" in compose_template
+    assert (
+        'openbao_sidecar("label_studio", cap_add=["IPC_LOCK"], security_opt=["no-new-privileges:true"])'
+        in compose_template
+    )
     assert "container_name: {{ label_studio_container_name }}" in compose_template
     assert '"{{ ansible_host }}:{{ label_studio_internal_port }}:{{ label_studio_container_port }}"' in compose_template
     assert '"127.0.0.1:{{ label_studio_internal_port }}:{{ label_studio_container_port }}"' in compose_template

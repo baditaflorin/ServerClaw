@@ -290,11 +290,12 @@ def test_flagsmith_templates_bind_private_port_and_render_public_domain() -> Non
     env_template = ENV_TEMPLATE_PATH.read_text(encoding="utf-8")
     openbao_env_template = OPENBAO_ENV_TEMPLATE_PATH.read_text(encoding="utf-8")
 
+    assert "{% from 'compose_macros.j2' import openbao_sidecar %}" in compose_template
+    assert (
+        'openbao_sidecar("flagsmith", cap_add=["IPC_LOCK"], security_opt=["no-new-privileges:true"])'
+        in compose_template
+    )
     assert "container_name: {{ flagsmith_container_name }}" in compose_template
-    assert 'user: "0:0"' in compose_template
-    assert 'BAO_SKIP_DROP_ROOT: "true"' in compose_template
-    assert "- test -s {{ flagsmith_env_file }}" in compose_template
-    assert "{{ flagsmith_env_file | dirname }}:{{ flagsmith_env_file | dirname }}" in compose_template
     assert '"{{ ansible_host }}:{{ flagsmith_internal_port }}:8000"' in compose_template
     assert '"127.0.0.1:{{ flagsmith_internal_port }}:8000"' in compose_template
     assert "openbao-agent:\n        condition: service_healthy" in compose_template

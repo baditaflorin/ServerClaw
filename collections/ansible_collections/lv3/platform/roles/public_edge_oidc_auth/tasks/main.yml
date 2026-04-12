@@ -149,7 +149,9 @@
     enabled: true
     state: restarted
     daemon_reload: true
-  when: public_edge_oidc_auth_binary_install is changed or public_edge_oidc_auth_config.changed or public_edge_oidc_auth_unit.changed
+  when:
+    - ansible_service_mgr == 'systemd'
+    - public_edge_oidc_auth_binary_install is changed or public_edge_oidc_auth_config.changed or public_edge_oidc_auth_unit.changed
 
 - name: Ensure the public edge OIDC auth proxy is enabled and started
   ansible.builtin.include_role:
@@ -221,3 +223,4 @@
     status_code: 401
   register: public_edge_oidc_auth_verify
   changed_when: false
+  when: ansible_service_mgr == 'systemd'

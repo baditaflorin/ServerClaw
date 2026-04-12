@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-11'
 facet: concern
 concern: platform
-total_adrs: 146
+total_adrs: 145
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2339,22 +2339,6 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
-  - adr: 0368
-    title: Docker Compose Jinja2 Macro Library
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - docker
-      - compose
-      - jinja2
-      - macro
-      - library
-    summary: 'Create a shared Jinja2 macro library at collections/ansiblecollections/lv3/platform/roles/common/templates/composemacros.j2.
-      Each compose template imports from '
-    filename: 0368-docker-compose-jinja2-macro-library.md
-    path: docs/adr/0368-docker-compose-jinja2-macro-library.md
   - adr: '0370'
     title: Service Lifecycle Task Includes
     status: Proposed

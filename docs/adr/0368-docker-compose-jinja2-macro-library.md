@@ -1,10 +1,14 @@
 # ADR 0368: Docker Compose Jinja2 Macro Library
 
-- **Date**: 2026-04-06
-- **Status**: Proposed
-- **Deciders**: platform team
-- **Concern**: platform, dry
-- **Tags**: docker, jinja2, templates, dry, macros
+- Date: 2026-04-06
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.116
+- Implemented In Platform Version: not yet applied
+- Implemented On: 2026-04-11
+- Deciders: platform team
+- Concern: platform, dry
+- Tags: docker, jinja2, templates, dry, macros
 
 ## Context
 
@@ -235,7 +239,10 @@ networks:
 
 #### Macro 6: `hairpin_hosts()`
 
-Emits `extra_hosts` entries from a centrally managed variable `platform_hairpin_nat_hosts` (defined in `inventory/group_vars/platform.yml`). This eliminates manual per-service maintenance.
+Emits `extra_hosts` entries from the centrally managed `platform_hairpin_nat_hosts`
+list. The live implementation now sources that list from the generated
+`inventory/group_vars/platform_hairpin.yml` artifact introduced by ADR 0374.
+This eliminates manual per-service maintenance.
 
 **Signature:**
 ```jinja2
@@ -250,7 +257,7 @@ Emits `extra_hosts` entries from a centrally managed variable `platform_hairpin_
 {% endfor %}
 ```
 
-**Requires** a new variable in `inventory/group_vars/platform.yml`:
+**Consumes** the generated `inventory/group_vars/platform_hairpin.yml` file:
 ```yaml
 platform_hairpin_nat_hosts:
   - hostname: agents.example.com
@@ -306,7 +313,7 @@ Then, in the role's `tasks/main.yml`, when calling `ansible.builtin.template`, t
 ### Migration strategy
 
 1. **Create the macro file** with all 6 macros.
-2. **Add `platform_hairpin_nat_hosts`** to `inventory/group_vars/platform.yml` by consolidating all `extra_hosts` entries currently scattered across compose templates.
+2. **Generate `platform_hairpin_nat_hosts`** into `inventory/group_vars/platform_hairpin.yml` by consolidating all `extra_hosts` entries currently scattered across compose templates.
 3. **Migrate one role** (start with `directus_runtime` as the reference implementation) — replace boilerplate with macro calls, verify the rendered output is byte-identical (except for logging standardisation).
 4. **Migrate remaining roles** in batches of 5-10, verifying rendered output each time.
 5. **Run `make validate-yaml`** after each batch to catch rendering errors.
@@ -326,6 +333,49 @@ ansible -m template -a "src=collections/ansible_collections/lv3/platform/roles/<
 make validate-yaml
 ```
 
+## Closure Update (2026-04-11)
+
+ADR 0368 is now implemented in repository terms. The original macro library
+landed earlier, but ws-0368 completed the remaining cleanup needed to treat the
+ADR as closed:
+
+- the shared `openbao_sidecar()` macro now supports the service-specific variants
+  still used by Flagsmith, Gitea, Keycloak, Label Studio, LibreChat, LiteLLM,
+  Mail Platform, MinIO, NetBox, Redpanda, Semaphore, and Windmill
+- the shared `redis_service()` macro now covers the remaining simple Redis/Valkey
+  consumers in Dify, GlitchTip, Lago, Langfuse, Outline, and Paperless
+- stale role-local `compose_macros.j2` shadow copies were removed from
+  `keycloak_runtime`, `netbox_runtime`, `plane_runtime`, and `semaphore_runtime`
+- fresh-worktree generation of `inventory/group_vars/platform.yml` was repaired
+  by teaching `scripts/generate_platform_vars.py` to avoid the stdlib `platform`
+  module import collision
+
+The hairpin part of the ADR also converged with later architecture work: the
+macro still consumes `platform_hairpin_nat_hosts`, but ADR 0374 now generates
+that list into `inventory/group_vars/platform_hairpin.yml` rather than keeping
+it in `inventory/group_vars/platform.yml`.
+
+Branch-local verification on 2026-04-11 confirmed:
+
+- `uvx --from pyyaml python scripts/generate_platform_vars.py --check` passes
+- `uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --check --only hairpin` passes with 10 derived entries
+- focused pytest coverage for the migrated Flagsmith, Gitea, Label Studio, and
+  MinIO templates passes
+- a broader role/defaults pytest replay surfaced baseline drift in unrelated
+  assertions, and a detached clean `origin/main` control run reproduced a
+  representative subset of those failures unchanged
+- the workstream ownership registry validates after refreshing the shard-backed
+  `workstreams.yaml`
+- `make remote-validate` still cannot complete from this controller because the
+  check lanes try to pull runner images from `registry.example.com`, which is
+  not reachable here
+
+The remaining gap is platform application, not repository state. The 2026-04-11
+live-apply replay was blocked by controller connectivity: SSH to the Proxmox
+Tailscale endpoint (`100.64.0.1`), the affected guests, and the remote build
+server all timed out from this controller, so no truthful `Implemented In
+Platform Version` can be recorded yet.
+
 ## Consequences
 
 **Positive:**
@@ -343,7 +393,7 @@ make validate-yaml
 ## Implementation plan
 
 1. Create `collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2` with all 6 macros
-2. Add `platform_hairpin_nat_hosts` to `inventory/group_vars/platform.yml`
+2. Generate `platform_hairpin_nat_hosts` into `inventory/group_vars/platform_hairpin.yml`
 3. Migrate `directus_runtime` as reference implementation — verify byte-identical output
 4. Migrate the 35 OpenBao sidecar users (highest duplication)
 5. Migrate the 12 Redis service users

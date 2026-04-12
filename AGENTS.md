@@ -67,6 +67,41 @@ values live in `.local/` (gitignored), not in committed code.
 - At runtime, `platform_domain` resolves to the real domain from `.local/identity.yml`
 - Fork operators only edit `.local/identity.yml` — everything else derives from it
 
+### ⚠️ CRITICAL: platform.yml must contain real IPs in the private repo
+
+`inventory/group_vars/platform.yml` is a **generated** file produced by
+`scripts/generate_platform_vars.py`. It contains deeply-nested derived
+structures (e.g. `platform_host.management.ipv4`, DNS targets, monitoring
+scrape targets) that are **not flat Ansible variables** — Ansible extra-vars
+cannot override nested dict keys, so the `-e @.local/identity.yml` injection
+that works for flat vars does NOT fix baked-in nested values.
+
+The generator loads `.local/identity.yml` as the highest-priority overlay so
+that the generated `platform.yml` always contains real deployment IPs and
+domains. The publish pipeline then sanitises those real values for the public
+ServerClaw mirror.
+
+**Rules for every agent and human operator:**
+
+| Situation | Required action |
+|-----------|-----------------|
+| After any change to `.local/identity.yml` | `make generate-platform-vars` + commit |
+| After any change to `inventory/host_vars/proxmox-host.yml` | `make generate-platform-vars` + commit |
+| You see `203.0.113.1` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator; `.local/identity.yml` was not applied |
+| You see `example.com` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator |
+| Publishing to ServerClaw | Publish pipeline sanitises real values automatically |
+
+**Never** assume that `203.0.113.1` or `example.com` appearing in
+`platform.yml` is correct. Those are sanitisation placeholders — they must
+not appear in the private repo's generated output. If `.local/identity.yml`
+is missing, the generator falls back to committed placeholders; treat that
+state as broken.
+
+> **Incident reference**: This gap caused `headscale.lv3.org` to have a DNS
+> A record pointing to `203.0.113.1` (a non-routable documentation IP), which
+> broke Tailscale VPN for the entire deployment. The fix was to make the
+> generator apply `.local/identity.yml` as a high-priority override.
+
 ### When writing new code
 
 **In roles/templates** — Always use template variables:

@@ -2,35 +2,132 @@
 {# Import in compose templates with: #}
 {# {% from 'compose_macros.j2' import openbao_sidecar, redis_service, healthcheck, logging, service_network, hairpin_hosts %} #}
 
-{% macro openbao_sidecar(prefix) %}
-  openbao-agent:
-    image: {{ vars[prefix + '_openbao_agent_image'] }}
-    container_name: {{ vars[prefix + '_openbao_agent_container_name'] }}
-    user: "0:0"
+{% macro openbao_sidecar(
+  prefix,
+  service_name='openbao-agent',
+  image_key='openbao_agent_image',
+  container_name_key='openbao_agent_container_name',
+  env_file_key='env_file',
+  agent_dir_key='openbao_agent_dir',
+  user='0:0',
+  network_mode='host',
+  restart='unless-stopped',
+  agent_dir_mount_target='/openbao-agent',
+  agent_dir_mount_mode='ro',
+  env_dir_mount_target=None,
+  env_dir_mount_mode='',
+  config_path='/openbao-agent/agent.hcl',
+  entrypoint=None,
+  command=None,
+  healthcheck_command=None,
+  healthcheck_interval=10,
+  healthcheck_timeout=3,
+  healthcheck_retries=12,
+  cap_add=None,
+  security_opt=None,
+  extra_environment=None,
+  extra_hosts=None
+) %}
+{%- set image = lookup('vars', prefix ~ '_' ~ image_key) -%}
+{%- set container_name = lookup('vars', prefix ~ '_' ~ container_name_key) -%}
+{%- set env_file = lookup('vars', prefix ~ '_' ~ env_file_key) -%}
+{%- set agent_dir = lookup('vars', prefix ~ '_' ~ agent_dir_key) -%}
+{%- set env_dir = env_file | dirname -%}
+{%- set env_dir_mount_target = env_dir_mount_target or env_dir -%}
+{%- set command = command or ['agent', '-config=' ~ config_path] -%}
+{%- set healthcheck_command = healthcheck_command or ('test -s ' ~ env_file) -%}
+  {{ service_name }}:
+    image: {{ image }}
+    container_name: {{ container_name }}
+    user: "{{ user }}"
     environment:
       BAO_SKIP_DROP_ROOT: "true"
+{% if extra_environment %}
+{% for key, value in extra_environment.items() %}
+      {{ key }}: {{ value | to_json }}
+{% endfor %}
+{% endif %}
+{% if entrypoint %}
+    entrypoint:
+{% for part in entrypoint %}
+      - {{ part | to_json }}
+{% endfor %}
+{% endif %}
     command:
-      - agent
-      - -config=/openbao-agent/agent.hcl
-    network_mode: host
-    restart: unless-stopped
+{% for part in command %}
+      - {{ part | to_json }}
+{% endfor %}
+{% if network_mode %}
+    network_mode: {{ network_mode }}
+{% endif %}
+    restart: {{ restart }}
+{% if extra_hosts %}
+    extra_hosts:
+{% for host in extra_hosts %}
+      - "{{ host }}"
+{% endfor %}
+{% endif %}
     healthcheck:
       test:
         - CMD-SHELL
-        - test -s {{ vars[prefix + '_env_file'] }}
-      interval: 10s
-      timeout: 3s
-      retries: 12
+        - {{ healthcheck_command | to_json }}
+      interval: {{ healthcheck_interval }}s
+      timeout: {{ healthcheck_timeout }}s
+      retries: {{ healthcheck_retries }}
+{% if cap_add %}
+    cap_add:
+{% for capability in cap_add %}
+      - {{ capability }}
+{% endfor %}
+{% endif %}
+{% if security_opt %}
+    security_opt:
+{% for option in security_opt %}
+      - {{ option }}
+{% endfor %}
+{% endif %}
     volumes:
-      - {{ vars[prefix + '_openbao_agent_dir'] }}:/openbao-agent:ro
-      - {{ vars[prefix + '_env_file'] | dirname }}:{{ vars[prefix + '_env_file'] | dirname }}
+      - {{ agent_dir }}:{{ agent_dir_mount_target }}{% if agent_dir_mount_mode %}:{{ agent_dir_mount_mode }}{% endif %}
+      - {{ env_dir }}:{{ env_dir_mount_target }}{% if env_dir_mount_mode %}:{{ env_dir_mount_mode }}{% endif %}
 {% endmacro %}
 
-{% macro redis_service(prefix, requirepass=true, use_valkey=false, append_only=true) %}
-  redis:
-    image: {{ vars[prefix + '_redis_image'] }}
-    container_name: {{ vars[prefix + '_redis_container_name'] }}
-    restart: unless-stopped
+{% macro redis_service(
+  prefix,
+  service_name='redis',
+  image_key='redis_image',
+  container_name_key='redis_container_name',
+  password_key='redis_password',
+  data_dir_key='redis_dir',
+  user=None,
+  requirepass=true,
+  use_valkey=false,
+  append_only=true,
+  restart='unless-stopped',
+  env_file_key=None,
+  extra_command_args=None,
+  healthcheck_command=None,
+  healthcheck_interval=5,
+  healthcheck_timeout=5,
+  healthcheck_retries=10,
+  healthcheck_grep='-q PONG',
+  include_logging=false
+) %}
+{%- set redis_image = lookup('vars', prefix ~ '_' ~ image_key) -%}
+{%- set redis_container_name = lookup('vars', prefix ~ '_' ~ container_name_key) -%}
+{%- set redis_password = lookup('vars', prefix ~ '_' ~ password_key) if requirepass else None -%}
+{%- set redis_dir = lookup('vars', prefix ~ '_' ~ data_dir_key) if data_dir_key else None -%}
+{%- set env_file = lookup('vars', prefix ~ '_' ~ env_file_key) if env_file_key else None -%}
+  {{ service_name }}:
+    image: {{ redis_image }}
+    container_name: {{ redis_container_name }}
+{% if user %}
+    user: "{{ user }}"
+{% endif %}
+    restart: {{ restart }}
+{% if env_file %}
+    env_file:
+      - {{ env_file }}
+{% endif %}
     command:
 {% if use_valkey %}
       - valkey-server
@@ -39,26 +136,37 @@
 {% endif %}
 {% if requirepass %}
       - --requirepass
-      - {{ vars[prefix + '_redis_password'] }}
+      - {{ redis_password }}
 {% endif %}
 {% if append_only %}
       - --appendonly
       - "yes"
 {% endif %}
+{% if extra_command_args %}
+{% for part in extra_command_args %}
+      - {{ part | to_json }}
+{% endfor %}
+{% endif %}
     healthcheck:
       test:
         - CMD-SHELL
-{% if requirepass %}
-        - redis-cli -a "{{ vars[prefix + '_redis_password'] }}" ping | grep -q PONG
+{% if healthcheck_command %}
+        - {{ healthcheck_command | to_json }}
+{% elif requirepass %}
+        - {{ ('redis-cli -a "' ~ redis_password ~ '" ping | grep ' ~ healthcheck_grep) | to_json }}
 {% else %}
-        - redis-cli ping | grep -q PONG
+        - {{ ('redis-cli ping | grep ' ~ healthcheck_grep) | to_json }}
 {% endif %}
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      interval: {{ healthcheck_interval }}s
+      timeout: {{ healthcheck_timeout }}s
+      retries: {{ healthcheck_retries }}
+{% if redis_dir %}
     volumes:
-      - {{ vars[prefix + '_redis_dir'] }}:/data
+      - {{ redis_dir }}:/data
+{% endif %}
+{% if include_logging %}
 {{ logging() }}
+{% endif %}
 {% endmacro %}
 
 {% macro healthcheck(type, port, path="/", interval=10, timeout=5, retries=12, start_period=None) %}
