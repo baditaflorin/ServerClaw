@@ -9,6 +9,7 @@
 #   common_docker_compose_converge_health_url (str, optional): URL to probe before deciding on force-recreate.
 #   common_docker_compose_converge_force_recreate_service (str, optional): Service name to force-recreate (defaults to service_name).
 #   common_docker_compose_converge_force_recreate_entire_stack (bool, optional): Force-recreate the full compose stack instead of a single service.
+#   common_docker_compose_converge_force_recreate (bool, optional): Force the recreate path even when no drift was auto-detected.
 #   common_docker_compose_converge_pull_retries (int, optional): Number of pull retries. Default: 5.
 #   common_docker_compose_converge_pull_delay (int, optional): Seconds between pull retries. Default: 5.
 # Outputs: Running compose stack. Sets common_dcc_force_recreate fact with the computed force-recreate decision.
@@ -146,6 +147,7 @@
         or (common_dcc_pull.changed | default(false))
         or (common_dcc_port_probe.failed | default(false))
         or (common_dcc_health_probe.status | default(0)) != 200
+        or (common_docker_compose_converge_force_recreate | default(false) | bool)
       }}
 
 - name: "Start {{ common_docker_compose_converge_service_name }} stack"
