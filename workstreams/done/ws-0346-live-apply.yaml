@@ -1,7 +1,7 @@
 id: ws-0346-live-apply
 adr: '0346'
 title: Live apply Repowise semantic code search from the latest origin/main
-status: ready
+status: merged
 owner: codex
 branch: codex/ws-0346-live-apply
 worktree_path: .worktrees/ws-0346-live-apply
