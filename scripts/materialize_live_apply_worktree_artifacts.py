@@ -87,6 +87,11 @@ def run_command(argv: list[str], *, repo_root: Path = REPO_ROOT) -> None:
 
 
 def find_primary_worktree(repo_root: Path) -> Path:
+    if repo_root.parent.name == ".worktrees":
+        shared_root = repo_root.parent.parent
+        if shared_root != repo_root and shared_root.exists():
+            return shared_root
+
     result = subprocess.run(
         ["git", "worktree", "list", "--porcelain"],
         cwd=str(repo_root),
@@ -137,6 +142,8 @@ def materialize_artifact(artifact_id: str, *, repo_root: Path = REPO_ROOT) -> Pa
         if not source.exists():
             raise RuntimeError(f"missing source image scan receipts at {source}")
         path.mkdir(parents=True, exist_ok=True)
+        if source.resolve() == path.resolve():
+            return path
         for entry in source.iterdir():
             target = path / entry.name
             if entry.is_dir():

@@ -2323,8 +2323,8 @@ def validate_identity_taxonomy(
         raise ValueError("identity principal 'ops@pam' must be classified as a human_operator")
     if principal_classes.get("lv3-automation@pve") != "agent":
         raise ValueError("identity principal 'lv3-automation@pve' must be classified as an agent")
-    if principal_classes.get("server@localhost") != "service":
-        raise ValueError("identity principal 'server@localhost' must be classified as a service")
+    if principal_classes.get("server@example.com") != "service":
+        raise ValueError("identity principal 'server@example.com' must be classified as a service")
     if principal_classes.get("root") != "break_glass":
         raise ValueError("identity principal 'root' must be classified as break_glass")
 
@@ -2405,13 +2405,13 @@ def validate_identity_taxonomy(
         )
 
 
-def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
+def validate_versions_stack(host_vars_context: dict[str, Any]) -> list[Path]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
     repo_version = require_semver(stack.get("repo_version"), "versions/stack.yaml.repo_version")
     platform_version = require_semver(stack.get("platform_version"), "versions/stack.yaml.platform_version")
     require_semver(stack.get("schema_version"), "versions/stack.yaml.schema_version")
 
-    receipt_ids = {path.stem for path in iter_receipt_paths()}
+    receipt_paths_by_id = {path.stem: path for path in iter_receipt_paths()}
     evidence = require_mapping(stack.get("live_apply_evidence"), "versions/stack.yaml.live_apply_evidence")
     receipt_dir = require_str(evidence.get("receipt_dir"), "versions/stack.yaml.live_apply_evidence.receipt_dir")
     if receipt_dir != "receipts/live-applies":
@@ -2421,11 +2421,17 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
     latest_receipts = require_mapping(
         evidence.get("latest_receipts"), "versions/stack.yaml.live_apply_evidence.latest_receipts"
     )
+    validated_receipt_paths: list[Path] = []
+    seen_receipt_ids: set[str] = set()
     for key, value in latest_receipts.items():
         require_identifier(key, f"versions/stack.yaml.live_apply_evidence.latest_receipts.{key}")
         value = require_str(value, f"versions/stack.yaml.live_apply_evidence.latest_receipts.{key}")
-        if value not in receipt_ids:
+        receipt_path = receipt_paths_by_id.get(value)
+        if receipt_path is None:
             raise ValueError(f"versions/stack.yaml.latest_receipts references unknown receipt '{value}'")
+        if value not in seen_receipt_ids:
+            validated_receipt_paths.append(receipt_path)
+            seen_receipt_ids.add(value)
 
     desired_state = require_mapping(stack.get("desired_state"), "versions/stack.yaml.desired_state")
     if (
@@ -2849,6 +2855,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         != platform_version
     ):
         raise ValueError("versions/stack.yaml.release_tracks.platform_versioning.current must match platform_version")
+    return validated_receipt_paths
 
 
 def validate_slo_catalog_assets() -> None:
@@ -3172,13 +3179,14 @@ def validate_repository_data_models() -> int:
     validate_redundancy_catalog(load_redundancy_catalog())
     validate_guest_replacement_catalog(load_guest_replacement_catalog())
     validate_mutation_audit_schema(load_mutation_audit_schema())
-    validate_receipts()
+    host_vars_context = validate_host_vars()
+    latest_receipt_paths = validate_versions_stack(host_vars_context)
+    validate_receipts(latest_receipt_paths, label="versions/stack.yaml latest receipts")
     validate_k6_receipt_schema()
     validate_k6_receipt_data()
     validate_promotion_receipts()
     validate_stage_smoke_catalog(load_stage_smoke_catalog())
     validate_uptime_monitors()
-    host_vars_context = validate_host_vars()
     validate_certificate_catalog(host_vars_context)
     validate_health_probe_catalog(host_vars_context)
     validate_data_catalog(load_data_catalog())
@@ -3226,7 +3234,6 @@ def validate_repository_data_models() -> int:
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))
-    validate_versions_stack(host_vars_context)
     validate_platform_vars()
     validate_no_tracked_env_files()
     validate_no_scaffold_placeholders()

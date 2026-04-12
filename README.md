@@ -58,12 +58,15 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
-| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply` |
-| `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply` |
-| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply` |
-| `platform` | `2026-04-09-adr-0373-phases-5-6-100-percent-adoption-live-apply` |
-| `ollama` | `2026-04-07-ollama-0.20.2-gemma4-e4b-upgrade-live-apply` |
+| `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
+| `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
 | `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
@@ -74,10 +77,7 @@ monitored, and recoverable from a single repository.
 | `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `mailpit` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `mail_platform` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `homepage` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `harbor` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 
 Showing 20 of 175 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -117,7 +117,7 @@ See [docker-dev/README.md](docker-dev/README.md) for details.
 git clone https://github.com/baditaflorin/ServerClaw.git
 cd ServerClaw
 make init-local              # Generate SSH keys and secrets
-make generate-inventory      # Generate inventory/hosts.yml from proxmox-host.yml
+make generate-inventory      # Generate inventory/hosts.yml from platform-host.yml
 # Edit inventory/group_vars/all/identity.yml (domain, operator name/email)
 make bootstrap               # Full staged bootstrap with validation gates
 ```
@@ -134,7 +134,7 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
 - **443+ ADRs** — Every architectural decision documented and indexed
-- **269+ runbooks** — Step-by-step procedures an AI agent can follow
+- **270+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -171,7 +171,7 @@ self-hosted platform:
 | Architecture decisions | `docs/adr/` | 443+ ADRs |
 | Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 160 roles |
 | Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 61 playbooks |
-| Operational runbooks | `docs/runbooks/` | 269+ runbooks |
+| Operational runbooks | `docs/runbooks/` | 270+ runbooks |
 | Automation scripts | `scripts/` | 309+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
@@ -200,9 +200,9 @@ Everything else derives from these values via Ansible templating.
 ### Fork checklist
 
 1. Edit `inventory/group_vars/all/identity.yml` (domain, name, email)
-2. Run `make generate-inventory` — generates `inventory/hosts.yml` from `inventory/host_vars/proxmox-host.yml`
+2. Run `make generate-inventory` — generates `inventory/hosts.yml` from `inventory/host_vars/platform-host.yml`
 3. Run `make init-local` to generate secrets
-4. Choose a [provider profile](config/provider-profiles/) (Hetzner, generic Debian, homelab)
+4. Choose a [provider profile](config/provider-profiles/) (cloud, generic Debian, homelab)
 5. Run `make bootstrap` or `make docker-dev-up`
 
 See [docs/runbooks/bootstrap-from-scratch.md](docs/runbooks/bootstrap-from-scratch.md).
@@ -229,18 +229,18 @@ make docker-dev-down         # Cleanup
 ```
 Proxmox VE Host (Debian 13, bare metal)
   |
-  +-- nginx-edge        (10.10.10.10)  Reverse proxy, TLS termination
-  +-- docker-runtime    (10.10.10.20)  Primary application runtime
-  +-- docker-build      (10.10.10.30)  CI/CD build server
-  +-- monitoring        (10.10.10.40)  Grafana, Prometheus, Alertmanager
-  +-- postgres          (10.10.10.50)  Shared PostgreSQL 16
-  +-- backup            (10.10.10.60)  Proxmox Backup Server
-  +-- runtime-control   (10.10.10.92)  API gateway, agent tools
-  +-- runtime-ai        (10.10.10.90)  GPU workloads (Ollama, inference)
+  +-- nginx-edge        (10.0.0.10)  Reverse proxy, TLS termination
+  +-- docker-runtime    (10.0.0.20)  Primary application runtime
+  +-- docker-build      (10.0.0.30)  CI/CD build server
+  +-- monitoring        (10.0.0.40)  Grafana, Prometheus, Alertmanager
+  +-- postgres          (10.0.0.50)  Shared PostgreSQL 16
+  +-- backup            (10.0.0.60)  Proxmox Backup Server
+  +-- runtime-control   (10.0.0.92)  API gateway, agent tools
+  +-- runtime-ai        (10.0.0.90)  GPU workloads (Ollama, inference)
   +-- [additional VMs per topology]
 ```
 
-All guest VMs are managed declaratively. `inventory/host_vars/proxmox-host.yml`
+All guest VMs are managed declaratively. `inventory/host_vars/platform-host.yml`
 is the single source of truth for VM topology (VMID, IP, RAM, cores). Running
 `make generate-inventory` derives `inventory/hosts.yml` and all Ansible host
 variables from it — no manual IP editing.
@@ -255,7 +255,7 @@ variables from it — no manual IP editing.
 - **Derive, don't declare**: `derive_service_defaults` computes 15-25
   variables per service from a registry — roles don't repeat boilerplate.
 - **Generated inventory**: `inventory/hosts.yml` is machine-generated from
-  `proxmox_guests` in `proxmox-host.yml`. Edit the source, not the output.
+  `proxmox_guests` in `platform-host.yml`. Edit the source, not the output.
 - **ADR governance**: Every architectural decision is recorded and indexed.
   Pre-commit hooks enforce status transitions.
 - **Verification gates**: `make verify-bootstrap-proxmox`, `make verify-bootstrap-guests`,
@@ -287,7 +287,7 @@ variables from it — no manual IP editing.
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
 │   ├── adr/             # 443+ architecture decision records
-│   ├── runbooks/        # 269+ operational runbooks
+│   ├── runbooks/        # 270+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
 ├── scripts/             # 309+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
@@ -302,7 +302,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 | Target | Description |
 |--------|-------------|
 | `make init-local` | Initialize .local/ overlay with SSH keys and secrets |
-| `make generate-inventory` | Regenerate inventory/hosts.yml from proxmox_guests in host_vars/proxmox-host.yml |
+| `make generate-inventory` | Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml |
 | `make validate-generated-inventory` | Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests |
 | `make bootstrap` | Full platform bootstrap from bare Debian 13 (ADR 0386) |
 | `make bootstrap-minimal` | Bootstrap critical path only (PG + Keycloak + Nginx + OpenBao) |
@@ -363,7 +363,6 @@ Showing 25 of 301 merged or live-applied workstreams. Full history: [merged work
 | --- | --- | --- | --- |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
-| `0364` | Live apply native build server gate execution from latest origin/main | `merged` | [ws-0364-live-apply.md](docs/workstreams/ws-0364-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
@@ -386,6 +385,7 @@ Showing 25 of 301 merged or live-applied workstreams. Full history: [merged work
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
+| `0167` | Graceful degradation mode declarations | `live_applied` | [adr-0167-graceful-degradation-mode-declarations.md](docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements

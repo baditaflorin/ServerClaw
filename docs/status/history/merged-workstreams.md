@@ -10,7 +10,6 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | --- | --- | --- | --- |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
-| `0364` | Live apply native build server gate execution from latest origin/main | `merged` | [ws-0364-live-apply.md](../../workstreams/ws-0364-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
@@ -168,6 +167,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
 | `0380` | Neko remote desktop exact-main live apply and regression hardening | `merged` | [ws-0380-live-apply.md](../../workstreams/ws-0380-live-apply.md) |
+| `0025` | Live apply ADR 0025 compose-managed runtime stacks from latest origin/main | `live_applied` | [ws-0025-live-apply.md](../../workstreams/ws-0025-live-apply.md) |
 | `0319` | Guarded live apply for the remaining runtime pool transition | `live_applied` | [ws-0331-runtime-pool-live-apply.md](../../workstreams/ws-0331-runtime-pool-live-apply.md) |
 | `0330` | Close out public GitHub readiness on the latest origin/main | `live_applied` | [ws-0330-main-closeout.md](../../workstreams/ws-0330-main-closeout.md) |
 | `0314` | Live apply resumable multi-step flows and return-to-task reentry from latest origin/main | `live_applied` | [ws-0314-live-apply.md](../../workstreams/ws-0314-live-apply.md) |

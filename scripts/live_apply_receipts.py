@@ -15,6 +15,8 @@ from controller_automation_toolkit import (
     command_succeeds,
     emit_cli_error,
     load_json,
+    repo_path,
+    shared_repo_root,
 )
 from environment_catalog import receipt_environment_ids, receipt_subdirectory_environments
 from workflow_catalog import (
@@ -111,7 +113,7 @@ def validate_source_commit(commit: str, path: Path) -> None:
 
 
 def evidence_ref_exists(ref: str, *, source_commit: str) -> bool:
-    if (REPO_ROOT / ref).exists():
+    if resolve_receipt_path(ref).exists():
         return True
     if not git_commit_lookup_available():
         return False
@@ -123,21 +125,38 @@ def evidence_ref_exists(ref: str, *, source_commit: str) -> bool:
 
 
 def iter_receipt_paths(receipts_dir: Path = RECEIPTS_DIR) -> list[Path]:
-    if not receipts_dir.exists():
-        return []
+    candidate_roots: list[Path] = []
+    for candidate in (receipts_dir, shared_repo_root(REPO_ROOT) / "receipts" / "live-applies"):
+        if candidate in candidate_roots or not candidate.exists():
+            continue
+        candidate_roots.append(candidate)
+
     receipt_paths: list[Path] = []
-    for path in sorted(receipts_dir.rglob("*.json")):
-        if not path.is_file():
-            continue
-        relative = path.relative_to(receipts_dir)
-        if "evidence" in relative.parts:
-            continue
-        receipt_paths.append(path)
+    seen_receipt_ids: set[str] = set()
+    for root in candidate_roots:
+        for path in sorted(root.rglob("*.json")):
+            if not path.is_file():
+                continue
+            relative = path.relative_to(root)
+            if "evidence" in relative.parts:
+                continue
+            if path.stem in seen_receipt_ids:
+                continue
+            seen_receipt_ids.add(path.stem)
+            receipt_paths.append(path)
     return receipt_paths
 
 
 def receipt_environment_for_path(path: Path) -> str:
-    relative = path.relative_to(RECEIPTS_DIR)
+    receipt_root = RECEIPTS_DIR
+    for candidate in (RECEIPTS_DIR, shared_repo_root(REPO_ROOT) / "receipts" / "live-applies"):
+        try:
+            path.relative_to(candidate)
+            receipt_root = candidate
+            break
+        except ValueError:
+            continue
+    relative = path.relative_to(receipt_root)
     return (
         relative.parts[0]
         if relative.parts and relative.parts[0] in receipt_subdirectory_environments()
@@ -146,13 +165,25 @@ def receipt_environment_for_path(path: Path) -> str:
 
 
 def receipt_relative_path(path: Path) -> Path:
-    return path.relative_to(REPO_ROOT)
+    for base in (REPO_ROOT, shared_repo_root(REPO_ROOT)):
+        try:
+            return path.relative_to(base)
+        except ValueError:
+            continue
+    return path
 
 
 def resolve_receipt_path(receipt_ref: str) -> Path:
     candidate = Path(receipt_ref)
     if not candidate.is_absolute():
-        candidate = REPO_ROOT / candidate
+        local_candidate = REPO_ROOT / candidate
+        if local_candidate.exists():
+            return local_candidate
+        if candidate.parts and candidate.parts[0] == "receipts":
+            shared_candidate = shared_repo_root(REPO_ROOT) / candidate
+            if shared_candidate.exists():
+                return shared_candidate
+        candidate = repo_path(*candidate.parts)
     return candidate
 
 
@@ -270,7 +301,7 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
             if report_ref is not None:
                 if not isinstance(report_ref, str) or not report_ref.strip():
                     raise ValueError(f"{path.name}: smoke_suites report_ref must be a non-empty string when present")
-                if not (REPO_ROOT / report_ref).exists():
+                if not resolve_receipt_path(report_ref).exists():
                     raise ValueError(f"{path.name}: smoke_suites report ref '{report_ref}' does not exist")
 
     evidence_refs = receipt.get("evidence_refs")
@@ -305,13 +336,14 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
                 )
 
 
-def validate_receipts() -> int:
+def validate_receipts(receipt_paths: list[Path] | None = None, *, label: str | None = None) -> int:
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
 
-    receipt_paths = iter_receipt_paths()
+    if receipt_paths is None:
+        receipt_paths = iter_receipt_paths()
     if not receipt_paths:
         raise ValueError(f"no receipt files found in {RECEIPTS_DIR}")
 
@@ -324,7 +356,7 @@ def validate_receipts() -> int:
             raise ValueError(f"duplicate receipt_id '{receipt_id}'")
         seen_ids.add(receipt_id)
 
-    print(f"Live apply receipts OK: {RECEIPTS_DIR}")
+    print(f"Live apply receipts OK: {label or str(RECEIPTS_DIR)}")
     return 0
 
 

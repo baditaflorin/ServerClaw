@@ -25,7 +25,6 @@ GITHUB_REPO_BASE_URL: Final[str] = os.environ.get(
 PACKAGED_SIBLING_DIRS: Final[set[str]] = {"config"}
 MAKEFILE_PATH: Final[Path] = REPO_ROOT / "Makefile"
 README_PATH: Final[Path] = REPO_ROOT / "README.md"
-RECEIPTS_DIR: Final[Path] = REPO_ROOT / "receipts" / "live-applies"
 MAKE_TARGET_PATTERN: Final[re.Pattern[str]] = re.compile(r"^([A-Za-z0-9_-]+):")
 WINDOWS_ABSOLUTE_PATH_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[A-Za-z]:/")
 PYYAML_INSTALL_HINT: Final[str] = (
@@ -62,6 +61,15 @@ def local_overlay_root(repo_root: Path | None = None) -> Path:
     return shared_repo_root(repo_root) / ".local"
 
 
+def receipts_root(repo_root: Path | None = None) -> Path:
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    shared_root = shared_repo_root(root)
+    shared_receipts = shared_root / "receipts"
+    if shared_root != root and _path_exists(shared_receipts):
+        return shared_receipts
+    return root / "receipts"
+
+
 def resolve_local_overlay_path(path_value: str | Path, *, repo_root: Path | None = None) -> Path:
     root = Path(repo_root) if repo_root is not None else REPO_ROOT
     path = Path(path_value).expanduser()
@@ -85,11 +93,14 @@ def repo_path(*parts: str) -> Path:
     if not parts:
         return REPO_ROOT
 
+    head = parts[0]
+    if head == "receipts":
+        return receipts_root(REPO_ROOT).joinpath(*parts[1:])
+
     candidate = REPO_ROOT.joinpath(*parts)
     if _path_exists(candidate):
         return candidate
 
-    head = parts[0]
     if head in PACKAGED_SIBLING_DIRS:
         sibling_root = REPO_ROOT.parent / head
         if _path_exists(sibling_root):
@@ -99,6 +110,9 @@ def repo_path(*parts: str) -> Path:
         return local_overlay_root(REPO_ROOT).joinpath(*parts[1:])
 
     return candidate
+
+
+RECEIPTS_DIR: Final[Path] = REPO_ROOT / "receipts" / "live-applies"
 
 
 def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_ROOT) -> Path:

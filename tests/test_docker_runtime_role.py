@@ -1194,7 +1194,7 @@ def test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs(
 
 
 def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
-    tasks = load_flat_tasks()
+    tasks = load_all_tasks()
     pin_hosts = next(
         task for task in tasks if task["name"] == "Pin public edge hostnames to the internal edge for Docker guests"
     )

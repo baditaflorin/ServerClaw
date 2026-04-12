@@ -8,12 +8,15 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
-| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply` |
-| `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply` |
-| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-centralization-live-apply` |
-| `platform` | `2026-04-09-adr-0373-phases-5-6-100-percent-adoption-live-apply` |
-| `ollama` | `2026-04-07-ollama-0.20.2-gemma4-e4b-upgrade-live-apply` |
+| `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
+| `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
+| `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
 | `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
@@ -24,14 +27,11 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `mailpit` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `mail_platform` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `homepage` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `harbor` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `gitea` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `docker_runtime` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `api_gateway` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `woodpecker` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `runbook_task_reentry` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
 | `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |

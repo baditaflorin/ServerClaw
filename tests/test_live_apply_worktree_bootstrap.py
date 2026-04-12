@@ -93,6 +93,19 @@ def test_materialize_uptime_kuma_monitors_invokes_generator(
     assert captured == [["make", "generate-uptime-kuma-monitors"]]
 
 
+def test_materialize_image_scan_receipts_prefers_shared_root_for_worktrees(tmp_path: Path) -> None:
+    shared_root = tmp_path / "repo"
+    repo_root = shared_root / ".worktrees" / "ws-0380"
+    source_dir = shared_root / "receipts" / "image-scans"
+    source_dir.mkdir(parents=True, exist_ok=True)
+    (source_dir / "2026-03-30-example.trivy.json").write_text('{"ok": true}\n', encoding="utf-8")
+
+    target = materializer.materialize_artifact("image_scan_receipts", repo_root=repo_root)
+
+    assert target == repo_root / "receipts" / "image-scans"
+    assert (target / "2026-03-30-example.trivy.json").read_text(encoding="utf-8") == '{"ok": true}\n'
+
+
 def test_live_apply_workflow_catalog_references_generated_artifact_manifest() -> None:
     workflow_catalog = json.loads((REPO_ROOT / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))
 
