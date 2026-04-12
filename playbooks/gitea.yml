@@ -71,7 +71,9 @@
     - automation
     - service-gitea
   vars:
+    keycloak_secret_dir: /etc/lv3/keycloak
     keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
+    proxmox_guests: "{{ hostvars[platform_topology_host].proxmox_guests }}"
 
   pre_tasks:
     - name: Run shared preflight checks
