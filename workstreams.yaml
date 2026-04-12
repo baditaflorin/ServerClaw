@@ -120,6 +120,7 @@ workstreams:
   - docs/release-notes/index/README.md
   - docs/release-notes/index/2026.md
   - inventory/host_vars/proxmox-host.yml
+  - inventory/group_vars/platform_tls_certs.yml
   - playbooks/tasks/security-scan.yml
   - playbooks/repowise.yml
   - collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml
@@ -139,6 +140,7 @@ workstreams:
   - receipts/image-scans/2026-04-12-ntfy-runtime.trivy.json
   - receipts/image-scans/2026-04-12-openbao-runtime.json
   - receipts/image-scans/2026-04-12-openbao-runtime.trivy.json
+  - receipts/ops-portal-snapshot.html
   - receipts/security-reports/20260412T120210Z.json
   - scripts/environment_topology.py
   - scripts/generate_release_notes.py
@@ -147,6 +149,7 @@ workstreams:
   - scripts/generate_status_docs.py
   - scripts/materialize_live_apply_worktree_artifacts.py
   - scripts/platform_manifest.py
+  - scripts/topology-snapshot.json
   - scripts/security_posture_report.py
   - scripts/service_catalog.py
   - scripts/subdomain_catalog.py
@@ -252,12 +255,15 @@ workstreams:
       mode: exclusive
     - id: ws_0371_generator_bootstrap
       paths:
+      - inventory/group_vars/platform_tls_certs.yml
+      - receipts/ops-portal-snapshot.html
       - scripts/environment_topology.py
       - scripts/generate_release_notes.py
       - scripts/generate_diagrams.py
       - scripts/generate_ops_portal.py
       - scripts/generate_status_docs.py
       - scripts/platform_manifest.py
+      - scripts/topology-snapshot.json
       - scripts/service_catalog.py
       - scripts/subdomain_catalog.py
       - scripts/validate_portal_auth.py

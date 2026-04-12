@@ -2,6 +2,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+import subprocess
 from unittest.mock import patch
 
 
@@ -14,6 +15,45 @@ import validation_toolkit  # noqa: E402
 
 
 class ValidationToolkitTests(unittest.TestCase):
+    def test_load_identity_vars_prefers_repo_platform_package_when_stdlib_platform_is_preloaded(self) -> None:
+        code = f"""
+import importlib
+import sys
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+repo_root = Path({str(REPO_ROOT)!r})
+scripts_dir = repo_root / "scripts"
+sys.path.insert(0, str(scripts_dir))
+sys.modules["platform"] = importlib.import_module("platform")
+
+import validation_toolkit
+
+temp_dir = Path(tempfile.mkdtemp(prefix="validation-toolkit-subprocess-"))
+repo = temp_dir / "repo"
+identity_path = repo / "inventory" / "group_vars" / "all" / "identity.yml"
+overlay_path = repo / ".local" / "identity.yml"
+identity_path.parent.mkdir(parents=True)
+overlay_path.parent.mkdir(parents=True)
+identity_path.write_text("platform_domain: example.com\\n", encoding="utf-8")
+overlay_path.write_text("platform_domain: lv3.org\\n", encoding="utf-8")
+
+with patch.object(validation_toolkit, "_find_identity_path", return_value=identity_path):
+    print(validation_toolkit.load_identity_vars()["platform_domain"])
+"""
+
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "lv3.org")
+
     def test_load_yaml_with_identity_uses_shared_local_overlay_values(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="validation-toolkit-"))
         repo_root = temp_dir / "repo"
