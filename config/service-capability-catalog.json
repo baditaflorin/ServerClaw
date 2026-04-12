@@ -1062,8 +1062,8 @@
       "vm": "coolify",
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
-      "public_url": "https://librechat.example.com",
-      "subdomain": "librechat.example.com",
+      "public_url": "https://chat.example.com",
+      "subdomain": "chat.example.com",
       "exposure": "edge-published",
       "health_probe_id": "librechat",
       "image_catalog_ids": [],
@@ -1083,8 +1083,8 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://librechat.example.com",
-          "subdomain": "librechat.example.com"
+          "url": "https://chat.example.com",
+          "subdomain": "chat.example.com"
         }
       }
     },
@@ -2781,7 +2781,7 @@
     {
       "id": "serverclaw",
       "name": "ServerClaw",
-      "description": "Public chat-first ServerClaw assistant surface backed by repo-governed local model and search integrations.",
+      "description": "Public chat-first ServerClaw assistant experience delivered through the LibreChat surface and backed by repo-governed local model and search integrations.",
       "category": "access",
       "lifecycle_status": "active",
       "vm": "coolify",
@@ -2814,7 +2814,7 @@
         "production": {
           "status": "active",
           "url": "https://chat.example.com",
-          "notes": "ServerClaw uses in-app Keycloak OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
+          "notes": "ServerClaw is presented to operators through the LibreChat runtime on chat.example.com while retaining repo-managed bootstrap access and in-app Keycloak OIDC."
         }
       }
     },

@@ -48,6 +48,8 @@
       mode: "0755"
     - path: "{{ litellm_secret_dir }}"
       mode: "0700"
+    - path: "{{ litellm_env_file | dirname }}"
+      mode: "0700"
 
 - name: Generate the LiteLLM master key
   ansible.builtin.shell: |
@@ -167,6 +169,7 @@
     owner: root
     group: root
     mode: "0600"
+  register: litellm_config_template
 
 - name: Render the LiteLLM environment file
   ansible.builtin.template:
@@ -175,6 +178,7 @@
     owner: root
     group: root
     mode: "0600"
+  register: litellm_env_template
   no_log: true
 
 - name: Render the LiteLLM compose file
@@ -186,6 +190,7 @@
     mode: "0644"
   vars:
     ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
+  register: litellm_compose_template
 
 - name: Pull the LiteLLM image
   ansible.builtin.command:
@@ -202,6 +207,92 @@
     'Pulling' in litellm_pull.stdout
     or 'Downloaded newer image' in litellm_pull.stdout
     or 'Pull complete' in litellm_pull.stdout
+
+- name: Check whether the Docker nat chain exists before LiteLLM startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: litellm_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before LiteLLM startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: litellm_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before LiteLLM startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: litellm_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: litellm_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: litellm_docker_nat_chain_recheck.rc == 0
+  when: litellm_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: litellm_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: litellm_docker_info.rc == 0
+  when: litellm_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before LiteLLM startup
+  ansible.builtin.assert:
+    that:
+      - litellm_docker_nat_chain.rc == 0 or (litellm_docker_nat_chain_recheck.rc | default(1)) == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; LiteLLM published ports will fail."
+
+- name: Check whether the LiteLLM local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ litellm_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: litellm_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current LiteLLM liveliness endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ litellm_internal_port }}{{ litellm_healthcheck_path }}"
+    method: GET
+    status_code: 200
+  register: litellm_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the LiteLLM startup needs a force recreate
+  ansible.builtin.set_fact:
+    litellm_force_recreate: >-
+      {{
+        litellm_docker_nat_chain.rc != 0
+        or (litellm_config_template.changed | default(false))
+        or (litellm_env_template.changed | default(false))
+        or (litellm_compose_template.changed | default(false))
+        or (litellm_pull.changed | default(false))
+        or (litellm_local_port_probe.failed | default(false))
+        or (litellm_health_probe.status | default(0)) != 200
+      }}
 
 - name: Start the LiteLLM stack
   ansible.builtin.command:
@@ -220,6 +311,110 @@
     'Creating' in litellm_up.stdout
     or 'Recreating' in litellm_up.stdout
     or 'Starting' in litellm_up.stdout
+  when: not litellm_force_recreate
+
+- name: Force-recreate the LiteLLM stack and recover Docker bridge-chain failures
+  when: litellm_force_recreate
+  block:
+    - name: Force-recreate the LiteLLM stack after Docker networking recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ litellm_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ litellm_site_dir }}"
+      register: litellm_force_up
+      changed_when: >-
+        'Creating' in litellm_force_up.stdout
+        or 'Recreating' in litellm_force_up.stdout
+        or 'Starting' in litellm_force_up.stdout
+      failed_when: litellm_force_up.rc != 0
+      retries: 3
+      delay: 5
+      until: litellm_force_up.rc == 0
+  rescue:
+    - name: Detect Docker bridge-chain and stale compose-network failures during LiteLLM startup
+      ansible.builtin.set_fact:
+        litellm_runtime_docker_nat_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            or 'Unable to enable DNAT rule' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
+        litellm_runtime_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            and 'does not exist' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
+
+    - name: Surface unexpected LiteLLM startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('litellm compose up failed')) }}"
+      when:
+        - not litellm_runtime_docker_nat_chain_missing
+        - not litellm_runtime_compose_network_missing
+
+    - name: Reset stale LiteLLM compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ litellm_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ litellm_site_dir }}"
+      register: litellm_down_retry
+      changed_when: >-
+        'Stopping' in (litellm_down_retry.stdout | default(''))
+        or 'Removing' in (litellm_down_retry.stdout | default(''))
+        or 'Removing' in (litellm_down_retry.stderr | default(''))
+      failed_when: false
+      when: litellm_runtime_docker_nat_chain_missing or litellm_runtime_compose_network_missing
+
+    - name: Reset Docker failed state before nat-chain recovery retry
+      ansible.builtin.command: systemctl reset-failed docker.service
+      changed_when: false
+      when: litellm_runtime_docker_nat_chain_missing
+
+    - name: Restart Docker to restore bridge networking before retrying LiteLLM startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: litellm_runtime_docker_nat_chain_missing or litellm_runtime_compose_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying LiteLLM startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: litellm_runtime_docker_nat_chain_missing or litellm_runtime_compose_network_missing
+
+    - name: Retry LiteLLM startup after Docker nat-chain or compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ litellm_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ litellm_site_dir }}"
+      register: litellm_force_up
+      changed_when: true
+      failed_when: litellm_force_up.rc != 0
+      when: litellm_runtime_docker_nat_chain_missing or litellm_runtime_compose_network_missing
 
 - name: Verify the LiteLLM runtime
   ansible.builtin.import_tasks: verify.yml

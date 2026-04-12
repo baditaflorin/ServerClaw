@@ -17,7 +17,11 @@ def test_role_defaults_pin_private_model_storage() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
     assert defaults["ollama_runtime_model_dir"] == "{{ ollama_runtime_data_dir }}/models"
     assert defaults["ollama_runtime_compose_project_name"] == "{{ ollama_runtime_site_dir | basename }}"
-    assert defaults["ollama_runtime_default_model"] == "llama3.2:3b"
+    assert (
+        defaults["ollama_runtime_service_topology"]
+        == "{{ hostvars[platform_topology_host].platform_service_topology }}"
+    )
+    assert defaults["ollama_runtime_default_model"] == "gemma4:e4b"
     assert defaults["ollama_runtime_image_pull_retries"] == 3
     assert defaults["ollama_runtime_image_pull_delay_seconds"] == 15
 

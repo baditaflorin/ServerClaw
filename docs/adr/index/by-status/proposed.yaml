@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 33
+total_adrs: 32
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -132,21 +132,6 @@ adrs:
       Runtime roles include them with includerole / in
     filename: 0370-service-lifecycle-task-includes.md
     path: docs/adr/0370-service-lifecycle-task-includes.md
-  - adr: '0371'
-    title: Parameterized Service Verification Tasks
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - parameterized
-      - service
-      - verification
-      - tasks
-    summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
-      parameters.
-    filename: 0371-parameterized-verify-tasks.md
-    path: docs/adr/0371-parameterized-verify-tasks.md
   - adr: '0372'
     title: Data-Driven Playbook Composition
     status: Proposed

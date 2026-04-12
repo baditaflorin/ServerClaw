@@ -78,6 +78,8 @@ def test_role_syncs_script_bootstrap_into_platform_context_build_context() -> No
     service_sources = defaults["platform_context_service_sources"]
     script_bootstrap = next(source for source in service_sources if source["dest"] == "script_bootstrap.py")
     assert script_bootstrap["src"] == "{{ platform_context_repo_root }}/scripts/script_bootstrap.py"
+    validation_toolkit = next(source for source in service_sources if source["dest"] == "scripts/validation_toolkit.py")
+    assert validation_toolkit["src"] == "{{ platform_context_repo_root }}/scripts/validation_toolkit.py"
 
 
 def test_env_template_exposes_serverclaw_memory_settings() -> None:

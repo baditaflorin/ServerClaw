@@ -153,6 +153,8 @@ platform_context_service_sources:
     dest: scripts/dependency_graph.py
   - src: "{{ platform_context_repo_root }}/scripts/slo_tracking.py"
     dest: scripts/slo_tracking.py
+  - src: "{{ platform_context_repo_root }}/scripts/validation_toolkit.py"
+    dest: scripts/validation_toolkit.py
   - src: "{{ platform_context_repo_root }}/scripts/controller_automation_toolkit.py"
     dest: scripts/controller_automation_toolkit.py
   - src: "{{ platform_context_repo_root }}/requirements/platform-context-api.txt"

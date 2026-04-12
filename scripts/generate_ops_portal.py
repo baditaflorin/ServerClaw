@@ -539,8 +539,11 @@ def _run_reconciliation_validate() -> dict[str, Any] | None:
 
 def render_reconciliation_panel() -> str:
     """Render the portal reconciliation status panel (ADR 0399 Phase 4)."""
-    # Try live validation first
-    validation = _run_reconciliation_validate()
+    # Keep generated-portal checks deterministic; opt into the live CLI probe
+    # only when an operator explicitly asks for it.
+    validation = None
+    if os.environ.get("OPS_PORTAL_ENABLE_RECONCILIATION_VALIDATE", "").lower() in {"1", "true", "yes"}:
+        validation = _run_reconciliation_validate()
 
     # Fall back to receipt if validation unavailable
     receipt_path, receipt = _latest_reconciliation_receipt()

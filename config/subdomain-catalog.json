@@ -284,30 +284,13 @@
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
       "target_port": 443,
-      "owner_adr": "0254",
+      "owner_adr": "0394",
       "tls": {
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       },
-      "notes": "LibreChat is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
-    },
-    {
-      "fqdn": "librechat.example.com",
-      "service_id": "librechat",
-      "environment": "production",
-      "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "203.0.113.1",
-      "target_port": 443,
-      "owner_adr": "0380",
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
-      },
-      "notes": "LibreChat is published through the shared NGINX edge and uses Keycloak SSO inside the application."
+      "notes": "LibreChat is published through the shared NGINX edge and carries the interactive ServerClaw chat surface plus its in-app Keycloak OIDC flow."
     },
     {
       "fqdn": "ci.example.com",

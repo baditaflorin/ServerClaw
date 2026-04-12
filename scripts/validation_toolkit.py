@@ -11,6 +11,8 @@ Usage:
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
 
@@ -132,9 +134,17 @@ _IDENTITY_PATH: str | None = None
 
 def _find_identity_path() -> Path:
     """Locate inventory/group_vars/all/identity.yml relative to this script."""
-    from pathlib import Path
-
     return Path(__file__).resolve().parents[1] / "inventory" / "group_vars" / "all" / "identity.yml"
+
+
+def _load_scalar_identity_mapping(path: Path) -> dict[str, str]:
+    import yaml
+
+    if not path.exists():
+        return {}
+    with path.open() as f:
+        data = yaml.safe_load(f) or {}
+    return {k: v for k, v in data.items() if isinstance(v, str) and "{{" not in v}
 
 
 def load_identity_vars() -> dict[str, str]:
@@ -144,14 +154,39 @@ def load_identity_vars() -> dict[str, str]:
     suitable for resolving ``{{ var }}`` placeholders in other YAML files.
     """
 
-    import yaml
-
     path = _find_identity_path()
-    if not path.exists():
-        return {}
-    with path.open() as f:
-        data = yaml.safe_load(f) or {}
-    return {k: v for k, v in data.items() if isinstance(v, str) and "{{" not in v}
+    identity_vars = _load_scalar_identity_mapping(path)
+
+    if os.environ.get("LV3_DISABLE_SHARED_LOCAL_IDENTITY", "").lower() in {"1", "true", "yes"}:
+        return identity_vars
+
+    # Worktrees intentionally do not have their own .local/ directory. Load the
+    # shared overlay from the main repo root when available so validation and
+    # generator scripts see the real deployment domain/IP facts.
+    from platform.repo import local_overlay_root
+
+    overlay_path = local_overlay_root(path.parents[3]) / "identity.yml"
+    identity_vars.update(_load_scalar_identity_mapping(overlay_path))
+    return identity_vars
+
+
+def resolve_public_domain_placeholders(value: Any) -> Any:
+    """Recursively replace committed ``example.com`` placeholders with the live platform domain."""
+
+    platform_domain = load_identity_vars().get("platform_domain", "example.com")
+    if platform_domain == "example.com":
+        return value
+
+    def _resolve(current: Any) -> Any:
+        if isinstance(current, str):
+            return current.replace("example.com", platform_domain)
+        if isinstance(current, list):
+            return [_resolve(item) for item in current]
+        if isinstance(current, dict):
+            return {key: _resolve(item) for key, item in current.items()}
+        return current
+
+    return _resolve(value)
 
 
 def resolve_jinja2_vars(text: str, variables: dict[str, str] | None = None) -> str:

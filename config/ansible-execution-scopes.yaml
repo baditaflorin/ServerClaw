@@ -464,6 +464,13 @@ playbooks:
     shared_surfaces:
       - service:librechat
       - inventory/host_vars/proxmox-host.yml
+  playbooks/repowise.yml:
+    playbook_id: repowise
+    canonical_service_id: repowise
+    mutation_scope: host
+    shared_surfaces:
+      - service:repowise
+      - inventory/host_vars/proxmox-host.yml
   playbooks/glitchtip.yml:
     playbook_id: glitchtip
     mutation_scope: platform

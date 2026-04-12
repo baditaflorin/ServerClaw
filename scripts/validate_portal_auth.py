@@ -7,6 +7,7 @@ from typing import Any
 
 import subdomain_catalog
 from controller_automation_toolkit import emit_cli_error
+from validation_toolkit import load_identity_vars
 
 
 ALLOWED_AUTH_REQUIREMENTS = {
@@ -16,12 +17,16 @@ ALLOWED_AUTH_REQUIREMENTS = {
     "upstream_auth",
 }
 EDGE_OIDC_REQUIREMENTS = {"edge_oidc"}
-PORTAL_REQUIREMENTS = {
-    "changelog.localhost": "edge_oidc",
-    "docs.localhost": "edge_oidc",
-    "grafana.localhost": "upstream_auth",
-    "ops.localhost": "edge_oidc",
-}
+
+
+def portal_requirements() -> dict[str, str]:
+    domain = load_identity_vars().get("platform_domain", "example.com")
+    return {
+        f"changelog.{domain}": "edge_oidc",
+        f"docs.{domain}": "edge_oidc",
+        f"grafana.{domain}": "upstream_auth",
+        f"ops.{domain}": "edge_oidc",
+    }
 
 
 def require_auth_requirement(entry: dict[str, Any], path: str) -> str:
@@ -56,7 +61,7 @@ def validate_portal_auth(
 
         entries_by_fqdn[fqdn] = entry
 
-    for fqdn, expected in PORTAL_REQUIREMENTS.items():
+    for fqdn, expected in portal_requirements().items():
         entry = entries_by_fqdn.get(fqdn)
         if entry is None:
             raise ValueError(f"required portal hostname '{fqdn}' is missing from config/subdomain-catalog.json")

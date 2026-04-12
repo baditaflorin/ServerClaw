@@ -1,7 +1,7 @@
 id: ws-0371-live-apply
 adr: '0371'
 title: Re-verify parameterized service verification tasks from the latest origin/main
-status: blocked
+status: ready
 owner: codex
 branch: codex/ws-0371-live-apply
 worktree_path: .worktrees/ws-0371-live-apply
@@ -12,15 +12,60 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml
+- collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
+- collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/ollama_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml
 - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml
 - collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml
+- collections/ansible_collections/lv3/platform/roles/repowise_runtime/templates/docker-compose.yml.j2
+- config/ansible-execution-scopes.yaml
+- config/health-probe-catalog.json
+- config/service-capability-catalog.json
+- config/subdomain-catalog.json
+- docs/adr/.index.yaml
+- docs/adr/index/**
 - docs/adr/0371-parameterized-verify-tasks.md
 - docs/workstreams/ws-0371-live-apply.md
 - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+- inventory/host_vars/proxmox-host.yml
+- playbooks/repowise.yml
+- playbooks/services/librechat.yml
+- playbooks/services/litellm.yml
+- playbooks/services/repowise.yml
+- playbooks/templates/compose_macros.j2
+- platform/ansible/execution_scopes.py
+- receipts/live-applies/*adr-0371*
+- receipts/live-applies/evidence/*ws-0371*
+- scripts/environment_topology.py
+- scripts/generate_diagrams.py
+- scripts/generate_ops_portal.py
+- scripts/generate_status_docs.py
+- scripts/platform_manifest.py
+- scripts/service_catalog.py
+- scripts/subdomain_catalog.py
+- scripts/validate_portal_auth.py
+- scripts/validation_toolkit.py
+- tests/test_ansible_execution_scopes.py
+- tests/test_common_docker_bridge_chains_helper.py
+- tests/test_litellm_runtime_role.py
+- tests/test_ollama_runtime_role.py
+- tests/test_ops_portal.py
+- tests/test_rag_context_runtime_role.py
+- tests/test_repowise_playbook.py
+- tests/test_service_compose_macro_resolution.py
+- tests/test_service_live_apply_wrappers.py
+- tests/test_subdomain_catalog.py
+- tests/test_validate_portal_auth.py
+- tests/test_validation_toolkit.py
 - workstreams/active/ws-0371-live-apply.yaml
+- workstreams/active/ws-0377-repo-intake-subdomain.yaml
 - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
@@ -33,24 +78,81 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml
     - collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml
     mode: exclusive
+  - id: ws_0371_runtime_followups
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+    - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
+    - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/ollama_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/repowise_runtime/templates/docker-compose.yml.j2
+    - inventory/host_vars/proxmox-host.yml
+    - playbooks/repowise.yml
+    - playbooks/templates/compose_macros.j2
+    mode: exclusive
+  - id: ws_0371_service_wrappers
+    paths:
+    - config/ansible-execution-scopes.yaml
+    - config/health-probe-catalog.json
+    - config/service-capability-catalog.json
+    - config/subdomain-catalog.json
+    - playbooks/services/librechat.yml
+    - playbooks/services/litellm.yml
+    - playbooks/services/repowise.yml
+    - platform/ansible/execution_scopes.py
+    - receipts/live-applies/*adr-0371*
+    - receipts/live-applies/evidence/*ws-0371*
+    - tests/test_ansible_execution_scopes.py
+    - tests/test_service_live_apply_wrappers.py
+    mode: exclusive
+  - id: ws_0371_generator_bootstrap
+    paths:
+    - scripts/environment_topology.py
+    - scripts/generate_diagrams.py
+    - scripts/generate_ops_portal.py
+    - scripts/generate_status_docs.py
+    - scripts/platform_manifest.py
+    - scripts/service_catalog.py
+    - scripts/subdomain_catalog.py
+    - scripts/validate_portal_auth.py
+    - scripts/validation_toolkit.py
+    mode: exclusive
   - id: ws_0371_docs
     paths:
+    - docs/adr/.index.yaml
+    - docs/adr/index/**
     - docs/adr/0371-parameterized-verify-tasks.md
     - docs/workstreams/ws-0371-live-apply.md
     - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+    mode: shared_contract
+    contract: adr-index-v1
+  - id: ws_0371_tests
+    paths:
+    - tests/test_ansible_execution_scopes.py
+    - tests/test_common_docker_bridge_chains_helper.py
+    - tests/test_litellm_runtime_role.py
+    - tests/test_ollama_runtime_role.py
+    - tests/test_ops_portal.py
+    - tests/test_rag_context_runtime_role.py
+    - tests/test_repowise_playbook.py
+    - tests/test_service_compose_macro_resolution.py
+    - tests/test_service_live_apply_wrappers.py
+    - tests/test_subdomain_catalog.py
+    - tests/test_validate_portal_auth.py
+    - tests/test_validation_toolkit.py
     mode: exclusive
   - id: ws_0371_workstream_registry
     paths:
     - workstreams/active/ws-0371-live-apply.yaml
+    - workstreams/active/ws-0377-repo-intake-subdomain.yaml
     - workstreams.yaml
     mode: shared_contract
     contract: workstream-registry-v1
-blockers:
-- "Governed make live-apply-service service=librechat env=production is still blocked by unrelated repo automation drift: make generate-ops-portal fails because agents.example.com requires edge_oidc without a repo-managed NGINX route."
-- "make check-canonical-truth is blocked by malformed active workstream metadata in ws-0377-repo-intake-subdomain (adr: '' in workstreams.yaml)."
-- "Scoped litellm replay changed proxmox_network, ran ifreload on proxmox-host, and the host remained unreachable on 100.64.0.1 after repeated SSH probes through 2026-04-11T21:32:06Z."
-ready_to_merge: false
-live_applied: false
+blockers: []
+ready_to_merge: true
+live_applied: true
 description: 'Finish ADR 0371 from the latest origin/main by closing the remaining
 
   verification-task migrations, validating the shared verifier contract, and

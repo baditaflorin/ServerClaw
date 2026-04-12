@@ -13,6 +13,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 
 from validation_toolkit import (
     load_yaml_with_identity,
+    resolve_public_domain_placeholders,
     require_bool,
     require_list,
     require_mapping,
@@ -138,7 +139,7 @@ def expected_dns_records_for_entry(entry: dict[str, Any], path: str) -> list[dic
 
 
 def load_subdomain_catalog() -> dict[str, Any]:
-    return load_json(SUBDOMAIN_CATALOG_PATH)
+    return resolve_public_domain_placeholders(load_json(SUBDOMAIN_CATALOG_PATH))
 
 
 def load_host_vars() -> dict[str, Any]:

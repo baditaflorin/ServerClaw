@@ -1,7 +1,9 @@
 import copy
+import os
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -15,6 +17,9 @@ import subdomain_catalog  # noqa: E402
 
 class SubdomainCatalogTests(unittest.TestCase):
     def setUp(self) -> None:
+        self._disable_overlay = patch.dict(os.environ, {"LV3_DISABLE_SHARED_LOCAL_IDENTITY": "1"})
+        self._disable_overlay.start()
+        self.addCleanup(self._disable_overlay.stop)
         self.catalog = subdomain_catalog.load_subdomain_catalog()
         self.service_catalog = service_catalog.load_service_catalog()
         self.host_vars = subdomain_catalog.load_host_vars()
@@ -55,6 +60,10 @@ class SubdomainCatalogTests(unittest.TestCase):
         self.assertEqual(
             subdomain_catalog.get_subdomain_entry(self.catalog, "flags.example.com")["service_id"],
             "flagsmith",
+        )
+        self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "chat.example.com")["service_id"],
+            "librechat",
         )
         self.assertEqual(
             subdomain_catalog.get_subdomain_entry(self.catalog, "annotate.example.com")["auth_requirement"],

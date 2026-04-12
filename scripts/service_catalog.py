@@ -11,6 +11,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
+from validation_toolkit import resolve_public_domain_placeholders
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_catalog import configured_environment_ids
@@ -223,7 +224,7 @@ def require_degradation_modes(value: Any, path: str) -> list[dict[str, Any]]:
 
 
 def load_service_catalog() -> dict[str, Any]:
-    return load_json(SERVICE_CATALOG_PATH)
+    return resolve_public_domain_placeholders(load_json(SERVICE_CATALOG_PATH))
 
 
 def health_probe_service_ids() -> set[str]:

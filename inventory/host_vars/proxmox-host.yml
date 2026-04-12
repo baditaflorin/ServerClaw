@@ -790,6 +790,7 @@ network_policy:
           ports:
             - 3005
             - 5000
+            - 7070
             - 8008
             - 8010
             - 8018
@@ -1012,6 +1013,11 @@ network_policy:
         - source: nginx
           protocol: tcp
           ports:
+            - 7070
+          description: Reverse proxy access to the Repowise semantic search surface
+        - source: nginx
+          protocol: tcp
+          ports:
             - 8084
           description: Reverse proxy access to the Nextcloud personal data plane
         - source: all_guests
@@ -1077,6 +1083,11 @@ network_policy:
           ports:
             - 7007
           description: Dozzle agent reachability from the hub host
+        - source: monitoring
+          protocol: tcp
+          ports:
+            - 7070
+          description: Private monitoring probes for the Repowise runtime
         - source: monitoring
           protocol: tcp
           ports:

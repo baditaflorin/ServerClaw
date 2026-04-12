@@ -27,7 +27,7 @@ services:
       - {{ repowise_repo_dir }}:/repo:ro
       - {{ repowise_data_dir }}:/data
     ports:
-      - "127.0.0.1:{{ repowise_port }}:{{ repowise_port }}"
+      - "{{ repowise_port }}:{{ repowise_port }}"
     networks:
       - default
       - platform-context

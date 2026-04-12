@@ -264,16 +264,28 @@
     - common_docker_bridge_chains_active_state.rc == 0
     - common_docker_bridge_chains_expect_forward_chain | default(false)
 
-- name: Capture final Docker nat chain state after retry loop
-  ansible.builtin.set_fact:
-    common_docker_bridge_chains_nat_final: "{{ common_docker_bridge_chains_nat_verify }}"
+- name: Probe final Docker nat chain state after retry loop
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: common_docker_bridge_chains_nat_final
+  changed_when: false
+  failed_when: common_docker_bridge_chains_nat_final.rc not in [0, 1]
   when:
     - common_docker_bridge_chains_require_nat_chain | bool
     - common_docker_bridge_chains_active_state.rc == 0
 
-- name: Capture final Docker forward chain state after retry loop
-  ansible.builtin.set_fact:
-    common_docker_bridge_chains_forward_final: "{{ common_docker_bridge_chains_forward_verify }}"
+- name: Probe final Docker forward chain state after retry loop
+  ansible.builtin.shell: *docker_forward_probe
+  args:
+    executable: /bin/bash
+  register: common_docker_bridge_chains_forward_final
+  changed_when: false
+  failed_when: common_docker_bridge_chains_forward_final.rc not in [0, 1]
   when:
     - common_docker_bridge_chains_active_state.rc == 0
     - common_docker_bridge_chains_expect_forward_chain | default(false)

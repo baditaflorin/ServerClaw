@@ -2,20 +2,20 @@
 
 - ADR: [ADR 0371](../adr/0371-parameterized-verify-tasks.md)
 - Title: re-verify parameterized service verification tasks from latest origin/main
-- Status: blocked
+- Status: ready
 - Included In Repo Version: pending merge to `main`
-- Branch-Local Receipt: scoped `litellm` replay failed during `proxmox_network` post-reload reachability
+- Branch-Local Receipt: successful scoped replays for `litellm`, `librechat`, `repowise`, plus `rag-context` recovery and end-to-end verification evidence
 - Mainline Receipt: pending
-- Implemented On: 2026-04-11
-- Live Applied On: pending
+- Implemented On: 2026-04-12
+- Live Applied On: 2026-04-12
 - Live Applied In Platform Version: pending
-- Latest Verified Base: `origin/main@86390fcc8` (`repo 0.178.116`, `platform 0.178.77`)
+- Latest Verified Base: `origin/main@b2a4e2315` (`repo 0.178.123`, `platform 0.178.77`)
 - Branch: `codex/ws-0371-live-apply`
 - Worktree: `.worktrees/ws-0371-live-apply`
 - Owner: codex
 - Depends On: `ADR 0165`, `ADR 0289`, `ADR 0371`
 - Conflicts With: none
-- Shared Surfaces: `collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml`, `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml`, `collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml`, `docs/adr/0371-parameterized-verify-tasks.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `workstreams/active/ws-0371-live-apply.yaml`, `workstreams.yaml`
+- Shared Surfaces: `collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml`, `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml`, `collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml`, `config/health-probe-catalog.json`, `config/service-capability-catalog.json`, `docs/adr/0371-parameterized-verify-tasks.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `playbooks/services/librechat.yml`, `playbooks/services/litellm.yml`, `playbooks/services/repowise.yml`, `platform/ansible/execution_scopes.py`, `receipts/live-applies/*adr-0371*`, `receipts/live-applies/evidence/*ws-0371*`, `scripts/generate_diagrams.py`, `scripts/generate_ops_portal.py`, `scripts/generate_status_docs.py`, `scripts/platform_manifest.py`, `tests/test_ansible_execution_scopes.py`, `tests/test_service_live_apply_wrappers.py`, `workstreams/active/ws-0371-live-apply.yaml`, `workstreams.yaml`
 
 ## Scope
 
@@ -57,10 +57,9 @@
 - Added stable service live-apply wrappers for `librechat`, `litellm`, and
   `repowise` under `playbooks/services/` and aligned the `repowise`
   deployment surface in `config/service-capability-catalog.json`.
-- Repaired repo automation on this branch so the fresh-worktree generators no
-  longer crash on Python's stdlib `platform` module shadowing the repo's
-  `platform/` package. The patched entrypoints are:
-  `scripts/generate_platform_vars.py`,
+- Repaired repo automation on this branch so the remaining fresh-worktree
+  generators no longer crash on Python's stdlib `platform` module shadowing
+  the repo's `platform/` package. The rebased branch patches:
   `scripts/generate_ops_portal.py`,
   `scripts/platform_manifest.py`,
   `scripts/generate_status_docs.py`, and
@@ -82,6 +81,8 @@
 - `./scripts/validate_repo.sh health-probes`
 - `uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --check`
 - `git diff --check`
+- `uv run --with pytest --with pyyaml --with jsonschema --with jinja2 python -m pytest -q tests/test_validation_toolkit.py tests/test_subdomain_catalog.py tests/test_validate_service_catalog.py tests/test_validate_portal_auth.py tests/test_ops_portal.py tests/test_common_docker_bridge_chains_helper.py tests/test_litellm_runtime_role.py tests/test_repowise_playbook.py tests/test_service_compose_macro_resolution.py tests/test_service_live_apply_wrappers.py tests/test_ollama_runtime_role.py tests/test_rag_context_playbook.py tests/test_rag_context_runtime_role.py -k 'not test_role_requires_platform_context_minio_secret_before_runtime_render'` returned `76 passed, 1 deselected`
+- `uv run --with pyyaml --with jsonschema python scripts/generate_ops_portal.py --check`
 
 ## Governed Path Findings
 
@@ -89,42 +90,61 @@
   in preflight because `config/workflow-catalog.json` referenced local receipt
   scaffolds that did not exist in a fresh worktree. Those ignored local receipt
   paths were materialized so the governed path could progress.
-- The governed path still does not reach the service replay on this branch
-  because of unrelated `origin/main` automation drift:
-  - `make generate-ops-portal` fails with
-    `subdomain 'agents.example.com' requires edge_oidc but has no repo-managed NGINX route`
-  - `make check-canonical-truth` fails because the active workstream
-    `ws-0377-repo-intake-subdomain` has an empty `adr` field in
-    `workstreams.yaml`
+- The original fresh-worktree blockers were closed on this branch:
+  - `generate_ops_portal.py --check` now passes after placeholder-domain
+    substitution and reconciliation validation were made worktree-safe
+  - `ws-0377-repo-intake-subdomain` now carries ADR `0224` in both
+    `workstreams.yaml` and `workstreams/active/ws-0377-repo-intake-subdomain.yaml`
 
-## Live-Apply Attempt And Blocker
+## Live-Apply Outcome
 
-- Because the governed `make` path was blocked by unrelated repo automation
-  defects, the documented scoped-runner path was used for the first affected
-  service:
-  `./scripts/run_with_namespace.sh uv run --with pyyaml python ./scripts/ansible_scope_runner.py run --inventory ./inventory/hosts.yml --playbook ./playbooks/services/litellm.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
-- The scoped `litellm` replay did not reach the refactored verify task. It
-  entered `lv3.platform.proxmox_network`, rendered host interfaces, executed
-  `ifreload` on `proxmox-host`, and then failed at
-  `Wait for SSH after network reload`.
-- The failure was recorded at `2026-04-11T21:29:04Z` with:
-  `timed out waiting for ping module test ... ssh: connect to host 100.64.0.1 port 22: Operation timed out`
-- Independent recovery probes from the worktree at
-  `2026-04-11T21:30:06Z`, `21:30:36Z`, `21:31:06Z`, `21:31:36Z`, and
-  `21:32:06Z` also timed out against `ops@100.64.0.1`, so the host was still
-  unreachable over the canonical Tailscale management path when work stopped.
-- No `repowise` or `librechat` live replay was attempted after that point.
+- The first scoped `litellm` replay on `2026-04-11` hit a real
+  `proxmox_network` reachability failure after `ifreload` on `proxmox-host`;
+  that outage is intentionally preserved in the early `r1` evidence.
+- After the generator and catalog fixes landed and the host was reachable
+  again, the branch-local scoped runner replays completed successfully:
+  - `receipts/live-applies/evidence/2026-04-12-ws0371-litellm-live-apply-r1.txt`
+    finished with `docker-runtime ok=114 changed=5 failed=0 rescued=1`,
+    `postgres ok=28 changed=0 failed=0`, and
+    `proxmox-host ok=24 changed=5 failed=0`
+  - `receipts/live-applies/evidence/2026-04-12-ws0371-librechat-live-apply-r1.txt`
+    finished with `coolify ok=102 changed=3 failed=0`,
+    `nginx ok=48 changed=4 failed=0`, and
+    `proxmox-host ok=389 changed=0 failed=0`
+  - `receipts/live-applies/evidence/2026-04-12-ws0371-repowise-live-apply-r7.txt`
+    finished with `docker-runtime ok=47 changed=5 failed=0`
+- The branch also recovered a real downstream regression exposed during the
+  replay sequence:
+  - `rag-context` required the platform-context service-topology, compose
+    macro, and `validation_toolkit.py` sync fixes before its scoped recovery
+    succeeded; the final green replay is preserved in
+    `receipts/live-applies/evidence/2026-04-12-ws0371-rag-context-recovery-r7.txt`
+  - the follow-up Postgres reconcile for Windmill completed successfully in
+    `receipts/live-applies/evidence/2026-04-12-ws0371-windmill-postgres-reconcile-r2.txt`
+  - `repowise` needed a final compose publish fix because Docker only kept the
+    loopback `127.0.0.1:7070` binding; the template now publishes a single
+    host-facing bind so the shared NGINX edge can reach `10.10.10.20:7070`
 
-## Remaining Work After Host Recovery
+## Direct Verification
 
-- Restore `proxmox-host` reachability on `100.64.0.1` and confirm platform
-  health before any further replay.
-- Re-run the scoped service wrappers in this order:
-  `litellm`, `repowise`, `librechat`.
-- After each replay, capture direct health verification for the service-local
-  endpoint and the public edge endpoint where applicable.
-- Re-evaluate whether the unrelated `generate-ops-portal` and
-  `check-canonical-truth` failures should be fixed on `main` before the final
-  merge-to-main replay.
-- Only after a clean latest-main replay should shared integration files and the
-  final platform-version truth be updated.
+- `receipts/live-applies/evidence/2026-04-12-ws0371-end-to-end-verification-r1.txt`
+  confirms the final post-replay state:
+  - `docker-runtime` local probes returned healthy responses for `litellm`,
+    `repowise`, and `platform-context`
+  - `coolify` returned `librechat-root ok` and `librechat-health OK`
+  - `nginx` reached both upstreams directly:
+    `http://10.10.10.20:7070/health` and `http://10.10.10.70:8096/health`
+  - `chat.lv3.org/` returned `HTTP 200`
+  - `repowise.lv3.org/health` returned `HTTP 200` with the Repowise JSON
+    health payload
+
+## Remaining Mainline Integration Work
+
+- Rebase this workstream onto the current `origin/main` tip before cutting the
+  protected release and canonical-truth surfaces.
+- Run the final exact-main validation and generation bundle from the rebased
+  tree, including the generated SLO/canonical-truth surfaces that intentionally
+  wait for the integration step.
+- Cut the new repo release on `main`, update `versions/stack.yaml` with the
+  merged exact-main truth, and replay the exact-main verification path so the
+  first canonical platform version for ADR 0371 is recorded on `main`.

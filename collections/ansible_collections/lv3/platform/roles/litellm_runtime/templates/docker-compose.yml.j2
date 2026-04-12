@@ -1,4 +1,6 @@
+{% if litellm_enable_openbao_agent | bool %}
 {% from 'compose_macros.j2' import openbao_sidecar %}
+{% endif %}
 services:
 {% if litellm_enable_openbao_agent | bool %}
 {{ openbao_sidecar("litellm") }}
@@ -28,7 +30,10 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - "curl -sf http://localhost:{{ litellm_container_port }}/health/liveliness || exit 1"
+        - >-
+          python -c "import urllib.request;
+          urllib.request.urlopen('http://127.0.0.1:{{ litellm_container_port }}/health/liveliness')"
+          >/dev/null 2>&1 || exit 1
       interval: 30s
       timeout: 10s
       retries: 3

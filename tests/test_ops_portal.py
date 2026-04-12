@@ -1,9 +1,11 @@
 import json
+import os
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +23,11 @@ class ServiceCatalogTests(unittest.TestCase):
 
 
 class OpsPortalRenderTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._disable_overlay = patch.dict(os.environ, {"LV3_DISABLE_SHARED_LOCAL_IDENTITY": "1"})
+        self._disable_overlay.start()
+        self.addCleanup(self._disable_overlay.stop)
+
     def test_render_portal_writes_expected_pages(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
         original_receipts = ops_portal.active_ephemeral_receipts

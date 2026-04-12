@@ -19,4 +19,5 @@
       loop: "{{ ansible_play_hosts }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.repowise_runtime

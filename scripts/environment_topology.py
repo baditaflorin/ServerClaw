@@ -11,7 +11,7 @@ from typing import Any
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_list, require_mapping, require_str
+from validation_toolkit import require_list, require_mapping, require_str, resolve_public_domain_placeholders
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from shared_policy_packs import load_shared_policy_packs
@@ -44,7 +44,7 @@ def require_string_list(value: Any, path: str) -> list[str]:
 
 
 def load_environment_topology() -> dict[str, Any]:
-    return load_json(ENVIRONMENT_TOPOLOGY_PATH)
+    return resolve_public_domain_placeholders(load_json(ENVIRONMENT_TOPOLOGY_PATH))
 
 
 def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, Any]) -> dict[str, dict[str, Any]]:

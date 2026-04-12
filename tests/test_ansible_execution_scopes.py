@@ -408,6 +408,57 @@ def test_run_planned_playbook_reserves_and_releases_target_lane(
     assert registry.snapshot()["active"]["lane:alpha"] == []
 
 
+def test_run_planned_playbook_uses_shared_local_identity_overlay_from_worktree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    shared_root = tmp_path / "repo"
+    worktree_root = shared_root / ".worktrees" / "ws-0371-live-apply"
+    local_overlay = shared_root / ".local"
+    local_overlay.mkdir(parents=True)
+    (local_overlay / "identity.yml").write_text("platform_domain: lv3.org\n", encoding="utf-8")
+    write_execution_lanes(worktree_root / "config" / "execution-lanes.yaml")
+    make_repo(worktree_root)
+    inventory_path = worktree_root / "inventory" / "hosts.yml"
+    plan = scopes.PlannedPlaybookExecution(
+        playbook_path="playbooks/leaf-alpha.yml",
+        env="production",
+        run_id="run-791",
+        mutation_scope="lane",
+        execution_class="mutation",
+        target_lane="lane:alpha",
+        target_hosts=("alpha",),
+        limit_expression="alpha",
+        inventory_shard_path=str(worktree_root / ".ansible" / "shards" / "run-791" / "leaf-alpha-production.json"),
+        shared_surfaces=("playbooks/leaf-alpha.yml", "service:alpha", "host:alpha"),
+        source_leaf_playbooks=("playbooks/leaf-alpha.yml",),
+    )
+    registry = scopes.LaneRegistry(
+        repo_root=worktree_root,
+        state_path=worktree_root / ".local" / "execution-lanes.json",
+    )
+    captured: list[list[str]] = []
+
+    def fake_run(command: list[str], cwd: Path, text: bool, check: bool = False):
+        del cwd, text, check
+        captured.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+
+    result = scopes.run_planned_playbook(
+        plan,
+        inventory_path=inventory_path,
+        repo_root=worktree_root,
+        lane_registry=registry,
+    )
+
+    assert result.returncode == 0
+    assert captured
+    assert ["-e", f"@{shared_root / '.local' / 'identity.yml'}"] in [
+        captured[0][index : index + 2] for index in range(len(captured[0]) - 1)
+    ]
+
+
 def test_run_planned_playbook_returns_busy_when_target_lane_is_already_reserved(tmp_path: Path) -> None:
     repo_root, _catalog_path, inventory_path = make_repo(tmp_path)
     write_execution_lanes(repo_root / "config" / "execution-lanes.yaml")
@@ -457,6 +508,11 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
         repo_root=REPO_ROOT,
         catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
     )
+    repowise_scope = scopes.resolve_playbook_scope(
+        "playbooks/services/repowise.yml",
+        repo_root=REPO_ROOT,
+        catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
+    )
     monitoring_scope = scopes.resolve_playbook_scope(
         "playbooks/monitoring-stack.yml",
         repo_root=REPO_ROOT,
@@ -468,5 +524,9 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
     assert api_scope.source_leaf_playbooks == ("playbooks/api-gateway.yml",)
     assert plausible_scope.mutation_scope == "platform"
     assert plausible_scope.source_leaf_playbooks == ("playbooks/plausible.yml",)
+    assert repowise_scope.mutation_scope == "host"
+    assert repowise_scope.target_lane is None
+    assert repowise_scope.source_leaf_playbooks == ("playbooks/repowise.yml",)
+    assert "service:repowise" in repowise_scope.shared_surfaces
     assert monitoring_scope.mutation_scope == "platform"
     assert "playbooks/services/grafana.yml" in monitoring_scope.source_leaf_playbooks

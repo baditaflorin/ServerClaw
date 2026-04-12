@@ -1,4 +1,6 @@
+{% if librechat_enable_openbao_agent | bool %}
 {% from 'compose_macros.j2' import openbao_sidecar %}
+{% endif %}
 services:
 {% if librechat_enable_openbao_agent | bool %}
 {{ openbao_sidecar("librechat") }}

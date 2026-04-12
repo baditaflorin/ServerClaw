@@ -1,7 +1,9 @@
 import copy
+import os
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -15,6 +17,9 @@ import validate_portal_auth  # noqa: E402
 
 class ValidatePortalAuthTests(unittest.TestCase):
     def setUp(self) -> None:
+        self._disable_overlay = patch.dict(os.environ, {"LV3_DISABLE_SHARED_LOCAL_IDENTITY": "1"})
+        self._disable_overlay.start()
+        self.addCleanup(self._disable_overlay.stop)
         self.catalog = subdomain_catalog.load_subdomain_catalog()
         self.public_edge_defaults = subdomain_catalog.load_public_edge_defaults()
 
