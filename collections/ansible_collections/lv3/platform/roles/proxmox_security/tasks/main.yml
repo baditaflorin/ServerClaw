@@ -79,6 +79,41 @@
   when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
   changed_when: true
 
+# Guard: after any restart, verify pve-firewall actually applied ACCEPT rules.
+# pve-firewall can crash between applying DROP policy and adding ACCEPT rules,
+# leaving the host completely unreachable. If this guard detects that state,
+# it flushes the ruleset (restores open access) and fails loudly so the
+# operator knows the firewall must be fixed before re-running convergence.
+- name: Wait for pve-firewall to populate ACCEPT rules (up to 30s)
+  ansible.builtin.shell: |
+    for i in $(seq 1 30); do
+      if nft list ruleset 2>/dev/null | grep -qE 'accept|ACCEPT'; then
+        echo "OK"
+        exit 0
+      fi
+      sleep 1
+    done
+    echo "TIMEOUT"
+    exit 1
+  register: _pve_fw_accept_check
+  changed_when: false
+  when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
+  failed_when: false
+
+- name: Emergency recovery — flush nftables if pve-firewall stuck in DROP-all
+  ansible.builtin.shell: |
+    set -euo pipefail
+    systemctl stop pve-firewall || true
+    nft flush ruleset
+    echo "EMERGENCY RECOVERY: pve-firewall left ruleset in DROP-all state."
+    echo "nftables flushed; host is now fully open. Fix cluster.fw and rerun."
+  when:
+    - proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
+    - _pve_fw_accept_check.rc is defined
+    - _pve_fw_accept_check.rc != 0
+  changed_when: true
+  failed_when: true   # abort convergence; operator must investigate
+
 - name: Render break-glass sshd port drop-in
   ansible.builtin.copy:
     dest: /etc/ssh/sshd_config.d/91-lv3-breakglass.conf
