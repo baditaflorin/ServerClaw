@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 32
+total_adrs: 31
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix

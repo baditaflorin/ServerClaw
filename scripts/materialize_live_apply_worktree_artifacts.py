@@ -57,6 +57,11 @@ ARTIFACTS: dict[str, ArtifactSpec] = {
         relative_path="receipts/image-scans",
         description="Latest container image scan receipts required by vulnerability budget gates.",
     ),
+    "security_reports": ArtifactSpec(
+        kind="directory",
+        relative_path="receipts/security-reports",
+        description="Security posture reports required by vulnerability budget gates.",
+    ),
 }
 
 
@@ -141,6 +146,20 @@ def materialize_artifact(artifact_id: str, *, repo_root: Path = REPO_ROOT) -> Pa
         source = source_root / "receipts" / "image-scans"
         if not source.exists():
             raise RuntimeError(f"missing source image scan receipts at {source}")
+        path.mkdir(parents=True, exist_ok=True)
+        if source.resolve() == path.resolve():
+            return path
+        for entry in source.iterdir():
+            target = path / entry.name
+            if entry.is_dir():
+                copytree(entry, target, dirs_exist_ok=True)
+            else:
+                copy2(entry, target)
+    elif artifact_id == "security_reports":
+        source_root = find_primary_worktree(repo_root)
+        source = source_root / "receipts" / "security-reports"
+        if not source.exists():
+            raise RuntimeError(f"missing source security reports at {source}")
         path.mkdir(parents=True, exist_ok=True)
         if source.resolve() == path.resolve():
             return path

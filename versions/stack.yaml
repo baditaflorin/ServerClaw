@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.178.126
-platform_version: 0.178.78
+platform_version: 0.178.126
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -29,7 +29,9 @@ live_apply_evidence:
     grist: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     homepage: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
+    librechat: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
+    litellm: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply

@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 345
+total_adrs: 346
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible

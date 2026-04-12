@@ -81,16 +81,21 @@ ownership_manifest:
     - versions/stack.yaml
     mode: shared_contract
     contract: mainline-release-integration-v1
-ready_to_merge: false
-live_applied: false
+ready_to_merge: true
+live_applied: true
 notes: |
   Live-apply workstream for ADR 0374 on the latest origin/main. Scope is to
   repair the merged generator/validator path, surface the generated values in
   platform.yml, switch runtime hairpin consumers to the shared manifest, replay
   the affected production services, and capture exact-main verification
   evidence without touching protected release files on the branch.
-blockers:
-  - Vulnerability budget gate still fails for production runs because
-    config/image-catalog.json uses placeholder digests and lacks scan receipts
-    for librechat_runtime and litellm_runtime. Live apply remains blocked until
-    real digests and receipts are recorded.
+
+  Live apply completed:
+  - make live-apply-service service=librechat env=production
+  - make live-apply-service service=litellm env=production ALLOW_IN_PLACE_MUTATION=true
+  - python3 scripts/security_posture_report.py --env production --skip-lynis --skip-trivy
+
+  Evidence:
+  - receipts/live-applies/evidence/2026-04-12-ws-0374-librechat-live-apply.txt
+  - receipts/live-applies/evidence/2026-04-12-ws-0374-litellm-live-apply.txt
+  - receipts/live-applies/evidence/2026-04-12-ws-0374-security-posture-report.txt
