@@ -65,9 +65,14 @@ must not depend on those objects remaining fetchable forever.
 After a live apply from the repository:
 
 1. verify the real platform state
-2. add or update the receipt under [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies)
-3. update [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml) if merged truth or observed state changed
-4. update the relevant runbook and README summary when integrated current state changed
+2. if the change runs through `make live-apply-service service=<id>`, ensure
+   `config/service-capability-catalog.json` sets `health_probe_id` for that
+   service and `config/health-probe-catalog.json` defines the matching probe;
+   the governed wrapper replays the service verification contract after Ansible
+   and fails closed when the probe mapping is missing
+3. add or update the receipt under [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies)
+4. update [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/versions/stack.yaml) if merged truth or observed state changed
+5. update the relevant runbook and README summary when integrated current state changed
 
 Backfilled receipts are allowed when older live changes were verified but not recorded in structured form at the time. Note that explicitly in the receipt.
 

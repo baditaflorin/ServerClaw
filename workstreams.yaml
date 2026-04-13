@@ -357,6 +357,27 @@ workstreams:
   blockers: []
   ready_to_merge: true
   live_applied: true
+  notes: 'Latest realistic base revalidated on 2026-04-13 against
+
+    origin/main@07ddfe99a (repo 0.178.127, platform 0.178.126). The governed
+
+    `live-apply-service` replays for `repowise`, `litellm`, and `librechat`
+
+    passed from that tip. The first LiteLLM rerun failed closed because
+
+    `config/service-capability-catalog.json` lacked `health_probe_id: litellm`
+
+    and `config/health-probe-catalog.json` had no `litellm`/`librechat` probe
+
+    definitions; this branch now adds those contracts, and the successful reruns
+
+    leave only the bounded 180-second Restic trigger warning. Final integration
+
+    still needs the protected `main` closeout: canonical receipt, release bump,
+
+    `versions/stack.yaml`, generated status surfaces, and push to `origin/main`.
+
+    '
   description: 'Finish ADR 0371 from the latest origin/main by closing the remaining
 
     verification-task migrations, validating the shared verifier contract, and

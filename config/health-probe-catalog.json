@@ -1297,6 +1297,111 @@
         }
       }
     },
+    "librechat": {
+      "service_name": "librechat",
+      "owning_vm": "coolify",
+      "role": "librechat_runtime",
+      "verify_file": "roles/librechat_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "LibreChat startup completes once the local root page answers on the Coolify runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local LibreChat root page continues to answer on the managed runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "LibreChat still serves its local root page after the OIDC and edge publication configuration converge.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "LibreChat Public",
+          "type": "http",
+          "url": "https://chat.example.com/",
+          "description": "Public LibreChat surface published through the shared NGINX edge and Keycloak OIDC flow.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-399"
+          ]
+        }
+      }
+    },
+    "litellm": {
+      "service_name": "litellm",
+      "owning_vm": "docker-runtime",
+      "role": "litellm_runtime",
+      "verify_file": "roles/litellm_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "LiteLLM startup completes once the local liveliness endpoint responds on docker-runtime.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:4000/health/liveliness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The LiteLLM liveliness endpoint continues to answer on the private runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:4000/health/liveliness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "LiteLLM returns the authenticated model inventory through the repo-managed master key contract.",
+        "timeout_seconds": 180,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; key=$(cat /etc/lv3/litellm/master-key); payload=$(mktemp); trap 'rm -f \"${payload}\"' EXIT; curl -fsS -H \"Authorization: Bearer ${key}\" http://127.0.0.1:4000/v1/models > \"${payload}\"; python3 -c 'import json, pathlib, sys; payload=json.loads(pathlib.Path(sys.argv[1]).read_text()); assert isinstance(payload.get(\"data\"), list); assert len(payload[\"data\"]) >= 1' \"${payload}\""
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "LiteLLM is intentionally private-only and its routed model inventory requires the repo-managed master key, so governed local probes remain the authoritative health signal."
+      }
+    },
     "livekit": {
       "service_name": "livekit",
       "owning_vm": "docker-runtime",
