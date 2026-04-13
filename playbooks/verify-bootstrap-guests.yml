@@ -28,11 +28,30 @@
 
 # Verify guest VM provisioning succeeded — ADR 0386
 #
-# Checks that all declared VMs exist, are running, and respond to SSH.
+# Inputs (required):
+#   - playbook_execution_env (string, required): Selects the environment-specific lv3_guests host pattern to verify.
 #
-# Usage:
-#   make verify-bootstrap-guests
-#   ansible-playbook -i inventory/hosts.yml playbooks/verify-bootstrap-guests.yml
+# Inputs (optional):
+#   - env (string, optional, default=production): Fallback environment selector when playbook_execution_env is not set.
+#   - playbook_execution_host_patterns (mapping, optional): Overrides the default lv3_guests host-pattern map for custom execution scopes.
+#
+# Outputs:
+#   - Reports SSH reachability and basic operating-system facts for each targeted guest.
+#   - Emits a local summary message confirming the guest verification sweep completed.
+#
+# Idempotency: Fully idempotent
+#              This playbook performs connectivity checks and fact gathering only; it does not mutate remote state.
+#
+# Dependencies:
+#   - ADR 0165: Requires the standard playbook metadata header for agent-governed validation.
+#   - ADR 0386: Verifies the guest bootstrap and replacement path introduced for managed guest lifecycle operations.
+#   - Requires: Inventory connectivity, bootstrap SSH access, and the target lv3_guests host pattern to be defined.
+#
+# Related ADRs: 0165, 0386
+# Related Runbooks: docs/runbooks/bootstrap-proxmox-guests.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
 
 - name: Verify guest VMs are reachable
   hosts: >-
@@ -40,7 +59,7 @@
       (
         playbook_execution_host_patterns
         | default({'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'}}, true)
-      )['lv3_guests'][playbook_execution_env | default('production')]
+      )['lv3_guests'][playbook_execution_env | default(env | default('production'))]
     }}
   gather_facts: false
   tasks:

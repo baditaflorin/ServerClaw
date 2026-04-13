@@ -1,12 +1,12 @@
 id: ws-0368-live-apply
 adr: 0368
 title: ADR 0368 Live Apply and Completion
-status: blocked
+status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: codex
-branch: codex/ws-0368-live-apply
-worktree_path: .worktrees/ws-0368-live-apply
+branch: codex/ws-0368-main-integration-r3
+worktree_path: .worktrees/ws-0368-main-integration-r3
 doc: docs/workstreams/ws-0368-live-apply.md
 depends_on:
 - adr-0368-docker-compose-jinja2-macro-library
@@ -31,10 +31,32 @@ shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/paperless_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/compose_macros.j2
+- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/docker_runtime_converge.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/nginx_edge_publication.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/postgres_preparation.yml
+- collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml
+- collections/ansible_collections/lv3/platform/roles/redpanda_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/redpanda_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/redpanda_runtime/tasks/verify.yml
 - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/compose_macros.j2
 - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
+- config/certificate-catalog.json
+- config/contracts/service-partitions/catalog.json
+- config/correction-loops.json
+- config/dependency-graph.json
+- config/health-probe-catalog.json
+- config/prometheus/file_sd/https_tls_targets.yml
+- config/prometheus/rules/https_tls_alerts.yml
+- config/service-capability-catalog.json
+- config/service-completeness.json
+- config/service-redundancy-catalog.json
+- config/subdomain-catalog.json
+- config/subdomain-exposure-registry.json
+- config/workflow-catalog.json
 - docs/adr/.index.yaml
 - docs/adr/0368-docker-compose-jinja2-macro-library.md
 - docs/adr/implementation-status/adr-0368.yaml
@@ -43,12 +65,35 @@ shared_surfaces:
 - docs/adr/index/by-range/0300-0399.yaml
 - docs/adr/index/by-status/implemented.yaml
 - docs/adr/index/by-status/proposed.yaml
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/diagrams/service-dependency-graph.excalidraw
+- docs/runbooks/configure-redpanda.md
+- docs/site-generated/architecture/dependency-graph.md
 - docs/workstreams/ws-0368-live-apply.md
+- inventory/group_vars/all/platform_services.yml
+- inventory/group_vars/platform.yml
+- platform/ansible/execution_scopes.py
+- playbooks/_includes/docker_runtime_converge.yml
+- playbooks/_includes/dns_publication.yml
+- playbooks/_includes/nginx_edge_publication.yml
+- playbooks/_includes/postgres_preparation.yml
+- playbooks/fix-edge-certificate.yml
+- playbooks/redpanda.yml
+- playbooks/tasks/openbao-refresh-approle-artifact.yml
+- playbooks/tasks/verify-probe.yml
+- playbooks/verify-bootstrap-guests.yml
+- receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+- scripts/validate_repo.sh
 - scripts/generate_platform_vars.py
+- scripts/topology-snapshot.json
+- tests/test_ansible_execution_scopes.py
 - tests/test_flagsmith_runtime_role.py
 - tests/test_gitea_runtime_role.py
 - tests/test_label_studio_runtime_role.py
 - tests/test_minio_runtime_role.py
+- tests/test_redpanda_playbook.py
+- tests/test_redpanda_runtime_role.py
+- tests/test_validate_repo_cache.py
 - workstreams/active/ws-0368-live-apply.yaml
 - workstreams.yaml
 ownership_manifest:
@@ -79,9 +124,61 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
     mode: exclusive
+  - id: adr_0368_exact_main_replay
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/docker_runtime_converge.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/nginx_edge_publication.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/postgres_preparation.yml
+    - collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml
+    - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/tasks/verify.yml
+    - config/certificate-catalog.json
+    - config/contracts/service-partitions/catalog.json
+    - config/correction-loops.json
+    - config/dependency-graph.json
+    - config/health-probe-catalog.json
+    - config/prometheus/file_sd/https_tls_targets.yml
+    - config/prometheus/rules/https_tls_alerts.yml
+    - config/service-capability-catalog.json
+    - config/service-completeness.json
+    - config/service-redundancy-catalog.json
+    - config/subdomain-catalog.json
+    - config/subdomain-exposure-registry.json
+    - config/workflow-catalog.json
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/diagrams/service-dependency-graph.excalidraw
+    - docs/runbooks/configure-redpanda.md
+    - docs/site-generated/architecture/dependency-graph.md
+    - inventory/group_vars/all/platform_services.yml
+    - platform/ansible/execution_scopes.py
+    - playbooks/_includes/docker_runtime_converge.yml
+    - playbooks/_includes/dns_publication.yml
+    - playbooks/_includes/nginx_edge_publication.yml
+    - playbooks/_includes/postgres_preparation.yml
+    - playbooks/redpanda.yml
+    - playbooks/tasks/openbao-refresh-approle-artifact.yml
+    - playbooks/tasks/verify-probe.yml
+    - playbooks/verify-bootstrap-guests.yml
+    - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+    - scripts/validate_repo.sh
+    - tests/test_ansible_execution_scopes.py
+    - tests/test_redpanda_playbook.py
+    - tests/test_redpanda_runtime_role.py
+    - tests/test_validate_repo_cache.py
+    - scripts/topology-snapshot.json
+    mode: exclusive
+  - id: adr_0368_cert_validation_hygiene
+    paths:
+    - playbooks/fix-edge-certificate.yml
+    mode: shared_contract
+    contract: cert-validation-playbook-v1
   - id: adr_0368_hairpin_generator
     paths:
     - scripts/generate_platform_vars.py
+    - inventory/group_vars/platform.yml
     mode: exclusive
   - id: adr_0368_docs
     paths:
@@ -110,15 +207,14 @@ notes: 'Purpose-built closure workstream for ADR 0368. Scope includes completing
 
   shared compose macro adoption, reconciling later hairpin automation drift,
 
-  validating the repo automation path, and recording live-apply evidence plus
+  replaying the exact-main Redpanda and data-model fixes needed for truthful
 
-  final ADR metadata without touching release files on the workstream branch.
+  live apply, validating the repo automation path, and recording live-apply
+
+  evidence plus final ADR metadata without touching protected release files
+
+  until the final integration step.
 
   '
-blockers:
-- Controller cannot reach the Proxmox Tailscale endpoint, affected guests, or the
-  remote build server from this machine, so the live apply cannot be completed
-  truthfully from the current worktree.
-- The governed live-apply wrapper is also blocked by unrelated baseline registry
-  drift in workstreams/active/ws-0377-repo-intake-subdomain.yaml (empty adr field).
+blockers: []
 plane_issue_id: 5bd08ebb-7b42-4947-b3d1-bcb3d20fcd84

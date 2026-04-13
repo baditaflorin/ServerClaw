@@ -267,6 +267,7 @@ graph TD
     sftpgo -->|hard| docker_runtime
     sftpgo -->|soft| keycloak
     sftpgo -->|soft| nginx_edge
+    sftpgo -->|startup_only| openbao
     sftpgo -->|hard| postgres
     status_page -->|hard| nginx_edge
     status_page -->|hard| uptime_kuma

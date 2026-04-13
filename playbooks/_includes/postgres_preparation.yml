@@ -4,10 +4,10 @@
 # Input: service_postgres_role (string) — the Ansible role name (e.g., "lv3.platform.directus_postgres")
 # Usage: import_playbook with -e @playbooks/vars/<service>.yml
 
-- name: "Prepare PostgreSQL for {{ service_postgres_role | regex_replace('lv3\\.platform\\.', '') }}"
+- name: "Prepare PostgreSQL for {{ (service_postgres_role | default('lv3.platform.postgres_vm')) | regex_replace('lv3\\.platform\\.', '') }}"
   vars:
     # Default for Ansible parser validation; overridden by -e @playbooks/vars/<service>.yml
-    service_postgres_role: "lv3.platform.directus_postgres"
+    service_postgres_role: "lv3.platform.postgres_vm"
   hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
@@ -24,4 +24,4 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
-    - role: "{{ service_postgres_role }}"
+    - role: "{{ service_postgres_role | default('lv3.platform.postgres_vm') }}"

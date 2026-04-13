@@ -8,6 +8,9 @@
   hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
+  vars:
+    # Default for Ansible parser validation; overridden by -e @playbooks/vars/<service>.yml
+    service_audit_name: "nginx_edge_publication"
   vars_files:
     - "{{ playbook_dir }}/../../inventory/group_vars/platform.yml"
 

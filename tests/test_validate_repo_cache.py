@@ -50,6 +50,12 @@ def test_validate_repo_supports_workstream_surface_stage() -> None:
     assert "scripts/workstream_surface_ownership.py" in script
 
 
+def test_validate_repo_excludes_playbook_descriptor_vars_from_syntax_and_lint() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert '$2 != "tasks" && $2 != "vars"' in script
+
+
 def test_validate_repo_checks_generated_discovery_artifacts() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 

@@ -7,6 +7,10 @@
 # Usage: import_playbook with -e @playbooks/vars/<service>.yml
 
 - name: "Converge {{ service_audit_name | default('service') }} on the Docker runtime VM"
+  vars:
+    # Defaults for Ansible parser validation; overridden by -e @playbooks/vars/<service>.yml
+    service_audit_name: "docker_runtime"
+    service_runtime_roles: []
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true

@@ -373,8 +373,8 @@ validate_ansible_lint() {
   echo "Ansible lint"
   install_collections
   load_lines_into_array lint_targets < <(
-    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' |
-      awk -F/ '(( $1 == "playbooks" && NF == 2 ) || ( $1 == "playbooks" && $2 == "groups" && NF == 3 )) && $NF ~ /\.yml$/ && $NF !~ /^\./ { print }' |
+    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
+      awk -F/ '(( $1 == "playbooks" && NF == 2 ) || ( $1 == "playbooks" && $2 == "groups" && NF == 3 ) || ( $1 == "playbooks" && $2 == "services" && NF == 3 && $3 !~ /^_/ )) && $NF ~ /\.yml$/ && $NF !~ /^\./ { print }' |
       awk '!seen[$0]++'
   )
   lint_targets+=("collections/ansible_collections/lv3/platform")
