@@ -53,7 +53,10 @@ workstreams:
     - id: pre_push_cert_skip
       paths:
       - .githooks/pre-push
-      mode: exclusive
+      mode: shared_contract
+      contract: pre-push-gate-v1
+      co_owners:
+      - ws-0375-certificate-validation
     - id: ws_0414_workstream
       paths:
       - workstreams/active/ws-0414-cert-lifecycle-agent-tools.yaml
