@@ -233,6 +233,7 @@ def assemble_latest_receipts(
     for item in sorted(
         items,
         key=lambda candidate: (
+            candidate.included_in_repo_version is None,
             parse_semver(candidate.included_in_repo_version) if candidate.included_in_repo_version else (0, 0, 0),
             int(candidate.adr),
             candidate.workstream_id,

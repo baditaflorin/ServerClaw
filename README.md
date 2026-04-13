@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.128` |
-| Platform version | `0.178.126` |
+| Repository version | `0.178.129` |
+| Platform version | `0.178.129` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -44,13 +44,13 @@ monitored, and recoverable from a single repository.
 | Managed guest count | 17 |
 | Running guest count | 10 |
 | Template VM present | `true` |
-| Declared services | 70 |
-| Publicly published services | 46 |
+| Declared services | 71 |
+| Publicly published services | 47 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 37 |
+| `edge-published` | 38 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
 | `private-only` | 28 |
@@ -58,6 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `keycloak` | `2026-04-13-keycloak-topology-fix-runtime-control-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
@@ -77,7 +78,6 @@ monitored, and recoverable from a single repository.
 | `semaphore` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `openfga` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 
 Showing 20 of 177 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -89,12 +89,12 @@ Showing 20 of 177 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.128` |
-| Platform version | `0.178.126` |
+| Repository version | `0.178.129` |
+| Platform version | `0.178.129` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
-| Declared services | 70 |
+| Declared services | 71 |
 <!-- END GENERATED: version-summary -->
 
 ## Quick Start
@@ -357,10 +357,11 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 303 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 304 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0373` | Live apply service registry and derived defaults from latest origin/main | `live_applied` | [ws-0373-live-apply.md](docs/workstreams/ws-0373-live-apply.md) |
 | `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](docs/workstreams/ws-0372-live-apply.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
@@ -385,7 +386,6 @@ Showing 25 of 303 merged or live-applied workstreams. Full history: [merged work
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
-| `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements

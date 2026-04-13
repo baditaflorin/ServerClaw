@@ -1,7 +1,7 @@
 id: ws-0373-live-apply
 adr: '0373'
 title: Live apply service registry and derived defaults from latest origin/main
-status: ready
+status: live_applied
 ready_to_merge: true
 live_applied: true
 owner: codex
@@ -58,6 +58,15 @@ ownership_manifest:
     - receipts/live-applies/
     mode: shared_contract
     contract: live-apply-evidence-v1
+canonical_truth:
+  changelog_entry: >-
+    fix Keycloak service topology: upstream now correctly points to
+    runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx
+    edge from reverting sso.lv3.org to the wrong host on next converge
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    keycloak: 2026-04-13-keycloak-topology-fix-runtime-control-live-apply
 notes: |
   Replay ADR 0373 from the latest origin/main worktree, verify the
   service-registry automation and governed live-apply path end to end,

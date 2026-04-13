@@ -222,6 +222,40 @@ def test_assemble_latest_receipts_prefers_newer_repo_version_over_higher_adr(can
     assert latest["public_edge_publication"] == "newer-edge-receipt"
 
 
+def test_assemble_latest_receipts_prefers_unreleased_live_apply_over_older_versioned_receipt(
+    canonical_repo: Path,
+) -> None:
+    items = [
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0331-mainline",
+            adr="0331",
+            title="Older versioned receipt",
+            status="live_applied",
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.178.120",
+            latest_receipts={"keycloak": "2026-04-05-ws-0331-runtime-pool-mainline-live-apply"},
+        ),
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0373-live-apply",
+            adr="0373",
+            title="Newer unreleased live apply",
+            status="live_applied",
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version=None,
+            latest_receipts={"keycloak": "2026-04-13-keycloak-topology-fix-runtime-control-live-apply"},
+        ),
+    ]
+
+    latest = canonical_truth.assemble_latest_receipts(
+        items,
+        stack_path=canonical_repo / "versions" / "stack.yaml",
+    )
+
+    assert latest["keycloak"] == "2026-04-13-keycloak-topology-fix-runtime-control-live-apply"
+
+
 def test_mark_pending_workstreams_released_sets_repo_version(canonical_repo: Path) -> None:
     changed = canonical_truth.mark_pending_workstreams_released("0.10.1")
 
