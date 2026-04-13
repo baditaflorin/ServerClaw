@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-12T18:55:31Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "ws-0374-merge-main",
+  "commit": "444dca4cc8db0d12cb6a71a26bc214684b004ce3",
+  "waiver": {
+    "reason_code": "gate_timeout",
+    "reason_summary": "The gate validation exceeded the maximum allowed execution time without completing all checks.",
+    "detail": "Remote pre-push gate stalled during build-server SSH while pushing gate-bypass receipt.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "git show --stat HEAD"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-13",
+    "remediation_ref": "ws-0374-live-apply"
+  }
+}

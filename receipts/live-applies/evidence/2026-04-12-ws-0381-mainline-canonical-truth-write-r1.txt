@@ -1,0 +1,2 @@
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/canonical_truth.py --write
+Canonical truth already current.

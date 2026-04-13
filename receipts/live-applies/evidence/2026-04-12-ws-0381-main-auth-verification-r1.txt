@@ -1,0 +1,74 @@
+== ops root ==
+HTTP/2 302
+server: nginx
+date: Sun, 12 Apr 2026 18:44:37 GMT
+content-type: text/html
+content-length: 138
+location: https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src https://analytics.lv3.org 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com; font-src 'self' data: https://unpkg.com; connect-src https://analytics.lv3.org 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+
+== ops sign_in ==
+HTTP/2 302
+server: nginx
+date: Sun, 12 Apr 2026 18:44:38 GMT
+content-type: text/html; charset=utf-8
+cache-control: no-cache, no-store, must-revalidate, max-age=0
+expires: Thu, 01 Jan 1970 00:00:00 UTC
+location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?approval_prompt=force&client_id=ops-portal-oauth&code_challenge=fz7yh6nrt1X5kLj251jiV7FhvH9O8YPxu3Ll7nut8WE&code_challenge_method=S256&redirect_uri=https%3A%2F%2Fops.lv3.org%2Foauth2%2Fcallback&response_type=code&scope=openid+profile+email&state=BpMAksIlow-Hi0cHrqrjNtAfX4FVhbOg6sYqWAF9UFo%3Ahttps%3A%2F%2Fops.lv3.org%2Foauth2%2Fsign_in
+set-cookie: _lv3_ops_portal_proxy_csrf=bTh7Xdy5iIunPt38Rasj0H0VRJXWsnTMLYieeDxGRA6nQHzEYNZPuukltt9hRK5wgUGcVt3XZElAVzbJzVOnhV9QTenPgAQyqCZ7IcTD39Dj7pIr61Wny7SrGEOmMBmeP9kZD72we4D1wrffGrUvmfpKmxLAW47w_AElcYEtJ4BAgBokClH8QNEAboAdcHaRBhhDwwshg4Bwaexi_icsCH02Kuu_gm1kEvOWUwoS8eiV0u5ZPavJIM0IKfw7aHYAD0iPoEVNzyIK6-Ctz25QL8U_JtwpibaKgha-Uic5|1776019478|2TnqtYhy6zXf0N2cFNZFOtpcckvdQbnYrIPlibuadZY=; Path=/; Domain=lv3.org; Max-Age=900; HttpOnly; Secure; SameSite=Lax
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src https://analytics.lv3.org 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com; font-src 'self' data: https://unpkg.com; connect-src https://analytics.lv3.org 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+
+== tasks root ==
+HTTP/2 302
+server: nginx
+date: Sun, 12 Apr 2026 18:44:38 GMT
+content-type: text/html
+content-length: 138
+location: https://tasks.lv3.org/oauth2/sign_in?rd=https://tasks.lv3.org/
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://tasks.lv3.org wss://tasks.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+
+== tasks sign_in ==
+HTTP/2 302
+server: nginx
+date: Sun, 12 Apr 2026 18:44:38 GMT
+content-type: text/html; charset=utf-8
+cache-control: no-cache, no-store, must-revalidate, max-age=0
+expires: Thu, 01 Jan 1970 00:00:00 UTC
+location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?approval_prompt=force&client_id=ops-portal-oauth&code_challenge=_sjpMsxnA8Db_YWWH9-PncYT99OWnfkAPOSfh70vOU8&code_challenge_method=S256&redirect_uri=https%3A%2F%2Fops.lv3.org%2Foauth2%2Fcallback&response_type=code&scope=openid+profile+email&state=_yQz3i7UJfOwVVDa9XCEkNg7MGJtXw1evfJv14TdWmE%3Ahttps%3A%2F%2Ftasks.lv3.org%2Foauth2%2Fsign_in
+set-cookie: _lv3_ops_portal_proxy_csrf=vXWHSZDcD4o2bjvfc8OT5P1Jk_IWCL4mSr5P9_Jc-e-pHqAdcdowTsmwTnyD5K-woWLCmjDCmYSqRk94YPQdSdCMJWhefdOcwaIWgjIcD_dJIGaFr8BCvlNq-GqdMZWezdij4Z4qazeoRPaYTgnI00H6fjD9UEU3NTLLf0dl9d_zxvD45maoSRnO7Ux2hRQYkXc0vND_-OzdYVASkqbpAzL86OooeIKdQ70oVqR4M20u24kxmoZOid-9Y0WQTvVnKvPrcgsOgSPJcHqbJfU0hjMYowvJDrnDO-_P6jep|1776019478|PciYeLwbc-yaJUZM_muahLWNvqJTsTIvemn3ZaYfBoo=; Path=/; Domain=lv3.org; Max-Age=900; HttpOnly; Secure; SameSite=Lax
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://tasks.lv3.org wss://tasks.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+x-robots-tag: noindex, nofollow

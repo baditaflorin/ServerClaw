@@ -1,0 +1,246 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=converge-identity-core-watchdog
+Preflight workflow: converge-identity-core-watchdog
+Description: Deploy the identity-core health watchdog on runtime-control: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).
+INFO no bootstrap manifest configured for this workflow
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+Result: PASS (converge-identity-core-watchdog)
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=0b99e8a356a94d6cb044de4487cd7170 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/inventory/hosts.yml --run-id 3580336f886f4b69a9ef0de1b5e8a62b --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/identity-core-watchdog.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/identity-core-watchdog.yml (env=production)
+Running scoped playbook: playbooks/identity-core-watchdog.yml limit=runtime-control shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/.ansible/shards/3580336f886f4b69a9ef0de1b5e8a62b/identity-core-watchdog-production.json
+
+PLAY [Converge identity-core watchdog on runtime-control] **********************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:33.613Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:39.490Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:39.502Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:39.530Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:39.540Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:39.598Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:39.606Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:39.635Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:39.641Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost] => (item=runtime-control) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "runtime-control",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:39.670Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:39.677Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:39.697Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:39.704Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost] => (item=runtime-control)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:39.730Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:39.739Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control] => (item=runtime-control)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:42.412Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:42.422Z","vm":"controller","workflow_id":"ansible-playbook"}
+[WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+[DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/tasks/preflight.yml:89:9
+
+87   ansible.builtin.assert:
+88     that:
+89       - ansible_distribution == "Debian"
+           ^ column 9
+
+Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+
+ok: [runtime-control] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:42.498Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:42.504Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:42.917Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:42.928Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook start audit event","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:43.414Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Stat the ntfy publish helper] ********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the ntfy publish helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:43.421Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the ntfy publish helper","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:43.731Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Stat the controller-local ntfy Ansible token] ****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the controller-local ntfy Ansible token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:43.737Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the controller-local ntfy Ansible token","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:44.185Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort ntfy start notification] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort ntfy start notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:44.192Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Publish a best-effort ntfy start notification","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:55.086Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Validating arguments against arg spec 'main' - Install the identity-core health watchdog (ADR 0376).] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Validating arguments against arg spec 'main' - Install the identity-core health watchdog (ADR 0376).","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:55.094Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Validating arguments against arg spec 'main' - Install the identity-core health watchdog (ADR 0376).","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:55.187Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Validate identity watchdog inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Validate identity watchdog inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:55.196Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Validate identity watchdog inputs","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:55.276Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Ensure the identity watchdog directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Ensure the identity watchdog directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:55.287Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control] => (item=/var/lib/lv3-identity-watchdog)
+ok: [runtime-control] => (item=/var/lib/lv3-identity-watchdog/state)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Ensure the identity watchdog directories exist","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:56.696Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Ensure the identity watchdog script directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Ensure the identity watchdog script directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:56.707Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Ensure the identity watchdog script directory exists","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:57.334Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Render the identity watchdog health check script] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Render the identity watchdog health check script","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:57.342Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Render the identity watchdog health check script","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:43:59.040Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Render the identity watchdog systemd service] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Render the identity watchdog systemd service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:59.048Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Render the identity watchdog systemd service","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:00.709Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Render the identity watchdog systemd timer] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Render the identity watchdog systemd timer","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:00.716Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Render the identity watchdog systemd timer","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:02.434Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.identity_core_watchdog : Clear any stale failed state for the identity watchdog service] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.identity_core_watchdog : Clear any stale failed state for the identity watchdog service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:02.446Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.identity_core_watchdog : Clear any stale failed state for the identity watchdog service","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:03.053Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the identity watchdog timer is enabled and active] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the identity watchdog timer is enabled and active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:03.062Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the identity watchdog timer is enabled and active","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:03.075Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for runtime-control
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:03.117Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:03.200Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common systemd_unit entrypoint inputs] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common systemd_unit entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:03.207Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common systemd_unit entrypoint inputs","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:03.283Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Skip systemd management — systemd not available on this host] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Skip systemd management \u2014 systemd not available on this host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:03.291Z","vm":"controller","workflow_id":"ansible-playbook"}
+[DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:12:9
+
+10   ansible.builtin.debug:
+11     msg: "Skipping systemd unit management for {{ common_systemd_unit_name }} — ansible_service_mgr={{ ansible_ser...
+12   when: ansible_service_mgr != 'systemd'
+           ^ column 9
+
+Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+
+skipping: [runtime-control]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Skip systemd management \u2014 systemd not available on this host","service_id":"ansible","target":"runtime-control","task_status":"skipped","trace_id":"background","ts":"2026-04-12T18:44:03.306Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Ensure the managed systemd unit matches the requested state] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:03.313Z","vm":"controller","workflow_id":"ansible-playbook"}
+[DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:20:9
+
+18     state: "{{ common_systemd_unit_state }}"
+19     daemon_reload: "{{ common_systemd_unit_daemon_reload }}"
+20   when: ansible_service_mgr == 'systemd'
+           ^ column 9
+
+Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:04.621Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify the managed systemd unit active state] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:04.631Z","vm":"controller","workflow_id":"ansible-playbook"}
+[DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:33:7
+
+31   when:
+32     - common_systemd_unit_verify_active | bool
+33     - ansible_service_mgr == 'systemd'
+         ^ column 7
+
+Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:05.307Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Verify identity watchdog timer is active] ********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify identity watchdog timer is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:05.330Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify identity watchdog timer is active","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:05.949Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Assert identity watchdog timer is running] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert identity watchdog timer is running","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:05.956Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert identity watchdog timer is running","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:06.035Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Build the shared playbook notification payload] **************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Build the shared playbook notification payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:06.042Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Build the shared playbook notification payload","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:06.072Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort ntfy completion notification] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort ntfy completion notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:06.078Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [runtime-control -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Publish a best-effort ntfy completion notification","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:44:16.672Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort Mattermost completion notification] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:16.679Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [runtime-control]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"runtime-control","task_status":"skipped","trace_id":"background","ts":"2026-04-12T18:44:16.702Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort NATS completion notification command] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:16.709Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [runtime-control]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"runtime-control","task_status":"skipped","trace_id":"background","ts":"2026-04-12T18:44:16.726Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+runtime-control            : ok=31   changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0

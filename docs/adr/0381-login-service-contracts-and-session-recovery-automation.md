@@ -1,10 +1,14 @@
 # ADR 0381: Login Service Contracts and Session Recovery Automation
 
-**Status:** Accepted
-
-**Date:** 2026-04-07
-
-**Supersedes / Extends:** ADR 0248 (Session And Logout Authority)
+- Status: Accepted
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.178.126
+- Implemented In Platform Version: 0.178.78
+- Implemented On: 2026-04-12
+- Date: 2026-04-07
+- Concern: Identity, Automation, Resilience
+- Supersedes / Extends: ADR 0248 (Session And Logout Authority)
+- Tags: login, session-recovery, oauth2-proxy, nginx, watchdog, automation
 
 ## Context
 
@@ -277,7 +281,7 @@ Any change touching authentication MUST follow this converge order:
 
 - [ ] `curl -sI https://ops.example.com/` returns 302 to `/oauth2/sign_in`
 - [ ] `curl -sI https://ops.example.com/oauth2/sign_in` returns 302 to `sso.example.com`
-- [ ] `grep -c _lv3_ops_portal_proxy_csrf /etc/nginx/sites-available/lv3-edge.conf` returns 17
+- [ ] `grep -c _lv3_ops_portal_proxy_csrf /etc/nginx/sites-available/lv3-edge.conf` returns the current protected-site count (observed: 16 on 2026-04-12)
 - [ ] `grep "oauth2/sign_in&client_id" /etc/nginx/sites-available/lv3-edge.conf` returns empty
 - [ ] Browser test: open incognito window, navigate to `ops.example.com`, complete Keycloak login, verify dashboard loads
 - [ ] Browser test: navigate to `tasks.example.com`, verify login works (same shared session)

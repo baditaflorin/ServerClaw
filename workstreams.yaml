@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 305
+  total_workstreams: 306
   by_year:
-    '2026': 305
+    '2026': 306
 workstreams:
 - id: ws-0375-certificate-validation
   adr: '0375'

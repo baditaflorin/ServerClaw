@@ -591,7 +591,8 @@ validate_generated_portals() {
   local generated_portal_output_dir=""
 
   echo "Generated portal validation"
-  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_ops_portal.py" --check \
+    --probe-timeout "${OPS_PORTAL_GATE_PROBE_TIMEOUT:-2}" >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
   generated_docs_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-site.XXXXXX")"
   generated_portal_output_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-portal.XXXXXX")"

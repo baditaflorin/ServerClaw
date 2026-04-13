@@ -15,16 +15,17 @@ Exit codes:
   2 = Script error
 """
 
-import json
-import sys
-import ssl
-import socket
 import argparse
-from datetime import datetime
-from pathlib import Path
-from typing import Optional
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import Enum
+import json
+from pathlib import Path
+import socket
+import ssl
+import subprocess
+import sys
+from typing import Optional
 
 
 class CertStatus(Enum):
@@ -48,6 +49,49 @@ class CertValidationResult:
     days_until_expiry: Optional[int] = None
     error_message: Optional[str] = None
     service_id: Optional[str] = None
+
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def detect_common_repo_root(repo_root: Path) -> Path:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return repo_root
+    common_dir = Path(result.stdout.strip())
+    if not common_dir.is_absolute():
+        common_dir = (repo_root / common_dir).resolve()
+    if common_dir.name == ".git":
+        return common_dir.parent
+    return repo_root
+
+
+def discover_local_root(repo_root: Path, common_repo_root: Path | None = None) -> Path:
+    shared_repo_root = common_repo_root or detect_common_repo_root(repo_root)
+    direct_root = repo_root / ".local"
+    shared_root = shared_repo_root / ".local"
+    if shared_repo_root != repo_root and shared_root.exists():
+        return shared_root
+    if direct_root.exists():
+        return direct_root
+    if shared_root.exists():
+        return shared_root
+    if repo_root.parent.name == ".worktrees":
+        sibling_root = repo_root.parent.parent / ".local"
+        if sibling_root.exists():
+            return sibling_root
+    return direct_root
+
+
+COMMON_REPO_ROOT = detect_common_repo_root(REPO_ROOT)
+LOCAL_ROOT = discover_local_root(REPO_ROOT, COMMON_REPO_ROOT)
 
 
 def _parse_der_cert(der_bytes: bytes) -> dict:
@@ -139,7 +183,7 @@ def validate(
 
     try:
         expiry = datetime.strptime(r.not_after, "%b %d %H:%M:%S %Y %Z")
-        delta = expiry - datetime.utcnow()
+        delta = expiry - datetime.now(UTC).replace(tzinfo=None)
         days_float = delta.total_seconds() / 86400
         days = int(delta.days)
         r.days_until_expiry = days
@@ -250,29 +294,69 @@ def format_text(results: list) -> str:
     return "\n".join(lines)
 
 
+def _read_platform_domain(path: Path) -> Optional[str]:
+    try:
+        import yaml
+    except ImportError:
+        return None
+    if not path.is_file():
+        return None
+    try:
+        identity = yaml.safe_load(path.read_text()) or {}
+    except Exception:
+        return None
+    domain = str(identity.get("platform_domain", "")).strip()
+    return domain or None
+
+
 def _get_real_domain() -> Optional[str]:
-    """Read platform_domain from .local/identity.yml — returns None if unconfigured.
+    """Read platform_domain from the shared .local overlay — returns None if unconfigured.
 
     ADR 0410 Phase 4a: validators must not try to connect to example.com
     (the generic committed placeholder). If .local/identity.yml is absent or
     contains the default, return None so the caller can skip validation.
     """
-    try:
-        import yaml
-    except ImportError:
-        return None
-    repo_root = Path(__file__).resolve().parent.parent
-    local_identity = repo_root / ".local" / "identity.yml"
-    if not local_identity.is_file():
-        return None
-    try:
-        identity = yaml.safe_load(local_identity.read_text())
-        domain = (identity or {}).get("platform_domain", "")
-        if domain and domain != "example.com":
-            return domain
-    except Exception:
-        pass
+    domain = _read_platform_domain(LOCAL_ROOT / "identity.yml")
+    if domain and domain != "example.com":
+        return domain
     return None
+
+
+def _get_committed_domain() -> Optional[str]:
+    return _read_platform_domain(REPO_ROOT / "inventory" / "group_vars" / "all" / "identity.yml")
+
+
+def _rewrite_hostname_for_real_domain(value: str, *, source_domain: Optional[str], real_domain: str) -> str:
+    if not value or not source_domain or source_domain == real_domain:
+        return value
+    if value == source_domain:
+        return real_domain
+    suffix = f".{source_domain}"
+    if value.endswith(suffix):
+        return f"{value[: -len(suffix)]}.{real_domain}"
+    return value
+
+
+def _rewrite_entries_for_real_domain(entries: list[dict], real_domain: str) -> list[dict]:
+    source_domain = _get_committed_domain() or "example.com"
+    rewritten = []
+    for entry in entries:
+        updated = dict(entry)
+        for field in ("fqdn", "target"):
+            value = updated.get(field)
+            if isinstance(value, str):
+                updated[field] = _rewrite_hostname_for_real_domain(
+                    value,
+                    source_domain=source_domain,
+                    real_domain=real_domain,
+                )
+        rewritten.append(updated)
+    return rewritten
+
+
+def _entry_matches_domain(entry: dict, domain: str) -> bool:
+    fqdn = entry.get("fqdn", "")
+    return fqdn == domain or fqdn.endswith(f".{domain}")
 
 
 def main():
@@ -300,19 +384,22 @@ def main():
         print("No active domains found to validate.", file=sys.stderr)
         sys.exit(2)
 
+    real_domain = _get_real_domain()
+    if real_domain:
+        entries = _rewrite_entries_for_real_domain(entries, real_domain)
+
     # ADR 0410 Phase 4a: skip example.com (generic committed placeholder).
-    # Only validate if .local/identity.yml has a real domain configured.
+    # Only validate if the shared .local overlay has a real domain configured.
     if not args.fqdn:
-        real_domain = _get_real_domain()
         if real_domain is None:
             print(
-                "[info] No real platform_domain in .local/identity.yml — skipping TLS validation "
-                "(committed catalog uses example.com placeholder). Configure .local/identity.yml "
+                "[info] No real platform_domain in the shared .local/identity.yml — skipping TLS validation "
+                "(committed catalog uses example.com placeholder). Configure the shared local overlay "
                 "with your real domain to enable certificate checks.",
                 file=sys.stderr,
             )
             sys.exit(0)
-        entries = [e for e in entries if real_domain in e["fqdn"]]
+        entries = [e for e in entries if _entry_matches_domain(e, real_domain)]
         if not entries:
             print(
                 f"[info] No catalog entries match configured domain '{real_domain}' — skipping.",

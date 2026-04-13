@@ -11,6 +11,8 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `litellm` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
+| `librechat` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
 | `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `identity_core_watchdog` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |

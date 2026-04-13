@@ -1,0 +1,66 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=configure-edge-publication
+Preflight workflow: configure-edge-publication
+Description: Publish repo-managed public hostnames at the NGINX edge.
+Bootstrap manifest: controller-local-base
+Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/packer-plugin-cache
+Bootstrap manifest: live-apply-generated-artifacts
+Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/drift-reports
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/image-scans
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json
+Bootstrap manifest: shared-edge-generated-portals
+Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/ops-portal
+PASS file bootstrap_ssh_private_key: .local/ssh/bootstrap.id_ed25519
+Result: PASS (configure-edge-publication)
+/Applications/Xcode.app/Contents/Developer/usr/bin/make generate-platform-vars
+/Applications/Xcode.app/Contents/Developer/usr/bin/make generate-cross-cutting-artifacts
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_cross_cutting_artifacts.py --write
+Loading registry from inventory/group_vars/all/platform_services.yml ...
+
+[HAIRPIN]
+  Wrote 11 hairpin entries to inventory/group_vars/platform_hairpin.yml
+
+[DNS]
+  WARN: s3.example.com (service=minio) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: repo-intake.example.com (service=repo_intake) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: files.example.com (service=sftpgo) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: apps.example.com (service_id=coolify_apps) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: browser.example.com (service_id=neko) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: changelog.example.com (service_id=changelog_portal) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: coolify.example.com (service_id=coolify) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: docs.example.com (service_id=docs_portal) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: grafana.example.com (service_id=grafana) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: grafana.staging.example.com (service_id=grafana) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: headscale.example.com (service_id=headscale) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: home.example.com (service_id=homepage) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: nginx.example.com (service_id=nginx_edge) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: scheduler.example.com (service_id=nomad) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: status.example.com (service_id=status_page) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  Wrote 37 DNS declarations to config/generated/dns-declarations.yaml
+
+[TLS]
+  Wrote 35 TLS cert declarations to inventory/group_vars/platform_tls_certs.yml
+
+[PROXY]
+  Wrote 32 nginx upstreams to config/generated/nginx-upstreams.conf and config/generated/nginx-upstreams.yaml
+
+[SSO]
+  Wrote 16 SSO client declarations to config/generated/sso-clients.yaml
+
+All concerns passed.
+PYTHONPATH=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_platform_vars.py --write
+Wrote generated platform vars to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/subdomain_exposure_audit.py --write-registry --validate
+/Applications/Xcode.app/Contents/Developer/usr/bin/make generate-changelog-portal docs
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_changelog_portal.py --write

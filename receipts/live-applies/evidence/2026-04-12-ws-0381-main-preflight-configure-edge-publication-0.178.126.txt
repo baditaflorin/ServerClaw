@@ -1,0 +1,24 @@
+Preflight workflow: configure-edge-publication
+Description: Publish repo-managed public hostnames at the NGINX edge.
+Bootstrap manifest: controller-local-base
+Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/.local/packer-plugin-cache
+Bootstrap manifest: live-apply-generated-artifacts
+Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/receipts/drift-reports
+PASS bootstrap artifact image_scan_receipts: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/receipts/image-scans via `python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact image_scan_receipts`
+PASS bootstrap artifact uptime_kuma_monitors: materialized file at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/config/uptime-kuma/monitors.json via `python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact uptime_kuma_monitors`
+PASS bootstrap artifact https_tls_alerts: materialized file at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/config/prometheus/rules/https_tls_alerts.yml via `python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact https_tls_alerts`
+PASS bootstrap artifact https_tls_targets: materialized file at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/config/prometheus/file_sd/https_tls_targets.yml via `python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact https_tls_targets`
+PASS bootstrap artifact platform_vars: materialized file at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/inventory/group_vars/platform.yml via `python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact platform_vars`
+Bootstrap manifest: shared-edge-generated-portals
+Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
+PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/changelog-portal via `make generate-changelog-portal`
+PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/docs-portal via `make docs`
+PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/ops-portal via `make generate-ops-portal`
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+Result: PASS (configure-edge-publication)

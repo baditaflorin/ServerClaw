@@ -3,8 +3,8 @@
 - **Date**: 2026-04-06
 - **Status**: Accepted
 - **Implementation Status**: Implemented
-- **Implemented In Repo Version**: 0.178.124
-- **Implemented In Platform Version**: not yet applied
+- **Implemented In Repo Version**: 0.178.126
+- **Implemented In Platform Version**: 0.178.126
 - **Implemented On**: 2026-04-12
 - **Deciders**: platform team
 - **Concern**: platform, dry

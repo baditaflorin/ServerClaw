@@ -10,6 +10,19 @@ REPO_USER_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "rec
 ADMIN_CLIENT_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "reconcile_admin_client.yml"
 COMPOSE_TEMPLATE_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "templates" / "docker-compose.yml.j2"
 SERVERCLAW_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "serverclaw_client.yml"
+PLANE_CLIENT_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "plane_client.yml"
+COMMON_COMPOSE_MACROS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "common"
+    / "templates"
+    / "compose_macros.j2"
+)
+PLAYBOOK_COMPOSE_MACROS_PATH = REPO_ROOT / "playbooks" / "templates" / "compose_macros.j2"
 
 
 def load_tasks(path: Path = TASKS_PATH) -> list[dict]:
@@ -36,11 +49,45 @@ def load_admin_client_tasks() -> list[dict]:
     return yaml.safe_load(ADMIN_CLIENT_TASKS_PATH.read_text())
 
 
+def load_plane_client_tasks() -> list[dict]:
+    return yaml.safe_load(PLANE_CLIENT_TASKS_PATH.read_text())
+
+
 def assert_task_retries(task: dict, register: str) -> None:
     assert task["register"] == register
     assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
     assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
     assert task["until"] == f"{register} is succeeded"
+
+
+def test_playbook_template_loader_exports_current_shared_compose_macros() -> None:
+    assert PLAYBOOK_COMPOSE_MACROS_PATH.read_text() == COMMON_COMPOSE_MACROS_PATH.read_text()
+
+
+def test_plane_oidc_client_reconciliation_uses_keycloak_client_module() -> None:
+    tasks = load_plane_client_tasks()
+    config_task = next(task for task in tasks if task.get("name") == "Set Plane OIDC client configuration facts")
+    reconcile_task = next(task for task in tasks if task.get("name") == "Ensure Plane OIDC client exists")
+
+    assert config_task["ansible.builtin.set_fact"]["plane_oidc_public_url"] == (
+        "{{ hostvars[platform_topology_host].platform_service_topology.plane.urls.public }}"
+    )
+    assert config_task["ansible.builtin.set_fact"]["plane_oidc_internal_url"] == (
+        "{{ hostvars[platform_topology_host].platform_service_topology.plane.urls.internal }}"
+    )
+
+    client = reconcile_task["community.general.keycloak_client"]
+    assert client["client_id"] == "{{ plane_oidc_client_id }}"
+    assert client["secret"] == "{{ plane_oidc_client_secret }}"
+    assert client["redirect_uris"] == [
+        "{{ plane_oidc_public_url }}/auth/callback/keycloak",
+        "{{ plane_oidc_public_url }}/auth/oidc/callback",
+        "{{ plane_oidc_internal_url }}/auth/callback/keycloak",
+        "{{ plane_oidc_internal_url }}/auth/oidc/callback",
+    ]
+    assert client["valid_post_logout_redirect_uris"] == "{{ keycloak_plane_post_logout_redirect_uris }}"
+    assert reconcile_task["register"] == "plane_client_reconcile"
+    assert reconcile_task["until"] == "plane_client_reconcile is succeeded"
 
 
 def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
@@ -49,7 +96,7 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_session_authority"] == "{{ platform_session_authority }}"
     assert (
         defaults["keycloak_database_host"]
-        == "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
+        == "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
     )
     assert defaults["keycloak_mail_platform_submission_host"] == "{{ smtp_host }}"
     assert defaults["keycloak_mail_platform_submission_port"] == "{{ smtp_port }}"
@@ -71,29 +118,33 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_compose_project_name"] == "keycloak"
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
-    assert defaults["keycloak_langfuse_client_secret_local_file"].endswith(
-        "/.local/keycloak/langfuse-client-secret.txt"
+    assert defaults["keycloak_langfuse_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/langfuse-client-secret.txt"
     )
     assert defaults["keycloak_superset_client_id"] == "superset"
-    assert defaults["keycloak_superset_client_secret_local_file"].endswith(
-        "/.local/keycloak/superset-client-secret.txt"
+    assert defaults["keycloak_superset_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/superset-client-secret.txt"
     )
     assert defaults["keycloak_glitchtip_client_id"] == "glitchtip"
-    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith(
-        "/.local/keycloak/glitchtip-client-secret.txt"
+    assert defaults["keycloak_glitchtip_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/glitchtip-client-secret.txt"
     )
     assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
-    assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
-        "/.local/keycloak/serverclaw-runtime-client-secret.txt"
+    assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/serverclaw-runtime-client-secret.txt"
     )
     assert defaults["keycloak_admin_client_id"] == "lv3-admin-runtime"
-    assert defaults["keycloak_admin_client_secret_local_file"].endswith("/.local/keycloak/admin-client-secret.txt")
+    assert defaults["keycloak_admin_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/admin-client-secret.txt"
+    )
     assert defaults["keycloak_recovery_admin_service_client_id"] == "lv3-recovery-admin"
     assert defaults["keycloak_grist_client_id"] == "grist"
-    assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
+    assert defaults["keycloak_grist_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/grist-client-secret.txt"
+    )
     assert defaults["keycloak_outline_automation_username"] == "outline.automation"
-    assert defaults["keycloak_outline_automation_password_local_file"].endswith(
-        "/.local/keycloak/outline.automation-password.txt"
+    assert defaults["keycloak_outline_automation_password_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/outline.automation-password.txt"
     )
     assert defaults["keycloak_ops_portal_post_logout_redirect_uris"] == [
         "{{ keycloak_ops_portal_root_url }}/",
@@ -109,7 +160,7 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_grist_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
-    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.example.com"
+    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.{{ platform_domain }}"
     assert defaults["keycloak_glitchtip_post_logout_redirect_uris"] == [
         "{{ keycloak_glitchtip_root_url }}",
         "{{ keycloak_glitchtip_root_url }}/",
@@ -120,16 +171,16 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_outline_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
-    assert defaults["keycloak_superset_root_url"] == "https://bi.example.com"
+    assert defaults["keycloak_superset_root_url"] == "https://bi.{{ platform_domain }}"
     assert defaults["keycloak_superset_post_logout_redirect_uris"] == [
         "{{ keycloak_superset_root_url }}",
         "{{ keycloak_superset_root_url }}/",
     ]
     assert defaults["keycloak_paperless_client_id"] == "paperless"
-    assert defaults["keycloak_paperless_client_secret_local_file"].endswith(
-        "/.local/keycloak/paperless-client-secret.txt"
+    assert defaults["keycloak_paperless_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/paperless-client-secret.txt"
     )
-    assert defaults["keycloak_paperless_root_url"] == "https://paperless.example.com"
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.{{ platform_domain }}"
     assert defaults["keycloak_paperless_post_logout_redirect_uris"] == [
         "{{ keycloak_paperless_root_url }}",
         "{{ keycloak_paperless_root_url }}/",
@@ -148,25 +199,32 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
 
 def test_role_requires_local_mail_submission_secret() -> None:
     tasks = load_tasks()
-    stat_task = next(
+    secret_check_task = next(
         task
         for task in tasks
-        if task.get("name")
-        == "Ensure the Keycloak mail submission password exists on the control machine when SMTP auth is enabled"
+        if task.get("name") == "Check Keycloak mail submission password when SMTP auth is enabled"
     )
-    fail_task = next(
-        task
-        for task in tasks
-        if task.get("name")
-        == "Fail if the Keycloak mail submission password is missing locally when SMTP auth is enabled"
-    )
-    assert stat_task["ansible.builtin.stat"]["path"] == "{{ keycloak_mail_platform_submission_password_local_file }}"
-    assert stat_task["when"] == "keycloak_mail_platform_submission_auth_enabled"
-    assert fail_task["when"] == [
-        "keycloak_mail_platform_submission_auth_enabled",
-        "not keycloak_mail_platform_submission_password_local.stat.exists",
+    assert secret_check_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert secret_check_task["ansible.builtin.include_role"]["tasks_from"] == "check_local_secrets"
+    assert secret_check_task["vars"]["common_check_local_secrets_files"] == [
+        {
+            "path": "{{ keycloak_mail_platform_submission_password_local_file }}",
+            "description": "Keycloak mail submission password",
+            "prerequisite": "Converge the mail platform before deploying Keycloak",
+        }
     ]
-    assert "password-reset and required-action mail" in fail_task["ansible.builtin.fail"]["msg"]
+    assert secret_check_task["when"] == "keycloak_mail_platform_submission_auth_enabled"
+
+
+def test_ops_portal_post_logout_redirects_cover_stale_session_recovery() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+
+    assert defaults["keycloak_ops_portal_root_url"] == "https://ops.{{ platform_domain }}"
+    assert defaults["keycloak_ops_portal_post_logout_redirect_uris"] == [
+        "{{ keycloak_ops_portal_root_url }}/",
+        "{{ keycloak_ops_portal_root_url }}",
+        "{{ keycloak_session_authority.shared_logged_out_url }}",
+    ]
 
 
 def test_role_reuses_recent_apt_cache_for_runtime_packages() -> None:
@@ -181,7 +239,7 @@ def test_role_reuses_recent_apt_cache_for_runtime_packages() -> None:
 def test_realm_task_applies_repo_managed_smtp_settings() -> None:
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    assert realm_block["module_defaults"]["group/community.general.keycloak"]["connection_timeout"] == (
+    assert realm_block["module_defaults"]["community.general.keycloak_realm"]["connection_timeout"] == (
         "{{ keycloak_admin_connection_timeout }}"
     )
     realm_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the LV3 realm exists")
@@ -262,6 +320,9 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
+    assert compose_render["vars"]["ansible_search_path"] == (
+        "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
+    )
     assert defaults["keycloak_image_pull_retries"] == 5
     assert defaults["keycloak_image_pull_delay_seconds"] == 5
     assert image_pull["retries"] == "{{ keycloak_image_pull_retries }}"
@@ -846,7 +907,7 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
     assert defaults["keycloak_admin_connection_timeout"] == 60
     assert defaults["keycloak_admin_reconciliation_retries"] == 24
     assert defaults["keycloak_admin_reconciliation_delay"] == 5
-    assert realm_block["module_defaults"]["group/community.general.keycloak"]["connection_timeout"] == (
+    assert realm_block["module_defaults"]["community.general.keycloak_realm"]["connection_timeout"] == (
         "{{ keycloak_admin_connection_timeout }}"
     )
     retry_task_names = [
@@ -859,10 +920,14 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         "Ensure the Gitea OAuth client exists",
         "Ensure the agent service client exists",
         "Ensure the Langfuse OAuth client exists",
+        "Ensure the Dify OAuth client exists",
+        "Ensure the Nomad OIDC client exists",
+        "Ensure the Directus OAuth client exists",
         "Ensure the Outline OAuth client exists",
         "Ensure the Paperless OAuth client exists",
         "Ensure the Superset OAuth client exists",
         "Ensure the ServerClaw OAuth client exists",
+        "Ensure the Grist OAuth client exists",
         "Ensure the API gateway client exists",
         "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent",
         "Ensure the ServerClaw runtime client exists",
@@ -881,6 +946,8 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         "Read the ServerClaw client secret",
         "Read the API gateway client secret",
         "Read the ServerClaw runtime client secret",
+        "Read the Dify client secret",
+        "Read the Nomad client secret",
     ]
     for task_name in retry_task_names:
         task = next(task for task in realm_block["block"] if task.get("name") == task_name)
@@ -964,10 +1031,10 @@ def test_role_manages_directus_client_secret() -> None:
     )
 
     assert defaults["keycloak_directus_client_id"] == "directus"
-    assert defaults["keycloak_directus_client_secret_local_file"].endswith(
-        "/.local/keycloak/directus-client-secret.txt"
+    assert defaults["keycloak_directus_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/directus-client-secret.txt"
     )
-    assert defaults["keycloak_directus_root_url"] == "https://data.example.com"
+    assert defaults["keycloak_directus_root_url"] == "https://data.{{ platform_domain }}"
     assert directus_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_directus_client_id }}"
     assert directus_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_directus_root_url }}/auth/login/keycloak/callback"
@@ -1018,11 +1085,15 @@ def test_role_manages_outline_client_secret() -> None:
         task for task in tasks if task.get("name") == "Mirror the Outline client secret to the control machine"
     )
     assert defaults["keycloak_grist_client_id"] == "grist"
-    assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
-    assert defaults["keycloak_grist_root_url"] == "https://grist.example.com"
+    assert defaults["keycloak_grist_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/grist-client-secret.txt"
+    )
+    assert defaults["keycloak_grist_root_url"] == "https://grist.{{ platform_domain }}"
     assert defaults["keycloak_outline_client_id"] == "outline"
-    assert defaults["keycloak_outline_client_secret_local_file"].endswith("/.local/keycloak/outline-client-secret.txt")
-    assert defaults["keycloak_outline_root_url"] == "https://wiki.example.com"
+    assert defaults["keycloak_outline_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/outline-client-secret.txt"
+    )
+    assert defaults["keycloak_outline_root_url"] == "https://wiki.{{ platform_domain }}"
     assert grafana_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_grafana_post_logout_redirect_uris }}"
     )
@@ -1070,10 +1141,10 @@ def test_role_manages_paperless_client_secret() -> None:
     )
 
     assert defaults["keycloak_paperless_client_id"] == "paperless"
-    assert defaults["keycloak_paperless_client_secret_local_file"].endswith(
-        "/.local/keycloak/paperless-client-secret.txt"
+    assert defaults["keycloak_paperless_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/paperless-client-secret.txt"
     )
-    assert defaults["keycloak_paperless_root_url"] == "https://paperless.example.com"
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.{{ platform_domain }}"
     assert (
         paperless_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_paperless_client_id }}"
     )
@@ -1105,10 +1176,10 @@ def test_role_manages_superset_client_secret() -> None:
     )
 
     assert defaults["keycloak_superset_client_id"] == "superset"
-    assert defaults["keycloak_superset_client_secret_local_file"].endswith(
-        "/.local/keycloak/superset-client-secret.txt"
+    assert defaults["keycloak_superset_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/superset-client-secret.txt"
     )
-    assert defaults["keycloak_superset_root_url"] == "https://bi.example.com"
+    assert defaults["keycloak_superset_root_url"] == "https://bi.{{ platform_domain }}"
     assert superset_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_superset_client_id }}"
     assert superset_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_superset_root_url }}/oauth-authorized/keycloak"
@@ -1144,10 +1215,10 @@ def test_role_manages_serverclaw_client_secret() -> None:
         task for task in tasks if task.get("name") == "Mirror the ServerClaw client secret to the control machine"
     )
     assert defaults["keycloak_serverclaw_client_id"] == "serverclaw"
-    assert defaults["keycloak_serverclaw_client_secret_local_file"].endswith(
-        "/.local/keycloak/serverclaw-client-secret.txt"
+    assert defaults["keycloak_serverclaw_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/serverclaw-client-secret.txt"
     )
-    assert defaults["keycloak_serverclaw_root_url"] == "https://chat.example.com"
+    assert defaults["keycloak_serverclaw_root_url"] == "https://chat.{{ platform_domain }}"
     assert defaults["keycloak_serverclaw_post_logout_redirect_uris"] == [
         "{{ keycloak_serverclaw_root_url }}",
         "{{ keycloak_serverclaw_root_url }}/",
@@ -1206,12 +1277,7 @@ def test_role_manages_the_outline_automation_identity() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
-    password_generation_task = next(
-        task for task in tasks if task.get("name") == "Generate the Outline automation password"
-    )
-    password_mirror_task = next(
-        task for task in tasks if task.get("name") == "Mirror the Outline automation password to the control machine"
-    )
+    runtime_secrets_task = next(task for task in tasks if task.get("name") == "Manage Keycloak runtime secrets")
     repo_user_reconciliation = next(
         task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users"
     )
@@ -1267,10 +1333,15 @@ def test_role_manages_the_outline_automation_identity() -> None:
     automation_password_task = next(
         task for task in repo_user_tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
     )
-    assert password_generation_task["ansible.builtin.shell"].count("openssl rand -base64 24") == 1
-    assert (
-        password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
-    )
+    assert {
+        "path": "{{ keycloak_outline_automation_password_remote_file }}",
+        "command": "openssl rand -base64 24 | tr -d '\\n'",
+        "label": "keycloak-outline-automation-password",
+    } in runtime_secrets_task["vars"]["common_manage_service_secrets_generate"]
+    assert {
+        "dest": "{{ keycloak_outline_automation_password_local_file }}",
+        "content_index": 4,
+    } in runtime_secrets_task["vars"]["common_manage_service_secrets_mirror"]
     assert defaults["keycloak_repo_user_reconciliation_retries"] == 24
     assert defaults["keycloak_repo_user_reconciliation_delay"] == 5
     assert defaults["keycloak_admin_connection_timeout"] == 60
@@ -1434,10 +1505,10 @@ def test_role_manages_glitchtip_client_secret() -> None:
     )
 
     assert defaults["keycloak_glitchtip_client_id"] == "glitchtip"
-    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith(
-        "/.local/keycloak/glitchtip-client-secret.txt"
+    assert defaults["keycloak_glitchtip_client_secret_local_file"] == (
+        "{{ keycloak_local_artifact_dir }}/glitchtip-client-secret.txt"
     )
-    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.example.com"
+    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.{{ platform_domain }}"
     assert defaults["keycloak_glitchtip_post_logout_redirect_uris"] == [
         "{{ keycloak_glitchtip_root_url }}",
         "{{ keycloak_glitchtip_root_url }}/",
