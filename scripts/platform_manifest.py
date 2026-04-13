@@ -165,7 +165,7 @@ def build_recent_changes(current_version: str) -> dict[str, str]:
 
 
 def load_static_config() -> dict[str, Any]:
-    from validation_toolkit import load_yaml_with_identity
+    from identity_yaml import load_yaml_with_identity
 
     payload = load_yaml_with_identity(STATIC_CONFIG_PATH)
     if not isinstance(payload, dict):

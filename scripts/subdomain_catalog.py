@@ -23,8 +23,8 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
 
 from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
+from identity_yaml import load_yaml_with_identity
 from validation_toolkit import (
-    load_yaml_with_identity,
     require_bool,
     require_list,
     require_mapping,
