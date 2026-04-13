@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.134",
-  "platform_version": "0.178.132",
-  "generated_at": "2026-04-13T22:48:49Z",
-  "next_refresh_at": "2026-04-13T23:48:49Z",
+  "repo_version": "0.178.135",
+  "platform_version": "0.178.133",
+  "generated_at": "2026-04-13T23:56:25Z",
+  "next_refresh_at": "2026-04-14T00:56:25Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -708,11 +708,11 @@
       },
       "repo_intake": {
         "service_name": "Repo Intake",
-        "status": "degraded",
-        "score": 0.75,
-        "safe_to_act": false,
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
         "source": "repo_evidence",
-        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://repo-intake.example.com",
         "last_live_apply": "2026-04-12T00:00:00Z"
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.133",
+    "last_version": "0.178.134",
     "deployed_at": "2026-04-13",
-    "summary": "ADR 0416 Phase 2: eliminate source_vm from platform_postgres_clients; derive pg_hba client IP from platform_service_registry.host_group at template render time \u2014 topology drift now impossible by construction; SSH-verified 6 pending registry corrections (uptime_kuma, mail_platform, redpanda, gotenberg, ollama, piper) live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end",
-    "release_notes_url": "docs/release-notes/0.178.134.md"
+    "summary": "ADR 0417: external attack surface hardening \u2014 LibreChat registration off by default, RFC 1918 IPs removed from system prompt, Keycloak /admin/ IP-ACL restricted to internal CIDRs, API gateway /docs blocked at nginx edge; regression tests in CI ADR 0416 Phase 2: eliminate source_vm from platform_postgres_clients; derive pg_hba client IP from platform_service_registry.host_group at template render time \u2014 topology drift now impossible by construction; SSH-verified 6 pending registry corrections (uptime_kuma, mail_platform, redpanda, gotenberg, ollama, piper)",
+    "release_notes_url": "docs/release-notes/0.178.135.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
