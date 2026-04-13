@@ -1,0 +1,6 @@
+Command: make remote-validate
+
+Result: failed
+- Build server could not pull runner images from registry.example.com (DNS lookup failure).
+- Local fallback marked all checks runner_unavailable due to docker info timeouts.
+- Gate status merged into .local/validation-gate/remote-validate-last-run.json for review.

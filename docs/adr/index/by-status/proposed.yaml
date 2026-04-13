@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 33
+total_adrs: 30
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -40,24 +40,6 @@ adrs:
     summary: 'Implementation Roadmap: Compose-Managed Runtime Stacks'
     filename: 0025-implementation-roadmap.md
     path: docs/adr/0025-implementation-roadmap.md
-  - adr: '0346'
-    title: '— Repowise: local semantic code search over the git repo'
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: documentation
-    keywords:
-      - repowise
-      - local
-      - semantic
-      - code
-      - search
-      - over
-      - git
-      - repo
-    summary: 'Deploy repowise — a local semantic code search service — using:'
-    filename: 0346-repowise-semantic-search.md
-    path: docs/adr/0346-repowise-semantic-search.md
   - adr: 0359
     title: Declarative PostgreSQL Client Registry
     status: Proposed
@@ -190,40 +172,6 @@ adrs:
       what it needs from DNS, nginx, TLS, and SSO — in '
     filename: 0374-cross-cutting-service-manifest.md
     path: docs/adr/0374-cross-cutting-service-manifest.md
-  - adr: 0380
-    title: Neko Remote Desktop for Interactive Operator Browser Access
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: identity
-    keywords:
-      - neko
-      - remote
-      - desktop
-      - interactive
-      - operator
-      - browser
-      - access
-    summary: Neko Remote Desktop for Interactive Operator Browser Access
-    filename: 0380-neko-for-operator-remote-browser-access.md
-    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
-  - adr: 0381
-    title: Login Service Contracts and Session Recovery Automation
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: automation
-    keywords:
-      - login
-      - service
-      - contracts
-      - session
-      - recovery
-      - automation
-    summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
-      .example.com.
-    filename: 0381-login-service-contracts-and-session-recovery-automation.md
-    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
   - adr: 0382
     title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
     status: Proposed

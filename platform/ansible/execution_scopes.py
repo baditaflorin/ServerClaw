@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from platform.execution_lanes import LaneRegistry, load_execution_lane_catalog
-from platform.repo import REPO_ROOT, load_yaml, shared_repo_root
+from platform.repo import REPO_ROOT, load_yaml, local_overlay_root
 
 
 CATALOG_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
@@ -725,8 +725,8 @@ def _resolve_identity_override(repo_root: Path) -> list[str]:
     deployment-specific values (real domain, operator name) override the
     generic defaults committed in ``inventory/group_vars/all/identity.yml``.
     """
-    # .local/ is always relative to the main repo root, even from worktrees.
-    local_identity = shared_repo_root(repo_root) / ".local" / "identity.yml"
+    # .local/ is always relative to the shared repo root, even from worktrees.
+    local_identity = local_overlay_root(repo_root) / "identity.yml"
     if local_identity.is_file():
         return ["-e", f"@{local_identity}"]
     return []

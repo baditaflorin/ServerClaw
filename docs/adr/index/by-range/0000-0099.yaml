@@ -426,8 +426,9 @@ adrs:
     summary: Long-running workloads on docker-runtime will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
-    implemented_in_platform_version: 0.23.0
-    implemented_on: '2026-03-22'
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
   - adr: '0025'
     title: Gap Analysis Matrix
     status: Proposed

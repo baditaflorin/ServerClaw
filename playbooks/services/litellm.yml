@@ -1,6 +1,11 @@
+# Playbook: playbooks/services/litellm.yml
+# Purpose: Re-export the top-level LiteLLM playbook through the services namespace used by grouped automation entrypoints.
+# Use case: Run when service-scoped orchestration needs to converge LiteLLM via `playbooks/services/`.
+# Inputs: Inventory targeting and any variables consumed by `playbooks/litellm.yml`.
+# Outputs: Delegates execution to the canonical LiteLLM playbook without adding new runtime behavior.
+# Idempotency: Fully idempotent because this file only imports another playbook.
+# Dependencies: ADR 0165 and playbooks/litellm.yml.
+# depends_on:
+#   - playbooks/litellm.yml
 ---
-# Service Playbook Wrapper: litellm.yml
-# Purpose: Delegates to the main LiteLLM convergence playbook.
-# This wrapper allows service-level orchestration and cross-service dependencies.
-
 - import_playbook: ../litellm.yml

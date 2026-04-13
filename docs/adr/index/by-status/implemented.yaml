@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 344
+total_adrs: 347
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -147,8 +147,9 @@ adrs:
     summary: Long-running workloads on docker-runtime will use a compose-managed deployment model.
     filename: 0025-compose-managed-runtime-stacks.md
     path: docs/adr/0025-compose-managed-runtime-stacks.md
-    implemented_in_platform_version: 0.23.0
-    implemented_on: '2026-03-22'
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
   - adr: '0026'
     title: Dedicated PostgreSQL VM Baseline
     status: Accepted
@@ -6036,6 +6037,27 @@ adrs:
     path: docs/adr/0346-outline-programmatic-wiki-api-and-automation-hooks.md
     implemented_in_platform_version: 0.178.4
     implemented_on: '2026-04-05'
+  - adr: '0346'
+    title: '— Repowise: local semantic code search over the git repo'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
+    concern: documentation
+    keywords:
+      - repowise
+      - local
+      - semantic
+      - code
+      - search
+      - over
+      - git
+      - repo
+    summary: 'Deploy repowise — a local semantic code search service — using:'
+    filename: 0346-repowise-semantic-search.md
+    path: docs/adr/0346-repowise-semantic-search.md
+    implemented_in_repo_version: 0.178.125
+    implemented_in_platform_version: 0.178.77
+    implemented_on: '2026-04-12'
   - adr: '0360'
     title: OpenBao TLS Cert Lifetime And Renewal Hardening
     status: Accepted
@@ -6203,6 +6225,53 @@ adrs:
     summary: We will expose ServerClaw governed tools in Open WebUI in two phases.
     filename: 0378-serverclaw-tool-surface-in-open-webui.md
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
+  - adr: 0380
+    title: Neko Remote Desktop for Interactive Operator Browser Access
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: identity
+    keywords:
+      - browser
+      - remote-desktop
+      - webrtc
+      - operator-access
+      - runtime-comms
+      - neko
+      - remote
+      - desktop
+      - interactive
+      - operator
+    summary: We will provide interactive operator browser access through multi-instance Neko
+    filename: 0380-neko-for-operator-remote-browser-access.md
+    path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
+  - adr: 0381
+    title: Login Service Contracts and Session Recovery Automation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-07'
+    concern: automation
+    keywords:
+      - login
+      - session-recovery
+      - oauth2-proxy
+      - nginx
+      - watchdog
+      - automation
+      - service
+      - contracts
+      - session
+      - recovery
+    summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
+      .example.com.
+    filename: 0381-login-service-contracts-and-session-recovery-automation.md
+    path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
   - adr: 0389
     title: Standard Procedure for Decommissioning a Platform Service
     status: Accepted

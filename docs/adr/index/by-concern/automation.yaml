@@ -503,21 +503,28 @@ adrs:
     path: docs/adr/0372-data-driven-playbook-composition.md
   - adr: 0381
     title: Login Service Contracts and Session Recovery Automation
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-07'
     concern: automation
     keywords:
       - login
+      - session-recovery
+      - oauth2-proxy
+      - nginx
+      - watchdog
+      - automation
       - service
       - contracts
       - session
       - recovery
-      - automation
     summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
       .example.com.
     filename: 0381-login-service-contracts-and-session-recovery-automation.md
     path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
   - adr: 0389
     title: Standard Procedure for Decommissioning a Platform Service
     status: Accepted

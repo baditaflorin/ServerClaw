@@ -1,10 +1,10 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://draw.example.com",
+  "source": "https://draw.localhost",
   "elements": [
     {
-      "id": "206dbd804eae39dc",
+      "id": "4d16df857cc6072f",
       "type": "rectangle",
       "x": 400,
       "y": 220,
@@ -33,7 +33,7 @@
       "locked": false
     },
     {
-      "id": "01ea00249e0960ae",
+      "id": "cc0b3bc09f327ca1",
       "type": "text",
       "x": 420,
       "y": 242,
@@ -71,7 +71,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "6012becad8aeb7d3",
+      "id": "383763625c84d2f5",
       "type": "rectangle",
       "x": 80,
       "y": 60,
@@ -100,7 +100,7 @@
       "locked": false
     },
     {
-      "id": "f7cc59fb3469d96e",
+      "id": "4dd451a26afaff5d",
       "type": "text",
       "x": 100,
       "y": 82,
@@ -138,7 +138,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "62e32e5c32aeace1",
+      "id": "f7be984621f55b70",
       "type": "rectangle",
       "x": 80,
       "y": 420,
@@ -167,7 +167,7 @@
       "locked": false
     },
     {
-      "id": "c3c3ff577fdfd58d",
+      "id": "cddc98fba44b938a",
       "type": "text",
       "x": 100,
       "y": 442,
@@ -205,7 +205,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "ff644b9cc8da93d4",
+      "id": "a1a69d8f00841565",
       "type": "rectangle",
       "x": 720,
       "y": 60,
@@ -234,7 +234,7 @@
       "locked": false
     },
     {
-      "id": "0574774e3f55a3cf",
+      "id": "e25bdcc7f3e72b51",
       "type": "text",
       "x": 740,
       "y": 82,
@@ -261,18 +261,18 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "NGINX Edge\nnginx-edge",
+      "text": "NGINX Edge\nnginx",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "NGINX Edge\nnginx-edge",
+      "originalText": "NGINX Edge\nnginx",
       "lineHeight": 1.25
     },
     {
-      "id": "93002229718e3521",
+      "id": "9ced36db19f2ea4b",
       "type": "rectangle",
       "x": 1040,
       "y": 220,
@@ -301,7 +301,7 @@
       "locked": false
     },
     {
-      "id": "3321a4db5da12e31",
+      "id": "d2180226f09cdf0b",
       "type": "text",
       "x": 1060,
       "y": 242,
@@ -328,18 +328,18 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Total tracked services\n76",
+      "text": "Total tracked services\n75",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Total tracked services\n76",
+      "originalText": "Total tracked services\n75",
       "lineHeight": 1.25
     },
     {
-      "id": "25c1d169a2befa78",
+      "id": "57f4f567a84c150b",
       "type": "arrow",
       "x": 510,
       "y": 268,
@@ -383,7 +383,7 @@
       "endArrowhead": "triangle"
     },
     {
-      "id": "d4fbf4e117345122",
+      "id": "7666a2c099573daf",
       "type": "arrow",
       "x": 510,
       "y": 268,
@@ -427,7 +427,7 @@
       "endArrowhead": "triangle"
     },
     {
-      "id": "500773f50125db11",
+      "id": "624e923ff009b5dd",
       "type": "arrow",
       "x": 510,
       "y": 268,

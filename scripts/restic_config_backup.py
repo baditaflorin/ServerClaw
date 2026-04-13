@@ -33,6 +33,12 @@ from script_bootstrap import ensure_repo_root_on_path
 
 REPO_ROOT = ensure_repo_root_on_path(__file__)
 
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
+
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 from platform.events import build_envelope
 from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
@@ -54,7 +60,7 @@ DEFAULT_GRACE_MINUTES = 30
 DEFAULT_MINIO_READY_RETRIES = 12
 DEFAULT_MINIO_READY_DELAY_SECONDS = 5
 DEFAULT_MINIO_HEALTH_PATH = "/minio/health/live"
-DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS = 180
+DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS = 300
 NTFY_CRITICAL_TITLE = "Restic backup critical"
 NTFY_STALE_MESSAGE_PREFIX = "Restic backup source is stale"
 FALLBACK_MINIO_CONTAINER_NAMES = ("outline-minio",)
@@ -475,6 +481,34 @@ def restic_call(
     return outcome
 
 
+def load_restic_snapshots(
+    *,
+    catalog: dict[str, Any],
+    credentials: dict[str, str],
+    endpoint: str,
+    cache_dir: Path,
+    tag: str | None = None,
+    latest: int | None = None,
+) -> list[dict[str, Any]]:
+    args = ["snapshots", "--json"]
+    if latest is not None:
+        args.extend(["--latest", str(latest)])
+    if tag:
+        args.extend(["--tag", tag])
+    snapshots_result = restic_call(
+        args,
+        catalog=catalog,
+        credentials=credentials,
+        endpoint=endpoint,
+        cache_dir=cache_dir,
+        timeout=DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS,
+    )
+    snapshots = json.loads(snapshots_result.stdout or "[]")
+    if not isinstance(snapshots, list):
+        raise ValueError("restic snapshots output must be a list")
+    return snapshots
+
+
 def ensure_restic_repository(
     *,
     catalog: dict[str, Any],
@@ -483,7 +517,7 @@ def ensure_restic_repository(
     cache_dir: Path,
 ) -> None:
     snapshots = run_command(
-        ["restic", *restic_common_args(catalog), "snapshots", "--json"],
+        ["restic", *restic_common_args(catalog), "snapshots", "--json", "--latest", "1"],
         env=build_restic_env(catalog=catalog, credentials=credentials, endpoint=endpoint, cache_dir=cache_dir),
         timeout=DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS,
     )
@@ -626,18 +660,6 @@ def summarize_latest_snapshots(
     restore_verify_dir: Path,
     generated_at: datetime,
 ) -> dict[str, Any]:
-    snapshots_result = restic_call(
-        ["snapshots", "--json"],
-        catalog=catalog,
-        credentials=credentials,
-        endpoint=endpoint,
-        cache_dir=cache_dir,
-        timeout=DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS,
-    )
-    snapshots = json.loads(snapshots_result.stdout or "[]")
-    if not isinstance(snapshots, list):
-        raise ValueError("restic snapshots output must be a list")
-
     source_entries: list[dict[str, Any]] = []
     summary = {
         "governed_sources": len(sources),
@@ -651,6 +673,14 @@ def summarize_latest_snapshots(
     for source in sources:
         existing_paths = [path for path in source.paths if path.exists()]
         reasons: list[str] = []
+        snapshots = load_restic_snapshots(
+            catalog=catalog,
+            credentials=credentials,
+            endpoint=endpoint,
+            cache_dir=cache_dir,
+            tag=f"source:{source.source_id}",
+            latest=1,
+        )
         latest_snapshot = snapshot_for_source(source, snapshots)
         last_restore = (
             latest_restore_verification(restore_verify_dir, repo_root=repo_root)
@@ -1118,17 +1148,14 @@ def run_restore_verification(
     if receipts_source is None or not receipts_source.restore_verification:
         raise ValueError("restic catalog does not define the receipts source required for restore verification")
 
-    snapshots_result = restic_call(
-        ["snapshots", "--json"],
+    snapshots = load_restic_snapshots(
         catalog=catalog,
         credentials=credentials,
         endpoint=endpoint,
         cache_dir=cache_dir,
-        timeout=DEFAULT_RESTIC_REPOSITORY_PROBE_TIMEOUT_SECONDS,
+        tag=f"source:{receipts_source.source_id}",
+        latest=1,
     )
-    snapshots = json.loads(snapshots_result.stdout or "[]")
-    if not isinstance(snapshots, list):
-        raise ValueError("restic snapshots output must be a list")
     snapshot = snapshot_for_source(receipts_source, snapshots)
     if snapshot is None:
         raise RuntimeError("No restic snapshot exists yet for source receipts.")

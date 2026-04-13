@@ -86,7 +86,7 @@ ServerClaw mirror.
 | Situation | Required action |
 |-----------|-----------------|
 | After any change to `.local/identity.yml` | `make generate-platform-vars` + commit |
-| After any change to `inventory/host_vars/<topology-host>.yml` | `make generate-platform-vars` + commit |
+| After any change to `inventory/host_vars/platform-host.yml` | `make generate-platform-vars` + commit |
 | You see `203.0.113.1` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator; `.local/identity.yml` was not applied |
 | You see `example.com` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator |
 | Publishing to ServerClaw | Publish pipeline sanitises real values automatically |

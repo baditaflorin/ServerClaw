@@ -1,0 +1,10 @@
+runtime-comms | CHANGED | rc=0 >>
+LISTEN 0      4096               *:8082            *:*
+LISTEN 0      4096               *:8083            *:*
+LISTEN 0      4096               *:8080            *:*
+LISTEN 0      4096               *:8081            *:*
+LISTEN 0      4096               *:8086            *:*
+LISTEN 0      4096               *:8087            *:*
+LISTEN 0      4096               *:8084            *:*
+LISTEN 0      4096               *:8085            *:*
+LISTEN 0      4096               *:8088            *:*

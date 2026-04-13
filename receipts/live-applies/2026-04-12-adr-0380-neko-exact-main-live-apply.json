@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-12-adr-0380-neko-exact-main-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-12",
+  "recorded_on": "2026-04-12",
+  "recorded_at": "2026-04-12T10:57:25Z",
+  "recorded_by": "codex",
+  "source_commit": "478832b99b6f5c13d5b0afab9eef5950dca7dc53",
+  "repo_version_context": "0.178.125",
+  "workflow_id": "converge-neko",
+  "adr": "0380",
+  "summary": "Replay ADR 0380 from the latest origin/main baseline, verify the public browser route end to end, and prove the corrected Proxmox UDP forwarding contract stays in place.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-comms"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    }
+  ],
+  "verification": [
+    {
+      "check": "make converge-neko env=production",
+      "result": "pass",
+      "observed": "The clean-cache exact-main converge completed successfully and left proxmox-host idempotent on the forwarding replay."
+    },
+    {
+      "check": "focused pytest suite",
+      "result": "pass",
+      "observed": "The ws-0380 closeout regression suite completed with 81 passed tests."
+    },
+    {
+      "check": "python3 scripts/neko_tool.py validate",
+      "result": "pass",
+      "observed": "All 9 Neko instances validated after the final converge."
+    },
+    {
+      "check": "verify_neko_webrtc_session.py",
+      "result": "pass",
+      "observed": "The public browser edge redirected through oauth2-proxy, selected backend 10.10.10.21:8080, and completed the WebRTC handshake."
+    },
+    {
+      "check": "runtime listener proof",
+      "result": "pass",
+      "observed": "runtime-comms listened on the expected TCP signalling ports 8080 through 8088."
+    },
+    {
+      "check": "proxmox forwarding proof",
+      "result": "pass",
+      "observed": "The Proxmox host forwarded UDP 50000-60000 to 10.10.10.21 and exposed no public TCP 8080 DNAT rule."
+    }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/evidence/2026-04-12-adr-0380-exact-main-converge-after-forwarding-fix.txt",
+    "receipts/live-applies/evidence/2026-04-12-adr-0380-final-focused-pytest.txt",
+    "receipts/live-applies/evidence/2026-04-12-adr-0380-forwarding-proof-fixed.txt",
+    "receipts/live-applies/evidence/2026-04-12-adr-0380-neko-validate-post-converge.txt",
+    "receipts/live-applies/evidence/2026-04-12-adr-0380-runtime-comms-listeners-post-converge.txt",
+    "receipts/live-applies/evidence/2026-04-12-adr-0380-webrtc-verify-post-converge.txt"
+  ],
+  "notes": [
+    "The workstream replayed ADR 0380 from the latest origin/main baseline in an isolated worktree before merging back to main.",
+    "An earlier stale Proxmox forwarding state still pointed at 10.10.10.41; the final exact-main converge and forwarding proof confirm the live contract now targets runtime-comms at 10.10.10.21 only."
+  ]
+}

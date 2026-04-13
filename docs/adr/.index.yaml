@@ -14,15 +14,15 @@ adr_number_range:
   last: '0410'
   next_available: '0411'
 implementation_status_summary:
-  Implemented: 344
+  Implemented: 347
   Partial: 3
   Not Implemented: 33
   Deprecated: 5
   Accepted: 25
-  Proposed: 33
+  Proposed: 30
 decision_status_summary:
-  Accepted: 341
-  Proposed: 39
+  Accepted: 344
+  Proposed: 36
   Deprecated: 14
   Implemented: 49
 facets:
@@ -111,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 344
+      count: 347
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -131,7 +131,7 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 33
+      count: 30
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0

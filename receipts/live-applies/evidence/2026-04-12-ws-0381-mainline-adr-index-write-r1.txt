@@ -1,0 +1,1 @@
+Written /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/docs/adr/.index.yaml and 29 ADR shard files (443 ADRs indexed)

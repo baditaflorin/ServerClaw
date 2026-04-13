@@ -1,0 +1,10 @@
+---
+# Purpose: Provide the service-scoped live-apply entry point for Repowise.
+# Use case: Run `make live-apply-service service=repowise env=<environment>` so the governed service lane can converge Repowise from the active worktree.
+# Inputs: `env` plus the standard live-apply wrapper variables consumed by `playbooks/repowise.yml`.
+# Outputs: Imports the canonical Repowise converge playbook without duplicating service logic.
+# Idempotency: Matches `playbooks/repowise.yml`; the wrapper adds no extra mutation.
+# Dependencies: ADR 0198, ADR 0346, and `playbooks/repowise.yml`.
+# Related Runbooks: docs/runbooks/configure-repowise.md
+
+- import_playbook: ../repowise.yml

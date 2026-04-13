@@ -17,8 +17,8 @@
   ansible.builtin.set_fact:
     plane_oidc_client_id: lv3-plane-oidc
     plane_oidc_client_name: "LV3 Plane Task Board"
-    plane_oidc_public_url: "{{ plane_service_topology.public_base_url | default('https://tasks.{{ platform_domain }}') }}"
-    plane_oidc_internal_url: "{{ plane_service_topology.internal_base_url | default('http://docker-runtime.internal:8000') }}"
+    plane_oidc_public_url: "{{ hostvars[platform_topology_host].platform_service_topology.plane.urls.public }}"
+    plane_oidc_internal_url: "{{ hostvars[platform_topology_host].platform_service_topology.plane.urls.internal }}"
     keycloak_api_url: "{{ keycloak_local_admin_url }}"
 
 - name: Check if Plane OIDC client already exists in Keycloak
@@ -76,105 +76,86 @@
   when: plane_client_exists
   no_log: true
 
-- name: Create Plane OIDC client in Keycloak
-  ansible.builtin.uri:
-    url: "{{ keycloak_api_url }}/admin/realms/{{ keycloak_realm_name }}/clients"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ keycloak_admin_token }}"
-      Content-Type: "application/json"
-    body_format: json
-    body:
-      clientId: "{{ plane_oidc_client_id }}"
-      name: "{{ plane_oidc_client_name }}"
-      description: "OIDC client for LV3 Plane task management system"
-      enabled: true
-      clientAuthenticatorType: "client-secret"
-      secret: "{{ plane_oidc_client_secret }}"
-      directAccessGrantsEnabled: true
-      publicClient: false
-      redirectUris:
-        - "{{ plane_oidc_public_url }}/auth/callback/keycloak"
-        - "{{ plane_oidc_public_url }}/auth/oidc/callback"
-        - "{{ plane_oidc_internal_url }}/auth/callback/keycloak"
-        - "{{ plane_oidc_internal_url }}/auth/oidc/callback"
-      webOrigins:
-        - "{{ plane_oidc_public_url }}"
-        - "{{ plane_oidc_internal_url }}"
-      attributes:
-        "backchannel.logout.session.required": "true"
-        "backchannel.logout.revoke.offline.tokens": "true"
-      standardFlowEnabled: true
-      implicitFlowEnabled: false
-      serviceAccountsEnabled: false
-      authorizationServicesEnabled: false
-      protocolMappers:
-        - name: "email"
-          protocolMapper: "oidc-usermodel-attribute-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.attribute": "email"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "email"
-            "jsonType.label": "String"
-        - name: "given name"
-          protocolMapper: "oidc-usermodel-attribute-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.attribute": "firstName"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "given_name"
-            "jsonType.label": "String"
-        - name: "family name"
-          protocolMapper: "oidc-usermodel-attribute-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.attribute": "lastName"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "family_name"
-            "jsonType.label": "String"
-        - name: "username"
-          protocolMapper: "oidc-usermodel-property-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.property": "username"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "preferred_username"
-            "jsonType.label": "String"
-    status_code: [201, 409]
+- name: Ensure Plane OIDC client exists
+  community.general.keycloak_client:
+    connection_timeout: "{{ keycloak_admin_connection_timeout | default(60) }}"
+    auth_client_id: "{{ keycloak_admin_client_id }}"
+    auth_client_secret: "{{ keycloak_admin_client_secret }}"
+    auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+    auth_realm: master
     validate_certs: false
-  register: plane_client_create
-  when: not plane_client_exists
-  no_log: true
-
-- name: Update Plane OIDC client redirect URIs
-  ansible.builtin.uri:
-    url: "{{ keycloak_api_url }}/admin/realms/{{ keycloak_realm_name }}/clients/{{ plane_client_uuid }}"
-    method: PUT
-    headers:
-      Authorization: "Bearer {{ keycloak_admin_token }}"
-      Content-Type: "application/json"
-    body_format: json
-    body:
-      redirectUris:
-        - "{{ plane_oidc_public_url }}/auth/callback/keycloak"
-        - "{{ plane_oidc_public_url }}/auth/oidc/callback"
-        - "{{ plane_oidc_internal_url }}/auth/callback/keycloak"
-        - "{{ plane_oidc_internal_url }}/auth/oidc/callback"
-      webOrigins:
-        - "{{ plane_oidc_public_url }}"
-        - "{{ plane_oidc_internal_url }}"
-    status_code: [204]
-    validate_certs: false
-  when: plane_client_exists
+    realm: "{{ keycloak_realm_name }}"
+    client_id: "{{ plane_oidc_client_id }}"
+    name: "{{ plane_oidc_client_name }}"
+    description: "OIDC client for LV3 Plane task management system"
+    enabled: true
+    protocol: openid-connect
+    public_client: false
+    client_authenticator_type: client-secret
+    secret: "{{ plane_oidc_client_secret }}"
+    standard_flow_enabled: true
+    implicit_flow_enabled: false
+    direct_access_grants_enabled: true
+    service_accounts_enabled: false
+    full_scope_allowed: false
+    root_url: "{{ plane_oidc_public_url }}"
+    base_url: "{{ plane_oidc_public_url }}"
+    admin_url: "{{ plane_oidc_public_url }}"
+    redirect_uris:
+      - "{{ plane_oidc_public_url }}/auth/callback/keycloak"
+      - "{{ plane_oidc_public_url }}/auth/oidc/callback"
+      - "{{ plane_oidc_internal_url }}/auth/callback/keycloak"
+      - "{{ plane_oidc_internal_url }}/auth/oidc/callback"
+    valid_post_logout_redirect_uris: "{{ keycloak_plane_post_logout_redirect_uris }}"
+    web_origins:
+      - "{{ plane_oidc_public_url }}"
+      - "{{ plane_oidc_internal_url }}"
+    protocol_mappers:
+      - name: "email"
+        protocolMapper: "oidc-usermodel-attribute-mapper"
+        protocol: "openid-connect"
+        config:
+          "userinfo.token.claim": "true"
+          "user.attribute": "email"
+          "id.token.claim": "true"
+          "access.token.claim": "true"
+          "claim.name": "email"
+          "jsonType.label": "String"
+      - name: "given name"
+        protocolMapper: "oidc-usermodel-attribute-mapper"
+        protocol: "openid-connect"
+        config:
+          "userinfo.token.claim": "true"
+          "user.attribute": "firstName"
+          "id.token.claim": "true"
+          "access.token.claim": "true"
+          "claim.name": "given_name"
+          "jsonType.label": "String"
+      - name: "family name"
+        protocolMapper: "oidc-usermodel-attribute-mapper"
+        protocol: "openid-connect"
+        config:
+          "userinfo.token.claim": "true"
+          "user.attribute": "lastName"
+          "id.token.claim": "true"
+          "access.token.claim": "true"
+          "claim.name": "family_name"
+          "jsonType.label": "String"
+      - name: "username"
+        protocolMapper: "oidc-usermodel-property-mapper"
+        protocol: "openid-connect"
+        config:
+          "userinfo.token.claim": "true"
+          "user.property": "username"
+          "id.token.claim": "true"
+          "access.token.claim": "true"
+          "claim.name": "preferred_username"
+          "jsonType.label": "String"
+    state: present
+  register: plane_client_reconcile
+  retries: "{{ keycloak_admin_reconciliation_retries | default(24) }}"
+  delay: "{{ keycloak_admin_reconciliation_delay | default(5) }}"
+  until: plane_client_reconcile is succeeded
   no_log: true
 
 - name: Write Plane OIDC client secret to local artifact

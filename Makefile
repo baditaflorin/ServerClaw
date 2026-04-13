@@ -25,6 +25,8 @@ ALLOW_IN_PLACE_MUTATION ?= false
 WARNING_DAYS ?= 45
 INACTIVE_DAYS ?= 60
 HTTPS_TLS_TIMEOUT_SECONDS ?= 60
+OPS_PORTAL_PROBE_TIMEOUT ?= 0
+OPS_PORTAL_GATE_PROBE_TIMEOUT ?= 2
 FAULT_INJECTION_ARGS ?=
 STAGING_RECEIPT ?=
 BRANCH ?=
@@ -93,12 +95,12 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: validate-local push-local prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-data-models validate-cross-catalog validate-types verify-waiver-escalation validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors generate-cross-cutting-artifacts validate-generated-cross-cutting docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status atlas-validate atlas-lint atlas-refresh-snapshots atlas-drift-check
 .PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
-.PHONY: syntax-check-ollama syntax-check-one-api syntax-check-piper syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw syntax-check-realtime collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
-.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-one-api converge-piper converge-label-studio converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
+.PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
+.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
-.PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
-.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-jupyterhub converge-jupyterhub syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
+.PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
+.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat
 .PHONY: syntax-check-flagsmith converge-flagsmith
@@ -404,7 +406,7 @@ install-cli:
 
 update-cli: install-cli
 
-generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in the platform host vars source
+generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write
 
 validate-generated-inventory: ## Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests
@@ -456,9 +458,6 @@ validate-health-probes:
 
 validate-alert-rules:
 	$(REPO_ROOT)/scripts/validate_repo.sh alert-rules
-
-syntax-check-realtime:
-	@printf '%s\n' "realtime/Netdata was removed by ADR 0401; use Grafana on monitoring instead."; exit 1
 
 validate-tofu:
 	$(TOFU_EXEC_CMD) validate all
@@ -519,7 +518,7 @@ generate-platform-manifest:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/platform_manifest.py --write
 
 generate-ops-portal:
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --write
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --write --probe-timeout $(OPS_PORTAL_PROBE_TIMEOUT)
 
 generate-changelog-portal:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --write
@@ -550,7 +549,7 @@ validate-generated-docs:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_diagrams.py --check
 
 validate-generated-portals:
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --check
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --check --probe-timeout $(OPS_PORTAL_GATE_PROBE_TIMEOUT)
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --check
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --check
 	$(MAKE) docs
@@ -722,9 +721,6 @@ syntax-check-tesseract-ocr:
 syntax-check-directus:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/directus.yml --syntax-check
 
-syntax-check-jupyterhub:
-	@printf '%s\n' "JupyterHub was removed by ADR 0402; no syntax-check target remains."; exit 1
-
 syntax-check-label-studio:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/label-studio.yml --syntax-check
 
@@ -829,9 +825,6 @@ syntax-check-searxng:
 syntax-check-ollama:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ollama.yml --syntax-check
 
-syntax-check-one-api:
-	@printf '%s\n' "One-API was removed by ADR 0393; no syntax-check target remains."; exit 1
-
 syntax-check-piper:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/piper.yml --syntax-check
 
@@ -849,9 +842,6 @@ syntax-check-nomad:
 
 syntax-check-dozzle:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/dozzle.yml --syntax-check
-
-syntax-check-open-webui:
-	@printf '%s\n' "Open WebUI was removed by ADR 0390; no syntax-check target remains."; exit 1
 
 syntax-check-serverclaw:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/serverclaw.yml --syntax-check
@@ -1077,10 +1067,6 @@ converge-directus:
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/directus.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/directus.yml $(ANSIBLE_TRACE_ARGS)
 
-converge-jupyterhub:
-	$(MAKE) preflight WORKFLOW=converge-jupyterhub
-	@printf '%s\n' "JupyterHub was removed by ADR 0402; use current notebook replacements instead."; exit 1
-
 converge-label-studio:
 	$(MAKE) preflight WORKFLOW=converge-label-studio
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
@@ -1274,10 +1260,6 @@ converge-ollama:
 	$(MAKE) preflight WORKFLOW=converge-ollama
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/ollama.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/ollama.yml
 
-converge-one-api:
-	$(MAKE) preflight WORKFLOW=converge-one-api
-	@printf '%s\n' "One-API was removed by ADR 0393; no converge target remains."; exit 1
-
 converge-piper:
 	$(MAKE) preflight WORKFLOW=converge-piper
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/piper.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
@@ -1308,14 +1290,6 @@ converge-dozzle:
 	$(MAKE) preflight WORKFLOW=converge-dozzle
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/dozzle.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/dozzle.yml
-
-converge-realtime:
-	$(MAKE) preflight WORKFLOW=converge-realtime
-	@printf '%s\n' "realtime/Netdata was removed by ADR 0401; use monitoring-stack and Grafana instead."; exit 1
-
-converge-open-webui:
-	$(MAKE) preflight WORKFLOW=converge-open-webui
-	@printf '%s\n' "Open WebUI was removed by ADR 0390; no converge target remains."; exit 1
 
 converge-serverclaw:
 	$(MAKE) preflight WORKFLOW=converge-serverclaw
@@ -1698,6 +1672,9 @@ remote-exec:
 
 check-build-server:
 	$(REPO_ROOT)/scripts/remote_exec.sh check-build-server
+
+apply-gate-tools:
+	$(MAKE) live-apply-service service=build-server-gate-tools env=$(if $(strip $(env)),$(env),production) EXTRA_ARGS='$(EXTRA_ARGS)'
 
 remote-tofu-plan:
 	@test -n "$(ENV)" || (echo "set ENV=<production|staging>"; exit 1)

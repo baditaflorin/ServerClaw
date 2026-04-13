@@ -1,29 +1,29 @@
 ---
 # Playbook: services/repo_intake.yml
-# Purpose: Provide the canonical service-scoped entrypoint for the ADR 0224 repo-intake live apply.
-# Use case: Used by shared live-apply and service-scoped automation paths that target only the repo-intake runtime.
+# Purpose: Provide a service-leaf import for the repo-intake runtime so the
+#   generic service live-apply path can target it through the normal playbook
+#   resolution rules.
+# Use case: Used by repo automation that enumerates every service leaf playbook
+#   under playbooks/services/.
 #
 # Inputs (required):
 #   - None.
 #
 # Inputs (optional):
-#   - None.
+#   - Same optional inputs as playbooks/repo-intake.yml.
 #
 # Outputs:
-#   - Imports the top-level repo-intake playbook without redefining host selection.
+#   - Imports the top-level repo-intake converge playbook.
 #
 # Idempotency: Fully idempotent
-#              This file only re-exports the canonical playbook entrypoint.
+#              This file is a pure import wrapper around the top-level playbook.
 #
 # Dependencies:
-#   - ADR 0165: Requires committed playbook metadata headers.
 #   - ADR 0224: Self-service repo intake and agent-assisted deployments.
-#   - Requires: playbooks/repo-intake.yml.
 #
-# Related ADRs: 0165, 0224
+# Related ADRs: 0224
 # Related Runbooks: docs/runbooks/repo-intake.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-04-12
-
+# Last Updated: 2026-04-11
 - import_playbook: ../repo-intake.yml

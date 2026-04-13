@@ -341,6 +341,7 @@
           "install-hooks",
           "merge-config-changes",
           "packer-template-rebuild",
+          "refresh-discovery-surfaces",
           "weekly-capacity-report"
         ]
       },
@@ -454,7 +455,10 @@
       "description": "The watchdog and observation-loop runtimes are themselves governed correction loops: they must emit durable state, choose the narrowest safe repair action first, and stop at explicit safety boundaries.",
       "applies_to": {
         "workflow_ids": [
+          "disk-space-monitor",
+          "portal-health-sweep",
           "platform-observation-loop",
+          "reconcile-portals",
           "scheduler-watchdog-loop"
         ]
       },

@@ -1,0 +1,21 @@
+workstream_id: ws-0374-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-12T18:29:52Z'
+completed_at: '2026-04-12T18:48:52Z'
+applied_by: codex
+repo_version: 0.178.126
+adr: '0374'
+summary: Live apply cross-cutting service manifest updates.
+targets:
+- target: docker-runtime
+  role: librechat
+- target: docker-runtime
+  role: litellm
+errors: []
+notes:
+- Live apply completed for librechat and litellm via make live-apply-service (litellm
+  used ALLOW_IN_PLACE_MUTATION=true).
+- Security posture receipt refreshed with python3 scripts/security_posture_report.py
+  --env production --skip-lynis --skip-trivy to avoid apt repo failures in Lynis playbook.
+- Evidence captured in receipts/live-applies/evidence/2026-04-12-ws-0374-*.txt.

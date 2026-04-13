@@ -44,6 +44,7 @@
         "mattermost",
         "minio",
         "n8n",
+        "neko",
         "netbox",
         "nextcloud",
         "ntfy",
@@ -73,6 +74,7 @@
         "crawl4ai",
         "dify",
         "gotenberg",
+        "litellm",
         "ollama",
         "piper",
         "platform_context_api",
@@ -122,6 +124,7 @@
       "summary": "Dedicated Coolify control-plane that remains managed outside the runtime-pool migration waves. coolify_apps has moved to the dedicated-coolify-apps partition.",
       "services": [
         "coolify",
+        "librechat",
         "serverclaw"
       ]
     },

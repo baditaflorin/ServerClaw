@@ -1,0 +1,7 @@
+Command: make check-build-server
+
+Result:
+- SSH connectivity to ops@10.10.10.30 OK (build-server-ok)
+- Workspace root: /home/ops/builds/serverclaw-platform
+- Session workspace: /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0364-live-apply-9cb96da019/repo
+- Immutable snapshot dry-run upload succeeded (repository-snapshot-125eebafa76faf2d8fb769636d8ba36109f4618a615d89a07b65569171a8270b.tar.gz)

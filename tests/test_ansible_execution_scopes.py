@@ -182,6 +182,16 @@ def test_validate_scope_catalog_covers_live_apply_service_wrappers(tmp_path: Pat
     scopes.validate_scope_catalog(repo_root=repo_root, catalog_path=catalog_path, inventory_path=inventory_path)
 
 
+def test_resolve_identity_override_uses_shared_local_overlay_for_worktrees(tmp_path: Path) -> None:
+    repo_root = tmp_path
+    worktree_root = repo_root / ".worktrees" / "ws-0346-live-apply"
+    worktree_root.mkdir(parents=True)
+    identity_path = repo_root / ".local" / "identity.yml"
+    write(identity_path, "platform_domain: example.com\n")
+
+    assert scopes._resolve_identity_override(worktree_root) == ["-e", f"@{identity_path}"]
+
+
 def test_plan_playbook_execution_discovers_hosts_and_writes_inventory_shard(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

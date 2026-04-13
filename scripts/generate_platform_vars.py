@@ -44,6 +44,20 @@ GENERATED_HEADER = (
     "# inventory/group_vars/all/identity.yml, and (when present) .local/identity.yml.\n"
     "# Do not edit by hand — run: make generate-platform-vars\n"
 )
+
+
+def resolve_local_identity_override_path() -> Path | None:
+    if LOCAL_IDENTITY_VARS_PATH.is_file():
+        return LOCAL_IDENTITY_VARS_PATH
+    repo_root = repo_path()
+    if ".worktrees" in repo_root.parts:
+        main_root = Path(*repo_root.parts[: repo_root.parts.index(".worktrees")])
+        candidate = main_root / ".local" / "identity.yml"
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 PORT_KEYS = (
     "alertmanager_port",
     "monitoring_grafana_port",
@@ -338,8 +352,9 @@ def load_sources() -> tuple[dict[str, Any], dict[str, Any]]:
     #
     # Result: the private repo's platform.yml contains real deployment values; the
     # publish pipeline (make publish-serverclaw) sanitises them for the public mirror.
-    if LOCAL_IDENTITY_VARS_PATH.is_file():
-        local_identity = require_mapping(load_yaml(LOCAL_IDENTITY_VARS_PATH), str(LOCAL_IDENTITY_VARS_PATH))
+    local_identity_path = resolve_local_identity_override_path()
+    if local_identity_path is not None:
+        local_identity = require_mapping(load_yaml(local_identity_path), str(local_identity_path))
         for key, val in local_identity.items():
             # Local overlay WINS — override any committed placeholder with real value.
             # Skip Jinja2 templates (e.g. derived URLs that reference other vars).

@@ -1092,9 +1092,9 @@ adrs:
     implemented_in_repo_version: 0.179.0
   - adr: '0346'
     title: '— Repowise: local semantic code search over the git repo'
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-05'
     concern: documentation
     keywords:
       - repowise
@@ -1108,6 +1108,9 @@ adrs:
     summary: 'Deploy repowise — a local semantic code search service — using:'
     filename: 0346-repowise-semantic-search.md
     path: docs/adr/0346-repowise-semantic-search.md
+    implemented_in_repo_version: 0.178.125
+    implemented_in_platform_version: 0.178.77
+    implemented_on: '2026-04-12'
   - adr: '0347'
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted
@@ -1714,38 +1717,51 @@ adrs:
     path: docs/adr/0378-serverclaw-tool-surface-in-open-webui.md
   - adr: 0380
     title: Neko Remote Desktop for Interactive Operator Browser Access
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
     concern: identity
     keywords:
+      - browser
+      - remote-desktop
+      - webrtc
+      - operator-access
+      - runtime-comms
       - neko
       - remote
       - desktop
       - interactive
       - operator
-      - browser
-      - access
-    summary: Neko Remote Desktop for Interactive Operator Browser Access
+    summary: We will provide interactive operator browser access through multi-instance Neko
     filename: 0380-neko-for-operator-remote-browser-access.md
     path: docs/adr/0380-neko-for-operator-remote-browser-access.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
   - adr: 0381
     title: Login Service Contracts and Session Recovery Automation
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-07'
     concern: automation
     keywords:
       - login
+      - session-recovery
+      - oauth2-proxy
+      - nginx
+      - watchdog
+      - automation
       - service
       - contracts
       - session
       - recovery
-      - automation
     summary: The platform uses exactly two cookies per protected edge session. Both are set by oauth2-proxy and scoped to
       .example.com.
     filename: 0381-login-service-contracts-and-session-recovery-automation.md
     path: docs/adr/0381-login-service-contracts-and-session-recovery-automation.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.78
+    implemented_on: '2026-04-12'
   - adr: 0382
     title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
     status: Proposed

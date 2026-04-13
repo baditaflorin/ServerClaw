@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-12",
+  "recorded_on": "2026-04-12",
+  "recorded_at": "2026-04-12T18:49:44Z",
+  "recorded_by": "codex",
+  "source_commit": "0de2267bf7e42af98389ee48de92e595b7ed0c4e",
+  "repo_version_context": "0.178.126",
+  "workflow_id": "converge-librechat",
+  "adr": "0374",
+  "summary": "Replay ADR 0374 cross-cutting service manifest updates from the latest origin/main and re-apply the affected runtime services.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime"
+    }
+  ],
+  "verification": [
+    {
+      "check": "make live-apply-service service=librechat env=production",
+      "result": "pass",
+      "observed": "Live apply completed after passing canonical-truth, vulnerability budget, and interface contract gates."
+    },
+    {
+      "check": "make live-apply-service service=litellm env=production ALLOW_IN_PLACE_MUTATION=true",
+      "result": "pass",
+      "observed": "Live apply completed with the immutable guest replacement override logged in the gate output."
+    },
+    {
+      "check": "python3 scripts/security_posture_report.py --env production --skip-lynis --skip-trivy",
+      "result": "pass",
+      "observed": "Generated a fresh security posture receipt from cached Lynis output after apt repository errors blocked the full scan."
+    }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/evidence/2026-04-12-ws-0374-librechat-live-apply.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0374-litellm-live-apply.txt",
+    "receipts/live-applies/evidence/2026-04-12-ws-0374-security-posture-report.txt"
+  ],
+  "notes": [
+    "The security posture scan skipped Lynis and Trivy because the Falco and Netdata apt repositories currently lack Release files, blocking apt cache refresh.",
+    "litellm remains governed by the immutable guest replacement policy; ALLOW_IN_PLACE_MUTATION=true was used for this scoped apply."
+  ]
+}

@@ -94,6 +94,13 @@
           "description": "Latest container image scan receipts required by vulnerability budget gates in fresh worktrees."
         },
         {
+          "id": "security_reports",
+          "kind": "directory",
+          "path": "receipts/security-reports",
+          "materialize_command": "python3 scripts/materialize_live_apply_worktree_artifacts.py --artifact security_reports",
+          "description": "Security posture reports consumed by vulnerability budget gates in fresh worktrees."
+        },
+        {
           "id": "https_tls_targets",
           "kind": "file",
           "path": "config/prometheus/file_sd/https_tls_targets.yml",

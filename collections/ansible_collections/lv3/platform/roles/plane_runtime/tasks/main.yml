@@ -237,6 +237,8 @@
     owner: root
     group: root
     mode: "0644"
+  vars:
+    ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
   register: plane_compose_render
 
 - name: Check if Plane stack is already running

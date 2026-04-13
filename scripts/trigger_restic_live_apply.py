@@ -32,7 +32,21 @@ REMOTE_RUNTIME_SUPPORT_FILES = (
     ("scripts/restic_config_backup.py", 0o755),
     ("scripts/script_bootstrap.py", 0o644),
     ("scripts/controller_automation_toolkit.py", 0o644),
+    ("scripts/ntfy_publish.py", 0o644),
+    ("platform/__init__.py", 0o644),
+    ("platform/datetime_compat.py", 0o644),
+    ("platform/enum_compat.py", 0o644),
+    ("platform/events/__init__.py", 0o644),
+    ("platform/events/taxonomy.py", 0o644),
+    ("platform/repo.py", 0o644),
+    ("platform/retry/__init__.py", 0o644),
+    ("platform/retry/classification.py", 0o644),
+    ("platform/retry/policy.py", 0o644),
+    ("config/event-taxonomy.yaml", 0o644),
+    ("config/ntfy/topics.yaml", 0o644),
+    ("config/retry-policies.yaml", 0o644),
     ("config/restic-file-backup-catalog.json", 0o644),
+    ("versions/stack.yaml", 0o644),
 )
 SYNCABLE_REPORT_KEYS = ("receipt_path", "latest_snapshot_receipt")
 
@@ -53,6 +67,7 @@ def build_remote_command(
     live_apply_trigger: bool,
     fallback_script_path: str = DEFAULT_FALLBACK_REMOTE_SCRIPT_PATH,
     fallback_catalog_path: str = DEFAULT_FALLBACK_REMOTE_CATALOG_PATH,
+    prefer_fallback_script: bool = False,
 ) -> str:
     primary_script_path = f"{repo_root}/scripts/restic_config_backup.py"
     primary_catalog_path = f"{repo_root}/config/restic-file-backup-catalog.json"
@@ -78,6 +93,10 @@ def build_remote_command(
     if live_apply_trigger:
         command.append("--live-apply-trigger")
     rendered_args = " ".join(shlex.quote(item) for item in command)
+    prefer_fallback_line = ""
+    if prefer_fallback_script:
+        prefer_fallback_line = 'if [ -f "$fallback_script_path" ]; then script_path="$fallback_script_path"; fi'
+
     shell_script = "\n".join(
         [
             "set -euo pipefail",
@@ -85,6 +104,7 @@ def build_remote_command(
             f"fallback_script_path={shlex.quote(fallback_script_path)}",
             f"catalog_path={shlex.quote(primary_catalog_path)}",
             f"fallback_catalog_path={shlex.quote(fallback_catalog_path)}",
+            prefer_fallback_line,
             'if [ ! -f "$script_path" ] && [ -f "$fallback_script_path" ]; then',
             '  script_path="$fallback_script_path"',
             "fi",
@@ -99,6 +119,7 @@ def build_remote_command(
             '  echo "restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path" >&2',
             "  exit 2",
             "fi",
+            f'export PYTHONPATH="{repo_root}:${{PYTHONPATH:-}}"',
             (
                 f'exec python3 "$script_path" --repo-root {shlex.quote(repo_root)} '
                 f'--catalog "$catalog_path" {rendered_args}'
@@ -330,12 +351,14 @@ def main(argv: list[str] | None = None) -> int:
             env=args.env,
             credential_file=args.credential_file,
         )
+        prefer_fallback_script = os.environ.get("RESTIC_USE_FALLBACK_SCRIPT") == "1"
         remote_command = build_remote_command(
             mode=args.mode,
             triggered_by=args.triggered_by,
             repo_root=args.repo_root,
             credential_file=args.credential_file,
             live_apply_trigger=args.live_apply_trigger,
+            prefer_fallback_script=prefer_fallback_script,
         )
         command = build_guest_ssh_command(context, "docker-runtime", remote_command)
         outcome = run_command(command)
@@ -348,6 +371,14 @@ def main(argv: list[str] | None = None) -> int:
             "stdout": outcome.stdout.strip(),
             "stderr": outcome.stderr.strip(),
         }
+        allow_timeout = os.environ.get("RESTIC_ALLOW_TIMEOUT") == "1"
+        if outcome.returncode != 0 and allow_timeout and "timed out" in (outcome.stderr or "").lower():
+            payload["status"] = "warning"
+            payload["warning"] = "Restic live-apply trigger timed out; see stderr for details."
+            print(json.dumps(payload, indent=2))
+            if getattr(args, "print_report_json", False):
+                print("REPORT_JSON=" + json.dumps(payload, separators=(",", ":")))
+            return 0
         if outcome.returncode == 0:
             synced_paths = sync_reported_receipt_artifacts(
                 context,

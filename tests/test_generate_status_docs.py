@@ -1,14 +1,31 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
+import sys
 
 import generate_status_docs
 import platform.root_summary as root_summary
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
 def write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def test_generate_status_docs_cli_help_runs_without_platform_import_conflict() -> None:
+    result = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "generate_status_docs.py"), "--help"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "usage:" in result.stdout.lower()
 
 
 def test_render_generated_docs_rolls_root_history_into_generated_ledgers(
@@ -116,7 +133,9 @@ lv3_service_topology:
     monkeypatch.setattr(generate_status_docs, "README_PATH", tmp_path / "README.md")
     monkeypatch.setattr(generate_status_docs, "STACK_PATH", tmp_path / "versions" / "stack.yaml")
     monkeypatch.setattr(
-        generate_status_docs, "HOST_VARS_PATH", tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
+        generate_status_docs,
+        "TOPOLOGY_HOST_VARS_PATH",
+        tmp_path / "inventory" / "host_vars" / "proxmox-host.yml",
     )
     monkeypatch.setattr(generate_status_docs, "WORKSTREAMS_PATH", tmp_path / "workstreams.yaml")
     monkeypatch.setattr(generate_status_docs, "RUNBOOKS_DIR", tmp_path / "docs" / "runbooks")
