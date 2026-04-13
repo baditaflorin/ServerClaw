@@ -38,6 +38,13 @@ keycloak_operator_first_name: Florin
 keycloak_operator_last_name: Badita
 keycloak_operator_email: "{{ platform_operator_email }}"
 keycloak_operator_password_remote_file: "{{ keycloak_secret_dir }}/florin.badita-password"
+# BEGIN SERVICE: platform-admin (repo-managed secondary admin — survives server rebuilds)
+keycloak_platform_admin_username: platform-admin
+keycloak_platform_admin_first_name: Platform
+keycloak_platform_admin_last_name: Admin
+keycloak_platform_admin_email: "platform-admin@{{ platform_domain }}"
+keycloak_platform_admin_password_remote_file: "{{ keycloak_secret_dir }}/platform-admin-password"
+# END SERVICE: platform-admin
 # BEGIN SERVICE: outline
 keycloak_outline_automation_username: outline.automation
 keycloak_outline_automation_first_name: Outline
@@ -48,6 +55,9 @@ keycloak_outline_automation_password_remote_file: "{{ keycloak_secret_dir }}/out
 keycloak_bootstrap_admin_password_local_file: "{{ keycloak_local_artifact_dir }}/bootstrap-admin-password.txt"
 keycloak_admin_client_secret_local_file: "{{ keycloak_local_artifact_dir }}/admin-client-secret.txt"
 keycloak_operator_password_local_file: "{{ keycloak_local_artifact_dir }}/florin.badita-password.txt"
+# BEGIN SERVICE: platform-admin
+keycloak_platform_admin_password_local_file: "{{ keycloak_local_artifact_dir }}/platform-admin-password.txt"
+# END SERVICE: platform-admin
 # BEGIN SERVICE: outline
 keycloak_outline_automation_password_local_file: "{{ keycloak_local_artifact_dir }}/outline.automation-password.txt"
 # END SERVICE: outline

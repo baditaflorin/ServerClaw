@@ -221,6 +221,88 @@ When you need the actual deployment domain, IP, or operator identity:
 
 ---
 
+---
+
+## Addendum: platform.yml Exception and Agent Guard Rules (2026-04-13)
+
+**Related:** ADR 0413 (Service Health Audit) identified that LLM agent sessions
+had been confused by the `example.com` generic-by-default pattern, leading to
+incorrect assumptions about TLS certificate errors.
+
+### The platform.yml Exception
+
+`inventory/group_vars/platform.yml` is a **generated** file that MUST contain
+real deployment values. Unlike all other committed files, it encodes deeply
+nested derived structures (DNS targets, management IPs, service topology bitmaps)
+that cannot be provided as Ansible extra-vars at runtime.
+
+**Rule:** `platform.yml` must NEVER contain `example.com` or `203.0.113.1`.
+If it does, downstream artifacts (TLS certs, DNS records, Tailscale config,
+monitoring targets) will be misconfigured.
+
+**How to regenerate:**
+```bash
+make generate-platform-vars
+```
+
+This reads `.local/identity.yml` as a high-priority overlay and bakes real
+values into `platform.yml`. Run it whenever:
+- `.local/identity.yml` changes
+- `inventory/host_vars/proxmox-host.yml` changes
+- You see `203.0.113.1` or `example.com` inside `platform.yml`
+
+**How to detect stale platform.yml:**
+```bash
+grep -c 'example\.com\|203\.0\.113\.' inventory/group_vars/platform.yml
+# must return 0; any hit means regenerate immediately
+```
+
+### platform_domain Guard in nginx-edge Playbooks
+
+`playbooks/_includes/nginx_edge_publication.yml` contains an `assert` pre-task
+that aborts with a clear error if `platform_domain == 'example.com'`:
+
+```yaml
+- name: Assert platform_domain is not the generic example.com placeholder
+  ansible.builtin.assert:
+    that:
+      - platform_domain is defined
+      - platform_domain != 'example.com'
+    fail_msg: >-
+      platform_domain is '{{ platform_domain | default('undefined') }}' ...
+      Run 'make generate-platform-vars' before running any nginx-edge playbook.
+```
+
+This guard fires for ALL 34 service playbooks that use the nginx-edge include.
+It prevents accidental TLS cert issuance with `example.com` as the domain.
+
+### Codified Rules for LLM Agents
+
+The following rules are binding for all automated agents (Claude Code, Semaphore
+CI, future LLM workers) operating on this codebase:
+
+| Rule | Enforcement |
+|------|-------------|
+| Never write `example.com` into `inventory/group_vars/platform.yml` | Guard assertion in nginx-edge playbooks |
+| Never commit `platform.yml` with placeholder IPs or domains | Pre-commit hook (planned ADR 0414 candidate) |
+| Always run `make generate-platform-vars` when changing `.local/identity.yml` | Makefile target + CLAUDE.md instruction |
+| TLS errors are NOT caused by `example.com` in code — they are caused by stale `platform.yml` or missing cert SANs | Documented in ADR 0413 post-mortem |
+| Do not interpret `example.com` in `docs/`, `tests/`, `inventory/group_vars/all/identity.yml` as a bug — it is intentional | This ADR |
+| Do NOT add real domain names to `docs/`, `tests/`, or `roles/defaults/` | CLAUDE.md Section 9 |
+
+### Disambiguation: example.com Appearances That Are Correct vs. Bugs
+
+| Location | `example.com` present | Correct? |
+|----------|----------------------|----------|
+| `inventory/group_vars/all/identity.yml` | Yes | ✅ Intentional — generic template |
+| `docs/adr/*.md`, `docs/postmortems/*.md` | Yes | ✅ Intentional — docs use generic |
+| `tests/*.py` | Yes | ✅ Intentional — test fixtures use generic |
+| `roles/*/defaults/main.yml` | Yes, via `{{ platform_domain }}` | ✅ Intentional — resolves at runtime |
+| `inventory/group_vars/platform.yml` | Yes | ❌ **BUG** — regenerate immediately |
+| `roles/*/defaults/main.yml` (hardcoded, not a variable) | Yes | ❌ **BUG** — use `{{ platform_domain }}` |
+
+---
+
 ## Artifacts
 
 | Artifact | Path |
@@ -231,3 +313,5 @@ When you need the actual deployment domain, IP, or operator identity:
 | Publication template | `publication/templates/identity.yml` |
 | Publish script | `scripts/publish_to_serverclaw.py` |
 | IoC refactor ADR | `docs/adr/0385-ioc-library-refactor.md` |
+| platform.yml guard | `playbooks/_includes/nginx_edge_publication.yml` (pre_tasks assert) |
+| Related post-mortem | `docs/postmortems/2026-04-13-service-health-audit.md` |
