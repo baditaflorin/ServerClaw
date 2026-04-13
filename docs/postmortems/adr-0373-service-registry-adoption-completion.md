@@ -139,7 +139,7 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and l
 - Representative service replay passed:
   - `make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
   - runtime health: `curl http://127.0.0.1:8101/health` returned `{"status":"ok"}`
-  - edge verification from `nginx` returned the expected OAuth redirect for `repo-intake.lv3.org`
+  - edge verification from `nginx` returned the expected OAuth redirect for `repo-intake.example.com`
 
 ---
 

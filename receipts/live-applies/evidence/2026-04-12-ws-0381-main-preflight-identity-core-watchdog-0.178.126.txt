@@ -2,5 +2,5 @@ WARN Broken interpreter cache entry at /Users/live/.cache/uv/interpreter-v4/690e
 Preflight workflow: converge-identity-core-watchdog
 Description: Deploy the identity-core health watchdog on runtime-control: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
 Result: PASS (converge-identity-core-watchdog)

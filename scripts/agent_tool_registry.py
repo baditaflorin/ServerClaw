@@ -1784,9 +1784,9 @@ def _keycloak_admin_token() -> tuple[str, str, str]:
     identity_path = local_root / "identity.yml"
     if identity_path.is_file():
         identity = load_yaml(identity_path)
-        domain = identity.get("platform_domain", "lv3.org")
+        domain = identity.get("platform_domain", "example.com")
     else:
-        domain = "lv3.org"
+        domain = "example.com"
 
     realm_name = domain.split(".")[0]
     base_url = f"https://sso.{domain}"

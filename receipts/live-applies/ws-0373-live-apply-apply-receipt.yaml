@@ -18,5 +18,5 @@ errors: []
 notes:
 - Latest-main replay ran from a worktree refreshed against origin/main commit bbdb0f700.
 - Governed restic receipts refreshed at receipts/restic-backups/20260413T105157Z.json, receipts/restic-backups/20260413T110651Z.json, and receipts/restic-snapshots-latest.json.
-- Runtime health on http://127.0.0.1:8101/health returned {"status":"ok"} and nginx edge verification returned the expected OAuth redirect for repo-intake.lv3.org.
+- Runtime health on http://127.0.0.1:8101/health returned {"status":"ok"} and nginx edge verification returned the expected OAuth redirect for repo-intake.example.com.
 - Supporting evidence captured in receipts/live-applies/evidence/2026-04-13-ws-0373-latest-main-replay.txt.

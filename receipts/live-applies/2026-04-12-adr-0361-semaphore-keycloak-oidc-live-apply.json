@@ -92,15 +92,15 @@
       "details": "BackendState: Starting; no assigned Tailscale IPs; login error fetch control key"
     },
     {
-      "probe": "curl -fsSI --max-time 5 https://headscale.lv3.org/health",
+      "probe": "curl -fsSI --max-time 5 https://headscale.example.com/health",
       "result": "timeout"
     },
     {
-      "probe": "nc -vz -w 5 65.108.75.123 443",
+      "probe": "nc -vz -w 5 203.0.113.1 443",
       "result": "timeout"
     },
     {
-      "probe": "nc -vz -w 5 65.108.75.123 22",
+      "probe": "nc -vz -w 5 203.0.113.1 22",
       "result": "timeout"
     },
     {

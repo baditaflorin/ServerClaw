@@ -2,318 +2,318 @@
 Preflight workflow: converge-windmill
 Description: Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
-INFO generated windmill_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/database-password.txt
-INFO generated windmill_superadmin_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
+INFO generated windmill_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/windmill/database-password.txt
+INFO generated windmill_superadmin_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/windmill/superadmin-secret.txt
 Result: PASS (converge-windmill)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=31ae95b06b21481891881d738f6cebaf ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/inventory/hosts.yml --run-id fc261d52a79b42649cc93a60dbb2d615 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/playbooks/windmill.yml (env=production)
-Running scoped playbook: playbooks/windmill.yml limit=proxmox_florin,postgres-lv3,runtime-control-lv3 shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/.ansible/shards/fc261d52a79b42649cc93a60dbb2d615/windmill-production.json
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=31ae95b06b21481891881d738f6cebaf ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply/inventory/hosts.yml --run-id fc261d52a79b42649cc93a60dbb2d615 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply/playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply/playbooks/windmill.yml (env=production)
+Running scoped playbook: playbooks/windmill.yml limit=proxmox-host,postgres-lv3,runtime-control-lv3 shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply/.ansible/shards/fc261d52a79b42649cc93a60dbb2d615/windmill-production.json
 
 PLAY [Converge the Tailscale operator proxy for Windmill] **********************
 
 TASK [Gathering Facts] *********************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:29:26.465Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.179Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.179Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Validating arguments against arg spec 'main' - Configure socket-activated Tailscale TCP proxies on the Proxmox host.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Validating arguments against arg spec 'main' - Configure socket-activated Tailscale TCP proxies on the Proxmox host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:29:32.188Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Validating arguments against arg spec 'main' - Configure socket-activated Tailscale TCP proxies on the Proxmox host.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.253Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Validating arguments against arg spec 'main' - Configure socket-activated Tailscale TCP proxies on the Proxmox host.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.253Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Resolve Proxmox Tailscale proxy inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Resolve Proxmox Tailscale proxy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:29:32.277Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Resolve Proxmox Tailscale proxy inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.340Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Resolve Proxmox Tailscale proxy inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.340Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Validate Proxmox Tailscale proxy inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Validate Proxmox Tailscale proxy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:29:32.359Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Validate Proxmox Tailscale proxy inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.423Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Validate Proxmox Tailscale proxy inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:32.423Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Ensure Proxmox Tailscale proxy systemd unit directory exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Ensure Proxmox Tailscale proxy systemd unit directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:29:32.445Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Ensure Proxmox Tailscale proxy systemd unit directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:33.017Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Ensure Proxmox Tailscale proxy systemd unit directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:33.017Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy socket units] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy socket units","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:29:33.033Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=windmill)
-ok: [proxmox_florin] => (item=nomad)
-ok: [proxmox_florin] => (item=mattermost)
-ok: [proxmox_florin] => (item=matrix-synapse)
-ok: [proxmox_florin] => (item=gitea)
-ok: [proxmox_florin] => (item=netbox)
-ok: [proxmox_florin] => (item=typesense)
-ok: [proxmox_florin] => (item=step-ca)
-ok: [proxmox_florin] => (item=openbao)
-ok: [proxmox_florin] => (item=openfga)
-ok: [proxmox_florin] => (item=semaphore)
-ok: [proxmox_florin] => (item=plane)
-ok: [proxmox_florin] => (item=woodpecker)
-ok: [proxmox_florin] => (item=open-webui)
-ok: [proxmox_florin] => (item=platform-context-api)
-ok: [proxmox_florin] => (item=portainer)
-ok: [proxmox_florin] => (item=vaultwarden)
-ok: [proxmox_florin] => (item=coolify)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy socket units","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:59.413Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=ntopng)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=windmill)
+ok: [proxmox-host] => (item=nomad)
+ok: [proxmox-host] => (item=mattermost)
+ok: [proxmox-host] => (item=matrix-synapse)
+ok: [proxmox-host] => (item=gitea)
+ok: [proxmox-host] => (item=netbox)
+ok: [proxmox-host] => (item=typesense)
+ok: [proxmox-host] => (item=step-ca)
+ok: [proxmox-host] => (item=openbao)
+ok: [proxmox-host] => (item=openfga)
+ok: [proxmox-host] => (item=semaphore)
+ok: [proxmox-host] => (item=plane)
+ok: [proxmox-host] => (item=woodpecker)
+ok: [proxmox-host] => (item=open-webui)
+ok: [proxmox-host] => (item=platform-context-api)
+ok: [proxmox-host] => (item=portainer)
+ok: [proxmox-host] => (item=vaultwarden)
+ok: [proxmox-host] => (item=coolify)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy socket units","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:29:59.413Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy service units] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy service units","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:29:59.424Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=windmill)
-ok: [proxmox_florin] => (item=nomad)
-ok: [proxmox_florin] => (item=mattermost)
-ok: [proxmox_florin] => (item=matrix-synapse)
-ok: [proxmox_florin] => (item=gitea)
-ok: [proxmox_florin] => (item=netbox)
-ok: [proxmox_florin] => (item=typesense)
-ok: [proxmox_florin] => (item=step-ca)
-ok: [proxmox_florin] => (item=openbao)
-ok: [proxmox_florin] => (item=openfga)
-ok: [proxmox_florin] => (item=semaphore)
-ok: [proxmox_florin] => (item=plane)
-ok: [proxmox_florin] => (item=woodpecker)
-ok: [proxmox_florin] => (item=open-webui)
-ok: [proxmox_florin] => (item=platform-context-api)
-ok: [proxmox_florin] => (item=portainer)
-ok: [proxmox_florin] => (item=vaultwarden)
-ok: [proxmox_florin] => (item=coolify)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy service units","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:25.888Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=ntopng)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=windmill)
+ok: [proxmox-host] => (item=nomad)
+ok: [proxmox-host] => (item=mattermost)
+ok: [proxmox-host] => (item=matrix-synapse)
+ok: [proxmox-host] => (item=gitea)
+ok: [proxmox-host] => (item=netbox)
+ok: [proxmox-host] => (item=typesense)
+ok: [proxmox-host] => (item=step-ca)
+ok: [proxmox-host] => (item=openbao)
+ok: [proxmox-host] => (item=openfga)
+ok: [proxmox-host] => (item=semaphore)
+ok: [proxmox-host] => (item=plane)
+ok: [proxmox-host] => (item=woodpecker)
+ok: [proxmox-host] => (item=open-webui)
+ok: [proxmox-host] => (item=platform-context-api)
+ok: [proxmox-host] => (item=portainer)
+ok: [proxmox-host] => (item=vaultwarden)
+ok: [proxmox-host] => (item=coolify)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Render Proxmox Tailscale proxy service units","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:25.888Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Flush Proxmox Tailscale proxy systemd handlers] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Flush Proxmox Tailscale proxy systemd handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:25.905Z","vm":"controller","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Read current Proxmox Tailscale proxy unit states] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Read current Proxmox Tailscale proxy unit states","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:25.923Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=windmill)
-ok: [proxmox_florin] => (item=nomad)
-ok: [proxmox_florin] => (item=mattermost)
-ok: [proxmox_florin] => (item=matrix-synapse)
-ok: [proxmox_florin] => (item=gitea)
-ok: [proxmox_florin] => (item=netbox)
-ok: [proxmox_florin] => (item=typesense)
-ok: [proxmox_florin] => (item=step-ca)
-ok: [proxmox_florin] => (item=openbao)
-ok: [proxmox_florin] => (item=openfga)
-ok: [proxmox_florin] => (item=semaphore)
-ok: [proxmox_florin] => (item=plane)
-ok: [proxmox_florin] => (item=woodpecker)
-ok: [proxmox_florin] => (item=open-webui)
-ok: [proxmox_florin] => (item=platform-context-api)
-ok: [proxmox_florin] => (item=portainer)
-ok: [proxmox_florin] => (item=vaultwarden)
-ok: [proxmox_florin] => (item=coolify)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read current Proxmox Tailscale proxy unit states","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:35.134Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=ntopng)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=windmill)
+ok: [proxmox-host] => (item=nomad)
+ok: [proxmox-host] => (item=mattermost)
+ok: [proxmox-host] => (item=matrix-synapse)
+ok: [proxmox-host] => (item=gitea)
+ok: [proxmox-host] => (item=netbox)
+ok: [proxmox-host] => (item=typesense)
+ok: [proxmox-host] => (item=step-ca)
+ok: [proxmox-host] => (item=openbao)
+ok: [proxmox-host] => (item=openfga)
+ok: [proxmox-host] => (item=semaphore)
+ok: [proxmox-host] => (item=plane)
+ok: [proxmox-host] => (item=woodpecker)
+ok: [proxmox-host] => (item=open-webui)
+ok: [proxmox-host] => (item=platform-context-api)
+ok: [proxmox-host] => (item=portainer)
+ok: [proxmox-host] => (item=vaultwarden)
+ok: [proxmox-host] => (item=coolify)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read current Proxmox Tailscale proxy unit states","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:35.134Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Enable Proxmox Tailscale proxy sockets] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Enable Proxmox Tailscale proxy sockets","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:35.152Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=windmill)
-ok: [proxmox_florin] => (item=nomad)
-ok: [proxmox_florin] => (item=mattermost)
-ok: [proxmox_florin] => (item=matrix-synapse)
-ok: [proxmox_florin] => (item=gitea)
-ok: [proxmox_florin] => (item=netbox)
-ok: [proxmox_florin] => (item=typesense)
-ok: [proxmox_florin] => (item=step-ca)
-ok: [proxmox_florin] => (item=openbao)
-ok: [proxmox_florin] => (item=openfga)
-ok: [proxmox_florin] => (item=semaphore)
-ok: [proxmox_florin] => (item=plane)
-ok: [proxmox_florin] => (item=woodpecker)
-ok: [proxmox_florin] => (item=open-webui)
-ok: [proxmox_florin] => (item=platform-context-api)
-ok: [proxmox_florin] => (item=portainer)
-ok: [proxmox_florin] => (item=vaultwarden)
-ok: [proxmox_florin] => (item=coolify)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Enable Proxmox Tailscale proxy sockets","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:47.971Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=ntopng)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=windmill)
+ok: [proxmox-host] => (item=nomad)
+ok: [proxmox-host] => (item=mattermost)
+ok: [proxmox-host] => (item=matrix-synapse)
+ok: [proxmox-host] => (item=gitea)
+ok: [proxmox-host] => (item=netbox)
+ok: [proxmox-host] => (item=typesense)
+ok: [proxmox-host] => (item=step-ca)
+ok: [proxmox-host] => (item=openbao)
+ok: [proxmox-host] => (item=openfga)
+ok: [proxmox-host] => (item=semaphore)
+ok: [proxmox-host] => (item=plane)
+ok: [proxmox-host] => (item=woodpecker)
+ok: [proxmox-host] => (item=open-webui)
+ok: [proxmox-host] => (item=platform-context-api)
+ok: [proxmox-host] => (item=portainer)
+ok: [proxmox-host] => (item=vaultwarden)
+ok: [proxmox-host] => (item=coolify)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Enable Proxmox Tailscale proxy sockets","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:47.971Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:47.981Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=ntopng)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=windmill)
-skipping: [proxmox_florin] => (item=nomad)
-skipping: [proxmox_florin] => (item=mattermost)
-skipping: [proxmox_florin] => (item=matrix-synapse)
-skipping: [proxmox_florin] => (item=gitea)
-skipping: [proxmox_florin] => (item=netbox)
-skipping: [proxmox_florin] => (item=typesense)
-skipping: [proxmox_florin] => (item=step-ca)
-skipping: [proxmox_florin] => (item=openbao)
-skipping: [proxmox_florin] => (item=openfga)
-skipping: [proxmox_florin] => (item=semaphore)
-skipping: [proxmox_florin] => (item=plane)
-skipping: [proxmox_florin] => (item=woodpecker)
-skipping: [proxmox_florin] => (item=open-webui)
-skipping: [proxmox_florin] => (item=platform-context-api)
-skipping: [proxmox_florin] => (item=portainer)
-skipping: [proxmox_florin] => (item=vaultwarden)
-skipping: [proxmox_florin] => (item=coolify)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:30:48.316Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=ntopng)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=windmill)
+skipping: [proxmox-host] => (item=nomad)
+skipping: [proxmox-host] => (item=mattermost)
+skipping: [proxmox-host] => (item=matrix-synapse)
+skipping: [proxmox-host] => (item=gitea)
+skipping: [proxmox-host] => (item=netbox)
+skipping: [proxmox-host] => (item=typesense)
+skipping: [proxmox-host] => (item=step-ca)
+skipping: [proxmox-host] => (item=openbao)
+skipping: [proxmox-host] => (item=openfga)
+skipping: [proxmox-host] => (item=semaphore)
+skipping: [proxmox-host] => (item=plane)
+skipping: [proxmox-host] => (item=woodpecker)
+skipping: [proxmox-host] => (item=open-webui)
+skipping: [proxmox-host] => (item=platform-context-api)
+skipping: [proxmox-host] => (item=portainer)
+skipping: [proxmox-host] => (item=vaultwarden)
+skipping: [proxmox-host] => (item=coolify)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:30:48.316Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Read active Proxmox Tailscale proxy service command lines] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Read active Proxmox Tailscale proxy service command lines","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:48.330Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=windmill)
-ok: [proxmox_florin] => (item=nomad)
-ok: [proxmox_florin] => (item=mattermost)
-ok: [proxmox_florin] => (item=matrix-synapse)
-ok: [proxmox_florin] => (item=gitea)
-ok: [proxmox_florin] => (item=netbox)
-ok: [proxmox_florin] => (item=typesense)
-ok: [proxmox_florin] => (item=step-ca)
-ok: [proxmox_florin] => (item=openbao)
-ok: [proxmox_florin] => (item=openfga)
-ok: [proxmox_florin] => (item=semaphore)
-ok: [proxmox_florin] => (item=plane)
-ok: [proxmox_florin] => (item=woodpecker)
-ok: [proxmox_florin] => (item=open-webui)
-ok: [proxmox_florin] => (item=platform-context-api)
-ok: [proxmox_florin] => (item=portainer)
-ok: [proxmox_florin] => (item=vaultwarden)
-ok: [proxmox_florin] => (item=coolify)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read active Proxmox Tailscale proxy service command lines","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:57.581Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=ntopng)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=windmill)
+ok: [proxmox-host] => (item=nomad)
+ok: [proxmox-host] => (item=mattermost)
+ok: [proxmox-host] => (item=matrix-synapse)
+ok: [proxmox-host] => (item=gitea)
+ok: [proxmox-host] => (item=netbox)
+ok: [proxmox-host] => (item=typesense)
+ok: [proxmox-host] => (item=step-ca)
+ok: [proxmox-host] => (item=openbao)
+ok: [proxmox-host] => (item=openfga)
+ok: [proxmox-host] => (item=semaphore)
+ok: [proxmox-host] => (item=plane)
+ok: [proxmox-host] => (item=woodpecker)
+ok: [proxmox-host] => (item=open-webui)
+ok: [proxmox-host] => (item=platform-context-api)
+ok: [proxmox-host] => (item=portainer)
+ok: [proxmox-host] => (item=vaultwarden)
+ok: [proxmox-host] => (item=coolify)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read active Proxmox Tailscale proxy service command lines","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:30:57.581Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:57.612Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=ntopng)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=windmill)
-skipping: [proxmox_florin] => (item=nomad)
-skipping: [proxmox_florin] => (item=mattermost)
-skipping: [proxmox_florin] => (item=matrix-synapse)
-skipping: [proxmox_florin] => (item=gitea)
-skipping: [proxmox_florin] => (item=netbox)
-skipping: [proxmox_florin] => (item=typesense)
-skipping: [proxmox_florin] => (item=step-ca)
-skipping: [proxmox_florin] => (item=openbao)
-skipping: [proxmox_florin] => (item=openfga)
-skipping: [proxmox_florin] => (item=semaphore)
-skipping: [proxmox_florin] => (item=plane)
-skipping: [proxmox_florin] => (item=woodpecker)
-skipping: [proxmox_florin] => (item=open-webui)
-skipping: [proxmox_florin] => (item=platform-context-api)
-skipping: [proxmox_florin] => (item=portainer)
-skipping: [proxmox_florin] => (item=vaultwarden)
-skipping: [proxmox_florin] => (item=coolify)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:30:58.074Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=ntopng)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=windmill)
+skipping: [proxmox-host] => (item=nomad)
+skipping: [proxmox-host] => (item=mattermost)
+skipping: [proxmox-host] => (item=matrix-synapse)
+skipping: [proxmox-host] => (item=gitea)
+skipping: [proxmox-host] => (item=netbox)
+skipping: [proxmox-host] => (item=typesense)
+skipping: [proxmox-host] => (item=step-ca)
+skipping: [proxmox-host] => (item=openbao)
+skipping: [proxmox-host] => (item=openfga)
+skipping: [proxmox-host] => (item=semaphore)
+skipping: [proxmox-host] => (item=plane)
+skipping: [proxmox-host] => (item=woodpecker)
+skipping: [proxmox-host] => (item=open-webui)
+skipping: [proxmox-host] => (item=platform-context-api)
+skipping: [proxmox-host] => (item=portainer)
+skipping: [proxmox-host] => (item=vaultwarden)
+skipping: [proxmox-host] => (item=coolify)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:30:58.074Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:58.101Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=ntopng)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=windmill)
-skipping: [proxmox_florin] => (item=nomad)
-skipping: [proxmox_florin] => (item=mattermost)
-skipping: [proxmox_florin] => (item=matrix-synapse)
-skipping: [proxmox_florin] => (item=gitea)
-skipping: [proxmox_florin] => (item=netbox)
-skipping: [proxmox_florin] => (item=typesense)
-skipping: [proxmox_florin] => (item=step-ca)
-skipping: [proxmox_florin] => (item=openbao)
-skipping: [proxmox_florin] => (item=openfga)
-skipping: [proxmox_florin] => (item=semaphore)
-skipping: [proxmox_florin] => (item=plane)
-skipping: [proxmox_florin] => (item=woodpecker)
-skipping: [proxmox_florin] => (item=open-webui)
-skipping: [proxmox_florin] => (item=platform-context-api)
-skipping: [proxmox_florin] => (item=portainer)
-skipping: [proxmox_florin] => (item=vaultwarden)
-skipping: [proxmox_florin] => (item=coolify)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:30:58.579Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=ntopng)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=windmill)
+skipping: [proxmox-host] => (item=nomad)
+skipping: [proxmox-host] => (item=mattermost)
+skipping: [proxmox-host] => (item=matrix-synapse)
+skipping: [proxmox-host] => (item=gitea)
+skipping: [proxmox-host] => (item=netbox)
+skipping: [proxmox-host] => (item=typesense)
+skipping: [proxmox-host] => (item=step-ca)
+skipping: [proxmox-host] => (item=openbao)
+skipping: [proxmox-host] => (item=openfga)
+skipping: [proxmox-host] => (item=semaphore)
+skipping: [proxmox-host] => (item=plane)
+skipping: [proxmox-host] => (item=woodpecker)
+skipping: [proxmox-host] => (item=open-webui)
+skipping: [proxmox-host] => (item=platform-context-api)
+skipping: [proxmox-host] => (item=portainer)
+skipping: [proxmox-host] => (item=vaultwarden)
+skipping: [proxmox-host] => (item=coolify)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:30:58.579Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Read effective Proxmox Tailscale proxy unit states] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Read effective Proxmox Tailscale proxy unit states","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:30:58.604Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=windmill)
-ok: [proxmox_florin] => (item=nomad)
-ok: [proxmox_florin] => (item=mattermost)
-ok: [proxmox_florin] => (item=matrix-synapse)
-ok: [proxmox_florin] => (item=gitea)
-ok: [proxmox_florin] => (item=netbox)
-ok: [proxmox_florin] => (item=typesense)
-ok: [proxmox_florin] => (item=step-ca)
-ok: [proxmox_florin] => (item=openbao)
-ok: [proxmox_florin] => (item=openfga)
-ok: [proxmox_florin] => (item=semaphore)
-ok: [proxmox_florin] => (item=plane)
-ok: [proxmox_florin] => (item=woodpecker)
-ok: [proxmox_florin] => (item=open-webui)
-ok: [proxmox_florin] => (item=platform-context-api)
-ok: [proxmox_florin] => (item=portainer)
-ok: [proxmox_florin] => (item=vaultwarden)
-ok: [proxmox_florin] => (item=coolify)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read effective Proxmox Tailscale proxy unit states","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:07.765Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=ntopng)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=windmill)
+ok: [proxmox-host] => (item=nomad)
+ok: [proxmox-host] => (item=mattermost)
+ok: [proxmox-host] => (item=matrix-synapse)
+ok: [proxmox-host] => (item=gitea)
+ok: [proxmox-host] => (item=netbox)
+ok: [proxmox-host] => (item=typesense)
+ok: [proxmox-host] => (item=step-ca)
+ok: [proxmox-host] => (item=openbao)
+ok: [proxmox-host] => (item=openfga)
+ok: [proxmox-host] => (item=semaphore)
+ok: [proxmox-host] => (item=plane)
+ok: [proxmox-host] => (item=woodpecker)
+ok: [proxmox-host] => (item=open-webui)
+ok: [proxmox-host] => (item=platform-context-api)
+ok: [proxmox-host] => (item=portainer)
+ok: [proxmox-host] => (item=vaultwarden)
+ok: [proxmox-host] => (item=coolify)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read effective Proxmox Tailscale proxy unit states","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:07.765Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Restart active Proxmox Tailscale proxy services when their unit or upstream changes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Restart active Proxmox Tailscale proxy services when their unit or upstream changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:07.776Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=ntopng)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=windmill)
-skipping: [proxmox_florin] => (item=nomad)
-skipping: [proxmox_florin] => (item=mattermost)
-skipping: [proxmox_florin] => (item=matrix-synapse)
-skipping: [proxmox_florin] => (item=gitea)
-skipping: [proxmox_florin] => (item=netbox)
-skipping: [proxmox_florin] => (item=typesense)
-skipping: [proxmox_florin] => (item=step-ca)
-skipping: [proxmox_florin] => (item=openbao)
-skipping: [proxmox_florin] => (item=openfga)
-skipping: [proxmox_florin] => (item=semaphore)
-skipping: [proxmox_florin] => (item=plane)
-skipping: [proxmox_florin] => (item=woodpecker)
-skipping: [proxmox_florin] => (item=open-webui)
-skipping: [proxmox_florin] => (item=platform-context-api)
-skipping: [proxmox_florin] => (item=portainer)
-skipping: [proxmox_florin] => (item=vaultwarden)
-skipping: [proxmox_florin] => (item=coolify)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Restart active Proxmox Tailscale proxy services when their unit or upstream changes","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:08.504Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=ntopng)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=windmill)
+skipping: [proxmox-host] => (item=nomad)
+skipping: [proxmox-host] => (item=mattermost)
+skipping: [proxmox-host] => (item=matrix-synapse)
+skipping: [proxmox-host] => (item=gitea)
+skipping: [proxmox-host] => (item=netbox)
+skipping: [proxmox-host] => (item=typesense)
+skipping: [proxmox-host] => (item=step-ca)
+skipping: [proxmox-host] => (item=openbao)
+skipping: [proxmox-host] => (item=openfga)
+skipping: [proxmox-host] => (item=semaphore)
+skipping: [proxmox-host] => (item=plane)
+skipping: [proxmox-host] => (item=woodpecker)
+skipping: [proxmox-host] => (item=open-webui)
+skipping: [proxmox-host] => (item=platform-context-api)
+skipping: [proxmox-host] => (item=portainer)
+skipping: [proxmox-host] => (item=vaultwarden)
+skipping: [proxmox-host] => (item=coolify)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_tailscale_proxy : Restart active Proxmox Tailscale proxy services when their unit or upstream changes","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:08.504Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Read final Proxmox Tailscale proxy unit states] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Read final Proxmox Tailscale proxy unit states","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:08.513Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=windmill)
-ok: [proxmox_florin] => (item=nomad)
-ok: [proxmox_florin] => (item=mattermost)
-ok: [proxmox_florin] => (item=matrix-synapse)
-ok: [proxmox_florin] => (item=gitea)
-ok: [proxmox_florin] => (item=netbox)
-ok: [proxmox_florin] => (item=typesense)
-ok: [proxmox_florin] => (item=step-ca)
-ok: [proxmox_florin] => (item=openbao)
-ok: [proxmox_florin] => (item=openfga)
-ok: [proxmox_florin] => (item=semaphore)
-ok: [proxmox_florin] => (item=plane)
-ok: [proxmox_florin] => (item=woodpecker)
-ok: [proxmox_florin] => (item=open-webui)
-ok: [proxmox_florin] => (item=platform-context-api)
-ok: [proxmox_florin] => (item=portainer)
-ok: [proxmox_florin] => (item=vaultwarden)
-ok: [proxmox_florin] => (item=coolify)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read final Proxmox Tailscale proxy unit states","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:17.513Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=ntopng)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=windmill)
+ok: [proxmox-host] => (item=nomad)
+ok: [proxmox-host] => (item=mattermost)
+ok: [proxmox-host] => (item=matrix-synapse)
+ok: [proxmox-host] => (item=gitea)
+ok: [proxmox-host] => (item=netbox)
+ok: [proxmox-host] => (item=typesense)
+ok: [proxmox-host] => (item=step-ca)
+ok: [proxmox-host] => (item=openbao)
+ok: [proxmox-host] => (item=openfga)
+ok: [proxmox-host] => (item=semaphore)
+ok: [proxmox-host] => (item=plane)
+ok: [proxmox-host] => (item=woodpecker)
+ok: [proxmox-host] => (item=open-webui)
+ok: [proxmox-host] => (item=platform-context-api)
+ok: [proxmox-host] => (item=portainer)
+ok: [proxmox-host] => (item=vaultwarden)
+ok: [proxmox-host] => (item=coolify)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Read final Proxmox Tailscale proxy unit states","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:17.513Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_tailscale_proxy : Assert Proxmox Tailscale proxy listeners remain active after converge] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Assert Proxmox Tailscale proxy listeners remain active after converge","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:17.543Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=ntopng) => {
+ok: [proxmox-host] => (item=ntopng) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -325,7 +325,7 @@ ok: [proxmox_florin] => (item=ntopng) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=postgres-lv3) => {
+ok: [proxmox-host] => (item=postgres-lv3) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -337,7 +337,7 @@ ok: [proxmox_florin] => (item=postgres-lv3) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=windmill) => {
+ok: [proxmox-host] => (item=windmill) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -349,7 +349,7 @@ ok: [proxmox_florin] => (item=windmill) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=nomad) => {
+ok: [proxmox-host] => (item=nomad) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -361,7 +361,7 @@ ok: [proxmox_florin] => (item=nomad) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=mattermost) => {
+ok: [proxmox-host] => (item=mattermost) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -373,7 +373,7 @@ ok: [proxmox_florin] => (item=mattermost) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=matrix-synapse) => {
+ok: [proxmox-host] => (item=matrix-synapse) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -385,7 +385,7 @@ ok: [proxmox_florin] => (item=matrix-synapse) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=gitea) => {
+ok: [proxmox-host] => (item=gitea) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -397,7 +397,7 @@ ok: [proxmox_florin] => (item=gitea) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=netbox) => {
+ok: [proxmox-host] => (item=netbox) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -409,7 +409,7 @@ ok: [proxmox_florin] => (item=netbox) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=typesense) => {
+ok: [proxmox-host] => (item=typesense) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -421,7 +421,7 @@ ok: [proxmox_florin] => (item=typesense) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=step-ca) => {
+ok: [proxmox-host] => (item=step-ca) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -433,7 +433,7 @@ ok: [proxmox_florin] => (item=step-ca) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=openbao) => {
+ok: [proxmox-host] => (item=openbao) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -445,7 +445,7 @@ ok: [proxmox_florin] => (item=openbao) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=openfga) => {
+ok: [proxmox-host] => (item=openfga) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -457,7 +457,7 @@ ok: [proxmox_florin] => (item=openfga) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=semaphore) => {
+ok: [proxmox-host] => (item=semaphore) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -469,7 +469,7 @@ ok: [proxmox_florin] => (item=semaphore) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=plane) => {
+ok: [proxmox-host] => (item=plane) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -481,7 +481,7 @@ ok: [proxmox_florin] => (item=plane) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=woodpecker) => {
+ok: [proxmox-host] => (item=woodpecker) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -493,7 +493,7 @@ ok: [proxmox_florin] => (item=woodpecker) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=open-webui) => {
+ok: [proxmox-host] => (item=open-webui) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -505,7 +505,7 @@ ok: [proxmox_florin] => (item=open-webui) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=platform-context-api) => {
+ok: [proxmox-host] => (item=platform-context-api) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -517,7 +517,7 @@ ok: [proxmox_florin] => (item=platform-context-api) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=portainer) => {
+ok: [proxmox-host] => (item=portainer) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -529,7 +529,7 @@ ok: [proxmox_florin] => (item=portainer) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=vaultwarden) => {
+ok: [proxmox-host] => (item=vaultwarden) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -541,7 +541,7 @@ ok: [proxmox_florin] => (item=vaultwarden) => {
     },
     "msg": "All assertions passed"
 }
-ok: [proxmox_florin] => (item=coolify) => {
+ok: [proxmox-host] => (item=coolify) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -553,212 +553,212 @@ ok: [proxmox_florin] => (item=coolify) => {
     },
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Assert Proxmox Tailscale proxy listeners remain active after converge","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:18.112Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Assert Proxmox Tailscale proxy listeners remain active after converge","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:18.112Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Validating arguments against arg spec 'main' - Proxmox security role inputs.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Validating arguments against arg spec 'main' - Proxmox security role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:18.133Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Validating arguments against arg spec 'main' - Proxmox security role inputs.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:18.183Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Validating arguments against arg spec 'main' - Proxmox security role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:18.183Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Validate Proxmox security inputs] ********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Validate Proxmox security inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:18.192Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Validate Proxmox security inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:18.264Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Validate Proxmox security inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:18.264Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Ensure security support packages are present] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Ensure security support packages are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:18.276Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Ensure security support packages are present","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:20.049Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Ensure security support packages are present","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:20.049Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Ensure Proxmox firewall configuration directory exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:20.058Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:20.513Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:20.513Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Render cluster-wide Proxmox firewall policy to staging file] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Render cluster-wide Proxmox firewall policy to staging file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:20.528Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Render cluster-wide Proxmox firewall policy to staging file","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:21.840Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Render cluster-wide Proxmox firewall policy to staging file","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:21.840Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Install cluster-wide Proxmox firewall policy] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Install cluster-wide Proxmox firewall policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:21.852Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Install cluster-wide Proxmox firewall policy","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:22.314Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Install cluster-wide Proxmox firewall policy","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:22.314Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Render host-specific Proxmox firewall policy to staging file] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Render host-specific Proxmox firewall policy to staging file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:22.325Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Render host-specific Proxmox firewall policy to staging file","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:23.651Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Render host-specific Proxmox firewall policy to staging file","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:23.651Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Install host-specific Proxmox firewall policy] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Install host-specific Proxmox firewall policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:23.672Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Install host-specific Proxmox firewall policy","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:24.108Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Install host-specific Proxmox firewall policy","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:24.108Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Enable and start Proxmox firewall service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Enable and start Proxmox firewall service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:24.121Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Enable and start Proxmox firewall service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:24.691Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Enable and start Proxmox firewall service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:24.691Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Compile Proxmox firewall configuration] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Compile Proxmox firewall configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:24.710Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:25.954Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:25.954Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Restart Proxmox firewall if rules changed] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Restart Proxmox firewall if rules changed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:25.962Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Restart Proxmox firewall if rules changed","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:26.002Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Restart Proxmox firewall if rules changed","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:26.002Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Render break-glass sshd port drop-in] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Render break-glass sshd port drop-in","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:26.016Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Render break-glass sshd port drop-in","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:27.272Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Render break-glass sshd port drop-in","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:27.272Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Validate full SSH daemon configuration after break-glass drop-in] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Validate full SSH daemon configuration after break-glass drop-in","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:27.298Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Validate full SSH daemon configuration after break-glass drop-in","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:27.340Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Validate full SSH daemon configuration after break-glass drop-in","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:27.340Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Reload sshd to apply break-glass port] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Reload sshd to apply break-glass port","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:27.354Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Reload sshd to apply break-glass port","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:27.384Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Reload sshd to apply break-glass port","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:27.384Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Read current Proxmox users] **************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Read current Proxmox users","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:27.393Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current Proxmox users","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:29.599Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current Proxmox users","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:29.599Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Ensure Proxmox users have notification email addresses] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Ensure Proxmox users have notification email addresses","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:29.611Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=root@pam)
-skipping: [proxmox_florin] => (item=ops@pam)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Ensure Proxmox users have notification email addresses","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:29.667Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=root@pam)
+skipping: [proxmox-host] => (item=ops@pam)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Ensure Proxmox users have notification email addresses","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:29.667Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Read current sendmail notification endpoints] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Read current sendmail notification endpoints","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:29.677Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current sendmail notification endpoints","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:30.978Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current sendmail notification endpoints","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:30.978Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Create sendmail notification endpoint] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Create sendmail notification endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:30.989Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Create sendmail notification endpoint","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:31.034Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Create sendmail notification endpoint","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:31.034Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Update sendmail notification endpoint] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Update sendmail notification endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:31.048Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Update sendmail notification endpoint","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:31.092Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Update sendmail notification endpoint","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:31.092Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Read current notification matchers] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Read current notification matchers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:31.100Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current notification matchers","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:32.271Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current notification matchers","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:32.271Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Create catch-all notification matcher] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Create catch-all notification matcher","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:32.300Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Create catch-all notification matcher","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:32.354Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Create catch-all notification matcher","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:32.354Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Update catch-all notification matcher] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Update catch-all notification matcher","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:32.365Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Update catch-all notification matcher","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:32.416Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Update catch-all notification matcher","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:32.416Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Send a direct mail delivery probe through local sendmail] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Send a direct mail delivery probe through local sendmail","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:32.435Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Send a direct mail delivery probe through local sendmail","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:32.903Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Send a direct mail delivery probe through local sendmail","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:32.903Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Check notification mail queue state] *****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Check notification mail queue state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:32.920Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Check notification mail queue state","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:33.415Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Check notification mail queue state","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:33.415Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Check existing ACME accounts] ************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Check existing ACME accounts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:33.439Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Check existing ACME accounts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:35.604Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Check existing ACME accounts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:35.604Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Register default ACME account] ***********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Register default ACME account","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:35.617Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Register default ACME account","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:35.648Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Register default ACME account","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:35.648Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Check existing ACME plugins] *************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Check existing ACME plugins","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:35.665Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Check existing ACME plugins","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:36.807Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Check existing ACME plugins","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:36.807Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Create temporary ACME DNS plugin credential file] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Create temporary ACME DNS plugin credential file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:36.824Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Create temporary ACME DNS plugin credential file","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:39.201Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Create temporary ACME DNS plugin credential file","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:39.201Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Create Hetzner ACME DNS plugin] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Create Hetzner ACME DNS plugin","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:39.211Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Create Hetzner ACME DNS plugin","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:39.268Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Create Hetzner ACME DNS plugin","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:39.268Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Update Hetzner ACME DNS plugin] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Update Hetzner ACME DNS plugin","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:39.295Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Update Hetzner ACME DNS plugin","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:40.440Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Update Hetzner ACME DNS plugin","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:40.440Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Remove temporary ACME DNS plugin credential file] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Remove temporary ACME DNS plugin credential file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:40.454Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Remove temporary ACME DNS plugin credential file","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:40.942Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Remove temporary ACME DNS plugin credential file","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:40.942Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Read current node ACME configuration] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Read current node ACME configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:40.951Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current node ACME configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:42.155Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current node ACME configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:42.155Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Configure node ACME domain binding] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Configure node ACME domain binding","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:42.167Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Configure node ACME domain binding","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:42.218Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Configure node ACME domain binding","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:42.218Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Read current certificate information] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Read current certificate information","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:42.245Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current certificate information","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:43.395Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current certificate information","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:43.395Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Order ACME certificate for Proxmox UI] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Order ACME certificate for Proxmox UI","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:43.407Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Order ACME certificate for Proxmox UI","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:43.454Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Order ACME certificate for Proxmox UI","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:43.454Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Provision or refresh local TOTP state for Proxmox admin] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Provision or refresh local TOTP state for Proxmox admin","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:43.475Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Provision or refresh local TOTP state for Proxmox admin","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:44.082Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Provision or refresh local TOTP state for Proxmox admin","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:44.082Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Parse local TOTP material] ***************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Parse local TOTP material","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:44.091Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Parse local TOTP material","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:44.133Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Parse local TOTP material","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:44.133Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Read current TFA entries for Proxmox admin user] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Read current TFA entries for Proxmox admin user","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:44.152Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current TFA entries for Proxmox admin user","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:46.342Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Read current TFA entries for Proxmox admin user","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:46.342Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Add TOTP entry for Proxmox admin user] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Add TOTP entry for Proxmox admin user","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:46.363Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Add TOTP entry for Proxmox admin user","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:46.427Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_security : Add TOTP entry for Proxmox admin user","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-04T07:31:46.427Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_security : Confirm TFA entries for Proxmox admin user] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_security : Confirm TFA entries for Proxmox admin user","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T07:31:46.437Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Confirm TFA entries for Proxmox admin user","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:47.664Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_security : Confirm TFA entries for Proxmox admin user","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-04T07:31:47.664Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY [Converge PostgreSQL access for Windmill] *********************************
 
@@ -2183,5 +2183,5 @@ fatal: [runtime-control-lv3]: FAILED! => {
 
 PLAY RECAP *********************************************************************
 postgres-lv3               : ok=95   changed=1    unreachable=0    failed=0    skipped=29   rescued=0    ignored=0
-proxmox_florin             : ok=40   changed=4    unreachable=0    failed=0    skipped=17   rescued=0    ignored=0
+proxmox-host             : ok=40   changed=4    unreachable=0    failed=0    skipped=17   rescued=0    ignored=0
 runtime-control-lv3        : ok=63   changed=3    unreachable=0    failed=1    skipped=3    rescued=1    ignored=0
