@@ -14,7 +14,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 - live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end
 - align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
-- ADR 0414/0415: fix SKIP_CERT_VALIDATION=1 gate bypass (was silently ignored), add cert_lifecycle_manager.py for programmatic cert+subdomain lifecycle, add daily cert-sync cron for auto-repair, add skip/warn mode for forks without Hetzner DNS API
 
 ## 0.178.78 (2026-04-10)
 

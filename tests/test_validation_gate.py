@@ -533,6 +533,7 @@ def test_gate_status_resolves_default_paths_from_repo_root(tmp_path: Path) -> No
         "scripts/__init__.py",
         "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
+        "scripts/validation_toolkit.py",
         "scripts/validation_lanes.py",
         "config/gate-bypass-waiver-catalog.json",
         "config/validation-gate.json",
