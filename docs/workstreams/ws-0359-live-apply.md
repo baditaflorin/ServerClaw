@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0359](../adr/0359-declarative-postgres-client-registry.md)
 - Title: verify and live-apply the declarative PostgreSQL client registry from the latest `origin/main`
-- Status: live applied
-- Included In Repo Version: `0.178.131`
+- Status: ready for merge
+- Target Repo Version: `0.178.132`
 - Latest Realistic Apply Base: `origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1` (`VERSION=0.178.129`)
-- Latest Reachable origin/main: `origin/main@063e88c0fe49c278cbfe231a345eaebb145ec404` (`VERSION=0.178.130`)
+- Latest Reachable origin/main: `origin/main@d95efb4e6e59218b7cbccb3a8e61aa95a7b7af72` (`VERSION=0.178.131`)
 - Branch: `codex/ws-0359-main-merge-r2`
 - Worktree: `.worktrees/ws-0359-main-merge-r2`
 - Owner: codex
@@ -20,7 +20,8 @@
 ## Current Starting Point
 
 - the replay began from `origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1` with `VERSION=0.178.129`
-- the closeout branch was finally rebased onto `origin/main@063e88c0fe49c278cbfe231a345eaebb145ec404`, where `VERSION=0.178.130`
+- the closeout branch captured a full exact-tip replay on `origin/main@063e88c0fe49c278cbfe231a345eaebb145ec404`
+- reachable `origin/main` has since advanced to `d95efb4e6e59218b7cbccb3a8e61aa95a7b7af72`, where `VERSION=0.178.131`
 - the implementation exists in code on this base:
   - `inventory/group_vars/platform_postgres.yml` defines `platform_postgres_clients`
   - `inventory/group_vars/postgres_guests.yml` derives guest source allowlists from the registry
@@ -84,5 +85,6 @@
 
 ## Closeout
 
-1. Push the fully validated branch to `origin/main`.
-2. Remove the dedicated `ws-0359-main-merge-r2` worktree after the push lands.
+1. Cut the integration-only `0.178.132` repo version from the rebased branch and refresh the main summaries.
+2. Replay `make live-apply-service service=postgres-vm env=production` from the exact rebased 0.178.132 integration commit and refresh the ADR 0359 receipt with that commit SHA.
+3. Rerun the focused tests plus repo validation gates, then fast-forward the result to `origin/main`.

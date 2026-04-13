@@ -8,7 +8,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
-| `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
@@ -177,6 +176,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
+| `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |

@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.130` |
+| Repository version | `0.178.132` |
 | Platform version | `0.178.130` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -58,8 +58,6 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
-| `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
-| `keycloak` | `2026-04-13-keycloak-topology-fix-runtime-control-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
@@ -76,8 +74,10 @@ monitored, and recoverable from a single repository.
 | `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `temporal` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `step_ca` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `semaphore` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `openfga` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 
 Showing 20 of 177 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -89,7 +89,7 @@ Showing 20 of 177 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.130` |
+| Repository version | `0.178.132` |
 | Platform version | `0.178.130` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

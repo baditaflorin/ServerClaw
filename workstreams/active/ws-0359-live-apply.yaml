@@ -1,7 +1,7 @@
 id: ws-0359-live-apply
 adr: 0359
 title: Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main
-status: live_applied
+status: ready_for_merge
 owner: codex
 branch: codex/ws-0359-main-merge-r2
 worktree_path: .worktrees/ws-0359-main-merge-r2
@@ -122,7 +122,7 @@ canonical_truth:
     postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
 blockers: []
 ready_to_merge: true
-live_applied: true
+live_applied: false
 notes: >
   ADR 0359 is already implemented in repo code on origin/main. This closeout
   started from the latest realistic 0.178.129 base
@@ -132,10 +132,12 @@ notes: >
   evaluation through the generated platform_host dict, pgaudit grant assertions on
   guests that do not host the audited databases, and the missing ADR 0359 registry
   load plus guest-wide 10.10.10.0/24 HBA fallback that otherwise allowed
-  cross-database logins. The branch then rebased onto the latest reachable
-  origin/main@063e88c0fe49c278cbfe231a345eaebb145ec404 and replayed
-  `make live-apply-service service=postgres-vm env=production` from commit
-  080375c1d0f351eba1b9fc4ffc23be2c686288a9, with a clean recap plus fresh
-  pgaudit, `pg_hba.conf`, positive-login, and cross-database denial evidence for
-  repo/platform version 0.178.131 before the final main push.
+  cross-database logins. The branch rebased first onto
+  origin/main@063e88c0fe49c278cbfe231a345eaebb145ec404 and captured exact-tip
+  replay evidence for repo/platform version 0.178.131. Reachable origin/main has
+  since advanced again to d95efb4e6e59218b7cbccb3a8e61aa95a7b7af72, which already
+  cut repo version 0.178.131 for ADR 0413. The final remaining step is to replay
+  `make live-apply-service service=postgres-vm env=production` once more from the
+  rebased 0.178.132 integration commit, refresh the receipt/source-commit
+  metadata, and then push main.
 plane_issue_id: ebace4da-ecfa-42aa-8d14-8189950e9d5a
