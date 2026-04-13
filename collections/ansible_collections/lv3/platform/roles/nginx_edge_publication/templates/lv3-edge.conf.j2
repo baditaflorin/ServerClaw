@@ -491,6 +491,12 @@ server {
     location @lv3_shared_logout_without_session {
         return 302 {{ oauth2_proxy_sign_out_url(public_edge_session_authority.shared_proxy_cleanup_url) }};
     }
+
+    location @lv3_forbidden {
+        default_type text/html;
+        add_header Cache-Control "no-store" always;
+        return 403 '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Access Denied — {{ platform_domain }}</title><style>*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8f9fa;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center}.card{background:#fff;border-radius:8px;box-shadow:0 2px 16px rgba(0,0,0,.1);max-width:480px;width:100%;padding:40px;text-align:center}.icon{font-size:48px;margin-bottom:16px}.title{font-size:22px;font-weight:600;color:#1a1a1a;margin:0 0 12px}.body{color:#555;margin:0 0 24px;line-height:1.6}.links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}a{display:inline-block;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500}.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}.btn-secondary{background:#f1f5f9;color:#374151;border:1px solid #d1d5db}.btn-secondary:hover{background:#e2e8f0}.admin{font-size:12px;color:#9ca3af;margin-top:20px}</style></head><body><div class="card"><div class="icon">&#128274;</div><h1 class="title">Insufficient Permissions</h1><p class="body">You are signed in but do not have access to this service. Your account may not be in the required group, or access may have been revoked.</p><div class="links"><a href="https://home.{{ platform_domain }}/" class="btn-primary">Back to Home</a><a href="{{ public_edge_session_authority.shared_logout_path }}" class="btn-secondary">Sign Out</a></div><p class="admin">If you believe this is a mistake, contact your platform administrator at <strong>admin@{{ platform_domain }}</strong></p></div></body></html>';
+    }
 {% endif %}
 
 {% if site.kind == 'proxy' %}
@@ -540,6 +546,7 @@ server {
 {% if protected_site %}
         auth_request /oauth2/auth;
         error_page 401 = @oauth2_signin;
+        error_page 403 = @lv3_forbidden;
         auth_request_set $auth_user $upstream_http_x_auth_request_user;
         auth_request_set $auth_email $upstream_http_x_auth_request_email;
         auth_request_set $auth_access_token $upstream_http_x_auth_request_access_token;
@@ -573,6 +580,7 @@ server {
 {% if protected_site %}
         auth_request /oauth2/auth;
         error_page 401 = @oauth2_signin;
+        error_page 403 = @lv3_forbidden;
         auth_request_set $auth_user $upstream_http_x_auth_request_user;
         auth_request_set $auth_email $upstream_http_x_auth_request_email;
         auth_request_set $auth_access_token $upstream_http_x_auth_request_access_token;
@@ -619,6 +627,7 @@ server {
 {% if protected_site %}
         auth_request /oauth2/auth;
         error_page 401 = @oauth2_signin;
+        error_page 403 = @lv3_forbidden;
         auth_request_set $auth_user $upstream_http_x_auth_request_user;
         auth_request_set $auth_email $upstream_http_x_auth_request_email;
 {% endif %}
@@ -631,6 +640,7 @@ server {
 {% if protected_site %}
         auth_request /oauth2/auth;
         error_page 401 = @oauth2_signin;
+        error_page 403 = @lv3_forbidden;
         auth_request_set $auth_user $upstream_http_x_auth_request_user;
         auth_request_set $auth_email $upstream_http_x_auth_request_email;
 {% endif %}

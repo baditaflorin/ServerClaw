@@ -271,6 +271,16 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the ServerClaw runtime client secret.
+      keycloak_semaphore_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id used by Semaphore.
+      keycloak_semaphore_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the Semaphore client secret.
       keycloak_grist_client_id:
         type: str
         required: true

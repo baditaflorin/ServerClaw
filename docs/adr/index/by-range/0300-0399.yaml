@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-12'
+generated: '2026-04-13'
 facet: range
 label: 0300-0399
 range:
@@ -1363,8 +1363,8 @@ adrs:
     path: docs/adr/0358-platform-health-contract-and-dependency-slo.md
   - adr: 0359
     title: Declarative PostgreSQL Client Registry
-    status: Proposed
-    implementation_status: Proposed
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -1376,6 +1376,9 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
+    implemented_in_repo_version: 0.178.12
+    implemented_in_platform_version: 0.178.132
+    implemented_on: '2026-04-13'
   - adr: '0360'
     title: OpenBao TLS Cert Lifetime And Renewal Hardening
     status: Accepted
@@ -1433,19 +1436,23 @@ adrs:
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0361'
     title: Semaphore Keycloak OIDC Integration
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-07'
     concern: security
     keywords:
       - semaphore
       - keycloak
       - oidc
+      - sso
+      - private-access
       - integration
-    summary: 'Extend Semaphore runtime configuration to support Keycloak OpenID Connect (OIDC) authentication while maintaining
-      fallback username/password login for recovery '
+    summary: Make the Semaphore OIDC client a repo-managed Keycloak concern and converge it
     filename: 0361-semaphore-keycloak-oidc-integration.md
     path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
+    implemented_in_repo_version: 0.178.130
+    implemented_in_platform_version: 0.178.130
+    implemented_on: '2026-04-13'
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted

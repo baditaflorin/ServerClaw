@@ -12,6 +12,17 @@
     - "{{ playbook_dir }}/../../inventory/group_vars/platform.yml"
 
   pre_tasks:
+    - name: Assert platform_domain is not the generic example.com placeholder
+      ansible.builtin.assert:
+        that:
+          - platform_domain is defined
+          - platform_domain != 'example.com'
+        fail_msg: >-
+          platform_domain is '{{ platform_domain | default('undefined') }}' — this means
+          inventory/group_vars/platform.yml was not generated or is stale.
+          Run 'make generate-platform-vars' before running any nginx-edge playbook.
+          See ADR 0407 for the generic-by-default / local overlay architecture.
+
     - name: Run shared preflight checks
       ansible.builtin.import_tasks: tasks/preflight.yml
       vars:

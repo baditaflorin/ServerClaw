@@ -31,7 +31,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-plausible.md",
       "implementation_refs": [
-        "playbooks/plausible.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/plausible.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/plausible.yml",
@@ -96,7 +95,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-flagsmith.md",
       "implementation_refs": [
-        "playbooks/flagsmith.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/flagsmith.yml",
@@ -155,7 +153,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-crawl4ai.md",
       "implementation_refs": [
-        "playbooks/crawl4ai.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/services/crawl4ai.yml",
         "collections/ansible_collections/lv3/platform/roles/crawl4ai_runtime",
@@ -995,7 +992,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-guest-network-policy.md",
       "implementation_refs": [
-        "playbooks/guest-network-policy.yml",
         "Makefile",
         "inventory/host_vars/proxmox-host.yml",
         "collections/ansible_collections/lv3/platform/playbooks/guest-network-policy.yml",
@@ -1082,7 +1078,6 @@
         ],
         "bootstrap_manifest_ids": [
           "controller-local-base",
-          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -1237,7 +1232,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-headscale.md",
       "implementation_refs": [
-        "playbooks/headscale.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/headscale.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/headscale.yml",
@@ -1560,7 +1554,6 @@
       "live_impact": "host_live",
       "owner_runbook": "docs/runbooks/configure-ntopng.md",
       "implementation_refs": [
-        "playbooks/ntopng.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/ntopng.yml",
         "collections/ansible_collections/lv3/platform/roles/proxmox_ntopng",
@@ -1610,7 +1603,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-docker-runtime.md",
       "implementation_refs": [
-        "playbooks/docker-runtime.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/docker-runtime.yml",
         "collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml"
@@ -1653,9 +1645,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/docker-publication-assurance.md",
       "implementation_refs": [
-        "playbooks/docker-publication-assurance.yml",
         "Makefile",
-        "playbooks/docker-publication-assurance.yml",
         "collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml",
         "collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml",
         "scripts/docker_publication_assurance.py",
@@ -1699,7 +1689,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
       "implementation_refs": [
-        "playbooks/postgres-vm.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/postgres-vm.yml",
         "collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml"
@@ -1744,7 +1733,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-mail-platform.md",
       "implementation_refs": [
-        "playbooks/mail-platform.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/mail-platform.yml",
         "collections/ansible_collections/lv3/platform/roles/mail_platform_runtime",
@@ -1798,7 +1786,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-mailpit.md",
       "implementation_refs": [
-        "playbooks/mailpit.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/mailpit.yml",
         "collections/ansible_collections/lv3/platform/roles/mailpit_runtime",
@@ -1856,7 +1843,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-livekit.md",
       "implementation_refs": [
-        "playbooks/livekit.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/livekit.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/livekit.yml",
@@ -1916,7 +1902,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
       "implementation_refs": [
-        "playbooks/neko.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/neko.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/neko.yml",
@@ -1979,7 +1964,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-redpanda.md",
       "implementation_refs": [
-        "playbooks/redpanda.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/redpanda.yml",
         "collections/ansible_collections/lv3/platform/roles/redpanda_runtime",
@@ -2041,7 +2025,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-openbao.md",
       "implementation_refs": [
-        "playbooks/openbao.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/openbao.yml",
         "collections/ansible_collections/lv3/platform/roles/openbao_runtime",
@@ -2097,7 +2080,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-step-ca.md",
       "implementation_refs": [
-        "playbooks/step-ca.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/step-ca.yml",
         "collections/ansible_collections/lv3/platform/roles/step_ca_runtime",
@@ -2148,7 +2130,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/adr/0376-identity-core-vm-isolation-and-watchdog.md",
       "implementation_refs": [
-        "playbooks/identity-core-watchdog.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/identity-core-watchdog.yml",
         "collections/ansible_collections/lv3/platform/roles/identity_core_watchdog"
@@ -2203,7 +2184,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-superset.md",
       "implementation_refs": [
-        "playbooks/superset.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/superset.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/superset.yml",
@@ -2269,7 +2249,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-tika.md",
       "implementation_refs": [
-        "playbooks/tika.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/tika.yml",
         "collections/ansible_collections/lv3/platform/roles/tika_runtime",
@@ -2327,7 +2306,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-nomad.md",
       "implementation_refs": [
-        "playbooks/nomad.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/groups/automation.yml",
         "collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/tasks/main.yml",
@@ -2382,10 +2360,7 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-openfga.md",
       "implementation_refs": [
-        "playbooks/openfga.yml",
         "Makefile",
-        "playbooks/openfga.yml",
-        "playbooks/services/openfga.yml",
         "collections/ansible_collections/lv3/platform/roles/openfga_postgres",
         "collections/ansible_collections/lv3/platform/roles/openfga_runtime",
         "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
@@ -2438,10 +2413,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-temporal.md",
       "implementation_refs": [
-        "playbooks/temporal.yml",
         "Makefile",
-        "playbooks/temporal.yml",
-        "playbooks/services/temporal.yml",
         "collections/ansible_collections/lv3/platform/roles/temporal_postgres",
         "collections/ansible_collections/lv3/platform/roles/temporal_runtime",
         "scripts/temporal_smoke.py",
@@ -2494,7 +2466,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-windmill.md",
       "implementation_refs": [
-        "playbooks/windmill.yml",
         "Makefile",
         "migrations/0016_config_merge_schema.sql",
         "config/windmill/scripts/merge-config-changes.py",
@@ -2563,7 +2534,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-woodpecker.md",
       "implementation_refs": [
-        "playbooks/woodpecker.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
         "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
@@ -2632,10 +2602,7 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-coolify.md",
       "implementation_refs": [
-        "playbooks/coolify.yml",
         "Makefile",
-        "playbooks/coolify.yml",
-        "playbooks/services/coolify.yml",
         "collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/verify.yml",
         "scripts/coolify_tool.py",
@@ -3040,9 +3007,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/restic-config-backups.md",
       "implementation_refs": [
-        "playbooks/restic-config-backup.yml",
         "Makefile",
-        "playbooks/restic-config-backup.yml",
         "collections/ansible_collections/lv3/platform/roles/restic_config_backup",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
         "config/restic-file-backup-catalog.json",
@@ -3810,7 +3775,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-control-plane-recovery.md",
       "implementation_refs": [
-        "playbooks/control-plane-recovery.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/control-plane-recovery.yml",
         "collections/ansible_collections/lv3/platform/roles/control_plane_recovery",
@@ -3869,7 +3833,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-label-studio.md",
       "implementation_refs": [
-        "playbooks/label-studio.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/label-studio.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/label-studio.yml",
@@ -3945,7 +3908,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-lago.md",
       "implementation_refs": [
-        "playbooks/lago.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/lago.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/lago.yml",
@@ -4019,7 +3981,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-keycloak.md",
       "implementation_refs": [
-        "playbooks/keycloak.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/keycloak.yml",
         "collections/ansible_collections/lv3/platform/roles/keycloak_postgres/tasks/main.yml",
@@ -4076,10 +4037,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-harbor.md",
       "implementation_refs": [
-        "playbooks/harbor.yml",
         "Makefile",
-        "playbooks/harbor.yml",
-        "playbooks/services/harbor.yml",
         "collections/ansible_collections/lv3/platform/roles/harbor_runtime",
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
         "inventory/host_vars/proxmox-host.yml",
@@ -4130,7 +4088,6 @@
       "owner_runbook": "docs/runbooks/configure-api-gateway.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/api-gateway.yml",
         "collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml",
         "collections/ansible_collections/lv3/platform/playbooks/public-edge.yml",
         "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml",
@@ -4199,7 +4156,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-matrix-synapse.md",
       "implementation_refs": [
-        "playbooks/matrix-synapse.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml",
         "collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres",
@@ -4257,10 +4213,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/platform-operations-portal.md",
       "implementation_refs": [
-        "playbooks/ops-portal.yml",
         "Makefile",
-        "playbooks/ops-portal.yml",
-        "playbooks/services/ops-portal.yml",
         "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml",
         "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2",
@@ -4334,7 +4287,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-dify.md",
       "implementation_refs": [
-        "playbooks/dify.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/dify.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/dify.yml",
@@ -4394,7 +4346,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-n8n.md",
       "implementation_refs": [
-        "playbooks/n8n.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/n8n.yml",
         "collections/ansible_collections/lv3/platform/roles/n8n_postgres/tasks/main.yml",
@@ -4451,7 +4402,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-nextcloud.md",
       "implementation_refs": [
-        "playbooks/nextcloud.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml",
@@ -4509,7 +4459,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-netbox.md",
       "implementation_refs": [
-        "playbooks/netbox.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/netbox.yml",
         "collections/ansible_collections/lv3/platform/roles/netbox_postgres",
@@ -4590,10 +4539,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-homepage.md",
       "implementation_refs": [
-        "playbooks/homepage.yml",
         "Makefile",
-        "playbooks/homepage.yml",
-        "playbooks/services/homepage.yml",
         "collections/ansible_collections/lv3/platform/roles/homepage_runtime",
         "scripts/generate_homepage_config.py",
         "config/service-capability-catalog.json",
@@ -4642,10 +4588,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-excalidraw.md",
       "implementation_refs": [
-        "playbooks/excalidraw.yml",
         "Makefile",
-        "playbooks/excalidraw.yml",
-        "playbooks/services/excalidraw.yml",
         "collections/ansible_collections/lv3/platform/roles/excalidraw_runtime",
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
         "scripts/generate_diagrams.py",
@@ -4706,7 +4649,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-langfuse.md",
       "implementation_refs": [
-        "playbooks/langfuse.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/langfuse.yml",
         "collections/ansible_collections/lv3/platform/roles/langfuse_postgres",
@@ -4764,7 +4706,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/minio-object-storage.md",
       "implementation_refs": [
-        "playbooks/minio.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/minio.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/minio.yml",
@@ -4822,9 +4763,7 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-serverclaw.md",
       "implementation_refs": [
-        "playbooks/serverclaw.yml",
         "Makefile",
-        "playbooks/serverclaw.yml",
         "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
@@ -4875,7 +4814,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-searxng.md",
       "implementation_refs": [
-        "playbooks/searxng.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/searxng.yml",
         "collections/ansible_collections/lv3/platform/roles/searxng_runtime",
@@ -4927,7 +4865,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-ollama.md",
       "implementation_refs": [
-        "playbooks/ollama.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/ollama.yml",
         "collections/ansible_collections/lv3/platform/roles/ollama_runtime",
@@ -4978,10 +4915,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-piper.md",
       "implementation_refs": [
-        "playbooks/piper.yml",
         "Makefile",
-        "playbooks/piper.yml",
-        "playbooks/services/piper.yml",
         "collections/ansible_collections/lv3/platform/roles/piper_runtime",
         "inventory/host_vars/proxmox-host.yml",
         "config/service-capability-catalog.json",
@@ -5032,7 +4966,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-dozzle.md",
       "implementation_refs": [
-        "playbooks/dozzle.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/dozzle.yml",
         "collections/ansible_collections/lv3/platform/roles/dozzle_runtime",
@@ -5094,7 +5027,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-ntfy.md",
       "implementation_refs": [
-        "playbooks/ntfy.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/ntfy.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/ntfy.yml",
@@ -5153,10 +5085,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-falco-runtime.md",
       "implementation_refs": [
-        "playbooks/falco.yml",
         "Makefile",
-        "playbooks/falco.yml",
-        "playbooks/services/falco.yml",
         "collections/ansible_collections/lv3/platform/roles/falco_runtime",
         "collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime",
         "collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2",
@@ -5217,10 +5146,7 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-gitea.md",
       "implementation_refs": [
-        "playbooks/gitea.yml",
         "Makefile",
-        "playbooks/gitea.yml",
-        "playbooks/services/gitea.yml",
         "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
         "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
         "collections/ansible_collections/lv3/platform/roles/gitea_runner",
@@ -5273,10 +5199,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-gotenberg.md",
       "implementation_refs": [
-        "playbooks/gotenberg.yml",
         "Makefile",
-        "playbooks/gotenberg.yml",
-        "playbooks/services/gotenberg.yml",
         "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime",
         "inventory/host_vars/proxmox-host.yml",
         "config/ansible-execution-scopes.yaml",
@@ -5330,7 +5253,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-typesense.md",
       "implementation_refs": [
-        "playbooks/typesense.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/typesense.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/typesense.yml",
@@ -5386,7 +5308,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/rag-platform-context.md",
       "implementation_refs": [
-        "playbooks/rag-context.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/rag-context.yml",
         "collections/ansible_collections/lv3/platform/roles/rag_context_runtime",
@@ -5445,7 +5366,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-portainer.md",
       "implementation_refs": [
-        "playbooks/portainer.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/portainer.yml",
         "collections/ansible_collections/lv3/platform/roles/portainer_runtime",
@@ -5500,10 +5420,7 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-vaultwarden.md",
       "implementation_refs": [
-        "playbooks/vaultwarden.yml",
         "Makefile",
-        "playbooks/vaultwarden.yml",
-        "playbooks/services/vaultwarden.yml",
         "collections/ansible_collections/lv3/platform/roles/vaultwarden_postgres",
         "collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime",
         "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy",
@@ -5556,7 +5473,6 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-mattermost.md",
       "implementation_refs": [
-        "playbooks/mattermost.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/mattermost.yml",
         "collections/ansible_collections/lv3/platform/roles/mattermost_postgres",
@@ -6421,7 +6337,6 @@
         "required_secret_ids": [],
         "bootstrap_manifest_ids": [
           "controller-local-base",
-          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -6472,7 +6387,6 @@
         "required_secret_ids": [],
         "bootstrap_manifest_ids": [
           "controller-local-base",
-          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -6524,7 +6438,6 @@
         "required_secret_ids": [],
         "bootstrap_manifest_ids": [
           "controller-local-base",
-          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -6578,7 +6491,6 @@
         ],
         "bootstrap_manifest_ids": [
           "controller-local-base",
-          "live-apply-generated-artifacts",
           "shared-edge-generated-portals"
         ]
       },
@@ -7312,7 +7224,7 @@
       ]
     },
     "converge-semaphore": {
-      "description": "Converge the private Semaphore runtime on docker-runtime, provision its PostgreSQL backend on postgres, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+      "description": "Converge the private Semaphore runtime on runtime-control, provision its PostgreSQL backend on postgres, reconcile the dedicated Keycloak OIDC client, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7328,7 +7240,8 @@
           "semaphore_database_password",
           "semaphore_admin_password",
           "semaphore_api_token",
-          "semaphore_admin_auth"
+          "semaphore_admin_auth",
+          "keycloak_semaphore_client_secret"
         ]
       },
       "validation_targets": [
@@ -7338,11 +7251,10 @@
       "live_impact": "host_and_guest_live",
       "owner_runbook": "docs/runbooks/configure-semaphore.md",
       "implementation_refs": [
-        "playbooks/semaphore.yml",
         "Makefile",
         "playbooks/semaphore.yml",
-        "playbooks/services/semaphore.yml",
         "inventory/semaphore-localhost.yml",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/semaphore_client.yml",
         "collections/ansible_collections/lv3/platform/roles/semaphore_postgres",
         "collections/ansible_collections/lv3/platform/roles/semaphore_runtime",
         "platform/ansible/semaphore.py",
@@ -7351,11 +7263,12 @@
         "inventory/host_vars/proxmox-host.yml"
       ],
       "outputs": [
-        "Private Semaphore runtime on docker-runtime with a PostgreSQL backend on postgres, a Tailscale-published controller URL on the Proxmox host, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
+        "Private Semaphore runtime on runtime-control with a PostgreSQL backend on postgres, a repo-managed Keycloak OIDC client mirrored under .local/keycloak/semaphore-client-secret.txt, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
       ],
       "verification_commands": [
         "make syntax-check-semaphore",
         "curl -fsS http://100.118.189.95:8020/api/ping",
+        "curl -fsSI http://100.118.189.95:8020/auth/oidc/login",
         "make semaphore-manage ACTION=list-projects",
         "make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template \"Semaphore Self-Test\" --wait'"
       ],
@@ -7487,10 +7400,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-plane.md",
       "implementation_refs": [
-        "playbooks/plane.yml",
         "Makefile",
-        "playbooks/plane.yml",
-        "playbooks/services/plane.yml",
         "collections/ansible_collections/lv3/platform/roles/plane_postgres",
         "collections/ansible_collections/lv3/platform/roles/plane_runtime",
         "inventory/host_vars/proxmox-host.yml",
@@ -7588,10 +7498,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-browser-runner.md",
       "implementation_refs": [
-        "playbooks/browser-runner.yml",
         "Makefile",
-        "playbooks/browser-runner.yml",
-        "playbooks/services/browser-runner.yml",
         "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/verify.yml",
         "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/templates/docker-compose.yml.j2",
@@ -7645,10 +7552,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-changedetection.md",
       "implementation_refs": [
-        "playbooks/changedetection.yml",
         "Makefile",
-        "playbooks/changedetection.yml",
-        "playbooks/services/changedetection.yml",
         "collections/ansible_collections/lv3/platform/roles/changedetection_runtime",
         "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
         "scripts/changedetection_sync.py",
@@ -7702,7 +7606,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-tesseract-ocr.md",
       "implementation_refs": [
-        "playbooks/tesseract-ocr.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml",
         "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime",
@@ -7770,7 +7673,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-directus.md",
       "implementation_refs": [
-        "playbooks/directus.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/directus.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/directus.yml",
@@ -7829,10 +7731,7 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-paperless.md",
       "implementation_refs": [
-        "playbooks/paperless.yml",
         "Makefile",
-        "playbooks/paperless.yml",
-        "playbooks/services/paperless.yml",
         "collections/ansible_collections/lv3/platform/roles/paperless_postgres",
         "collections/ansible_collections/lv3/platform/roles/paperless_runtime",
         "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
@@ -7902,7 +7801,6 @@
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-glitchtip.md",
       "implementation_refs": [
-        "playbooks/glitchtip.yml",
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/glitchtip.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/glitchtip.yml",
@@ -7963,9 +7861,7 @@
       ],
       "live_impact": "host_and_guest_live",
       "implementation_refs": [
-        "playbooks/litellm.yml",
         "Makefile",
-        "playbooks/litellm.yml",
         "collections/ansible_collections/lv3/platform/roles/litellm_postgres",
         "collections/ansible_collections/lv3/platform/roles/litellm_runtime",
         "config/llm-gateway/model-catalog.yaml",
@@ -8016,9 +7912,7 @@
       ],
       "live_impact": "host_and_guest_live",
       "implementation_refs": [
-        "playbooks/librechat.yml",
         "Makefile",
-        "playbooks/librechat.yml",
         "collections/ansible_collections/lv3/platform/roles/librechat_runtime",
         "config/llm-gateway/auth.yaml",
         "config/serverclaw/system-prompt.md"

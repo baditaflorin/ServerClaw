@@ -20,8 +20,7 @@ glitchtip_openbao_agent_container_name: glitchtip-openbao-agent
 glitchtip_openbao_secret_path: services/glitchtip/runtime-env
 glitchtip_openbao_policy_name: lv3-service-glitchtip-runtime
 glitchtip_openbao_approle_name: glitchtip-runtime
-glitchtip_internal_port: "{{ platform_service_topology | platform_service_port('glitchtip', 'internal') }}"
-glitchtip_internal_base_url: "{{ platform_service_topology | platform_service_url('glitchtip', 'internal') }}"
+# glitchtip_internal_port and glitchtip_internal_base_url are derived by derive_service_defaults (ADR 0373)
 glitchtip_public_base_url: "https://{{ glitchtip_service_topology.public_hostname }}"
 glitchtip_container_name: glitchtip
 glitchtip_valkey_container_name: glitchtip-valkey

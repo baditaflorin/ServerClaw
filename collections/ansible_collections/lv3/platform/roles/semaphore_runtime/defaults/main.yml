@@ -10,7 +10,7 @@ semaphore_env_file: "{{ semaphore_site_dir }}/semaphore.env"
 semaphore_compose_file: "{{ semaphore_site_dir }}/docker-compose.yml"
 semaphore_image: docker.io/semaphoreui/semaphore:latest
 semaphore_container_name: semaphore
-semaphore_local_artifact_dir: "{{ playbook_dir }}/../.local/semaphore"
+semaphore_local_artifact_dir: "{{ repo_shared_local_root }}/semaphore"
 semaphore_secret_dir: /etc/lv3/semaphore
 
 # OpenBao agent configuration (from ADR 0373)
@@ -26,7 +26,7 @@ semaphore_database_user: semaphore_admin
 semaphore_database_inventory_host: postgres
 semaphore_database_host: "{{ hostvars[semaphore_database_inventory_host].ansible_host }}"
 semaphore_database_port: 5432
-semaphore_database_password_local_file: "{{ playbook_dir }}/../.local/semaphore/database-password.txt"
+semaphore_database_password_local_file: "{{ semaphore_local_artifact_dir }}/database-password.txt"
 semaphore_admin_password_local_file: "{{ semaphore_local_artifact_dir }}/admin-password.txt"
 semaphore_admin_password_guest_file: "{{ semaphore_secret_dir }}/admin-password"
 semaphore_api_token_local_file: "{{ semaphore_local_artifact_dir }}/api-token.txt"
@@ -43,7 +43,7 @@ semaphore_verify_ssl: false
 semaphore_enable_oidc: true
 semaphore_oidc_provider: keycloak
 semaphore_oidc_client_id: semaphore
-semaphore_oidc_client_secret_local_file: "{{ semaphore_local_artifact_dir }}/oidc-client-secret.txt"
+semaphore_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/semaphore-client-secret.txt"
 semaphore_oidc_client_secret_guest_file: "{{ semaphore_secret_dir }}/oidc-client-secret"
 semaphore_oidc_issuer_url: "{{ keycloak_oidc_issuer_url }}"
 semaphore_oidc_callback_url: "{{ semaphore_controller_url }}/auth/oidc/callback"

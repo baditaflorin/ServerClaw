@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.129
-platform_version: 0.178.129
+repo_version: 0.178.132
+platform_version: 0.178.132
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -33,7 +33,7 @@ live_apply_evidence:
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
     litellm: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
-    postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
+    postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
     uptime_kuma: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
@@ -68,7 +68,7 @@ live_apply_evidence:
     neko: 2026-04-12-adr-0380-neko-exact-main-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-04-13-keycloak-topology-fix-runtime-control-live-apply
+    keycloak: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     openfga: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -1179,8 +1179,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.129
+    current: 0.178.132
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.78
+    current: 0.178.132
     meaning: intended platform release for the actual server configuration

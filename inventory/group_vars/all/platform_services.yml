@@ -1376,7 +1376,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: semaphore_runtime
     internal_port: 3004
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/semaphore
     container_name: semaphore
     needs_openbao: true
@@ -1781,7 +1781,7 @@ platform_service_registry:
       client_id: serverclaw
       client_secret_local_file: .local/keycloak/serverclaw-client-secret.txt
       redirect_uris:
-        - "https://chat.{{ platform_domain }}/oauth/oidc/callback"
+        - "https://chat.{{ platform_domain }}/oauth/openid/callback"
       scopes:
         - openid
         - profile

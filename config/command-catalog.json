@@ -2942,7 +2942,7 @@
       }
     },
     "converge-semaphore": {
-      "description": "Converge the private Semaphore runtime, PostgreSQL backend, host-side Tailscale proxy, seeded self-test project, and controller-local auth artifacts.",
+      "description": "Converge the private Semaphore runtime, PostgreSQL backend, dedicated Keycloak OIDC client, host-side Tailscale proxy, seeded self-test project, and controller-local auth artifacts.",
       "workflow_id": "converge-semaphore",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -2958,11 +2958,11 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-semaphore passes",
         "make validate passes before the apply",
-        "Semaphore remains private-only and the seeded project scope is understood before rollout"
+        "Semaphore remains private-only, the dedicated Keycloak client reconcile is expected, and the seeded project scope is understood before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record PostgreSQL, runtime, proxy, controller-local auth artifact generation, and the seeded self-test task verification."
+        "notes": "Record PostgreSQL, runtime, proxy, Keycloak client-secret mirroring, one OIDC redirect response, controller-local auth artifact generation, and the seeded self-test task verification."
       },
       "failure_guidance": {
         "stop_conditions": [

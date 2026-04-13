@@ -28,12 +28,28 @@ def test_defaults_enable_pgaudit_and_repo_managed_sensitive_table_catalog() -> N
     )
     assert defaults["postgres_vm_pgaudit_log"] == "ddl,role"
     assert defaults["postgres_vm_repo_root"] == "{{ inventory_dir | dirname }}"
+    assert defaults["postgres_vm_platform_postgres_registry_file"] == (
+        "{{ postgres_vm_repo_root }}/inventory/group_vars/platform_postgres.yml"
+    )
     assert defaults["postgres_vm_shared_preload_libraries"] == ["pgaudit"]
+    assert defaults["postgres_vm_client_allowed_sources_default"] == [
+        "{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}/32"
+    ]
 
 
 def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> None:
     tasks = load_yaml(TASKS_PATH)
-    install_task = next(task for task in tasks if task.get("name") == "Install PostgreSQL guest packages")
+    cache_refresh_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Install PostgreSQL guest packages"
+        and task.get("ansible.builtin.command", {}).get("argv") == ["apt-get", "update"]
+    )
+    install_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Install PostgreSQL guest packages" and "ansible.builtin.apt" in task
+    )
     package_task = next(task for task in tasks if task.get("name") == "Ensure PostgreSQL pgaudit package is present")
     extension_check_task = next(
         task
@@ -44,9 +60,10 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
         task for task in tasks if task.get("name") == "Create pgaudit extension in writable databases"
     )
 
-    assert install_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
+    assert cache_refresh_task["register"] == "postgres_vm_apt_cache_refresh"
+    assert cache_refresh_task["until"] == "postgres_vm_apt_cache_refresh.rc == 0"
+    assert install_task["ansible.builtin.apt"]["name"] == "{{ postgres_vm_packages }}"
     assert package_task["ansible.builtin.apt"]["name"] == "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit"
-    assert package_task["ansible.builtin.apt"]["cache_valid_time"] == 3600
     assert package_task["when"] == [
         "postgres_vm_pgaudit_enabled | bool",
         "'pgaudit' in postgres_vm_shared_preload_libraries",
@@ -64,7 +81,20 @@ def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> 
 
 def test_main_tasks_load_sensitive_table_catalog_and_grant_audit_role() -> None:
     tasks = load_yaml(TASKS_PATH)
+    load_registry_task = next(
+        task for task in tasks if task.get("name") == "Load declarative PostgreSQL client registry"
+    )
     decode_task = next(task for task in tasks if task.get("name") == "Decode pgaudit sensitive-table catalog")
+    select_grants_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Select pgaudit sensitive-table grants for databases present on this guest"
+    )
+    validate_grants_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Assert pgaudit sensitive-table grants point at existing databases"
+    )
     schema_grant_task = next(
         task for task in tasks if task.get("name") == "Grant schema usage to the pgaudit audit role"
     )
@@ -72,14 +102,25 @@ def test_main_tasks_load_sensitive_table_catalog_and_grant_audit_role() -> None:
         task for task in tasks if task.get("name") == "Grant sensitive-table privileges to the pgaudit audit role"
     )
 
+    assert (
+        load_registry_task["ansible.builtin.include_vars"]["file"]
+        == "{{ postgres_vm_platform_postgres_registry_file }}"
+    )
     assert "from_yaml" in decode_task["ansible.builtin.set_fact"]["postgres_vm_pgaudit_sensitive_tables"]
+    assert (
+        "selectattr('database', 'in', postgres_vm_pgaudit_database_discovery.stdout_lines)"
+        in (select_grants_task["ansible.builtin.set_fact"]["postgres_vm_pgaudit_table_grants_for_host"])
+    )
+    assert validate_grants_task["loop"] == "{{ postgres_vm_pgaudit_table_grants_for_host }}"
     assert schema_grant_task["register"] == "postgres_vm_pgaudit_schema_grant"
+    assert schema_grant_task["loop"] == "{{ postgres_vm_pgaudit_table_grants_for_host }}"
     assert schema_grant_task["retries"] == 10
     assert schema_grant_task["delay"] == 3
     assert schema_grant_task["until"] == "postgres_vm_pgaudit_schema_grant.rc == 0"
     assert "postgres_vm_pgaudit_audit_role" in grant_task["ansible.builtin.command"]["argv"][-1]
     assert "item.privileges" in grant_task["ansible.builtin.command"]["argv"][-1]
     assert grant_task["register"] == "postgres_vm_pgaudit_table_grant"
+    assert grant_task["loop"] == "{{ postgres_vm_pgaudit_table_grants_for_host }}"
     assert grant_task["retries"] == 10
     assert grant_task["delay"] == 3
     assert grant_task["until"] == "postgres_vm_pgaudit_table_grant.rc == 0"

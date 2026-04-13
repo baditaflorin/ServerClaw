@@ -1,207 +1,101 @@
 # ADR 0361: Semaphore Keycloak OIDC Integration
 
-**Status**: Proposed
-**Date**: 2026-04-07
-**Deciders**: Platform Engineering
-**Supersedes**: ADR 0149 (Semaphore baseline - enhanced with SSO)
+- Status: Accepted
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.178.130
+- Implemented In Platform Version: 0.178.130
+- Implemented On: 2026-04-13
+- Date: 2026-04-07
+- Concern: Identity, Automation, Private Access
+- Depends on: ADR 0056 (Keycloak for operator and agent SSO), ADR 0149 (Semaphore for Ansible job management UI and API), ADR 0165 (Playbook / role metadata standard)
+- Tags: semaphore, keycloak, oidc, sso, private-access
+
+---
 
 ## Context
 
-Semaphore is deployed as the Ansible automation controller but currently relies on local username/password authentication. This creates several issues:
+Semaphore was already the private Ansible job-management controller, but it was
+still carrying a local-only login model and a draft OIDC setup that depended on
+manual Keycloak client creation and a controller-local secret path under
+`.local/semaphore/`.
 
-1. **No SSO integration** - Cannot leverage shared Keycloak identity broker (ADR 0056)
-2. **Manual user management** - Each user requires manual account creation
-3. **Inconsistent auth model** - Other services (Grafana, Outline, etc.) use Keycloak but Semaphore doesn't
-4. **No audit trail** - User activity in Semaphore isn't connected to platform identity events
+That created four problems:
+
+1. the desired Keycloak login path was not reconciled as part of the Semaphore
+   playbook itself
+2. the OIDC client secret was treated like a Semaphore-local artifact instead of
+   a Keycloak-managed client credential
+3. the controller-local secret path encouraged the wrong ownership boundary
+4. the first draft workstream documentation contributed to the public secret
+   exposure incident on 2026-04-11
 
 ## Decision
 
-Extend Semaphore runtime configuration to support **Keycloak OpenID Connect (OIDC)** authentication while maintaining fallback username/password login for recovery scenarios.
+Make the Semaphore OIDC client a repo-managed Keycloak concern and converge it
+as part of the normal Semaphore apply path.
 
-### Changes Made
+### The repo-managed contract
 
-**Role**: `semaphore_runtime`
+- `playbooks/semaphore.yml` now reconciles the dedicated Keycloak `semaphore`
+  client before the Semaphore runtime converge
+- the mirrored client secret lives at
+  `.local/keycloak/semaphore-client-secret.txt`
+- `semaphore_runtime` requires that mirrored Keycloak secret locally instead of
+  generating or restoring its own OIDC secret
+- Semaphore keeps the repo-managed `ops-semaphore` admin login as a break-glass
+  path while using Keycloak OIDC for routine operator sign-in
 
-1. **Defaults** (`defaults/main.yml`)
-   - `semaphore_enable_oidc`: Toggle OIDC support (default: true)
-   - `semaphore_oidc_provider`: Provider type (keycloak)
-   - `semaphore_oidc_client_id`: Keycloak client ID
-   - `semaphore_oidc_client_secret_*`: Secret file paths
-   - `semaphore_oidc_issuer_url`: Keycloak realm endpoint
-   - `semaphore_oidc_callback_url`: OAuth redirect URI
-   - `semaphore_oidc_scopes`: OpenID Connect scopes
-   - `semaphore_oidc_auto_provision_user`: Auto-create users on first login
+### Scope of the implementation
 
-2. **Environment Template** (`templates/semaphore.env.j2`)
-   - Conditional OIDC environment variables passed to container
-   - Variables only included when `semaphore_enable_oidc=true`
-
-3. **Tasks** (`tasks/main.yml`)
-   - Generate OIDC client secret (local + guest)
-   - Persist secret in OpenBao for secret management
-   - Include secret in Semaphore environment injection
-
-4. **Documentation** (`meta/argument_specs.yml`)
-   - Document all new OIDC variables and their purposes
-
-## Rationale
-
-### Why Keycloak OIDC?
-
-- **Consistent identity**: Unifies authentication across all platform services (ADR 0056)
-- **Better UX**: Single sign-on for operators across Grafana, Outline, Semaphore, etc.
-- **Audit trail**: Centralized identity events for compliance and security
-- **User auto-provisioning**: New Keycloak users automatically gain Semaphore access
-- **No password reuse risk**: Users don't reuse passwords across services
-
-### Why Keep Fallback Auth?
-
-- **Recovery**: If Keycloak is down, admins can still access Semaphore
-- **Gradual rollout**: Allows testing OIDC without removing password auth
-- **Compatibility**: Existing automation/API scripts using passwords still work
-
-### Why Optional?
-
-- `semaphore_enable_oidc: true` by default but easily disabled
-- Allows environments without Keycloak to run Semaphore
-- Backward compatible with prior deployments
-
-## Implementation
-
-### Configuration
-
-```yaml
-# Enable OIDC (default)
-semaphore_enable_oidc: true
-semaphore_oidc_provider: keycloak
-semaphore_oidc_client_id: semaphore
-semaphore_oidc_issuer_url: "https://auth.example.com/realms/lv3"
-semaphore_oidc_callback_url: "http://100.64.0.1:8020/auth/oidc/callback"
-semaphore_oidc_scopes: "openid profile email"
-semaphore_oidc_auto_provision_user: true
-
-# Fallback username/password (always available)
-semaphore_admin_username: ops-semaphore
-```
-
-### Secret Management
-
-OIDC client secret is:
-1. Generated locally on control machine (if missing)
-2. Persisted on guest VM
-3. Injected via OpenBao agent into Semaphore container
-4. Never stored in plain text on disk
-
-### Login Flow
-
-**With OIDC Enabled:**
-```
-User → Semaphore Login Page
-       ├─ "Login with Keycloak" (OIDC)
-       └─ Username/Password (Fallback)
-
-If OIDC selected:
-User → Keycloak Login → Consent → Semaphore Auto-Provisioned
-
-If Fallback selected:
-User → ops-semaphore / password → Login
-```
+- move Semaphore controller-local artifacts to the shared local-overlay pattern
+  that works from dedicated worktrees
+- align the playbook, role defaults, and tests around the Keycloak-managed
+  secret flow
+- update the runbooks, service catalogs, dependency graph, and workstream
+  records so they describe the same OIDC ownership boundary
+- remove the stale manual draft instructions from the historical ws-0362 note
 
 ## Consequences
 
 ### Positive
 
-✅ **Unified identity**: Same credentials across Grafana, Outline, Semaphore
-✅ **Better security**: No password reuse, no password storage in Semaphore
-✅ **Audit trail**: All logins go through Keycloak (ADR 0056 audit)
-✅ **User management**: Keycloak admins control Semaphore access
-✅ **Graceful degradation**: Fallback auth if Keycloak is down
-✅ **Easy rollout**: Optional, backward compatible, can be disabled
+- Semaphore now follows the same repo-managed OIDC pattern as the other
+  Keycloak-backed services
+- the Keycloak client secret sits under the correct owner path,
+  `.local/keycloak/`, instead of the service-local `.local/semaphore/`
+- a `make converge-semaphore` run is sufficient to reconcile both the dedicated
+  Keycloak client and the Semaphore runtime
+- the historical draft documentation no longer points operators at the leaked
+  manual secret path
 
-### Negative
+### Negative / Accepted Risk
 
-⚠️ **Keycloak dependency**: OIDC unavailable if Keycloak is unreachable
-⚠️ **Configuration complexity**: More environment variables
-⚠️ **Extra setup step**: Keycloak client must be created first
+- the live apply required manual recovery of three Docker Compose stacks on
+  `docker-runtime` (`mail-platform`, `netbox`, and `keycloak`) because the
+  Keycloak container had no network and the compose stacks were stopped after
+  reachability was restored
+- the Keycloak readiness probe (`http://127.0.0.1:19000/health/ready`) returned
+  `Connection refused` until `docker compose ... up -d --force-recreate` was
+  run for the Keycloak stack
 
-## Deployment
+## Verification
 
-### Prerequisites
+- focused Semaphore/Keycloak regression coverage passed:
+  `35 passed in 5.23s`
+- `make preflight WORKFLOW=converge-semaphore` passed and reported
+  `keycloak_semaphore_client_secret` as present
+- `./scripts/validate_repo.sh workstream-surfaces` passed
+- `./scripts/validate_repo.sh agent-standards` reported a warning about a stale
+  topology snapshot but no failures
+- `make converge-semaphore env=production` completed successfully after the
+  runtime recovery steps
+- `GET /api/ping` returned `pong`
+- `GET /auth/oidc/login` returned `200 OK`
+- `make semaphore-manage ACTION=list-projects` succeeded
+- the seeded `Semaphore Self-Test` template completed with status `success`
 
-- Keycloak realm deployed (ADR 0056)
-- Keycloak client created with:
-  - Client type: Confidential OpenID Connect
-  - Redirect URI: `http://100.64.0.1:8020/auth/oidc/callback`
-  - Scopes: `openid profile email`
+## Live Apply Evidence
 
-### Deployment Steps
-
-1. **Create Keycloak Client** (5 min)
-   ```
-   Admin Console → Clients → Create
-   - Client ID: semaphore
-   - Type: OpenID Connect (Confidential)
-   - Redirect: http://100.64.0.1:8020/auth/oidc/callback
-   ```
-
-2. **Get Client Secret** (1 min)
-   ```
-   Credentials Tab → Copy Client secret
-   Store in: .local/semaphore/oidc-client-secret.txt
-   ```
-
-3. **Create Test User** (2 min)
-   ```
-   Users → Create User
-   - Username: ops
-   - Email: ops@example.com
-   - Password: [set in credentials tab]
-   ```
-
-4. **Deploy Semaphore** (5 min)
-   ```bash
-   make converge-semaphore env=production
-   ```
-
-5. **Verify** (2 min)
-   ```
-   http://100.64.0.1:8020
-   Should show "Login with Keycloak" button
-   ```
-
-## Testing Checklist
-
-- [ ] Fallback login works (ops-semaphore + password)
-- [ ] OIDC "Login with Keycloak" button visible
-- [ ] Keycloak login redirects correctly
-- [ ] New Keycloak users auto-provisioned
-- [ ] Email claim properly mapped
-- [ ] API tokens still work
-- [ ] Logout flow works
-- [ ] Session timeout works
-
-## Related ADRs
-
-- **ADR 0056**: Keycloak as shared SSO broker
-- **ADR 0149**: Semaphore service baseline
-- **ADR 0343**: Load auth contract compliance for operator tools
-
-## Documentation
-
-- **Setup Guide**: `docs/runbooks/configure-semaphore-keycloak.md`
-- **Quick Start**: `SEMAPHORE-SETUP-QUICK-START.md`
-- **Workstream**: `docs/workstreams/ws-0362-semaphore-keycloak-oidc.md`
-
-## Questions
-
-**Q: Can we use internal Keycloak URL?**
-A: Yes, use internal IP if external DNS fails: `https://10.10.10.92:8080`
-
-**Q: What if Keycloak is down?**
-A: Fallback to `ops-semaphore` username/password login
-
-**Q: Can we disable OIDC?**
-A: Yes, set `semaphore_enable_oidc: false` and re-converge
-
-**Q: Do existing scripts break?**
-A: No, API tokens and username/password auth still work
+- receipt: `receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json`
+- receipt: `receipts/live-applies/ws-0361-live-apply-apply-receipt.yaml`
+- evidence summary: `receipts/live-applies/evidence/2026-04-13-ws-0361-summary.txt`

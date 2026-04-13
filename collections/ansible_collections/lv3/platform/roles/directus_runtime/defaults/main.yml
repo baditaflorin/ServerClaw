@@ -21,7 +21,7 @@ directus_public_hostname_overrides:
     address: "{{ directus_public_edge_private_ip }}"
 directus_compose_project_name: directus
 directus_compose_network_name: "{{ directus_compose_project_name }}_default"
-directus_container_port: "{{ platform_service_topology | platform_service_port('directus', 'internal') }}"
+directus_container_port: "{{ directus_internal_port }}"
 directus_database_name: directus
 directus_database_user: directus
 directus_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

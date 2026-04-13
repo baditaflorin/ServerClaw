@@ -1,0 +1,3 @@
+postgres | CHANGED | rc=0 >>
+14:host    keycloak  keycloak  10.10.10.20/32  scram-sha-256
+34:host    windmill  windmill_admin  10.10.10.92/32  scram-sha-256

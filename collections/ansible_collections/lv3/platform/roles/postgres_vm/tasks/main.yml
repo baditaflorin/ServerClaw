@@ -38,6 +38,10 @@
     state: present
     force_apt_get: true
 
+- name: Load declarative PostgreSQL client registry
+  ansible.builtin.include_vars:
+    file: "{{ postgres_vm_platform_postgres_registry_file }}"
+
 - name: Ensure PostgreSQL service is enabled and started
   ansible.builtin.service:
     name: "{{ postgres_vm_postgresql_service_name }}"
@@ -241,6 +245,16 @@
       }}
   when: postgres_vm_pgaudit_enabled | bool
 
+- name: Select pgaudit sensitive-table grants for databases present on this guest
+  ansible.builtin.set_fact:
+    postgres_vm_pgaudit_table_grants_for_host: >-
+      {{
+        postgres_vm_pgaudit_sensitive_tables.table_grants
+        | selectattr('database', 'in', postgres_vm_pgaudit_database_discovery.stdout_lines)
+        | list
+      }}
+  when: postgres_vm_pgaudit_enabled | bool
+
 - name: Check whether pgaudit extension already exists in each writable database
   become: true
   become_user: postgres
@@ -288,12 +302,11 @@
 - name: Assert pgaudit sensitive-table grants point at existing databases
   ansible.builtin.assert:
     that:
-      - item.database in postgres_vm_pgaudit_database_discovery.stdout_lines
       - item.schema is match('^[a-z_][a-z0-9_]*$')
       - item.table is match('^[a-z_][a-z0-9_]*$')
       - item.privileges | length > 0
-    fail_msg: "Every pgaudit sensitive-table grant must reference one existing database plus safe schema and table identifiers."
-  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+    fail_msg: "Every pgaudit sensitive-table grant must use safe schema and table identifiers plus at least one privilege."
+  loop: "{{ postgres_vm_pgaudit_table_grants_for_host }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
   when: postgres_vm_pgaudit_enabled | bool
@@ -308,7 +321,7 @@
       - "{{ item.database }}"
       - -Atqc
       - "SELECT to_regclass('{{ item.schema }}.{{ item.table }}') IS NOT NULL"
-  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+  loop: "{{ postgres_vm_pgaudit_table_grants_for_host }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
   register: postgres_vm_pgaudit_relation_checks
@@ -329,7 +342,7 @@
       - -c
       - "GRANT USAGE ON SCHEMA {{ item.schema }} TO {{ postgres_vm_pgaudit_audit_role }}"
   register: postgres_vm_pgaudit_schema_grant
-  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+  loop: "{{ postgres_vm_pgaudit_table_grants_for_host }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}"
   changed_when: false
@@ -351,7 +364,7 @@
       - -c
       - "GRANT {{ item.privileges | map('upper') | join(', ') }} ON TABLE {{ item.schema }}.{{ item.table }} TO {{ postgres_vm_pgaudit_audit_role }}"
   register: postgres_vm_pgaudit_table_grant
-  loop: "{{ postgres_vm_pgaudit_sensitive_tables.table_grants }}"
+  loop: "{{ postgres_vm_pgaudit_table_grants_for_host }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
   changed_when: false

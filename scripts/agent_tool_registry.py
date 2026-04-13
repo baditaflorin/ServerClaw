@@ -1729,6 +1729,288 @@ def tool_get_disk_usage(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str
     return report.to_dict()
 
 
+# ---------------------------------------------------------------------------
+# Keycloak account provisioning (ADR 0411 / ADR 0412)
+# ---------------------------------------------------------------------------
+
+
+def _keycloak_local_root() -> Path:
+    """Return the .local/ root to use for Keycloak credentials.
+
+    When running from a git worktree, `.local/` may exist but lack credentials
+    (it may only have tool-audit/). In that case, fall back to the main
+    worktree's .local/ via the git common dir (ADR 0407 convention).
+    """
+    import subprocess
+
+    local_root = REPO_ROOT / ".local"
+    # Prefer local_root only if it actually has Keycloak credentials
+    if (local_root / "keycloak" / "admin-client-secret.txt").is_file():
+        return local_root
+
+    # Try git common dir to find the main worktree
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        git_common = Path(result.stdout.strip())
+        # git common dir is .git inside the main worktree
+        main_local = git_common.parent / ".local"
+        if (main_local / "keycloak" / "admin-client-secret.txt").is_file():
+            return main_local
+    except (subprocess.SubprocessError, OSError):
+        pass
+
+    return local_root  # return original even if missing; caller will raise
+
+
+def _keycloak_admin_token() -> tuple[str, str, str]:
+    """Return (access_token, base_url, realm_name) for the Keycloak admin API.
+
+    Reads credentials from .local/keycloak/admin-client-secret.txt and derives
+    the SSO base URL from .local/identity.yml (platform_domain).
+
+    Override with env var LV3_KEYCLOAK_ADMIN_CLIENT_SECRET_FILE pointing to
+    the secret file path. When running from a git worktree, the main worktree's
+    .local/ is used automatically (ADR 0407).
+    """
+    import urllib.parse
+
+    local_root = _keycloak_local_root()
+    identity_path = local_root / "identity.yml"
+    if identity_path.is_file():
+        identity = load_yaml(identity_path)
+        domain = identity.get("platform_domain", "lv3.org")
+    else:
+        domain = "lv3.org"
+
+    realm_name = domain.split(".")[0]
+    base_url = f"https://sso.{domain}"
+
+    secret_override = os.environ.get("LV3_KEYCLOAK_ADMIN_CLIENT_SECRET_FILE")
+    if secret_override:
+        secret_path = Path(secret_override)
+    else:
+        secret_path = local_root / "keycloak" / "admin-client-secret.txt"
+
+    if not secret_path.is_file():
+        raise RuntimeError(
+            f"Keycloak admin client secret not found at {secret_path}. "
+            "Run the keycloak_runtime convergence to provision it, or set "
+            "LV3_KEYCLOAK_ADMIN_CLIENT_SECRET_FILE env var."
+        )
+    client_secret = secret_path.read_text().strip()
+
+    token_url = f"{base_url}/realms/master/protocol/openid-connect/token"
+    body = urllib.parse.urlencode(
+        {
+            "grant_type": "client_credentials",
+            "client_id": "lv3-admin-runtime",
+            "client_secret": client_secret,
+        }
+    ).encode()
+    req = urllib.request.Request(token_url, data=body, method="POST")
+    req.add_header("Content-Type", "application/x-www-form-urlencoded")
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            token_data = json.loads(resp.read())
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"Keycloak token request failed: HTTP {exc.code} — check admin-client-secret.txt") from exc
+    return token_data["access_token"], base_url, realm_name
+
+
+def _keycloak_api_request(
+    method: str,
+    url: str,
+    token: str,
+    *,
+    body: dict[str, Any] | None = None,
+    expected_statuses: tuple[int, ...] = (200,),
+) -> tuple[int, Any]:
+    """Make a Keycloak admin API request and return (status_code, parsed_json_or_None)."""
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(url, data=data, method=method)
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            status = resp.status
+            raw = resp.read()
+            return status, json.loads(raw) if raw else None
+    except urllib.error.HTTPError as exc:
+        if exc.code in expected_statuses:
+            return exc.code, None
+        body_text = exc.read().decode(errors="replace")
+        raise RuntimeError(f"Keycloak API {method} {url} → HTTP {exc.code}: {body_text[:500]}") from exc
+
+
+def _keycloak_resolve_group_id(base_url: str, realm: str, token: str, group_name: str) -> str | None:
+    """Return the Keycloak group UUID for a given group name, or None if not found."""
+    _, groups = _keycloak_api_request(
+        "GET",
+        f"{base_url}/admin/realms/{realm}/groups?search={urllib.parse.quote(group_name)}&exact=true",
+        token,
+        expected_statuses=(200,),
+    )
+    if not groups:
+        return None
+    for g in groups:
+        if g.get("name") == group_name:
+            return g["id"]
+    return None
+
+
+def tool_provision_account(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Provision a Keycloak user with optional expiry and group assignments (ADR 0411)."""
+    import urllib.parse
+    import secrets
+    import string
+
+    username = require_str(args.get("username"), "arguments.username")
+    email = require_str(args.get("email"), "arguments.email")
+    first_name = args.get("first_name", "")
+    last_name = args.get("last_name", "")
+    expires_in_days: int | None = args.get("expires_in_days")
+    group_names: list[str] = args.get("groups", ["lv3-platform-viewers", "grafana-viewers"])
+    provided_password: str | None = args.get("password")
+
+    # Generate password if not provided
+    if provided_password:
+        password = provided_password
+    else:
+        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+        password = "".join(secrets.choice(alphabet) for _ in range(20))
+
+    token, base_url, realm = _keycloak_admin_token()
+
+    # Build custom attributes
+    custom_attrs: dict[str, list[str]] = {}
+    expires_at_iso: str | None = None
+    if expires_in_days is not None:
+        import datetime
+
+        expires_at = dt.datetime.utcnow() + dt.timedelta(days=expires_in_days)
+        expires_at_iso = expires_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+        custom_attrs["account_expires_at"] = [expires_at_iso]
+        custom_attrs["account_type"] = ["temporary"]
+
+    # Create user
+    user_payload: dict[str, Any] = {
+        "username": username,
+        "email": email,
+        "enabled": True,
+        "emailVerified": True,
+    }
+    if first_name:
+        user_payload["firstName"] = first_name
+    if last_name:
+        user_payload["lastName"] = last_name
+    if custom_attrs:
+        user_payload["attributes"] = custom_attrs
+
+    status, _ = _keycloak_api_request(
+        "POST",
+        f"{base_url}/admin/realms/{realm}/users",
+        token,
+        body=user_payload,
+        expected_statuses=(201,),
+    )
+    if status != 201:
+        raise RuntimeError(f"Failed to create Keycloak user: HTTP {status}")
+
+    # Resolve the created user's ID
+    _, users = _keycloak_api_request(
+        "GET",
+        f"{base_url}/admin/realms/{realm}/users?username={urllib.parse.quote(username)}&exact=true",
+        token,
+    )
+    if not users:
+        raise RuntimeError(f"User '{username}' not found after creation")
+    user_id = users[0]["id"]
+
+    # Set password
+    _keycloak_api_request(
+        "PUT",
+        f"{base_url}/admin/realms/{realm}/users/{user_id}/reset-password",
+        token,
+        body={"type": "password", "value": password, "temporary": False},
+        expected_statuses=(204,),
+    )
+
+    # Assign groups
+    assigned_groups: list[str] = []
+    skipped_groups: list[str] = []
+    for group_name in group_names:
+        group_id = _keycloak_resolve_group_id(base_url, realm, token, group_name)
+        if group_id is None:
+            skipped_groups.append(group_name)
+            continue
+        _keycloak_api_request(
+            "PUT",
+            f"{base_url}/admin/realms/{realm}/users/{user_id}/groups/{group_id}",
+            token,
+            expected_statuses=(204,),
+        )
+        assigned_groups.append(group_name)
+
+    result: dict[str, Any] = {
+        "status": "created",
+        "user_id": user_id,
+        "username": username,
+        "email": email,
+        "password": password,
+        "realm": realm,
+        "groups_assigned": assigned_groups,
+        "groups_skipped": skipped_groups,
+        "sso_url": f"{base_url}/realms/{realm}/account",
+    }
+    if expires_at_iso:
+        result["expires_at"] = expires_at_iso
+    return result
+
+
+def tool_deprovision_account(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    """Disable or delete a Keycloak account by username (ADR 0411)."""
+    import urllib.parse
+
+    username = require_str(args.get("username"), "arguments.username")
+    hard_delete: bool = args.get("hard_delete", False)
+
+    token, base_url, realm = _keycloak_admin_token()
+
+    _, users = _keycloak_api_request(
+        "GET",
+        f"{base_url}/admin/realms/{realm}/users?username={urllib.parse.quote(username)}&exact=true",
+        token,
+    )
+    if not users:
+        return {"status": "not_found", "username": username}
+
+    user_id = users[0]["id"]
+
+    if hard_delete:
+        _keycloak_api_request(
+            "DELETE",
+            f"{base_url}/admin/realms/{realm}/users/{user_id}",
+            token,
+            expected_statuses=(204,),
+        )
+        return {"status": "deleted", "username": username, "user_id": user_id}
+    else:
+        _keycloak_api_request(
+            "PUT",
+            f"{base_url}/admin/realms/{realm}/users/{user_id}",
+            token,
+            body={"enabled": False},
+            expected_statuses=(204,),
+        )
+        return {"status": "disabled", "username": username, "user_id": user_id}
+
+
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
@@ -1768,6 +2050,8 @@ HANDLERS: Final[dict[str, Any]] = {
     "mempalace_status": tool_mempalace_status,
     "execute_host_command": tool_execute_host_command,
     "get_disk_usage": tool_get_disk_usage,
+    "provision_account": tool_provision_account,
+    "deprovision_account": tool_deprovision_account,
 }
 
 

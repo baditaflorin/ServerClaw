@@ -9,6 +9,7 @@ postgres_vm_max_connections: 200
 postgres_vm_nftables_config_file: /etc/nftables.conf
 postgres_vm_admin_role: "{{ proxmox_guest_ci_user }}"
 postgres_vm_repo_root: "{{ inventory_dir | dirname }}"
+postgres_vm_platform_postgres_registry_file: "{{ postgres_vm_repo_root }}/inventory/group_vars/platform_postgres.yml"
 postgres_vm_superuser_reserved_connections: 3
 postgres_vm_reserved_connections: 5
 postgres_vm_shared_preload_libraries:
@@ -18,7 +19,7 @@ postgres_vm_listen_addresses:
   - "{{ ansible_host }}"
 postgres_vm_ssh_allowed_sources: "{{ proxmox_management_allowed_sources }}"
 postgres_vm_client_allowed_sources_default:
-  - "{{ platform_host.network.internal_ipv4 }}/32"
+  - "{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}/32"
 postgres_vm_client_allowed_sources_extra: []
 postgres_vm_client_allowed_sources: >-
   {{

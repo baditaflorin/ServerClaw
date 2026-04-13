@@ -38,6 +38,17 @@
         description: "Semaphore database password"
         prerequisite: "Run the Semaphore PostgreSQL converge first so the runtime can connect to postgres"
 
+- name: Check Semaphore Keycloak OIDC prerequisites on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ semaphore_oidc_client_secret_local_file }}"
+        description: "Semaphore Keycloak OIDC client secret"
+        prerequisite: "Run the dedicated Semaphore Keycloak client reconcile step first so the runtime can authenticate operators through Keycloak"
+  when: semaphore_enable_oidc | default(false)
+
 - name: Ensure the Semaphore runtime packages are present
   ansible.builtin.apt:
     name:
@@ -263,61 +274,7 @@
   changed_when: "'changed' in semaphore_cookie_encryption_generation.stdout"
   no_log: true
 
-- name: Check whether the local OIDC client secret already exists
-  ansible.builtin.stat:
-    path: "{{ semaphore_oidc_client_secret_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: semaphore_oidc_client_secret_local
-  when: semaphore_enable_oidc | default(false)
-
-- name: Check whether the persisted OIDC client secret exists on the guest
-  ansible.builtin.stat:
-    path: "{{ semaphore_oidc_client_secret_guest_file }}"
-  register: semaphore_oidc_client_secret_guest
-  when: semaphore_enable_oidc | default(false)
-
-- name: Read the persisted OIDC client secret from the guest when the local copy is missing
-  ansible.builtin.slurp:
-    src: "{{ semaphore_oidc_client_secret_guest_file }}"
-  register: semaphore_oidc_client_secret_guest_raw
-  when:
-    - semaphore_enable_oidc | default(false)
-    - not semaphore_oidc_client_secret_local.stat.exists
-    - semaphore_oidc_client_secret_guest.stat.exists
-  no_log: true
-
-- name: Restore the OIDC client secret to the control machine from the guest copy
-  ansible.builtin.copy:
-    dest: "{{ semaphore_oidc_client_secret_local_file }}"
-    content: "{{ semaphore_oidc_client_secret_guest_raw.content | b64decode | trim }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  when:
-    - semaphore_enable_oidc | default(false)
-    - not semaphore_oidc_client_secret_local.stat.exists
-    - semaphore_oidc_client_secret_guest.stat.exists
-  no_log: true
-
-- name: Generate the OIDC client secret
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ semaphore_oidc_client_secret_local_file }}" ]; then
-      umask 077
-      openssl rand -base64 32 | tr -d '\n' > "{{ semaphore_oidc_client_secret_local_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  delegate_to: localhost
-  become: false
-  register: semaphore_oidc_client_secret_generation
-  changed_when: "'changed' in semaphore_oidc_client_secret_generation.stdout"
-  when: semaphore_enable_oidc | default(false)
-  no_log: true
-
-- name: Persist the OIDC client secret on the guest
+- name: Persist the Keycloak-managed OIDC client secret on the guest
   ansible.builtin.copy:
     src: "{{ semaphore_oidc_client_secret_local_file }}"
     dest: "{{ semaphore_oidc_client_secret_guest_file }}"

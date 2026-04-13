@@ -571,7 +571,7 @@
       "id": "semaphore",
       "service": "semaphore",
       "name": "Semaphore",
-      "vm": "docker-runtime",
+      "vm": "runtime-control",
       "tier": 2,
       "category": "automation",
       "adr": "0149"
@@ -1585,6 +1585,12 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "Superset starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
+    },
+    {
+      "from": "semaphore",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Semaphore delegates routine browser sign-in to the shared Keycloak OIDC broker while retaining a repo-managed break-glass admin login."
     },
     {
       "from": "semaphore",

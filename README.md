@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.129` |
-| Platform version | `0.178.129` |
+| Repository version | `0.178.132` |
+| Platform version | `0.178.132` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -58,7 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
-| `keycloak` | `2026-04-13-keycloak-topology-fix-runtime-control-live-apply` |
+| `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
@@ -89,8 +89,8 @@ Showing 20 of 177 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.129` |
-| Platform version | `0.178.129` |
+| Repository version | `0.178.132` |
+| Platform version | `0.178.132` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -365,6 +365,7 @@ Showing 25 of 304 merged or live-applied workstreams. Full history: [merged work
 | `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](docs/workstreams/ws-0372-live-apply.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
+| `0359` | Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main | `live_applied` | [ws-0359-live-apply.md](docs/workstreams/ws-0359-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |

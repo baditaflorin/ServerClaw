@@ -12,8 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end
 - align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
-- fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge
 
 ## 0.178.78 (2026-04-10)
 
@@ -29,10 +29,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.129 release notes](docs/release-notes/0.178.129.md)
+- [0.178.131 release notes](docs/release-notes/0.178.131.md)
 
 ## Previous Releases
 
+- [0.178.129 release notes](docs/release-notes/0.178.129.md)
 - [0.178.123 release notes](docs/release-notes/0.178.123.md)
 - [0.178.122 release notes](docs/release-notes/0.178.122.md)
 - [0.178.121 release notes](docs/release-notes/0.178.121.md)
@@ -44,9 +45,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.115 release notes](docs/release-notes/0.178.115.md)
 - [0.178.114 release notes](docs/release-notes/0.178.114.md)
 - [0.178.113 release notes](docs/release-notes/0.178.113.md)
-- [0.178.112 release notes](docs/release-notes/0.178.112.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (457 releases)](docs/release-notes/index/2026.md)
+- [2026 (458 releases)](docs/release-notes/index/2026.md)
