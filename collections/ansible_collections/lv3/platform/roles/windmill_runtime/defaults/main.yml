@@ -779,6 +779,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0155 queued intent dispatcher
     description: Repo-managed ADR 0155 worker that replays queued intents once their blocking workflow or resource claims are released.
+  - path: f/lv3/keycloak_account_expiry_reaper
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/keycloak-account-expiry-reaper.py"
+    language: python3
+    summary: ADR 0412 Keycloak account expiry reaper
+    description: Repo-managed worker that scans Keycloak users with an account_expires_at attribute and disables those whose expiry timestamp has passed. Runs daily at 02:00 UTC.
 windmill_seed_schedules:
   - path: f/lv3/scheduler_watchdog_loop_every_10s
     schedule: "*/10 * * * * *"
@@ -1128,6 +1133,16 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0121 nightly search-index rebuild placeholder
     description: Repo-managed nightly search-index rebuild definition; enable it after the search fabric is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/keycloak_account_expiry_reaper_daily
+    schedule: "0 0 2 * * *"
+    timezone: UTC
+    script_path: f/lv3/keycloak_account_expiry_reaper
+    args:
+      dry_run: false
+    enabled: true
+    summary: ADR 0412 daily Keycloak account expiry reaper
+    description: Repo-managed daily sweep at 02:00 UTC that disables Keycloak users whose account_expires_at attribute has passed. Implements the expiry side of ADR 0411 temporary account provisioning.
     no_flow_overlap: true
 windmill_seed_raw_apps:
   - path: f/lv3/operator_access_admin

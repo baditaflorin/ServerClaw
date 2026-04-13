@@ -76,6 +76,14 @@ TOOL_PACKS = {
             "get-api-publication-surface",
         ],
     },
+    "accounts": {
+        "title": "ServerClaw Accounts — User Provisioning",
+        "description": "Provision and deprovision platform SSO accounts via Keycloak. A single account grants access to 17+ services. Supports optional expiry for temporary accounts (ADR 0411).",
+        "tools": [
+            "provision-account",
+            "deprovision-account",
+        ],
+    },
 }
 
 GATEWAY_BASE_URL = "http://10.10.10.92:8083"
