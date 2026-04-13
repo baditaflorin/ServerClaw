@@ -129,7 +129,7 @@
   when: common_docker_bridge_chains_active_state.rc == 0
 
 - name: Reset SSH connection before Docker bridge-chain recovery checks
-  ansible.builtin.meta: reset_connection
+  ansible.builtin.include_tasks: docker_bridge_chains_reset_connection.yml
   when:
     - common_docker_bridge_chains_active_state.rc == 0
     - >

@@ -17,7 +17,6 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
-
 existing_platform = sys.modules.get("platform")
 if existing_platform is not None and not hasattr(existing_platform, "__path__"):
     del sys.modules["platform"]
@@ -176,6 +175,9 @@ PORT_ASSIGNMENT_TEMPLATE_RE = re.compile(
 GUEST_IPV4_TEMPLATE_RE = re.compile(
     r"""{{\s*\(proxmox_guests\s+\|\s+selectattr\('name',\s+'equalto',\s+'([^']+)'\)\s+\|\s+map\(attribute='ipv4'\)\s+\|\s+first\)\s*}}"""
 )
+GUEST_IPV4_FIRST_OBJECT_RE = re.compile(
+    r"""{{\s*\(proxmox_guests\s+\|\s+selectattr\('name',\s+'equalto',\s+'([^']+)'\)\s+\|\s+list\s+\|\s+first\)\.ipv4\s*}}"""
+)
 
 
 def yaml_dump(payload: Any) -> str:
@@ -284,6 +286,7 @@ def render_known_templates_in_string(
         rendered = PORT_ASSIGNMENT_TEMPLATE_RE.sub(replace_port_assignment, rendered)
         rendered = HOST_SELF_TEMPLATE_RE.sub(replace_host_self, rendered)
         rendered = GUEST_IPV4_TEMPLATE_RE.sub(replace_guest_ipv4, rendered)
+        rendered = GUEST_IPV4_FIRST_OBJECT_RE.sub(replace_guest_ipv4, rendered)
         rendered = HOST_VAR_TEMPLATE_RE.sub(replace_host_var, rendered)
     return rendered
 
@@ -959,7 +962,20 @@ def build_tcp_proxies(host_vars: dict[str, Any], ports: dict[str, int]) -> list[
                 ),
                 "listen_port": resolve_tcp_proxy_port(proxy.get("listen_port"), ports),
                 "upstream_host": require_string(
-                    proxy.get("upstream_host"),
+                    render_known_templates_in_string(
+                        require_string(
+                            proxy.get("upstream_host"),
+                            f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_host",
+                        ),
+                        host_vars,
+                        {
+                            guest["name"]: guest["ipv4"]
+                            for guest in require_list(host_vars.get("proxmox_guests"), "host_vars.proxmox_guests")
+                            if isinstance(guest, dict) and guest.get("name") and guest.get("ipv4")
+                        },
+                        ports,
+                        f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_host",
+                    ),
                     f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_host",
                 ),
                 "upstream_port": resolve_tcp_proxy_port(proxy.get("upstream_port"), ports),
@@ -1128,8 +1144,14 @@ def build_platform_vars(
                     "host_vars.proxmox_public_ingress_tcp_ports",
                 ),
                 "public_ingress_tcp_forwards": copy.deepcopy(
-                    require_list(
-                        host_vars.get("proxmox_public_ingress_tcp_forwards"),
+                    render_known_templates(
+                        require_list(
+                            host_vars.get("proxmox_public_ingress_tcp_forwards"),
+                            "host_vars.proxmox_public_ingress_tcp_forwards",
+                        ),
+                        host_vars,
+                        guest_ipv4_by_name,
+                        resolved_ports,
                         "host_vars.proxmox_public_ingress_tcp_forwards",
                     )
                 ),
@@ -1150,7 +1172,16 @@ def build_platform_vars(
                     ]
                 ),
                 "tailscale_operator_target_guest": require_string(
-                    host_vars.get("proxmox_tailscale_operator_target_guest"),
+                    render_known_templates_in_string(
+                        require_string(
+                            host_vars.get("proxmox_tailscale_operator_target_guest"),
+                            "host_vars.proxmox_tailscale_operator_target_guest",
+                        ),
+                        host_vars,
+                        guest_ipv4_by_name,
+                        resolved_ports,
+                        "host_vars.proxmox_tailscale_operator_target_guest",
+                    ),
                     "host_vars.proxmox_tailscale_operator_target_guest",
                 ),
                 "tailscale_tcp_proxies": tcp_proxies,

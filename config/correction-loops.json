@@ -396,6 +396,61 @@
       "retry_budget_cycles": 1
     },
     {
+      "id": "operational_surface_reconcile",
+      "description": "Operational surface hygiene workflows regenerate bounded portal, discovery, and capacity-reporting artifacts from repo-managed truth before operators intervene.",
+      "applies_to": {
+        "workflow_ids": [
+          "disk-space-monitor",
+          "portal-health-sweep",
+          "reconcile-portals",
+          "refresh-discovery-surfaces"
+        ]
+      },
+      "invariant": "The generated operational surface matches the current repo catalogs and the bounded verification command confirms the refreshed artifact is usable.",
+      "observation_sources": [
+        "Workflow-local generated files, rendered portal fragments, or JSON summaries emitted by the bounded command.",
+        "The repo catalogs and manifests that define the authoritative discovery, portal, or capacity inputs.",
+        "The verification command attached to the workflow that proves the refreshed operational surface is consumable."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record that the operational surface already matches the current repo truth and no refresh is needed.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Replay the bounded generation or reconciliation command so the operational surface is rebuilt from the same canonical inputs.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate when the regenerated surface still fails verification or when republishing would overwrite an unknown or operator-managed artifact.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "The workflow verification_commands plus any downstream portal or artifact validation that consumes the regenerated surface.",
+        "success_signal": "The refreshed operational surface passes its bounded verification command without introducing new drift."
+      },
+      "escalation": {
+        "boundary": "Stop when the same bounded refresh path fails twice, when canonical inputs disagree, or when a follow-up repair would leave the governed read-only artifact boundary.",
+        "target": "operator",
+        "runbook": "docs/runbooks/validate-repository-automation.md"
+      },
+      "retry_budget_cycles": 1
+    },
+    {
       "id": "runtime_self_correction_watchers",
       "description": "The watchdog and observation-loop runtimes are themselves governed correction loops: they must emit durable state, choose the narrowest safe repair action first, and stop at explicit safety boundaries.",
       "applies_to": {

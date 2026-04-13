@@ -987,6 +987,11 @@ network_policy:
         - source: nginx
           protocol: tcp
           ports:
+            - 8101
+          description: Reverse proxy access to the repo-intake deployment surface
+        - source: nginx
+          protocol: tcp
+          ports:
             - 8110
           description: Reverse proxy access to the Label Studio shared-edge publication
         - source: nginx
@@ -3116,6 +3121,27 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.ops_portal_port }}"
+  repo_intake:
+    service_name: repo-intake
+    owning_vm: docker-runtime
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}"
+    public_hostname: repo-intake.{{ platform_domain }}
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repo-intake
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:8101"
   homepage:
     service_name: homepage
     owning_vm: runtime-general

@@ -1,23 +1,46 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-04-12T07:20:59Z",
-  "recorded_on": "2026-04-12",
+  "recorded_at": "2026-04-13T11:06:51Z",
+  "recorded_on": "2026-04-13",
   "recorded_by": "codex",
   "repository": {
     "bucket": "restic-config-backup",
-    "endpoint": "http://10.200.25.3:9000"
+    "endpoint": "http://10.200.25.2:9000"
   },
   "summary": {
-    "governed_sources": 3,
+    "governed_sources": 5,
     "protected": 2,
-    "uncovered": 0,
+    "uncovered": 2,
     "inactive": 1,
-    "uncovered_sources": [],
+    "uncovered_sources": [
+      "receipts",
+      "controller_secret_manifest"
+    ],
     "inactive_sources": [
       "falco_overrides"
     ]
   },
   "sources": [
+    {
+      "source_id": "receipts",
+      "label": "receipts",
+      "paths": [
+        "receipts"
+      ],
+      "state": "uncovered",
+      "expected_schedule": "every_6_hours",
+      "freshness_minutes": 360,
+      "freshness_policy": "interval",
+      "retention": {
+        "keep_daily": 90,
+        "keep_monthly": 12
+      },
+      "latest_snapshot": null,
+      "last_restore_verification": null,
+      "reasons": [
+        "No new live-apply result was recorded for receipts."
+      ]
+    },
     {
       "source_id": "config",
       "label": "config",
@@ -33,13 +56,13 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "76275707ec0c89959e74450e1ac3964e5bd74264d02c46f4949ab40ff81d597e",
-        "recorded_at": "2026-04-12T07:20:59Z",
+        "snapshot_id": "c25571ed74d08e1f32ff41f98e465f861625bb2ef199198a2c2333a996a2aa19",
+        "recorded_at": "2026-04-13T11:06:51Z",
         "host": "docker-runtime",
         "paths": [
           "config"
         ],
-        "files": 1
+        "files": 4
       },
       "last_restore_verification": null,
       "reasons": [
@@ -60,8 +83,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "1324bcb58243e98b6a30e5805724b6b1698600d73231a654edbd128eb0de33b4",
-        "recorded_at": "2026-04-12T07:20:59Z",
+        "snapshot_id": "e2c9742bd0e9168f71a786125edae2c9617a4f97867d4caef9c28a3026eb0722",
+        "recorded_at": "2026-04-13T11:06:51Z",
         "host": "docker-runtime",
         "paths": [
           "versions/stack.yaml"
@@ -71,6 +94,25 @@
       "last_restore_verification": null,
       "reasons": [
         "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
+      ]
+    },
+    {
+      "source_id": "controller_secret_manifest",
+      "label": "controller_secret_manifest",
+      "paths": [
+        "config/controller-local-secrets.json"
+      ],
+      "state": "uncovered",
+      "expected_schedule": "daily",
+      "freshness_minutes": 1440,
+      "freshness_policy": "interval",
+      "retention": {
+        "keep_daily": 90
+      },
+      "latest_snapshot": null,
+      "last_restore_verification": null,
+      "reasons": [
+        "No new live-apply result was recorded for controller_secret_manifest."
       ]
     },
     {

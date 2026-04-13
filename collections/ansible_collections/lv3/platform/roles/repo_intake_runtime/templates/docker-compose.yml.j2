@@ -1,20 +1,24 @@
-version: '3.8'
-
 services:
   repo-intake:
+    build:
+      context: {{ repo_intake_build_context_dir }}
+      network: host
     image: {{ repo_intake_image }}
     container_name: {{ repo_intake_container_name }}
     restart: unless-stopped
     ports:
-      - "{{ repo_intake_port }}:8096"
-    environment:
-      PORT: "8096"
-      SESSION_SECRET: "{{ repo_intake_session_secret }}"
-      REPO_INTAKE_STATIC_API_TOKEN: "{{ repo_intake_static_api_token }}"
+      - "{{ repo_intake_internal_port }}:{{ repo_intake_internal_port }}"
+    env_file:
+      - {{ repo_intake_env_file }}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - {{ repo_intake_secret_dir }}/coolify/admin-auth.json:/srv/repo/.local/coolify/admin-auth.json:ro
+      - {{ repo_intake_secret_dir }}/ssh/bootstrap.id_ed25519:/srv/repo/.local/ssh/bootstrap.id_ed25519:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ repo_intake_internal_port }}/health', timeout=5)
       interval: 30s
       timeout: 10s
       retries: 3

@@ -1070,7 +1070,7 @@ platform_service_registry:
   repo_intake:
     service_type: docker_compose
     image_catalog_key: ""            # repo-intake is a bespoke container built locally
-    internal_port: 8096
+    internal_port: 8101
     host_group: docker-runtime
     site_dir: /opt/repo-intake
     container_name: repo-intake
@@ -1101,7 +1101,7 @@ platform_service_registry:
       public_client: false
     proxy:
       enabled: true
-      upstream_port: 8096
+      upstream_port: 8101
       upstream_host: docker-runtime
       public_fqdn: repo-intake.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy

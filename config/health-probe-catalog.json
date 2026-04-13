@@ -2466,6 +2466,52 @@
         }
       }
     },
+    "repo_intake": {
+      "service_name": "repo-intake",
+      "owning_vm": "docker-runtime",
+      "role": "repo_intake_runtime",
+      "verify_file": "roles/repo_intake_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Repo-intake startup completes once the private health endpoint responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8101/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The repo-intake health endpoint responds on the private runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8101/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The repo-intake dashboard shell renders locally after the runtime and mirrored controller secrets settle.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8101/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Repo-intake is published behind the shared edge auth boundary; the repo-managed local health and dashboard verification path is the authoritative contract."
+      }
+    },
     "grist": {
       "service_name": "grist",
       "owning_vm": "docker-runtime",

@@ -1,9 +1,9 @@
 scanner_version: '1.0'
-generated: '2026-04-12T22:13:18.351486'
+generated: '2026-04-13T14:19:29.327319'
 total_adrs: 1
 scan_summary:
   fully_matching: 1
-  partial_matching: 1
+  partial_matching: 0
   no_evidence: 0
 reports:
-- 0381
+- '0373'

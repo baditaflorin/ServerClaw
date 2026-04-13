@@ -170,6 +170,7 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive() -> None:
             "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
             "host_user": "ops",
             "host_addr": "100.64.0.1",
+            "host_port": "2222",
             "guests": {"docker-runtime": "10.10.10.20"},
         },
         "docker-runtime",
@@ -179,5 +180,6 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive() -> None:
     joined = " ".join(command)
 
     assert "ProxyCommand=" in joined
+    assert " -p 2222 " in joined
     assert "-o StrictHostKeyChecking=no" in joined
     assert "-o UserKnownHostsFile=/dev/null" in joined

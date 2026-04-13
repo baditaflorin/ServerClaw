@@ -1,0 +1,33 @@
+---
+# Purpose: Verify that the local repo-intake health endpoint and dashboard shell render after convergence.
+# Use case: Include after repo_intake_runtime reconciliation or from shared health-probe contracts.
+# Dependencies: ADR 0165, ADR 0224, ADR 0373.
+- name: Verify the repo-intake health endpoint responds locally
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: verify_service_health
+  vars:
+    common_verify_service_name: repo-intake
+    common_verify_port: "{{ repo_intake_internal_port }}"
+    common_verify_health_url: "http://127.0.0.1:{{ repo_intake_internal_port }}/health"
+    common_verify_health_retries: 20
+    common_verify_health_delay: 3
+
+- name: Verify the repo-intake root page renders locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ repo_intake_internal_port }}/"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: repo_intake_verify_root
+  changed_when: false
+  retries: 20
+  delay: 3
+  until: repo_intake_verify_root.status == 200
+
+- name: Assert the repo-intake root page renders with the expected deployment surface
+  ansible.builtin.assert:
+    that:
+      - "'Repo Intake' in repo_intake_verify_root.content"
+      - "'Catalog Profiles' in repo_intake_verify_root.content or 'Custom Deployment' in repo_intake_verify_root.content"
+    fail_msg: "Repo-intake rendered without the expected dashboard shell."

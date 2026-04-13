@@ -30,7 +30,10 @@ from platform.workstream_registry import load_active_workstreams
 
 
 HOST_VARS_PATH = TOPOLOGY_HOST_VARS_PATH  # ADR 0407: single source of truth in platform.repo
-GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
+GROUP_VARS_CANDIDATE_PATHS = (
+    repo_path("inventory", "group_vars", "all", "main.yml"),
+    repo_path("inventory", "group_vars", "all.yml"),
+)
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 NATS_PUBLISH_POLICY = policy_for_surface("nats_publish")
 SSH_CONNECT_TIMEOUT_SECONDS = int(default_timeout("ssh_connection"))
@@ -80,12 +83,17 @@ def parse_datetime(value: str) -> datetime:
     return parsed
 
 
+def load_group_vars() -> dict[str, Any]:
+    for candidate in GROUP_VARS_CANDIDATE_PATHS:
+        if candidate.is_file():
+            return load_yaml(candidate)
+    rendered = ", ".join(str(path.relative_to(REPO_ROOT)) for path in GROUP_VARS_CANDIDATE_PATHS)
+    raise FileNotFoundError(f"unable to locate controller group vars in any supported path ({rendered})")
+
+
 def load_controller_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
-    group_vars_path = GROUP_VARS_PATH
-    if not group_vars_path.exists():
-        group_vars_path = repo_path("inventory", "group_vars", "all", "main.yml")
-    group_vars = load_yaml(group_vars_path)
+    group_vars = load_group_vars()
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
     bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])
     repo_local_secret_root = REPO_ROOT / ".local"
@@ -100,6 +108,7 @@ def load_controller_context() -> dict[str, Any]:
         or (host_vars.get("proxmox_internal_ipv4") if prefer_internal_host else host_vars["management_tailscale_ipv4"])
         or host_vars["management_tailscale_ipv4"]
     )
+    host_port = os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22"
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     return {
         "host_vars": host_vars,
@@ -108,6 +117,7 @@ def load_controller_context() -> dict[str, Any]:
         "bootstrap_key": bootstrap_key,
         "host_user": group_vars["proxmox_host_admin_user"],
         "host_addr": host_addr,
+        "host_port": host_port,
         "guests": guests,
     }
 
@@ -133,8 +143,13 @@ def run_shell(command: str, *, cwd: Path | None = None, env: dict[str, str] | No
     return run_command(["/bin/bash", "-lc", command], cwd=cwd, env=env)
 
 
+def host_ssh_port(context: dict[str, Any]) -> str:
+    return str(context.get("host_port") or os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22")
+
+
 def build_host_ssh_command(context: dict[str, Any], remote_command: str) -> list[str]:
     key_path = str(context["bootstrap_key"])
+    port = host_ssh_port(context)
     return [
         "ssh",
         "-i",
@@ -151,6 +166,8 @@ def build_host_ssh_command(context: dict[str, Any], remote_command: str) -> list
         "StrictHostKeyChecking=no",
         "-o",
         "UserKnownHostsFile=/dev/null",
+        "-p",
+        port,
         f"{context['host_user']}@{context['host_addr']}",
         remote_command,
     ]
@@ -160,10 +177,12 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, remote_command
     key_path = str(context["bootstrap_key"])
     guest_ip = context["guests"][target]
     host_login = f"{context['host_user']}@{context['host_addr']}"
+    port = host_ssh_port(context)
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"-p {shlex.quote(port)} "
         f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
@@ -199,10 +218,12 @@ def build_guest_ssh_tunnel_command(
     key_path = str(context["bootstrap_key"])
     guest_ip = context["guests"][target]
     host_login = f"{context['host_user']}@{context['host_addr']}"
+    port = host_ssh_port(context)
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"-p {shlex.quote(port)} "
         f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [

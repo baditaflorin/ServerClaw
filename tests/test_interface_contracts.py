@@ -67,6 +67,48 @@ def test_converge_workflow_contract_validates() -> None:
     assert any(contract["contract_id"] == "converge-workflow-live-apply-v1" for contract in contracts)
 
 
+def test_converge_workflow_contract_accepts_collection_playbook(monkeypatch) -> None:
+    contract = {
+        "contract_id": "test-converge-contract",
+        "metadata": {
+            "workflow_prefix": "converge-",
+            "required_validation_target": "validate",
+            "receipt_required": True,
+            "generic_live_apply_targets": ["live-apply-service"],
+        },
+    }
+    workflow_catalog = {
+        "workflows": {
+            "converge-api-gateway": {
+                "preferred_entrypoint": {"kind": "make_target", "target": "converge-api-gateway"},
+                "validation_targets": ["validate"],
+                "live_impact": "guest_live",
+                "owner_runbook": "docs/runbooks/configure-api-gateway.md",
+                "implementation_refs": [
+                    "Makefile",
+                    "collections/ansible_collections/lv3/platform/playbooks/api-gateway.yml",
+                ],
+            }
+        }
+    }
+    command_catalog = {
+        "commands": {
+            "converge-api-gateway": {
+                "workflow_id": "converge-api-gateway",
+                "evidence": {"live_apply_receipt_required": True},
+            }
+        }
+    }
+
+    monkeypatch.setattr(interface_contracts, "load_workflow_catalog", lambda: workflow_catalog)
+    monkeypatch.setattr(interface_contracts, "load_command_catalog", lambda: command_catalog)
+    monkeypatch.setattr(
+        interface_contracts, "parse_make_targets", lambda: {"live-apply-service", "converge-api-gateway"}
+    )
+
+    interface_contracts.validate_converge_workflow_contract(contract)
+
+
 def test_script_list_reports_new_contracts(capsys) -> None:
     module = load_interface_contracts_module()
     exit_code = module.main(["--list"])

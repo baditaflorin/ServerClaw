@@ -13,7 +13,7 @@ from pathlib import Path, PurePosixPath
 
 import yaml
 
-from controller_automation_toolkit import emit_cli_error
+from controller_automation_toolkit import emit_cli_error, resolve_repo_local_path
 from drift_lib import build_guest_ssh_command, load_controller_context, run_command
 
 
@@ -193,16 +193,26 @@ def remote_file_exists(
 
 
 def resolve_openbao_init_local_file() -> Path:
-    group_vars = LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all.yml"
-    if not group_vars.exists():
-        group_vars = LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml"
-    payload = yaml.safe_load(group_vars.read_text(encoding="utf-8")) or {}
-    init_path = str(payload.get("openbao_init_local_file") or "").strip()
-    if not init_path:
-        raise ValueError(
-            "openbao_init_local_file is not declared in inventory/group_vars/all.yml or inventory/group_vars/all/main.yml"
-        )
-    return Path(init_path)
+    candidate_paths = (
+        LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml",
+        LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all.yml",
+    )
+    for group_vars in candidate_paths:
+        if not group_vars.is_file():
+            continue
+        payload = yaml.safe_load(group_vars.read_text(encoding="utf-8")) or {}
+        init_path = str(payload.get("openbao_init_local_file") or "").strip()
+        if init_path:
+            shared_local_root_prefix = "{{ repo_shared_local_root }}/"
+            if init_path.startswith(shared_local_root_prefix):
+                repo_relative_local_path = Path(".local") / init_path.removeprefix(shared_local_root_prefix)
+                return resolve_repo_local_path(repo_relative_local_path, repo_root=LOCAL_REPO_ROOT)
+            return resolve_repo_local_path(init_path, repo_root=LOCAL_REPO_ROOT)
+
+    rendered_candidates = ", ".join(str(path.relative_to(LOCAL_REPO_ROOT)) for path in candidate_paths)
+    raise ValueError(
+        f"openbao_init_local_file is not declared in any supported inventory defaults file ({rendered_candidates})"
+    )
 
 
 def run_local_converge_restic(env: str) -> None:
@@ -228,12 +238,16 @@ def ensure_remote_runtime_credentials(
     *,
     env: str,
     credential_file: str,
+    refresh: bool = False,
     target: str = "docker-runtime",
 ) -> None:
-    if remote_file_exists(context, target=target, path=credential_file):
+    if refresh:
+        run_local_converge_restic(env)
+    elif remote_file_exists(context, target=target, path=credential_file):
         return
 
-    run_local_converge_restic(env)
+    if not refresh and not remote_file_exists(context, target=target, path=credential_file):
+        run_local_converge_restic(env)
 
     if not remote_file_exists(context, target=target, path=credential_file):
         raise RuntimeError(
@@ -344,6 +358,7 @@ def main(argv: list[str] | None = None) -> int:
             context,
             env=args.env,
             credential_file=args.credential_file,
+            refresh=args.live_apply_trigger and args.mode == "backup",
         )
         prefer_fallback_script = os.environ.get("RESTIC_USE_FALLBACK_SCRIPT") == "1"
         remote_command = build_remote_command(

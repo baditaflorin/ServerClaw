@@ -1,56 +1,309 @@
 adr_number: '0373'
 title: Service Registry and Derived Defaults
-canonical_status: Proposed
-canonical_implementation_status: Proposed
+canonical_status: Accepted
+canonical_implementation_status: Implemented
 detected_markers:
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:75c019e8c
+  evidence: 75c019e8c Merge remote-tracking branch 'origin/main' into codex/ws-0373-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-13T14:19:29.138865'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:0dfcd5f37
+  evidence: 0dfcd5f37 [adr-0373] Repair repo-intake live-apply follow-through
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.138959'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:18dfb4ea0
+  evidence: "18dfb4ea0 [fix] Restore gitea_image default \u2014 dropped by ADR 0373\
+    \ migration"
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.139400'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:df2ddeace
+  evidence: df2ddeace [adr-0373] Repair latest-main live-apply gates
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.139841'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:6b6e12822
+  evidence: 6b6e12822 [adr-0373] Repair fresh-worktree portal validation
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.139868'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:90fecc469
+  evidence: 90fecc469 [adr-0373] Restore governed service wrappers
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.139884'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:4f0848ed8
+  evidence: 4f0848ed8 [adr-0373] Fix worktree local overlay resolution
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.139893'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:ecab76e21
+  evidence: ecab76e21 [adr-0373] Repair exact-main validation surfaces
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.139902'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:f11330ad0
+  evidence: "f11330ad0 fix: Use hardcoded paths in netbox_runtime defaults \u2014\
+    \ ADR 0373 compliance"
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.141323'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:ff6e94adc
+  evidence: "ff6e94adc fix: Add missing ADR 0373 service variables to netbox_runtime\
+    \ \u2014 resolves undefined netbox_local_artifact_dir"
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.141364'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:125073c25
+  evidence: "125073c25 fix: Add keycloak_image to role defaults \u2014 ADR 0373 compliance"
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.141373'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:34349cbc6
+  evidence: '34349cbc6 fix: Remove container_image_catalog references from playbook
+    vars (derived via ADR 0373)'
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.141438'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:829d31711
+  evidence: 829d31711 [adr-0373] Add conventional service variables to keycloak playbook
+    vars
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.141455'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:add33e006
+  evidence: 'add33e006 fix: add missing ADR 0373 service variables to homepage playbook'
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.141505'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:8305ecc0a
+  evidence: '8305ecc0a [adr-0373] Fix: Add conventional service variables to minio
+    playbook vars'
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.141559'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:51118d918
+  evidence: '51118d918 fix: Add missing keycloak service variables to playbook (ADR
+    0373 compatibility)'
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.141923'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:cef1593b8
+  evidence: "cef1593b8 [release] Bump to 0.178.83 \u2014 Fix keycloak service variables\
+    \ (ADR 0373 compatibility)"
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.141933'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:9207a184c
+  evidence: 9207a184c Revert "[adr-0373] Remove 494 redundant variable declarations
+    now derived by derive_service_defaults"
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.142513'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:a56ba43af
+  evidence: "a56ba43af [live-apply] ADR 0373 Phases 5-6 \u2014 100% service adoption\
+    \ with live production verification"
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.142521'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:659cb4029
+  evidence: 659cb4029 [adr-0373] Remove 494 redundant variable declarations now derived
+    by derive_service_defaults
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.142696'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:7363b90e9
+  evidence: 7363b90e9 [adr-0373-phase-5] Migrate final 7 roles to derive_service_defaults
+    pattern
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.142858'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:4d8ce4859
+  evidence: 4d8ce4859 [live-apply] ADR 0373 Phase 4 alertmanager_runtime deployed
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.142941'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:e22a9dbe7
+  evidence: "e22a9dbe7 [release] Bump to 0.178.66 \u2014 ADR 0373 Phase 4 unified\
+    \ service registry"
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.142950'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:ed719ba30
+  evidence: ed719ba30 [adr-0373] Add comprehensive runbook for adding new services
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.142979'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:2070d4ca4
+  evidence: 2070d4ca4 [adr-0373-phase-4f] Migrate alertmanager_runtime to use derive_service_defaults
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.142993'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:af750d92e
+  evidence: af750d92e [adr-0373-phase-4c-e] Extend derive_service_defaults task for
+    all service types
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143004'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:5c6788ff0
+  evidence: 5c6788ff0 [adr-0373-phase-4a-b] Add service_type to all 74 roles and state_dirs
+    to system packages
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143015'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:7187bb04c
+  evidence: 7187bb04c [adr-0373] Add comprehensive runbook for adding new services
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143102'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:6b7694a8e
+  evidence: 6b7694a8e [adr-0373-phase-4f] Migrate alertmanager_runtime to use derive_service_defaults
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143120'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:c917bc8ea
+  evidence: c917bc8ea [adr-0373-phase-4c-e] Extend derive_service_defaults task for
+    all service types
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143130'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:beda0c4b2
+  evidence: beda0c4b2 [adr-0373-phase-4a-b] Add service_type to all 74 roles and state_dirs
+    to system packages
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143140'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:2aa0782a4
+  evidence: '2aa0782a4 fix: update librechat argument_specs for ADR-0373 derived variables'
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143179'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:e9ee0be52
+  evidence: 'e9ee0be52 [adr-0373-phase-3-partial] Migrate Docker application roles:
+    librechat, litellm'
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143197'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:eaf967a2b
+  evidence: 'eaf967a2b [adr-0373-phase-2] Migrate Group A roles: gitea, keycloak,
+    woodpecker'
+  confidence: 0.8
+  detected_on: '2026-04-13T14:19:29.143217'
+- marker_type: git-commit
+  adr_number: '0373'
+  location: git:79a20cfaf
+  evidence: '79a20cfaf [ws-0362] Fix: align semaphore_runtime with ADR 0373 pattern'
+  confidence: 1.0
+  detected_on: '2026-04-13T14:19:29.145563'
 - marker_type: git-commit
   adr_number: '0373'
   location: git:3c3f4c5f3
   evidence: "3c3f4c5f3 feat(batch-1-registry): migrate all runtime roles to service\
     \ registry \u2014 ADR 0373"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:44.104886'
+  detected_on: '2026-04-13T14:19:29.149313'
 - marker_type: git-commit
   adr_number: '0373'
   location: git:efdf86bf3
   evidence: 'efdf86bf3 feat(adr-0373): service registry, derivation task, validator,
     directus migration'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.104936'
+  detected_on: '2026-04-13T14:19:29.149436'
 - marker_type: git-commit
   adr_number: '0373'
   location: git:4abad96cc
   evidence: '4abad96cc feat(adr-0373): add service registry, derivation task, and
     validator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.104942'
+  detected_on: '2026-04-13T14:19:29.149451'
 - marker_type: git-commit
   adr_number: '0373'
   location: git:f2b4f1132
   evidence: "f2b4f1132 feat(batch-1-registry): migrate all runtime roles to service\
     \ registry \u2014 ADR 0373"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:44.105373'
+  detected_on: '2026-04-13T14:19:29.150585'
 - marker_type: git-commit
   adr_number: '0373'
   location: git:b51e9dc41
   evidence: 'b51e9dc41 feat(adr-0373): service registry, derivation task, validator,
     directus migration'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.105438'
+  detected_on: '2026-04-13T14:19:29.151018'
 - marker_type: git-commit
   adr_number: '0373'
   location: git:fb9dd760f
   evidence: 'fb9dd760f feat(adr-0373): add service registry, derivation task, and
     validator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.105443'
-inferred_implementation_status: Possibly Implemented
-status_match: false
-summary: 'Canonical Status: Proposed
+  detected_on: '2026-04-13T14:19:29.151031'
+- marker_type: playbook
+  adr_number: '0373'
+  location: playbooks/homepage.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-13T14:19:29.193915'
+- marker_type: playbook
+  adr_number: '0373'
+  location: playbooks/harbor.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-13T14:19:29.196902'
+- marker_type: playbook
+  adr_number: '0373'
+  location: playbooks/keycloak.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-13T14:19:29.198100'
+- marker_type: playbook
+  adr_number: '0373'
+  location: playbooks/refresh-discovery-surfaces.yml
+  evidence: ADR reference found in playbook
+  confidence: 0.9
+  detected_on: '2026-04-13T14:19:29.199553'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Status: Accepted
 
-  Inferred Status: Possibly Implemented
+  Inferred Status: Likely Implemented
 
-  Markers Found: 6
+  Markers Found: 45
 
-  Breakdown: git-commit=6'
+  Breakdown: git-commit=41, playbook=4'

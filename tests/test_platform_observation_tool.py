@@ -74,6 +74,40 @@ def test_normalize_image_reference_strips_default_registry_prefixes():
     assert tool.normalize_image_reference("index.docker.io/library/redis:7") == "redis:7"
 
 
+def test_build_host_ssh_command_honors_breakglass_port():
+    command_argv = tool.build_host_ssh_command(
+        {
+            "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
+            "host_user": "ops",
+            "host_addr": "65.108.75.123",
+            "host_port": "2222",
+        },
+        "hostname",
+    )
+
+    assert command_argv[-2:] == ["ops@65.108.75.123", "hostname"]
+    assert "-p" in command_argv
+    assert command_argv[command_argv.index("-p") + 1] == "2222"
+
+
+def test_build_guest_ssh_command_honors_breakglass_port():
+    command_argv = tool.build_guest_ssh_command(
+        {
+            "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
+            "host_user": "ops",
+            "host_addr": "65.108.75.123",
+            "host_port": "2222",
+            "guests": {"docker-runtime": "10.10.10.20"},
+        },
+        "docker-runtime",
+        "hostname",
+    )
+
+    joined = " ".join(command_argv)
+    assert "ProxyCommand=ssh" in joined
+    assert " -p 2222 " in joined
+
+
 def test_check_image_freshness_flags_unpinned_and_local_build(monkeypatch):
     catalog = {
         "images": [

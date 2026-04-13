@@ -289,8 +289,24 @@ def validate_environment_references(
                     f"service '{service_id}' environment '{env_id}' subdomain '{subdomain}' "
                     "is missing from the subdomain catalog"
                 )
-            if entry.get("service_id") != service_id:
-                raise ValueError(f"subdomain '{subdomain}' must reference service_id '{service_id}'")
+            owner_service_id = entry.get("service_id")
+            if owner_service_id != service_id:
+                owner_service = service_index.get(str(owner_service_id))
+                owner_bindings = (
+                    require_mapping(owner_service.get("environments"), f"services.{owner_service_id}.environments")
+                    if owner_service is not None
+                    else {}
+                )
+                owner_binding = owner_bindings.get(env_id) if isinstance(owner_bindings, dict) else None
+                owner_subdomain = (
+                    require_str(
+                        owner_binding.get("subdomain"), f"services.{owner_service_id}.environments.{env_id}.subdomain"
+                    )
+                    if isinstance(owner_binding, dict) and owner_binding.get("subdomain") is not None
+                    else None
+                )
+                if owner_subdomain != subdomain:
+                    raise ValueError(f"subdomain '{subdomain}' must reference service_id '{service_id}'")
             if entry.get("status") != status:
                 raise ValueError(
                     f"service '{service_id}' environment '{env_id}' status '{status}' "

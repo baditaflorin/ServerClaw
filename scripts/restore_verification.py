@@ -275,9 +275,11 @@ def require_host_command(context: dict[str, Any], command: str, *, action: str) 
 def build_restored_guest_ssh_command(context: dict[str, Any], ip_address: str, remote_command: str) -> list[str]:
     key_path = str(context["bootstrap_key"])
     host_login = f"{context['host_user']}@{context['host_addr']}"
+    host_port = str(context.get("host_port") or os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22")
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 "
-        f"-o LogLevel=ERROR {shlex.quote(host_login)} -W %h:%p"
+        f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"-p {shlex.quote(host_port)} {shlex.quote(host_login)} -W %h:%p"
     )
     return [
         "ssh",

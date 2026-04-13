@@ -980,7 +980,9 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
     services = require_mapping(catalog.get("services"), "config/health-probe-catalog.json.services")
     topology = host_vars_context["topology"]
     platform_service_registry = require_mapping(
-        require_mapping(load_yaml(PLATFORM_SERVICES_PATH), str(PLATFORM_SERVICES_PATH)).get("platform_service_registry"),
+        require_mapping(load_yaml(PLATFORM_SERVICES_PATH), str(PLATFORM_SERVICES_PATH)).get(
+            "platform_service_registry"
+        ),
         "inventory/group_vars/all/platform_services.yml.platform_service_registry",
     )
     allowed_service_ids = set(topology.keys()) | set(platform_service_registry.keys())

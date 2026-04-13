@@ -41,6 +41,17 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert platform_vars["outline_port"] == 3006
 
 
+def test_build_platform_vars_resolves_guest_ip_templates_in_platform_host_network() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    network = platform_vars["platform_host"]["network"]
+
+    assert network["public_ingress_tcp_forwards"][0]["target_host"] == "10.10.10.92"
+    assert network["public_ingress_tcp_forwards"][1]["target_host"] == "10.10.10.10"
+    assert network["tailscale_operator_target_guest"] == "10.10.10.30"
+    assert network["tailscale_tcp_proxies"][1]["upstream_host"] == "10.10.10.50"
+    assert all("proxmox_guests" not in value for value in iter_strings(network))
+
+
 def test_build_platform_vars_includes_minio_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     minio = platform_vars["platform_service_topology"]["minio"]

@@ -10,7 +10,7 @@ generated: '2026-04-12'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 347
+total_adrs: 348
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6179,6 +6179,27 @@ adrs:
     path: docs/adr/0368-docker-compose-jinja2-macro-library.md
     implemented_in_repo_version: 0.178.116
     implemented_on: '2026-04-11'
+  - adr: '0373'
+    title: Service Registry and Derived Defaults
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: automation
+    keywords:
+      - ansible
+      - registry
+      - defaults
+      - dry
+      - service-catalog
+      - service
+      - derived
+    summary: 'Create a platform service registry in inventory/groupvars/platformservices.yml that declares each service''s
+      identity and metadata. A shared Ansible vars plugin '
+    filename: 0373-service-registry-and-derived-defaults.md
+    path: docs/adr/0373-service-registry-and-derived-defaults.md
+    implemented_in_repo_version: 0.178.67
+    implemented_in_platform_version: 0.178.72
+    implemented_on: '2026-04-09'
   - adr: '0375'
     title: Certificate Validation And Concordance Enforcement
     status: Accepted
