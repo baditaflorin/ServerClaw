@@ -20,7 +20,7 @@ if _SCRIPTS_DIR not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from validation_toolkit import require_list, require_str
+from validation_toolkit import require_list, require_mapping, require_str
 
 from platform.events import load_event_taxonomy, load_topic_index
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
@@ -36,12 +36,6 @@ SOURCE_ROOTS = (
 )
 TOPIC_PATTERN = re.compile(r"""["'](platform\.[a-z0-9-]+(?:\.[a-z0-9_.-]+)+)["']""")
 NTFY_TOPIC_PATTERN = re.compile(r"""\b(platform\.[a-z0-9-]+(?:\.[a-z0-9_.-]+)+)\b""")
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be a mapping")
-    return value
 
 
 def iter_python_files() -> list[Path]:
