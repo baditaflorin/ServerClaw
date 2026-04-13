@@ -93,7 +93,7 @@ def service_catalog_enforces_observed_guest_surfaces() -> bool:
     return current_git_branch() == "main"
 
 
-def require_smoke_suites(value: Any, path: str) -> list[dict[str, Any]]:
+def validate_smoke_suites(value: Any, path: str) -> list[dict[str, Any]]:
     suites = require_list(value, path)
     normalized: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -105,11 +105,11 @@ def require_smoke_suites(value: Any, path: str) -> list[dict[str, Any]]:
         seen_ids.add(suite_id)
         name = require_str(suite.get("name"), f"{path}[{index}].name")
         description = require_str(suite.get("description"), f"{path}[{index}].description")
-        required_receipt_keywords = require_string_list(
+        required_receipt_keywords = unique_string_list(
             suite.get("required_receipt_keywords", []),
             f"{path}[{index}].required_receipt_keywords",
         )
-        required_verification_checks = require_string_list(
+        required_verification_checks = unique_string_list(
             suite.get("required_verification_checks", []),
             f"{path}[{index}].required_verification_checks",
         )
@@ -127,7 +127,7 @@ def require_smoke_suites(value: Any, path: str) -> list[dict[str, Any]]:
     return normalized
 
 
-def require_environment_bindings(
+def validate_environment_bindings(
     value: Any,
     path: str,
     *,
@@ -157,14 +157,14 @@ def require_environment_bindings(
                 f"{path}.{env_id}.stage_ready",
             )
         if "smoke_suite_ids" in binding:
-            normalized_binding["smoke_suite_ids"] = require_string_list(
+            normalized_binding["smoke_suite_ids"] = unique_string_list(
                 binding.get("smoke_suite_ids"),
                 f"{path}.{env_id}.smoke_suite_ids",
             )
         if "notes" in binding:
             normalized_binding["notes"] = require_str(binding.get("notes"), f"{path}.{env_id}.notes")
         if "smoke_suites" in binding:
-            normalized_binding["smoke_suites"] = require_smoke_suites(
+            normalized_binding["smoke_suites"] = validate_smoke_suites(
                 binding.get("smoke_suites"),
                 f"{path}.{env_id}.smoke_suites",
             )
@@ -186,7 +186,7 @@ def require_environment_bindings(
     return normalized
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     result = []
     for index, item in enumerate(items):
@@ -196,7 +196,7 @@ def require_string_list(value: Any, path: str) -> list[str]:
     return result
 
 
-def require_degradation_modes(value: Any, path: str) -> list[dict[str, Any]]:
+def validate_degradation_modes(value: Any, path: str) -> list[dict[str, Any]]:
     modes = require_list(value, path)
     normalized: list[dict[str, Any]] = []
     seen_dependencies: set[str] = set()
@@ -399,7 +399,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             if len(adr_matches) > 1 and adr_file is None:
                 raise ValueError(f"services[{index}].adr_file is required because ADR {adr} resolves to multiple files")
 
-        require_environment_bindings(
+        validate_environment_bindings(
             service.get("environments"),
             f"services[{index}].environments",
             public_url=public_url,
@@ -438,14 +438,14 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                     f"services[{index}].health_probe_id references unknown health probe '{health_probe_id}'"
                 )
 
-        for image_id in require_string_list(
+        for image_id in unique_string_list(
             service.get("image_catalog_ids", []),
             f"services[{index}].image_catalog_ids",
         ):
             if image_id not in known_image_ids:
                 raise ValueError(f"services[{index}].image_catalog_ids references unknown image '{image_id}'")
 
-        for secret_id in require_string_list(
+        for secret_id in unique_string_list(
             service.get("secret_catalog_ids", []),
             f"services[{index}].secret_catalog_ids",
         ):
@@ -453,10 +453,10 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                 raise ValueError(f"services[{index}].secret_catalog_ids references unknown secret '{secret_id}'")
 
         if "tags" in service:
-            require_string_list(service.get("tags"), f"services[{index}].tags")
+            unique_string_list(service.get("tags"), f"services[{index}].tags")
 
         if "degradation_modes" in service:
-            require_degradation_modes(
+            validate_degradation_modes(
                 service.get("degradation_modes"),
                 f"services[{index}].degradation_modes",
             )
