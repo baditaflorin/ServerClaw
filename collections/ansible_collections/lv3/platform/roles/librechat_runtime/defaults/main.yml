@@ -38,6 +38,11 @@ librechat_creds_key_local_file: "{{ librechat_local_artifact_dir }}/creds-key.tx
 librechat_creds_key_remote_file: "{{ librechat_secret_dir }}/creds-key"
 librechat_creds_iv_local_file: "{{ librechat_local_artifact_dir }}/creds-iv.txt"
 librechat_creds_iv_remote_file: "{{ librechat_secret_dir }}/creds-iv"
+# Registration — secure by default (ADR 0417)
+# Set to true in inventory overlay only when open registration is intentional.
+librechat_allow_registration: false
+librechat_allow_social_login: true
+librechat_allow_social_registration: false
 # OIDC / Keycloak
 librechat_enable_oidc: true
 librechat_oidc_client_id: serverclaw

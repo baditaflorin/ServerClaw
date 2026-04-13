@@ -169,6 +169,14 @@ server {
 {% set protected_site = public_edge_authenticated_sites[_raw_key] if _raw_key in public_edge_authenticated_sites else none %}
 {% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
+{% set global_blocked_exact_paths = (public_edge_blocked_exact_paths_overrides | default({}))[_raw_key] | default([]) %}
+{% set all_blocked_exact_paths = blocked_exact_paths + global_blocked_exact_paths %}
+{% set blocked_prefix_paths = site.blocked_prefix_paths | default([]) %}
+{% set global_blocked_prefix_paths = (public_edge_blocked_prefix_paths_overrides | default({}))[_raw_key] | default([]) %}
+{% set all_blocked_prefix_paths = blocked_prefix_paths + global_blocked_prefix_paths %}
+{% set acl_prefix_paths = site.acl_prefix_paths | default([]) %}
+{% set global_acl_prefix_paths = (public_edge_acl_prefix_paths_overrides | default({}))[_raw_key] | default([]) %}
+{% set all_acl_prefix_paths = acl_prefix_paths + global_acl_prefix_paths %}
 {% set exact_redirects = site.exact_redirects | default([]) %}
 {% set server_sent_events = site.server_sent_events | default(false) %}
 {% set prefix_proxy_routes = site.prefix_proxy_routes | default([]) %}
@@ -274,6 +282,24 @@ server {
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
 {% endfor %}
+    }
+{% endfor %}
+{% for blocked_path in all_blocked_exact_paths %}
+    location = {{ blocked_path.path }} {
+        return {{ blocked_path.status | default(404) }};
+    }
+{% endfor %}
+{% for blocked_path in all_blocked_prefix_paths %}
+    location ^~ {{ blocked_path.path }} {
+        return {{ blocked_path.status | default(404) }};
+    }
+{% endfor %}
+{% for acl_path in all_acl_prefix_paths %}
+    location ^~ {{ acl_path.path }} {
+{% for cidr in acl_path.allow | default([]) %}
+        allow {{ cidr }};
+{% endfor %}
+        deny all;
     }
 {% endfor %}
     location / {
@@ -500,9 +526,22 @@ server {
 {% endif %}
 
 {% if site.kind == 'proxy' %}
-{% for blocked_path in blocked_exact_paths %}
+{% for blocked_path in all_blocked_exact_paths %}
     location = {{ blocked_path.path }} {
         return {{ blocked_path.status | default(404) }};
+    }
+{% endfor %}
+{% for blocked_path in all_blocked_prefix_paths %}
+    location ^~ {{ blocked_path.path }} {
+        return {{ blocked_path.status | default(404) }};
+    }
+{% endfor %}
+{% for acl_path in all_acl_prefix_paths %}
+    location ^~ {{ acl_path.path }} {
+{% for cidr in acl_path.allow | default([]) %}
+        allow {{ cidr }};
+{% endfor %}
+        deny all;
     }
 {% endfor %}
 {% if site.root_proxy_path is defined %}
