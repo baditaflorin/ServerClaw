@@ -7,12 +7,23 @@ import json
 import re
 import sys
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from typing import Any, Final
 
-if str(Path(__file__).resolve().parent) not in sys.path:
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
 
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
+
+from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from validation_toolkit import require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
@@ -31,7 +42,7 @@ ALLOWED_RESERVED_CAPACITY_EXCLUSIONS = SHARED_POLICIES.reserved_capacity_exclusi
 LIVE_LABEL_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     normalized: list[str] = []
     seen: set[str] = set()
@@ -164,7 +175,7 @@ def validate_environment_placement(
         f"{path}.placement.anti_affinity_group",
     )
     normalize_tag_token(anti_affinity_group)
-    exclusions = require_string_list(
+    exclusions = unique_string_list(
         placement.get("reserved_capacity_exclusions"),
         f"{path}.placement.reserved_capacity_exclusions",
     )
@@ -222,7 +233,7 @@ def guest_placement_index(
             "name": guest_name,
             "vmid": guest.get("vmid"),
             "placement": placement,
-            "base_tags": require_string_list(guest.get("tags"), f"host_vars.proxmox_guests[{index}].tags"),
+            "base_tags": unique_string_list(guest.get("tags"), f"host_vars.proxmox_guests[{index}].tags"),
             "live_tags": placement_live_tags(placement, domain_index),
         }
     return indexed
