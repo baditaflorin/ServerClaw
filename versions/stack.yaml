@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.133
-platform_version: 0.178.132
+repo_version: 0.178.134
+platform_version: 0.178.133
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -33,7 +33,7 @@ live_apply_evidence:
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
     litellm: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
-    postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
+    postgres_vm: 2026-04-14-adr-0416-phase2-derived-pg-hba-ip-live-apply
     uptime_kuma: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
