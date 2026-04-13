@@ -21,7 +21,7 @@ from script_bootstrap import ensure_repo_root_on_path
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_int, require_mapping
+from validation_toolkit import require_int, require_mapping, require_str as require_string
 
 REPO_ROOT = ensure_repo_root_on_path(__file__)
 
@@ -76,12 +76,6 @@ def parse_datetime(value: str) -> datetime:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=UTC)
     return parsed
-
-
-def require_string(value: object, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def state_file_path() -> Optional[Path]:
