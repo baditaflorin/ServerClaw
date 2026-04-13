@@ -9,10 +9,12 @@ import subprocess
 import sys
 import tempfile
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -36,7 +38,7 @@ DEFAULT_REPORT_DIR = ".local/stage-smoke-suites"
 ALLOWED_RUNNERS = {"integration_suite"}
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     normalized: list[str] = []
     for index, item in enumerate(items):
@@ -166,13 +168,13 @@ def validate_stage_smoke_catalog(
                 f"stage-smoke-suites.suites[{suite_offset}].mode must be one of {sorted(integration_suite.MODE_MARKERS)}"
             )
         require_str(suite.get("description"), f"stage-smoke-suites.suites[{suite_offset}].description")
-        targets = require_string_list(
+        targets = unique_string_list(
             suite.get("targets"),
             f"stage-smoke-suites.suites[{suite_offset}].targets",
         )
         required_service_ids = []
         if "required_service_ids" in suite:
-            required_service_ids = require_string_list(
+            required_service_ids = unique_string_list(
                 suite.get("required_service_ids"),
                 f"stage-smoke-suites.suites[{suite_offset}].required_service_ids",
             )
@@ -207,7 +209,7 @@ def validate_stage_smoke_catalog(
                 continue
             smoke_suite_ids = binding.get("smoke_suite_ids", [])
             if smoke_suite_ids:
-                smoke_suite_ids = require_string_list(
+                smoke_suite_ids = unique_string_list(
                     smoke_suite_ids,
                     f"service-capability-catalog.services.{service_id}.environments.{environment}.smoke_suite_ids",
                 )
@@ -255,7 +257,7 @@ def resolve_declared_suite_ids(
     smoke_suite_ids = binding.get("smoke_suite_ids", [])
     if not smoke_suite_ids:
         raise ValueError(f"service '{service_id}' environment '{environment}' does not declare smoke_suite_ids")
-    return require_string_list(
+    return unique_string_list(
         smoke_suite_ids,
         f"service-capability-catalog.services.{service_id}.environments.{environment}.smoke_suite_ids",
     )
