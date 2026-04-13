@@ -36,6 +36,11 @@ that are intentionally not product-catalog services still run through
 preflight, canonical-truth, interface-contract, Ansible, and live-backup
 trigger checks, but they skip those product-service-only gates.
 
+When `playbooks/vars/<service>.yml` exists, `make live-apply-service` also
+passes that descriptor automatically. This keeps the governed service lane
+aligned with the `converge-<service>` entrypoints for ADR 0372 playbooks that
+use shared `_includes/` imports plus service descriptors.
+
 ## Environment Resolution
 
 `env` defaults to `production`.

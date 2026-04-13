@@ -12,13 +12,26 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
+
+## 0.178.78 (2026-04-10)
+
+- fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
+- fix: Remove duplicate repo_intake entry in platform_services.yml registry
+- fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
+- fix: Escape Prometheus template syntax in alert rules for Jinja2 rendering compatibility
+- verified: Phase 6 cosmetic cleanup stable in production (118/118 convergence tasks passing)
+
+## 0.178.77
+
+- Harbor OIDC fix, public release readiness, ADR 0385-0388 IoC + OIDC centralization, bootstrap and Docker dev, ADR 0373 Phase 4, multi-instance deployment, operator provisioning, operational fixes
+
 ## Latest Release
 
-- [0.178.126 release notes](docs/release-notes/0.178.126.md)
+- [0.178.123 release notes](docs/release-notes/0.178.123.md)
 
 ## Previous Releases
 
-- [0.178.123 release notes](docs/release-notes/0.178.123.md)
 - [0.178.122 release notes](docs/release-notes/0.178.122.md)
 - [0.178.121 release notes](docs/release-notes/0.178.121.md)
 - [0.178.120 release notes](docs/release-notes/0.178.120.md)
@@ -30,8 +43,9 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.114 release notes](docs/release-notes/0.178.114.md)
 - [0.178.113 release notes](docs/release-notes/0.178.113.md)
 - [0.178.112 release notes](docs/release-notes/0.178.112.md)
+- [0.178.111 release notes](docs/release-notes/0.178.111.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (457 releases)](docs/release-notes/index/2026.md)
+- [2026 (456 releases)](docs/release-notes/index/2026.md)

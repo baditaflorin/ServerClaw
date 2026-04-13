@@ -21,27 +21,26 @@ DEPENDENCY_WAVE_PLAYBOOKS_PATH = REPO_ROOT / "config" / "dependency-wave-playboo
 CERTIFICATE_CATALOG_PATH = REPO_ROOT / "config" / "certificate-catalog.json"
 
 
-def test_ntfy_playbook_orders_dns_runtime_and_edge_publication() -> None:
+def test_ntfy_playbook_imports_standard_includes_and_public_verify() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
+    imports = [entry["import_playbook"] for entry in plays if "import_playbook" in entry]
 
-    dns_play = next(play for play in plays if play.get("name") == "Ensure Hetzner DNS publication for ntfy")
+    assert imports == [
+        "_includes/dns_publication.yml",
+        "_includes/nginx_edge_publication.yml",
+    ]
+
     docker_play = next(play for play in plays if play.get("name") == "Converge ntfy on the Docker runtime VM")
-    edge_play = next(play for play in plays if play.get("name") == "Publish ntfy through the NGINX edge")
-    public_verify_play = next(
-        play for play in plays if play.get("name") == "Verify the ntfy public health endpoint from the controller"
-    )
-
-    assert any(
-        task.get("ansible.builtin.include_role", {}).get("name") == "lv3.platform.hetzner_dns_record"
-        for task in dns_play["tasks"]
-    )
     assert [role["role"] for role in docker_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.ntfy_runtime",
     ]
-    assert edge_play["vars_files"] == ["{{ playbook_dir }}/../inventory/group_vars/platform.yml"]
+
+    public_verify_play = next(
+        play for play in plays if play.get("name") == "Verify the ntfy public health endpoint from the controller"
+    )
     verify_task = public_verify_play["tasks"][0]
-    assert verify_task["ansible.builtin.uri"]["url"] == "https://ntfy.example.com/v1/health"
+    assert verify_task["ansible.builtin.uri"]["url"] == "https://ntfy.{{ platform_domain }}/v1/health"
     assert verify_task["retries"] == 12
 
 

@@ -9,47 +9,22 @@ SERVICE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "sftpgo.yml"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
-def test_sftpgo_dns_stage_converges_only_the_files_subdomain_record() -> None:
+def test_sftpgo_playbook_imports_standard_includes_and_publish_play() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
-    dns_play = plays[0]
-    tasks = dns_play["tasks"]
+    imports = [entry["import_playbook"] for entry in plays if "import_playbook" in entry]
 
-    assert dns_play["hosts"] == "localhost"
-    assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "files.example.com"
+    assert imports == [
+        "_includes/dns_publication.yml",
+        "_includes/postgres_preparation.yml",
+        "_includes/docker_runtime_converge.yml",
+        "_includes/nginx_edge_publication.yml",
+    ]
 
-    select_task = next(task for task in tasks if task.get("name") == "Select the SFTPGo subdomain entry")
-    assert (
-        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
+    publish_play = next(
+        play for play in plays if play.get("name") == "Bootstrap and verify the SFTPGo publication contract"
     )
-
-    converge_task = next(task for task in tasks if task.get("name") == "Converge the SFTPGo Hetzner DNS record")
-    assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"
-    assert converge_task["vars"]["hetzner_dns_record_name"] == "{{ selected_subdomain_record_name }}"
-    assert converge_task["vars"]["hetzner_dns_record_value"] == "{{ selected_subdomain.target }}"
-
-
-def test_sftpgo_playbook_converges_postgres_runtime_edge_and_publish_roles() -> None:
-    plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
-
-    postgres_roles = [role["role"] for role in plays[1]["roles"]]
-    runtime_roles = [role["role"] for role in plays[2]["roles"]]
-    edge_roles = [role["role"] for role in plays[3]["roles"]]
-    publish_tasks = plays[4]["tasks"]
-
-    assert postgres_roles == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.postgres_vm",
-        "lv3.platform.sftpgo_postgres",
-    ]
-    assert runtime_roles == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.docker_runtime",
-        "lv3.platform.keycloak_runtime",
-        "lv3.platform.sftpgo_runtime",
-    ]
-    assert edge_roles == ["lv3.platform.nginx_edge_publication"]
-    assert plays[4]["hosts"] == "localhost"
+    publish_tasks = publish_play["tasks"]
+    assert publish_play["hosts"] == "localhost"
     assert publish_tasks == [
         {
             "name": "Bootstrap and verify the SFTPGo provisioning and publication contract",
