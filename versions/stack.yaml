@@ -13,7 +13,7 @@ live_apply_evidence:
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+    public_edge_publication: 2026-04-13-adr-0411-nginx-403-forbidden-page-live-apply
     headscale: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
     vikunja: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
     semaphore: 2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply
