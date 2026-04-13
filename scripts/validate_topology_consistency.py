@@ -7,7 +7,9 @@ Checks that the source of truth for "which VM runs this service"
 (platform_services.yml → host_group) is consistent with every
 derived registry that encodes the same fact:
 
-  1. platform_postgres_clients.source_vm  (inventory/group_vars/platform_postgres.yml)
+  1. platform_postgres_clients — After ADR 0416 Phase 2, source_vm is derived from
+     host_group at template time. This check verifies no legacy source_vm fields remain
+     and that every postgres client service has a registry entry with a resolvable host_group.
   2. lv3_service_topology.{service}.owning_vm / IP references  (inventory/host_vars/proxmox-host.yml)
 
 Usage:
@@ -38,31 +40,8 @@ TOPOLOGY_OWNING_VM_EXCLUDES: set[str] = {
     # representing the Docker daemon host itself, not a deployable service.
     # Its registry entry has host_group="all" (systemwide) intentionally.
     "docker_runtime",
-    # --- PENDING OPERATOR VERIFICATION (ADR 0416 remediation checklist) ---
-    # These entries have a known topology vs registry mismatch that requires
-    # SSH verification to determine the correct host. Each MUST be removed
-    # from this list once verified and the appropriate registry updated.
-    # Added: 2026-04-14. Review deadline: 2026-04-21.
-    # uptime_kuma: registry=docker-runtime, topology=runtime-general
-    # Action: SSH to both VMs, check `docker ps | grep uptime_kuma`
-    "uptime_kuma",
-    # mail_platform: registry=docker-runtime, topology=runtime-control
-    # Action: SSH to runtime-control, check `docker ps | grep mail`
-    "mail_platform",
-    # redpanda: registry=runtime-control, topology=docker-runtime
-    # Action: SSH to runtime-control, check `docker ps | grep redpanda`
-    "redpanda",
-    # gotenberg: registry=docker-runtime, topology=runtime-ai
-    # Action: SSH to runtime-ai, check `docker ps | grep gotenberg`
-    "gotenberg",
-    # ollama: registry=runtime-ai, topology=docker-runtime
-    # Best guess: registry (runtime-ai) is correct; update topology if confirmed
-    # Action: SSH to runtime-ai, check `docker ps | grep ollama`
-    "ollama",
-    # piper: registry=runtime-ai, topology=docker-runtime
-    # Best guess: registry (runtime-ai) is correct; update topology if confirmed
-    # Action: SSH to runtime-ai, check `docker ps | grep piper`
-    "piper",
+    # All pending items from the initial 2026-04-14 audit have been SSH-verified
+    # and resolved. Do not add new entries here without SSH evidence.
 }
 
 # Services in platform_postgres_clients that are intentionally absent from
@@ -119,36 +98,65 @@ def check_postgres_source_vm_drift(
 ) -> list[str]:
     """Return list of drift error messages.
 
-    For every entry in platform_postgres_clients where the service name
-    exists in platform_service_registry, assert that:
-      source_vm == host_group
+    ADR 0416 Phase 2: source_vm is NO LONGER declared in platform_postgres_clients.
+    The IP is derived at template time from platform_service_registry[service].host_group.
+
+    This check:
+    - Fails if any entry still has a legacy source_vm field
+    - Fails if any service is missing from platform_service_registry (IP can't be derived)
+    - Fails if the derived host_group is not a known guest in platform_guest_catalog
     """
     errors: list[str] = []
+
+    # Load platform_guest_catalog to validate host_group resolution
+    try:
+        from pathlib import Path
+
+        platform_yml = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
+        with platform_yml.open() as f:
+            import yaml as _yaml
+
+            platform_data = _yaml.safe_load(f)
+        known_guests = set(platform_data.get("platform_guest_catalog", {}).get("by_name", {}).keys())
+    except Exception:
+        known_guests = set()
 
     for client in postgres_clients:
         service_name = client.get("service", "")
         source_vm = client.get("source_vm", "")
 
+        # Check 1: No legacy source_vm should remain (Phase 2 complete)
+        if source_vm:
+            errors.append(
+                f"LEGACY source_vm  postgres client '{service_name}': "
+                f"source_vm={source_vm!r} is still present.\n"
+                f"       Fix: remove 'source_vm' from this entry in {POSTGRES_CLIENTS_PATH.name}.\n"
+                f"       IP will be derived from platform_service_registry['{service_name}'].host_group "
+                f"at template render time (ADR 0416 Phase 2)."
+            )
+            continue
+
+        # Check 2: service must exist in registry so IP can be derived
         if service_name not in registry:
-            # Service exists in postgres clients but not in main registry — warn only
-            if verbose:
-                print(
-                    f"  NOTICE: postgres client '{service_name}' not in platform_service_registry "
-                    f"(source_vm={source_vm!r})"
-                )
+            errors.append(
+                f"MISSING  postgres client '{service_name}' not in platform_service_registry.\n"
+                f"         Fix: add a '{service_name}' entry to platform_services.yml with host_group set.\n"
+                f"         Without it, pg_hba.conf will have no entry and the service will be blocked."
+            )
             continue
 
         host_group = registry[service_name].get("host_group", "")
 
-        if source_vm != host_group:
+        # Check 3: host_group must resolve to a known guest
+        if known_guests and host_group not in known_guests:
             errors.append(
-                f"DRIFT  postgres client '{service_name}': "
-                f"source_vm={source_vm!r} but platform_service_registry.host_group={host_group!r}\n"
-                f"       Fix: change 'source_vm' in {POSTGRES_CLIENTS_PATH.name} "
-                f"to {host_group!r}, then run: make converge-postgres-vm env=production"
+                f"UNRESOLVABLE  postgres client '{service_name}': "
+                f"platform_service_registry.host_group={host_group!r} "
+                f"is not in platform_guest_catalog.by_name.\n"
+                f"       Fix: correct host_group in platform_services.yml to a known guest name."
             )
         elif verbose:
-            print(f"  OK     postgres client '{service_name}': source_vm={source_vm!r}")
+            print(f"  OK     postgres client '{service_name}': host_group={host_group!r} (derived, no source_vm)")
 
     return errors
 
