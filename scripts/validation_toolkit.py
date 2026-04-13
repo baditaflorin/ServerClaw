@@ -54,7 +54,7 @@ def require_bool(value: Any, path: str) -> bool:
     return value
 
 
-def require_int(value: Any, path: str, minimum: int | None = None, maximum: int | None = None) -> int:
+def require_int(value: Any, path: str, *, minimum: int | None = None, maximum: int | None = None) -> int:
     """Validate that value is an integer (not a bool). Optionally enforce bounds."""
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{path} must be an integer")
@@ -68,8 +68,6 @@ def require_int(value: Any, path: str, minimum: int | None = None, maximum: int 
 def require_identifier(value: Any, path: str) -> str:
     """Validate that value is a lowercase alphanumeric identifier (hyphens and underscores allowed)."""
     s = require_str(value, path)
-    if "{{" in s:
-        return s  # Jinja2 template — resolved at Ansible runtime
     import re
 
     if not re.fullmatch(r"[a-z][a-z0-9_-]*", s):
@@ -82,8 +80,6 @@ def require_identifier(value: Any, path: str) -> str:
 def require_http_url(value: Any, path: str) -> str:
     """Validate that value is a string starting with http:// or https://."""
     s = require_str(value, path)
-    if "{{" in s:
-        return s  # Jinja2 template — resolved at Ansible runtime
     if not s.startswith(("http://", "https://")):
         raise ValueError(f"{path} must be an HTTP(S) URL")
     return s
@@ -121,56 +117,3 @@ def optional(value: Any, path: str, validator, **kwargs):
     if value is None:
         return None
     return validator(value, path, **kwargs)
-
-
-# ---------------------------------------------------------------------------
-# Identity variable resolution (ADR 0385)
-# ---------------------------------------------------------------------------
-
-_IDENTITY_PATH: str | None = None
-
-
-def _find_identity_path() -> Path:
-    """Locate inventory/group_vars/all/identity.yml relative to this script."""
-    from pathlib import Path
-
-    return Path(__file__).resolve().parents[1] / "inventory" / "group_vars" / "all" / "identity.yml"
-
-
-def load_identity_vars() -> dict[str, str]:
-    """Load simple scalar identity variables from identity.yml.
-
-    Only returns variables whose values are plain strings (no Jinja2 expressions),
-    suitable for resolving ``{{ var }}`` placeholders in other YAML files.
-    """
-
-    import yaml
-
-    path = _find_identity_path()
-    if not path.exists():
-        return {}
-    with path.open() as f:
-        data = yaml.safe_load(f) or {}
-    return {k: v for k, v in data.items() if isinstance(v, str) and "{{" not in v}
-
-
-def resolve_jinja2_vars(text: str, variables: dict[str, str] | None = None) -> str:
-    """Resolve simple ``{{ var }}`` expressions in *text*.
-
-    If *variables* is ``None``, loads identity vars automatically.
-    """
-    if variables is None:
-        variables = load_identity_vars()
-    for key, value in variables.items():
-        text = text.replace("{{ " + key + " }}", value)
-        text = text.replace("{{" + key + "}}", value)
-    return text
-
-
-def load_yaml_with_identity(path: Path) -> Any:
-    """Load a YAML file, resolving ``{{ platform_domain }}`` and friends first."""
-    import yaml
-
-    raw = path.read_text()
-    resolved = resolve_jinja2_vars(raw)
-    return yaml.safe_load(resolved)

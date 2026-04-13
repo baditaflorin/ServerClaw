@@ -42,8 +42,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml
+from identity_yaml import load_yaml_with_identity
 from validation_toolkit import (
-    load_yaml_with_identity,
     require_bool,
     require_int,
     require_list,

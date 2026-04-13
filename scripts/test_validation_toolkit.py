@@ -1,4 +1,6 @@
-"""Simple test suite for validation_toolkit — run with: python scripts/test_validation_toolkit.py"""
+#!/usr/bin/env python3
+
+from __future__ import annotations
 
 import sys
 from pathlib import Path
@@ -6,186 +8,82 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from validation_toolkit import (
-    require_str,
-    require_mapping,
-    require_list,
-    require_string_list,
-    require_bool,
-    require_int,
-    require_identifier,
-    require_http_url,
-    require_semver,
-    require_enum,
-    require_path,
     optional,
+    require_bool,
+    require_enum,
+    require_http_url,
+    require_identifier,
+    require_int,
+    require_list,
+    require_mapping,
+    require_path,
+    require_semver,
+    require_str,
+    require_string_list,
 )
 
 
-def test_require_str():
-    assert require_str("hello", "x") == "hello"
+def assert_value_error(fn, message: str) -> None:
     try:
-        require_str(123, "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_str("", "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_str("  ", "x")
-        assert False
-    except ValueError:
-        pass
-    assert require_str("", "x", allow_empty=True) == ""
+        fn()
+    except ValueError as exc:
+        assert str(exc) == message
+    else:
+        raise AssertionError(f"expected ValueError: {message}")
 
 
-def test_require_mapping():
-    assert require_mapping({"a": 1}, "x") == {"a": 1}
-    try:
-        require_mapping([], "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_mapping("str", "x")
-        assert False
-    except ValueError:
-        pass
+def main() -> None:
+    assert require_str("hello", "field") == "hello"
+    assert require_str("  ", "field", allow_empty=True) == "  "
+    assert_value_error(lambda: require_str(1, "field"), "field must be a non-empty string")
+    assert_value_error(lambda: require_str("  ", "field"), "field must be a non-empty string")
 
+    mapping = {"key": "value"}
+    assert require_mapping(mapping, "obj") is mapping
+    assert_value_error(lambda: require_mapping([], "obj"), "obj must be an object")
 
-def test_require_list():
-    assert require_list([1, 2], "x") == [1, 2]
-    try:
-        require_list({}, "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_list([1], "x", min_length=2)
-        assert False
-    except ValueError:
-        pass
+    values = [1, 2]
+    assert require_list(values, "items", min_length=2) is values
+    assert_value_error(lambda: require_list({}, "items"), "items must be a list")
+    assert_value_error(lambda: require_list([], "items", min_length=1), "items must have at least 1 item(s)")
 
+    strings = ["a", "b"]
+    assert require_string_list(strings, "items", min_length=2) is strings
+    assert_value_error(lambda: require_string_list(["a", ""], "items"), "items[1] must be a non-empty string")
 
-def test_require_string_list():
-    assert require_string_list(["a", "b"], "x") == ["a", "b"]
-    try:
-        require_string_list([1, 2], "x")
-        assert False
-    except ValueError:
-        pass
+    assert require_bool(True, "flag") is True
+    assert_value_error(lambda: require_bool(1, "flag"), "flag must be a boolean")
 
+    assert require_int(3, "count", minimum=1, maximum=5) == 3
+    assert_value_error(lambda: require_int(True, "count"), "count must be an integer")
+    assert_value_error(lambda: require_int(0, "count", minimum=1), "count must be >= 1")
+    assert_value_error(lambda: require_int(6, "count", maximum=5), "count must be <= 5")
 
-def test_require_bool():
-    assert require_bool(True, "x") is True
-    assert require_bool(False, "x") is False
-    try:
-        require_bool(1, "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_bool("true", "x")
-        assert False
-    except ValueError:
-        pass
+    assert require_identifier("alpha_1", "id") == "alpha_1"
+    assert_value_error(
+        lambda: require_identifier("1alpha", "id"),
+        "id must be a lowercase identifier (letters, digits, hyphens, underscores; must start with a letter)",
+    )
 
+    assert require_http_url("https://example.com", "url") == "https://example.com"
+    assert_value_error(lambda: require_http_url("ftp://example.com", "url"), "url must be an HTTP(S) URL")
 
-def test_require_int():
-    assert require_int(42, "x") == 42
-    try:
-        require_int(True, "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_int("1", "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_int(5, "x", minimum=10)
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_int(15, "x", maximum=10)
-        assert False
-    except ValueError:
-        pass
+    assert require_semver("v1.2.3", "version") == "v1.2.3"
+    assert_value_error(
+        lambda: require_semver("1.2", "version"),
+        "version must be a semantic version (e.g., 1.2.3 or v1.2.3)",
+    )
 
+    assert require_enum("green", "color", {"green", "blue"}) == "green"
+    assert_value_error(lambda: require_enum("red", "color", {"green", "blue"}), "color must be one of: blue, green")
 
-def test_require_identifier():
-    assert require_identifier("hello", "x") == "hello"
-    assert require_identifier("hello-world_123", "x") == "hello-world_123"
-    try:
-        require_identifier("Hello", "x")
-        assert False
-    except ValueError:
-        pass
-    try:
-        require_identifier("1abc", "x")
-        assert False
-    except ValueError:
-        pass
+    assert require_path("/tmp/file", "path") == "/tmp/file"
+    assert_value_error(lambda: require_path("tmp/file", "path"), "path must be an absolute path starting with /")
 
-
-def test_require_http_url():
-    assert require_http_url("http://example.com", "x") == "http://example.com"
-    assert require_http_url("https://example.com/path", "x") == "https://example.com/path"
-    try:
-        require_http_url("ftp://example.com", "x")
-        assert False
-    except ValueError:
-        pass
-
-
-def test_require_semver():
-    assert require_semver("1.2.3", "x") == "1.2.3"
-    assert require_semver("v1.2.3", "x") == "v1.2.3"
-    try:
-        require_semver("1.2", "x")
-        assert False
-    except ValueError:
-        pass
-
-
-def test_require_enum():
-    assert require_enum("a", "x", ["a", "b", "c"]) == "a"
-    try:
-        require_enum("d", "x", ["a", "b", "c"])
-        assert False
-    except ValueError:
-        pass
-
-
-def test_require_path():
-    assert require_path("/etc/foo", "x") == "/etc/foo"
-    try:
-        require_path("relative/path", "x")
-        assert False
-    except ValueError:
-        pass
-
-
-def test_optional():
-    assert optional(None, "x", require_str) is None
-    assert optional("hello", "x", require_str) == "hello"
+    assert optional(None, "field", require_str) is None
+    assert optional("value", "field", require_str) == "value"
+    assert_value_error(lambda: optional("", "field", require_str), "field must be a non-empty string")
 
 
 if __name__ == "__main__":
-    test_require_str()
-    test_require_mapping()
-    test_require_list()
-    test_require_string_list()
-    test_require_bool()
-    test_require_int()
-    test_require_identifier()
-    test_require_http_url()
-    test_require_semver()
-    test_require_enum()
-    test_require_path()
-    test_optional()
-    print("All tests passed.")
+    main()
