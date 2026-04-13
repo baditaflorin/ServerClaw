@@ -2114,7 +2114,7 @@
         base_url: "{{ keycloak_serverclaw_root_url }}"
         admin_url: "{{ keycloak_serverclaw_root_url }}"
         redirect_uris:
-          - "{{ keycloak_serverclaw_root_url }}/oauth/oidc/callback"
+          - "{{ keycloak_serverclaw_root_url }}/oauth/openid/callback"
         valid_post_logout_redirect_uris: "{{ keycloak_serverclaw_post_logout_redirect_uris }}"
         web_origins:
           - "{{ keycloak_serverclaw_root_url }}"

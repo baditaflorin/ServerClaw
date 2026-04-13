@@ -1781,7 +1781,7 @@ platform_service_registry:
       client_id: serverclaw
       client_secret_local_file: .local/keycloak/serverclaw-client-secret.txt
       redirect_uris:
-        - "https://chat.{{ platform_domain }}/oauth/oidc/callback"
+        - "https://chat.{{ platform_domain }}/oauth/openid/callback"
       scopes:
         - openid
         - profile

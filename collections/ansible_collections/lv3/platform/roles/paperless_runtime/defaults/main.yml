@@ -4,7 +4,7 @@
 # platform_service_registry — ADR 0373.
 # Purpose: Default runtime inputs for the Paperless document archive and API.
 
-paperless_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('paperless') }}"
+paperless_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('paperless') }}"
 paperless_openbao_api_token_path: services/paperless/api-token
 paperless_openbao_runtime_compose_file: "{{ openbao_compose_file | default('/opt/openbao/docker-compose.yml') }}"
 paperless_openbao_runtime_service_name: openbao

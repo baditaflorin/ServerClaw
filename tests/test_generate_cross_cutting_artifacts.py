@@ -39,4 +39,4 @@ def test_generate_sso_clients_tracks_librechat_serverclaw_client() -> None:
     )
 
     assert clients["serverclaw"]["service"] == "librechat"
-    assert clients["serverclaw"]["redirect_uris"] == ["https://chat.example.com/oauth/oidc/callback"]
+    assert clients["serverclaw"]["redirect_uris"] == ["https://chat.example.com/oauth/openid/callback"]
