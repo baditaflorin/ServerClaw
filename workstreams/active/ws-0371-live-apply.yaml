@@ -17,9 +17,11 @@ shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml
 - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
+- collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/main.yml
 - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/ollama_runtime/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml
@@ -76,11 +78,13 @@ shared_surfaces:
 - receipts/image-scans/2026-04-12-openbao-runtime.json
 - receipts/image-scans/2026-04-12-openbao-runtime.trivy.json
 - receipts/ops-portal-snapshot.html
+- scripts/canonical_truth.py
 - receipts/security-reports/20260412T120210Z.json
 - scripts/environment_topology.py
 - scripts/generate_release_notes.py
 - scripts/generate_diagrams.py
 - scripts/generate_ops_portal.py
+- scripts/generate_platform_vars.py
 - scripts/generate_status_docs.py
 - scripts/materialize_live_apply_worktree_artifacts.py
 - scripts/drift_lib.py
@@ -95,9 +99,13 @@ shared_surfaces:
 - scripts/validation_toolkit.py
 - scripts/vulnerability_budget.py
 - tests/test_ansible_execution_scopes.py
+- tests/test_canonical_truth.py
 - tests/test_common_docker_bridge_chains_helper.py
+- tests/test_docker_runtime_role.py
+- tests/test_generate_cross_cutting_artifacts.py
 - tests/test_generate_release_notes.py
 - tests/test_generate_host_sbom_task.py
+- tests/test_generate_platform_vars.py
 - tests/test_live_apply_worktree_bootstrap.py
 - tests/test_litellm_runtime_role.py
 - tests/test_ollama_runtime_role.py
@@ -115,6 +123,8 @@ shared_surfaces:
 - tests/test_validation_toolkit.py
 - tests/test_vulnerability_budget.py
 - workstreams/active/ws-0371-live-apply.yaml
+- workstreams/active/ws-0368-live-apply.yaml
+- workstreams/active/ws-0373-live-apply.yaml
 - workstreams/active/ws-0377-repo-intake-subdomain.yaml
 - workstreams/done/ws-0364-live-apply.yaml
 - workstreams.yaml
@@ -132,7 +142,9 @@ ownership_manifest:
   - id: ws_0371_runtime_followups
     paths:
     - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+    - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/ollama_runtime/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml
@@ -210,6 +222,7 @@ ownership_manifest:
     paths:
     - inventory/group_vars/platform_tls_certs.yml
     - receipts/ops-portal-snapshot.html
+    - scripts/canonical_truth.py
     - scripts/environment_topology.py
     - scripts/generate_release_notes.py
     - scripts/generate_diagrams.py
@@ -222,6 +235,11 @@ ownership_manifest:
     - scripts/validate_portal_auth.py
     - scripts/validation_toolkit.py
     mode: exclusive
+  - id: ws_0371_platform_vars_generator
+    paths:
+    - scripts/generate_platform_vars.py
+    mode: shared_contract
+    contract: platform-vars-generator-v1
   - id: ws_0371_generated_docs_shared
     paths:
     - docs/site-generated/architecture/dependency-graph.md
@@ -255,8 +273,12 @@ ownership_manifest:
   - id: ws_0371_tests
     paths:
     - tests/test_ansible_execution_scopes.py
+    - tests/test_canonical_truth.py
     - tests/test_common_docker_bridge_chains_helper.py
+    - tests/test_docker_runtime_role.py
+    - tests/test_generate_cross_cutting_artifacts.py
     - tests/test_generate_release_notes.py
+    - tests/test_generate_platform_vars.py
     - tests/test_litellm_runtime_role.py
     - tests/test_ollama_runtime_role.py
     - tests/test_ops_portal.py
@@ -271,6 +293,8 @@ ownership_manifest:
   - id: ws_0371_workstream_registry
     paths:
     - workstreams/active/ws-0371-live-apply.yaml
+    - workstreams/active/ws-0368-live-apply.yaml
+    - workstreams/active/ws-0373-live-apply.yaml
     - workstreams/active/ws-0377-repo-intake-subdomain.yaml
     - workstreams/done/ws-0364-live-apply.yaml
     - workstreams.yaml

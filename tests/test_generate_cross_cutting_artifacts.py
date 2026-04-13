@@ -1,9 +1,15 @@
+import pytest
 from pathlib import Path
 
 import generate_cross_cutting_artifacts
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture(autouse=True)
+def disable_shared_identity_overlay(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LV3_DISABLE_SHARED_LOCAL_IDENTITY", "1")
 
 
 def test_load_guest_catalog_falls_back_to_topology_host_vars() -> None:

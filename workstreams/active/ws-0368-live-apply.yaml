@@ -82,7 +82,8 @@ ownership_manifest:
   - id: adr_0368_hairpin_generator
     paths:
     - scripts/generate_platform_vars.py
-    mode: exclusive
+    mode: shared_contract
+    contract: platform-vars-generator-v1
   - id: adr_0368_docs
     paths:
     - docs/adr/.index.yaml

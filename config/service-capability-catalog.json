@@ -1608,7 +1608,7 @@
       "public_url": "https://browser.example.com",
       "subdomain": "browser.example.com",
       "exposure": "edge-published",
-      "uptime_monitor_name": "Neko Browser",
+      "uptime_monitor_name": "Neko Public",
       "health_probe_id": "neko",
       "adr": "0380",
       "adr_file": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
@@ -2599,6 +2599,42 @@
           "status": "active",
           "url": "https://proxmox.example.com",
           "subdomain": "proxmox.example.com"
+        }
+      }
+    },
+    {
+      "id": "repo_intake",
+      "name": "Repo Intake",
+      "description": "Repo-assisted intake surface for guided repository deployments and bootstrap handoff through the shared authenticated edge.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8101",
+      "public_url": "https://repo-intake.example.com",
+      "subdomain": "repo-intake.example.com",
+      "exposure": "edge-published",
+      "adr": "0224",
+      "adr_file": "docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md",
+      "runbook": "docs/runbooks/repo-intake.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/repo-intake.yml",
+      "restart_domain": "runtime-general-automation",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "health_probe_id": "repo_intake",
+      "tags": [
+        "repository",
+        "intake",
+        "deployment",
+        "bootstrap"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://repo-intake.example.com",
+          "subdomain": "repo-intake.example.com",
+          "notes": "The browser surface is protected by the shared oauth2-proxy and Keycloak flow while repo-managed local checks remain the authoritative health contract."
         }
       }
     },

@@ -3855,7 +3855,7 @@
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
-          "name": "Neko Browser",
+          "name": "Neko Public",
           "type": "http",
           "url": "https://browser.example.com",
           "description": "Public Neko browser entrypoint published through the shared edge.",

@@ -335,6 +335,10 @@ public_edge_authenticated_sites:
       - /health
     unauthenticated_prefix_paths:
       - /static/                   # CSS, JS, and static assets bypass OAuth2
+  repo-intake.{{ platform_domain }}:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_prefix_paths:
+      - /static/                   # CSS, JS, and static assets bypass OAuth2
 public_edge_certificate_domains: >-
   {{
     (
