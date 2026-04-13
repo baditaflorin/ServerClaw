@@ -11,7 +11,7 @@ purpose: Compact ADR discovery manifest that points readers to shard-sized ADR m
 total_adrs: 448
 adr_number_range:
   first: '0001'
-  last: '0415'
+  last: '0416'
   next_available: '0416'
 implementation_status_summary:
   Implemented: 352
@@ -137,8 +137,13 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0416'
+  next_available_adr: '0417'
 latest_adrs:
+  - adr: '0416'
+    title: Topology Consistency Enforcement
+    implementation_status: Implemented
+    concern: vm-topology
+    path: docs/adr/0416-topology-consistency-enforcement.md
   - adr: '0415'
     title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
     implementation_status: Accepted
