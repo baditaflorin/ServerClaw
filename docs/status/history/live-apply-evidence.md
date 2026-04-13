@@ -8,6 +8,8 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
+| `keycloak` | `2026-04-13-keycloak-topology-fix-runtime-control-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
@@ -24,12 +26,10 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `temporal` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `step_ca` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `semaphore` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `openfga` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `openbao` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `nomad_scheduler` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `mailpit` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `homepage` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `harbor` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `gitea` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |

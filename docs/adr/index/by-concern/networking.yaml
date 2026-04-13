@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: networking
-total_adrs: 27
+total_adrs: 28
 adrs:
   - adr: '0015'
     title: example.com DNS And Subdomain Model
@@ -517,3 +517,17 @@ adrs:
     path: docs/adr/0391-cpu-only-operational-automation.md
     implemented_in_repo_version: 0.178.79
     implemented_on: '2026-04-10'
+  - adr: '0412'
+    title: Keycloak Native Account Expiry
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - keycloak
+      - native
+      - account
+      - expiry
+    summary: Store the expiry timestamp as a custom user attribute on every temporary
+    filename: 0412-keycloak-native-account-expiry.md
+    path: docs/adr/0412-keycloak-native-account-expiry.md

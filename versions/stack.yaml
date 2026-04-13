@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.129
-platform_version: 0.178.129
+repo_version: 0.178.130
+platform_version: 0.178.130
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -16,7 +16,7 @@ live_apply_evidence:
     public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     headscale: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
     vikunja: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
-    semaphore: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    semaphore: 2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     identity_core_watchdog: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply

@@ -8,6 +8,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](../../workstreams/ws-0372-live-apply.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |

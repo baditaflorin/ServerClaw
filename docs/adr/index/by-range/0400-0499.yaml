@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 11
+total_adrs: 13
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -213,3 +213,31 @@ adrs:
     summary: Replace the hardcoded 10.10.10.0/24 with a configurable subnet that avoids
     filename: 0410-docker-isolation-testing-and-ioc-completion.md
     path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md
+  - adr: '0411'
+    title: Unified Account Provisioning API
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - unified
+      - account
+      - provisioning
+      - api
+    summary: Build a POST /v1/accounts endpoint on the platform API gateway
+    filename: 0411-unified-account-provisioning-api.md
+    path: docs/adr/0411-unified-account-provisioning-api.md
+  - adr: '0412'
+    title: Keycloak Native Account Expiry
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - keycloak
+      - native
+      - account
+      - expiry
+    summary: Store the expiry timestamp as a custom user attribute on every temporary
+    filename: 0412-keycloak-native-account-expiry.md
+    path: docs/adr/0412-keycloak-native-account-expiry.md

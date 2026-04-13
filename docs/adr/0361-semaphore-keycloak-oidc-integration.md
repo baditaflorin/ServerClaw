@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Live applied
-- Implemented In Repo Version: pending main merge
-- Implemented In Platform Version: 0.178.126
+- Implemented In Repo Version: 0.178.130
+- Implemented In Platform Version: 0.178.130
 - Implemented On: 2026-04-13
 - Date: 2026-04-07
 - Concern: Identity, Automation, Private Access

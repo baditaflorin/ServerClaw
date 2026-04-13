@@ -2,17 +2,17 @@
 
 - ADR: [ADR 0361](../adr/0361-semaphore-keycloak-oidc-integration.md)
 - Title: verify and live-apply the repo-managed Semaphore Keycloak OIDC flow from the latest origin/main
-- Status: ready_to_merge
-- Included In Repo Version: pending main merge
+- Status: merged
+- Included In Repo Version: 0.178.130
 - Branch-Local Receipt: `receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json`
 - Evidence Summary: `receipts/live-applies/evidence/2026-04-13-ws-0361-summary.txt`
 - Prior Receipt: `receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json`
-- Mainline Receipt: pending
+- Mainline Receipt: `receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json`
 - Implemented On: 2026-04-13
 - Live Applied On: 2026-04-13
-- Live Applied In Platform Version: 0.178.126
+- Live Applied In Platform Version: 0.178.130
 - Original Branch Base: `origin/main@86390fcc8a07fca2a58670f60ec4cf6b9d0278eb`
-- Latest Upstream Checked: `origin/main@307cdbb6961b18d80f93f85024c3539589ce18fa`
+- Latest Upstream Checked: `origin/main@258e264c6ff5cde2ba4ea822442567fb0f9bf7a4`
 - Branch: `codex/ws-0361-live-apply`
 - Worktree: `.worktrees/ws-0361-live-apply`
 - Owner: codex
@@ -51,4 +51,4 @@
 
 ## Notes
 
-- protected integration files stay intentionally untouched on this workstream branch until the exact-main integration step: no `VERSION` bump, no release-section edits in `changelog.md`, no top-level `README.md` status rewrite, and no `versions/stack.yaml` update
+- protected integration files were updated during the exact-main integration step (VERSION, changelog, README status blocks, versions/stack.yaml)

@@ -279,7 +279,7 @@ workstreams:
 - id: ws-0368-live-apply
   adr: 0368
   title: ADR 0368 Live Apply and Completion
-  status: ready_to_merge
+  status: merged
   ready_to_merge: true
   live_applied: true
   owner: codex
@@ -476,9 +476,9 @@ workstreams:
 - id: ws-0361-live-apply
   adr: '0361'
   title: Semaphore Keycloak OIDC integration live apply
-  status: blocked
-  ready_to_merge: false
-  live_applied: false
+  status: merged
+  ready_to_merge: true
+  live_applied: true
   owner: codex
   branch: codex/ws-0361-live-apply
   worktree_path: .worktrees/ws-0361-live-apply
@@ -494,7 +494,7 @@ workstreams:
   - docs/runbooks/configure-semaphore.md
   - docs/runbooks/configure-semaphore-keycloak.md
   - docs/postmortems/2026-04-11-public-release-secret-exposure.md
-  - workstreams/active/ws-0361-live-apply.yaml
+  - workstreams/done/ws-0361-live-apply.yaml
   - workstreams.yaml
   - docs/adr/.index.yaml
   - docs/adr/index/**/*.yaml
@@ -585,10 +585,11 @@ workstreams:
 
     '
   canonical_truth:
-    changelog_entry: null
-    release_bump: null
-    included_in_repo_version: null
-    latest_receipts: {}
+    changelog_entry: live-apply ADR 0361 and record verified Semaphore Keycloak OIDC integration evidence
+    release_bump: patch
+    included_in_repo_version: 0.178.130
+    latest_receipts:
+      semaphore_keycloak_oidc: 2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply
   blockers: []
   plane_issue_id: ef6c2a9c-6b89-4760-b443-95ee881e4511
 - id: adr-0360-openbao-cert-hardening
