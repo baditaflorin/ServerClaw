@@ -4,7 +4,8 @@
 - Title: verify and live-apply the declarative PostgreSQL client registry from the latest `origin/main`
 - Status: in progress
 - Included In Repo Version: `0.178.129`
-- Latest Verified Base: `origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1`
+- Latest Realistic Apply Base: `origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1` (`VERSION=0.178.129`)
+- Latest Reachable origin/main: `origin/main@258e264c6ff5cde2ba4ea822442567fb0f9bf7a4` (`VERSION=0.178.129`)
 - Branch: `codex/ws-0359-main-merge-r2`
 - Worktree: `.worktrees/ws-0359-main-merge-r2`
 - Owner: codex
@@ -29,8 +30,9 @@
 ## Verification To Date
 
 - On 2026-04-13, the focused role regression slice
-  `python3 -m pytest -q tests/test_proxmox_guests_role.py`
-  passed with `3 passed in 0.13s` after adding live template fallback for `lv3.platform.proxmox_guests`.
+  `python3 -m pytest -q tests/test_proxmox_guests_role.py tests/test_postgres_vm_role.py tests/test_postgres_vm_access_policy.py`
+  passed with `17 passed` after fixing the Proxmox template fallback path, the
+  `postgres_vm` default-evaluation regression, and the ADR 0359 registry/HBA exact-main gaps.
 - On 2026-04-13, the narrow guest provisioning replay
   provisioned `postgres-replica`, `postgres-apps`, and `postgres-data` from the live
   base template `9000` after resolving the missing `lv3-postgres-host` template `9002`
@@ -41,10 +43,28 @@
 - On 2026-04-13, Ansible could reach `postgres-replica`, `postgres-apps`, and
   `postgres-data` through the `proxmox_host_jump` path; evidence is
   `receipts/live-applies/evidence/2026-04-13-ws-0359-postgres-ha-ping-r1-0.178.129.txt`.
+- On 2026-04-13, the exact-main `postgres-vm` replay converged all four managed
+  PostgreSQL guests after fixing the `platform_host` default expansion bug, scoping
+  pgaudit grants to databases present on each guest, explicitly loading
+  `inventory/group_vars/platform_postgres.yml`, and removing the guest-wide
+  `10.10.10.0/24` HBA fallback that bypassed ADR 0359 least-privilege behaviour.
+  Evidence is
+  `receipts/live-applies/evidence/2026-04-13-ws-0359-live-apply-main-r6-0.178.129.txt`.
+- On 2026-04-13, the live `postgres` guest `pg_hba.conf` contained concrete ADR 0359
+  registry entries for `keycloak` and `windmill`; evidence is
+  `receipts/live-applies/evidence/2026-04-13-ws-0359-pg-hba-registry-entries-r3-0.178.129.txt`.
+- On 2026-04-13, representative service logins succeeded from the real client VMs:
+  `docker-runtime -> keycloak` and `runtime-control -> windmill`; evidence is
+  `receipts/live-applies/evidence/2026-04-13-ws-0359-keycloak-psql-success-r3-0.178.129.txt`
+  and `receipts/live-applies/evidence/2026-04-13-ws-0359-windmill-psql-success-r3-0.178.129.txt`.
+- On 2026-04-13, a cross-database login attempt `docker-runtime keycloak -> windmill`
+  failed with `no pg_hba.conf entry`, confirming the least-privilege cutover is live;
+  evidence is
+  `receipts/live-applies/evidence/2026-04-13-ws-0359-keycloak-psql-negative-r3-0.178.129.txt`.
 
 ## Plan
 
 1. Recreate workstream ownership on the latest exact-main branch so repo automation can validate the session honestly.
 2. Provision the missing PostgreSQL HA guests with a narrow `proxmox_guests_active` target.
 3. Run `make live-apply-service service=postgres-vm env=production` from this worktree and verify `pg_hba.conf`, firewall reachability, and representative `psql` connectivity.
-4. Update ADR/workstream/release truth, run the repo validation and push gates, then fast-forward the final result to `origin/main`.
+4. Rebase the closeout onto the latest reachable `origin/main`, rerun the repo validation and receipt gates, then fast-forward the final result to `origin/main`.

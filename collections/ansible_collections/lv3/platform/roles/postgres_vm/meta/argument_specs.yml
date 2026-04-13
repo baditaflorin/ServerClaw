@@ -29,6 +29,11 @@ argument_specs:
         required: true
         description:
           - Administrative PostgreSQL role that must exist after convergence.
+      postgres_vm_platform_postgres_registry_file:
+        type: path
+        required: false
+        description:
+          - Controller-local ADR 0359 registry file used to render per-service pg_hba entries.
       postgres_vm_max_connections:
         type: int
         required: true

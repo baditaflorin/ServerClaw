@@ -686,6 +686,8 @@ workstreams:
   - playbooks/proxmox-install.yml
   - playbooks/postgres-vm.yml
   - tests/test_proxmox_guests_role.py
+  - tests/test_postgres_vm_role.py
+  - tests/test_postgres_vm_access_policy.py
   - README.md
   - RELEASE.md
   - VERSION
@@ -737,6 +739,8 @@ workstreams:
     - id: ws0359_topology_tests
       paths:
       - tests/test_proxmox_guests_role.py
+      - tests/test_postgres_vm_role.py
+      - tests/test_postgres_vm_access_policy.py
       mode: exclusive
     - id: ws0359_release_integration
       paths:
@@ -763,7 +767,12 @@ workstreams:
     lv3.platform.proxmox_guests to fall back from missing specialized template VMIDs
     to live source templates, and then successfully provisioned the previously missing
     postgres-replica, postgres-apps, and postgres-data guests from template 9000.
-    The next step is the governed postgres-vm live apply plus on-box verification.
+    The exact-main replay then fixed three live gaps the branch exposed: postgres_vm
+    default evaluation through the generated platform_host dict, pgaudit grant assertions
+    on guests that do not host the audited databases, and the missing ADR 0359 registry
+    load / guest-wide 10.10.10.0/24 HBA fallback that otherwise allowed cross-database
+    logins. The next step is rebasing this verified closeout onto the latest reachable
+    origin/main and finishing the merge.
 
     '
   plane_issue_id: ebace4da-ecfa-42aa-8d14-8189950e9d5a

@@ -1,7 +1,11 @@
 # ADR 0359: Declarative PostgreSQL Client Registry
 
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.12
+- Implemented In Platform Version: 0.178.130
+- Implemented On: 2026-04-13
 - **Date**: 2026-04-05
-- **Status**: Proposed
 - **Deciders**: platform team
 - **Concern**: data, platform
 
@@ -28,7 +32,7 @@ Introduce a **declarative PostgreSQL client registry** as the single source of t
 
 ### Registry structure
 
-Define `platform_postgres_clients` in `inventory/group_vars/platform.yml`:
+Define `platform_postgres_clients` in `inventory/group_vars/platform_postgres.yml`:
 
 ```yaml
 platform_postgres_clients:
@@ -130,6 +134,12 @@ The generation runs as part of `make generate-platform-vars` (same pipeline as A
 
 This check runs in the `schema-validation` gate lane.
 
+## Implementation Notes
+
+- The canonical ADR 0359 registry lives in `inventory/group_vars/platform_postgres.yml`.
+- `lv3.platform.postgres_vm` explicitly loads that controller-local registry file before rendering `pg_hba.conf`, so fresh worktrees and exact-main replays do not depend on Ansible group-var filename conventions.
+- The 2026-04-13 live apply also removed the overly broad `10.10.10.0/24` bridge fallback from `postgres_vm_client_allowed_sources_extra_bridge`; retaining only Docker bridge CIDRs preserves container interoperability without allowing guest-wide cross-database logins.
+
 ## Consequences
 
 **Positive:**
@@ -146,7 +156,7 @@ This check runs in the `schema-validation` gate lane.
 
 ## Implementation plan
 
-1. Add `platform_postgres_clients` to `inventory/group_vars/platform.yml` with all current service entries (data migration, no behaviour change)
+1. Add `platform_postgres_clients` to `inventory/group_vars/platform_postgres.yml` with all current service entries (data migration, no behaviour change)
 2. Add validation to `generate_platform_vars.py` and the schema-validation gate
 3. Implement `postgres_client` shared role
 4. Update `pg_hba.conf.j2` to generate per-service least-privilege entries

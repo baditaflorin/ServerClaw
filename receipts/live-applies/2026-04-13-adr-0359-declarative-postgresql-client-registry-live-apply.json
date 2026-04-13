@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-13",
+  "recorded_on": "2026-04-13",
+  "recorded_at": "2026-04-13T12:59:44Z",
+  "recorded_by": "codex",
+  "workflow_id": "ws-0359-live-apply",
+  "adr": "0359",
+  "workstream": "ws-0359-live-apply",
+  "source_branch": "codex/ws-0359-main-merge-r2",
+  "source_commit": "bbdb0f7008db4bac81c8cc30a287e728b83790a1",
+  "repo_version_context": "0.178.129",
+  "platform_version_context": "0.178.126",
+  "integrated_repo_version": "0.178.130",
+  "integrated_platform_version": "0.178.130",
+  "summary": "Replay ADR 0359 from the latest realistic 0.178.129 origin/main base, provision the missing PostgreSQL HA guests, repair the exact-main postgres-vm gaps uncovered during the replay, and verify live least-privilege database access end to end before merging the closeout back onto the later reachable origin/main tip.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-replica",
+      "vmid": 154,
+      "address": "10.10.10.51"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-apps",
+      "vmid": 151,
+      "address": "10.10.10.52"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-data",
+      "vmid": 152,
+      "address": "10.10.10.54"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control",
+      "address": "10.10.10.92"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Provision missing PostgreSQL HA guests",
+      "result": "pass",
+      "observed": "The replay provisioned postgres-replica, postgres-apps, and postgres-data from the live base template after teaching lv3.platform.proxmox_guests to fall back from missing specialized template VMIDs to the available source template."
+    },
+    {
+      "check": "Focused PostgreSQL replay regression slice",
+      "result": "pass",
+      "observed": "The exact-main regression slice covering proxmox guest provisioning, postgres_vm defaults/tasks, and ADR 0359 access policy passed with 17 focused tests."
+    },
+    {
+      "check": "postgres-vm live apply",
+      "result": "pass",
+      "observed": "The final exact-main postgres-vm replay converged postgres, postgres-replica, postgres-apps, and postgres-data successfully after fixing the platform_host default expansion bug, scoping pgaudit grants to databases present on each guest, loading the ADR 0359 registry file explicitly, and removing the guest-wide 10.10.10.0/24 HBA fallback."
+    },
+    {
+      "check": "PostgreSQL runtime settings",
+      "result": "pass",
+      "observed": "All four PostgreSQL guests reported shared_preload_libraries=pgaudit, pgaudit.log=ddl,role, and log_connections=on after the replay."
+    },
+    {
+      "check": "Live pg_hba registry entries",
+      "result": "pass",
+      "observed": "The postgres guest pg_hba.conf contained concrete ADR 0359 registry entries for keycloak from 10.10.10.20/32 and windmill_admin from 10.10.10.92/32."
+    },
+    {
+      "check": "Representative client logins",
+      "result": "pass",
+      "observed": "A live docker-runtime login as keycloak to the keycloak database and a live runtime-control login as windmill_admin to the windmill database both succeeded against 10.10.10.50."
+    },
+    {
+      "check": "Cross-database denial",
+      "result": "pass",
+      "observed": "A docker-runtime login as keycloak to the windmill database failed with `no pg_hba.conf entry`, confirming the least-privilege ADR 0359 access policy is live."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0359-live-apply.md",
+    "docs/adr/0359-declarative-postgres-client-registry.md",
+    "docs/runbooks/configure-postgres-vm.md",
+    "workstreams/active/ws-0359-live-apply.yaml",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/postgres_vm/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/postgres_vm/meta/argument_specs.yml",
+    "collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml",
+    "inventory/group_vars/platform_postgres.yml",
+    "inventory/group_vars/postgres_guests.yml",
+    "tests/test_proxmox_guests_role.py",
+    "tests/test_postgres_vm_role.py",
+    "tests/test_postgres_vm_access_policy.py",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-provision-ha-guests-r2-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-proxmox-qm-status-r2-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-postgres-ha-ping-r1-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-live-apply-main-r6-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-postgres-runtime-settings-r1-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-pg-hba-registry-entries-r3-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-keycloak-psql-success-r3-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-windmill-psql-success-r3-0.178.129.txt",
+    "receipts/live-applies/evidence/2026-04-13-ws-0359-keycloak-psql-negative-r3-0.178.129.txt"
+  ],
+  "notes": [
+    "The exact-main replay started from origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1, the latest realistic 0.178.129 release base at apply time.",
+    "During closeout, reachable origin/main advanced to 258e264c6ff5cde2ba4ea822442567fb0f9bf7a4 without changing VERSION; the final merge rebases these verified ADR 0359 fixes onto that newer tip before pushing main.",
+    "The replay discovered and fixed three exact-main gaps that blocked the live cutover: postgres_vm default evaluation through the generated platform_host dict, pgaudit grant assertions on guests that do not host the audited databases, and the missing ADR 0359 registry load plus guest-wide 10.10.10.0/24 HBA fallback that otherwise allowed cross-database logins."
+  ]
+}

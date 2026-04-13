@@ -10,7 +10,7 @@ generated: '2026-04-13'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 349
+total_adrs: 350
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6058,6 +6058,24 @@ adrs:
     implemented_in_repo_version: 0.178.125
     implemented_in_platform_version: 0.178.77
     implemented_on: '2026-04-12'
+  - adr: 0359
+    title: Declarative PostgreSQL Client Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - declarative
+      - postgresql
+      - client
+      - registry
+    summary: 'Introduce a declarative PostgreSQL client registry as the single source of truth for all service database relationships.
+      All downstream artifacts — pghba.conf, '
+    filename: 0359-declarative-postgres-client-registry.md
+    path: docs/adr/0359-declarative-postgres-client-registry.md
+    implemented_in_repo_version: 0.178.12
+    implemented_in_platform_version: 0.178.130
+    implemented_on: '2026-04-13'
   - adr: '0360'
     title: OpenBao TLS Cert Lifetime And Renewal Hardening
     status: Accepted

@@ -1363,8 +1363,8 @@ adrs:
     path: docs/adr/0358-platform-health-contract-and-dependency-slo.md
   - adr: 0359
     title: Declarative PostgreSQL Client Registry
-    status: Proposed
-    implementation_status: Proposed
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -1376,6 +1376,9 @@ adrs:
       All downstream artifacts — pghba.conf, '
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
+    implemented_in_repo_version: 0.178.12
+    implemented_in_platform_version: 0.178.130
+    implemented_on: '2026-04-13'
   - adr: '0360'
     title: OpenBao TLS Cert Lifetime And Renewal Hardening
     status: Accepted
