@@ -1,5 +1,5 @@
 id: ws-0377-repo-intake-subdomain
-adr: "0224"
+adr: '0224'
 title: Repo Intake as First-Class Subdomain
 status: ready
 ready_to_merge: false

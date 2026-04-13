@@ -138,8 +138,10 @@ def test_linux_guest_firewall_only_resets_ssh_when_the_rendered_policy_changes()
         task for task in tasks if task["name"] == "Wait for guest SSH after post-bridge nftables changes"
     )
 
+    assert reset_task["ansible.builtin.include_tasks"] == "reset_connection.yml"
     assert reset_task["when"] == "linux_guest_firewall_config.changed"
     assert wait_task["when"] == "linux_guest_firewall_config.changed"
+    assert post_bridge_reset_task["ansible.builtin.include_tasks"] == "reset_connection.yml"
     assert post_bridge_reset_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
     assert post_bridge_wait_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
 
@@ -183,11 +185,9 @@ def test_coolify_guest_policy_enables_container_forwarding_for_published_ports()
     assert coolify_policy["allow_container_forwarding"] is True
 
     published_sources = {
-        rule["source"]: tuple(rule["ports"])
-        for rule in coolify_policy["allowed_inbound"]
-        if rule["source"] == "nginx-edge"
+        rule["source"]: tuple(rule["ports"]) for rule in coolify_policy["allowed_inbound"] if rule["source"] == "nginx"
     }
-    assert published_sources["nginx-edge"] == (80, 443, 8000, 8096)
+    assert published_sources["nginx"] == (80, 443, 8000, 8096)
 
 
 def test_livekit_guest_policy_allows_edge_signalling_and_public_media_ingress() -> None:
@@ -195,7 +195,7 @@ def test_livekit_guest_policy_allows_edge_signalling_and_public_media_ingress() 
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
 
     assert any(
-        rule["source"] == "nginx-edge" and rule["protocol"] == "tcp" and 7880 in rule["ports"]
+        rule["source"] == "nginx" and rule["protocol"] == "tcp" and 7880 in rule["ports"]
         for rule in docker_runtime_rules
     )
     assert any(

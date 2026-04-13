@@ -50,6 +50,12 @@
       vars:
         linux_guest_firewall_recover_missing_docker_bridge_chains: true
     - role: lv3.platform.docker_runtime
+      vars:
+        # Repo-intake may be the first bridge-published runtime on a recovered
+        # host, so let the role reconcile Docker without requiring a preexisting
+        # nat DOCKER chain. The repo-intake runtime health checks still verify
+        # the published listener after compose comes up.
+        docker_runtime_require_nat_chain: false
     - role: lv3.platform.repo_intake_runtime
 
   post_tasks:

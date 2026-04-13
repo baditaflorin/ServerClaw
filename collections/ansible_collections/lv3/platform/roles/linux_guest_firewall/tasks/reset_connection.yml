@@ -1,0 +1,9 @@
+# Purpose: Reset the SSH transport only after the parent linux_guest_firewall role has decided a policy change occurred.
+# Use case: Included from the linux_guest_firewall role before waiting for the next SSH health probe after nftables updates.
+# Inputs: None directly; inclusion is gated by the parent role.
+# Outputs: Forces Ansible to reconnect before post-firewall verification continues.
+# Idempotency: Safe to include repeatedly because reset_connection only refreshes transport state.
+# Dependencies: ADR 0165 metadata standard and the parent linux_guest_firewall role.
+---
+- name: Reset the SSH connection after linux_guest_firewall updates
+  ansible.builtin.meta: reset_connection

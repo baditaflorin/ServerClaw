@@ -1,4 +1,5 @@
 ---
+# Purpose: Sync the repo snapshot into a local Docker build context, mirror required controller credentials, start the repo-intake runtime on docker-runtime, and verify the local service contract.
 - name: Derive Repo Intake conventional defaults from the service registry
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -7,46 +8,147 @@
     common_derive_service_name: repo_intake
   when: repo_intake_site_dir is not defined
 
-- name: Ensure repo-intake data directory exists
+- name: Resolve the repo-intake build context directory
+  ansible.builtin.set_fact:
+    repo_intake_build_context_dir: "{{ repo_intake_build_context_dir | default(repo_intake_site_dir ~ '/build-context', true) }}"
+
+- name: Ensure repo-intake site directory exists
   ansible.builtin.file:
-    path: "{{ repo_intake_data_dir }}"
+    path: "{{ repo_intake_site_dir }}"
     state: directory
     mode: '0755'
+
+- name: Ensure repo-intake runtime support packages are present
+  ansible.builtin.apt:
+    name:
+      - rsync
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure repo-intake runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default(item.owner | default('root')) }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ repo_intake_build_context_dir }}"
+      owner: ops
+      group: ops
+      mode: '0755'
+    - path: "{{ repo_intake_env_file | dirname }}"
+      mode: '0700'
+    - path: "{{ repo_intake_secret_dir }}"
+      mode: '0700'
+    - path: "{{ repo_intake_secret_dir }}/coolify"
+      mode: '0700'
+    - path: "{{ repo_intake_secret_dir }}/ssh"
+      mode: '0700'
+
+- name: Sync the repo snapshot into the repo-intake build context
+  ansible.posix.synchronize:
+    src: "{{ repo_intake_repo_root }}/"
+    dest: "{{ repo_intake_build_context_dir }}/"
+    delete: true
+    archive: true
+    recursive: true
+    rsync_opts: >-
+      {{
+        repo_intake_repo_sync_excludes
+        | map('regex_replace', '^(.*)$', '--exclude=\\1')
+        | list
+      }}
+  delegate_to: localhost
+  become: false
+  register: repo_intake_repo_sync
+
+- name: Copy the Coolify admin auth file for repo-intake runtime actions
+  ansible.builtin.copy:
+    src: "{{ repo_intake_coolify_admin_auth_local_file }}"
+    dest: "{{ repo_intake_secret_dir }}/coolify/admin-auth.json"
+    owner: root
+    group: root
+    mode: '0600'
+  no_log: true
+  register: repo_intake_coolify_admin_auth
+
+- name: Copy the shared bootstrap SSH key for repo-intake runtime actions
+  ansible.builtin.copy:
+    src: "{{ repo_intake_bootstrap_private_key_local_file }}"
+    dest: "{{ repo_intake_secret_dir }}/ssh/bootstrap.id_ed25519"
+    owner: root
+    group: root
+    mode: '0600'
+  no_log: true
+  register: repo_intake_bootstrap_key
 
 - name: Create repo-intake Docker Compose file
   ansible.builtin.template:
     src: docker-compose.yml.j2
-    dest: "{{ repo_intake_data_dir }}/docker-compose.yml"
+    dest: "{{ repo_intake_compose_file }}"
     mode: '0644'
   register: compose_file
 
 - name: Create repo-intake environment file
   ansible.builtin.template:
     src: repo-intake.env.j2
-    dest: "{{ repo_intake_data_dir }}/repo-intake.env"
+    dest: "{{ repo_intake_env_file }}"
     mode: '0600'
+  register: env_file
 
-- name: Pull repo-intake image
-  community.docker.docker_image:
-    name: "{{ repo_intake_image }}"
-    source: pull
-    state: present
-  ignore_errors: true  # May fail if image not in registry yet
+- name: Render the repo-intake Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "{{ repo_intake_build_context_dir }}/Dockerfile"
+    owner: ops
+    group: ops
+    mode: '0644'
+  register: dockerfile
+
+- name: Render the repo-intake .dockerignore file
+  ansible.builtin.template:
+    src: dockerignore.j2
+    dest: "{{ repo_intake_build_context_dir }}/.dockerignore"
+    owner: ops
+    group: ops
+    mode: '0644'
+  register: dockerignore
+
+- name: Record whether repo-intake runtime inputs changed
+  ansible.builtin.set_fact:
+    repo_intake_runtime_recreate: >-
+      {{
+        compose_file.changed
+        or env_file.changed
+        or dockerfile.changed
+        or dockerignore.changed
+        or repo_intake_repo_sync.changed
+        or repo_intake_coolify_admin_auth.changed
+        or repo_intake_bootstrap_key.changed
+      }}
 
 - name: Deploy repo-intake container via Docker Compose
   community.docker.docker_compose_v2:
-    project_src: "{{ repo_intake_data_dir }}"
+    project_src: "{{ repo_intake_compose_file | dirname }}"
     state: present
-    restarted: "{{ compose_file.changed }}"
+    build: always
+    pull: never
+    recreate: "{{ 'always' if repo_intake_runtime_recreate else 'auto' }}"
   environment:
     DOCKER_HOST: "unix:///var/run/docker.sock"
 
 - name: Wait for repo-intake to be ready
   ansible.builtin.uri:
-    url: "http://localhost:{{ repo_intake_port }}/health"
+    url: "http://127.0.0.1:{{ repo_intake_internal_port }}/health"
     status_code: 200
     connect_timeout: 5
+  failed_when: false
   retries: 30
   delay: 1
   register: result
-  until: result.status == 200
+  until: result.status | default(0) == 200
+
+- name: Verify the repo-intake runtime
+  ansible.builtin.import_tasks: verify.yml

@@ -11,10 +11,12 @@ from __future__ import annotations
 import json
 import subprocess
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -69,7 +71,8 @@ def create_app() -> FastAPI:
     template_dir = Path(__file__).parent / "templates"
     static_dir = Path(__file__).parent / "static"
     if template_dir.exists():
-        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+        if static_dir.exists():
+            app.mount("/static", StaticFiles(directory=static_dir), name="static")
         templates = Jinja2Templates(directory=template_dir)
 
     # Root endpoint
@@ -371,6 +374,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=int(__import__("os").environ.get("PORT", "8096")),
+        port=int(__import__("os").environ.get("PORT", "8101")),
         log_level="info",
     )

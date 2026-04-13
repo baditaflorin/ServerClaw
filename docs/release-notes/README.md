@@ -5,6 +5,7 @@ Versioned release notes live here after `Unreleased` is cut on `main`.
 Detailed per-change deployment history is generated separately in the deployment history portal from receipts, promotion records, and mutation audit events.
 
 ## Releases
+- [0.178.129](0.178.129.md)
 - [0.178.126](0.178.126.md)
 - [0.178.123](0.178.123.md)
 - [0.178.122](0.178.122.md)

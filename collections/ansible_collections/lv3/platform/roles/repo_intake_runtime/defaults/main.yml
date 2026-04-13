@@ -1,10 +1,24 @@
 ---
-# Repo Intake Runtime Defaults
-
-repo_intake_container_name: repo-intake
+# Purpose: Define the repo-intake-specific build inputs, mirrored controller secrets, and repo sync exclusions while ADR 0373 derives conventional runtime paths from the service registry.
+# Conventional defaults (site_dir, secret_dir, compose_file, env_file,
+# container_name, internal_port) are derived from platform_service_registry.
+# Only repo-intake-specific build/runtime inputs remain here.
 repo_intake_image: repo-intake:latest
-repo_intake_data_dir: /opt/repo-intake
-repo_intake_port: 8096
+repo_intake_repo_root: "{{ playbook_dir | dirname }}"
 repo_intake_gateway_url: "https://api.{{ platform_domain }}"
 repo_intake_session_secret: "{{ lookup('password', '.local/repo-intake/session.secret chars=ascii_letters,digits length=32') }}"
 repo_intake_static_api_token: "{{ lookup('password', '.local/repo-intake/static-api.token chars=ascii_letters,digits length=48') }}"
+repo_intake_coolify_admin_auth_local_file: "{{ repo_shared_local_root }}/coolify/admin-auth.json"
+repo_intake_bootstrap_private_key_local_file: "{{ repo_shared_bootstrap_private_key_path }}"
+repo_intake_repo_sync_excludes:
+  - ".ansible/"
+  - ".cache/"
+  - ".git/"
+  - ".local/"
+  - ".mypy_cache/"
+  - ".pytest_cache/"
+  - ".ruff_cache/"
+  - ".venv/"
+  - "build/"
+  - "dist/"
+  - "__pycache__/"

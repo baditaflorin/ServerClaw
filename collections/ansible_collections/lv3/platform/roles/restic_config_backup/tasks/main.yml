@@ -80,6 +80,7 @@
       }}
   delegate_to: localhost
   become: false
+  no_log: true
 
 - name: Assert restic runtime secrets are available locally
   ansible.builtin.assert:
@@ -117,6 +118,138 @@
       mode: "0700"
     - path: "{{ restic_config_backup_runtime_openbao_agent_dir }}"
       mode: "0700"
+
+- name: Determine the effective shared MinIO container name
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if docker inspect {{ restic_config_backup_minio_container_name | quote }} >/dev/null 2>&1; then
+      printf '%s' {{ restic_config_backup_minio_container_name | quote }}
+    elif docker inspect outline-minio >/dev/null 2>&1; then
+      printf '%s' outline-minio
+    else
+      exit 1
+    fi
+  args:
+    executable: /bin/bash
+  register: restic_config_backup_minio_container_effective_name
+  changed_when: false
+  failed_when: false
+
+- name: Assert the shared MinIO container exists
+  ansible.builtin.assert:
+    that:
+      - restic_config_backup_minio_container_effective_name.rc == 0
+      - restic_config_backup_minio_container_effective_name.stdout | trim | length > 0
+    fail_msg: >-
+      Unable to find the shared MinIO container on docker-runtime.
+      Tried {{ restic_config_backup_minio_container_name }} and outline-minio.
+
+- name: Check whether the shared MinIO container is already running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ restic_config_backup_minio_container_effective_name.stdout | trim }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: restic_config_backup_minio_container_running
+  changed_when: false
+
+- name: Start the shared MinIO container when it is stopped
+  ansible.builtin.command:
+    argv:
+      - docker
+      - start
+      - "{{ restic_config_backup_minio_container_effective_name.stdout | trim }}"
+  register: restic_config_backup_minio_container_start
+  changed_when: true
+  when: >-
+    restic_config_backup_minio_container_running.stdout_lines
+    | select('equalto', restic_config_backup_minio_container_effective_name.stdout | trim)
+    | list
+    | length
+    == 0
+
+- name: Wait for the shared MinIO container to report running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ restic_config_backup_minio_container_effective_name.stdout | trim }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: restic_config_backup_minio_container_running_verify
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: >-
+    (
+      restic_config_backup_minio_container_running_verify.stdout_lines
+      | select('equalto', restic_config_backup_minio_container_effective_name.stdout | trim)
+      | list
+      | length
+    ) == 1
+
+- name: Probe shared MinIO auth with the controller-local root secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec \
+      -e MINIO_ROOT_USER={{ restic_config_backup_minio_access_key | quote }} \
+      -e MINIO_ROOT_PASSWORD={{ restic_config_backup_minio_secret_key | quote }} \
+      {{ restic_config_backup_minio_container_effective_name.stdout | trim | quote }} \
+      sh -ceu 'mc alias set local http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" >/dev/null'
+  args:
+    executable: /bin/bash
+  register: restic_config_backup_minio_auth_probe
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Read the live MinIO root password from the running container when the controller-local secret drifts
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker inspect --format '{% raw %}{{range .Config.Env}}{{println .}}{{end}}{% endraw %}' \
+      {{ restic_config_backup_minio_container_effective_name.stdout | trim | quote }} \
+      | sed -n 's/^MINIO_ROOT_PASSWORD=//p' \
+      | tail -n 1
+  args:
+    executable: /bin/bash
+  register: restic_config_backup_minio_live_secret
+  changed_when: false
+  when: restic_config_backup_minio_auth_probe.rc != 0
+  no_log: true
+
+- name: Override the restic MinIO secret with the live container credential when needed
+  ansible.builtin.set_fact:
+    restic_config_backup_minio_secret_key: "{{ restic_config_backup_minio_live_secret.stdout | trim }}"
+  when:
+    - restic_config_backup_minio_auth_probe.rc != 0
+    - restic_config_backup_minio_live_secret.stdout | trim | length > 0
+  no_log: true
+
+- name: Sync the controller-local MinIO root secret when the live container secret is newer
+  ansible.builtin.copy:
+    dest: "{{ restic_config_backup_minio_secret_key_local_file }}"
+    content: "{{ restic_config_backup_minio_secret_key }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when:
+    - restic_config_backup_minio_auth_probe.rc != 0
+    - restic_config_backup_minio_live_secret.stdout | trim | length > 0
+  no_log: true
+
+- name: Assert the effective MinIO root secret is available
+  ansible.builtin.assert:
+    that:
+      - restic_config_backup_minio_secret_key | length > 0
+    fail_msg: "Unable to resolve a working MinIO root secret for the restic backup runtime."
 
 - name: Render the runtime restic catalog
   ansible.builtin.copy:
@@ -238,99 +371,10 @@
       dest: config/restic-file-backup-catalog.json
       mode: "0644"
 
-- name: Check whether the shared MinIO container exists
-  ansible.builtin.command:
-    argv:
-      - docker
-      - ps
-      - -a
-      - --filter
-      - "name={{ restic_config_backup_minio_container_name }}"
-      - --format
-      - "{{ '{{' }}.Names{{ '}}' }}"
-  register: restic_config_backup_minio_container_present
-  changed_when: false
-
-- name: Assert the shared MinIO container exists
-  ansible.builtin.assert:
-    that:
-      - >-
-        restic_config_backup_minio_container_present.stdout_lines
-        | select('equalto', restic_config_backup_minio_container_name)
-        | list
-        | length
-        == 1
-    fail_msg: >-
-      {{ restic_config_backup_minio_container_name }} is missing on docker-runtime.
-      Converge MinIO before enabling ADR 0302 restic backups.
-
-- name: Check whether the shared MinIO container is already running
-  ansible.builtin.command:
-    argv:
-      - docker
-      - ps
-      - --filter
-      - "name={{ restic_config_backup_minio_container_name }}"
-      - --filter
-      - status=running
-      - --format
-      - "{{ '{{' }}.Names{{ '}}' }}"
-  register: restic_config_backup_minio_container_running
-  changed_when: false
-
-- name: Start the shared MinIO container when it is stopped
-  ansible.builtin.command:
-    argv:
-      - docker
-      - start
-      - "{{ restic_config_backup_minio_container_name }}"
-  register: restic_config_backup_minio_container_start
-  changed_when: true
-  when: >-
-    restic_config_backup_minio_container_running.stdout_lines
-    | select('equalto', restic_config_backup_minio_container_name)
-    | list
-    | length
-    == 0
-
-- name: Wait for the shared MinIO container to report running
-  ansible.builtin.command:
-    argv:
-      - docker
-      - ps
-      - --filter
-      - "name={{ restic_config_backup_minio_container_name }}"
-      - --filter
-      - status=running
-      - --format
-      - "{{ '{{' }}.Names{{ '}}' }}"
-  register: restic_config_backup_minio_container_running_verify
-  changed_when: false
-  retries: 12
-  delay: 5
-  until: >-
-    (
-      restic_config_backup_minio_container_running_verify.stdout_lines
-      | select('equalto', restic_config_backup_minio_container_name)
-      | list
-      | length
-    ) == 1
-
 - name: Ensure the MinIO restic bucket exists with object lock
   ansible.builtin.shell: |
     set -euo pipefail
-    container_name={{ restic_config_backup_minio_container_name | quote }}
-    if ! docker inspect "$container_name" >/dev/null 2>&1; then
-      if docker inspect outline-minio >/dev/null 2>&1; then
-        container_name=outline-minio
-      else
-        echo "unable to find MinIO container: tried $container_name and outline-minio" >&2
-        exit 1
-      fi
-    fi
-    if [ "$(docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' "$container_name")" != "true" ]; then
-      docker start "$container_name" >/dev/null
-    fi
+    container_name={{ restic_config_backup_minio_container_effective_name.stdout | trim | quote }}
     docker exec \
       -e MINIO_ROOT_USER={{ restic_config_backup_minio_access_key | quote }} \
       -e MINIO_ROOT_PASSWORD={{ restic_config_backup_minio_secret_key | quote }} \
@@ -346,6 +390,7 @@
   retries: 12
   delay: 5
   until: restic_config_backup_bucket_bootstrap.rc == 0
+  no_log: true
 
 - name: Enable and start the restic backup timer
   ansible.builtin.systemd:

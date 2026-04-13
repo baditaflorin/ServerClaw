@@ -68,7 +68,7 @@
   changed_when: false
 
 - name: Reset SSH connection before recovering the local OpenBao runtime
-  ansible.builtin.meta: reset_connection
+  ansible.builtin.include_tasks: ensure_local_openbao_runtime_reset_connection.yml
   when: (common_local_openbao_runtime_probe.status | default(0)) not in [200, 429, 472, 473, 501, 503]
 
 - name: Inspect current OpenBao container networks before local recovery

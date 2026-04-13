@@ -79,7 +79,7 @@
   changed_when: true
 
 - name: Reset SSH connection after guest nftables policy evaluation
-  ansible.builtin.meta: reset_connection
+  ansible.builtin.include_tasks: reset_connection.yml
   when: linux_guest_firewall_config.changed
 
 - name: Wait for guest SSH after nftables changes
@@ -152,7 +152,7 @@
   changed_when: true
 
 - name: Reset SSH connection after post-bridge guest nftables policy evaluation
-  ansible.builtin.meta: reset_connection
+  ansible.builtin.include_tasks: reset_connection.yml
   when: linux_guest_firewall_post_bridge_config.changed
 
 - name: Wait for guest SSH after post-bridge nftables changes

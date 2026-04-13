@@ -442,6 +442,15 @@
       "adr": "0074"
     },
     {
+      "id": "repo_intake",
+      "service": "repo_intake",
+      "name": "Repo Intake",
+      "vm": "docker-runtime",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0224"
+    },
+    {
       "id": "grist",
       "service": "grist",
       "name": "Grist",
@@ -1390,6 +1399,24 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The generated portal is published as static content on nginx."
+    },
+    {
+      "from": "repo_intake",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "Repo-intake is hosted on the shared docker-runtime guest."
+    },
+    {
+      "from": "repo_intake",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "repo-intake.example.com is gated behind the shared edge auth boundary and Keycloak-backed browser authentication."
+    },
+    {
+      "from": "repo_intake",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to repo-intake.example.com depends on the shared NGINX edge publication path."
     },
     {
       "from": "grist",

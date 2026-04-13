@@ -227,6 +227,11 @@ Create: `collections/ansible_collections/lv3/platform/playbooks/services/my_new_
 - import_playbook: ../my_new_service.yml
 ```
 
+The `playbooks/services/<service>.yml` wrapper is not optional. The governed
+`make live-apply-service` and workflow-catalog contract expect this exact
+wrapper/import pattern so the scoped runner can resolve the service entrypoint
+without custom host expressions.
+
 ## Step 6: Add to Makefile (convenience)
 
 Edit: `Makefile`
@@ -288,22 +293,23 @@ python3 scripts/workstream_registry.py --write
    # Check service is responding
    ```
 
-## Step 8: Merge to main and Live-Apply
+## Step 9: Merge to main and Live-Apply
 
 1. Create pull request on verify branch
 2. Get approval (reference ADR 0373)
 3. Merge to main:
    ```bash
    git checkout main && git merge verify --no-ff
-   git push origin main
    ```
-4. Live-apply on production:
+4. Live-apply from the merged `main` tree:
    ```bash
    make converge-my_new_service env=production
    ```
-5. Bump platform version in versions/stack.yaml
-6. Update changelog.md
-7. Push updated versions/stack.yaml
+5. Verify the real service surface (internal health plus public edge behavior if published).
+6. Record a live-apply receipt under `receipts/live-applies/`.
+7. Bump `VERSION` and cut the release artifacts on `main`.
+8. Only after the merged-tree replay succeeds, bump `platform_version` in `versions/stack.yaml`.
+9. Push `origin/main`.
 
 ## Service Type Decision Matrix
 

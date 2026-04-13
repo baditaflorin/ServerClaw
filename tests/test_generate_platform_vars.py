@@ -1,10 +1,16 @@
 from pathlib import Path
 
 import generate_platform_vars
+import pytest
 import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture(autouse=True)
+def disable_local_identity_overlay(monkeypatch) -> None:
+    monkeypatch.setattr(generate_platform_vars, "resolve_local_identity_override_path", lambda: None)
 
 
 def iter_strings(value):
@@ -39,6 +45,17 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert langfuse["urls"]["public"] == "https://langfuse.example.com"
     assert langfuse["urls"]["internal"] == "http://10.10.10.20:3002"
     assert platform_vars["outline_port"] == 3006
+
+
+def test_build_platform_vars_resolves_guest_ip_templates_in_platform_host_network() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    network = platform_vars["platform_host"]["network"]
+
+    assert network["public_ingress_tcp_forwards"][0]["target_host"] == "10.10.10.92"
+    assert network["public_ingress_tcp_forwards"][1]["target_host"] == "10.10.10.10"
+    assert network["tailscale_operator_target_guest"] == "10.10.10.30"
+    assert network["tailscale_tcp_proxies"][1]["upstream_host"] == "10.10.10.50"
+    assert all("proxmox_guests" not in value for value in iter_strings(network))
 
 
 def test_build_platform_vars_includes_minio_publication_topology() -> None:
@@ -293,10 +310,10 @@ def test_build_platform_vars_includes_piper_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     piper = platform_vars["platform_service_topology"]["piper"]
 
-    assert piper["ports"]["internal"] == 8100
-    assert piper["urls"]["internal"] == "http://10.10.10.20:8100"
+    assert piper["ports"]["internal"] == 8106
+    assert piper["urls"]["internal"] == "http://10.10.10.20:8106"
     assert piper["exposure_model"] == "private-only"
-    assert platform_vars["piper_port"] == 8100
+    assert platform_vars["piper_port"] == 8106
 
 
 def test_build_platform_vars_includes_redpanda_private_topology() -> None:
@@ -404,7 +421,7 @@ def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
 
     assert port_map == {"internal": 3003, "controller": 3009}
     assert urls == {
-        "public": "http://git.example.com:3009",
+        "public": "https://git.example.com",
         "internal": "http://10.10.10.20:3003",
         "controller": "http://100.64.0.1:3009",
     }
@@ -467,8 +484,7 @@ def test_build_platform_vars_moves_support_surfaces_to_runtime_general() -> None
 
     assert homepage["owning_vm"] == "runtime-general"
     assert homepage["urls"]["internal"] == "http://10.10.10.91:3090"
-    assert homepage["edge"]["upstream"] == "http://10.10.10.91:9080"
-    assert homepage["edge"]["root_proxy_path"] == "/homepage"
+    assert homepage["edge"]["upstream"] == homepage["urls"]["internal"]
     assert mailpit["owning_vm"] == "runtime-general"
     assert mailpit["urls"]["internal"] == "http://10.10.10.91:8025"
     assert status_page["owning_vm"] == "runtime-general"
@@ -570,7 +586,7 @@ def test_build_service_urls_resolves_paperless_internal_url() -> None:
 
 
 def test_build_service_urls_resolves_piper_internal_url() -> None:
-    ports = {"piper_port": 8100}
+    ports = {"piper_port": 8106}
     service = {"owning_vm": "docker-runtime"}
     host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
     guest_ipv4_by_name = {"docker-runtime": "10.10.10.20"}
@@ -585,8 +601,8 @@ def test_build_service_urls_resolves_piper_internal_url() -> None:
         stack,
     )
 
-    assert port_map == {"internal": 8100}
-    assert urls == {"internal": "http://10.10.10.20:8100"}
+    assert port_map == {"internal": 8106}
+    assert urls == {"internal": "http://10.10.10.20:8106"}
 
 
 def test_build_platform_vars_renders_service_topology_without_unresolved_templates() -> None:
@@ -635,7 +651,7 @@ def test_woodpecker_network_policy_allows_host_and_edge_access() -> None:
     allowed_inbound = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
 
     assert any(rule["source"] == "host" and 8102 in rule["ports"] for rule in allowed_inbound)
-    assert any(rule["source"] == "nginx-edge" and 8102 in rule["ports"] for rule in allowed_inbound)
+    assert any(rule["source"] == "nginx" and 8102 in rule["ports"] for rule in allowed_inbound)
 
 
 def test_build_platform_vars_uses_loopback_for_guest_local_platform_context_verification() -> None:

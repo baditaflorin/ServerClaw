@@ -48,6 +48,7 @@ from subdomain_catalog import (
     validate_subdomain_catalog,
 )
 from agent_tool_registry import load_agent_tool_registry
+from validation_toolkit import load_yaml_with_identity
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")

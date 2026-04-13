@@ -1,0 +1,9 @@
+# Purpose: Reset the SSH transport only after the parent local OpenBao recovery helper decides recovery is required.
+# Use case: Included from ensure_local_openbao_runtime.yml before recovery probes that may run after Docker or network state changed.
+# Inputs: None directly; inclusion is gated by the parent helper.
+# Outputs: Forces Ansible to reconnect before local OpenBao recovery continues.
+# Idempotency: Safe to include repeatedly because reset_connection only refreshes transport state.
+# Dependencies: ADR 0165 metadata standard and the parent ensure_local_openbao_runtime helper.
+---
+- name: Reset the SSH connection before recovering the local OpenBao runtime
+  ansible.builtin.meta: reset_connection

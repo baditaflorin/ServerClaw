@@ -97,13 +97,16 @@ def load_controller_context() -> dict[str, Any]:
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
     bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
+    host_addr = os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip() or host_vars["management_tailscale_ipv4"]
+    host_port = os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22"
     return {
         "host_vars": host_vars,
         "group_vars": group_vars,
         "secret_manifest": secret_manifest,
         "bootstrap_key": bootstrap_key,
         "host_user": group_vars["proxmox_host_admin_user"],
-        "host_addr": host_vars["management_tailscale_ipv4"],
+        "host_addr": host_addr,
+        "host_port": host_port,
         "guests": guests,
     }
 
@@ -138,9 +141,11 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, *extra_args: s
     key_path = str(context["bootstrap_key"])
     guest_ip = context["guests"][target]
     host_login = f"{context['host_user']}@{context['host_addr']}"
+    host_port = str(context.get("host_port") or os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22")
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 "
         f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"-p {shlex.quote(host_port)} "
         f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [

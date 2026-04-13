@@ -178,6 +178,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     )
     assert "Recover pre-restart containers that remained stopped after Docker restarts" in task_names
     assert "Confirm pre-restart containers recovered after Docker restarts" in task_names
+    assert "Re-assert Docker bridge networking chains after pre-restart container recovery" in task_names
     inspect_pre_restart = next(
         task for task in tasks if task["name"] == "Inspect running containers before Docker restarts"
     )
@@ -185,6 +186,11 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
         task for task in tasks if task["name"] == "Record containers that were running before Docker restarts"
     )
     ensure_task = next(task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present")
+    reassert_chains = next(
+        task
+        for task in tasks
+        if task["name"] == "Re-assert Docker bridge networking chains after pre-restart container recovery"
+    )
     recheck_pre_restart = next(
         task for task in tasks if task["name"] == "Re-inspect pre-restart containers after Docker restarts"
     )
@@ -228,6 +234,24 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert (
         ensure_task["vars"]["common_docker_bridge_chains_require_nat_chain"] == "{{ docker_runtime_require_nat_chain }}"
     )
+    assert ensure_task["when"] == "docker_runtime_pre_restart_container_names | default([]) | length == 0"
+    assert reassert_chains["ansible.builtin.include_role"] == {
+        "name": "lv3.platform.common",
+        "tasks_from": "docker_bridge_chains",
+    }
+    assert reassert_chains["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert (
+        reassert_chains["vars"]["common_docker_bridge_chains_require_nat_chain"]
+        == "{{ docker_runtime_require_nat_chain }}"
+    )
+    assert (
+        reassert_chains["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    )
+    assert (
+        reassert_chains["vars"]["common_docker_bridge_chains_delay"]
+        == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    )
+    assert reassert_chains["when"] == "docker_runtime_pre_restart_container_names | default([]) | length > 0"
     assert defaults["docker_runtime_chain_recheck_retries"] == 30
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
     assert defaults["docker_runtime_container_recovery_retries"] == 30

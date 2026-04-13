@@ -78,6 +78,23 @@ def test_build_report_counts_passes_and_failures() -> None:
     assert report["summary"]["fail_count"] == 1
 
 
+def test_build_restored_guest_ssh_command_honors_breakglass_port() -> None:
+    command_argv = rv.build_restored_guest_ssh_command(
+        {
+            "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
+            "host_user": "ops",
+            "host_addr": "65.108.75.123",
+            "host_port": "2222",
+        },
+        "10.10.10.20",
+        "hostname",
+    )
+
+    joined = " ".join(command_argv)
+    assert "ProxyCommand=ssh" in joined
+    assert " -p 2222 " in joined
+
+
 def test_build_target_result_fails_when_synthetic_replay_fails() -> None:
     target = rv.RestoreTarget(
         vm_name="docker-runtime",

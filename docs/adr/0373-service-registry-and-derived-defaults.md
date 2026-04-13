@@ -1,10 +1,14 @@
 # ADR 0373: Service Registry and Derived Defaults
 
-- **Date**: 2026-04-06
-- **Status**: Proposed
-- **Deciders**: platform team
-- **Concern**: platform, dry
-- **Tags**: ansible, registry, defaults, dry, service-catalog
+- Date: 2026-04-06
+- Status: Accepted
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.178.67
+- Implemented In Platform Version: 0.178.72
+- Implemented On: 2026-04-09
+- Deciders: platform team
+- Concern: platform, dry
+- Tags: ansible, registry, defaults, dry, service-catalog
 
 ## Context
 
@@ -338,6 +342,30 @@ If a role's migration breaks, the fix is to temporarily re-add the removed defau
 5. Migrate remaining roles in batches
 6. Remove redundant conventional variables from each migrated role's `defaults/main.yml`
 7. Trim `argument_specs.yml` for each migrated role
+
+## Verification Notes
+
+- Initial platform adoption was recorded in
+  `receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json`,
+  which marks the first live platform state where all services used
+  `derive_service_defaults`.
+- Latest-main replay was re-verified on 2026-04-13 from a worktree based on
+  `origin/main` `bbdb0f700` plus ADR 0373 follow-through fixes:
+  - `python3 scripts/validate_service_registry.py --check`
+  - `python3 scripts/interface_contracts.py --list`
+  - `./scripts/validate_repo.sh agent-standards`
+  - `uv run --with pytest --with pyyaml --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_openbao_systemd_credentials_helper.py tests/test_restic_config_backup.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_linux_guest_firewall_role.py`
+  - `make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+  - `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
+- The 2026-04-13 replay confirmed:
+  - `repo_intake` converged successfully on `docker-runtime`
+  - direct health checks on `http://127.0.0.1:8101/health` returned `{"status":"ok"}`
+  - edge verification from the `nginx` guest returned the expected OAuth redirect
+    for `https://repo-intake.lv3.org/`
+  - governed restic backup receipts were refreshed at
+    `receipts/restic-backups/20260413T105157Z.json`,
+    `receipts/restic-backups/20260413T110651Z.json`, and
+    `receipts/restic-snapshots-latest.json`
 
 ## Depends on
 

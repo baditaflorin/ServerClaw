@@ -32,6 +32,7 @@ from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
 REPO_ROOT = repo_path()
 STACK_PATH = repo_path("versions", "stack.yaml")
+HOST_VARS_PATH = TOPOLOGY_HOST_VARS_PATH
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 RUNBOOKS_DIR = repo_path("docs", "runbooks")
 ADR_DIR = repo_path("docs", "adr")

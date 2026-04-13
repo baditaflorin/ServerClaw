@@ -1,4 +1,5 @@
 ---
+# Purpose: Declare the validated input contract for the repo_intake_runtime role after ADR 0373 moved conventional defaults into the service registry.
 argument_specs:
   main:
     short_description: Deploy repo-intake runtime (ADR 0224)
@@ -13,15 +14,10 @@ argument_specs:
       repo_intake_image:
         type: str
         default: repo-intake:latest
-        description: Container image tag
-      repo_intake_data_dir:
+        description: Container image tag for the locally built runtime
+      repo_intake_build_context_dir:
         type: str
-        default: /opt/repo-intake
-        description: Host directory for data persistence
-      repo_intake_port:
-        type: int
-        default: 8096
-        description: Local listener port
+        description: Optional override for the host directory containing the synced repo snapshot and Docker build context
       repo_intake_gateway_url:
         type: str
         default: https://api.{{ platform_domain }}
@@ -34,3 +30,15 @@ argument_specs:
         type: str
         required: true
         description: Static API token for authentication
+      repo_intake_repo_root:
+        type: str
+        default: "{{ playbook_dir | dirname }}"
+        description: Controller-side repository root synced into the intake build context
+      repo_intake_coolify_admin_auth_local_file:
+        type: str
+        default: "{{ repo_shared_local_root }}/coolify/admin-auth.json"
+        description: Controller-local Coolify admin auth file mirrored into the runtime
+      repo_intake_bootstrap_private_key_local_file:
+        type: str
+        default: "{{ repo_shared_bootstrap_private_key_path }}"
+        description: Controller-local bootstrap SSH key mirrored into the runtime

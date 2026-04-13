@@ -28,6 +28,9 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     expect_forward = next(
         task for task in tasks if task["name"] == "Decide whether Docker forward-chain enforcement is required"
     )
+    reset_connection = next(
+        task for task in tasks if task["name"] == "Reset SSH connection before Docker bridge-chain recovery checks"
+    )
     wait_for_ssh = next(
         task for task in tasks if task["name"] == "Wait for SSH before Docker bridge-chain recovery checks"
     )
@@ -50,6 +53,7 @@ def test_docker_bridge_chain_helper_asserts_on_retry_task_success_state() -> Non
     assert "iptables -t filter -S DOCKER-FORWARD" in initial_forward["ansible.builtin.shell"]
     assert "iptables -t filter -S DOCKER >/dev/null 2>&1" in initial_forward["ansible.builtin.shell"]
     assert "iptables -t filter -S FORWARD" in initial_forward["ansible.builtin.shell"]
+    assert reset_connection["ansible.builtin.include_tasks"] == "docker_bridge_chains_reset_connection.yml"
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
     assert wait_for_ssh["ansible.builtin.wait_for_connection"]["connect_timeout"] == 5
     assert nat_verify["register"] == "common_docker_bridge_chains_nat_verify"
