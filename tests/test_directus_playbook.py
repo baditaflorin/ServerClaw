@@ -19,26 +19,25 @@ WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 
 
-def test_directus_playbook_orders_runtime_database_and_edge_roles() -> None:
+def test_directus_playbook_imports_standard_includes_and_exposes_access_model_seed() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
+    imports = [entry["import_playbook"] for entry in plays if "import_playbook" in entry]
 
-    postgres_play = next(play for play in plays if play.get("name") == "Prepare PostgreSQL for Directus")
-    docker_play = next(play for play in plays if play.get("name") == "Converge Directus on the Docker runtime VM")
-    edge_play = next(play for play in plays if play.get("name") == "Publish Directus through the NGINX edge")
+    assert imports == [
+        "_includes/dns_publication.yml",
+        "_includes/postgres_preparation.yml",
+        "_includes/docker_runtime_converge.yml",
+        "_includes/nginx_edge_publication.yml",
+    ]
+
+    access_model_play = next(
+        play for play in plays if play.get("name") == "Seed the Directus access model in PostgreSQL"
+    )
+    access_task = access_model_play["tasks"][0]
+    assert access_task["ansible.builtin.include_role"]["name"] == "lv3.platform.directus_postgres"
+    assert access_task["ansible.builtin.include_role"]["tasks_from"] == "access_model.yml"
+
     public_verify_play = next(play for play in plays if play.get("name") == "Verify the public Directus publication")
-
-    assert [role["role"] for role in postgres_play["roles"]] == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.postgres_vm",
-        "lv3.platform.directus_postgres",
-    ]
-    assert [role["role"] for role in docker_play["roles"]] == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.docker_runtime",
-        "lv3.platform.keycloak_runtime",
-        "lv3.platform.directus_runtime",
-    ]
-    assert edge_play["vars_files"] == ["{{ playbook_dir }}/../inventory/group_vars/platform.yml"]
     verify_task = public_verify_play["tasks"][0]
     assert verify_task["ansible.builtin.include_role"]["name"] == "lv3.platform.directus_runtime"
     assert verify_task["ansible.builtin.include_role"]["tasks_from"] == "publish.yml"

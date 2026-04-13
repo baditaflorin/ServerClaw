@@ -668,7 +668,7 @@ syntax-check-monitoring:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/monitoring-stack.yml --syntax-check
 
 syntax-check-ntfy:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntfy.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntfy.yml -e @$(REPO_ROOT)/playbooks/vars/ntfy.yml --syntax-check
 
 syntax-check-ntopng:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntopng.yml --syntax-check
@@ -719,16 +719,16 @@ syntax-check-tesseract-ocr:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/tesseract-ocr.yml --syntax-check
 
 syntax-check-directus:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/directus.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/directus.yml -e @$(REPO_ROOT)/playbooks/vars/directus.yml --syntax-check
 
 syntax-check-label-studio:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/label-studio.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/label-studio.yml -e @$(REPO_ROOT)/playbooks/vars/label-studio.yml --syntax-check
 
 syntax-check-superset:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/superset.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/superset.yml -e @$(REPO_ROOT)/playbooks/vars/superset.yml --syntax-check
 
 syntax-check-sftpgo:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/sftpgo.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/sftpgo.yml -e @$(REPO_ROOT)/playbooks/vars/sftpgo.yml --syntax-check
 
 syntax-check-semaphore:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/semaphore.yml --syntax-check
@@ -749,7 +749,7 @@ syntax-check-coolify:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/coolify.yml --syntax-check
 
 syntax-check-keycloak:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/keycloak.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/keycloak.yml -e @$(REPO_ROOT)/playbooks/vars/keycloak.yml --syntax-check
 
 syntax-check-harbor:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/harbor.yml --syntax-check
@@ -761,16 +761,16 @@ syntax-check-minio:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/minio.yml --syntax-check
 
 syntax-check-flagsmith:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/flagsmith.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/flagsmith.yml -e @$(REPO_ROOT)/playbooks/vars/flagsmith.yml --syntax-check
 
 syntax-check-lago:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/lago.yml --syntax-check
 
 syntax-check-plausible:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/plausible.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/plausible.yml -e @$(REPO_ROOT)/playbooks/vars/plausible.yml --syntax-check
 
 syntax-check-glitchtip:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/glitchtip.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/glitchtip.yml -e @$(REPO_ROOT)/playbooks/vars/glitchtip.yml --syntax-check
 
 syntax-check-plane:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/plane.yml --syntax-check
@@ -794,7 +794,7 @@ syntax-check-mailpit:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/mailpit.yml --syntax-check
 
 syntax-check-livekit:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/livekit.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/livekit.yml -e @$(REPO_ROOT)/playbooks/vars/livekit.yml --syntax-check
 
 syntax-check-neko:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/neko.yml --syntax-check
@@ -820,22 +820,21 @@ syntax-check-netbox:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/netbox.yml --syntax-check
 
 syntax-check-searxng:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/searxng.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/searxng.yml -e @$(REPO_ROOT)/playbooks/vars/searxng.yml --syntax-check
 
 syntax-check-ollama:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ollama.yml --syntax-check
-
 syntax-check-piper:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/piper.yml --syntax-check
 
 syntax-check-matrix-synapse:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/matrix-synapse.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/matrix-synapse.yml -e @$(REPO_ROOT)/playbooks/vars/matrix-synapse.yml --syntax-check
 
 syntax-check-n8n:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/n8n.yml --syntax-check
 
 syntax-check-nextcloud:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/nextcloud.yml --syntax-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/nextcloud.yml -e @$(REPO_ROOT)/playbooks/vars/nextcloud.yml --syntax-check
 
 syntax-check-nomad:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/nomad.yml --syntax-check
@@ -1568,7 +1567,12 @@ live-apply-service:
 	else \
 		printf '%s\n' "INFO live-apply-service: skipping service-catalog gates for non-catalog playbook '$(service)'"; \
 	fi
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(if $(filter ops_portal,$(service)),-e ops_portal_repo_root=$(REPO_ROOT),) $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	@descriptor_args=""; \
+	if [ -f "$(REPO_ROOT)/playbooks/vars/$(service).yml" ]; then \
+		printf '%s\n' "INFO live-apply-service: loading playbook descriptor playbooks/vars/$(service).yml"; \
+		descriptor_args="-e @$(REPO_ROOT)/playbooks/vars/$(service).yml"; \
+	fi; \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $$descriptor_args $(if $(filter ops_portal,$(service)),-e ops_portal_repo_root=$(REPO_ROOT),) $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 	@if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
 		printf '%s\n' "INFO live-apply-service: skipping restic live-apply trigger for syntax-check run"; \
 	else \

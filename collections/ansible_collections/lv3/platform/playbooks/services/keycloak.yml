@@ -1,0 +1,28 @@
+---
+# Playbook: services/keycloak.yml
+# Purpose: Provide the stable live-apply service wrapper for Keycloak.
+# Use case: Run `make live-apply-service service=keycloak` so the generic service lane can invoke the Keycloak converge playbook.
+#
+# Inputs (required):
+#   - env (str, required): Environment selector passed by the live-apply wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH connection strategy.
+#
+# Outputs:
+#   - Imports the canonical Keycloak converge playbook.
+#
+# Idempotency: Fully idempotent
+#              The wrapper only imports the canonical playbook and adds no extra mutation.
+#
+# Dependencies:
+#   - ADR 0097: Keycloak is the shared identity plane for authenticated platform services.
+#   - Requires: playbooks/keycloak.yml
+#
+# Related ADRs: 0079, 0097, 0197
+# Related Runbooks: docs/runbooks/configure-keycloak.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-11
+
+- import_playbook: ../keycloak.yml

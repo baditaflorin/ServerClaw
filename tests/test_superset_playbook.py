@@ -19,31 +19,18 @@ WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 
 
-def test_superset_playbook_orders_dns_database_runtime_edge_and_public_verify() -> None:
+def test_superset_playbook_imports_standard_includes_and_public_verify() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
+    imports = [entry["import_playbook"] for entry in plays if "import_playbook" in entry]
 
-    dns_play = plays[0]
-    postgres_play = next(play for play in plays if play["name"] == "Prepare PostgreSQL for Superset")
-    runtime_play = next(play for play in plays if play["name"] == "Converge Superset on the Docker runtime VM")
-    edge_play = next(play for play in plays if play["name"] == "Publish Superset through the NGINX edge")
-    publish_play = next(play for play in plays if play["name"] == "Verify the public Superset publication")
-
-    assert dns_play["hosts"] == "localhost"
-    assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "bi.example.com"
-
-    assert [role["role"] for role in postgres_play["roles"]] == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.postgres_vm",
-        "lv3.platform.superset_postgres",
+    assert imports == [
+        "_includes/dns_publication.yml",
+        "_includes/postgres_preparation.yml",
+        "_includes/docker_runtime_converge.yml",
+        "_includes/nginx_edge_publication.yml",
     ]
-    assert [role["role"] for role in runtime_play["roles"]] == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.docker_runtime",
-        "lv3.platform.keycloak_runtime",
-        "lv3.platform.superset_runtime",
-    ]
-    assert edge_play["vars_files"] == ["{{ playbook_dir }}/../inventory/group_vars/platform.yml"]
+
+    publish_play = next(play for play in plays if play.get("name") == "Verify the public Superset publication")
     publish_task = publish_play["tasks"][0]
     assert publish_task["ansible.builtin.include_role"]["name"] == "lv3.platform.superset_runtime"
     assert publish_task["ansible.builtin.include_role"]["tasks_from"] == "publish.yml"
