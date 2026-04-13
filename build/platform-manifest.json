@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.131",
-  "platform_version": "0.178.130",
-  "generated_at": "2026-04-13T21:35:59Z",
-  "next_refresh_at": "2026-04-13T22:35:59Z",
+  "repo_version": "0.178.133",
+  "platform_version": "0.178.132",
+  "generated_at": "2026-04-13T21:38:00Z",
+  "next_refresh_at": "2026-04-13T22:38:00Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -98,13 +98,14 @@
       },
       "coolify_apps": {
         "service_name": "Coolify Apps Ingress",
-        "status": "degraded",
-        "score": 0.8,
-        "safe_to_act": false,
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
         "source": "repo_evidence",
-        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO, live apply evidence.",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://apps.example.com"
+        "primary_url": "https://apps.example.com",
+        "last_live_apply": "2026-04-03T00:00:00Z"
       },
       "crawl4ai": {
         "service_name": "Crawl4AI",
@@ -705,6 +706,17 @@
         "primary_url": "kafka://10.10.10.20:9092",
         "last_live_apply": "2026-04-12T00:00:00Z"
       },
+      "repo_intake": {
+        "service_name": "Repo Intake",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://repo-intake.example.com",
+        "last_live_apply": "2026-04-12T00:00:00Z"
+      },
       "repowise": {
         "service_name": "Repowise Semantic Code Search",
         "status": "healthy",
@@ -750,6 +762,17 @@
         "primary_url": "https://chat.example.com",
         "last_live_apply": "2026-04-12T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "sftpgo": {
+        "service_name": "SFTPGo",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://files.example.com",
+        "last_live_apply": "2026-04-12T00:00:00Z"
       },
       "status_page": {
         "service_name": "Public Status Page",
@@ -6272,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.129",
+    "last_version": "0.178.131",
     "deployed_at": "2026-04-13",
-    "summary": "ADR 0413: fix LibreChat SSO redirect_uri mismatch, retire stale platform_service_topology in 5 roles, codify platform-admin as repo-managed Keycloak identity, and guard nginx-edge playbooks against stale platform.yml implement ADR 0411/0412: provision-account/deprovision-account agent tools with live Keycloak auth, Windmill daily account-expiry reaper, nginx @lv3_forbidden 403 error page, and LibreChat accounts tool pack",
-    "release_notes_url": "docs/release-notes/0.178.131.md"
+    "summary": "live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests",
+    "release_notes_url": "docs/release-notes/0.178.133.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
