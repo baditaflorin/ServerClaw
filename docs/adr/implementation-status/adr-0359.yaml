@@ -5,60 +5,171 @@ canonical_implementation_status: Implemented
 detected_markers:
 - marker_type: git-commit
   adr_number: 0359
+  location: git:a96809531
+  evidence: a96809531 [ws-0359] Cut 0.178.132 prep on latest mainline
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.510111'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:1c6c23fc0
+  evidence: 1c6c23fc0 [ws-0359] Record rebased live-apply closeout evidence
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.510200'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:ade706116
+  evidence: ade706116 [ws-0359] Fix exact-main ADR 0359 live apply gaps
+  confidence: 1.0
+  detected_on: '2026-04-13T18:14:30.510211'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:b97e69b16
+  evidence: b97e69b16 [ws-0359] Provision postgres HA guests from live template fallback
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.510225'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:c32c0c81c
+  evidence: 'c32c0c81c On codex/ws-0359-main-merge-r2: ws-0359-restic-generated'
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.510428'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:255aabae9
+  evidence: '255aabae9 index on codex/ws-0359-main-merge-r2: 17a001981 [ws-0359] Fix
+    exact-main ADR 0359 live apply gaps'
+  confidence: 1.0
+  detected_on: '2026-04-13T18:14:30.510440'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:17a001981
+  evidence: 17a001981 [ws-0359] Fix exact-main ADR 0359 live apply gaps
+  confidence: 1.0
+  detected_on: '2026-04-13T18:14:30.510447'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:8d177c3e7
+  evidence: 8d177c3e7 [ws-0359] Refresh canonical truth for exact-main replay
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.510551'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:f686601f0
+  evidence: f686601f0 [ws-0359] Provision postgres HA guests from live template fallback
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.510564'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:39422ad46
+  evidence: 39422ad46 [ws-0359] Refresh latest-main apply evidence
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511569'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:2aa850cf7
+  evidence: 2aa850cf7 [ws-0359] Unblock exact-main live apply gating
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511595'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:52c757d6c
+  evidence: 52c757d6c [ws-0359] Refresh latest-main replay evidence (0.178.123)
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511607'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:4578fa49a
+  evidence: 4578fa49a [ws-0359] Refresh blocked latest-main replay to 0.178.118
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511618'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:993c01f6f
+  evidence: 993c01f6f [ws-0359] Record latest-main blocked live-apply state
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511629'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:66e6fb543
+  evidence: 66e6fb543 [ws-0359] Refresh latest-main replay evidence (0.178.123)
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511692'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:bd7d1ece3
+  evidence: bd7d1ece3 [ws-0359] Refresh blocked latest-main replay to 0.178.118
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511731'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:16847638b
+  evidence: 16847638b [ws-0359] Record latest-main blocked live-apply state
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.511742'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:e1efe6a99
+  evidence: e1efe6a99 [ws-0359] Refresh blocked latest-main replay to 0.178.118
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.512190'
+- marker_type: git-commit
+  adr_number: 0359
+  location: git:9c3bf1f5e
+  evidence: 9c3bf1f5e [ws-0359] Record latest-main blocked live-apply state
+  confidence: 0.6
+  detected_on: '2026-04-13T18:14:30.512208'
+- marker_type: git-commit
+  adr_number: 0359
   location: git:5ac89567d
   evidence: '5ac89567d chore: add gate bypass receipts for ADR 0359 push'
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:39.828234'
+  detected_on: '2026-04-13T18:14:30.521392'
 - marker_type: git-commit
   adr_number: 0359
   location: git:7248a600b
   evidence: "7248a600b [release] Bump to 0.178.12 \u2014 ADR 0359 declarative PostgreSQL\
     \ client registry"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:39.828366'
+  detected_on: '2026-04-13T18:14:30.521610'
 - marker_type: git-commit
   adr_number: 0359
   location: git:e86feffef
   evidence: 'e86feffef feat(adr-0359): implement declarative PostgreSQL client registry'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:39.828372'
+  detected_on: '2026-04-13T18:14:30.521621'
 - marker_type: git-commit
   adr_number: 0359
   location: git:bf57cd0b8
   evidence: 'bf57cd0b8 release(0.178.8): ADR 0359 declarative postgres registry +
     keycloak fixes'
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:39.828375'
+  detected_on: '2026-04-13T18:14:30.521630'
 - marker_type: git-commit
   adr_number: 0359
   location: git:c33b6f02c
   evidence: 'c33b6f02c feat(adr-0359): implement declarative PostgreSQL client registry'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:39.828397'
+  detected_on: '2026-04-13T18:14:30.521671'
 - marker_type: git-commit
   adr_number: 0359
   location: git:9d1aa8d91
   evidence: '9d1aa8d91 docs(adr-0359): declarative postgres client registry'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:39.828465'
+  detected_on: '2026-04-13T18:14:30.521830'
 - marker_type: git-commit
   adr_number: 0359
   location: git:227123ea4
   evidence: '227123ea4 docs(adr-0359): declarative postgres client registry'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:39.828475'
+  detected_on: '2026-04-13T18:14:30.521921'
 inferred_implementation_status: Likely Implemented
-status_match: false
-summary: 'Canonical Status: Accepted
+status_match: true
+summary: 'Canonical Status: Implemented
 
   Inferred Status: Likely Implemented
 
-  Markers Found: 7
+  Markers Found: 26
 
-  Breakdown: git-commit=7
-
-  Implemented In Repo Version: 0.178.12
-
-  Implemented In Platform Version: 0.178.131
+  Breakdown: git-commit=26
 
   Implemented On: 2026-04-13'

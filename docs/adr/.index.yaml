@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-13'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 445
+total_adrs: 446
 adr_number_range:
   first: '0001'
-  last: '0412'
-  next_available: '0413'
+  last: '0413'
+  next_available: '0414'
 implementation_status_summary:
   Implemented: 350
   Partial: 3
   Not Implemented: 33
   Deprecated: 5
   Accepted: 25
-  Proposed: 29
+  Proposed: 30
 decision_status_summary:
   Accepted: 347
-  Proposed: 35
+  Proposed: 36
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 13
+      count: 14
       first_adr: '0400'
-      last_adr: '0412'
+      last_adr: '0413'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -106,7 +106,7 @@ facets:
       count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 40
+      count: 41
   by_status:
     - implementation_status: Implemented
       slug: implemented
@@ -131,14 +131,19 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 29
+      count: 30
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0413'
+  next_available_adr: '0414'
 latest_adrs:
+  - adr: '0413'
+    title: SSO Redirect URI Mismatch and Service Topology Variable Drift
+    implementation_status: Proposed
+    concern: vm-topology
+    path: docs/adr/0413-sso-redirect-uri-and-service-topology-variable-drift.md
   - adr: '0412'
     title: Keycloak Native Account Expiry
     implementation_status: Proposed
@@ -186,12 +191,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0404-service-lifecycle-contract.md
-  - adr: '0403'
-    title: Safe Password Alphabet Standard
-    implementation_status: Partial
-    concern: security
-    path: docs/adr/0403-safe-password-alphabet-standard.md
-    implemented_on: '2026-04-10'
 discovery_queries:
   how do we bootstrap:
     - '0001'

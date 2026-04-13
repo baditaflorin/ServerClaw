@@ -535,7 +535,7 @@ workstreams:
 - id: ws-0359-live-apply
   adr: 0359
   title: Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main
-  status: ready_for_merge
+  status: live_applied
   owner: codex
   branch: codex/ws-0359-main-merge-r2
   worktree_path: .worktrees/ws-0359-main-merge-r2
@@ -569,6 +569,7 @@ workstreams:
   - inventory/hosts.yml
   - playbooks/proxmox-install.yml
   - playbooks/postgres-vm.yml
+  - scripts/topology-snapshot.json
   - tests/test_proxmox_guests_role.py
   - tests/test_postgres_vm_role.py
   - tests/test_postgres_vm_access_policy.py
@@ -621,6 +622,7 @@ workstreams:
       - inventory/hosts.yml
       - playbooks/proxmox-install.yml
       - playbooks/postgres-vm.yml
+      - scripts/topology-snapshot.json
       mode: shared_contract
       contract: platform-topology-v1
     - id: ws0359_topology_tests
@@ -655,7 +657,7 @@ workstreams:
       postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
   blockers: []
   ready_to_merge: true
-  live_applied: false
+  live_applied: true
   notes: 'ADR 0359 is already implemented in repo code on origin/main. This closeout
     started from the latest realistic 0.178.129 base origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1,
     provisioned the missing postgres-replica, postgres-apps, and postgres-data guests
@@ -665,11 +667,12 @@ workstreams:
     ADR 0359 registry load plus guest-wide 10.10.10.0/24 HBA fallback that otherwise
     allowed cross-database logins. The branch rebased first onto origin/main@063e88c0fe49c278cbfe231a345eaebb145ec404
     and captured exact-tip replay evidence for repo/platform version 0.178.131. Reachable
-    origin/main has since advanced again to d95efb4e6e59218b7cbccb3a8e61aa95a7b7af72,
-    which already cut repo version 0.178.131 for ADR 0413. The final remaining step
-    is to replay `make live-apply-service service=postgres-vm env=production` once
-    more from the rebased 0.178.132 integration commit, refresh the receipt/source-commit
-    metadata, and then push main.
+    origin/main then advanced again to d95efb4e6e59218b7cbccb3a8e61aa95a7b7af72, which
+    already cut repo version 0.178.131 for ADR 0413. The final closeout rebased onto
+    that tip, cut repo version 0.178.132, replayed `make live-apply-service service=postgres-vm
+    env=production` from exact commit a968095316c70ebe95858891c0e90fbfa9182a77, refreshed
+    the runtime and least- privilege access proofs, and recorded ADR 0359 as live-applied
+    in platform version 0.178.132.
 
     '
   plane_issue_id: ebace4da-ecfa-42aa-8d14-8189950e9d5a

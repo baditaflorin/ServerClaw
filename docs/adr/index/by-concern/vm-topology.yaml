@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: vm-topology
-total_adrs: 40
+total_adrs: 41
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -748,3 +748,21 @@ adrs:
     summary: Build a POST /v1/accounts endpoint on the platform API gateway
     filename: 0411-unified-account-provisioning-api.md
     path: docs/adr/0411-unified-account-provisioning-api.md
+  - adr: '0413'
+    title: SSO Redirect URI Mismatch and Service Topology Variable Drift
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - sso
+      - redirect
+      - uri
+      - mismatch
+      - service
+      - topology
+      - variable
+      - drift
+    summary: The single authoritative source for LibreChat's callback URL is
+    filename: 0413-sso-redirect-uri-and-service-topology-variable-drift.md
+    path: docs/adr/0413-sso-redirect-uri-and-service-topology-variable-drift.md

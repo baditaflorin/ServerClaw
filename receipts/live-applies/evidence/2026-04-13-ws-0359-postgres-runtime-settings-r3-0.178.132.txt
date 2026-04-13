@@ -1,0 +1,16 @@
+postgres-apps | CHANGED | rc=0 >>
+pgaudit
+ddl,role
+on
+postgres-replica | CHANGED | rc=0 >>
+pgaudit
+ddl,role
+on
+postgres | CHANGED | rc=0 >>
+pgaudit
+ddl,role
+on
+postgres-data | CHANGED | rc=0 >>
+pgaudit
+ddl,role
+on
