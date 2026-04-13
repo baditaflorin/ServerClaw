@@ -1,0 +1,22 @@
+Workstream ws-0361-live-apply live-apply summary (2026-04-13)
+
+Live apply command:
+- make converge-semaphore env=production
+
+Pre-apply recovery actions on docker-runtime:
+- sudo docker compose -f /opt/mail-platform/docker-compose.yml up -d
+- sudo docker compose -f /opt/netbox/docker-compose.yml up -d
+- sudo docker compose -f /opt/keycloak/docker-compose.yml up -d --force-recreate
+- Keycloak readiness check: curl http://127.0.0.1:19000/health/ready (HTTP 200)
+
+Verification (controller):
+- curl "$SEMAPHORE_BASE_URL/api/ping" -> "pong"
+- curl -fsSI "$SEMAPHORE_BASE_URL/auth/oidc/login" -> HTTP 200 with Semaphore HTML
+- make semaphore-manage ACTION=list-projects -> LV3 Semaphore listed
+- make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template "Semaphore Self-Test" --wait' -> status success
+
+Repo validation:
+- ./scripts/validate_repo.sh workstream-surfaces (pass)
+- make preflight WORKFLOW=converge-semaphore (pass; keycloak_semaphore_client_secret present)
+- pytest tests/test_semaphore_runtime_role.py tests/test_semaphore_playbook.py tests/test_keycloak_runtime_role.py (35 passed)
+- ./scripts/validate_repo.sh agent-standards (warning: topology snapshot stale)

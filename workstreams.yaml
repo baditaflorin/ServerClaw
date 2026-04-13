@@ -279,9 +279,9 @@ workstreams:
 - id: ws-0368-live-apply
   adr: 0368
   title: ADR 0368 Live Apply and Completion
-  status: blocked
-  ready_to_merge: false
-  live_applied: false
+  status: ready_to_merge
+  ready_to_merge: true
+  live_applied: true
   owner: codex
   branch: codex/ws-0368-live-apply
   worktree_path: .worktrees/ws-0368-live-apply
@@ -519,9 +519,11 @@ workstreams:
   - tests/test_semaphore_playbook.py
   - receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json
   - receipts/live-applies/2026-04-12-adr-0361-semaphore-keycloak-oidc-live-apply.json
+  - receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json
   - receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-mainline-live-apply.json
   - receipts/live-applies/evidence/2026-04-11-ws-0361-*
   - receipts/live-applies/evidence/2026-04-12-ws-0361-*
+  - receipts/live-applies/evidence/2026-04-13-ws-0361-*
   ownership_manifest:
     owned_surfaces:
     - id: workstream_registry
@@ -558,9 +560,11 @@ workstreams:
       - tests/test_semaphore_playbook.py
       - receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json
       - receipts/live-applies/2026-04-12-adr-0361-semaphore-keycloak-oidc-live-apply.json
+      - receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json
       - receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-mainline-live-apply.json
       - receipts/live-applies/evidence/2026-04-11-ws-0361-*
       - receipts/live-applies/evidence/2026-04-12-ws-0361-*
+      - receipts/live-applies/evidence/2026-04-13-ws-0361-*
       mode: exclusive
     - id: adr_0361_index
       paths:
@@ -585,16 +589,7 @@ workstreams:
     release_bump: null
     included_in_repo_version: null
     latest_receipts: {}
-  blockers:
-  - Live apply blocked on 2026-04-11 because `make converge-semaphore env=production`
-    reached the scoped Ansible run and then failed when SSH to `proxmox-host` at `100.64.0.1:22`
-    timed out. Direct probes to `65.108.75.123:22`, `100.118.189.95:22`, `100.118.189.95:2222`,
-    `10.10.10.92:22`, `http://100.64.0.1:8020`, and `https://100.64.0.1:8006/api2/json/`
-    were also unreachable from this workstation; `tailscale ping 100.64.0.1` and `tailscale
-    ping 10.10.10.92` timed out even though `tailscale status --json` still listed
-    the subnet-router peer online, and the installed macOS App Store/TestFlight Tailscale
-    build could not provide `tailscale ssh` as a fallback. The repo changes are ready
-    but the live mutate remains pending restored host reachability.
+  blockers: []
   plane_issue_id: ef6c2a9c-6b89-4760-b443-95ee881e4511
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'

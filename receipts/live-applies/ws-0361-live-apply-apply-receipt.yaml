@@ -1,0 +1,24 @@
+workstream_id: ws-0361-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-13T12:28:38Z'
+completed_at: '2026-04-13T12:38:47Z'
+applied_by: codex
+repo_version: 0414f3f1991be54278374b0ee7789e04f6ba0b1c
+adr: '0361'
+summary: Live apply Semaphore Keycloak OIDC integration and verify controller auth flow.
+targets:
+- target: proxmox-host
+  role: proxmox-tailscale-proxy
+- target: postgres
+  role: semaphore-postgres
+- target: docker-runtime
+  role: keycloak-runtime
+- target: runtime-control
+  role: semaphore-runtime
+errors: []
+notes:
+- Live apply executed via make converge-semaphore env=production.
+- Pre-apply recovery on docker-runtime: docker compose up -d for mail-platform and netbox; docker compose up -d --force-recreate for keycloak.
+- Verification: /api/ping returned pong; /auth/oidc/login returned HTTP 200; semaphore-manage list-projects and Semaphore Self-Test template succeeded.
+- Evidence captured in receipts/live-applies/evidence/2026-04-13-ws-0361-summary.txt.

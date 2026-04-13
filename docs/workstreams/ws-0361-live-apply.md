@@ -2,17 +2,17 @@
 
 - ADR: [ADR 0361](../adr/0361-semaphore-keycloak-oidc-integration.md)
 - Title: verify and live-apply the repo-managed Semaphore Keycloak OIDC flow from the latest origin/main
-- Status: blocked
-- Included In Repo Version: not yet
-- Branch-Local Receipt: `receipts/live-applies/2026-04-12-adr-0361-semaphore-keycloak-oidc-live-apply.json`
-- Evidence Summary: `receipts/live-applies/evidence/2026-04-12-ws-0361-summary.txt`
+- Status: ready_to_merge
+- Included In Repo Version: pending main merge
+- Branch-Local Receipt: `receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json`
+- Evidence Summary: `receipts/live-applies/evidence/2026-04-13-ws-0361-summary.txt`
 - Prior Receipt: `receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json`
 - Mainline Receipt: pending
-- Implemented On: 2026-04-11
-- Live Applied On: not yet
-- Live Applied In Platform Version: not yet applied
+- Implemented On: 2026-04-13
+- Live Applied On: 2026-04-13
+- Live Applied In Platform Version: 0.178.126
 - Original Branch Base: `origin/main@86390fcc8a07fca2a58670f60ec4cf6b9d0278eb`
-- Latest Upstream Checked: `origin/main@cdcc806bebd22d18a67c4591049eb2250f488413`
+- Latest Upstream Checked: `origin/main@307cdbb6961b18d80f93f85024c3539589ce18fa`
 - Branch: `codex/ws-0361-live-apply`
 - Worktree: `.worktrees/ws-0361-live-apply`
 - Owner: codex
@@ -26,51 +26,29 @@
 - update the Semaphore runbooks, service catalogs, workstream state, and postmortem follow-up so the rotated-secret workflow is clear and reproducible
 - verify the repo automation path and the live Semaphore converge from the latest exact-main base
 
-## Outcome So Far
+## Outcome
 
 - dedicated worktree and branch created from `origin/main@86390fcc8a07fca2a58670f60ec4cf6b9d0278eb`
 - Semaphore and Keycloak role wiring now reconciles the dedicated Keycloak client before the Semaphore runtime and consumes the mirrored secret from `.local/keycloak/semaphore-client-secret.txt`
 - the service catalogs, dependency graph, runbooks, active workstream record, and sanitized historical `ws-0362` note now describe the same repo-managed OIDC boundary
-- while this workstream was in flight, `origin/main` advanced to `59fbe662b57c28388e47e784c29f457ffd4ec1d3` with release-only and unrelated Docker/Postgres changes; no overlapping ws-0361 surfaces moved upstream
+- `make converge-semaphore env=production` completed after restoring reachability and recovering the affected compose stacks on `docker-runtime`
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml python -m pytest -q tests/test_semaphore_runtime_role.py tests/test_semaphore_playbook.py tests/test_keycloak_runtime_role.py` passed with `32 passed in 3.19s`
-- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_dependency_graph.py tests/test_preflight_controller_local.py tests/test_validate_service_completeness.py tests/test_secret_rotation.py` reported `25 passed, 1 failed`; the lone failure is unrelated current-mainline drift in `tests/test_dependency_graph.py` because `litellm` is now a direct hard dependency of `postgres` but the baseline assertion set has not been updated
-- `make syntax-check-semaphore` passed
-- `make preflight WORKFLOW=converge-semaphore` passed after creating the unrelated ignored artifact directories that the current global workflow catalog expects in a fresh worktree; the preflight correctly reported `keycloak_semaphore_client_secret` as absent-before-apply
+- `uv run --with pytest --with pyyaml python -m pytest -q tests/test_semaphore_runtime_role.py tests/test_semaphore_playbook.py tests/test_keycloak_runtime_role.py` passed with `35 passed in 5.23s`
+- `make preflight WORKFLOW=converge-semaphore` passed and reported `keycloak_semaphore_client_secret` as present
 - `./scripts/validate_repo.sh workstream-surfaces` passed
-- broader repo validators on the same base still report unrelated mainline drift outside ws-0361, including the protected `README.md` public-entrypoint lint, a stale removed `playbooks/jupyterhub.yml` reference in repository data-model validation, and an unrelated `librechat` uptime contract issue
+- `./scripts/validate_repo.sh agent-standards` reported a warning about a stale topology snapshot but no failures
+- `GET /api/ping` returned `pong`
+- `GET /auth/oidc/login` returned `200 OK`
+- `make semaphore-manage ACTION=list-projects` succeeded
+- `Semaphore Self-Test` template completed with status `success`
 
-## Live-Apply Blocker
+## Live Apply Notes
 
-- `make converge-semaphore env=production` reached the scoped Ansible run and then failed before guest work began because SSH to `proxmox-host` at `100.64.0.1:22` timed out
-- direct follow-up probes from this workstation also failed:
-  - `ssh ops@100.64.0.1`: timeout
-  - `ssh ops@65.108.75.123`: timeout
-  - `ssh ops@100.118.189.95`: connection refused
-  - `ssh -p 2222 ops@100.118.189.95`: connection refused
-  - `tailscale ping 100.64.0.1`: timeout
-  - `tailscale ping 10.10.10.92`: timeout
-  - `ssh ops@10.10.10.92`: timeout
-  - `curl http://100.64.0.1:8020/api/ping`: timeout
-  - `curl http://100.118.189.95:8020/api/ping`: connection refused
-  - `curl https://100.64.0.1:8006/api2/json/`: timeout
-- `tailscale status --json` still listed the peer `proxmox-florin-subnet-router` online at `100.64.0.1`, but the local client reported coordination-server health warnings and no viable host or routed-guest management path from this workstation
-- `tailscale ssh` could not be used as a fallback because the macOS App Store/TestFlight build installed on this machine does not provide that subcommand
-- the current controller-local Semaphore auth artifact still points at `http://100.64.0.1:8020`, so the repo changes are ready but the live platform state was not mutated from this session
-- 2026-04-12 follow-up probes confirmed the workstation is currently logged out of the Headscale-managed tailnet:
-  - `tailscale status --json` reported `BackendState: Starting` with no assigned Tailscale IPs
-  - `curl -fsSI --max-time 5 https://headscale.lv3.org/health` timed out
-  - `nc -vz -w 5 65.108.75.123 443` and `nc -vz -w 5 65.108.75.123 22` timed out
-
-## Remaining Closeout
-
-- restore working reachability to `proxmox-host` or provide the correct `LV3_PROXMOX_HOST_ADDR` for this workstation
-- rerun `make converge-semaphore env=production`
-- verify `/api/ping`, `/auth/oidc/login`, `make semaphore-manage ACTION=list-projects`, and the seeded `Semaphore Self-Test` template against the live controller
-- record the final live-apply receipt(s), update ADR 0361 from `Partial` to `Live applied`, and only then perform the exact-main integration step for protected release surfaces
+- recovered `mail-platform`, `netbox`, and `keycloak` compose stacks on `docker-runtime` after regaining host access
+- forced a Keycloak container recreate to restore network connectivity before the readiness probe succeeded
 
 ## Notes
 
-- protected integration files stay intentionally untouched on this workstream branch because the live apply did not complete: no `VERSION` bump, no release-section edits in `changelog.md`, no top-level `README.md` status rewrite, and no `versions/stack.yaml` update
+- protected integration files stay intentionally untouched on this workstream branch until the exact-main integration step: no `VERSION` bump, no release-section edits in `changelog.md`, no top-level `README.md` status rewrite, and no `versions/stack.yaml` update

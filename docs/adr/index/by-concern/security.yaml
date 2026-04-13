@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-12'
+generated: '2026-04-13'
 facet: concern
 concern: security
 total_adrs: 38
@@ -555,7 +555,7 @@ adrs:
   - adr: '0361'
     title: Semaphore Keycloak OIDC Integration
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-04-07'
     concern: security
     keywords:
@@ -568,7 +568,8 @@ adrs:
     summary: Make the Semaphore OIDC client a repo-managed Keycloak concern and converge it
     filename: 0361-semaphore-keycloak-oidc-integration.md
     path: docs/adr/0361-semaphore-keycloak-oidc-integration.md
-    implemented_on: '2026-04-11'
+    implemented_in_platform_version: 0.178.126
+    implemented_on: '2026-04-13'
   - adr: '0362'
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted

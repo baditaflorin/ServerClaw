@@ -82,6 +82,19 @@ Expected results:
 
 ## Troubleshooting
 
+### Keycloak readiness endpoint fails during converge
+
+If `make converge-semaphore env=production` stalls or fails while waiting for
+the Keycloak readiness probe, recover the Keycloak compose stack on
+`docker-runtime`:
+
+```bash
+sudo docker compose -f /opt/keycloak/docker-compose.yml up -d --force-recreate
+curl -fsS http://127.0.0.1:19000/health/ready
+```
+
+Re-run the converge once the readiness endpoint returns a 200 response.
+
 ### Missing `.local/keycloak/semaphore-client-secret.txt`
 
 1. Verify the shared Keycloak runtime is healthy.

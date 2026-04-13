@@ -94,3 +94,27 @@ After a converge:
 - if the Semaphore Keycloak client secret is rotated or exposed, refresh the
   repo-managed mirror with `make converge-semaphore env=production`
 - document any emergency UI-authored mutation immediately and bring it back to repo truth in the same turn
+
+## Troubleshooting
+
+### Keycloak readiness probe fails during converge
+
+If `make converge-semaphore env=production` fails while waiting for the Keycloak
+readiness endpoint, recover the Keycloak compose stack on `docker-runtime`:
+
+```bash
+sudo docker compose -f /opt/keycloak/docker-compose.yml up -d --force-recreate
+curl -fsS http://127.0.0.1:19000/health/ready
+```
+
+Re-run the converge once the readiness endpoint responds.
+
+### Docker runtime compose stacks stopped after recovery
+
+If the Docker runtime recovery leaves other compose stacks stopped (for example
+`mail-platform` or `netbox`), restart them before re-running the converge:
+
+```bash
+sudo docker compose -f /opt/mail-platform/docker-compose.yml up -d
+sudo docker compose -f /opt/netbox/docker-compose.yml up -d
+```

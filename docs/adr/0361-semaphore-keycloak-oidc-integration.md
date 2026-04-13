@@ -1,10 +1,10 @@
 # ADR 0361: Semaphore Keycloak OIDC Integration
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: not yet merged
-- Implemented In Platform Version: not yet applied
-- Implemented On: 2026-04-11
+- Implementation Status: Live applied
+- Implemented In Repo Version: pending main merge
+- Implemented In Platform Version: 0.178.126
+- Implemented On: 2026-04-13
 - Date: 2026-04-07
 - Concern: Identity, Automation, Private Access
 - Depends on: ADR 0056 (Keycloak for operator and agent SSO), ADR 0149 (Semaphore for Ansible job management UI and API), ADR 0165 (Playbook / role metadata standard)
@@ -70,44 +70,32 @@ as part of the normal Semaphore apply path.
 
 ### Negative / Accepted Risk
 
-- live apply from this workstation is currently blocked by host reachability:
-  `make converge-semaphore env=production` reached the scoped Ansible run and
-  then failed when SSH to `proxmox-host` at `100.64.0.1:22` timed out
-- direct probes to `65.108.75.123:22`, `100.118.189.95:22`,
-  `100.118.189.95:2222`, `10.10.10.92:22`, `http://100.64.0.1:8020`, and
-  `https://100.64.0.1:8006/api2/json/` were also unreachable from this machine
-  during the same session
-- `tailscale status --json` still showed the subnet-router peer online, but the
-  local client reported coordination-server health warnings and both
-  `tailscale ping 100.64.0.1` and `tailscale ping 10.10.10.92` timed out
-- a 2026-04-12 follow-up confirmed the workstation was logged out of the
-  Headscale-managed tailnet and could not reach `https://headscale.lv3.org/health`
-  or the Proxmox management IP on ports `22` and `443`
+- the live apply required manual recovery of three Docker Compose stacks on
+  `docker-runtime` (`mail-platform`, `netbox`, and `keycloak`) because the
+  Keycloak container had no network and the compose stacks were stopped after
+  reachability was restored
+- the Keycloak readiness probe (`http://127.0.0.1:19000/health/ready`) returned
+  `Connection refused` until `docker compose ... up -d --force-recreate` was
+  run for the Keycloak stack
 
 ## Verification
 
 - focused Semaphore/Keycloak regression coverage passed:
-  `32 passed in 3.19s`
-- targeted controller-local and catalog validation reported `25 passed, 1
-  failed`; the lone failure is unrelated current-mainline drift in
-  `tests/test_dependency_graph.py` because `litellm` is now a direct hard
-  dependency of `postgres` but the baseline assertion set has not yet been
-  updated
-- `make syntax-check-semaphore` passed
-- `make preflight WORKFLOW=converge-semaphore` passed and correctly reported
-  `keycloak_semaphore_client_secret` as absent-before-apply
-- the branch-local workstream registry and ownership surfaces were regenerated
-  and validated
+  `35 passed in 5.23s`
+- `make preflight WORKFLOW=converge-semaphore` passed and reported
+  `keycloak_semaphore_client_secret` as present
+- `./scripts/validate_repo.sh workstream-surfaces` passed
+- `./scripts/validate_repo.sh agent-standards` reported a warning about a stale
+  topology snapshot but no failures
+- `make converge-semaphore env=production` completed successfully after the
+  runtime recovery steps
+- `GET /api/ping` returned `pong`
+- `GET /auth/oidc/login` returned `200 OK`
+- `make semaphore-manage ACTION=list-projects` succeeded
+- the seeded `Semaphore Self-Test` template completed with status `success`
 
-## Remaining Apply Step
+## Live Apply Evidence
 
-This ADR is repository-ready but not yet live-applied.
-
-When host reachability is restored:
-
-1. rerun `make converge-semaphore env=production`
-2. verify the private controller `/api/ping` and `/auth/oidc/login` endpoints
-3. verify `make semaphore-manage ACTION=list-projects`
-4. run the seeded `Semaphore Self-Test` template
-5. record the final live-apply receipt(s)
-6. update this ADR from `Partial` to `Live applied`
+- receipt: `receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json`
+- receipt: `receipts/live-applies/ws-0361-live-apply-apply-receipt.yaml`
+- evidence summary: `receipts/live-applies/evidence/2026-04-13-ws-0361-summary.txt`
