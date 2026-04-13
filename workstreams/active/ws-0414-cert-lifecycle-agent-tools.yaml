@@ -1,0 +1,47 @@
+id: ws-0414-cert-lifecycle-agent-tools
+adr: "0414"
+title: "Cert Lifecycle Management: Agent Tools, Cron Sync, and Skip-Validation Mode"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: platform-infrastructure
+branch: claude/hungry-yonath
+worktree_path: .claude/worktrees/hungry-yonath
+doc: docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
+depends_on:
+  - adr-0375-certificate-validation-and-concordance-enforcement
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0021-public-subdomain-publication-nginx-edge
+conflicts_with: []
+shared_surfaces:
+  - .githooks/pre-push
+  - scripts/certificate_validator.py
+  - config/subdomain-catalog.json
+  - config/certificate-catalog.json
+ownership_manifest:
+  owned_surfaces:
+  - id: cert_lifecycle_manager
+    paths:
+    - scripts/cert_lifecycle_manager.py
+    - config/cert-sync-cron.yaml
+    - docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
+    - docs/runbooks/cert-lifecycle-management.md
+    mode: exclusive
+  - id: pre_push_cert_skip
+    paths:
+    - .githooks/pre-push
+    mode: exclusive
+  - id: ws_0414_workstream
+    paths:
+    - workstreams/active/ws-0414-cert-lifecycle-agent-tools.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+notes: |
+  Root cause: pre-push hook advertised SKIP_CERT_VALIDATION=1 bypass but
+  never checked the env var, forcing operators to use --no-verify.
+  Fixes: honor SKIP_CERT_VALIDATION=1 with proper bypass logging.
+  Adds: cert_lifecycle_manager.py for programmatic subdomain+cert operations
+  (create, delete, renew, revoke, sync-missing) callable from LibreChat agent.
+  Adds: cron-based auto-sync for missing certs.
+  Adds: --skip-cert-validation mode for deployments without Hetzner DNS API.
+  Related postmortem: ADR 0415.

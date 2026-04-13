@@ -10,7 +10,11 @@ generated: '2026-04-13'
 facet: status
 implementation_status: Accepted
 slug: accepted
+<<<<<<< HEAD
 total_adrs: 30
+=======
+total_adrs: 26
+>>>>>>> 309759ff9 (feat(ADR-0414/0415): cert lifecycle manager + fix SKIP_CERT_VALIDATION=1 gate bypass)
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -525,3 +529,20 @@ adrs:
     path: docs/adr/0405-emergency-credential-rotation-after-public-release.md
     implemented_in_repo_version: 0.178.103
     implemented_on: '2026-04-11'
+  - adr: '0415'
+    title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-14'
+    concern: ci-cd
+    keywords:
+      - postmortem
+      - cert
+      - mismatch
+      - gate
+      - forced
+      - no-verify
+      - push
+    summary: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
+    filename: 0415-postmortem-cert-mismatch-gate-forced-no-verify.md
+    path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md

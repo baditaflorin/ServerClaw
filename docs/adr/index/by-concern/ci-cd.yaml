@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: ci-cd
-total_adrs: 43
+total_adrs: 44
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -814,3 +814,20 @@ adrs:
     path: docs/adr/0399-platform-reconciliation-daemon.md
     implemented_in_repo_version: 0.178.92
     implemented_on: '2026-04-10'
+  - adr: '0415'
+    title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-14'
+    concern: ci-cd
+    keywords:
+      - postmortem
+      - cert
+      - mismatch
+      - gate
+      - forced
+      - no-verify
+      - push
+    summary: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
+    filename: 0415-postmortem-cert-mismatch-gate-forced-no-verify.md
+    path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md

@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 14
+total_adrs: 16
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -177,7 +177,7 @@ adrs:
     title: Generic Inventory Hostnames
     status: Proposed
     implementation_status: Proposed
-    date: '2026-04-11'
+    date: '2026-03-21'
     concern: platform
     keywords:
       - generic
@@ -259,3 +259,36 @@ adrs:
     summary: The single authoritative source for LibreChat's callback URL is
     filename: 0413-sso-redirect-uri-and-service-topology-variable-drift.md
     path: docs/adr/0413-sso-redirect-uri-and-service-topology-variable-drift.md
+  - adr: '0414'
+    title: Certificate Lifecycle Agent Tools and Cron Sync
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-14'
+    concern: security
+    keywords:
+      - certificate
+      - lifecycle
+      - agent
+      - tools
+      - cron
+      - sync
+    summary: 'We implement four changes:'
+    filename: 0414-cert-lifecycle-agent-tools-and-cron-sync.md
+    path: docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
+  - adr: '0415'
+    title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-14'
+    concern: ci-cd
+    keywords:
+      - postmortem
+      - cert
+      - mismatch
+      - gate
+      - forced
+      - no-verify
+      - push
+    summary: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
+    filename: 0415-postmortem-cert-mismatch-gate-forced-no-verify.md
+    path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md

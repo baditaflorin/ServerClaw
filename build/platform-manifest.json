@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.131",
   "platform_version": "0.178.130",
-  "generated_at": "2026-04-13T14:10:03Z",
-  "next_refresh_at": "2026-04-13T15:10:03Z",
+  "generated_at": "2026-04-13T21:35:59Z",
+  "next_refresh_at": "2026-04-13T22:35:59Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -98,14 +98,13 @@
       },
       "coolify_apps": {
         "service_name": "Coolify Apps Ingress",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
+        "status": "degraded",
+        "score": 0.8,
+        "safe_to_act": false,
         "source": "repo_evidence",
-        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO, live apply evidence.",
         "lifecycle_status": "active",
-        "primary_url": "https://apps.example.com",
-        "last_live_apply": "2026-04-03T00:00:00Z"
+        "primary_url": "https://apps.example.com"
       },
       "crawl4ai": {
         "service_name": "Crawl4AI",

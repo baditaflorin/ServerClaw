@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: security
-total_adrs: 38
+total_adrs: 39
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -716,3 +716,19 @@ adrs:
     path: docs/adr/0405-emergency-credential-rotation-after-public-release.md
     implemented_in_repo_version: 0.178.103
     implemented_on: '2026-04-11'
+  - adr: '0414'
+    title: Certificate Lifecycle Agent Tools and Cron Sync
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-14'
+    concern: security
+    keywords:
+      - certificate
+      - lifecycle
+      - agent
+      - tools
+      - cron
+      - sync
+    summary: 'We implement four changes:'
+    filename: 0414-cert-lifecycle-agent-tools-and-cron-sync.md
+    path: docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
