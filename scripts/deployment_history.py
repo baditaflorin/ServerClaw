@@ -18,6 +18,7 @@ from changelog_redaction import redact_history_entries
 from environment_catalog import receipt_subdirectory_environments
 from live_apply_receipts import iter_receipt_paths
 from mutation_audit import resolve_loki_url
+from platform.repo import shared_repo_root
 
 
 LIVE_APPLY_DIR = repo_path("receipts", "live-applies")
@@ -155,16 +156,26 @@ def iter_json_paths(root: Path) -> list[Path]:
 
 def relative_repo_path(path: Path) -> str:
     resolved = path.resolve()
-    try:
-        return resolved.relative_to(repo_path()).as_posix()
-    except ValueError:
-        return str(resolved)
+    roots = (repo_path().resolve(), shared_repo_root(repo_path()).resolve())
+    for root in roots:
+        if resolved.is_relative_to(root):
+            return resolved.relative_to(root).as_posix()
+    return str(resolved)
 
 
 def receipt_environment(path: Path, root: Path) -> str:
-    relative = path.resolve().relative_to(root.resolve())
-    if relative.parts and relative.parts[0] in receipt_subdirectory_environments():
-        return relative.parts[0]
+    resolved_path = path.resolve()
+    candidate_roots = [root.resolve()]
+    shared_receipts_root = (shared_repo_root(repo_path()) / "receipts" / "live-applies").resolve()
+    if candidate_roots[0] == LIVE_APPLY_DIR.resolve() and shared_receipts_root not in candidate_roots:
+        candidate_roots.append(shared_receipts_root)
+
+    for candidate_root in candidate_roots:
+        if resolved_path.is_relative_to(candidate_root):
+            relative = resolved_path.relative_to(candidate_root)
+            if relative.parts and relative.parts[0] in receipt_subdirectory_environments():
+                return relative.parts[0]
+            return "production"
     return "production"
 
 
@@ -205,7 +216,10 @@ def collect_live_apply_entries(
 ) -> list[dict[str, Any]]:
     matchers = build_service_matchers(service_catalog)
     entries: list[dict[str, Any]] = []
+    include_shared_receipts = receipts_dir.resolve() == LIVE_APPLY_DIR.resolve()
     for path in iter_receipt_paths(receipts_dir):
+        if not include_shared_receipts and not path.resolve().is_relative_to(receipts_dir.resolve()):
+            continue
         receipt = load_json(path)
         receipt_id = history_receipt_id(path, receipt)
         receipt_timestamp = history_receipt_timestamp(receipt)

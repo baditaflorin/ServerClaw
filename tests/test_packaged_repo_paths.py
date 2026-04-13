@@ -4,9 +4,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+if str(REPO_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
+import deployment_history
 from platform import repo as repo_module
 from platform.ledger import _common as ledger_common
 
@@ -56,3 +59,20 @@ def test_repo_path_prefers_materialized_worktree_receipts_over_shared_receipts(m
     monkeypatch.setattr(repo_module, "REPO_ROOT", worktree_root)
 
     assert repo_module.repo_path("receipts", "security-reports", "latest.json") == worktree_receipt
+
+
+def test_deployment_history_relative_repo_path_supports_shared_receipts(monkeypatch, tmp_path: Path) -> None:
+    shared_root = tmp_path / "repo"
+    worktree_root = shared_root / ".worktrees" / "ws-0371"
+    receipt_path = shared_root / "receipts" / "live-applies" / "2026-04-13-test.json"
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(
+        deployment_history,
+        "repo_path",
+        lambda *parts: worktree_root if not parts else worktree_root.joinpath(*parts),
+    )
+    monkeypatch.setattr(deployment_history, "shared_repo_root", lambda _repo_root=None: shared_root)
+
+    assert deployment_history.relative_repo_path(receipt_path) == "receipts/live-applies/2026-04-13-test.json"

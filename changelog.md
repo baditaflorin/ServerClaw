@@ -12,8 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- replayed ADR 0371 from exact mainline by migrating the remaining LibreChat, LiteLLM, and Repowise verifier wrappers onto the shared `verify_service_health` contract, validating the fresh-worktree automation paths, and recording governed end-to-end live-apply evidence for the affected services
-
 ## Latest Release
 
 - [0.178.126 release notes](docs/release-notes/0.178.126.md)

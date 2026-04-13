@@ -1,10 +1,10 @@
 id: ws-0371-live-apply
 adr: '0371'
 title: Re-verify parameterized service verification tasks from the latest origin/main
-status: ready_for_merge
+status: in_progress
 owner: codex
 branch: codex/ws-0371-live-apply
-worktree_path: .worktrees/ws-0371-live-apply
+worktree_path: .worktrees/ws-0371-final
 doc: docs/workstreams/ws-0371-live-apply.md
 depends_on:
 - adr-0165-workflow-idempotency
@@ -34,6 +34,7 @@ shared_surfaces:
 - config/service-capability-catalog.json
 - config/subdomain-catalog.json
 - config/worktree-bootstrap-manifests.json
+- collections/ansible_collections/lv3/platform/playbooks/tasks/generate-host-sbom.yml
 - docs/adr/.index.yaml
 - docs/adr/index/**
 - docs/adr/0371-parameterized-verify-tasks.md
@@ -54,13 +55,15 @@ shared_surfaces:
 - inventory/host_vars/proxmox-host.yml
 - inventory/group_vars/platform_tls_certs.yml
 - playbooks/tasks/security-scan.yml
+- playbooks/tasks/generate-host-sbom.yml
 - playbooks/repowise.yml
 - collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml
 - playbooks/services/librechat.yml
 - playbooks/services/litellm.yml
 - playbooks/services/repowise.yml
 - playbooks/templates/compose_macros.j2
-- platform/ansible/execution_scopes.py
+- platform/repo.py
+  - platform/ansible/execution_scopes.py
 - receipts/live-applies/*adr-0371*
 - receipts/live-applies/evidence/*ws0371*
 - receipts/live-applies/evidence/*ws-0371*
@@ -80,7 +83,10 @@ shared_surfaces:
 - scripts/generate_ops_portal.py
 - scripts/generate_status_docs.py
 - scripts/materialize_live_apply_worktree_artifacts.py
+- scripts/drift_lib.py
+- scripts/deployment_history.py
 - scripts/platform_manifest.py
+- scripts/trigger_restic_live_apply.py
 - scripts/topology-snapshot.json
 - scripts/security_posture_report.py
 - scripts/service_catalog.py
@@ -91,16 +97,19 @@ shared_surfaces:
 - tests/test_ansible_execution_scopes.py
 - tests/test_common_docker_bridge_chains_helper.py
 - tests/test_generate_release_notes.py
+- tests/test_generate_host_sbom_task.py
 - tests/test_live_apply_worktree_bootstrap.py
 - tests/test_litellm_runtime_role.py
 - tests/test_ollama_runtime_role.py
 - tests/test_ops_portal.py
+- tests/test_packaged_repo_paths.py
 - tests/test_rag_context_runtime_role.py
 - tests/test_repowise_playbook.py
 - tests/test_security_scan_task.py
 - tests/test_security_posture_report.py
 - tests/test_service_compose_macro_resolution.py
 - tests/test_service_live_apply_wrappers.py
+- tests/test_restic_config_backup.py
 - tests/test_subdomain_catalog.py
 - tests/test_validate_portal_auth.py
 - tests/test_validation_toolkit.py
@@ -173,17 +182,29 @@ ownership_manifest:
   - id: ws_0371_worktree_bootstrap
     paths:
     - config/worktree-bootstrap-manifests.json
+    - platform/repo.py
+    - scripts/deployment_history.py
     - scripts/materialize_live_apply_worktree_artifacts.py
     - tests/test_live_apply_worktree_bootstrap.py
+    - tests/test_packaged_repo_paths.py
     mode: exclusive
   - id: ws_0371_security_posture_refresh
     paths:
+    - collections/ansible_collections/lv3/platform/playbooks/tasks/generate-host-sbom.yml
     - collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml
+    - playbooks/tasks/generate-host-sbom.yml
     - playbooks/tasks/security-scan.yml
     - receipts/security-reports/20260412T120210Z.json
     - scripts/security_posture_report.py
+    - tests/test_generate_host_sbom_task.py
     - tests/test_security_posture_report.py
     - tests/test_security_scan_task.py
+    mode: exclusive
+  - id: ws_0371_live_apply_trigger
+    paths:
+    - scripts/drift_lib.py
+    - scripts/trigger_restic_live_apply.py
+    - tests/test_restic_config_backup.py
     mode: exclusive
   - id: ws_0371_generator_bootstrap
     paths:
