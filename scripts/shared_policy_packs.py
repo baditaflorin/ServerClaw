@@ -20,7 +20,7 @@ SHARED_POLICY_PACKS_PATH: Final = repo_path("config", "shared-policy-packs.json"
 SHARED_POLICY_PACKS_SCHEMA_PATH: Final = repo_path("docs", "schema", "shared-policy-packs.schema.json")
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     normalized: list[str] = []
     seen: set[str] = set()
@@ -130,7 +130,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
         f"{path_str}.packs.service_redundancy.rehearsal_gate",
     )
     rehearsal_tier_sequence = tuple(
-        require_string_list(
+        unique_string_list(
             rehearsal_gate.get("required_tiers"),
             f"{path_str}.packs.service_redundancy.rehearsal_gate.required_tiers",
         )
@@ -142,7 +142,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
             + ", ".join(unknown_rehearsal_tiers)
         )
     allowed_rehearsal_results = set(
-        require_string_list(
+        unique_string_list(
             rehearsal_gate.get("allowed_results"),
             f"{path_str}.packs.service_redundancy.rehearsal_gate.allowed_results",
         )
@@ -192,19 +192,19 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
         )
 
     known_empty_locations = set(
-        require_string_list(
+        unique_string_list(
             redundancy.get("known_empty_locations"),
             f"{path_str}.packs.service_redundancy.known_empty_locations",
         )
     )
     allowed_standby_modes = set(
-        require_string_list(
+        unique_string_list(
             redundancy.get("standby_modes"),
             f"{path_str}.packs.service_redundancy.standby_modes",
         )
     )
     control_plane_categories = set(
-        require_string_list(
+        unique_string_list(
             redundancy.get("control_plane_categories"),
             f"{path_str}.packs.service_redundancy.control_plane_categories",
         )
@@ -235,7 +235,7 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
                 f"shared policy packs define multiple primary capacity classes for requester '{requester_class}'"
             )
         aliases = tuple(
-            require_string_list(
+            unique_string_list(
                 entry.get("aliases"),
                 f"{path_str}.packs.capacity_classes.classes[{index}].aliases",
             )
@@ -254,13 +254,13 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
         primary_capacity_class_by_requester[requester_class] = class_id
         capacity_class_ids.append(class_id)
         declared_drill_borrow = tuple(
-            require_string_list(
+            unique_string_list(
                 entry.get("declared_drill_borrow_from", []),
                 f"{path_str}.packs.capacity_classes.classes[{index}].declared_drill_borrow_from",
             )
         )
         break_glass_borrow = tuple(
-            require_string_list(
+            unique_string_list(
                 entry.get("break_glass_borrow_from", []),
                 f"{path_str}.packs.capacity_classes.classes[{index}].break_glass_borrow_from",
             )
@@ -286,31 +286,31 @@ def load_shared_policy_packs(path: Path = SHARED_POLICY_PACKS_PATH) -> SharedPol
 
     placement = require_mapping(packs.get("placement"), f"{path_str}.packs.placement")
     failure_domain_kinds = set(
-        require_string_list(
+        unique_string_list(
             placement.get("failure_domain_kinds"),
             f"{path_str}.packs.placement.failure_domain_kinds",
         )
     )
     failure_domain_statuses = set(
-        require_string_list(
+        unique_string_list(
             placement.get("failure_domain_statuses"),
             f"{path_str}.packs.placement.failure_domain_statuses",
         )
     )
     guest_placement_classes = set(
-        require_string_list(
+        unique_string_list(
             placement.get("guest_placement_classes"),
             f"{path_str}.packs.placement.guest_placement_classes",
         )
     )
     environment_placement_classes = set(
-        require_string_list(
+        unique_string_list(
             placement.get("environment_placement_classes"),
             f"{path_str}.packs.placement.environment_placement_classes",
         )
     )
     reserved_capacity_exclusions = set(
-        require_string_list(
+        unique_string_list(
             placement.get("reserved_capacity_exclusions"),
             f"{path_str}.packs.placement.reserved_capacity_exclusions",
         )
