@@ -2341,7 +2341,7 @@ adrs:
     filename: 0359-declarative-postgres-client-registry.md
     path: docs/adr/0359-declarative-postgres-client-registry.md
     implemented_in_repo_version: 0.178.12
-    implemented_in_platform_version: 0.178.130
+    implemented_in_platform_version: 0.178.131
     implemented_on: '2026-04-13'
   - adr: '0370'
     title: Service Lifecycle Task Includes

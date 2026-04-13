@@ -1,7 +1,7 @@
 id: ws-0359-live-apply
 adr: 0359
 title: Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main
-status: in_progress
+status: live_applied
 owner: codex
 branch: codex/ws-0359-main-merge-r2
 worktree_path: .worktrees/ws-0359-main-merge-r2
@@ -25,6 +25,9 @@ shared_surfaces:
   - docs/adr/index/by-range/*.yaml
   - docs/adr/index/by-status/*.yaml
   - docs/runbooks/configure-postgres-vm.md
+  - collections/ansible_collections/lv3/platform/roles/postgres_vm/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/postgres_vm/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
   - collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml
   - inventory/group_vars/platform_postgres.yml
   - inventory/group_vars/postgres_guests.yml
@@ -74,6 +77,9 @@ ownership_manifest:
       contract: adr-index-v1
     - id: ws0359_platform_topology
       paths:
+        - collections/ansible_collections/lv3/platform/roles/postgres_vm/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/postgres_vm/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml
         - inventory/group_vars/platform_postgres.yml
         - inventory/group_vars/postgres_guests.yml
@@ -105,20 +111,31 @@ ownership_manifest:
         - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
         - receipts/live-applies/evidence/2026-04-13-ws-0359-*
       mode: exclusive
+canonical_truth:
+  changelog_entry: live-apply ADR 0359 from the latest origin/main by replaying
+    postgres-vm onto the rebased mainline tree, removing the guest-wide
+    10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to
+    end
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
 blockers: []
-ready_to_merge: false
-live_applied: false
+ready_to_merge: true
+live_applied: true
 notes: >
-  ADR 0359 is already implemented in repo code on origin/main, and this exact-main
-  replay starts from origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1
-  (repo version 0.178.129). On 2026-04-13 the workstream restored active ownership,
-  taught lv3.platform.proxmox_guests to fall back from missing specialized template
-  VMIDs to live source templates, and then successfully provisioned the previously
-  missing postgres-replica, postgres-apps, and postgres-data guests from template
-  9000. The exact-main replay then fixed three live gaps the branch exposed:
-  postgres_vm default evaluation through the generated platform_host dict,
-  pgaudit grant assertions on guests that do not host the audited databases,
-  and the missing ADR 0359 registry load / guest-wide 10.10.10.0/24 HBA fallback
-  that otherwise allowed cross-database logins. The next step is rebasing this
-  verified closeout onto the latest reachable origin/main and finishing the merge.
+  ADR 0359 is already implemented in repo code on origin/main. This closeout
+  started from the latest realistic 0.178.129 base
+  origin/main@bbdb0f7008db4bac81c8cc30a287e728b83790a1, provisioned the missing
+  postgres-replica, postgres-apps, and postgres-data guests from the live template
+  fallback path, then fixed three exact-main replay gaps: postgres_vm default
+  evaluation through the generated platform_host dict, pgaudit grant assertions on
+  guests that do not host the audited databases, and the missing ADR 0359 registry
+  load plus guest-wide 10.10.10.0/24 HBA fallback that otherwise allowed
+  cross-database logins. The branch then rebased onto the latest reachable
+  origin/main@063e88c0fe49c278cbfe231a345eaebb145ec404 and replayed
+  `make live-apply-service service=postgres-vm env=production` from commit
+  080375c1d0f351eba1b9fc4ffc23be2c686288a9, with a clean recap plus fresh
+  pgaudit, `pg_hba.conf`, positive-login, and cross-database denial evidence for
+  repo/platform version 0.178.131 before the final main push.
 plane_issue_id: ebace4da-ecfa-42aa-8d14-8189950e9d5a
