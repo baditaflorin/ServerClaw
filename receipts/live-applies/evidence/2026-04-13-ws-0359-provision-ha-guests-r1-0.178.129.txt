@@ -1,0 +1,233 @@
+
+PLAY [Install Proxmox VE on Debian 13 hosts] ***********************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:13.268Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.437Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_repository : Validating arguments against arg spec 'main' - Proxmox repository role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_repository : Validating arguments against arg spec 'main' - Proxmox repository role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.453Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_repository : Validating arguments against arg spec 'main' - Proxmox repository role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.484Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_kernel : Validating arguments against arg spec 'main' - Proxmox kernel role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_kernel : Validating arguments against arg spec 'main' - Proxmox kernel role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.510Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_kernel : Validating arguments against arg spec 'main' - Proxmox kernel role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.555Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_platform : Validating arguments against arg spec 'main' - Proxmox platform role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_platform : Validating arguments against arg spec 'main' - Proxmox platform role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.573Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_platform : Validating arguments against arg spec 'main' - Proxmox platform role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.606Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_access : Validating arguments against arg spec 'main' - Proxmox access role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_access : Validating arguments against arg spec 'main' - Proxmox access role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.630Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_access : Validating arguments against arg spec 'main' - Proxmox access role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.663Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.685Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.750Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.782Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.839Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_tailscale : Validating arguments against arg spec 'main' - Install and attach Tailscale on the Proxmox host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale : Validating arguments against arg spec 'main' - Install and attach Tailscale on the Proxmox host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.870Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale : Validating arguments against arg spec 'main' - Install and attach Tailscale on the Proxmox host.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:17.948Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_headscale : Validating arguments against arg spec 'main' - Install and configure the Headscale control plane on the Proxmox host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_headscale : Validating arguments against arg spec 'main' - Install and configure the Headscale control plane on the Proxmox host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:17.986Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_headscale : Validating arguments against arg spec 'main' - Install and configure the Headscale control plane on the Proxmox host.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:18.082Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_tailscale_proxy : Validating arguments against arg spec 'main' - Configure socket-activated Tailscale TCP proxies on the Proxmox host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_tailscale_proxy : Validating arguments against arg spec 'main' - Configure socket-activated Tailscale TCP proxies on the Proxmox host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:18.132Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_tailscale_proxy : Validating arguments against arg spec 'main' - Configure socket-activated Tailscale TCP proxies on the Proxmox host.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:18.260Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:18.292Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:18.344Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:18.369Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:18.419Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Ensure snippets directory exists] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:18.446Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:19.047Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validate each guest references a declared template] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:19.057Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=postgres-replica) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 4,
+        "disk_gb": 96,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.51",
+        "macaddr": "BC:24:11:8C:51:17",
+        "memory_mb": 8192,
+        "name": "postgres-replica",
+        "packages": [
+            "acl",
+            "nftables",
+            "postgresql",
+            "postgresql-contrib"
+        ],
+        "placement": {
+            "anti_affinity_group": "postgres-ha",
+            "co_location_exceptions": [
+                {
+                    "rationale": "The platform still has only one active failure domain, so the PostgreSQL standby carries an explicit temporary same-domain waiver until auxiliary capacity is live.",
+                    "scope": "failure_domain"
+                }
+            ],
+            "failure_domain": "host:proxmox-host",
+            "placement_class": "standby"
+        },
+        "role": "postgres-replica",
+        "tags": [
+            "postgres",
+            "database",
+            "ha",
+            "lv3"
+        ],
+        "template_key": "lv3-postgres-host",
+        "vmid": 151
+    },
+    "msg": "All assertions passed"
+}
+ok: [proxmox-host] => (item=postgres-apps) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 4,
+        "disk_gb": 128,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.52",
+        "macaddr": "BC:24:11:2A:2E:52",
+        "memory_mb": 8192,
+        "name": "postgres-apps",
+        "packages": [
+            "acl",
+            "nftables",
+            "postgresql",
+            "postgresql-contrib"
+        ],
+        "placement": {
+            "anti_affinity_group": "postgres-apps",
+            "co_location_exceptions": [
+                {
+                    "rationale": "The platform still has only one active failure domain, so the apps PostgreSQL primary carries an explicit temporary same-domain waiver until auxiliary capacity is live.",
+                    "scope": "failure_domain"
+                }
+            ],
+            "failure_domain": "host:proxmox-host",
+            "placement_class": "primary"
+        },
+        "role": "postgres-apps",
+        "tags": [
+            "postgres",
+            "database",
+            "apps",
+            "lv3"
+        ],
+        "template_key": "lv3-postgres-host",
+        "vmid": 152
+    },
+    "msg": "All assertions passed"
+}
+ok: [proxmox-host] => (item=postgres-data) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 4,
+        "disk_gb": 128,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.54",
+        "macaddr": "BC:24:11:2A:2E:54",
+        "memory_mb": 8192,
+        "name": "postgres-data",
+        "packages": [
+            "acl",
+            "nftables",
+            "postgresql",
+            "postgresql-contrib"
+        ],
+        "placement": {
+            "anti_affinity_group": "postgres-data",
+            "co_location_exceptions": [
+                {
+                    "rationale": "The platform still has only one active failure domain, so the data PostgreSQL primary carries an explicit temporary same-domain waiver until auxiliary capacity is live.",
+                    "scope": "failure_domain"
+                }
+            ],
+            "failure_domain": "host:proxmox-host",
+            "placement_class": "primary"
+        },
+        "role": "postgres-data",
+        "tags": [
+            "postgres",
+            "database",
+            "data",
+            "lv3"
+        ],
+        "template_key": "lv3-postgres-host",
+        "vmid": 154
+    },
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:19.107Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Build failure-domain live label map] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:19.122Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:19.153Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:19.165Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox-host] => (item=postgres-replica)
+changed: [proxmox-host] => (item=postgres-apps)
+changed: [proxmox-host] => (item=postgres-data)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:26.131Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Check which guest VMs already exist] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:26.145Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=postgres-replica)
+ok: [proxmox-host] => (item=postgres-apps)
+ok: [proxmox-host] => (item=postgres-data)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:30.574Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Read current guest configurations] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:30.587Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=postgres-replica)
+ok: [proxmox-host] => (item=postgres-apps)
+ok: [proxmox-host] => (item=postgres-data)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-13T12:00:33.825Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Clone guest VMs from template] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-13T12:00:33.839Z","vm":"controller","workflow_id":"ansible-playbook"}
+failed: [proxmox-host] (item=postgres-replica) => {"ansible_loop_var": "item", "changed": true, "cmd": ["qm", "clone", "9002", "151", "--name", "postgres-replica", "--full", "1", "--storage", "local", "--format", "qcow2"], "delta": "0:00:01.615697", "end": "2026-04-13 14:00:35.858046", "item": {"ansible_loop_var": "item", "changed": false, "cmd": ["qm", "status", "151"], "delta": "0:00:01.685207", "end": "2026-04-13 14:00:28.309070", "failed": false, "failed_when_result": false, "invocation": {"module_args": {"_raw_params": "qm status 151", "_uses_shell": false, "argv": null, "chdir": null, "creates": null, "executable": null, "expand_argument_vars": true, "removes": null, "stdin": null, "stdin_add_newline": true, "strip_empty_ends": true}}, "item": {"cidr": 24, "cores": 4, "disk_gb": 96, "gateway4": "10.10.10.1", "ipv4": "10.10.10.51", "macaddr": "BC:24:11:8C:51:17", "memory_mb": 8192, "name": "postgres-replica", "packages": ["acl", "nftables", "postgresql", "postgresql-contrib"], "placement": {"anti_affinity_group": "postgres-ha", "co_location_exceptions": [{"rationale": "The platform still has only one active failure domain, so the PostgreSQL standby carries an explicit temporary same-domain waiver until auxiliary capacity is live.", "scope": "failure_domain"}], "failure_domain": "host:proxmox-host", "placement_class": "standby"}, "role": "postgres-replica", "tags": ["postgres", "database", "ha", "lv3"], "template_key": "lv3-postgres-host", "vmid": 151}, "msg": "non-zero return code", "rc": 2, "start": "2026-04-13 14:00:26.623863", "stderr": "Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/151.conf' does not exist", "stderr_lines": ["Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/151.conf' does not exist"], "stdout": "", "stdout_lines": []}, "msg": "non-zero return code", "rc": 2, "start": "2026-04-13 14:00:34.242349", "stderr": "unable to find configuration file for VM 9002 on node 'Debian-trixie-latest-amd64-base'", "stderr_lines": ["unable to find configuration file for VM 9002 on node 'Debian-trixie-latest-amd64-base'"], "stdout": "", "stdout_lines": []}
+failed: [proxmox-host] (item=postgres-apps) => {"ansible_loop_var": "item", "changed": true, "cmd": ["qm", "clone", "9002", "152", "--name", "postgres-apps", "--full", "1", "--storage", "local", "--format", "qcow2"], "delta": "0:00:01.647965", "end": "2026-04-13 14:00:37.939114", "item": {"ansible_loop_var": "item", "changed": false, "cmd": ["qm", "status", "152"], "delta": "0:00:00.704599", "end": "2026-04-13 14:00:29.424575", "failed": false, "failed_when_result": false, "invocation": {"module_args": {"_raw_params": "qm status 152", "_uses_shell": false, "argv": null, "chdir": null, "creates": null, "executable": null, "expand_argument_vars": true, "removes": null, "stdin": null, "stdin_add_newline": true, "strip_empty_ends": true}}, "item": {"cidr": 24, "cores": 4, "disk_gb": 128, "gateway4": "10.10.10.1", "ipv4": "10.10.10.52", "macaddr": "BC:24:11:2A:2E:52", "memory_mb": 8192, "name": "postgres-apps", "packages": ["acl", "nftables", "postgresql", "postgresql-contrib"], "placement": {"anti_affinity_group": "postgres-apps", "co_location_exceptions": [{"rationale": "The platform still has only one active failure domain, so the apps PostgreSQL primary carries an explicit temporary same-domain waiver until auxiliary capacity is live.", "scope": "failure_domain"}], "failure_domain": "host:proxmox-host", "placement_class": "primary"}, "role": "postgres-apps", "tags": ["postgres", "database", "apps", "lv3"], "template_key": "lv3-postgres-host", "vmid": 152}, "msg": "non-zero return code", "rc": 2, "start": "2026-04-13 14:00:28.719976", "stderr": "Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/152.conf' does not exist", "stderr_lines": ["Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/152.conf' does not exist"], "stdout": "", "stdout_lines": []}, "msg": "non-zero return code", "rc": 2, "start": "2026-04-13 14:00:36.291149", "stderr": "unable to find configuration file for VM 9002 on node 'Debian-trixie-latest-amd64-base'", "stderr_lines": ["unable to find configuration file for VM 9002 on node 'Debian-trixie-latest-amd64-base'"], "stdout": "", "stdout_lines": []}
+failed: [proxmox-host] (item=postgres-data) => {"ansible_loop_var": "item", "changed": true, "cmd": ["qm", "clone", "9002", "154", "--name", "postgres-data", "--full", "1", "--storage", "local", "--format", "qcow2"], "delta": "0:00:00.664342", "end": "2026-04-13 14:00:39.011217", "item": {"ansible_loop_var": "item", "changed": false, "cmd": ["qm", "status", "154"], "delta": "0:00:00.709026", "end": "2026-04-13 14:00:30.537865", "failed": false, "failed_when_result": false, "invocation": {"module_args": {"_raw_params": "qm status 154", "_uses_shell": false, "argv": null, "chdir": null, "creates": null, "executable": null, "expand_argument_vars": true, "removes": null, "stdin": null, "stdin_add_newline": true, "strip_empty_ends": true}}, "item": {"cidr": 24, "cores": 4, "disk_gb": 128, "gateway4": "10.10.10.1", "ipv4": "10.10.10.54", "macaddr": "BC:24:11:2A:2E:54", "memory_mb": 8192, "name": "postgres-data", "packages": ["acl", "nftables", "postgresql", "postgresql-contrib"], "placement": {"anti_affinity_group": "postgres-data", "co_location_exceptions": [{"rationale": "The platform still has only one active failure domain, so the data PostgreSQL primary carries an explicit temporary same-domain waiver until auxiliary capacity is live.", "scope": "failure_domain"}], "failure_domain": "host:proxmox-host", "placement_class": "primary"}, "role": "postgres-data", "tags": ["postgres", "database", "data", "lv3"], "template_key": "lv3-postgres-host", "vmid": 154}, "msg": "non-zero return code", "rc": 2, "start": "2026-04-13 14:00:29.828839", "stderr": "Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/154.conf' does not exist", "stderr_lines": ["Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/154.conf' does not exist"], "stdout": "", "stdout_lines": []}, "msg": "non-zero return code", "rc": 2, "start": "2026-04-13 14:00:38.346875", "stderr": "unable to find configuration file for VM 9002 on node 'Debian-trixie-latest-amd64-base'", "stderr_lines": ["unable to find configuration file for VM 9002 on node 'Debian-trixie-latest-amd64-base'"], "stdout": "", "stdout_lines": []}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"One or more items failed","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"proxmox-host","task_status":"failed","trace_id":"background","ts":"2026-04-13T12:00:39.047Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+proxmox-host               : ok=18   changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0

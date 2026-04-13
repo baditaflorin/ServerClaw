@@ -25,6 +25,82 @@
   loop_control:
     label: "{{ item.name }}"
 
+- name: Discover currently available Proxmox template VMIDs
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - get
+      - /cluster/resources
+      - --type
+      - vm
+      - --output-format
+      - json
+  register: proxmox_cluster_vm_resources
+  changed_when: false
+
+- name: Record currently available Proxmox template VMIDs
+  ansible.builtin.set_fact:
+    proxmox_available_template_vmids: >-
+      {{
+        proxmox_cluster_vm_resources.stdout
+        | from_json
+        | selectattr('template', 'defined')
+        | selectattr('template', 'equalto', 1)
+        | map(attribute='vmid')
+        | map('int')
+        | list
+      }}
+
+- name: Resolve template VMIDs against currently available templates
+  ansible.builtin.set_fact:
+    proxmox_resolved_template_vmids: >-
+      {{
+        proxmox_resolved_template_vmids | default({}) | combine({
+          item.key: (
+            item.value.vmid
+            if (item.value.vmid | int) in proxmox_available_template_vmids
+            else (
+              proxmox_vm_templates[item.value.source_template].vmid
+              if (
+                item.value.source_template is defined
+                and item.value.source_template in proxmox_vm_templates
+                and (proxmox_vm_templates[item.value.source_template].vmid | int) in proxmox_available_template_vmids
+              )
+              else item.value.vmid
+            )
+          )
+        })
+      }}
+  loop: "{{ proxmox_vm_templates | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Report template fallbacks when specialized templates are unavailable
+  ansible.builtin.debug:
+    msg: >-
+      Template {{ item.key }} (VMID {{ item.value.vmid }}) is unavailable on this
+      Proxmox host; provisioning will fall back to source template
+      {{ item.value.source_template }} (VMID {{ proxmox_resolved_template_vmids[item.key] }}).
+  when:
+    - item.value.source_template is defined
+    - (item.value.vmid | int) != (proxmox_resolved_template_vmids[item.key] | int)
+  loop: "{{ proxmox_vm_templates | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Assert each guest resolves to an available template VMID
+  ansible.builtin.assert:
+    that:
+      - (proxmox_resolved_template_vmids[item.template_key] | int) in proxmox_available_template_vmids
+    fail_msg: >-
+      Guest {{ item.name }} template {{ item.template_key }} does not resolve to a
+      live Proxmox template VMID. Resolved VMID:
+      {{ proxmox_resolved_template_vmids[item.template_key] | default('undefined') }}.
+      Available template VMIDs: {{ proxmox_available_template_vmids | join(', ') }}.
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
 - name: Build failure-domain live label map
   ansible.builtin.set_fact:
     proxmox_failure_domain_live_labels: >-
@@ -67,7 +143,7 @@
     argv:
       - qm
       - clone
-      - "{{ proxmox_vm_templates[item.item.template_key].vmid | string }}"
+      - "{{ proxmox_resolved_template_vmids[item.item.template_key] | string }}"
       - "{{ item.item.vmid | string }}"
       - --name
       - "{{ item.item.name }}"
