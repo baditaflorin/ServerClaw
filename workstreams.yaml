@@ -69,8 +69,8 @@ workstreams:
 - id: ws-0372-live-apply
   adr: '0372'
   title: ADR 0372 Live Apply and Automation Verification
-  status: in_progress
-  ready_to_merge: false
+  status: merged
+  ready_to_merge: true
   live_applied: false
   owner: platform-infrastructure
   branch: codex/ws-0372-live-apply
@@ -147,6 +147,13 @@ workstreams:
       - workstreams/active/ws-0372-live-apply.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: align live-apply-service descriptor loading with ADR 0372 playbook
+      composition, add missing keycloak/searxng service wrappers, and verify the include-based
+      playbook tests
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
   description: 'Finalize ADR 0372 on the governed live-apply path. The branch verifies
     that
 

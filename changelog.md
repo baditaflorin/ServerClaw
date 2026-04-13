@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
+
 ## 0.178.78 (2026-04-10)
 
 - fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
