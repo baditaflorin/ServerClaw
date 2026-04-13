@@ -1087,7 +1087,7 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
     monkeypatch.setattr(
         trigger,
         "run_command",
-        lambda command: types.SimpleNamespace(
+        lambda command, timeout=None: types.SimpleNamespace(
             returncode=0, stdout='REPORT_JSON={"summary":{"protected":1}}', stderr=""
         ),
     )
@@ -1133,6 +1133,61 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         "sync_repo_root": "/srv/proxmox-host_server",
         "sync_report": {"summary": {"protected": 1}},
     }
+
+
+def test_trigger_main_uses_documented_restic_timeout(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(trigger, "load_controller_context", lambda: {"controller": "context"})
+    monkeypatch.setattr(trigger, "ensure_remote_runtime_support_files", lambda context, repo_root: None)
+    monkeypatch.setattr(
+        trigger,
+        "ensure_remote_runtime_credentials",
+        lambda context, env, credential_file, target="docker-runtime": None,
+    )
+    monkeypatch.setattr(
+        trigger, "build_guest_ssh_command", lambda context, target, remote_command: ["ssh", target, remote_command]
+    )
+    monkeypatch.setattr(
+        trigger,
+        "run_command",
+        lambda command, timeout=None: (
+            captured.update({"timeout": timeout})
+            or types.SimpleNamespace(returncode=0, stdout='REPORT_JSON={"summary":{"protected":1}}', stderr="")
+        ),
+    )
+    monkeypatch.setattr(trigger, "sync_reported_receipt_artifacts", lambda context, target, repo_root, report: [])
+
+    assert trigger.main(["--env", "production", "--mode", "backup"]) == 0
+    assert captured["timeout"] == trigger.RESTIC_REMOTE_COMMAND_TIMEOUT_SECONDS
+
+
+def test_trigger_main_allows_timeout_warning_when_opted_in(monkeypatch, capsys) -> None:
+    monkeypatch.setenv("RESTIC_ALLOW_TIMEOUT", "1")
+    monkeypatch.setattr(trigger, "load_controller_context", lambda: {"controller": "context"})
+    monkeypatch.setattr(trigger, "ensure_remote_runtime_support_files", lambda context, repo_root: None)
+    monkeypatch.setattr(
+        trigger,
+        "ensure_remote_runtime_credentials",
+        lambda context, env, credential_file, target="docker-runtime": None,
+    )
+    monkeypatch.setattr(
+        trigger, "build_guest_ssh_command", lambda context, target, remote_command: ["ssh", target, remote_command]
+    )
+    monkeypatch.setattr(
+        trigger,
+        "run_command",
+        lambda command, timeout=None: types.SimpleNamespace(
+            returncode=124,
+            stdout="",
+            stderr="restic snapshots --json timed out after 180 seconds",
+        ),
+    )
+
+    assert trigger.main(["--env", "production", "--mode", "backup"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "warning"
+    assert payload["warning"] == "Restic live-apply trigger timed out; see stderr for details."
 
 
 def test_main_live_apply_backup_omits_ntfy_requirement(monkeypatch, tmp_path: Path) -> None:

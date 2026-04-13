@@ -49,6 +49,7 @@ REMOTE_RUNTIME_SUPPORT_FILES = (
     ("versions/stack.yaml", 0o644),
 )
 SYNCABLE_REPORT_KEYS = ("receipt_path", "latest_snapshot_receipt")
+RESTIC_REMOTE_COMMAND_TIMEOUT_SECONDS = int(os.environ.get("RESTIC_TRIGGER_TIMEOUT_SECONDS", "180"))
 
 
 def extract_report_json(stdout: str) -> dict | None:
@@ -355,7 +356,7 @@ def main(argv: list[str] | None = None) -> int:
             prefer_fallback_script=prefer_fallback_script,
         )
         command = build_guest_ssh_command(context, "docker-runtime", remote_command)
-        outcome = run_command(command)
+        outcome = run_command(command, timeout=RESTIC_REMOTE_COMMAND_TIMEOUT_SECONDS)
         report = extract_report_json(outcome.stdout)
         payload = {
             "status": "ok" if outcome.returncode == 0 else "error",

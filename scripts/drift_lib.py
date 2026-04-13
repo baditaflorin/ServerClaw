@@ -112,15 +112,36 @@ def load_controller_context() -> dict[str, Any]:
     }
 
 
-def run_command(command: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> CommandResult:
-    completed = subprocess.run(
-        command,
-        cwd=str(cwd) if cwd else None,
-        env=env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+def run_command(
+    command: list[str],
+    *,
+    cwd: Path | None = None,
+    env: dict[str, str] | None = None,
+    timeout: float | None = None,
+) -> CommandResult:
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=str(cwd) if cwd else None,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = (exc.stdout or "").strip()
+        stderr_lines = []
+        if exc.stderr:
+            stderr_lines.append(exc.stderr.strip())
+        if timeout is not None:
+            stderr_lines.append(f"command timed out after {int(timeout)} seconds")
+        return CommandResult(
+            argv=command,
+            returncode=124,
+            stdout=stdout,
+            stderr="\n".join(line for line in stderr_lines if line),
+        )
     return CommandResult(
         argv=command,
         returncode=completed.returncode,
