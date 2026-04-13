@@ -98,12 +98,16 @@
       - path: "{{ keycloak_outline_automation_password_remote_file }}"
         command: "openssl rand -base64 24 | tr -d '\\n'"
         label: "keycloak-outline-automation-password"
+      - path: "{{ keycloak_platform_admin_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "keycloak-platform-admin-password"
     common_manage_service_secrets_read:
       - "{{ keycloak_bootstrap_admin_password_remote_file }}"
       - "{{ keycloak_operator_password_remote_file }}"
       - "{{ keycloak_admin_client_secret_remote_file }}"
       - "{{ keycloak_recovery_admin_service_secret_remote_file }}"
       - "{{ keycloak_outline_automation_password_remote_file }}"
+      - "{{ keycloak_platform_admin_password_remote_file }}"
     common_manage_service_secrets_mirror:
       - dest: "{{ keycloak_bootstrap_admin_password_local_file }}"
         content_index: 0
@@ -113,6 +117,8 @@
         content_index: 2
       - dest: "{{ keycloak_outline_automation_password_local_file }}"
         content_index: 4
+      - dest: "{{ keycloak_platform_admin_password_local_file }}"
+        content_index: 5
     common_manage_service_secrets_local_artifact_dir: "{{ keycloak_local_artifact_dir }}"
     common_manage_service_secrets_fact_name: "keycloak_decoded_secrets"
   no_log: true
@@ -136,6 +142,7 @@
     keycloak_admin_client_secret: "{{ keycloak_decoded_secrets[2] }}"
     keycloak_recovery_admin_service_secret: "{{ keycloak_decoded_secrets[3] }}"
     keycloak_outline_automation_password: "{{ keycloak_decoded_secrets[4] }}"
+    keycloak_platform_admin_password: "{{ keycloak_decoded_secrets[5] }}"
     keycloak_database_password: "{{ lookup('ansible.builtin.file', keycloak_database_password_local_file) | trim }}"
     keycloak_runtime_secret_payload:
       KC_DB_PASSWORD: "{{ lookup('ansible.builtin.file', keycloak_database_password_local_file) | trim }}"
@@ -2114,7 +2121,7 @@
         base_url: "{{ keycloak_serverclaw_root_url }}"
         admin_url: "{{ keycloak_serverclaw_root_url }}"
         redirect_uris:
-          - "{{ keycloak_serverclaw_root_url }}/oauth/oidc/callback"
+          - "{{ keycloak_serverclaw_root_url }}/oauth/openid/callback"
         valid_post_logout_redirect_uris: "{{ keycloak_serverclaw_post_logout_redirect_uris }}"
         web_origins:
           - "{{ keycloak_serverclaw_root_url }}"

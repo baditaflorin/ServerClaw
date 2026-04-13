@@ -58,8 +58,8 @@ dify_sandbox_image: "{{ container_image_catalog.images.dify_sandbox_runtime.ref 
 dify_plugin_daemon_image: "{{ container_image_catalog.images.dify_plugin_daemon_runtime.ref }}"
 dify_nginx_image: "{{ container_image_catalog.images.dify_nginx_runtime.ref }}"
 dify_ssrf_proxy_image: "{{ container_image_catalog.images.dify_ssrf_proxy_runtime.ref }}"
-dify_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('dify', 'internal') }}"
-dify_internal_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('dify', 'internal') }}"
+dify_port: "{{ dify_internal_port }}"
+dify_internal_base_url: "http://{{ ansible_host }}:{{ dify_internal_port }}"
 dify_public_base_url: "https://{{ dify_service_topology.public_hostname }}"
 dify_public_hostname: "{{ dify_service_topology.public_hostname }}"
 dify_console_api_url: "{{ dify_public_base_url }}"
@@ -74,7 +74,7 @@ dify_langfuse_host: https://langfuse.{{ platform_domain }}
 dify_admin_email: "{{ platform_operator_email }}"
 dify_admin_name: "{{ platform_operator_name }}"
 dify_vector_store: qdrant
-dify_ollama_base_url: "http://host.docker.internal:{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('ollama', 'internal') }}"
+dify_ollama_base_url: "http://host.docker.internal:11434"
 dify_sandbox_port: 8194
 dify_plugin_daemon_port: 5002
 dify_nginx_port: 80

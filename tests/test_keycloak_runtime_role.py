@@ -1259,7 +1259,7 @@ def test_role_manages_serverclaw_client_secret() -> None:
         == "{{ keycloak_serverclaw_client_id }}"
     )
     assert serverclaw_client_task["community.general.keycloak_client"]["redirect_uris"] == [
-        "{{ keycloak_serverclaw_root_url }}/oauth/oidc/callback"
+        "{{ keycloak_serverclaw_root_url }}/oauth/openid/callback"
     ]
     assert serverclaw_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_serverclaw_post_logout_redirect_uris }}"

@@ -259,6 +259,132 @@
   until: keycloak_operator_grafana_group_membership.status == 204
   no_log: true
 
+# BEGIN: platform-admin repo-managed account (ADR 0413 / ADR 0407)
+# This account is the secondary platform admin. It is separate from the named operator
+# (florin.badita) so that the primary operator identity is never shared. The password is
+# stored in .local/keycloak/platform-admin-password.txt (never committed).
+- name: Look up the platform-admin user in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users?username={{ keycloak_platform_admin_username | urlencode }}&exact=true"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_platform_admin_lookup
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: keycloak_platform_admin_lookup.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Create the platform-admin user in Keycloak when missing
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users"
+    method: POST
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      username: "{{ keycloak_platform_admin_username }}"
+      firstName: "{{ keycloak_platform_admin_first_name }}"
+      lastName: "{{ keycloak_platform_admin_last_name }}"
+      email: "{{ keycloak_platform_admin_email }}"
+      emailVerified: true
+      enabled: true
+      requiredActions: []
+    status_code:
+      - 201
+      - 204
+      - 409
+  register: keycloak_platform_admin_create
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: keycloak_platform_admin_create.status in [201, 204, 409]
+  when: (keycloak_platform_admin_lookup.json | length) == 0
+  no_log: true
+
+- name: Re-read the platform-admin user in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users?username={{ keycloak_platform_admin_username | urlencode }}&exact=true"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_platform_admin_lookup_final
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: keycloak_platform_admin_lookup_final.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Reset the platform-admin password in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_platform_admin_lookup_final.json[0].id }}/reset-password"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      type: password
+      value: "{{ keycloak_platform_admin_password }}"
+      temporary: false
+    status_code: 204
+  register: keycloak_platform_admin_password_reset
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: keycloak_platform_admin_password_reset.status == 204
+  changed_when: false
+  no_log: true
+
+- name: Read the platform-admin groups from Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_platform_admin_lookup_final.json[0].id }}/groups"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_platform_admin_groups
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: keycloak_platform_admin_groups.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Ensure platform-admin belongs to lv3-platform-admins
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_platform_admin_lookup_final.json[0].id }}/groups/{{ keycloak_platform_admin_group_id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    status_code: 204
+  when: >-
+    (
+      keycloak_platform_admin_groups.json
+      | selectattr('name', 'equalto', 'lv3-platform-admins')
+      | list | length
+    ) == 0
+  register: keycloak_platform_admin_group_put
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: keycloak_platform_admin_group_put.status == 204
+  no_log: true
+
+- name: Ensure platform-admin belongs to grafana-admins
+  ansible.builtin.uri:
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_platform_admin_lookup_final.json[0].id }}/groups/{{ keycloak_grafana_admin_group_id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    status_code: 204
+  when: >-
+    (
+      keycloak_platform_admin_groups.json
+      | selectattr('name', 'equalto', keycloak_grafana_groups.admins)
+      | list | length
+    ) == 0
+  register: keycloak_platform_admin_grafana_group_put
+  retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+  delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+  until: keycloak_platform_admin_grafana_group_put.status == 204
+  no_log: true
+# END: platform-admin repo-managed account
+
 - name: Refresh the Keycloak admin token before reconciling the Outline automation user
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
