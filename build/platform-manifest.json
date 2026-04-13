@@ -2,9 +2,9 @@
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
   "repo_version": "0.178.129",
-  "platform_version": "0.178.126",
-  "generated_at": "2026-04-13T09:49:37Z",
-  "next_refresh_at": "2026-04-13T10:49:37Z",
+  "platform_version": "0.178.129",
+  "generated_at": "2026-04-13T12:40:10Z",
+  "next_refresh_at": "2026-04-13T13:40:10Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6275,7 +6275,7 @@
   "recent_changes": {
     "last_version": "0.178.123",
     "deployed_at": "2026-04-13",
-    "summary": "align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge",
+    "summary": "implement ADR 0411/0412: provision-account/deprovision-account agent tools with live Keycloak auth, Windmill daily account-expiry reaper, nginx @lv3_forbidden 403 error page, and LibreChat accounts tool pack align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests",
     "release_notes_url": "docs/release-notes/0.178.129.md"
   },
   "agentic_architecture": {

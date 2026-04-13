@@ -3,8 +3,8 @@
 - Date: 2026-04-13
 
 ## Summary
+- implement ADR 0411/0412: provision-account/deprovision-account agent tools with live Keycloak auth, Windmill daily account-expiry reaper, nginx @lv3_forbidden 403 error page, and LibreChat accounts tool pack
 - align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
-- fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge
 - fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
 - fix: Remove duplicate repo_intake entry in platform_services.yml registry
 - fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
