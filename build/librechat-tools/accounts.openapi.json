@@ -1,0 +1,210 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ServerClaw Accounts \u2014 User Provisioning",
+    "version": "1.0.0",
+    "description": "Provision and deprovision platform SSO accounts via Keycloak. A single account grants access to 17+ services. Supports optional expiry for temporary accounts (ADR 0411)."
+  },
+  "servers": [
+    {
+      "url": "http://10.10.10.92:8083"
+    }
+  ],
+  "paths": {
+    "/v1/dify-tools/provision-account": {
+      "post": {
+        "operationId": "provision-account",
+        "summary": "Provision Platform Account",
+        "description": "Create a Keycloak SSO account in the platform realm. Optionally set an expiry (account_expires_at attribute) and assign Keycloak groups. Returns the generated password so the operator can send login details. Covers 17+ services via OIDC. ADR 0411.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "username",
+                  "email"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Keycloak username (e.g. 'florin.badita')"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "User email address"
+                  },
+                  "first_name": {
+                    "type": "string",
+                    "description": "User first name (optional)"
+                  },
+                  "last_name": {
+                    "type": "string",
+                    "description": "User last name (optional)"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password to set. If omitted, a 20-char random password is generated."
+                  },
+                  "expires_in_days": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Days until the account expires. Sets account_expires_at attribute. Windmill daily reaper (ADR 0412) will disable the account."
+                  },
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Keycloak group names to assign. Defaults to ['lv3-platform-viewers', 'grafana-viewers']. Use 'lv3-platform-admins' for admin access."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "user_id",
+                    "username",
+                    "email",
+                    "password",
+                    "realm",
+                    "groups_assigned",
+                    "sso_url"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "password": {
+                      "type": "string"
+                    },
+                    "realm": {
+                      "type": "string"
+                    },
+                    "groups_assigned": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "groups_skipped": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "sso_url": {
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dify-tools/deprovision-account": {
+      "post": {
+        "operationId": "deprovision-account",
+        "summary": "Deprovision Platform Account",
+        "description": "Disable (or permanently delete) a Keycloak SSO account by username. Disabling (default) is reversible; hard_delete=true is permanent and requires careful consideration. ADR 0411.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "username"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Keycloak username of the account to deprovision"
+                  },
+                  "hard_delete": {
+                    "type": "boolean",
+                    "description": "If true, permanently delete the user. If false (default), disable (reversible)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "username"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "disabled",
+                        "deleted",
+                        "not_found"
+                      ]
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-LV3-Dify-Api-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ]
+}
