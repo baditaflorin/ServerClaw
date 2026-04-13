@@ -12,43 +12,22 @@ ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes
 DEPENDENCY_WAVE_PLAYBOOKS_PATH = REPO_ROOT / "config" / "dependency-wave-playbooks.yaml"
 
 
-def test_livekit_dns_stage_converges_only_the_livekit_subdomain_record() -> None:
+def test_livekit_playbook_imports_standard_includes_and_verification() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
-    dns_play = plays[0]
-    tasks = dns_play["tasks"]
+    imports = [entry["import_playbook"] for entry in plays if "import_playbook" in entry]
 
-    assert dns_play["hosts"] == "localhost"
-    assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "livekit.example.com"
-
-    select_task = next(task for task in tasks if task.get("name") == "Select the LiveKit subdomain entry")
-    assert (
-        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
-    )
-
-    converge_task = next(task for task in tasks if task.get("name") == "Converge the LiveKit Hetzner DNS record")
-    assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"
-    assert converge_task["vars"]["hetzner_dns_record_name"] == "{{ selected_subdomain_record_name }}"
-
-
-def test_livekit_playbook_converges_network_runtime_edge_and_public_verification() -> None:
-    plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
-
-    network_roles = [role["role"] for role in plays[1]["roles"]]
-    runtime_roles = [role["role"] for role in plays[2]["roles"]]
-    edge_roles = [role["role"] for role in plays[3]["roles"]]
-    verify_task = plays[4]["tasks"][0]
-
-    assert network_roles == ["lv3.platform.proxmox_network"]
-    assert runtime_roles == [
-        "lv3.platform.docker_runtime",
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.livekit_runtime",
+    assert imports == [
+        "_includes/dns_publication.yml",
+        "_includes/nginx_edge_publication.yml",
     ]
-    assert edge_roles == ["lv3.platform.nginx_edge_publication"]
+
+    verify_play = next(
+        play for play in plays if play.get("name") == "Verify public LiveKit room lifecycle from the controller"
+    )
+    verify_task = verify_play["tasks"][0]
     assert verify_task["ansible.builtin.command"]["argv"][1] == "{{ livekit_tool_script }}"
     assert verify_task["ansible.builtin.command"]["argv"][2] == "verify-room-lifecycle"
-    assert "https://livekit.example.com" in verify_task["ansible.builtin.command"]["argv"]
+    assert "https://livekit.{{ platform_domain }}" in verify_task["ansible.builtin.command"]["argv"]
 
 
 def test_livekit_service_wrapper_imports_the_canonical_playbook() -> None:

@@ -1062,7 +1062,6 @@
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
       "public_url": "https://chat.example.com",
-      "subdomain": "chat.example.com",
       "exposure": "edge-published",
       "image_catalog_ids": [],
       "secret_catalog_ids": [],

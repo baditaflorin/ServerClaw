@@ -66,6 +66,100 @@ workstreams:
     automated remediation playbooks.
 
     '
+- id: ws-0372-live-apply
+  adr: '0372'
+  title: ADR 0372 Live Apply and Automation Verification
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: platform-infrastructure
+  branch: codex/ws-0372-live-apply
+  worktree_path: .worktrees/ws-0372-live-apply
+  doc: docs/workstreams/ws-0372-live-apply.md
+  depends_on:
+  - adr-0372-data-driven-playbook-composition
+  conflicts_with: []
+  shared_surfaces:
+  - Makefile
+  - playbooks/services/keycloak.yml
+  - playbooks/services/searxng.yml
+  - config/health-probe-catalog.json
+  - config/service-capability-catalog.json
+  - config/service-redundancy-catalog.json
+  - config/subdomain-catalog.json
+  - scripts/decommission_service.py
+  - scripts/generate_ops_portal.py
+  - scripts/immutable_guest_replacement.py
+  - scripts/service_redundancy.py
+  - docs/adr/0372-data-driven-playbook-composition.md
+  - docs/runbooks/playbook-execution-model.md
+  - tests/test_directus_playbook.py
+  - tests/test_flagsmith_playbook.py
+  - tests/test_glitchtip_playbook.py
+  - tests/test_keycloak_playbook.py
+  - tests/test_label_studio_playbook.py
+  - tests/test_livekit_playbook.py
+  - tests/test_matrix_synapse_playbook.py
+  - tests/test_nextcloud_playbook.py
+  - tests/test_ntfy_playbook.py
+  - tests/test_plausible_playbook.py
+  - tests/test_sftpgo_playbook.py
+  - tests/test_superset_playbook.py
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0372_live_apply_runner
+      paths:
+      - Makefile
+      - playbooks/services/keycloak.yml
+      - playbooks/services/searxng.yml
+      - docs/runbooks/playbook-execution-model.md
+      mode: exclusive
+    - id: ws_0372_preflight_gate_fixes
+      paths:
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/subdomain-catalog.json
+      - scripts/decommission_service.py
+      - scripts/generate_ops_portal.py
+      - scripts/immutable_guest_replacement.py
+      - scripts/service_redundancy.py
+      mode: exclusive
+    - id: ws_0372_playbook_tests
+      paths:
+      - tests/test_directus_playbook.py
+      - tests/test_flagsmith_playbook.py
+      - tests/test_glitchtip_playbook.py
+      - tests/test_keycloak_playbook.py
+      - tests/test_label_studio_playbook.py
+      - tests/test_livekit_playbook.py
+      - tests/test_matrix_synapse_playbook.py
+      - tests/test_nextcloud_playbook.py
+      - tests/test_ntfy_playbook.py
+      - tests/test_plausible_playbook.py
+      - tests/test_sftpgo_playbook.py
+      - tests/test_superset_playbook.py
+      mode: exclusive
+    - id: ws_0372_doc_state
+      paths:
+      - docs/adr/0372-data-driven-playbook-composition.md
+      - docs/workstreams/ws-0372-live-apply.md
+      - workstreams/active/ws-0372-live-apply.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  description: 'Finalize ADR 0372 on the governed live-apply path. The branch verifies
+    that
+
+    service-scoped live applies load playbook descriptor vars correctly, restores
+
+    any missing service wrappers needed by the shared apply runner, aligns the
+
+    playbook tests with the shared-include model now present on origin/main, and
+
+    records end-to-end live-apply evidence for the ADR.
+
+    '
+  plane_issue_id: 86a2487d-67a2-40d6-974a-5da04320db13
 - id: ws-0368-live-apply
   adr: 0368
   title: ADR 0368 Live Apply and Completion

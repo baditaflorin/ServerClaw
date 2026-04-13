@@ -26,40 +26,17 @@ COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 
 
-def test_label_studio_playbook_converges_dns_database_runtime_edge_and_public_verify() -> None:
+def test_label_studio_playbook_imports_standard_includes_and_custom_edge_play() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
+    imports = [entry["import_playbook"] for entry in plays if "import_playbook" in entry]
 
-    dns_play = plays[0]
-    postgres_play = next(play for play in plays if play["name"] == "Prepare PostgreSQL for Label Studio")
-    runtime_play = next(play for play in plays if play["name"] == "Converge Label Studio on the Docker runtime VM")
-    edge_play = next(play for play in plays if play["name"] == "Publish Label Studio through the NGINX edge")
-    publish_play = next(
-        play for play in plays if play["name"] == "Verify the public Label Studio shared-edge publication"
-    )
-
-    assert dns_play["hosts"] == "localhost"
-    assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "annotate.example.com"
-    assert dns_play["vars"]["subdomain_catalog_path"] == "{{ playbook_dir }}/../config/subdomain-catalog.json"
-    assert dns_play["vars"]["inventory_defaults_path"] == "{{ playbook_dir }}/../inventory/group_vars/all.yml"
-
-    select_task = next(task for task in dns_play["tasks"] if task["name"] == "Select the Label Studio subdomain entry")
-    assert (
-        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
-    )
-
-    assert [role["role"] for role in postgres_play["roles"]] == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.postgres_vm",
-        "lv3.platform.label_studio_postgres",
+    assert imports == [
+        "_includes/dns_publication.yml",
+        "_includes/postgres_preparation.yml",
+        "_includes/docker_runtime_converge.yml",
     ]
-    assert [role["role"] for role in runtime_play["roles"]] == [
-        "lv3.platform.linux_guest_firewall",
-        "lv3.platform.docker_runtime",
-        "lv3.platform.label_studio_runtime",
-        "lv3.platform.typesense_runtime",
-        "lv3.platform.api_gateway_runtime",
-    ]
+
+    edge_play = next(play for play in plays if play.get("name") == "Publish Label Studio through the NGINX edge")
     assert [role["role"] for role in edge_play["roles"]] == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.public_edge_oidc_auth",
@@ -67,6 +44,9 @@ def test_label_studio_playbook_converges_dns_database_runtime_edge_and_public_ve
     ]
     assert edge_play["vars_files"] == ["{{ playbook_dir }}/../inventory/group_vars/platform.yml"]
 
+    publish_play = next(
+        play for play in plays if play.get("name") == "Verify the public Label Studio shared-edge publication"
+    )
     publish_task = publish_play["tasks"][0]
     assert publish_task["ansible.builtin.include_role"]["name"] == "lv3.platform.label_studio_runtime"
     assert publish_task["ansible.builtin.include_role"]["tasks_from"] == "verify_public.yml"
