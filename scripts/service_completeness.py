@@ -16,7 +16,7 @@ from typing import Any
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_bool, require_list, require_mapping
+from validation_toolkit import require_bool, require_list, require_mapping, require_str as require_string
 
 REPO_ROOT = Path(os.environ.get("LV3_REPO_ROOT", Path(__file__).resolve().parent.parent))
 SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
@@ -82,13 +82,7 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def require_string(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_date(value: Any, path: str) -> str:
+def validate_date(value: Any, path: str) -> str:
     value = require_string(value, path)
     dt.date.fromisoformat(value)
     return value
@@ -137,7 +131,7 @@ def load_context() -> dict[str, Any]:
                 raise ValueError(
                     f"config/service-completeness.json.suppression_presets.{preset_name}.{item_id} is not a known checklist id"
                 )
-            require_date(value, f"config/service-completeness.json.suppression_presets.{preset_name}.{item_id}")
+            validate_date(value, f"config/service-completeness.json.suppression_presets.{preset_name}.{item_id}")
 
     for service_id, profile in service_profiles.items():
         profile = require_mapping(profile, f"config/service-completeness.json.services.{service_id}")
@@ -177,7 +171,7 @@ def load_context() -> dict[str, Any]:
                 raise ValueError(
                     f"config/service-completeness.json.services.{service_id}.suppressed_checks.{item_id} is not a known checklist id"
                 )
-            require_date(
+            validate_date(
                 value,
                 f"config/service-completeness.json.services.{service_id}.suppressed_checks.{item_id}",
             )
