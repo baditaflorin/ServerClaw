@@ -21,7 +21,7 @@ if existing_platform is not None and not hasattr(existing_platform, "__path__"):
 
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 
-from validation_toolkit import require_int, require_list, require_mapping, require_str
+from validation_toolkit import require_enum, require_int, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from service_id_resolver import resolve_service_id
@@ -48,14 +48,7 @@ REHEARSAL_TIER_SEQUENCE = SHARED_POLICIES.rehearsal_tier_sequence
 ALLOWED_REHEARSAL_RESULTS = SHARED_POLICIES.allowed_rehearsal_results
 
 
-def require_enum(value: Any, path: str, allowed: set[str]) -> str:
-    value = require_str(value, path)
-    if value not in allowed:
-        raise ValueError(f"{path} must be one of {sorted(allowed)}")
-    return value
-
-
-def require_date(value: Any, path: str) -> date:
+def validate_date(value: Any, path: str) -> date:
     value = require_str(value, path)
     try:
         return datetime.strptime(value, "%Y-%m-%d").date()
@@ -63,7 +56,7 @@ def require_date(value: Any, path: str) -> date:
         raise ValueError(f"{path} must use YYYY-MM-DD") from exc
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     normalized: list[str] = []
     seen: set[str] = set()
@@ -248,7 +241,7 @@ def normalized_rehearsal_metadata(
             f"services.{service_id}.rehearsal.proofs[{index}].proves_tier",
             set(REHEARSAL_TIER_SEQUENCE),
         )
-        performed_on = require_date(
+        performed_on = validate_date(
             proof.get("performed_on"),
             f"services.{service_id}.rehearsal.proofs[{index}].performed_on",
         )
@@ -437,7 +430,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
     expected_max_tier = max_supported_tier_for_domains(failure_domain_count)
     if TIER_ORDER[max_supported_tier] > TIER_ORDER[expected_max_tier]:
         raise ValueError("platform.max_supported_tier exceeds what the declared failure_domain_count supports")
-    require_string_list(platform.get("notes"), "platform.notes")
+    unique_string_list(platform.get("notes"), "platform.notes")
     load_rehearsal_gate_policies(catalog)
 
     services = require_mapping(catalog.get("services"), "services")
@@ -472,7 +465,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
             minimum=0,
         )
 
-        require_string_list(entry.get("backup_sources"), f"services.{service_id}.backup_sources")
+        unique_string_list(entry.get("backup_sources"), f"services.{service_id}.backup_sources")
         standby = require_mapping(entry.get("standby"), f"services.{service_id}.standby")
         standby_kind = require_enum(
             standby.get("kind"),
