@@ -271,6 +271,328 @@ workstreams:
     '
   blockers: []
   plane_issue_id: 42ea1e56-38e5-4a5d-a25d-392abad9e3e8
+- id: ws-0372-live-apply
+  adr: '0372'
+  title: ADR 0372 Live Apply and Automation Verification
+  status: merged
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: codex/ws-0372-live-apply
+  worktree_path: .worktrees/ws-0372-live-apply
+  doc: docs/workstreams/ws-0372-live-apply.md
+  depends_on:
+  - adr-0372-data-driven-playbook-composition
+  conflicts_with: []
+  shared_surfaces:
+  - Makefile
+  - playbooks/services/keycloak.yml
+  - playbooks/services/searxng.yml
+  - config/health-probe-catalog.json
+  - config/service-capability-catalog.json
+  - config/service-redundancy-catalog.json
+  - config/subdomain-catalog.json
+  - scripts/decommission_service.py
+  - scripts/generate_ops_portal.py
+  - scripts/immutable_guest_replacement.py
+  - scripts/service_redundancy.py
+  - docs/adr/0372-data-driven-playbook-composition.md
+  - docs/runbooks/playbook-execution-model.md
+  - tests/test_directus_playbook.py
+  - tests/test_flagsmith_playbook.py
+  - tests/test_glitchtip_playbook.py
+  - tests/test_keycloak_playbook.py
+  - tests/test_label_studio_playbook.py
+  - tests/test_livekit_playbook.py
+  - tests/test_matrix_synapse_playbook.py
+  - tests/test_nextcloud_playbook.py
+  - tests/test_ntfy_playbook.py
+  - tests/test_plausible_playbook.py
+  - tests/test_sftpgo_playbook.py
+  - tests/test_superset_playbook.py
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0372_live_apply_runner
+      paths:
+      - Makefile
+      - playbooks/services/keycloak.yml
+      - playbooks/services/searxng.yml
+      - docs/runbooks/playbook-execution-model.md
+      mode: exclusive
+    - id: ws_0372_preflight_gate_fixes
+      paths:
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/subdomain-catalog.json
+      - scripts/decommission_service.py
+      - scripts/generate_ops_portal.py
+      - scripts/immutable_guest_replacement.py
+      - scripts/service_redundancy.py
+      mode: exclusive
+    - id: ws_0372_playbook_tests
+      paths:
+      - tests/test_directus_playbook.py
+      - tests/test_flagsmith_playbook.py
+      - tests/test_glitchtip_playbook.py
+      - tests/test_keycloak_playbook.py
+      - tests/test_label_studio_playbook.py
+      - tests/test_livekit_playbook.py
+      - tests/test_matrix_synapse_playbook.py
+      - tests/test_nextcloud_playbook.py
+      - tests/test_ntfy_playbook.py
+      - tests/test_plausible_playbook.py
+      - tests/test_sftpgo_playbook.py
+      - tests/test_superset_playbook.py
+      mode: exclusive
+    - id: ws_0372_doc_state
+      paths:
+      - docs/adr/0372-data-driven-playbook-composition.md
+      - docs/workstreams/ws-0372-live-apply.md
+      - workstreams/active/ws-0372-live-apply.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: align live-apply-service descriptor loading with ADR 0372 playbook
+      composition, add missing keycloak/searxng service wrappers, and verify the include-based
+      playbook tests
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  description: 'Finalize ADR 0372 on the governed live-apply path. The branch verifies
+    that
+
+    service-scoped live applies load playbook descriptor vars correctly, restores
+
+    any missing service wrappers needed by the shared apply runner, aligns the
+
+    playbook tests with the shared-include model now present on origin/main, and
+
+    records end-to-end live-apply evidence for the ADR.
+
+    '
+  blockers:
+  - 'Live-apply-service fails the vulnerability budget gate because the image scan
+    receipts for edge-published services (ex: directus_runtime dated 2026-03-30) are
+    older than the 7-day policy window.'
+  - 'Attempted to refresh scans on docker-runtime, but trivy remote scans fail because
+    tagged images (ex: minio/minio:RELEASE.2025-07-23T15-54-02Z) are no longer present
+    locally and the host cannot resolve docker.io to pull; artifact-cache scans also
+    time out at 10.10.10.80:5001.'
+  plane_issue_id: 86a2487d-67a2-40d6-974a-5da04320db13
+- id: adr-0369-python-validation-toolkit
+  adr: 0369
+  title: Shared Python validation toolkit for catalog and registry scripts
+  status: in_progress
+  owner: codex
+  branch: codex/adr-0369-mainline
+  worktree_path: .worktrees/adr-0369-mainline
+  doc: docs/workstreams/adr-0369-python-validation-toolkit.md
+  depends_on:
+  - adr-0039-controller-automation-toolkit
+  - adr-0048-command-catalog-pattern
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0369-python-validation-toolkit.md
+  - docs/workstreams/adr-0369-python-validation-toolkit.md
+  - scripts/validation_toolkit.py
+  - scripts/test_validation_toolkit.py
+  - scripts/identity_yaml.py
+  - scripts/generate_cross_cutting_artifacts.py
+  - scripts/generate_ops_portal.py
+  - scripts/capability_contracts.py
+  - scripts/container_image_policy.py
+  - scripts/environment_topology.py
+  - scripts/failure_domain_policy.py
+  - scripts/gate_bypass_waivers.py
+  - scripts/generate_platform_vars.py
+  - scripts/immutable_guest_replacement.py
+  - scripts/maintenance_window_tool.py
+  - scripts/ntfy_publish.py
+  - scripts/provider_boundary_catalog.py
+  - scripts/runtime_assurance.py
+  - scripts/service_catalog.py
+  - scripts/service_completeness.py
+  - scripts/service_redundancy.py
+  - scripts/shared_policy_packs.py
+  - scripts/stage_smoke_suites.py
+  - scripts/token_lifecycle.py
+  - scripts/typesense_catalog_sync.py
+  - scripts/validate_nats_topics.py
+  - scripts/validate_repository_data_models.py
+  - scripts/validation_runner_contracts.py
+  - scripts/vulnerability_budget.py
+  - workstreams/active/adr-0369-python-validation-toolkit.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_0369_workstream_docs
+      paths:
+      - docs/workstreams/adr-0369-python-validation-toolkit.md
+      - workstreams/active/adr-0369-python-validation-toolkit.yaml
+      mode: exclusive
+    - id: adr_0369_validation_toolkit
+      paths:
+      - scripts/validation_toolkit.py
+      - scripts/test_validation_toolkit.py
+      - scripts/identity_yaml.py
+      - scripts/generate_cross_cutting_artifacts.py
+      - scripts/generate_ops_portal.py
+      - scripts/capability_contracts.py
+      - scripts/container_image_policy.py
+      - scripts/environment_topology.py
+      - scripts/failure_domain_policy.py
+      - scripts/gate_bypass_waivers.py
+      - scripts/generate_platform_vars.py
+      - scripts/immutable_guest_replacement.py
+      - scripts/maintenance_window_tool.py
+      - scripts/ntfy_publish.py
+      - scripts/provider_boundary_catalog.py
+      - scripts/runtime_assurance.py
+      - scripts/service_catalog.py
+      - scripts/service_completeness.py
+      - scripts/service_redundancy.py
+      - scripts/shared_policy_packs.py
+      - scripts/stage_smoke_suites.py
+      - scripts/token_lifecycle.py
+      - scripts/typesense_catalog_sync.py
+      - scripts/validate_nats_topics.py
+      - scripts/validate_repository_data_models.py
+      - scripts/validation_runner_contracts.py
+      - scripts/vulnerability_budget.py
+      mode: exclusive
+  ready_to_merge: false
+  live_applied: false
+- id: ws-0368-live-apply
+  adr: 0368
+  title: ADR 0368 Live Apply and Completion
+  status: blocked
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0368-live-apply
+  worktree_path: .worktrees/ws-0368-live-apply
+  doc: docs/workstreams/ws-0368-live-apply.md
+  depends_on:
+  - adr-0368-docker-compose-jinja2-macro-library
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/compose_macros.j2
+  - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/lago_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/compose_macros.j2
+  - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/paperless_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/compose_macros.j2
+  - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/compose_macros.j2
+  - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
+  - docs/adr/.index.yaml
+  - docs/adr/0368-docker-compose-jinja2-macro-library.md
+  - docs/adr/implementation-status/adr-0368.yaml
+  - docs/adr/index/by-concern/platform.yaml
+  - docs/adr/index/by-concern/vm-topology.yaml
+  - docs/adr/index/by-range/0300-0399.yaml
+  - docs/adr/index/by-status/implemented.yaml
+  - docs/adr/index/by-status/proposed.yaml
+  - docs/workstreams/ws-0368-live-apply.md
+  - scripts/generate_platform_vars.py
+  - tests/test_flagsmith_runtime_role.py
+  - tests/test_gitea_runtime_role.py
+  - tests/test_label_studio_runtime_role.py
+  - tests/test_minio_runtime_role.py
+  - workstreams/active/ws-0368-live-apply.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: adr_0368_compose_macros
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
+      - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/compose_macros.j2
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/lago_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/label_studio_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/compose_macros.j2
+      - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/paperless_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/compose_macros.j2
+      - collections/ansible_collections/lv3/platform/roles/redpanda_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/compose_macros.j2
+      - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
+      mode: exclusive
+    - id: adr_0368_hairpin_generator
+      paths:
+      - scripts/generate_platform_vars.py
+      mode: exclusive
+    - id: adr_0368_docs
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/0368-docker-compose-jinja2-macro-library.md
+      - docs/adr/implementation-status/adr-0368.yaml
+      - docs/adr/index/by-concern/platform.yaml
+      - docs/adr/index/by-concern/vm-topology.yaml
+      - docs/adr/index/by-range/0300-0399.yaml
+      - docs/adr/index/by-status/implemented.yaml
+      - docs/adr/index/by-status/proposed.yaml
+      - docs/workstreams/ws-0368-live-apply.md
+      - workstreams/active/ws-0368-live-apply.yaml
+      - tests/test_flagsmith_runtime_role.py
+      - tests/test_gitea_runtime_role.py
+      - tests/test_label_studio_runtime_role.py
+      - tests/test_minio_runtime_role.py
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  notes: 'Purpose-built closure workstream for ADR 0368. Scope includes completing
+    the
+
+    shared compose macro adoption, reconciling later hairpin automation drift,
+
+    validating the repo automation path, and recording live-apply evidence plus
+
+    final ADR metadata without touching release files on the workstream branch.
+
+    '
+  blockers:
+  - Controller cannot reach the Proxmox Tailscale endpoint, affected guests, or the
+    remote build server from this machine, so the live apply cannot be completed truthfully
+    from the current worktree.
+  - The governed live-apply wrapper is also blocked by unrelated baseline registry
+    drift in workstreams/active/ws-0377-repo-intake-subdomain.yaml (empty adr field).
+  plane_issue_id: 5bd08ebb-7b42-4947-b3d1-bcb3d20fcd84
 - id: ws-0364-service-api-agent-tools
   adr: '0364'
   title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
