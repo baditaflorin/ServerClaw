@@ -1545,6 +1545,72 @@
       "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
     },
     {
+      "fqdn": "files.example.com",
+      "service_id": "sftpgo",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0373",
+      "publication": {
+        "delivery_model": "private-network",
+        "access_model": "private-network",
+        "audience": "private-network"
+      },
+      "assertions": {
+        "publication_class": "private-only",
+        "environment": "production",
+        "audience": "private-network",
+        "auth_requirement": "private_network",
+        "route_target": {
+          "service_id": "sftpgo",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": true,
+        "tls": false
+      },
+      "adapter": {
+        "dns": {
+          "target": "203.0.113.1",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "203.0.113.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "tailnet",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "none",
+          "auto_renew": false
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "SFTPGo web-based file manager. Published through the shared NGINX edge."
+    },
+    {
       "fqdn": "flags.example.com",
       "service_id": "flagsmith",
       "environment": "production",
@@ -3167,6 +3233,77 @@
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
     },
     {
+      "fqdn": "repo-intake.example.com",
+      "service_id": "repo_intake",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0373",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "repo_intake",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:8101",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "203.0.113.1",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "203.0.113.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "repo_intake",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:8101"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Repo intake webhook service. Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
+    },
+    {
       "fqdn": "repowise.example.com",
       "service_id": "repowise",
       "environment": "production",
@@ -3236,6 +3373,72 @@
       },
       "live_tracking_expected": true,
       "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required."
+    },
+    {
+      "fqdn": "s3.example.com",
+      "service_id": "minio",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0373",
+      "publication": {
+        "delivery_model": "private-network",
+        "access_model": "private-network",
+        "audience": "private-network"
+      },
+      "assertions": {
+        "publication_class": "private-only",
+        "environment": "production",
+        "audience": "private-network",
+        "auth_requirement": "private_network",
+        "route_target": {
+          "service_id": "minio",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": true,
+        "tls": false
+      },
+      "adapter": {
+        "dns": {
+          "target": "203.0.113.1",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "203.0.113.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "none",
+          "auto_renew": false
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "MinIO S3-compatible object storage API endpoint."
     },
     {
       "fqdn": "scheduler.example.com",
@@ -3395,7 +3598,7 @@
           "service_id": "keycloak",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}",
           "target_port": 443
         }
       },
@@ -3435,7 +3638,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3936,12 +4139,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 54,
-    "active_total": 50,
-    "active_public_total": 46,
-    "active_private_total": 4,
+    "catalog_total": 57,
+    "active_total": 53,
+    "active_public_total": 47,
+    "active_private_total": 6,
     "planned_total": 4,
-    "shared_edge_total": 45,
-    "platform_sso_total": 17
+    "shared_edge_total": 46,
+    "platform_sso_total": 18
   }
 }

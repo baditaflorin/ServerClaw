@@ -196,43 +196,6 @@
       }
     },
     {
-      "id": "crawl4ai",
-      "name": "Crawl4AI",
-      "description": "Private LLM-optimised web content crawler for cleaned Markdown extraction and bounded browser-assisted fetches.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:11235",
-      "exposure": "private-only",
-      "health_probe_id": "crawl4ai",
-      "image_catalog_ids": [
-        "crawl4ai_runtime"
-      ],
-      "adr": "0288",
-      "adr_file": "docs/adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md",
-      "runbook": "docs/runbooks/configure-crawl4ai.md",
-      "runtime_pool": "runtime-ai",
-      "deployment_surface": "playbooks/services/crawl4ai.yml",
-      "restart_domain": "runtime-ai-execution",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
-      "mobility_tier": "burst_batch",
-      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability",
-      "tags": [
-        "crawl",
-        "markdown",
-        "automation",
-        "private"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "http://10.10.10.20:11235",
-          "notes": "The runtime stays private to docker-runtime and the guest network; there is no public DNS record and no shared API gateway route for Crawl4AI."
-        }
-      }
-    },
-    {
       "id": "changelog_portal",
       "name": "Deployment History Portal",
       "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",
@@ -334,6 +297,43 @@
           "url": "https://apps.example.com",
           "subdomain": "apps.example.com",
           "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology on coolify-apps."
+        }
+      }
+    },
+    {
+      "id": "crawl4ai",
+      "name": "Crawl4AI",
+      "description": "Private LLM-optimised web content crawler for cleaned Markdown extraction and bounded browser-assisted fetches.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:11235",
+      "exposure": "private-only",
+      "health_probe_id": "crawl4ai",
+      "image_catalog_ids": [
+        "crawl4ai_runtime"
+      ],
+      "adr": "0288",
+      "adr_file": "docs/adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md",
+      "runbook": "docs/runbooks/configure-crawl4ai.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/crawl4ai.yml",
+      "restart_domain": "runtime-ai-execution",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
+      "mobility_tier": "burst_batch",
+      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability",
+      "tags": [
+        "crawl",
+        "markdown",
+        "automation",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:11235",
+          "notes": "The runtime stays private to docker-runtime and the guest network; there is no public DNS record and no shared API gateway route for Crawl4AI."
         }
       }
     },
@@ -622,6 +622,53 @@
       }
     },
     {
+      "id": "flagsmith",
+      "name": "Flagsmith",
+      "description": "Feature flag and remote configuration control plane with repo-managed environment and baseline feature seeding.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8017",
+      "public_url": "https://flags.example.com",
+      "subdomain": "flags.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Flagsmith Public Health",
+      "health_probe_id": "flagsmith",
+      "secret_catalog_ids": [
+        "flagsmith_database_password",
+        "flagsmith_django_secret_key",
+        "flagsmith_admin_password",
+        "flagsmith_environment_keys"
+      ],
+      "image_catalog_ids": [
+        "flagsmith_runtime"
+      ],
+      "adr": "0288",
+      "adr_file": "docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md",
+      "runbook": "docs/runbooks/configure-flagsmith.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/flagsmith.yml",
+      "restart_domain": "runtime-general-product-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "tags": [
+        "feature-flags",
+        "remote-config",
+        "control-plane",
+        "edge-authenticated"
+      ],
+      "notes": "The public UI and browser management API are protected by the shared edge oauth2-proxy and Keycloak flow while server-side environment keys remain private and repo-managed through OpenBao.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://flags.example.com",
+          "subdomain": "flags.example.com",
+          "notes": "The bootstrap org, project, environments, feature definitions, and environment API keys are seeded from the repo-managed Flagsmith runtime role."
+        }
+      }
+    },
+    {
       "id": "gitea",
       "name": "Gitea",
       "description": "Private self-hosted Git service with Keycloak SSO, repo bootstrap automation, and a dedicated Actions runner on docker-build.",
@@ -659,42 +706,6 @@
           "status": "active",
           "url": "http://100.64.0.1:3009",
           "subdomain": "git.example.com"
-        }
-      }
-    },
-    {
-      "id": "gotenberg",
-      "name": "Gotenberg",
-      "description": "Private stateless document rendering service for HTML, Markdown, text, and Office-to-PDF conversion workflows.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "runtime-ai",
-      "vmid": 190,
-      "internal_url": "http://10.10.10.90:3007",
-      "exposure": "private-only",
-      "health_probe_id": "gotenberg",
-      "image_catalog_ids": [
-        "gotenberg_runtime"
-      ],
-      "adr": "0278",
-      "runbook": "docs/runbooks/configure-gotenberg.md",
-      "runtime_pool": "runtime-ai",
-      "deployment_surface": "playbooks/services/gotenberg.yml",
-      "restart_domain": "runtime-ai-document-extraction",
-      "api_contract_ref": "config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml",
-      "mobility_tier": "burst_batch",
-      "dashboard_url": "https://grafana.example.com/d/lv3-gotenberg/lv3-gotenberg",
-      "tags": [
-        "documents",
-        "pdf",
-        "rendering",
-        "private"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "http://10.10.10.90:3007",
-          "notes": "The runtime stays private on runtime-ai; authenticated operator and automation access is brokered through the shared API gateway route at https://api.example.com/v1/gotenberg."
         }
       }
     },
@@ -754,6 +765,42 @@
       }
     },
     {
+      "id": "gotenberg",
+      "name": "Gotenberg",
+      "description": "Private stateless document rendering service for HTML, Markdown, text, and Office-to-PDF conversion workflows.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "runtime-ai",
+      "vmid": 190,
+      "internal_url": "http://10.10.10.90:3007",
+      "exposure": "private-only",
+      "health_probe_id": "gotenberg",
+      "image_catalog_ids": [
+        "gotenberg_runtime"
+      ],
+      "adr": "0278",
+      "runbook": "docs/runbooks/configure-gotenberg.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/gotenberg.yml",
+      "restart_domain": "runtime-ai-document-extraction",
+      "api_contract_ref": "config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml",
+      "mobility_tier": "burst_batch",
+      "dashboard_url": "https://grafana.example.com/d/lv3-gotenberg/lv3-gotenberg",
+      "tags": [
+        "documents",
+        "pdf",
+        "rendering",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.90:3007",
+          "notes": "The runtime stays private on runtime-ai; authenticated operator and automation access is brokered through the shared API gateway route at https://api.example.com/v1/gotenberg."
+        }
+      }
+    },
+    {
       "id": "grafana",
       "name": "Grafana",
       "description": "Metrics dashboards, platform overview, and service detail dashboards.",
@@ -796,6 +843,51 @@
           "url": "https://grafana.staging.example.com",
           "subdomain": "grafana.staging.example.com",
           "notes": "Planned shared-edge staging hostname; live publication remains pending."
+        }
+      }
+    },
+    {
+      "id": "grist",
+      "name": "Grist",
+      "description": "Self-hosted no-code spreadsheet database for operator-managed structured data, formulas, and governed workflow tables.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8484",
+      "public_url": "https://grist.example.com",
+      "subdomain": "grist.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Grist Public Status",
+      "health_probe_id": "grist",
+      "image_catalog_ids": [
+        "grist_runtime"
+      ],
+      "secret_catalog_ids": [
+        "grist_session_secret",
+        "keycloak_grist_client_secret"
+      ],
+      "adr": "0279",
+      "runbook": "docs/runbooks/configure-grist.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/grist.yml",
+      "restart_domain": "runtime-general-product-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "tags": [
+        "grist",
+        "spreadsheet",
+        "database",
+        "operations",
+        "oidc"
+      ],
+      "notes": "Live-apply evidence is tracked on the workstream branch; merge-to-main still must update the integrated README, VERSION, changelog, and versions/stack.yaml surfaces.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://grist.example.com",
+          "subdomain": "grist.example.com",
+          "notes": "The public spreadsheet surface is published through the shared edge while the document UI remains gated by the repo-managed Keycloak OIDC client."
         }
       }
     },
@@ -880,53 +972,6 @@
       }
     },
     {
-      "id": "flagsmith",
-      "name": "Flagsmith",
-      "description": "Feature flag and remote configuration control plane with repo-managed environment and baseline feature seeding.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8017",
-      "public_url": "https://flags.example.com",
-      "subdomain": "flags.example.com",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "Flagsmith Public Health",
-      "health_probe_id": "flagsmith",
-      "secret_catalog_ids": [
-        "flagsmith_database_password",
-        "flagsmith_django_secret_key",
-        "flagsmith_admin_password",
-        "flagsmith_environment_keys"
-      ],
-      "image_catalog_ids": [
-        "flagsmith_runtime"
-      ],
-      "adr": "0288",
-      "adr_file": "docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md",
-      "runbook": "docs/runbooks/configure-flagsmith.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/flagsmith.yml",
-      "restart_domain": "runtime-general-product-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "movable_singleton",
-      "tags": [
-        "feature-flags",
-        "remote-config",
-        "control-plane",
-        "edge-authenticated"
-      ],
-      "notes": "The public UI and browser management API are protected by the shared edge oauth2-proxy and Keycloak flow while server-side environment keys remain private and repo-managed through OpenBao.",
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://flags.example.com",
-          "subdomain": "flags.example.com",
-          "notes": "The bootstrap org, project, environments, feature definitions, and environment API keys are seeded from the repo-managed Flagsmith runtime role."
-        }
-      }
-    },
-    {
       "id": "homepage",
       "name": "Homepage",
       "description": "Unified operator-facing dashboard for the current LV3 service inventory, quick links, and live service reachability.",
@@ -1003,6 +1048,111 @@
       "restart_domain": "runtime-control-identity",
       "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-control",
       "mobility_tier": "anchor"
+    },
+    {
+      "id": "label_studio",
+      "name": "Label Studio",
+      "description": "Repo-managed human-in-the-loop data annotation platform with deterministic project catalog reconciliation.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8110",
+      "public_url": "https://annotate.example.com",
+      "subdomain": "annotate.example.com",
+      "exposure": "edge-published",
+      "health_probe_id": "label_studio",
+      "image_catalog_ids": [
+        "label_studio_runtime"
+      ],
+      "secret_catalog_ids": [
+        "label_studio_database_password",
+        "label_studio_admin_password",
+        "label_studio_admin_token"
+      ],
+      "adr": "0289",
+      "adr_file": "docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md",
+      "runbook": "docs/runbooks/configure-label-studio.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/label-studio.yml",
+      "restart_domain": "runtime-general-data-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability",
+      "tags": [
+        "annotation",
+        "human-in-the-loop",
+        "postgres",
+        "edge-authenticated",
+        "ml-data"
+      ],
+      "notes": "Label Studio runs on docker-runtime with a dedicated PostgreSQL database and repo-managed project catalog sync. Browser access is enforced by the shared edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain the current Community Edition-compatible recovery and automation path.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://annotate.example.com",
+          "subdomain": "annotate.example.com",
+          "notes": "Repo automation verifies the local /api/version contract, the shared-edge auth redirects, and the repo-managed project catalog through the private runtime token."
+        }
+      }
+    },
+    {
+      "id": "lago",
+      "name": "Lago",
+      "description": "Usage metering and billing control plane with a protected operator browser surface and a governed public event-ingest adapter.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8100",
+      "public_url": "https://billing.example.com",
+      "subdomain": "billing.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Lago Public Health",
+      "health_probe_id": "lago",
+      "secret_catalog_ids": [
+        "lago_database_password",
+        "lago_redis_password",
+        "lago_secret_key_base",
+        "lago_rsa_private_key",
+        "lago_encryption_primary_key",
+        "lago_encryption_deterministic_key",
+        "lago_encryption_key_derivation_salt",
+        "lago_bootstrap_user_password",
+        "lago_org_api_key",
+        "lago_smoke_producer_token",
+        "lago_producer_catalog"
+      ],
+      "image_catalog_ids": [
+        "lago_api_runtime",
+        "lago_front_runtime",
+        "lago_pdf_runtime",
+        "lago_redis_runtime"
+      ],
+      "adr": "0292",
+      "adr_file": "docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md",
+      "runbook": "docs/runbooks/configure-lago.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/lago.yml",
+      "restart_domain": "runtime-general-product-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "tags": [
+        "billing",
+        "metering",
+        "usage",
+        "edge-authenticated",
+        "event-ingest"
+      ],
+      "notes": "The browser UI and management surfaces at billing.example.com stay behind the shared oauth2-proxy and Keycloak edge-auth flow. Public `/api/health` and `/api/v1/events` remain reachable without browser sign-in, with event ingest terminating at the governed API-gateway adapter and rejected payloads published to `billing.events.rejected`.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://billing.example.com",
+          "subdomain": "billing.example.com",
+          "notes": "The repo-managed smoke customer, subscription, billable metric, and plan are seeded through the Lago API and validated by direct plus public ingest replays on every governed converge."
+        }
+      }
     },
     {
       "id": "langfuse",
@@ -1117,64 +1267,6 @@
         "production": {
           "status": "active",
           "url": "http://10.10.10.20:4000"
-        }
-      }
-    },
-    {
-      "id": "lago",
-      "name": "Lago",
-      "description": "Usage metering and billing control plane with a protected operator browser surface and a governed public event-ingest adapter.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8100",
-      "public_url": "https://billing.example.com",
-      "subdomain": "billing.example.com",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "Lago Public Health",
-      "health_probe_id": "lago",
-      "secret_catalog_ids": [
-        "lago_database_password",
-        "lago_redis_password",
-        "lago_secret_key_base",
-        "lago_rsa_private_key",
-        "lago_encryption_primary_key",
-        "lago_encryption_deterministic_key",
-        "lago_encryption_key_derivation_salt",
-        "lago_bootstrap_user_password",
-        "lago_org_api_key",
-        "lago_smoke_producer_token",
-        "lago_producer_catalog"
-      ],
-      "image_catalog_ids": [
-        "lago_api_runtime",
-        "lago_front_runtime",
-        "lago_pdf_runtime",
-        "lago_redis_runtime"
-      ],
-      "adr": "0292",
-      "adr_file": "docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md",
-      "runbook": "docs/runbooks/configure-lago.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/lago.yml",
-      "restart_domain": "runtime-general-product-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "movable_singleton",
-      "tags": [
-        "billing",
-        "metering",
-        "usage",
-        "edge-authenticated",
-        "event-ingest"
-      ],
-      "notes": "The browser UI and management surfaces at billing.example.com stay behind the shared oauth2-proxy and Keycloak edge-auth flow. Public `/api/health` and `/api/v1/events` remain reachable without browser sign-in, with event ingest terminating at the governed API-gateway adapter and rejected payloads published to `billing.events.rejected`.",
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://billing.example.com",
-          "subdomain": "billing.example.com",
-          "notes": "The repo-managed smoke customer, subscription, billable metric, and plan are seeded through the Lago API and validated by direct plus public ingest replays on every governed converge."
         }
       }
     },
@@ -1304,90 +1396,6 @@
       }
     },
     {
-      "id": "minio",
-      "name": "MinIO",
-      "description": "Shared S3-compatible object storage runtime for platform buckets, governed bucket policy reconciliation, and browser-based object inspection.",
-      "category": "data",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:9010",
-      "public_url": "https://minio.example.com",
-      "subdomain": "minio.example.com",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "MinIO Public Health",
-      "health_probe_id": "minio",
-      "image_catalog_ids": [
-        "minio_runtime"
-      ],
-      "secret_catalog_ids": [
-        "minio_root_password"
-      ],
-      "adr": "0274",
-      "adr_file": "docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md",
-      "runbook": "docs/runbooks/minio-object-storage.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/minio.yml",
-      "restart_domain": "runtime-general-data-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "anchor",
-      "tags": [
-        "s3",
-        "object-storage",
-        "minio",
-        "shared"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://minio.example.com",
-          "subdomain": "minio.example.com",
-          "notes": "The public S3 API remains machine-accessible while the browser console is separately published at minio-console.example.com behind the shared edge OIDC gate."
-        }
-      }
-    },
-    {
-      "id": "redpanda",
-      "name": "Redpanda",
-      "description": "Private Kafka-compatible streaming platform for durable, replayable event logs and schema-managed topics.",
-      "category": "data",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "kafka://10.10.10.20:9092",
-      "exposure": "private-only",
-      "health_probe_id": "redpanda",
-      "image_catalog_ids": [
-        "redpanda_runtime"
-      ],
-      "secret_catalog_ids": [
-        "redpanda_admin_password",
-        "redpanda_platform_password"
-      ],
-      "adr": "0290",
-      "adr_file": "docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md",
-      "runbook": "docs/runbooks/configure-redpanda.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/redpanda.yml",
-      "restart_domain": "runtime-general-data-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "anchor",
-      "tags": [
-        "streaming",
-        "kafka",
-        "redpanda",
-        "private"
-      ],
-      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime reserves 8099 for the Temporal UI.",
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "kafka://10.10.10.20:9092",
-          "notes": "Platform callers use the Kafka listener on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners remain private on 9644, 8103, and 8104."
-        }
-      }
-    },
-    {
       "id": "matrix_synapse",
       "name": "Matrix Synapse",
       "description": "Repo-managed Matrix Synapse runtime with Discord and WhatsApp mautrix bridges that serves as the canonical ServerClaw conversation hub.",
@@ -1481,6 +1489,49 @@
       }
     },
     {
+      "id": "minio",
+      "name": "MinIO",
+      "description": "Shared S3-compatible object storage runtime for platform buckets, governed bucket policy reconciliation, and browser-based object inspection.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:9010",
+      "public_url": "https://minio.example.com",
+      "subdomain": "minio.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "MinIO Public Health",
+      "health_probe_id": "minio",
+      "image_catalog_ids": [
+        "minio_runtime"
+      ],
+      "secret_catalog_ids": [
+        "minio_root_password"
+      ],
+      "adr": "0274",
+      "adr_file": "docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md",
+      "runbook": "docs/runbooks/minio-object-storage.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/minio.yml",
+      "restart_domain": "runtime-general-data-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "anchor",
+      "tags": [
+        "s3",
+        "object-storage",
+        "minio",
+        "shared"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://minio.example.com",
+          "subdomain": "minio.example.com",
+          "notes": "The public S3 API remains machine-accessible while the browser console is separately published at minio-console.example.com behind the shared edge OIDC gate."
+        }
+      }
+    },
+    {
       "id": "n8n",
       "name": "n8n",
       "description": "Repo-managed external app connector fabric and webhook automation runtime for ServerClaw, with a public edge hostname and PostgreSQL-backed persistence.",
@@ -1558,6 +1609,41 @@
       }
     },
     {
+      "id": "neko",
+      "name": "Neko Remote Desktop",
+      "description": "WebRTC-based interactive remote desktop for operator browser debugging and exploration of platform integrations.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "runtime-comms",
+      "vmid": 121,
+      "internal_url": "http://10.10.10.21:8080",
+      "public_url": "https://browser.example.com",
+      "subdomain": "browser.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Neko Browser",
+      "health_probe_id": "neko",
+      "adr": "0380",
+      "adr_file": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/neko.yml",
+      "restart_domain": "runtime-comms-webrtc",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "anchor",
+      "tags": [
+        "interactive",
+        "debugging",
+        "webrtc",
+        "remote-access"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://browser.example.com",
+          "subdomain": "browser.example.com"
+        }
+      }
+    },
+    {
       "id": "netbox",
       "name": "NetBox",
       "description": "Private topology, IPAM, and inventory system for the platform.",
@@ -1593,41 +1679,6 @@
         "production": {
           "status": "active",
           "url": "http://100.64.0.1:8004"
-        }
-      }
-    },
-    {
-      "id": "neko",
-      "name": "Neko Remote Desktop",
-      "description": "WebRTC-based interactive remote desktop for operator browser debugging and exploration of platform integrations.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "runtime-comms",
-      "vmid": 121,
-      "internal_url": "http://10.10.10.21:8080",
-      "public_url": "https://browser.example.com",
-      "subdomain": "browser.example.com",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "Neko Browser",
-      "health_probe_id": "neko",
-      "adr": "0380",
-      "adr_file": "docs/adr/0380-neko-for-operator-remote-browser-access.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/neko.yml",
-      "restart_domain": "runtime-comms-webrtc",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "anchor",
-      "tags": [
-        "interactive",
-        "debugging",
-        "webrtc",
-        "remote-access"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://browser.example.com",
-          "subdomain": "browser.example.com"
         }
       }
     },
@@ -1674,44 +1725,6 @@
           "url": "https://cloud.example.com",
           "subdomain": "cloud.example.com",
           "notes": "Published through the shared NGINX edge while Nextcloud itself enforces session, login, and DAV discovery behavior."
-        }
-      }
-    },
-    {
-      "id": "typesense",
-      "name": "Typesense",
-      "description": "Private full-text search engine for structured internal platform data and faceted operator lookups.",
-      "category": "data",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://100.64.0.1:8016",
-      "exposure": "private-only",
-      "health_probe_id": "typesense",
-      "image_catalog_ids": [
-        "typesense_runtime"
-      ],
-      "secret_catalog_ids": [
-        "typesense_api_key"
-      ],
-      "adr": "0277",
-      "runbook": "docs/runbooks/configure-typesense.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/typesense.yml",
-      "restart_domain": "runtime-general-data-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "movable_singleton",
-      "tags": [
-        "search",
-        "structured-data",
-        "full-text",
-        "private"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "http://100.64.0.1:8016",
-          "notes": "Private Tailscale controller route published by the Proxmox host proxy."
         }
       }
     },
@@ -1922,40 +1935,6 @@
       }
     },
     {
-      "id": "piper",
-      "name": "Piper",
-      "description": "Private CPU neural text-to-speech runtime for agent voice output, narrated notifications, and LiveKit-bound spoken responses.",
-      "category": "communication",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8100",
-      "exposure": "private-only",
-      "health_probe_id": "piper",
-      "adr": "0284",
-      "adr_file": "docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md",
-      "runbook": "docs/runbooks/configure-piper.md",
-      "runtime_pool": "runtime-ai",
-      "deployment_surface": "playbooks/services/piper.yml",
-      "restart_domain": "runtime-ai-inference",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
-      "mobility_tier": "burst_batch",
-      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability",
-      "tags": [
-        "tts",
-        "speech",
-        "voice",
-        "private"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "http://10.10.10.20:8100",
-          "notes": "Piper remains private to docker-runtime and the managed guest network; there is no public hostname or shared API gateway route."
-        }
-      }
-    },
-    {
       "id": "openbao",
       "name": "OpenBao",
       "description": "Private secrets authority for controller automation and runtime credentials.",
@@ -2045,48 +2024,6 @@
       }
     },
     {
-      "id": "temporal",
-      "name": "Temporal",
-      "description": "Private durable workflow and task queue engine for long-running platform automation that must survive worker crashes and retries.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "runtime-control",
-      "vmid": 192,
-      "internal_url": "grpc://127.0.0.1:7233",
-      "exposure": "private-only",
-      "health_probe_id": "temporal",
-      "image_catalog_ids": [
-        "temporal_server_runtime",
-        "temporal_admin_tools_runtime",
-        "temporal_ui_runtime"
-      ],
-      "secret_catalog_ids": [
-        "temporal_database_password"
-      ],
-      "adr": "0293",
-      "adr_file": "docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md",
-      "runbook": "docs/runbooks/configure-temporal.md",
-      "runtime_pool": "runtime-control",
-      "deployment_surface": "playbooks/services/temporal.yml",
-      "restart_domain": "runtime-control-automation",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-control",
-      "mobility_tier": "anchor",
-      "tags": [
-        "workflow",
-        "durable",
-        "temporal",
-        "private"
-      ],
-      "notes": "The frontend gRPC port, HTTP port, and UI are intentionally loopback-only on runtime-control; operators reach them through SSH tunneling or repo-managed admin-tools commands.",
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "grpc://127.0.0.1:7233",
-          "notes": "The repo-managed `lv3` namespace is bootstrapped automatically, while UI diagnostics are exposed only through a loopback tunnel to preserve the current guest firewall boundary."
-        }
-      }
-    },
-    {
       "id": "ops_portal",
       "name": "Platform Operations Portal",
       "description": "Interactive operator portal with live service actions, drift visibility, runbook launchers, and deployment streaming.",
@@ -2124,51 +2061,6 @@
           "url": "https://ops.staging.example.com",
           "subdomain": "ops.staging.example.com",
           "notes": "Planned staging portal for the interactive runtime."
-        }
-      }
-    },
-    {
-      "id": "grist",
-      "name": "Grist",
-      "description": "Self-hosted no-code spreadsheet database for operator-managed structured data, formulas, and governed workflow tables.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8484",
-      "public_url": "https://grist.example.com",
-      "subdomain": "grist.example.com",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "Grist Public Status",
-      "health_probe_id": "grist",
-      "image_catalog_ids": [
-        "grist_runtime"
-      ],
-      "secret_catalog_ids": [
-        "grist_session_secret",
-        "keycloak_grist_client_secret"
-      ],
-      "adr": "0279",
-      "runbook": "docs/runbooks/configure-grist.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/grist.yml",
-      "restart_domain": "runtime-general-product-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "movable_singleton",
-      "tags": [
-        "grist",
-        "spreadsheet",
-        "database",
-        "operations",
-        "oidc"
-      ],
-      "notes": "Live-apply evidence is tracked on the workstream branch; merge-to-main still must update the integrated README, VERSION, changelog, and versions/stack.yaml surfaces.",
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://grist.example.com",
-          "subdomain": "grist.example.com",
-          "notes": "The public spreadsheet surface is published through the shared edge while the document UI remains gated by the repo-managed Keycloak OIDC client."
         }
       }
     },
@@ -2223,53 +2115,6 @@
       }
     },
     {
-      "id": "label_studio",
-      "name": "Label Studio",
-      "description": "Repo-managed human-in-the-loop data annotation platform with deterministic project catalog reconciliation.",
-      "category": "data",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:8110",
-      "public_url": "https://annotate.example.com",
-      "subdomain": "annotate.example.com",
-      "exposure": "edge-published",
-      "health_probe_id": "label_studio",
-      "image_catalog_ids": [
-        "label_studio_runtime"
-      ],
-      "secret_catalog_ids": [
-        "label_studio_database_password",
-        "label_studio_admin_password",
-        "label_studio_admin_token"
-      ],
-      "adr": "0289",
-      "adr_file": "docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md",
-      "runbook": "docs/runbooks/configure-label-studio.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/label-studio.yml",
-      "restart_domain": "runtime-general-data-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "movable_singleton",
-      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=label-studio-availability",
-      "tags": [
-        "annotation",
-        "human-in-the-loop",
-        "postgres",
-        "edge-authenticated",
-        "ml-data"
-      ],
-      "notes": "Label Studio runs on docker-runtime with a dedicated PostgreSQL database and repo-managed project catalog sync. Browser access is enforced by the shared edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain the current Community Edition-compatible recovery and automation path.",
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://annotate.example.com",
-          "subdomain": "annotate.example.com",
-          "notes": "Repo automation verifies the local /api/version contract, the shared-edge auth redirects, and the repo-managed project catalog through the private runtime token."
-        }
-      }
-    },
-    {
       "id": "paperless",
       "name": "Paperless-ngx",
       "description": "Self-hosted document archive and metadata API with OCR, taxonomy reconciliation, and Keycloak-backed operator sign-in.",
@@ -2317,6 +2162,40 @@
           "url": "https://paperless.example.com",
           "subdomain": "paperless.example.com",
           "notes": "docs.example.com remains reserved for the developer portal, so Paperless publishes at paperless.example.com."
+        }
+      }
+    },
+    {
+      "id": "piper",
+      "name": "Piper",
+      "description": "Private CPU neural text-to-speech runtime for agent voice output, narrated notifications, and LiveKit-bound spoken responses.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8100",
+      "exposure": "private-only",
+      "health_probe_id": "piper",
+      "adr": "0284",
+      "adr_file": "docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md",
+      "runbook": "docs/runbooks/configure-piper.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/piper.yml",
+      "restart_domain": "runtime-ai-inference",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-ai",
+      "mobility_tier": "burst_batch",
+      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability",
+      "tags": [
+        "tts",
+        "speech",
+        "voice",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:8100",
+          "notes": "Piper remains private to docker-runtime and the managed guest network; there is no public hostname or shared API gateway route."
         }
       }
     },
@@ -2603,6 +2482,83 @@
       }
     },
     {
+      "id": "redpanda",
+      "name": "Redpanda",
+      "description": "Private Kafka-compatible streaming platform for durable, replayable event logs and schema-managed topics.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "kafka://10.10.10.20:9092",
+      "exposure": "private-only",
+      "health_probe_id": "redpanda",
+      "image_catalog_ids": [
+        "redpanda_runtime"
+      ],
+      "secret_catalog_ids": [
+        "redpanda_admin_password",
+        "redpanda_platform_password"
+      ],
+      "adr": "0290",
+      "adr_file": "docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md",
+      "runbook": "docs/runbooks/configure-redpanda.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/redpanda.yml",
+      "restart_domain": "runtime-general-data-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "anchor",
+      "tags": [
+        "streaming",
+        "kafka",
+        "redpanda",
+        "private"
+      ],
+      "notes": "The private Kafka listener stays on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime reserves 8099 for the Temporal UI.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "kafka://10.10.10.20:9092",
+          "notes": "Platform callers use the Kafka listener on 9092 while the authenticated Admin API, HTTP Proxy, and Schema Registry listeners remain private on 9644, 8103, and 8104."
+        }
+      }
+    },
+    {
+      "id": "repo_intake",
+      "name": "Repo Intake",
+      "description": "Webhook intake service for repo-managed automation triggers.",
+      "category": "platform",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8101",
+      "public_url": "https://repo-intake.example.com",
+      "subdomain": "repo-intake.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Repo Intake",
+      "health_probe_id": "repo_intake",
+      "image_catalog_ids": [],
+      "secret_catalog_ids": [],
+      "adr": "0373",
+      "adr_file": "docs/adr/0373-service-registry-and-derive-service-defaults.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/repo-intake.yml",
+      "restart_domain": "runtime-general",
+      "mobility_tier": "portable",
+      "tags": [
+        "webhook",
+        "intake",
+        "automation"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://repo-intake.example.com",
+          "subdomain": "repo-intake.example.com",
+          "notes": "Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
+        }
+      }
+    },
+    {
       "id": "repowise",
       "name": "Repowise Semantic Code Search",
       "description": "Local semantic code search service over the git repository using Ollama embeddings and Qdrant vector storage.",
@@ -2679,63 +2635,6 @@
           "url": "http://search.example.com",
           "subdomain": "search.example.com",
           "notes": "Tailnet-only hostname published on the Proxmox host Tailscale IP."
-        }
-      }
-    },
-    {
-      "id": "woodpecker",
-      "name": "Woodpecker CI",
-      "description": "Repo-managed event-driven CI server with Gitea OAuth, a public edge URL, and a private controller path on the Proxmox host.",
-      "category": "automation",
-      "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://100.64.0.1:8017",
-      "public_url": "https://ci.example.com",
-      "subdomain": "ci.example.com",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "Woodpecker Public",
-      "health_probe_id": "woodpecker",
-      "image_catalog_ids": [
-        "woodpecker_server_runtime",
-        "woodpecker_agent_runtime"
-      ],
-      "secret_catalog_ids": [
-        "woodpecker_database_password",
-        "woodpecker_gitea_client_secret",
-        "woodpecker_agent_secret",
-        "woodpecker_api_token",
-        "woodpecker_secret_smoke"
-      ],
-      "adr": "0287",
-      "adr_file": "docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md",
-      "runbook": "docs/runbooks/configure-woodpecker.md",
-      "runtime_pool": "runtime-general",
-      "deployment_surface": "playbooks/services/woodpecker.yml",
-      "restart_domain": "runtime-general-automation",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
-      "mobility_tier": "movable_singleton",
-      "degradation_modes": [
-        {
-          "dependency": "postgres",
-          "dependency_type": "hard",
-          "degraded_behaviour": "Woodpecker cannot persist repositories, secrets, pipeline history, or queued state without PostgreSQL.",
-          "degraded_for_seconds_max": 0,
-          "recovery_signal": "Woodpecker database connectivity succeeds again",
-          "tested_by": "fault:postgres-unavailable"
-        }
-      ],
-      "tags": [
-        "ci",
-        "pipelines",
-        "git",
-        "automation"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://ci.example.com",
-          "subdomain": "ci.example.com"
         }
       }
     },
@@ -2817,6 +2716,42 @@
           "status": "active",
           "url": "https://chat.example.com",
           "notes": "ServerClaw uses in-app Keycloak OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
+        }
+      }
+    },
+    {
+      "id": "sftpgo",
+      "name": "SFTPGo",
+      "description": "Web-based SFTP and file management service with OIDC SSO integration.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8080",
+      "public_url": "https://files.example.com",
+      "subdomain": "files.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "SFTPGo",
+      "health_probe_id": "sftpgo",
+      "image_catalog_ids": [],
+      "secret_catalog_ids": [],
+      "adr": "0373",
+      "adr_file": "docs/adr/0373-service-registry-and-derive-service-defaults.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/sftpgo.yml",
+      "restart_domain": "runtime-general-data-apps",
+      "mobility_tier": "portable",
+      "tags": [
+        "sftp",
+        "file-transfer",
+        "files"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://files.example.com",
+          "subdomain": "files.example.com",
+          "notes": "Web-based file management published through the shared NGINX edge."
         }
       }
     },
@@ -2935,6 +2870,82 @@
       }
     },
     {
+      "id": "temporal",
+      "name": "Temporal",
+      "description": "Private durable workflow and task queue engine for long-running platform automation that must survive worker crashes and retries.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "runtime-control",
+      "vmid": 192,
+      "internal_url": "grpc://127.0.0.1:7233",
+      "exposure": "private-only",
+      "health_probe_id": "temporal",
+      "image_catalog_ids": [
+        "temporal_server_runtime",
+        "temporal_admin_tools_runtime",
+        "temporal_ui_runtime"
+      ],
+      "secret_catalog_ids": [
+        "temporal_database_password"
+      ],
+      "adr": "0293",
+      "adr_file": "docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md",
+      "runbook": "docs/runbooks/configure-temporal.md",
+      "runtime_pool": "runtime-control",
+      "deployment_surface": "playbooks/services/temporal.yml",
+      "restart_domain": "runtime-control-automation",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-control",
+      "mobility_tier": "anchor",
+      "tags": [
+        "workflow",
+        "durable",
+        "temporal",
+        "private"
+      ],
+      "notes": "The frontend gRPC port, HTTP port, and UI are intentionally loopback-only on runtime-control; operators reach them through SSH tunneling or repo-managed admin-tools commands.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "grpc://127.0.0.1:7233",
+          "notes": "The repo-managed `lv3` namespace is bootstrapped automatically, while UI diagnostics are exposed only through a loopback tunnel to preserve the current guest firewall boundary."
+        }
+      }
+    },
+    {
+      "id": "tesseract_ocr",
+      "name": "Tesseract OCR",
+      "description": "Private OCR fallback API for scanned PDFs and image uploads when Apache Tika returns no embedded text.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "runtime-ai",
+      "vmid": 190,
+      "internal_url": "http://10.10.10.90:3008",
+      "exposure": "private-only",
+      "health_probe_id": "tesseract_ocr",
+      "adr": "0286",
+      "adr_file": "docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md",
+      "runbook": "docs/runbooks/configure-tesseract-ocr.md",
+      "runtime_pool": "runtime-ai",
+      "deployment_surface": "playbooks/services/tesseract-ocr.yml",
+      "restart_domain": "runtime-ai-document-extraction",
+      "api_contract_ref": "config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml",
+      "mobility_tier": "burst_batch",
+      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability",
+      "tags": [
+        "ocr",
+        "document-extraction",
+        "images",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.90:3008",
+          "notes": "Tesseract OCR stays private on runtime-ai and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
+        }
+      }
+    },
+    {
       "id": "tika",
       "name": "Apache Tika",
       "description": "Private stateless document text and metadata extraction service for the RAG and ServerClaw memory ingestion pipelines.",
@@ -2972,36 +2983,40 @@
       }
     },
     {
-      "id": "tesseract_ocr",
-      "name": "Tesseract OCR",
-      "description": "Private OCR fallback API for scanned PDFs and image uploads when Apache Tika returns no embedded text.",
+      "id": "typesense",
+      "name": "Typesense",
+      "description": "Private full-text search engine for structured internal platform data and faceted operator lookups.",
       "category": "data",
       "lifecycle_status": "active",
-      "vm": "runtime-ai",
-      "vmid": 190,
-      "internal_url": "http://10.10.10.90:3008",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8016",
       "exposure": "private-only",
-      "health_probe_id": "tesseract_ocr",
-      "adr": "0286",
-      "adr_file": "docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md",
-      "runbook": "docs/runbooks/configure-tesseract-ocr.md",
-      "runtime_pool": "runtime-ai",
-      "deployment_surface": "playbooks/services/tesseract-ocr.yml",
-      "restart_domain": "runtime-ai-document-extraction",
-      "api_contract_ref": "config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml",
-      "mobility_tier": "burst_batch",
-      "dashboard_url": "https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability",
+      "health_probe_id": "typesense",
+      "image_catalog_ids": [
+        "typesense_runtime"
+      ],
+      "secret_catalog_ids": [
+        "typesense_api_key"
+      ],
+      "adr": "0277",
+      "runbook": "docs/runbooks/configure-typesense.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/typesense.yml",
+      "restart_domain": "runtime-general-data-apps",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
       "tags": [
-        "ocr",
-        "document-extraction",
-        "images",
+        "search",
+        "structured-data",
+        "full-text",
         "private"
       ],
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://10.10.10.90:3008",
-          "notes": "Tesseract OCR stays private on runtime-ai and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
+          "url": "http://100.64.0.1:8016",
+          "notes": "Private Tailscale controller route published by the Proxmox host proxy."
         }
       }
     },
@@ -3139,6 +3154,63 @@
           "smoke_suite_ids": [
             "production-windmill-primary-path"
           ]
+        }
+      }
+    },
+    {
+      "id": "woodpecker",
+      "name": "Woodpecker CI",
+      "description": "Repo-managed event-driven CI server with Gitea OAuth, a public edge URL, and a private controller path on the Proxmox host.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8017",
+      "public_url": "https://ci.example.com",
+      "subdomain": "ci.example.com",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Woodpecker Public",
+      "health_probe_id": "woodpecker",
+      "image_catalog_ids": [
+        "woodpecker_server_runtime",
+        "woodpecker_agent_runtime"
+      ],
+      "secret_catalog_ids": [
+        "woodpecker_database_password",
+        "woodpecker_gitea_client_secret",
+        "woodpecker_agent_secret",
+        "woodpecker_api_token",
+        "woodpecker_secret_smoke"
+      ],
+      "adr": "0287",
+      "adr_file": "docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md",
+      "runbook": "docs/runbooks/configure-woodpecker.md",
+      "runtime_pool": "runtime-general",
+      "deployment_surface": "playbooks/services/woodpecker.yml",
+      "restart_domain": "runtime-general-automation",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
+      "mobility_tier": "movable_singleton",
+      "degradation_modes": [
+        {
+          "dependency": "postgres",
+          "dependency_type": "hard",
+          "degraded_behaviour": "Woodpecker cannot persist repositories, secrets, pipeline history, or queued state without PostgreSQL.",
+          "degraded_for_seconds_max": 0,
+          "recovery_signal": "Woodpecker database connectivity succeeds again",
+          "tested_by": "fault:postgres-unavailable"
+        }
+      ],
+      "tags": [
+        "ci",
+        "pipelines",
+        "git",
+        "automation"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://ci.example.com",
+          "subdomain": "ci.example.com"
         }
       }
     }
