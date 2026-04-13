@@ -48,7 +48,12 @@ docker_runtime_engine_packages:
 
 docker_runtime_admin_users:
   - "{{ proxmox_guest_ci_user }}"
-docker_runtime_public_edge_ipv4: "{{ platform_host.network.public_edge_ipv4 }}"
+docker_runtime_public_edge_ipv4: >-
+  {{
+    proxmox_public_edge_ipv4
+    if proxmox_public_edge_ipv4 is defined
+    else hostvars[platform_topology_host].proxmox_public_edge_ipv4
+  }}
 docker_runtime_public_edge_host_aliases: >-
   {{
     (

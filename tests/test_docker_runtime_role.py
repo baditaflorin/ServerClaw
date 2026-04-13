@@ -1218,8 +1218,13 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
     defaults = load_defaults()
     controller_repo_root = defaults["docker_runtime_controller_repo_root"]
     daemon_config = defaults["docker_runtime_daemon_config"]
+    public_edge_ipv4_expr = " ".join(defaults["docker_runtime_public_edge_ipv4"].split())
 
     assert defaults["docker_runtime_registry_mirrors"] == ["https://mirror.gcr.io"]
+    assert public_edge_ipv4_expr == (
+        "{{ proxmox_public_edge_ipv4 if proxmox_public_edge_ipv4 is defined else "
+        "hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
+    )
     assert "ansible.builtin.pipe" in controller_repo_root
     assert "git -C " in controller_repo_root
     assert "rev-parse --show-toplevel" in controller_repo_root
