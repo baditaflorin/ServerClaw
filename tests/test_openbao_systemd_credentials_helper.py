@@ -86,9 +86,39 @@ def test_openbao_systemd_credentials_restarts_and_rechecks_when_secret_payload_c
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "register: common_openbao_systemd_credentials_secret_write" in tasks
+    assert "changed_when: >-" in tasks
+    assert "common_openbao_systemd_credentials_current_secret.status == 404" in tasks
     assert (
         "common_openbao_systemd_credentials_secret_write is defined and common_openbao_systemd_credentials_secret_write.changed"
         in tasks
     )
     assert "Wait for the refreshed host-native credential file after OpenBao secret changes" in tasks
     assert "common_openbao_systemd_credentials_refreshed_credential_file" in tasks
+
+
+def test_openbao_systemd_credentials_helper_uses_include_task_for_local_runtime_reset_connection() -> None:
+    tasks = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "common"
+        / "tasks"
+        / "ensure_local_openbao_runtime.yml"
+    ).read_text(encoding="utf-8")
+    helper = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "common"
+        / "tasks"
+        / "ensure_local_openbao_runtime_reset_connection.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "include_tasks: ensure_local_openbao_runtime_reset_connection.yml" in tasks
+    assert "ansible.builtin.meta: reset_connection" in helper

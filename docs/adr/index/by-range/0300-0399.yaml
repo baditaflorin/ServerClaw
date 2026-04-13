@@ -1607,19 +1607,25 @@ adrs:
     path: docs/adr/0372-data-driven-playbook-composition.md
   - adr: '0373'
     title: Service Registry and Derived Defaults
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: resilience
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: automation
     keywords:
-      - service
+      - ansible
       - registry
-      - derived
       - defaults
+      - dry
+      - service-catalog
+      - service
+      - derived
     summary: 'Create a platform service registry in inventory/groupvars/platformservices.yml that declares each service''s
       identity and metadata. A shared Ansible vars plugin '
     filename: 0373-service-registry-and-derived-defaults.md
     path: docs/adr/0373-service-registry-and-derived-defaults.md
+    implemented_in_repo_version: 0.178.67
+    implemented_in_platform_version: 0.178.72
+    implemented_on: '2026-04-09'
   - adr: '0374'
     title: Cross-Cutting Service Manifest
     status: Proposed

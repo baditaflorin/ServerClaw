@@ -986,7 +986,22 @@ def test_resolve_openbao_init_local_file_prefers_split_group_vars_layout(tmp_pat
 
     resolved = trigger.resolve_openbao_init_local_file()
 
-    assert resolved == Path(".local/openbao/init.json")
+    assert resolved == tmp_path / ".local" / "openbao" / "init.json"
+
+
+def test_resolve_openbao_init_local_file_maps_repo_shared_local_root(tmp_path: Path, monkeypatch) -> None:
+    worktree_root = tmp_path / ".worktrees" / "ws-0373"
+    inventory_dir = worktree_root / "inventory" / "group_vars" / "all"
+    inventory_dir.mkdir(parents=True)
+    (inventory_dir / "main.yml").write_text(
+        'openbao_init_local_file: "{{ repo_shared_local_root }}/openbao/init.json"\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", worktree_root)
+
+    resolved = trigger.resolve_openbao_init_local_file()
+
+    assert resolved == tmp_path / ".local" / "openbao" / "init.json"
 
 
 def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path, monkeypatch) -> None:
@@ -1028,7 +1043,7 @@ def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path
 
 
 def test_ensure_remote_runtime_credentials_runs_converge_when_missing(monkeypatch) -> None:
-    exists_sequence = iter([False, True])
+    exists_sequence = iter([False, False, True])
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(
@@ -1046,6 +1061,30 @@ def test_ensure_remote_runtime_credentials_runs_converge_when_missing(monkeypatc
         {"controller": "context"},
         env="production",
         credential_file="/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+    )
+
+    assert captured == {"env": "production"}
+
+
+def test_ensure_remote_runtime_credentials_refreshes_before_live_apply_backup(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        trigger,
+        "remote_file_exists",
+        lambda context, target, path: True,
+    )
+    monkeypatch.setattr(
+        trigger,
+        "run_local_converge_restic",
+        lambda env: captured.update({"env": env}),
+    )
+
+    trigger.ensure_remote_runtime_credentials(
+        {"controller": "context"},
+        env="production",
+        credential_file="/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+        refresh=True,
     )
 
     assert captured == {"env": "production"}
@@ -1087,11 +1126,12 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
     monkeypatch.setattr(
         trigger,
         "ensure_remote_runtime_credentials",
-        lambda context, env, credential_file, target="docker-runtime": captured.update(
+        lambda context, env, credential_file, refresh=False, target="docker-runtime": captured.update(
             {
                 "credential_context": context,
                 "credential_env": env,
                 "credential_file": credential_file,
+                "credential_refresh": refresh,
                 "credential_target": target,
             }
         ),
@@ -1142,11 +1182,68 @@ def test_trigger_main_syncs_runtime_support_files_before_remote_execution(monkey
         "credential_context": {"controller": "context"},
         "credential_env": "production",
         "credential_file": "/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+        "credential_refresh": False,
         "credential_target": "docker-runtime",
         "sync_context": {"controller": "context"},
         "sync_target": "docker-runtime",
         "sync_repo_root": "/srv/proxmox-host_server",
         "sync_report": {"summary": {"protected": 1}},
+    }
+
+
+def test_trigger_main_refreshes_runtime_credentials_for_live_apply_backup(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(trigger, "load_controller_context", lambda: {"controller": "context"})
+    monkeypatch.setattr(
+        trigger, "ensure_remote_runtime_support_files", lambda context, repo_root, target="docker-runtime": None
+    )
+    monkeypatch.setattr(
+        trigger,
+        "ensure_remote_runtime_credentials",
+        lambda context, env, credential_file, refresh=False, target="docker-runtime": captured.update(
+            {
+                "env": env,
+                "credential_file": credential_file,
+                "refresh": refresh,
+                "target": target,
+            }
+        ),
+    )
+    monkeypatch.setattr(
+        trigger, "build_guest_ssh_command", lambda context, target, remote_command: ["ssh", target, remote_command]
+    )
+    monkeypatch.setattr(
+        trigger,
+        "run_command",
+        lambda command: types.SimpleNamespace(
+            returncode=0,
+            stdout='REPORT_JSON={"summary":{"protected":1}}',
+            stderr="",
+        ),
+    )
+    monkeypatch.setattr(trigger, "sync_reported_receipt_artifacts", lambda context, target, repo_root, report: [])
+
+    assert (
+        trigger.main(
+            [
+                "--env",
+                "production",
+                "--mode",
+                "backup",
+                "--repo-root",
+                "/srv/proxmox-host_server",
+                "--live-apply-trigger",
+            ]
+        )
+        == 0
+    )
+
+    assert captured == {
+        "env": "production",
+        "credential_file": "/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json",
+        "refresh": True,
+        "target": "docker-runtime",
     }
 
 

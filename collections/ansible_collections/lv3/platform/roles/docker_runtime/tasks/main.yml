@@ -431,6 +431,7 @@
     common_docker_bridge_chains_require_nat_chain: "{{ docker_runtime_require_nat_chain }}"
     common_docker_bridge_chains_retries: "{{ docker_runtime_chain_recheck_retries }}"
     common_docker_bridge_chains_delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+  when: docker_runtime_pre_restart_container_names | default([]) | length == 0
 
 - name: Re-inspect pre-restart containers after Docker restarts
   ansible.builtin.command:
@@ -1256,6 +1257,17 @@
   delay: "{{ docker_runtime_container_recovery_delay_seconds }}"
   until: docker_runtime_recovered_container_inspect.rc == 0
   when: docker_runtime_pre_restart_container_details | default([]) | length > 0
+
+- name: Re-assert Docker bridge networking chains after pre-restart container recovery
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: "{{ docker_runtime_require_nat_chain }}"
+    common_docker_bridge_chains_retries: "{{ docker_runtime_chain_recheck_retries }}"
+    common_docker_bridge_chains_delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+  when: docker_runtime_pre_restart_container_names | default([]) | length > 0
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml

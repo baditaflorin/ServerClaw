@@ -1,9 +1,9 @@
 id: ws-0373-live-apply
 adr: '0373'
 title: Live apply service registry and derived defaults from latest origin/main
-status: blocked
-ready_to_merge: false
-live_applied: false
+status: ready
+ready_to_merge: true
+live_applied: true
 owner: codex
 branch: codex/ws-0373-live-apply
 worktree_path: .worktrees/ws-0373-live-apply
@@ -58,22 +58,24 @@ ownership_manifest:
     - receipts/live-applies/
     mode: shared_contract
     contract: live-apply-evidence-v1
-notes: 'Replay ADR 0373 from the latest origin/main worktree, verify the
-
+notes: |
+  Replay ADR 0373 from the latest origin/main worktree, verify the
   service-registry automation and governed live-apply path end to end,
-
   and leave merge-safe evidence after ADR 0407 moved receipts/ out of
-
   the normal committed surface.
 
-  '
-blockers:
-- '2026-04-12: Governed production replay is blocked by live access-path failure,
-  not by repo validation. `make live-apply-service service=repo_intake env=production
-  ALLOW_IN_PLACE_MUTATION=true` now reaches the scoped Ansible apply, but the host
-  hop is unavailable: local `tailscale status --json` reports `BackendState: Starting`
-  and `You are logged out` because `https://headscale.lv3.org/key?v=125` at `65.108.75.123:443`
-  times out; `ssh` to `ops@100.64.0.1` on ports `22` and `2222` is refused; `ssh`
-  to `ops@65.108.75.123` on ports `22` and `2222` times out; `curl -Ik --max-time
-  15 https://headscale.lv3.org` and `https://65.108.75.123` both time out.'
+  Latest-main replay completed on 2026-04-13:
+  - python3 scripts/validate_service_registry.py --check
+  - python3 scripts/interface_contracts.py --list
+  - ./scripts/validate_repo.sh agent-standards
+  - uv run --with pytest --with pyyaml --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_openbao_systemd_credentials_helper.py tests/test_restic_config_backup.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_linux_guest_firewall_role.py
+  - make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true
+  - python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger
+
+  Evidence:
+  - receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json
+  - receipts/restic-backups/20260413T105157Z.json
+  - receipts/restic-backups/20260413T110651Z.json
+  - receipts/restic-snapshots-latest.json
+blockers: []
 plane_issue_id: 42ea1e56-38e5-4a5d-a25d-392abad9e3e8

@@ -151,21 +151,12 @@ def test_resolve_repo_local_path_maps_missing_controller_local_secret(tmp_path: 
 
 def test_resolve_repo_local_path_maps_inaccessible_controller_local_secret(
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     repo_root = tmp_path / "repo"
     mirrored_secret = repo_root / ".local" / "ssh" / "worker.id_ed25519"
     mirrored_secret.parent.mkdir(parents=True)
     mirrored_secret.write_text("secret", encoding="utf-8")
-    inaccessible = "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/worker.id_ed25519"
-    original = drift_lib._path_exists
-
-    def fake_path_exists(path: Path) -> bool:
-        if str(path) == inaccessible:
-            return False
-        return original(path)
-
-    monkeypatch.setattr(drift_lib, "_path_exists", fake_path_exists)
+    inaccessible = "/private/tmp/nonexistent-controller/.local/ssh/worker.id_ed25519"
 
     resolved = drift_lib.resolve_repo_local_path(
         inaccessible,
@@ -211,6 +202,7 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive(tmp_path: Path) -> 
             "bootstrap_key": tmp_path / "worker.id_ed25519",
             "host_user": "ops",
             "host_addr": "100.64.0.1",
+            "host_port": "2222",
             "guests": {"docker-runtime": "10.10.10.20"},
         },
         "docker-runtime",
@@ -219,6 +211,7 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive(tmp_path: Path) -> 
 
     joined = " ".join(command)
     assert "ProxyCommand=ssh" in joined
+    assert " -p 2222 " in joined
     assert "StrictHostKeyChecking=no" in joined
     assert "UserKnownHostsFile=/dev/null" in joined
 
@@ -243,13 +236,17 @@ def test_resolve_nats_tunnel_target_falls_back_to_docker_runtime() -> None:
 
 
 def test_inventory_guest_proxy_command_is_non_interactive() -> None:
-    group_vars = (REPO_ROOT / "inventory" / "group_vars" / "all.yml").read_text(encoding="utf-8")
+    candidate_paths = (
+        REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml",
+        REPO_ROOT / "inventory" / "group_vars" / "all.yml",
+    )
+    group_vars_path = next(path for path in candidate_paths if path.exists())
+    group_vars = group_vars_path.read_text(encoding="utf-8")
 
     assert "proxmox_guest_ssh_proxy_command" in group_vars
-    assert "-o BatchMode=yes" in group_vars
-    assert "-o LogLevel=ERROR" in group_vars
-    assert "-o StrictHostKeyChecking=no" in group_vars
-    assert "-o UserKnownHostsFile=/dev/null" in group_vars
+    assert "ProxyJump=" in group_vars
+    assert "LV3_PROXMOX_HOST_ADDR" in group_vars
+    assert "LV3_PROXMOX_HOST_PORT" in group_vars
 
 
 def test_inventory_proxmox_host_is_env_overridable() -> None:

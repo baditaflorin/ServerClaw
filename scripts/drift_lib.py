@@ -108,6 +108,7 @@ def load_controller_context() -> dict[str, Any]:
         or (host_vars.get("proxmox_internal_ipv4") if prefer_internal_host else host_vars["management_tailscale_ipv4"])
         or host_vars["management_tailscale_ipv4"]
     )
+    host_port = os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22"
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     return {
         "host_vars": host_vars,
@@ -116,6 +117,7 @@ def load_controller_context() -> dict[str, Any]:
         "bootstrap_key": bootstrap_key,
         "host_user": group_vars["proxmox_host_admin_user"],
         "host_addr": host_addr,
+        "host_port": host_port,
         "guests": guests,
     }
 
@@ -141,8 +143,13 @@ def run_shell(command: str, *, cwd: Path | None = None, env: dict[str, str] | No
     return run_command(["/bin/bash", "-lc", command], cwd=cwd, env=env)
 
 
+def host_ssh_port(context: dict[str, Any]) -> str:
+    return str(context.get("host_port") or os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22")
+
+
 def build_host_ssh_command(context: dict[str, Any], remote_command: str) -> list[str]:
     key_path = str(context["bootstrap_key"])
+    port = host_ssh_port(context)
     return [
         "ssh",
         "-i",
@@ -159,6 +166,8 @@ def build_host_ssh_command(context: dict[str, Any], remote_command: str) -> list
         "StrictHostKeyChecking=no",
         "-o",
         "UserKnownHostsFile=/dev/null",
+        "-p",
+        port,
         f"{context['host_user']}@{context['host_addr']}",
         remote_command,
     ]
@@ -168,10 +177,12 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, remote_command
     key_path = str(context["bootstrap_key"])
     guest_ip = context["guests"][target]
     host_login = f"{context['host_user']}@{context['host_addr']}"
+    port = host_ssh_port(context)
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"-p {shlex.quote(port)} "
         f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
@@ -207,10 +218,12 @@ def build_guest_ssh_tunnel_command(
     key_path = str(context["bootstrap_key"])
     guest_ip = context["guests"][target]
     host_login = f"{context['host_user']}@{context['host_addr']}"
+    port = host_ssh_port(context)
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"-p {shlex.quote(port)} "
         f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
