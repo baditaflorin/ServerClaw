@@ -76,3 +76,39 @@ def test_load_adr_index_prefers_canonical_entry_over_auxiliary_duplicates(tmp_pa
     assert adr.implementation_status == "Implemented"
     assert adr.implemented_in_repo_version == "0.178.126"
     assert adr.implemented_in_platform_version == "0.178.78"
+
+
+def test_generate_report_distinguishes_decision_and_implementation_status() -> None:
+    module = load_module("adr_implementation_scanner_status_report", "scripts/adr_implementation_scanner.py")
+    metadata = module.ADRMetadata(
+        adr_number="0374",
+        title="Cross-Cutting Service Manifest",
+        filename="0374-cross-cutting-service-manifest.md",
+        path="docs/adr/0374-cross-cutting-service-manifest.md",
+        status="Accepted",
+        implementation_status="Implemented",
+        implemented_in_repo_version="0.178.126",
+        implemented_in_platform_version="0.178.126",
+        implemented_on="2026-04-12",
+    )
+    markers = [
+        module.ImplementationMarker(
+            marker_type="live-apply-receipt",
+            adr_number="0374",
+            location="receipts/live-applies/2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply.json",
+            evidence="Committed live-apply evidence references the ADR",
+            confidence=1.0,
+        )
+    ]
+
+    report = module.generate_report(metadata, markers)
+    markdown = module.generate_markdown_report(report)
+
+    assert report.inferred_implementation_status == "Likely Implemented"
+    assert report.status_match is True
+    assert "Canonical Decision Status: Accepted" in report.summary
+    assert "Canonical Implementation Status: Implemented" in report.summary
+    assert "Inferred Implementation Status: Likely Implemented" in report.summary
+    assert "| Canonical Decision Status | Accepted |" in markdown
+    assert "| Canonical Implementation Status | Implemented |" in markdown
+    assert "| Inferred Implementation Status | Likely Implemented |" in markdown

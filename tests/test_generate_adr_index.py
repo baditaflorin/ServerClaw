@@ -194,3 +194,46 @@ def test_main_uses_utc_generated_date_for_written_index(monkeypatch) -> None:
 
     assert module.main(["--write"]) == 0
     assert captured["generated_on"] == dt.date(2026, 4, 3)
+
+
+def test_bold_frontmatter_metadata_is_parsed_into_status_shards(tmp_path: Path) -> None:
+    module = load_module("adr_discovery_bold_frontmatter", "scripts/adr_discovery.py")
+    adr_dir = tmp_path / "docs" / "adr"
+    reservations_path = adr_dir / "index" / "reservations.yaml"
+
+    write(
+        adr_dir / "0374-cross-cutting-service-manifest.md",
+        """# ADR 0374: Cross-Cutting Service Manifest
+
+- **Date**: 2026-04-06
+- **Status**: Accepted
+- **Implementation Status**: Implemented
+- **Implemented In Repo Version**: 0.178.126
+- **Implemented In Platform Version**: 0.178.126
+- **Implemented On**: 2026-04-12
+- **Tags**: dns, sso, certificates, nginx, dry, manifest
+
+## Decision
+
+Centralize cross-cutting service declarations in the platform registry.
+""",
+    )
+    module.ensure_reservations_file(reservations_path)
+
+    adrs = module.load_adrs(adr_dir, repo_root=tmp_path)
+    ledger = module.load_reservation_ledger(reservations_path)
+    documents = module.build_generated_index_documents(
+        adrs,
+        ledger,
+        repo_root=tmp_path,
+        adr_dir=adr_dir,
+        generated_on=dt.date(2026, 4, 14),
+    )
+
+    implemented_status = yaml.safe_load(documents[adr_dir / "index" / "by-status" / "implemented.yaml"])
+    range_shard = yaml.safe_load(documents[adr_dir / "index" / "by-range" / "0300-0399.yaml"])
+
+    assert implemented_status["adrs"][0]["adr"] == "0374"
+    assert implemented_status["adrs"][0]["status"] == "Accepted"
+    assert implemented_status["adrs"][0]["implementation_status"] == "Implemented"
+    assert range_shard["adrs"][0]["implementation_status"] == "Implemented"

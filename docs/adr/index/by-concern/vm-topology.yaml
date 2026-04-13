@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: vm-topology
-total_adrs: 41
+total_adrs: 42
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -734,6 +734,23 @@ adrs:
     summary: 'runtime-control retains only the four identity-core services:'
     filename: 0376-identity-core-vm-isolation-and-watchdog.md
     path: docs/adr/0376-identity-core-vm-isolation-and-watchdog.md
+  - adr: 0387
+    title: Platform DRY Consolidation
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-09'
+    concern: vm-topology
+    keywords:
+      - ansible
+      - dry
+      - lifecycle
+      - composition
+      - topology
+      - platform
+      - consolidation
+    summary: This ADR serves as the consolidation point for DRY work. It elevates
+    filename: 0387-platform-dry-consolidation.md
+    path: docs/adr/0387-platform-dry-consolidation.md
   - adr: '0411'
     title: Unified Account Provisioning API
     status: Proposed

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: platform
-total_adrs: 145
+total_adrs: 141
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2329,7 +2329,7 @@ adrs:
     title: Declarative PostgreSQL Client Registry
     status: Accepted
     implementation_status: Implemented
-    date: '2026-03-21'
+    date: '2026-04-05'
     concern: platform
     keywords:
       - declarative
@@ -2343,50 +2343,6 @@ adrs:
     implemented_in_repo_version: 0.178.12
     implemented_in_platform_version: 0.178.132
     implemented_on: '2026-04-13'
-  - adr: '0370'
-    title: Service Lifecycle Task Includes
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - service
-      - lifecycle
-      - task
-      - includes
-    summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
-      Runtime roles include them with includerole / in
-    filename: 0370-service-lifecycle-task-includes.md
-    path: docs/adr/0370-service-lifecycle-task-includes.md
-  - adr: '0371'
-    title: Parameterized Service Verification Tasks
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - parameterized
-      - service
-      - verification
-      - tasks
-    summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
-      parameters.
-    filename: 0371-parameterized-verify-tasks.md
-    path: docs/adr/0371-parameterized-verify-tasks.md
-  - adr: '0374'
-    title: Cross-Cutting Service Manifest
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - cross-cutting
-      - service
-      - manifest
-    summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
-      what it needs from DNS, nginx, TLS, and SSO — in '
-    filename: 0374-cross-cutting-service-manifest.md
-    path: docs/adr/0374-cross-cutting-service-manifest.md
   - adr: '0377'
     title: Open WebUI Platform Knowledge Integration
     status: Deprecated
@@ -2433,19 +2389,6 @@ adrs:
       and chat.example.com users to access a shared me
     filename: 0385-mempalace-chat-lv3-integration.md
     path: docs/adr/0385-mempalace-chat-lv3-integration.md
-  - adr: 0387
-    title: Platform DRY Consolidation
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - platform
-      - dry
-      - consolidation
-    summary: This ADR serves as the consolidation point for DRY work. It elevates
-    filename: 0387-platform-dry-consolidation.md
-    path: docs/adr/0387-platform-dry-consolidation.md
   - adr: 0387
     title: ServerClaw-in-Docker — Containerized Platform Development Environment
     status: Proposed
@@ -2569,7 +2512,7 @@ adrs:
     title: Generic Inventory Hostnames
     status: Proposed
     implementation_status: Proposed
-    date: '2026-03-21'
+    date: '2026-04-11'
     concern: platform
     keywords:
       - generic

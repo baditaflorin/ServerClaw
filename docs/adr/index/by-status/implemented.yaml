@@ -10,7 +10,7 @@ generated: '2026-04-13'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 350
+total_adrs: 351
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6062,7 +6062,7 @@ adrs:
     title: Declarative PostgreSQL Client Registry
     status: Accepted
     implementation_status: Implemented
-    date: '2026-03-21'
+    date: '2026-04-05'
     concern: platform
     keywords:
       - declarative
@@ -6237,6 +6237,28 @@ adrs:
     implemented_in_repo_version: 0.178.67
     implemented_in_platform_version: 0.178.72
     implemented_on: '2026-04-09'
+  - adr: '0374'
+    title: Cross-Cutting Service Manifest
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: networking
+    keywords:
+      - dns
+      - sso
+      - certificates
+      - nginx
+      - dry
+      - manifest
+      - cross-cutting
+      - service
+    summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
+      what it needs from DNS, nginx, TLS, and SSO — in '
+    filename: 0374-cross-cutting-service-manifest.md
+    path: docs/adr/0374-cross-cutting-service-manifest.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.126
+    implemented_on: '2026-04-12'
   - adr: '0375'
     title: Certificate Validation And Concordance Enforcement
     status: Accepted

@@ -1365,7 +1365,7 @@ adrs:
     title: Declarative PostgreSQL Client Registry
     status: Accepted
     implementation_status: Implemented
-    date: '2026-03-21'
+    date: '2026-04-05'
     concern: platform
     keywords:
       - declarative
@@ -1556,13 +1556,16 @@ adrs:
     implemented_on: '2026-04-11'
   - adr: 0369
     title: Python Validation Toolkit
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-06'
     concern: ci-cd
     keywords:
       - python
       - validation
+      - scripts
+      - dry
+      - tooling
       - toolkit
     summary: Create a shared validation toolkit module at scripts/validationtoolkit.py containing all canonical validation
       functions. All 43+ catalog/registry scripts must i
@@ -1570,13 +1573,17 @@ adrs:
     path: docs/adr/0369-python-validation-toolkit.md
   - adr: '0370'
     title: Service Lifecycle Task Includes
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-06'
+    concern: automation
     keywords:
-      - service
+      - ansible
+      - roles
+      - dry
       - lifecycle
+      - tasks
+      - service
       - task
       - includes
     summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
@@ -1585,14 +1592,17 @@ adrs:
     path: docs/adr/0370-service-lifecycle-task-includes.md
   - adr: '0371'
     title: Parameterized Service Verification Tasks
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-06'
+    concern: automation
     keywords:
+      - ansible
+      - verification
+      - healthcheck
+      - dry
       - parameterized
       - service
-      - verification
       - tasks
     summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
       parameters.
@@ -1600,14 +1610,18 @@ adrs:
     path: docs/adr/0371-parameterized-verify-tasks.md
   - adr: '0372'
     title: Data-Driven Playbook Composition
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: automation
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-06'
+    concern: networking
     keywords:
+      - ansible
+      - playbooks
+      - dry
+      - composition
+      - dns
       - data-driven
       - playbook
-      - composition
     summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
       that drives playbook composition.
     filename: 0372-data-driven-playbook-composition.md
@@ -1635,18 +1649,26 @@ adrs:
     implemented_on: '2026-04-09'
   - adr: '0374'
     title: Cross-Cutting Service Manifest
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: networking
     keywords:
+      - dns
+      - sso
+      - certificates
+      - nginx
+      - dry
+      - manifest
       - cross-cutting
       - service
-      - manifest
     summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
       what it needs from DNS, nginx, TLS, and SSO — in '
     filename: 0374-cross-cutting-service-manifest.md
     path: docs/adr/0374-cross-cutting-service-manifest.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.126
+    implemented_on: '2026-04-12'
   - adr: '0375'
     title: Certificate Validation And Concordance Enforcement
     status: Accepted
@@ -1903,13 +1925,17 @@ adrs:
     path: docs/adr/0386-unified-disk-monitoring.md
   - adr: 0387
     title: Platform DRY Consolidation
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-09'
+    concern: vm-topology
     keywords:
-      - platform
+      - ansible
       - dry
+      - lifecycle
+      - composition
+      - topology
+      - platform
       - consolidation
     summary: This ADR serves as the consolidation point for DRY work. It elevates
     filename: 0387-platform-dry-consolidation.md

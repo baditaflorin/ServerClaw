@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: automation
-total_adrs: 32
+total_adrs: 33
 adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
@@ -487,20 +487,43 @@ adrs:
     path: docs/adr/0364-outline-agent-tools.md
     implemented_in_repo_version: 0.178.22
     implemented_on: '2026-04-06'
-  - adr: '0372'
-    title: Data-Driven Playbook Composition
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+  - adr: '0370'
+    title: Service Lifecycle Task Includes
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-06'
     concern: automation
     keywords:
-      - data-driven
-      - playbook
-      - composition
-    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
-      that drives playbook composition.
-    filename: 0372-data-driven-playbook-composition.md
-    path: docs/adr/0372-data-driven-playbook-composition.md
+      - ansible
+      - roles
+      - dry
+      - lifecycle
+      - tasks
+      - service
+      - task
+      - includes
+    summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
+      Runtime roles include them with includerole / in
+    filename: 0370-service-lifecycle-task-includes.md
+    path: docs/adr/0370-service-lifecycle-task-includes.md
+  - adr: '0371'
+    title: Parameterized Service Verification Tasks
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-06'
+    concern: automation
+    keywords:
+      - ansible
+      - verification
+      - healthcheck
+      - dry
+      - parameterized
+      - service
+      - tasks
+    summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
+      parameters.
+    filename: 0371-parameterized-verify-tasks.md
+    path: docs/adr/0371-parameterized-verify-tasks.md
   - adr: '0373'
     title: Service Registry and Derived Defaults
     status: Accepted

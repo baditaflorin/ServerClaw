@@ -5,111 +5,182 @@ canonical_implementation_status: Implemented
 detected_markers:
 - marker_type: git-commit
   adr_number: '0374'
+  location: git:444dca4cc
+  evidence: 444dca4cc [gate] record ws-0374 remote gate bypass
+  confidence: 0.6
+  detected_on: '2026-04-14T00:51:06.335042'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:a5306ec09
+  evidence: a5306ec09 [adr-0374] complete live apply on main
+  confidence: 0.8
+  detected_on: '2026-04-14T00:51:06.335102'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:567285dbf
+  evidence: "567285dbf Merge origin/main \u2014 ADR 0374 live-apply repairs + hairpin\
+    \ macro improvements"
+  confidence: 1.0
+  detected_on: '2026-04-14T00:51:06.335320'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:b632bafe1
+  evidence: b632bafe1 [workstreams] close ws-0374 after merge
+  confidence: 0.6
+  detected_on: '2026-04-14T00:51:06.335372'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:cbb40e282
+  evidence: "cbb40e282 [release] Bump to 0.178.124 \u2014 ADR 0374 live-apply repairs"
+  confidence: 1.0
+  detected_on: '2026-04-14T00:51:06.335376'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:01785bf53
+  evidence: 01785bf53 Merge remote-tracking branch 'origin/main' into codex/ws-0374-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-14T00:51:06.335381'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:5b41ba875
+  evidence: 5b41ba875 [adr-0374] update ADR and workstream metadata
+  confidence: 0.8
+  detected_on: '2026-04-14T00:51:06.335389'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:a78998c25
+  evidence: a78998c25 [adr-0374] harden live-apply gates in worktrees
+  confidence: 0.8
+  detected_on: '2026-04-14T00:51:06.335396'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:f77ea1559
+  evidence: f77ea1559 Merge origin/main into ws-0374-live-apply
+  confidence: 0.6
+  detected_on: '2026-04-14T00:51:06.335409'
+- marker_type: git-commit
+  adr_number: '0374'
+  location: git:0f8f76025
+  evidence: 0f8f76025 [adr-0374] repair cross-cutting manifest workflows
+  confidence: 0.8
+  detected_on: '2026-04-14T00:51:06.335413'
+- marker_type: git-commit
+  adr_number: '0374'
   location: git:53009c1d0
   evidence: "53009c1d0 [release] Bump to 0.178.35 \u2014 DRY centralization ADRs 0368-0374"
   confidence: 0.6
-  detected_on: '2026-04-07T07:55:44.466293'
+  detected_on: '2026-04-14T00:51:06.349324'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:681666d8e
   evidence: "681666d8e [merge] claude/objective-bose \u2014 implement DRY centralization\
     \ ADRs 0368-0374"
   confidence: 0.6
-  detected_on: '2026-04-07T07:55:44.466314'
+  detected_on: '2026-04-14T00:51:06.349359'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:95c844d52
   evidence: 95c844d52 [workstreams] Register DRY centralization ADRs 0368-0374 and
     update ADR index
   confidence: 0.6
-  detected_on: '2026-04-07T07:55:44.466322'
+  detected_on: '2026-04-14T00:51:06.349368'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:ed610a0ec
   evidence: 'ed610a0ec feat(adr-0374-ph4): nginx edge publication declarations and
     generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466331'
+  detected_on: '2026-04-14T00:51:06.349381'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:6a4fc9b7a
   evidence: '6a4fc9b7a feat(adr-0374-ph1): hairpin NAT cross-cutting declarations
     and generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466336'
+  detected_on: '2026-04-14T00:51:06.349385'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:2e3ccd7f6
   evidence: '2e3ccd7f6 feat(adr-0374-ph2): DNS publication declarations and generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466341'
+  detected_on: '2026-04-14T00:51:06.349389'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:b9f837bbc
   evidence: 'b9f837bbc feat(adr-0374-ph5): SSO client provisioning declarations and
     generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466345'
+  detected_on: '2026-04-14T00:51:06.349392'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:a326f0d02
   evidence: a326f0d02 [workstreams] Register DRY centralization ADRs 0368-0374 and
     update ADR index
   confidence: 0.6
-  detected_on: '2026-04-07T07:55:44.466600'
+  detected_on: '2026-04-14T00:51:06.353258'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:59b187395
   evidence: '59b187395 feat(adr-0374-ph4): nginx edge publication declarations and
     generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466657'
+  detected_on: '2026-04-14T00:51:06.353315'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:108e1e6cf
   evidence: '108e1e6cf feat(adr-0374-ph1): hairpin NAT cross-cutting declarations
     and generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466661'
+  detected_on: '2026-04-14T00:51:06.354872'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:e6677b3fa
   evidence: 'e6677b3fa feat(adr-0374-ph2): DNS publication declarations and generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466666'
+  detected_on: '2026-04-14T00:51:06.354889'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:930f7e213
   evidence: '930f7e213 feat(adr-0374-ph5): SSO client provisioning declarations and
     generator'
   confidence: 0.8
-  detected_on: '2026-04-07T07:55:44.466703'
+  detected_on: '2026-04-14T00:51:06.354910'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:8b12f07e9
   evidence: "8b12f07e9 feat: add Phase 2-5 implementation prompts to ADR 0374 \u2014\
     \ DNS, TLS, Nginx, SSO"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:44.467207'
+  detected_on: '2026-04-14T00:51:06.355314'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:eb7e1410d
   evidence: 'eb7e1410d chore: update ADR references to 0368-0374'
   confidence: 0.6
-  detected_on: '2026-04-07T07:55:44.467228'
+  detected_on: '2026-04-14T00:51:06.355332'
 - marker_type: git-commit
   adr_number: '0374'
   location: git:2295a23f9
   evidence: '2295a23f9 chore: renumber DRY centralization ADRs 0368-0374 (0361-0367
     already exist)'
   confidence: 0.6
-  detected_on: '2026-04-07T07:55:44.467235'
-inferred_implementation_status: Possibly Implemented
-status_match: false
-summary: 'Canonical Status: Proposed
+  detected_on: '2026-04-14T00:51:06.355338'
+- marker_type: live-apply-receipt
+  adr_number: '0374'
+  location: receipts/live-applies/2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply.json
+  evidence: Committed live-apply evidence references the ADR
+  confidence: 1.0
+  detected_on: '2026-04-14T00:51:07.096648'
+inferred_implementation_status: Likely Implemented
+status_match: true
+summary: 'Canonical Decision Status: Accepted
 
-  Inferred Status: Possibly Implemented
+  Canonical Implementation Status: Implemented
 
-  Markers Found: 15
+  Inferred Implementation Status: Likely Implemented
 
-  Breakdown: git-commit=15'
+  Markers Found: 26
+
+  Breakdown: git-commit=25, live-apply-receipt=1
+
+  Implemented On: 2026-04-12'

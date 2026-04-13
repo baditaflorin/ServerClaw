@@ -10,7 +10,7 @@ generated: '2026-04-13'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 30
+total_adrs: 24
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -55,78 +55,6 @@ adrs:
     summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
     filename: 0364-native-build-server-gate-execution.md
     path: docs/adr/0364-native-build-server-gate-execution.md
-  - adr: 0369
-    title: Python Validation Toolkit
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: ci-cd
-    keywords:
-      - python
-      - validation
-      - toolkit
-    summary: Create a shared validation toolkit module at scripts/validationtoolkit.py containing all canonical validation
-      functions. All 43+ catalog/registry scripts must i
-    filename: 0369-python-validation-toolkit.md
-    path: docs/adr/0369-python-validation-toolkit.md
-  - adr: '0370'
-    title: Service Lifecycle Task Includes
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - service
-      - lifecycle
-      - task
-      - includes
-    summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
-      Runtime roles include them with includerole / in
-    filename: 0370-service-lifecycle-task-includes.md
-    path: docs/adr/0370-service-lifecycle-task-includes.md
-  - adr: '0371'
-    title: Parameterized Service Verification Tasks
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - parameterized
-      - service
-      - verification
-      - tasks
-    summary: Create a shared verifyservicehealth.yml task file in the common role that handles all verification patterns through
-      parameters.
-    filename: 0371-parameterized-verify-tasks.md
-    path: docs/adr/0371-parameterized-verify-tasks.md
-  - adr: '0372'
-    title: Data-Driven Playbook Composition
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: automation
-    keywords:
-      - data-driven
-      - playbook
-      - composition
-    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
-      that drives playbook composition.
-    filename: 0372-data-driven-playbook-composition.md
-    path: docs/adr/0372-data-driven-playbook-composition.md
-  - adr: '0374'
-    title: Cross-Cutting Service Manifest
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - cross-cutting
-      - service
-      - manifest
-    summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
-      what it needs from DNS, nginx, TLS, and SSO — in '
-    filename: 0374-cross-cutting-service-manifest.md
-    path: docs/adr/0374-cross-cutting-service-manifest.md
   - adr: 0382
     title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
     status: Proposed
@@ -234,19 +162,6 @@ adrs:
     summary: 'Implement a three-layer architecture with a single shared query module:'
     filename: 0386-unified-disk-monitoring.md
     path: docs/adr/0386-unified-disk-monitoring.md
-  - adr: 0387
-    title: Platform DRY Consolidation
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
-    concern: platform
-    keywords:
-      - platform
-      - dry
-      - consolidation
-    summary: This ADR serves as the consolidation point for DRY work. It elevates
-    filename: 0387-platform-dry-consolidation.md
-    path: docs/adr/0387-platform-dry-consolidation.md
   - adr: 0387
     title: ServerClaw-in-Docker — Containerized Platform Development Environment
     status: Proposed
@@ -375,7 +290,7 @@ adrs:
     title: Generic Inventory Hostnames
     status: Proposed
     implementation_status: Proposed
-    date: '2026-03-21'
+    date: '2026-04-11'
     concern: platform
     keywords:
       - generic

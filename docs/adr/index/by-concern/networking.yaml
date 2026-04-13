@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-13'
 facet: concern
 concern: networking
-total_adrs: 28
+total_adrs: 30
 adrs:
   - adr: '0015'
     title: example.com DNS And Subdomain Model
@@ -495,6 +495,46 @@ adrs:
     summary: 1. Add nativecommand to every check entry in config/validation-gate.json.
     filename: 0364-native-build-server-gate-execution.md
     path: docs/adr/0364-native-build-server-gate-execution.md
+  - adr: '0372'
+    title: Data-Driven Playbook Composition
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-06'
+    concern: networking
+    keywords:
+      - ansible
+      - playbooks
+      - dry
+      - composition
+      - dns
+      - data-driven
+      - playbook
+    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
+      that drives playbook composition.
+    filename: 0372-data-driven-playbook-composition.md
+    path: docs/adr/0372-data-driven-playbook-composition.md
+  - adr: '0374'
+    title: Cross-Cutting Service Manifest
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: networking
+    keywords:
+      - dns
+      - sso
+      - certificates
+      - nginx
+      - dry
+      - manifest
+      - cross-cutting
+      - service
+    summary: 'Extend the platform service registry (ADR 0373) with cross-cutting concern declarations. Each service declares
+      what it needs from DNS, nginx, TLS, and SSO — in '
+    filename: 0374-cross-cutting-service-manifest.md
+    path: docs/adr/0374-cross-cutting-service-manifest.md
+    implemented_in_repo_version: 0.178.126
+    implemented_in_platform_version: 0.178.126
+    implemented_on: '2026-04-12'
   - adr: 0391
     title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
     status: Accepted
