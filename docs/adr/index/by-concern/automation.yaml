@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-13'
+generated: '2026-04-14'
 facet: concern
 concern: automation
 total_adrs: 33

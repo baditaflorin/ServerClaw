@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-13'
+generated: '2026-04-14'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
 total_adrs: 448
 adr_number_range:
@@ -14,15 +14,15 @@ adr_number_range:
   last: '0415'
   next_available: '0416'
 implementation_status_summary:
-  Implemented: 350
+  Implemented: 352
   Partial: 3
   Not Implemented: 33
   Deprecated: 5
-  Accepted: 26
-  Proposed: 31
+  Accepted: 31
+  Proposed: 24
 decision_status_summary:
-  Accepted: 348
-  Proposed: 37
+  Accepted: 355
+  Proposed: 30
   Deprecated: 14
   Implemented: 49
 facets:
@@ -64,7 +64,7 @@ facets:
       count: 12
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 32
+      count: 33
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 7
@@ -85,10 +85,10 @@ facets:
       count: 11
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
-      count: 28
+      count: 30
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 145
+      count: 141
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -106,12 +106,12 @@ facets:
       count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 41
+      count: 42
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 350
+      count: 352
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -127,11 +127,11 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 26
+      count: 31
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 31
+      count: 24
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0

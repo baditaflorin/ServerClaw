@@ -6,15 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-13'
+generated: '2026-04-14'
 facet: status
 implementation_status: Accepted
 slug: accepted
-<<<<<<< HEAD
-total_adrs: 30
-=======
-total_adrs: 26
->>>>>>> 309759ff9 (feat(ADR-0414/0415): cert lifecycle manager + fix SKIP_CERT_VALIDATION=1 gate bypass)
+total_adrs: 31
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
