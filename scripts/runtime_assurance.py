@@ -17,7 +17,7 @@ ensure_repo_root_on_path(__file__)
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_mapping
+from validation_toolkit import require_mapping, require_str as require_string
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
@@ -124,12 +124,6 @@ def load_publication_registry(path: Path | None = None) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"{path or PUBLICATION_REGISTRY_PATH} must be an object")
     return payload
-
-
-def require_string(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def validate_runtime_assurance_catalog(
