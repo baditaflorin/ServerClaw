@@ -1,7 +1,7 @@
 id: ws-0374-status-repair
 adr: '0374'
 title: Repair ADR 0374 status artifacts on latest origin/main
-status: ready_for_merge
+status: merged
 ready_to_merge: true
 live_applied: false
 owner: codex
@@ -21,7 +21,8 @@ shared_surfaces:
 - docs/workstreams/ws-0374-status-repair.md
 - scripts/adr_implementation_scanner.py
 - tests/test_adr_implementation_scanner.py
-- workstreams/active/ws-0374-status-repair.yaml
+- workstreams/archive/2026/ws-0374-status-repair.yaml
+- receipts/gate-bypasses/20260413T215948Z-codex-ws-0374-status-repair-09b5acd-skip-remote-gate.json
 - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
@@ -34,7 +35,8 @@ ownership_manifest:
     - docs/adr/index/by-status/proposed.yaml
     - docs/adr/implementation-status/adr-0374.yaml
     - docs/workstreams/ws-0374-status-repair.md
-    - workstreams/active/ws-0374-status-repair.yaml
+    - workstreams/archive/2026/ws-0374-status-repair.yaml
+    - receipts/gate-bypasses/20260413T215948Z-codex-ws-0374-status-repair-09b5acd-skip-remote-gate.json
     mode: shared_contract
     contract: workstream-registry-v1
   - id: ws_0374_status_scanner
@@ -67,4 +69,6 @@ notes: |
   - docs/adr/implementation-status/adr-0374.yaml now reports Accepted + Implemented with a matching live-apply receipt.
   - scripts/adr_discovery.py now parses bold list-item frontmatter keys used by current ADR files.
   - scripts/adr_implementation_scanner.py now treats committed live-apply receipts as first-class implementation evidence.
+  - The merge-to-main push used a governed bypass after the SSH-backed remote gate stalled; receipt:
+    receipts/gate-bypasses/20260413T215948Z-codex-ws-0374-status-repair-09b5acd-skip-remote-gate.json
 blockers: []

@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 306
+  total_workstreams: 307
   by_year:
-    '2026': 306
+    '2026': 307
 workstreams:
 - id: ws-0375-certificate-validation
   adr: '0375'
@@ -66,98 +66,6 @@ workstreams:
     automated remediation playbooks.
 
     '
-- id: ws-0374-status-repair
-  adr: '0374'
-  title: Repair ADR 0374 status artifacts on latest origin/main
-  status: ready_for_merge
-  ready_to_merge: true
-  live_applied: false
-  owner: codex
-  branch: codex/ws-0374-status-repair
-  worktree_path: .worktrees/ws-0374-status-repair
-  doc: docs/workstreams/ws-0374-status-repair.md
-  depends_on:
-  - ws-0374-live-apply
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/.index.yaml
-  - docs/adr/index/by-range/0300-0399.yaml
-  - docs/adr/index/by-status/accepted.yaml
-  - docs/adr/index/by-status/implemented.yaml
-  - docs/adr/index/by-status/proposed.yaml
-  - docs/adr/implementation-status/adr-0374.yaml
-  - docs/workstreams/ws-0374-status-repair.md
-  - scripts/adr_implementation_scanner.py
-  - tests/test_adr_implementation_scanner.py
-  - workstreams/active/ws-0374-status-repair.yaml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0374_status_repair_docs
-      paths:
-      - docs/adr/.index.yaml
-      - docs/adr/index/by-range/0300-0399.yaml
-      - docs/adr/index/by-status/accepted.yaml
-      - docs/adr/index/by-status/implemented.yaml
-      - docs/adr/index/by-status/proposed.yaml
-      - docs/adr/implementation-status/adr-0374.yaml
-      - docs/workstreams/ws-0374-status-repair.md
-      - workstreams/active/ws-0374-status-repair.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws_0374_status_scanner
-      paths:
-      - scripts/adr_implementation_scanner.py
-      - tests/test_adr_implementation_scanner.py
-      mode: exclusive
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-  notes: 'Exact-main follow-up after the ADR 0374 live apply landed. The current
-
-    source ADR is Accepted + Implemented, but the generated ADR status shards
-
-    and implementation-status report on origin/main still present stale
-
-    "Proposed"/"Possibly Implemented" metadata. Scope is limited to repairing
-
-    the generator/report labeling path, regenerating the affected ADR status
-
-    artifacts, validating them on latest origin/main, and merging the fix
-
-    cleanly without touching deployment state.
-
-
-    Verification completed on latest origin/main:
-
-    - python3 scripts/generate_adr_index.py --write
-
-    - python3 scripts/adr_implementation_scanner.py --adr-numbers 0374 --output docs/adr/implementation-status
-    --format yaml
-
-    - uv run --with pytest --with pyyaml pytest -q tests/test_adr_implementation_scanner.py
-    tests/test_generate_adr_index.py
-
-    - ./scripts/validate_repo.sh agent-standards
-
-
-    Results:
-
-    - ADR 0374 now appears in docs/adr/index/by-status/implemented.yaml.
-
-    - docs/adr/implementation-status/adr-0374.yaml now reports Accepted + Implemented
-    with a matching live-apply receipt.
-
-    - scripts/adr_discovery.py now parses bold list-item frontmatter keys used by
-    current ADR files.
-
-    - scripts/adr_implementation_scanner.py now treats committed live-apply receipts
-    as first-class implementation evidence.
-
-    '
-  blockers: []
 - id: ws-0373-live-apply
   adr: '0373'
   title: Live apply service registry and derived defaults from latest origin/main

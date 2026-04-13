@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0374](../adr/0374-cross-cutting-service-manifest.md)
 - Title: repair stale ADR 0374 status artifacts on the latest `origin/main`
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/ws-0374-status-repair`
 - Worktree: `.worktrees/ws-0374-status-repair`
 - Owner: codex
@@ -35,3 +35,4 @@ Result:
 - `docs/adr/index/by-status/implemented.yaml` now classifies ADR 0374 as implemented.
 - `docs/adr/implementation-status/adr-0374.yaml` now records `Canonical Decision Status: Accepted`, `Canonical Implementation Status: Implemented`, and `Inferred Implementation Status: Likely Implemented`.
 - The implementation scanner now treats committed live-apply receipts as implementation evidence and the ADR index parser now accepts bold ADR frontmatter keys like `- **Status**:`.
+- The main push used a governed remote-gate bypass after the SSH-backed remote pre-push gate stalled; receipt: `receipts/gate-bypasses/20260413T215948Z-codex-ws-0374-status-repair-09b5acd-skip-remote-gate.json`.
