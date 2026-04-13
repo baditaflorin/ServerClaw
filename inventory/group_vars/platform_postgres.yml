@@ -47,7 +47,7 @@ platform_postgres_clients:
   - service: keycloak
     database: keycloak
     user: keycloak
-    source_vm: docker-runtime
+    source_vm: runtime-control
     password_local_file: "{{ repo_shared_root }}/.local/keycloak/database-password.txt"
     password_remote_dir: /etc/lv3/keycloak
     password_remote_file: /etc/lv3/keycloak/database-password
