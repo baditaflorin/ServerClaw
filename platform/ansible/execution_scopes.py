@@ -597,7 +597,7 @@ def _collect_makefile_entrypoints(makefile_path: Path, repo_root: Path) -> tuple
             path = match.group("path")
             if "--syntax-check" in line:
                 break
-            if path.startswith("playbooks/tasks/"):
+            if path.startswith("playbooks/tasks/") or path.startswith("playbooks/vars/"):
                 break
             entrypoints.append(normalize_repo_path(path, repo_root=repo_root))
             break
