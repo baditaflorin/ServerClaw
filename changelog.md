@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0413: fix LibreChat SSO redirect_uri mismatch, retire stale platform_service_topology in 5 roles, codify platform-admin as repo-managed Keycloak identity, and guard nginx-edge playbooks against stale platform.yml
+
 - implement ADR 0411/0412: provision-account/deprovision-account agent tools with live Keycloak auth, Windmill daily account-expiry reaper, nginx @lv3_forbidden 403 error page, and LibreChat accounts tool pack
 - align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
 - live-apply ADR 0361 to reconcile the Semaphore Keycloak OIDC integration and record verified controller auth evidence
@@ -30,10 +32,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.178.129 release notes](docs/release-notes/0.178.129.md)
+- [0.178.131 release notes](docs/release-notes/0.178.131.md)
 
 ## Previous Releases
 
+- [0.178.129 release notes](docs/release-notes/0.178.129.md)
 - [0.178.123 release notes](docs/release-notes/0.178.123.md)
 - [0.178.122 release notes](docs/release-notes/0.178.122.md)
 - [0.178.121 release notes](docs/release-notes/0.178.121.md)
@@ -45,9 +48,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.115 release notes](docs/release-notes/0.178.115.md)
 - [0.178.114 release notes](docs/release-notes/0.178.114.md)
 - [0.178.113 release notes](docs/release-notes/0.178.113.md)
-- [0.178.112 release notes](docs/release-notes/0.178.112.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (457 releases)](docs/release-notes/index/2026.md)
+- [2026 (458 releases)](docs/release-notes/index/2026.md)

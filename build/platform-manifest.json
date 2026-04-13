@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.129",
-  "platform_version": "0.178.129",
-  "generated_at": "2026-04-13T12:40:10Z",
-  "next_refresh_at": "2026-04-13T13:40:10Z",
+  "repo_version": "0.178.131",
+  "platform_version": "0.178.130",
+  "generated_at": "2026-04-13T14:10:03Z",
+  "next_refresh_at": "2026-04-13T15:10:03Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -2765,7 +2765,7 @@
       },
       {
         "id": "converge-semaphore",
-        "description": "Converge the private Semaphore runtime on docker-runtime, provision its PostgreSQL backend on postgres, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+        "description": "Converge the private Semaphore runtime on runtime-control, provision its PostgreSQL backend on postgres, reconcile the dedicated Keycloak OIDC client, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
         "tags": [
           "converge-semaphore",
           "host-and-guest-live",
@@ -5542,7 +5542,7 @@
         "id": "configure-semaphore",
         "title": "Configure Semaphore",
         "agent_trust_required": "T3",
-        "steps": 5,
+        "steps": 6,
         "path": "docs/runbooks/configure-semaphore.md",
         "workflow_ids": [
           "converge-semaphore",
@@ -6273,10 +6273,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.123",
+    "last_version": "0.178.129",
     "deployed_at": "2026-04-13",
-    "summary": "implement ADR 0411/0412: provision-account/deprovision-account agent tools with live Keycloak auth, Windmill daily account-expiry reaper, nginx @lv3_forbidden 403 error page, and LibreChat accounts tool pack align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests",
-    "release_notes_url": "docs/release-notes/0.178.129.md"
+    "summary": "ADR 0413: fix LibreChat SSO redirect_uri mismatch, retire stale platform_service_topology in 5 roles, codify platform-admin as repo-managed Keycloak identity, and guard nginx-edge playbooks against stale platform.yml implement ADR 0411/0412: provision-account/deprovision-account agent tools with live Keycloak auth, Windmill daily account-expiry reaper, nginx @lv3_forbidden 403 error page, and LibreChat accounts tool pack",
+    "release_notes_url": "docs/release-notes/0.178.131.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
