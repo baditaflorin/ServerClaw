@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -11,23 +10,15 @@ from typing import Any
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_list, require_mapping, require_str, require_string_list
+from validation_toolkit import require_identifier, require_list, require_mapping, require_str, require_string_list
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, repo_path
 
 
 CATALOG_PATH = repo_path("config", "provider-boundary-catalog.yaml")
-IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 
 
-def require_identifier(value: Any, path: str) -> str:
-    candidate = require_str(value, path)
-    if not IDENTIFIER_PATTERN.fullmatch(candidate):
-        raise ValueError(f"{path} must match {IDENTIFIER_PATTERN.pattern}")
-    return candidate
-
-
-def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
+def validate_str_int_mapping(value: Any, path: str) -> dict[str, int]:
     mapping = require_mapping(value, path)
     normalized: dict[str, int] = {}
     for key, item in mapping.items():
@@ -72,7 +63,7 @@ def validate_provider_boundary_catalog(catalog: dict[str, Any]) -> list[dict[str
 
         implementation_paths = require_string_list(entry.get("implementation_paths"), f"{path}.implementation_paths")
         translation_tasks = require_string_list(entry.get("translation_tasks"), f"{path}.translation_tasks")
-        raw_pattern_counts = require_str_int_mapping(entry.get("raw_pattern_counts"), f"{path}.raw_pattern_counts")
+        raw_pattern_counts = validate_str_int_mapping(entry.get("raw_pattern_counts"), f"{path}.raw_pattern_counts")
         canonical_patterns = require_string_list(entry.get("canonical_patterns"), f"{path}.canonical_patterns")
 
         resolved_paths = [_resolve_repo_path(item) for item in implementation_paths]
