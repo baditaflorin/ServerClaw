@@ -2526,7 +2526,7 @@
       "id": "repo_intake",
       "name": "Repo Intake",
       "description": "Webhook intake service for repo-managed automation triggers.",
-      "category": "platform",
+      "category": "automation",
       "lifecycle_status": "active",
       "vm": "docker-runtime",
       "vmid": 120,
