@@ -15,7 +15,10 @@ def test_root_playbook_targets_runtime_host_and_roles() -> None:
     plays = yaml.safe_load(ROOT_PLAYBOOK.read_text())
     play = plays[0]
 
-    assert play["hosts"] == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
+    assert (
+        play["hosts"]
+        == "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
+    )
     assert play["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},
         {"role": "lv3.platform.docker_runtime"},

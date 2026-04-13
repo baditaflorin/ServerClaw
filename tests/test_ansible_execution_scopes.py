@@ -196,6 +196,36 @@ live-apply-service:
     assert scopes._collect_makefile_entrypoints(repo_root / "Makefile", repo_root) == ()
 
 
+def test_validate_scope_catalog_ignores_live_apply_descriptor_paths(tmp_path: Path) -> None:
+    repo_root, catalog_path, inventory_path = make_repo(tmp_path)
+    write(
+        repo_root / "playbooks" / "services" / "alpha.yml",
+        """
+---
+- import_playbook: ../leaf-alpha.yml
+""".strip()
+        + "\n",
+    )
+    write(
+        repo_root / "playbooks" / "vars" / "alpha.yml",
+        "service_enabled: true\n",
+    )
+    write(
+        repo_root / "Makefile",
+        """
+live-apply-service:
+\tdescriptor_args=""
+\tif [ -f "$(REPO_ROOT)/playbooks/vars/$(service).yml" ]; then \
+\t\tdescriptor_args="-e @$(REPO_ROOT)/playbooks/vars/$(service).yml"; \
+\tfi
+\t$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- $$descriptor_args
+""".strip()
+        + "\n",
+    )
+
+    scopes.validate_scope_catalog(repo_root=repo_root, catalog_path=catalog_path, inventory_path=inventory_path)
+
+
 def test_validate_scope_catalog_ignores_makefile_descriptor_placeholders(tmp_path: Path) -> None:
     repo_root, catalog_path, inventory_path = make_repo(tmp_path)
     write(
