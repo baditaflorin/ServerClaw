@@ -172,12 +172,22 @@ def remote_file_exists(
 
 
 def resolve_openbao_init_local_file() -> Path:
-    group_vars = LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all.yml"
-    payload = yaml.safe_load(group_vars.read_text(encoding="utf-8")) or {}
-    init_path = str(payload.get("openbao_init_local_file") or "").strip()
-    if not init_path:
-        raise ValueError("openbao_init_local_file is not declared in inventory/group_vars/all.yml")
-    return Path(init_path)
+    candidate_paths = (
+        LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml",
+        LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all.yml",
+    )
+    for group_vars in candidate_paths:
+        if not group_vars.is_file():
+            continue
+        payload = yaml.safe_load(group_vars.read_text(encoding="utf-8")) or {}
+        init_path = str(payload.get("openbao_init_local_file") or "").strip()
+        if init_path:
+            return Path(init_path)
+
+    rendered_candidates = ", ".join(str(path.relative_to(LOCAL_REPO_ROOT)) for path in candidate_paths)
+    raise ValueError(
+        f"openbao_init_local_file is not declared in any supported inventory defaults file ({rendered_candidates})"
+    )
 
 
 def run_local_converge_restic(env: str) -> None:

@@ -15,9 +15,18 @@ import json
 import sys
 from pathlib import Path
 
+import yaml
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import load_yaml_with_identity, require_enum, require_int, require_mapping, require_str
+from validation_toolkit import (
+    load_yaml_with_identity,
+    require_enum,
+    require_int,
+    require_mapping,
+    require_str,
+    resolve_jinja2_vars,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
@@ -30,9 +39,33 @@ NULLABLE_PORT_SERVICE_TYPES = {"system_package", "infrastructure"}
 CATALOG_VALIDATED_SERVICE_TYPES = {"docker_compose"}
 
 
+def _make_unique_key_loader(path: Path) -> type[yaml.SafeLoader]:
+    class UniqueKeyLoader(yaml.SafeLoader):
+        pass
+
+    def construct_mapping(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode, deep: bool = False) -> dict:
+        mapping: dict = {}
+        for key_node, value_node in node.value:
+            key = loader.construct_object(key_node, deep=deep)
+            if key in mapping:
+                line = key_node.start_mark.line + 1
+                raise ValueError(f"Duplicate key {key!r} in {path} at line {line}")
+            mapping[key] = loader.construct_object(value_node, deep=deep)
+        return mapping
+
+    UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping)
+    return UniqueKeyLoader
+
+
+def load_registry_file(path: Path) -> dict:
+    raw = path.read_text(encoding="utf-8")
+    resolved = resolve_jinja2_vars(raw)
+    data = yaml.load(resolved, Loader=_make_unique_key_loader(path))
+    return require_mapping(data, str(path))
+
+
 def load_registry() -> dict:
-    data = load_yaml_with_identity(REGISTRY_PATH)
-    return require_mapping(data, str(REGISTRY_PATH))
+    return load_registry_file(REGISTRY_PATH)
 
 
 def load_image_catalog() -> dict | None:
@@ -236,7 +269,11 @@ def check(
 
 
 def cmd_check(args: argparse.Namespace) -> int:
-    registry = load_registry()
+    try:
+        registry = load_registry()
+    except ValueError as exc:
+        print(f"  ERROR    {exc}", file=sys.stderr)
+        return 1
     image_catalog = load_image_catalog()
     inventory_names = load_inventory_names()
     runtime_roles = discover_runtime_roles()
@@ -264,7 +301,11 @@ def cmd_check(args: argparse.Namespace) -> int:
 
 
 def cmd_list(args: argparse.Namespace) -> int:
-    registry = load_registry()
+    try:
+        registry = load_registry()
+    except ValueError as exc:
+        print(f"  ERROR    {exc}", file=sys.stderr)
+        return 1
     service_map = registry.get("platform_service_registry", {})
 
     if not service_map:

@@ -90,6 +90,11 @@ def _is_playbook_reference(path: str) -> bool:
     return "playbooks" in candidate.parts
 
 
+def _is_playbook_ref(path: str) -> bool:
+    """Backward-compatible alias kept for existing tests/importers."""
+    return _is_playbook_reference(path)
+
+
 def _workflow_playbook_candidates(workflow_id: str) -> list[Path]:
     if not workflow_id.startswith("converge-"):
         return []

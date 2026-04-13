@@ -94,3 +94,33 @@ def test_check_rejects_invalid_docker_service_contract() -> None:
     assert any("image_catalog_key 'missing_image' not found" in error for error in errors)
     assert any("internal_port must be an integer" in error for error in errors)
     assert any("host_group 'missing-host' not found in inventory hosts/groups" in error for error in errors)
+
+
+def test_load_registry_file_rejects_duplicate_keys(tmp_path: Path) -> None:
+    registry_path = tmp_path / "platform_services.yml"
+    registry_path.write_text(
+        """
+platform_service_registry:
+  demo:
+    service_type: docker_compose
+    internal_port: 1234
+    host_group: docker-runtime
+    service_type: infrastructure
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    try:
+        registry_validator.load_registry_file(registry_path)
+    except ValueError as exc:
+        assert "Duplicate key 'service_type'" in str(exc)
+    else:
+        raise AssertionError("expected duplicate key validation to fail")
+
+
+def test_repo_intake_port_does_not_conflict_with_browser_runner() -> None:
+    registry = registry_validator.load_registry()
+    service_map = registry["platform_service_registry"]
+
+    assert service_map["repo_intake"]["internal_port"] != service_map["browser_runner"]["internal_port"]

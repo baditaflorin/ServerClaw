@@ -42,6 +42,7 @@ RESTIC_ROLE_TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
+DRIFT_LIB_PATH = REPO_ROOT / "scripts" / "drift_lib.py"
 
 
 def _load_module(path: Path, name: str):
@@ -951,6 +952,20 @@ def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: P
     assert stdin_payloads[0].startswith("#!/usr/bin/env python3")
 
 
+def test_resolve_openbao_init_local_file_prefers_split_group_vars_layout(tmp_path: Path, monkeypatch) -> None:
+    inventory_dir = tmp_path / "inventory" / "group_vars" / "all"
+    inventory_dir.mkdir(parents=True)
+    (inventory_dir / "main.yml").write_text(
+        "openbao_init_local_file: .local/openbao/init.json\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", tmp_path)
+
+    resolved = trigger.resolve_openbao_init_local_file()
+
+    assert resolved == Path(".local/openbao/init.json")
+
+
 def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", tmp_path)
     monkeypatch.setattr(
@@ -1215,6 +1230,28 @@ def test_restic_role_prefers_runtime_control_openbao_with_local_fallback() -> No
         'common_openbao_systemd_credentials_manage_local_openbao_runtime: "{{ restic_config_backup_runtime_openbao_effective_manage_local_runtime }}"'
         in tasks
     )
+
+
+def test_restic_role_recovers_minio_root_secret_from_live_container_when_local_secret_drifts() -> None:
+    tasks = RESTIC_ROLE_TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "Determine the effective shared MinIO container name" in tasks
+    assert "Probe shared MinIO auth with the controller-local root secret" in tasks
+    assert (
+        "Read the live MinIO root password from the running container when the controller-local secret drifts" in tasks
+    )
+    assert "Override the restic MinIO secret with the live container credential when needed" in tasks
+    assert "Sync the controller-local MinIO root secret when the live container secret is newer" in tasks
+    assert "restic_config_backup_minio_container_effective_name" in tasks
+    assert "no_log: true" in tasks
+
+
+def test_drift_lib_supports_split_group_vars_layout_for_live_apply_helpers() -> None:
+    drift_lib_text = DRIFT_LIB_PATH.read_text(encoding="utf-8")
+
+    assert 'repo_path("inventory", "group_vars", "all", "main.yml")' in drift_lib_text
+    assert "GROUP_VARS_CANDIDATE_PATHS" in drift_lib_text
+    assert "group_vars = load_group_vars()" in drift_lib_text
 
 
 def test_restic_playbook_enables_bridge_chain_recovery_on_docker_runtime() -> None:
