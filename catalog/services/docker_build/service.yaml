@@ -6,11 +6,11 @@ service:
     offload tasks.
   category: infrastructure
   lifecycle_status: active
-  vm: docker-build-lv3
+  vm: docker-build
   vmid: 130
   internal_url: ssh://ops@10.10.10.30
-  public_url: https://build.lv3.org
-  subdomain: build.lv3.org
+  public_url: https://build.example.com
+  subdomain: build.example.com
   exposure: informational-only
   uptime_monitor_name: Docker Build SSH
   health_probe_id: docker_build
@@ -21,7 +21,7 @@ service:
   restart_domain: dedicated-build-core
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-build
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-vm-docker-build-lv3/lv3-vm-docker-build-lv3
+  dashboard_url: https://grafana.example.com/d/lv3-vm-docker-build/lv3-vm-docker-build
   tags:
     - build
     - docker
@@ -29,8 +29,8 @@ service:
   environments:
     production:
       status: active
-      url: https://build.lv3.org
-      subdomain: build.lv3.org
+      url: https://build.example.com
+      subdomain: build.example.com
 completeness:
   service_type: vm-service
   requires_subdomain: true
@@ -48,24 +48,24 @@ redundancy:
     - pbs_vm_130
   standby:
     kind: cold
-    location: docker-build-lv3
-    failover_trigger: Restore docker-build-lv3 when the build worker guest or its
-      persistent workspace cannot be recovered in place.
-    failback_method: Restore or rebuild docker-build-lv3, then rerun the documented
-      build-host converge and cache warm-up.
+    location: docker-build
+    failover_trigger: Restore docker-build when the build worker guest or its persistent
+      workspace cannot be recovered in place.
+    failback_method: Restore or rebuild docker-build, then rerun the documented build-host
+      converge and cache warm-up.
 dependency:
   node:
     id: docker_build
     service: docker_build
     name: Docker Build VM
-    vm: docker-build-lv3
+    vm: docker-build
     tier: 1
     category: infrastructure
     adr: 0028
   outbound_edges: []
 health:
   service_name: docker-build
-  owning_vm: docker-build-lv3
+  owning_vm: docker-build
   role: null
   verify_file: null
   liveness:

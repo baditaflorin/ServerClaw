@@ -6,11 +6,11 @@ service:
     operator and agent sessions.
   category: communication
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:7880
-  public_url: https://livekit.lv3.org
-  subdomain: livekit.lv3.org
+  public_url: https://livekit.example.com
+  subdomain: livekit.example.com
   exposure: edge-published
   health_probe_id: livekit
   image_catalog_ids:
@@ -31,14 +31,14 @@ service:
     - voice
     - webrtc
     - realtime
-  notes: Signal traffic is published through the shared NGINX edge at livekit.lv3.org
+  notes: Signal traffic is published through the shared NGINX edge at livekit.example.com
     while media TCP and UDP listeners are forwarded directly by the Proxmox host to
-    docker-runtime-lv3.
+    docker-runtime.
   environments:
     production:
       status: active
-      url: https://livekit.lv3.org
-      subdomain: livekit.lv3.org
+      url: https://livekit.example.com
+      subdomain: livekit.example.com
       notes: Room creation and participant access are governed by repo-managed API
         credentials and short-lived LiveKit tokens instead of an edge OIDC boundary.
 completeness:
@@ -63,17 +63,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when LiveKit, its public signalling
-      path, or its media listener contract cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the LiveKit
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when LiveKit, its public signalling path,
+      or its media listener contract cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the LiveKit converge
+      from git.
 dependency:
   node:
     id: livekit
     service: livekit
     name: LiveKit
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: communication
     adr: 0293
@@ -81,12 +81,12 @@ dependency:
     - from: livekit
       to: docker_runtime
       type: hard
-      description: LiveKit runs as a repo-managed Docker Compose workload on docker-runtime-lv3.
+      description: LiveKit runs as a repo-managed Docker Compose workload on docker-runtime.
     - from: livekit
       to: nginx_edge
       type: soft
-      description: Public signalling at livekit.lv3.org depends on the shared NGINX
-        edge publication path.
+      description: Public signalling at livekit.example.com depends on the shared
+        NGINX edge publication path.
     - from: livekit
       to: openbao
       type: startup_only
@@ -94,13 +94,13 @@ dependency:
         env contract before the service is verified.
 health:
   service_name: livekit
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: livekit_runtime
   verify_file: roles/livekit_runtime/tasks/verify.yml
   startup:
     kind: tcp
     description: LiveKit startup completes once the local signalling listener is reachable
-      on docker-runtime-lv3.
+      on docker-runtime.
     timeout_seconds: 120
     retries: 24
     delay_seconds: 5
@@ -108,7 +108,7 @@ health:
     port: 7880
   liveness:
     kind: tcp
-    description: The LiveKit TCP media listener remains bound on docker-runtime-lv3.
+    description: The LiveKit TCP media listener remains bound on docker-runtime.
     timeout_seconds: 120
     retries: 24
     delay_seconds: 5

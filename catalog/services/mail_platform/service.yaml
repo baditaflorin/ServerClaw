@@ -5,11 +5,11 @@ service:
   description: Managed SMTP, IMAP, and delivery automation surface for platform notifications.
   category: communication
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: http://10.10.10.92:8081
-  public_url: https://mail.lv3.org
-  subdomain: mail.lv3.org
+  public_url: https://mail.example.com
+  subdomain: mail.example.com
   exposure: informational-only
   uptime_monitor_name: Mail Platform Gateway Private
   health_probe_id: mail_platform
@@ -28,7 +28,7 @@ service:
   restart_domain: runtime-control-communications
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-mail-platform/lv3-mail-platform
+  dashboard_url: https://grafana.example.com/d/lv3-mail-platform/lv3-mail-platform
   tags:
     - mail
     - smtp
@@ -37,8 +37,8 @@ service:
   environments:
     production:
       status: active
-      url: https://mail.lv3.org
-      subdomain: mail.lv3.org
+      url: https://mail.example.com
+      subdomain: mail.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -56,17 +56,17 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when the mail platform or its runtime
+    location: runtime-control
+    failover_trigger: Restore runtime-control when the mail platform or its runtime
       state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the mail-platform
+    failback_method: Restore or rebuild runtime-control, then rerun the mail-platform
       converge from git.
 dependency:
   node:
     id: mail_platform
     service: mail_platform
     name: Mail Platform
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: communication
     adr: '0041'
@@ -74,8 +74,8 @@ dependency:
     - from: mail_platform
       to: nginx_edge
       type: soft
-      description: The published mail.lv3.org informational surface is exposed through
-        the shared NGINX edge.
+      description: The published mail.example.com informational surface is exposed
+        through the shared NGINX edge.
     - from: mail_platform
       to: openbao
       type: startup_only
@@ -83,7 +83,7 @@ dependency:
         by the OpenBao sidecar.
 health:
   service_name: mail-platform
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: mail_platform_runtime
   verify_file: roles/mail_platform_runtime/tasks/verify.yml
   liveness:
@@ -119,7 +119,7 @@ health:
       name: Mail Platform Gateway Private
       type: http
       url: http://10.10.10.92:8081/healthz
-      description: Private mail gateway health endpoint on runtime-control-lv3.
+      description: Private mail gateway health endpoint on runtime-control.
       interval: 60
       retryInterval: 60
       maxretries: 0

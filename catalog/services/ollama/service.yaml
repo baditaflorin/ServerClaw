@@ -6,7 +6,7 @@ service:
     workbenches.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:11434
   exposure: private-only
@@ -45,24 +45,24 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Ollama or its model-serving
-      state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Ollama
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Ollama or its model-serving state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Ollama converge
+      from git.
 dependency:
   node:
     id: ollama
     service: ollama
     name: Ollama
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: automation
     adr: '0145'
   outbound_edges: []
 health:
   service_name: ollama
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: ollama_runtime
   verify_file: roles/ollama_runtime/tasks/verify.yml
   liveness:
@@ -88,7 +88,7 @@ health:
       - ollama
       - ollama
       - show
-      - llama3.2:3b
+      - gemma4:e4b
     success_rc: 0
   uptime_kuma:
     enabled: false

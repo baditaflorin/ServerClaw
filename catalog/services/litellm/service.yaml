@@ -1,0 +1,116 @@
+schema_version: 1.0.0
+service:
+  id: litellm
+  name: LiteLLM
+  description: Private LLM proxy and router providing unified API access to multiple
+    language model providers.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime
+  vmid: 120
+  internal_url: http://10.10.10.20:4000
+  exposure: private-only
+  health_probe_id: litellm
+  image_catalog_ids: []
+  secret_catalog_ids: []
+  adr: 0381
+  runbook: docs/runbooks/configure-litellm.md
+  runtime_pool: runtime-ai
+  deployment_surface: playbooks/litellm.yml
+  restart_domain: runtime-ai-inference
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
+  mobility_tier: elastic_stateless
+  tags:
+    - llm
+    - proxy
+    - routing
+    - private
+  environments:
+    production:
+      status: active
+      url: http://10.10.10.20:4000
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  dashboard_file: config/grafana/dashboards/litellm.json
+  alert_rule_file: config/alertmanager/rules/litellm.yml
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+    - git_repository
+    - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when LiteLLM or its proxy runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the LiteLLM converge
+      from git.
+dependency:
+  node:
+    id: litellm
+    service: litellm
+    name: LiteLLM Proxy
+    vm: docker-runtime
+    tier: 2
+    category: automation
+  outbound_edges:
+    - from: litellm
+      to: ollama
+      type: hard
+      description: LiteLLM Proxy forwards local chat and embedding aliases to the
+        private Ollama runtime.
+    - from: litellm
+      to: openbao
+      type: startup_only
+      description: LiteLLM Proxy consumes runtime secrets from the OpenBao sidecar.
+    - from: litellm
+      to: postgres
+      type: hard
+      description: LiteLLM Proxy stores virtual keys and usage data in PostgreSQL.
+health:
+  service_name: litellm
+  owning_vm: docker-runtime
+  role: litellm_runtime
+  verify_file: roles/litellm_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: LiteLLM Proxy startup completes once the liveliness endpoint answers.
+    timeout_seconds: 180
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:4000/health/liveliness
+    method: GET
+    expected_status:
+      - 200
+  liveness:
+    kind: http
+    description: The LiteLLM Proxy liveliness endpoint continues to answer.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:4000/health/liveliness
+    method: GET
+    expected_status:
+      - 200
+  readiness:
+    kind: http
+    description: The LiteLLM Proxy health endpoint confirms readiness.
+    timeout_seconds: 120
+    retries: 12
+    delay_seconds: 2
+    url: http://127.0.0.1:4000/health/readiness
+    method: GET
+    expected_status:
+      - 200
+  uptime_kuma:
+    enabled: false
+    reason: The private LiteLLM Proxy surface is verified through repo-managed local
+      health probes.

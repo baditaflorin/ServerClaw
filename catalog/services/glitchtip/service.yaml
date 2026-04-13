@@ -6,7 +6,7 @@ service:
     DSNs, and Keycloak-backed browser sign-in.
   category: observability
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   runtime_pool: runtime-general
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   deployment_surface: playbooks/services/glitchtip.yml
@@ -14,8 +14,8 @@ service:
   restart_domain: runtime-general-observability
   vmid: 120
   internal_url: http://10.10.10.20:3005
-  public_url: https://errors.lv3.org
-  subdomain: errors.lv3.org
+  public_url: https://errors.example.com
+  subdomain: errors.example.com
   exposure: edge-published
   uptime_monitor_name: GlitchTip Public Health
   health_probe_id: glitchtip
@@ -35,7 +35,7 @@ service:
     - mail_platform_server_mailbox_password
   adr: 0281
   runbook: docs/runbooks/configure-glitchtip.md
-  dashboard_url: https://grafana.lv3.org/d/lv3-glitchtip/lv3-glitchtip
+  dashboard_url: https://grafana.example.com/d/lv3-glitchtip/lv3-glitchtip
   tags:
     - errors
     - sentry-compatible
@@ -48,8 +48,8 @@ service:
   environments:
     production:
       status: active
-      url: https://errors.lv3.org
-      subdomain: errors.lv3.org
+      url: https://errors.example.com
+      subdomain: errors.example.com
       notes: The public GlitchTip surface is published through the shared NGINX edge,
         but the application itself owns browser authentication through the repo-managed
         Keycloak client and project-scoped DSN issuance.
@@ -75,10 +75,10 @@ redundancy:
     rto_minutes: 120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the GlitchTip runtime, DSN bootstrap
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the GlitchTip runtime, DSN bootstrap
       state, or notification wiring cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, rerun the GlitchTip converge
+    failback_method: Restore or rebuild docker-runtime, rerun the GlitchTip converge
       from git, and repeat the public health plus synthetic event verification before
       resuming operator use.
 dependency:
@@ -86,7 +86,7 @@ dependency:
     id: glitchtip
     service: glitchtip
     name: GlitchTip
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: observability
     adr: 0281
@@ -95,7 +95,7 @@ dependency:
       to: docker_runtime
       type: hard
       description: The GlitchTip web runtime, project bootstrap flow, and supporting
-        Valkey container run on docker-runtime-lv3.
+        Valkey container run on docker-runtime.
     - from: glitchtip
       to: keycloak
       type: soft
@@ -114,8 +114,8 @@ dependency:
     - from: glitchtip
       to: nginx_edge
       type: soft
-      description: Public access to errors.lv3.org depends on the shared NGINX edge
-        publication path.
+      description: Public access to errors.example.com depends on the shared NGINX
+        edge publication path.
     - from: glitchtip
       to: ntfy
       type: soft
@@ -133,13 +133,13 @@ dependency:
         the shared PostgreSQL cluster.
 health:
   service_name: glitchtip
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: glitchtip_runtime
   verify_file: roles/glitchtip_runtime/tasks/verify.yml
   startup:
     kind: http
     description: GlitchTip startup completes once the local internal health endpoint
-      returns 200 on docker-runtime-lv3.
+      returns 200 on docker-runtime.
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
@@ -149,7 +149,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: The local GlitchTip health endpoint continues to answer on docker-runtime-lv3.
+    description: The local GlitchTip health endpoint continues to answer on docker-runtime.
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
@@ -164,7 +164,7 @@ health:
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
-    url: https://errors.lv3.org/api/0/internal/health/
+    url: https://errors.example.com/api/0/internal/health/
     method: GET
     expected_status:
       - 200
@@ -182,7 +182,7 @@ health:
     monitor:
       name: GlitchTip Public Health
       type: http
-      url: https://errors.lv3.org/api/0/internal/health/
+      url: https://errors.example.com/api/0/internal/health/
       description: Public GlitchTip health endpoint published through the shared NGINX
         edge VM.
       interval: 60
@@ -201,8 +201,8 @@ data:
     access_role: platform-operator
     pii_risk: high
     locations:
-      - PostgreSQL database glitchtip on postgres-lv3
-      - /opt/glitchtip/data/uploads on docker-runtime-lv3
+      - PostgreSQL database glitchtip on postgres
+      - /opt/glitchtip/data/uploads on docker-runtime
       - .local/glitchtip/projects.json on the control machine
     notes: GlitchTip stores grouped exception payloads, issue metadata, notification
       state, uploaded artifacts, and the repo-managed DSN project catalogue for first-party
@@ -215,5 +215,5 @@ slos:
     indicator: availability
     objective_percent: 99.5
     probe_module: http_2xx_follow_redirects
-    target_url: https://errors.lv3.org/api/0/internal/health/
+    target_url: https://errors.example.com/api/0/internal/health/
     window_days: 30

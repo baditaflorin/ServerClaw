@@ -1,0 +1,83 @@
+schema_version: 1.0.0
+service:
+  id: sftpgo
+  name: SFTPGo
+  description: Web-based SFTP and file management service with OIDC SSO integration.
+  category: data
+  lifecycle_status: active
+  vm: docker-runtime
+  vmid: 120
+  internal_url: http://10.10.10.20:8080
+  public_url: https://files.example.com
+  subdomain: files.example.com
+  exposure: edge-published
+  image_catalog_ids: []
+  secret_catalog_ids: []
+  adr: '0373'
+  adr_file: docs/adr/0373-service-registry-and-derived-defaults.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/sftpgo.yml
+  restart_domain: runtime-general-data-apps
+  mobility_tier: elastic_stateless
+  tags:
+    - sftp
+    - file-transfer
+    - files
+  environments:
+    production:
+      status: active
+      url: https://files.example.com
+      subdomain: files.example.com
+      notes: Web-based file management published through the shared NGINX edge.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  keycloak_client_generated: true
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+    - git_repository
+    - pbs_vm_120
+    - pbs_vm_150
+  standby:
+    kind: cold
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime or postgres when the SFTPGo runtime or
+      metadata store cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime and postgres, then rerun the
+      SFTPGo converge and smoke-transfer verification from git.
+dependency:
+  node:
+    id: sftpgo
+    service: sftpgo
+    name: SFTPGo
+    vm: docker-runtime
+    tier: 2
+    category: data
+    adr: '0373'
+  outbound_edges:
+    - from: sftpgo
+      to: docker_runtime
+      type: hard
+      description: SFTPGo runs as a compose-managed workload on docker-runtime.
+    - from: sftpgo
+      to: keycloak
+      type: soft
+      description: SFTPGo delegates operator browser sign-in to the shared Keycloak
+        OIDC broker.
+    - from: sftpgo
+      to: nginx_edge
+      type: soft
+      description: Public access to files.example.com depends on the shared NGINX
+        edge publication path.
+    - from: sftpgo
+      to: postgres
+      type: hard
+      description: SFTPGo stores account, API key, and audit metadata in Postgres.

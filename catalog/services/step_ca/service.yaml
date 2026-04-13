@@ -5,7 +5,7 @@ service:
   description: Private certificate authority for internal TLS and SSH certificates.
   category: security
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: https://100.64.0.1:9443
   exposure: private-only
@@ -46,29 +46,29 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when step-ca or its runtime state
-      cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the step-ca
-      converge from git.
+    location: runtime-control
+    failover_trigger: Restore runtime-control when step-ca or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild runtime-control, then rerun the step-ca converge
+      from git.
 dependency:
   node:
     id: step_ca
     service: step_ca
     name: step-ca
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: security
     adr: '0042'
   outbound_edges: []
 health:
   service_name: step-ca
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: step_ca_runtime
   verify_file: roles/step_ca_runtime/tasks/verify.yml
   liveness:
     kind: tcp
-    description: The private step-ca API listens on runtime-control-lv3.
+    description: The private step-ca API listens on runtime-control.
     timeout_seconds: 120
     retries: 1
     delay_seconds: 0
@@ -109,15 +109,24 @@ health:
         - step-ca_default
   tls_certificate_ids:
     - step-ca-proxy
+  watchdog:
+    kind: identity_core_watchdog
+    description: On-VM identity-core watchdog probes Step-CA health every 15 seconds
+      and auto-restarts on 2 consecutive failures (ADR 0376).
+    interval_seconds: 15
+    failure_threshold: 2
+    max_restarts_per_hour: 6
+    url: https://127.0.0.1:9000/health
+    ntfy_topic: platform-identity-critical
   uptime_kuma:
     enabled: true
     monitor:
       name: Step CA Private
       type: http
       url: https://10.10.10.92:9000/health
-      description: Private step-ca health endpoint on runtime-control-lv3.
-      interval: 60
-      retryInterval: 60
+      description: Private step-ca health endpoint on runtime-control.
+      interval: 15
+      retryInterval: 15
       maxretries: 0
       maxredirects: 10
       accepted_statuscodes:

@@ -6,11 +6,11 @@ service:
     and scoped robot credentials for repository automation.
   category: security
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: http://10.10.10.92:8095
-  public_url: https://registry.lv3.org
-  subdomain: registry.lv3.org
+  public_url: https://registry.example.com
+  subdomain: registry.example.com
   exposure: edge-published
   uptime_monitor_name: Harbor Registry Public
   health_probe_id: harbor
@@ -26,7 +26,7 @@ service:
   restart_domain: runtime-control-supply-chain
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-harbor/lv3-harbor
+  dashboard_url: https://grafana.example.com/d/lv3-harbor/lv3-harbor
   tags:
     - registry
     - containers
@@ -35,8 +35,8 @@ service:
   environments:
     production:
       status: active
-      url: https://registry.lv3.org
-      subdomain: registry.lv3.org
+      url: https://registry.example.com
+      subdomain: registry.example.com
       notes: Published through the shared NGINX edge while Harbor handles operator
         authentication and project policy.
 completeness:
@@ -59,17 +59,17 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when Harbor or its persisted registry
+    location: runtime-control
+    failover_trigger: Restore runtime-control when Harbor or its persisted registry
       state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Harbor
-      converge and registry verification workflow.
+    failback_method: Restore or rebuild runtime-control, then rerun the Harbor converge
+      and registry verification workflow.
 dependency:
   node:
     id: harbor
     service: harbor
     name: Harbor
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: security
     adr: '0201'
@@ -77,16 +77,17 @@ dependency:
     - from: harbor
       to: keycloak
       type: soft
-      description: Operator browser sign-in to registry.lv3.org depends on the shared
-        Keycloak OIDC path, while robot credentials still support governed automation.
+      description: Operator browser sign-in to registry.example.com depends on the
+        shared Keycloak OIDC path, while robot credentials still support governed
+        automation.
     - from: harbor
       to: nginx_edge
       type: soft
-      description: Public reachability for registry.lv3.org depends on the shared
+      description: Public reachability for registry.example.com depends on the shared
         NGINX edge publication path.
 health:
   service_name: harbor
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: harbor_runtime
   verify_file: roles/harbor_runtime/tasks/verify.yml
   liveness:
@@ -106,7 +107,7 @@ health:
     timeout_seconds: 180
     retries: 24
     delay_seconds: 5
-    url: https://registry.lv3.org/api/v2.0/ping
+    url: https://registry.example.com/api/v2.0/ping
     method: GET
     expected_status:
       - 200
@@ -122,7 +123,7 @@ health:
     monitor:
       name: Harbor Registry Public
       type: http
-      url: https://registry.lv3.org/api/v2.0/ping
+      url: https://registry.example.com/api/v2.0/ping
       description: Harbor ping endpoint published through the shared NGINX edge.
       interval: 60
       retryInterval: 60
@@ -163,7 +164,7 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://registry.lv3.org/api/v2.0/ping
+    target_url: https://registry.example.com/api/v2.0/ping
     probe_module: http_2xx_follow_redirects
     description: Harbor remains reachable through the shared LV3 edge for image pulls,
       pushes, and operator access.

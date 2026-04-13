@@ -6,11 +6,11 @@ service:
     bridges that serves as the canonical ServerClaw conversation hub.
   category: communication
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8008
-  public_url: https://matrix.lv3.org
-  subdomain: matrix.lv3.org
+  public_url: https://matrix.example.com
+  subdomain: matrix.example.com
   exposure: edge-published
   uptime_monitor_name: Matrix Synapse Public
   health_probe_id: matrix_synapse
@@ -41,7 +41,7 @@ service:
   restart_domain: runtime-general-collaboration
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
-  dashboard_url: https://grafana.lv3.org/d/lv3-matrix-synapse/lv3-matrix-synapse
+  dashboard_url: https://grafana.example.com/d/lv3-matrix-synapse/lv3-matrix-synapse
   tags:
     - matrix
     - synapse
@@ -53,8 +53,8 @@ service:
   environments:
     production:
       status: active
-      url: https://matrix.lv3.org
-      subdomain: matrix.lv3.org
+      url: https://matrix.example.com
+      subdomain: matrix.example.com
       notes: The public Matrix client API is edge-published while authentication stays
         inside Synapse, federation remains disabled for ADR 0255, and ADR 0256 manages
         Discord plus WhatsApp bridge bots through application-service registrations
@@ -78,17 +78,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Matrix Synapse or its runtime
-      state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Matrix
-      Synapse converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Matrix Synapse or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Matrix Synapse
+      converge from git.
 dependency:
   node:
     id: matrix_synapse
     service: matrix_synapse
     name: Matrix Synapse
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: communication
     adr: '0255'
@@ -96,8 +96,8 @@ dependency:
     - from: matrix_synapse
       to: nginx_edge
       type: soft
-      description: Public reachability for matrix.lv3.org depends on the shared edge
-        publication path.
+      description: Public reachability for matrix.example.com depends on the shared
+        edge publication path.
     - from: matrix_synapse
       to: openbao
       type: startup_only
@@ -110,7 +110,7 @@ dependency:
         event history in Postgres.
 health:
   service_name: matrix-synapse
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: matrix_synapse_runtime
   verify_file: roles/matrix_synapse_runtime/tasks/verify.yml
   startup:
@@ -151,8 +151,8 @@ health:
     monitor:
       name: Matrix Synapse Public
       type: http
-      url: https://matrix.lv3.org/_matrix/client/versions
-      description: Public Matrix Synapse client versions endpoint on matrix.lv3.org.
+      url: https://matrix.example.com/_matrix/client/versions
+      description: Public Matrix Synapse client versions endpoint on matrix.example.com.
       interval: 60
       retryInterval: 60
       maxretries: 0
@@ -190,6 +190,6 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://matrix.lv3.org/_matrix/client/versions
+    target_url: https://matrix.example.com/_matrix/client/versions
     probe_module: http_2xx_follow_redirects
     description: Matrix Synapse remains reachable on the public client versions endpoint.

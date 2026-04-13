@@ -6,11 +6,11 @@ service:
     checked by Uptime Robot.
   category: observability
   lifecycle_status: active
-  vm: runtime-general-lv3
+  vm: runtime-general
   vmid: 191
   internal_url: http://10.10.10.91:3001/status/lv3-platform
-  public_url: https://status.lv3.org
-  subdomain: status.lv3.org
+  public_url: https://status.example.com
+  subdomain: status.example.com
   exposure: edge-published
   health_probe_id: status_page
   adr: 0109
@@ -27,8 +27,8 @@ service:
   environments:
     production:
       status: active
-      url: https://status.lv3.org
-      subdomain: status.lv3.org
+      url: https://status.example.com
+      subdomain: status.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -46,17 +46,17 @@ redundancy:
     - pbs_vm_191
   standby:
     kind: cold
-    location: runtime-general-lv3
-    failover_trigger: Restore runtime-general-lv3 when the status page runtime cannot
+    location: runtime-general
+    failover_trigger: Restore runtime-general when the status page runtime cannot
       be recovered in place.
-    failback_method: Restore or rebuild runtime-general-lv3, then rerun the status-page
+    failback_method: Restore or rebuild runtime-general, then rerun the status-page
       converge from git.
 dependency:
   node:
     id: status_page
     service: status_page
     name: Public Status Page
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: observability
     adr: 0109
@@ -64,8 +64,8 @@ dependency:
     - from: status_page
       to: nginx_edge
       type: hard
-      description: The public status page is published at status.lv3.org through the
-        shared NGINX edge hostname.
+      description: The public status page is published at status.example.com through
+        the shared NGINX edge hostname.
     - from: status_page
       to: uptime_kuma
       type: hard
@@ -73,7 +73,7 @@ dependency:
         cannot function if that service is unavailable.
 health:
   service_name: status-page
-  owning_vm: runtime-general-lv3
+  owning_vm: runtime-general
   role: null
   verify_file: null
   liveness:
@@ -98,7 +98,7 @@ health:
     expected_status:
       - 200
     headers:
-      Host: status.lv3.org
+      Host: status.example.com
     validate_tls: false
   uptime_kuma:
     enabled: false
@@ -110,7 +110,7 @@ slos:
     indicator: availability
     objective_percent: 99.9
     window_days: 30
-    target_url: https://status.lv3.org
+    target_url: https://status.example.com
     probe_module: http_2xx_follow_redirects
     description: The public status page remains externally reachable as the last-resort
       platform signal.

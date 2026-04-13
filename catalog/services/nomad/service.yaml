@@ -2,14 +2,16 @@ schema_version: 1.0.0
 service:
   id: nomad
   name: Nomad
-  description: Private distributed scheduler for durable batch jobs and long-running
-    internal workloads.
+  description: Distributed scheduler for durable batch jobs and long-running internal
+    workloads with operator dashboard at scheduler.example.com.
   category: automation
   lifecycle_status: active
-  vm: monitoring-lv3
+  vm: monitoring
   vmid: 140
   internal_url: https://100.64.0.1:8013
-  exposure: private-only
+  public_url: https://scheduler.example.com
+  subdomain: scheduler.example.com
+  exposure: edge-published
   health_probe_id: nomad
   secret_catalog_ids:
     - nomad_acl_management_token
@@ -30,7 +32,7 @@ service:
         Nomad client is unavailable. The Nomad server and build-targeted jobs continue
         to operate.
       degraded_for_seconds_max: -1
-      recovery_signal: docker-runtime-lv3 rejoins the Nomad client set
+      recovery_signal: docker-runtime rejoins the Nomad client set
       tested_by: fault:docker-runtime-unavailable
     - dependency: docker_build
       dependency_type: soft
@@ -38,7 +40,7 @@ service:
         build pool cannot place while the docker-build Nomad client is unavailable.
         The Nomad server and runtime-targeted jobs continue to operate.
       degraded_for_seconds_max: -1
-      recovery_signal: docker-build-lv3 rejoins the Nomad client set
+      recovery_signal: docker-build rejoins the Nomad client set
       tested_by: fault:docker-build-unavailable
   tags:
     - scheduler
@@ -47,7 +49,10 @@ service:
   environments:
     production:
       status: active
-      url: https://100.64.0.1:8013
+      url: https://scheduler.example.com
+      subdomain: scheduler.example.com
+      notes: Operator dashboard published through shared NGINX edge with native OIDC
+        auth.
 completeness:
   service_type: vm-service
   requires_subdomain: false
@@ -65,17 +70,17 @@ redundancy:
     - pbs_vm_140
   standby:
     kind: cold
-    location: monitoring-lv3
-    failover_trigger: Restore monitoring-lv3 when the Nomad server or its local Raft
-      state cannot be recovered in place.
-    failback_method: Restore or rebuild monitoring-lv3, then replay the Nomad converge
+    location: monitoring
+    failover_trigger: Restore monitoring when the Nomad server or its local Raft state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild monitoring, then replay the Nomad converge
       and smoke-job verification from git.
 dependency:
   node:
     id: nomad
     service: nomad
     name: Nomad
-    vm: monitoring-lv3
+    vm: monitoring
     tier: 1
     category: automation
     adr: '0232'
@@ -92,12 +97,12 @@ dependency:
         on the docker-runtime Nomad client remaining available for placement.
 health:
   service_name: nomad
-  owning_vm: monitoring-lv3
+  owning_vm: monitoring
   role: nomad_cluster_bootstrap
   verify_file: roles/nomad_cluster_bootstrap/tasks/verify.yml
   liveness:
     kind: systemd
-    description: The lv3-nomad systemd unit is active on monitoring-lv3.
+    description: The lv3-nomad systemd unit is active on monitoring.
     timeout_seconds: 30
     retries: 1
     delay_seconds: 0

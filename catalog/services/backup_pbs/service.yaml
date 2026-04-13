@@ -5,7 +5,7 @@ service:
   description: Backup datastore and snapshot retention service for the Proxmox estate.
   category: data
   lifecycle_status: active
-  vm: backup-lv3
+  vm: backup
   vmid: 160
   internal_url: https://10.10.10.60:8007
   exposure: private-only
@@ -45,24 +45,24 @@ redundancy:
     - proxmox_offsite_vm_160
   standby:
     kind: cold
-    location: backup-lv3
-    failover_trigger: Restore backup-lv3 from the off-site Proxmox copy when the local
+    location: backup
+    failover_trigger: Restore backup from the off-site Proxmox copy when the local
       PBS VM or datastore is lost or corrupted.
-    failback_method: Bring backup-lv3 back from the off-site copy, confirm the datastore,
+    failback_method: Bring backup back from the off-site copy, confirm the datastore,
       then resume scheduled Proxmox backups.
 dependency:
   node:
     id: backup_pbs
     service: backup_pbs
     name: Proxmox Backup Server
-    vm: backup-lv3
+    vm: backup
     tier: 1
     category: data
     adr: 0029
   outbound_edges: []
 health:
   service_name: backup-pbs
-  owning_vm: backup-lv3
+  owning_vm: backup
   role: backup_vm
   verify_file: roles/backup_vm/tasks/verify.yml
   liveness:
@@ -95,7 +95,7 @@ health:
       type: port
       hostname: 10.10.10.60
       port: 8007
-      description: Private PBS listener on backup-lv3.
+      description: Private PBS listener on backup.
       interval: 60
       retryInterval: 60
       maxretries: 0

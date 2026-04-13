@@ -276,6 +276,18 @@ def secret_catalog_ids() -> set[str]:
     return ids
 
 
+def uptime_monitor_names() -> tuple[set[str], bool]:
+    if not UPTIME_MONITORS_PATH.exists():
+        return set(), False
+
+    monitor_catalog = require_list(load_json(UPTIME_MONITORS_PATH), "uptime-kuma.monitors")
+    names: set[str] = set()
+    for index, monitor in enumerate(monitor_catalog):
+        monitor = require_mapping(monitor, f"uptime-kuma.monitors[{index}]")
+        names.add(require_str(monitor.get("name"), f"uptime-kuma.monitors[{index}].name"))
+    return names, True
+
+
 def validate_service_catalog(catalog: dict[str, Any]) -> None:
     from standby_capacity import validate_catalog_standby_policies
 
@@ -290,7 +302,6 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
 
     host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     stack = load_yaml(STACK_PATH)
-    monitor_catalog = load_json(UPTIME_MONITORS_PATH)
     topology = require_mapping(host_vars.get("lv3_service_topology"), "lv3_service_topology")
     guest_vmids = {
         guest["name"]: guest["vmid"] for guest in require_list(host_vars.get("proxmox_guests"), "proxmox_guests")
@@ -305,7 +316,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
     allowed_service_surfaces = set(observed_guests)
     if not service_catalog_enforces_observed_guest_surfaces():
         allowed_service_surfaces.update(guest_vmids.keys())
-    monitor_names = {monitor["name"] for monitor in monitor_catalog}
+    monitor_names, has_monitor_catalog = uptime_monitor_names()
     probe_service_ids = health_probe_service_ids()
     known_image_ids = image_catalog_ids()
     known_secret_ids = secret_catalog_ids()
@@ -413,7 +424,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                 service.get("uptime_monitor_name"),
                 f"services[{index}].uptime_monitor_name",
             )
-            if monitor_name not in monitor_names:
+            if has_monitor_catalog and monitor_name not in monitor_names:
                 raise ValueError(f"services[{index}].uptime_monitor_name references unknown monitor '{monitor_name}'")
 
         if "health_probe_id" in service:

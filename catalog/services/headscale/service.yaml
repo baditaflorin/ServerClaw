@@ -5,10 +5,10 @@ service:
   description: Repo-managed control plane for the LV3 zero-trust mesh VPN.
   category: access
   lifecycle_status: active
-  vm: proxmox_florin
+  vm: proxmox-host
   internal_url: http://10.10.10.1:8080
-  public_url: https://headscale.lv3.org
-  subdomain: headscale.lv3.org
+  public_url: https://headscale.example.com
+  subdomain: headscale.example.com
   exposure: edge-published
   uptime_monitor_name: Headscale Public Health
   health_probe_id: headscale
@@ -29,8 +29,8 @@ service:
   environments:
     production:
       status: active
-      url: https://headscale.lv3.org
-      subdomain: headscale.lv3.org
+      url: https://headscale.example.com
+      subdomain: headscale.example.com
 completeness:
   service_type: vm-service
   requires_subdomain: true
@@ -58,7 +58,7 @@ dependency:
     id: headscale
     service: headscale
     name: Headscale
-    vm: proxmox_florin
+    vm: proxmox-host
     tier: 1
     category: access
     adr: '0144'
@@ -66,11 +66,11 @@ dependency:
     - from: headscale
       to: nginx_edge
       type: soft
-      description: Public registration and control-plane reachability for headscale.lv3.org
+      description: Public registration and control-plane reachability for headscale.example.com
         depends on the shared NGINX edge publication path.
 health:
   service_name: headscale
-  owning_vm: proxmox_florin
+  owning_vm: proxmox-host
   role: proxmox_headscale
   verify_file: roles/proxmox_headscale/tasks/main.yml
   liveness:
@@ -104,7 +104,7 @@ health:
     monitor:
       name: Headscale Public Health
       type: http
-      url: https://headscale.lv3.org/health
+      url: https://headscale.example.com/health
       description: Public Headscale health endpoint published through the shared NGINX
         edge.
       interval: 60

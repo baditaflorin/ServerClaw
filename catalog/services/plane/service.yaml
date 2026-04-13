@@ -5,11 +5,11 @@ service:
   description: Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8093
-  public_url: https://tasks.lv3.org
-  subdomain: tasks.lv3.org
+  public_url: https://tasks.example.com
+  subdomain: tasks.example.com
   exposure: edge-published
   uptime_monitor_name: Plane Public
   health_probe_id: plane
@@ -46,8 +46,8 @@ service:
   environments:
     production:
       status: active
-      url: https://tasks.lv3.org
-      subdomain: tasks.lv3.org
+      url: https://tasks.example.com
+      subdomain: tasks.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -64,17 +64,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the Plane runtime or its shared
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the Plane runtime or its shared
       state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Plane converge
+    failback_method: Restore or rebuild docker-runtime, then rerun the Plane converge
       from git.
 dependency:
   node:
     id: plane
     service: plane
     name: Plane
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: 0193
@@ -82,14 +82,14 @@ dependency:
     - from: plane
       to: keycloak
       type: soft
-      description: Authenticated browser access to tasks.lv3.org depends on the shared
-        Keycloak-backed edge auth path, while the private controller path remains
+      description: Authenticated browser access to tasks.example.com depends on the
+        shared Keycloak-backed edge auth path, while the private controller path remains
         available for governed automation.
     - from: plane
       to: nginx_edge
       type: soft
-      description: Public access to tasks.lv3.org depends on the shared NGINX edge
-        publication path.
+      description: Public access to tasks.example.com depends on the shared NGINX
+        edge publication path.
     - from: plane
       to: openbao
       type: startup_only
@@ -102,7 +102,7 @@ dependency:
         in Postgres.
 health:
   service_name: plane
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: plane_runtime
   verify_file: roles/plane_runtime/tasks/verify.yml
   liveness:
@@ -131,7 +131,7 @@ health:
     monitor:
       name: Plane Public
       type: http
-      url: https://tasks.lv3.org/
+      url: https://tasks.example.com/
       description: Public Plane board published through the shared NGINX edge and
         authenticated by the repo-managed oauth2-proxy flow.
       interval: 60
@@ -152,7 +152,7 @@ data:
     locations:
       - /opt/plane/data/minio
     notes: Plane attachment uploads and exported artifacts are persisted in the local
-      MinIO-backed object store on docker-runtime-lv3.
+      MinIO-backed object store on docker-runtime.
   - id: plane-workspace-store
     service: plane
     name: Plane workspace and issue store
@@ -171,7 +171,7 @@ slos:
     indicator: availability
     objective_percent: 99.0
     window_days: 30
-    target_url: https://tasks.lv3.org/
+    target_url: https://tasks.example.com/
     probe_module: http_2xx_follow_redirects
     description: Plane remains reachable through the public LV3 edge for ADR board
       tracking and issue synchronization.

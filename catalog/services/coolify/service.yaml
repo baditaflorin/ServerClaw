@@ -6,11 +6,11 @@ service:
     from Git repositories.
   category: infrastructure
   lifecycle_status: active
-  vm: coolify-lv3
+  vm: coolify
   vmid: 170
   internal_url: http://100.64.0.1:8012
-  public_url: https://coolify.lv3.org
-  subdomain: coolify.lv3.org
+  public_url: https://coolify.example.com
+  subdomain: coolify.example.com
   exposure: edge-published
   health_probe_id: coolify
   secret_catalog_ids:
@@ -32,8 +32,8 @@ service:
   environments:
     production:
       status: active
-      url: https://coolify.lv3.org
-      subdomain: coolify.lv3.org
+      url: https://coolify.example.com
+      subdomain: coolify.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -57,17 +57,17 @@ redundancy:
     - pbs_vm_170
   standby:
     kind: cold
-    location: coolify-lv3
-    failover_trigger: Restore coolify-lv3 when the Coolify control plane or its managed
+    location: coolify
+    failover_trigger: Restore coolify when the Coolify control plane or its managed
       runtime state cannot be recovered in place.
-    failback_method: Restore or rebuild coolify-lv3, then rerun the Coolify converge
-      and smoke deployment verification from git.
+    failback_method: Restore or rebuild coolify, then rerun the Coolify converge and
+      smoke deployment verification from git.
 dependency:
   node:
     id: coolify
     service: coolify
     name: Coolify
-    vm: coolify-lv3
+    vm: coolify
     tier: 1
     category: infrastructure
     adr: 0194
@@ -75,18 +75,18 @@ dependency:
     - from: coolify
       to: keycloak
       type: soft
-      description: Authenticated browser access to coolify.lv3.org depends on the
-        shared Keycloak-backed edge auth path, while the private controller remains
+      description: Authenticated browser access to coolify.example.com depends on
+        the shared Keycloak-backed edge auth path, while the private controller remains
         reachable over the management network.
     - from: coolify
       to: nginx_edge
       type: soft
-      description: Public dashboard access to coolify.lv3.org depends on the shared
+      description: Public dashboard access to coolify.example.com depends on the shared
         NGINX edge publication, while the private controller proxy remains reachable
         directly.
 health:
   service_name: coolify
-  owning_vm: coolify-lv3
+  owning_vm: coolify
   role: coolify_runtime
   verify_file: roles/coolify_runtime/tasks/verify.yml
   liveness:

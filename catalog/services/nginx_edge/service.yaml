@@ -5,11 +5,11 @@ service:
   description: Public ingress edge that terminates TLS and publishes selected services.
   category: access
   lifecycle_status: active
-  vm: nginx-lv3
+  vm: nginx
   vmid: 110
   internal_url: http://10.10.10.10
-  public_url: https://nginx.lv3.org
-  subdomain: nginx.lv3.org
+  public_url: https://nginx.example.com
+  subdomain: nginx.example.com
   exposure: edge-static
   uptime_monitor_name: NGINX Edge Public
   health_probe_id: nginx_edge
@@ -20,7 +20,7 @@ service:
   restart_domain: dedicated-edge-publication
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-edge
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-vm-nginx-lv3/lv3-vm-nginx-lv3
+  dashboard_url: https://grafana.example.com/d/lv3-vm-nginx/lv3-vm-nginx
   tags:
     - nginx
     - edge
@@ -29,8 +29,8 @@ service:
   environments:
     production:
       status: active
-      url: https://nginx.lv3.org
-      subdomain: nginx.lv3.org
+      url: https://nginx.example.com
+      subdomain: nginx.example.com
 completeness:
   service_type: nginx-plugin
   requires_subdomain: true
@@ -48,24 +48,24 @@ redundancy:
     - pbs_vm_110
   standby:
     kind: cold
-    location: nginx-lv3
-    failover_trigger: Restore or rebuild nginx-lv3 when edge publication cannot be
-      recovered in place.
-    failback_method: Restore nginx-lv3 and replay the ingress and edge-publication
-      converges from git.
+    location: nginx
+    failover_trigger: Restore or rebuild nginx when edge publication cannot be recovered
+      in place.
+    failback_method: Restore nginx and replay the ingress and edge-publication converges
+      from git.
 dependency:
   node:
     id: nginx_edge
     service: nginx_edge
     name: NGINX Edge
-    vm: nginx-lv3
+    vm: nginx
     tier: 1
     category: infrastructure
     adr: '0021'
   outbound_edges: []
 health:
   service_name: nginx-edge
-  owning_vm: nginx-lv3
+  owning_vm: nginx
   role: nginx_edge_publication
   verify_file: roles/nginx_edge_publication/tasks/verify.yml
   liveness:
@@ -78,7 +78,7 @@ health:
     expected_state: active
   readiness:
     kind: http
-    description: The managed nginx.lv3.org host header is served over HTTPS.
+    description: The managed nginx.example.com host header is served over HTTPS.
     timeout_seconds: 30
     retries: 1
     delay_seconds: 0
@@ -87,14 +87,14 @@ health:
     expected_status:
       - 200
     headers:
-      Host: nginx.lv3.org
+      Host: nginx.example.com
     validate_tls: false
   uptime_kuma:
     enabled: true
     monitor:
       name: NGINX Edge Public
       type: http
-      url: https://nginx.lv3.org
+      url: https://nginx.example.com
       description: Public landing page served by the NGINX edge VM.
       interval: 60
       retryInterval: 60
@@ -108,6 +108,6 @@ slos:
     indicator: availability
     objective_percent: 99.95
     window_days: 30
-    target_url: https://nginx.lv3.org
+    target_url: https://nginx.example.com
     probe_module: http_2xx_follow_redirects
     description: The edge reverse proxy remains reachable for published services.

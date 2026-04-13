@@ -6,11 +6,11 @@ service:
     for ServerClaw, with a public edge hostname and PostgreSQL-backed persistence.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:5678
-  public_url: https://n8n.lv3.org
-  subdomain: n8n.lv3.org
+  public_url: https://n8n.example.com
+  subdomain: n8n.example.com
   exposure: edge-published
   uptime_monitor_name: n8n Public Health
   health_probe_id: n8n
@@ -37,8 +37,8 @@ service:
   environments:
     production:
       status: active
-      url: https://n8n.lv3.org
-      subdomain: n8n.lv3.org
+      url: https://n8n.example.com
+      subdomain: n8n.example.com
       notes: The editor is protected by the shared oauth2-proxy and Keycloak edge
         flow while selected webhook paths remain intentionally public for governed
         ServerClaw connector calls.
@@ -59,17 +59,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when n8n or its runtime state cannot
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when n8n or its runtime state cannot
       be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the n8n converge
+    failback_method: Restore or rebuild docker-runtime, then rerun the n8n converge
       from git.
 dependency:
   node:
     id: n8n
     service: n8n
     name: n8n
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: '0151'
@@ -82,7 +82,7 @@ dependency:
     - from: n8n
       to: nginx_edge
       type: soft
-      description: Public reachability for n8n.lv3.org depends on the shared edge
+      description: Public reachability for n8n.example.com depends on the shared edge
         publication path.
     - from: n8n
       to: openbao
@@ -95,7 +95,7 @@ dependency:
       description: n8n stores workflow, credential, and execution state in Postgres.
 health:
   service_name: n8n
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: n8n_runtime
   verify_file: roles/n8n_runtime/tasks/verify.yml
   startup:
@@ -135,7 +135,7 @@ health:
     monitor:
       name: n8n Public Health
       type: http
-      url: https://n8n.lv3.org/healthz
+      url: https://n8n.example.com/healthz
       description: n8n edge-published health endpoint behind the shared NGINX edge
         VM.
       interval: 60

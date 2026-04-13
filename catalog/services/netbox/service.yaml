@@ -5,7 +5,7 @@ service:
   description: Private topology, IPAM, and inventory system for the platform.
   category: data
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://100.64.0.1:8004
   exposure: private-only
@@ -49,17 +49,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when NetBox or its persistent state
-      cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the NetBox
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when NetBox or its persistent state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the NetBox converge
+      from git.
 dependency:
   node:
     id: netbox
     service: netbox
     name: NetBox
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: data
     adr: '0054'
@@ -75,7 +75,7 @@ dependency:
       description: NetBox stores all inventory, topology, and IPAM data in Postgres.
 health:
   service_name: netbox
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: netbox_runtime
   verify_file: roles/netbox_runtime/tasks/verify.yml
   startup:
@@ -115,7 +115,7 @@ health:
       name: NetBox Private
       type: http
       url: http://10.10.10.20:8082/login/
-      description: Private NetBox login surface on docker-runtime-lv3.
+      description: Private NetBox login surface on docker-runtime.
       interval: 60
       retryInterval: 60
       maxretries: 0

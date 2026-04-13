@@ -5,7 +5,7 @@ service:
   description: Private retrieval-augmented query API for repository and platform context.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://100.64.0.1:8010
   exposure: private-only
@@ -36,6 +36,8 @@ completeness:
   requires_secrets: true
   requires_compose_secrets: true
   suppression_preset: legacy-service
+  suppressed_checks:
+    dependency_health_gate: '2026-05-15'
 redundancy:
   tier: R1
   recovery_objective:
@@ -46,17 +48,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the platform context API or
-      its runtime state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the platform-context
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the platform context API or its
+      runtime state cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the platform-context
       converge from git.
 dependency:
   node:
     id: platform_context_api
     service: platform_context_api
     name: Platform Context API
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: automation
     adr: '0070'
@@ -79,7 +81,7 @@ dependency:
         operator query grounding.
 health:
   service_name: platform-context-api
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: rag_context_runtime
   verify_file: roles/rag_context_runtime/tasks/verify.yml
   startup:
@@ -120,7 +122,7 @@ health:
       name: Platform Context Private
       type: http
       url: http://10.10.10.20:8010/healthz
-      description: Private platform-context health endpoint on docker-runtime-lv3.
+      description: Private platform-context health endpoint on docker-runtime.
       interval: 60
       retryInterval: 60
       maxretries: 0

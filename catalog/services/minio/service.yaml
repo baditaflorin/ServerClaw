@@ -6,11 +6,11 @@ service:
     bucket policy reconciliation, and browser-based object inspection.
   category: data
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:9010
-  public_url: https://minio.lv3.org
-  subdomain: minio.lv3.org
+  public_url: https://minio.example.com
+  subdomain: minio.example.com
   exposure: edge-published
   uptime_monitor_name: MinIO Public Health
   health_probe_id: minio
@@ -34,11 +34,11 @@ service:
   environments:
     production:
       status: active
-      url: https://minio.lv3.org
-      subdomain: minio.lv3.org
+      url: https://minio.example.com
+      subdomain: minio.example.com
       notes: The public S3 API remains machine-accessible while the browser console
-        is separately published at minio-console.lv3.org behind the shared edge OIDC
-        gate.
+        is separately published at minio-console.example.com behind the shared edge
+        OIDC gate.
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -57,17 +57,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the shared MinIO object store
-      or its bucket data cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the MinIO converge
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the shared MinIO object store or
+      its bucket data cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the MinIO converge
       from git.
 dependency:
   node:
     id: minio
     service: minio
     name: MinIO
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: data
     adr: '0274'
@@ -85,7 +85,7 @@ dependency:
         its compose environment before bucket and policy reconciliation runs.
 health:
   service_name: minio
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: minio_runtime
   verify_file: roles/minio_runtime/tasks/verify.yml
   startup:
@@ -128,7 +128,7 @@ health:
     monitor:
       name: MinIO Public Health
       type: http
-      url: https://minio.lv3.org/minio/health/live
+      url: https://minio.example.com/minio/health/live
       description: Public MinIO S3 API health endpoint published through the shared
         NGINX edge VM.
       interval: 60
@@ -157,7 +157,7 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://minio.lv3.org/minio/health/live
+    target_url: https://minio.example.com/minio/health/live
     probe_module: http_2xx_follow_redirects
     description: The shared MinIO S3-compatible object-storage API remains reachable
       through the public LV3 edge.

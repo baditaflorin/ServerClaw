@@ -1,0 +1,119 @@
+schema_version: 1.0.0
+service:
+  id: repo_intake
+  name: Repo Intake
+  description: Webhook intake service for repo-managed automation triggers.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime
+  vmid: 120
+  internal_url: http://10.10.10.20:8101
+  public_url: https://repo-intake.example.com
+  subdomain: repo-intake.example.com
+  exposure: edge-published
+  health_probe_id: repo_intake
+  image_catalog_ids: []
+  secret_catalog_ids: []
+  adr: '0373'
+  adr_file: docs/adr/0373-service-registry-and-derived-defaults.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/repo-intake.yml
+  restart_domain: runtime-general
+  mobility_tier: elastic_stateless
+  tags:
+    - webhook
+    - intake
+    - automation
+  environments:
+    production:
+      status: active
+      url: https://repo-intake.example.com
+      subdomain: repo-intake.example.com
+      notes: Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: false
+  requires_secrets: true
+  requires_compose_secrets: false
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+    - git_repository
+    - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the repo-intake runtime cannot be
+      recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the repo-intake
+      converge from git.
+dependency:
+  node:
+    id: repo_intake
+    service: repo_intake
+    name: Repo Intake
+    vm: docker-runtime
+    tier: 2
+    category: automation
+    adr: '0224'
+  outbound_edges:
+    - from: repo_intake
+      to: docker_runtime
+      type: hard
+      description: Repo-intake is hosted on the shared docker-runtime guest.
+    - from: repo_intake
+      to: keycloak
+      type: soft
+      description: repo-intake.example.com is gated behind the shared edge auth boundary
+        and Keycloak-backed browser authentication.
+    - from: repo_intake
+      to: nginx_edge
+      type: soft
+      description: Public access to repo-intake.example.com depends on the shared
+        NGINX edge publication path.
+health:
+  service_name: repo-intake
+  owning_vm: docker-runtime
+  role: repo_intake_runtime
+  verify_file: roles/repo_intake_runtime/tasks/verify.yml
+  startup:
+    kind: http
+    description: Repo-intake startup completes once the private health endpoint responds
+      on the local listener.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8101/health
+    method: GET
+    expected_status:
+      - 200
+  liveness:
+    kind: http
+    description: The repo-intake health endpoint responds on the private runtime listener.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8101/health
+    method: GET
+    expected_status:
+      - 200
+  readiness:
+    kind: http
+    description: The repo-intake dashboard shell renders locally after the runtime
+      and mirrored controller secrets settle.
+    timeout_seconds: 180
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:8101/
+    method: GET
+    expected_status:
+      - 200
+  uptime_kuma:
+    enabled: false
+    reason: Repo-intake is published behind the shared edge auth boundary; the repo-managed
+      local health and dashboard verification path is the authoritative contract.

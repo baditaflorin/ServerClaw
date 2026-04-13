@@ -6,7 +6,7 @@ service:
     monitoring service with repo-governed watch catalogue reconciliation.
   category: observability
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:5000
   exposure: private-only
@@ -20,7 +20,7 @@ service:
   restart_domain: runtime-general-observability
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: movable_singleton
-  dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability
+  dashboard_url: https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability
   tags:
     - change-detection
     - external-dependencies
@@ -30,9 +30,8 @@ service:
     production:
       status: active
       url: http://10.10.10.20:5000
-      notes: The runtime stays private to docker-runtime-lv3; authenticated operator
-        and automation access is brokered through the shared API gateway route at
-        https://api.lv3.org/v1/changedetection.
+      notes: The runtime stays private to docker-runtime; authenticated operator and
+        automation access is brokered through the shared API gateway route at https://api.example.com/v1/changedetection.
 completeness:
   service_type: compose
   requires_subdomain: false
@@ -52,17 +51,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the Changedetection runtime,
-      its watch datastore, or the shared runtime state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Changedetection
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the Changedetection runtime, its
+      watch datastore, or the shared runtime state cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Changedetection
       converge and gateway verification workflow.
 dependency:
   node:
     id: changedetection
     service: changedetection
     name: Changedetection.io
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: observability
     adr: 0280
@@ -72,12 +71,12 @@ dependency:
       type: soft
       description: Authenticated operator and automation access to Changedetection
         is brokered through the governed API gateway route, while the private runtime
-        remains directly verifiable on docker-runtime-lv3.
+        remains directly verifiable on docker-runtime.
     - from: changedetection
       to: docker_runtime
       type: hard
       description: The Changedetection.io runtime and its datastore volume are hosted
-        on docker-runtime-lv3.
+        on docker-runtime.
     - from: changedetection
       to: mattermost
       type: soft
@@ -90,7 +89,7 @@ dependency:
         through the governed ntfy channel.
 health:
   service_name: changedetection
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: changedetection_runtime
   verify_file: roles/changedetection_runtime/tasks/verify.yml
   startup:
@@ -106,7 +105,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: Changedetection keeps serving the private root page on docker-runtime-lv3.
+    description: Changedetection keeps serving the private root page on docker-runtime.
     timeout_seconds: 180
     retries: 24
     delay_seconds: 5
@@ -146,7 +145,7 @@ data:
     access_role: platform-operator
     pii_risk: low
     locations:
-      - Docker volume changedetection-datastore on docker-runtime-lv3
+      - Docker volume changedetection-datastore on docker-runtime
       - /etc/lv3/changedetection/watch-catalog.json
       - /opt/changedetection/watch-sync-report.json
     notes: Changedetection stores repo-managed watch metadata, snapshots, diff history,
@@ -159,5 +158,5 @@ slos:
     window_days: 30
     target_url: http://10.10.10.20:5000/
     probe_module: http_2xx_follow_redirects
-    description: The private Changedetection.io runtime remains reachable on docker-runtime-lv3
+    description: The private Changedetection.io runtime remains reachable on docker-runtime
       for governed upstream release, advisory, and API change monitoring.

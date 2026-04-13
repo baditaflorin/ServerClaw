@@ -1,0 +1,117 @@
+schema_version: 1.0.0
+service:
+  id: neko
+  name: Neko Remote Desktop
+  description: WebRTC-based interactive remote desktop for operator browser debugging
+    and exploration of platform integrations.
+  category: automation
+  lifecycle_status: active
+  vm: runtime-comms
+  vmid: 121
+  internal_url: http://10.10.10.21:8080
+  public_url: https://browser.example.com
+  subdomain: browser.example.com
+  exposure: edge-published
+  uptime_monitor_name: Neko Browser
+  health_probe_id: neko
+  adr: 0380
+  adr_file: docs/adr/0380-neko-for-operator-remote-browser-access.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/neko.yml
+  restart_domain: runtime-comms-webrtc
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: anchor
+  tags:
+    - interactive
+    - debugging
+    - webrtc
+    - remote-access
+  environments:
+    production:
+      status: active
+      url: https://browser.example.com
+      subdomain: browser.example.com
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: true
+  requires_secrets: true
+  requires_compose_secrets: true
+  suppression_preset: legacy-service
+  suppressed_checks: {}
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 120
+    rpo_minutes: 1440
+  backup_sources:
+    - git_repository
+    - pbs_vm_121
+  standby:
+    kind: cold
+    location: runtime-comms
+    failover_trigger: Restore runtime-comms when Neko or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild runtime-comms, then rerun the Neko converge
+      from git.
+dependency:
+  node:
+    id: neko
+    service: neko
+    name: Neko Remote Desktop
+    vm: runtime-comms
+    tier: 2
+    category: automation
+    adr: 0380
+  outbound_edges:
+    - from: neko
+      to: keycloak
+      type: soft
+      description: Neko operator access is controlled through Keycloak OIDC client
+        configuration for Tailscale headscale management network.
+    - from: neko
+      to: nginx_edge
+      type: hard
+      description: Neko WebRTC signalling is proxied through the shared NGINX edge
+        at browser.example.com with TLS termination and WebSocket upgrade support.
+health:
+  service_name: neko
+  owning_vm: runtime-comms
+  role: neko_runtime
+  verify_file: collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: Neko responds on its local WebRTC signalling health endpoint.
+    timeout_seconds: 30
+    retries: 10
+    delay_seconds: 3
+    url: http://127.0.0.1:8080/
+    method: GET
+    expected_status:
+      - 200
+  readiness:
+    kind: http
+    description: Neko WebRTC signalling is ready to accept WebSocket connections after
+      Docker container health checks pass.
+    timeout_seconds: 30
+    retries: 10
+    delay_seconds: 3
+    url: http://127.0.0.1:8080/
+    method: GET
+    expected_status:
+      - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Neko Browser
+      type: http
+      url: https://browser.example.com
+      description: Public Neko browser entrypoint published through the shared edge.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 5
+      accepted_statuscodes:
+        - 200-299
+    reason: Neko is operator-facing and published through the edge at browser.example.com;
+      public health monitoring is essential for remote access availability.

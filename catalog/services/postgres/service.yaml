@@ -6,10 +6,10 @@ service:
     future application state.
   category: data
   lifecycle_status: active
-  vm: postgres-lv3
+  vm: postgres
   vmid: 150
-  internal_url: postgres://database.lv3.org:5432
-  subdomain: database.lv3.org
+  internal_url: postgres://database.example.com:5432
+  subdomain: database.example.com
   exposure: private-only
   uptime_monitor_name: PostgreSQL VIP Port
   health_probe_id: postgres
@@ -20,19 +20,19 @@ service:
   restart_domain: dedicated-postgres-core
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-postgres
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
+  dashboard_url: https://grafana.example.com/d/lv3-vm-postgres/lv3-vm-postgres
   redundancy:
     tier: R2
     rto_target: 60s planned switchover, 5m unplanned failover
     rpo_target: 0s synchronous replication target
     backup_source: backup_pbs
-    standby_location: postgres-replica-lv3 on the same Proxmox host
-    failover_trigger: Patroni health loss on postgres-lv3 or operator-initiated switchover.
+    standby_location: postgres-replica on the same Proxmox host
+    failover_trigger: Patroni health loss on postgres or operator-initiated switchover.
     failback_method: Reinitialize the former primary as a Patroni standby before a
       planned switchover back.
     standby:
       mode: warm
-      vm: postgres-replica-lv3
+      vm: postgres-replica
       vmid: 151
       reservation:
         resources:
@@ -42,14 +42,14 @@ service:
         storage_class: local-lvm
         required_network_attachment: vmbr10
       placement:
-        primary_compose_project: systemd:patroni-postgres-lv3
-        standby_compose_project: systemd:patroni-postgres-replica-lv3
-        primary_namespace: guest:postgres-lv3:patroni
-        standby_namespace: guest:postgres-replica-lv3:patroni
+        primary_compose_project: systemd:patroni-postgres
+        standby_compose_project: systemd:patroni-postgres-replica
+        primary_namespace: guest:postgres:patroni
+        standby_namespace: guest:postgres-replica:patroni
         primary_data_paths:
-          - guest:postgres-lv3:/var/lib/postgresql
+          - guest:postgres:/var/lib/postgresql
         standby_data_paths:
-          - guest:postgres-replica-lv3:/var/lib/postgresql
+          - guest:postgres-replica:/var/lib/postgresql
       failure_domain_honesty: This warm standby protects against guest-level corruption
         and software faults, but it does not cover loss of the single Proxmox host.
   tags:
@@ -60,8 +60,8 @@ service:
   environments:
     production:
       status: active
-      url: postgres://database.lv3.org:5432
-      subdomain: database.lv3.org
+      url: postgres://database.example.com:5432
+      subdomain: database.example.com
 completeness:
   service_type: vm-service
   requires_subdomain: true
@@ -79,9 +79,9 @@ redundancy:
     - pbs_vm_150
   standby:
     kind: warm
-    location: postgres-replica-lv3
-    failover_trigger: Promote postgres-replica-lv3 through the documented Patroni
-      failover path when postgres-lv3 or the current leader becomes unavailable.
+    location: postgres-replica
+    failover_trigger: Promote postgres-replica through the documented Patroni failover
+      path when postgres or the current leader becomes unavailable.
     failback_method: Rebuild the old primary as a replica, let it resync, and only
       then move the writable VIP back if a planned failback is required.
   rehearsal:
@@ -98,8 +98,8 @@ redundancy:
           path were both unavailable, so no data-loss window was exercised.
         health_verification: VM 151 is absent from `qm list`, `/etc/patroni` on VM
           150 only contains template inputs, both `patroni` and `keepalived` are inactive
-          on postgres-lv3, and the Proxmox host can open `10.10.10.50:5432` but not
-          the expected VIP `10.10.10.55:5432`.
+          on postgres, and the Proxmox host can open `10.10.10.50:5432` but not the
+          expected VIP `10.10.10.55:5432`.
         rollback_result: Not applicable because no promotion or failback was performed.
         evidence_ref: receipts/live-applies/2026-03-27-adr-0188-postgres-rehearsal-evidence.md
 dependency:
@@ -107,14 +107,14 @@ dependency:
     id: postgres
     service: postgres
     name: Postgres
-    vm: postgres-lv3
+    vm: postgres
     tier: 1
     category: data
     adr: '0026'
   outbound_edges: []
 health:
   service_name: postgres
-  owning_vm: postgres-lv3
+  owning_vm: postgres
   role: postgres_ha
   verify_file: roles/postgres_ha/tasks/verify.yml
   liveness:

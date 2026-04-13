@@ -6,7 +6,7 @@ service:
     tailnet.
   category: automation
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: http://100.64.0.1:8005
   exposure: private-only
@@ -61,17 +61,17 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when Windmill or its runtime state
-      cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Windmill
-      converge from git.
+    location: runtime-control
+    failover_trigger: Restore runtime-control when Windmill or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild runtime-control, then rerun the Windmill converge
+      from git.
 dependency:
   node:
     id: windmill
     service: windmill
     name: Windmill
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: '0044'
@@ -93,7 +93,7 @@ dependency:
         Postgres.
 health:
   service_name: windmill
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: windmill_runtime
   verify_file: roles/windmill_runtime/tasks/verify.yml
   liveness:
@@ -123,7 +123,7 @@ health:
       name: Windmill Private
       type: http
       url: http://10.10.10.92:8000/api/version
-      description: Private Windmill API version endpoint on runtime-control-lv3.
+      description: Private Windmill API version endpoint on runtime-control.
       interval: 60
       retryInterval: 60
       maxretries: 0

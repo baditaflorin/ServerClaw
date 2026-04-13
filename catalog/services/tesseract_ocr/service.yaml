@@ -6,7 +6,7 @@ service:
     Tika returns no embedded text.
   category: data
   lifecycle_status: active
-  vm: runtime-ai-lv3
+  vm: runtime-ai
   vmid: 190
   internal_url: http://10.10.10.90:3008
   exposure: private-only
@@ -19,7 +19,7 @@ service:
   restart_domain: runtime-ai-document-extraction
   api_contract_ref: config/contracts/runtime-pools/runtime-ai/tesseract-ocr.openapi.yaml
   mobility_tier: burst_batch
-  dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability
+  dashboard_url: https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability
   tags:
     - ocr
     - document-extraction
@@ -29,9 +29,8 @@ service:
     production:
       status: active
       url: http://10.10.10.90:3008
-      notes: Tesseract OCR stays private on runtime-ai-lv3 and is intended as the
-        second-stage fallback when Tika returns no text for image-like documents or
-        scanned PDFs.
+      notes: Tesseract OCR stays private on runtime-ai and is intended as the second-stage
+        fallback when Tika returns no text for image-like documents or scanned PDFs.
 completeness:
   service_type: compose
   requires_subdomain: false
@@ -52,17 +51,17 @@ redundancy:
     - pbs_vm_190
   standby:
     kind: cold
-    location: runtime-ai-lv3
-    failover_trigger: Restore runtime-ai-lv3 when Tesseract OCR or the runtime-ai
-      document-extraction pool state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-ai-lv3, then rerun the Tika and Tesseract
+    location: runtime-ai
+    failover_trigger: Restore runtime-ai when Tesseract OCR or the runtime-ai document-extraction
+      pool state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-ai, then rerun the Tika and Tesseract
       OCR converges from git.
 dependency:
   node:
     id: tesseract_ocr
     service: tesseract_ocr
     name: Tesseract OCR
-    vm: runtime-ai-lv3
+    vm: runtime-ai
     tier: 2
     category: data
     adr: 0286
@@ -71,7 +70,7 @@ dependency:
       to: docker_runtime
       type: hard
       description: The Tesseract OCR runtime and its repo-built container image are
-        hosted on runtime-ai-lv3.
+        hosted on runtime-ai.
     - from: tesseract_ocr
       to: tika
       type: soft
@@ -79,7 +78,7 @@ dependency:
         to Tesseract OCR when Tika returns no embedded text.
 health:
   service_name: tesseract-ocr
-  owning_vm: runtime-ai-lv3
+  owning_vm: runtime-ai
   role: tesseract_ocr_runtime
   verify_file: roles/tesseract_ocr_runtime/tasks/verify.yml
   startup:
@@ -126,7 +125,7 @@ health:
     success_rc: 0
   uptime_kuma:
     enabled: false
-    reason: The Tesseract OCR runtime remains private to runtime-ai-lv3 and is verified
+    reason: The Tesseract OCR runtime remains private to runtime-ai and is verified
       through repo-managed readiness probes and helper-path checks.
 data:
   - id: tesseract-ocr-transient-request-buffers
@@ -139,8 +138,8 @@ data:
     pii_risk: medium
     locations:
       - Transient uploaded image and PDF buffers inside the tesseract-ocr container
-        on docker-runtime-lv3
-      - Ephemeral rendered page images created during PDF OCR on docker-runtime-lv3
+        on docker-runtime
+      - Ephemeral rendered page images created during PDF OCR on docker-runtime
     notes: The OCR runtime is stateless and discards uploaded source files, rendered
       page images, and extracted text after each synchronous request completes.
 slos:
@@ -151,5 +150,5 @@ slos:
     window_days: 30
     target_url: http://10.10.10.90:3008/healthz
     probe_module: http_2xx_follow_redirects
-    description: The private Tesseract OCR runtime remains reachable on runtime-ai-lv3
+    description: The private Tesseract OCR runtime remains reachable on runtime-ai
       for scanned-image and image-only document fallback extraction.

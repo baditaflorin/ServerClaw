@@ -6,11 +6,11 @@ service:
     a tailnet-only hostname.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8881
-  public_url: http://search.lv3.org
-  subdomain: search.lv3.org
+  public_url: http://search.example.com
+  subdomain: search.example.com
   exposure: private-only
   health_probe_id: searxng
   image_catalog_ids:
@@ -33,8 +33,8 @@ service:
   environments:
     production:
       status: active
-      url: http://search.lv3.org
-      subdomain: search.lv3.org
+      url: http://search.example.com
+      subdomain: search.example.com
       notes: Tailnet-only hostname published on the Proxmox host Tailscale IP.
 completeness:
   service_type: compose
@@ -53,24 +53,24 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when SearXNG or its runtime state
-      cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the SearXNG
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when SearXNG or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the SearXNG converge
+      from git.
 dependency:
   node:
     id: searxng
     service: searxng
     name: SearXNG
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: automation
     adr: 0148
   outbound_edges: []
 health:
   service_name: searxng
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: searxng_runtime
   verify_file: roles/searxng_runtime/tasks/verify.yml
   liveness:

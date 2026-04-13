@@ -6,7 +6,7 @@
 # ============================================================================
 repository: proxmox_reference_platform
 schema_version: 1
-generated: '2026-04-11'
+generated: '2026-04-14'
 source_root: docs/discovery/repo-structure
 pack_manifest: docs/discovery/onboarding-packs.yaml
 purpose: Generated root repository discovery entrypoint. Read this first for quick orientation, then open the deeper section files under docs/discovery/repo-structure/ when you need detail.
@@ -46,7 +46,7 @@ section_index:
     summary: Ansible, IaC, policy, inventory, scripts, and tests that define and validate the platform.
     when_to_read: Use this section when changing provisioning, topology, repo automation, or validation logic.
     entry_counts:
-      directories: 14
+      directories: 15
   - id: runtime-and-delivery
     title: Runtime Packaging And Delivery
     file: docs/discovery/repo-structure/runtime-and-delivery.yaml

@@ -6,11 +6,11 @@ service:
     public LV3 pages.
   category: observability
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8016
-  public_url: https://analytics.lv3.org
-  subdomain: analytics.lv3.org
+  public_url: https://analytics.example.com
+  subdomain: analytics.example.com
   exposure: edge-published
   uptime_monitor_name: Plausible Public Health
   health_probe_id: plausible
@@ -41,8 +41,8 @@ service:
   environments:
     production:
       status: active
-      url: https://analytics.lv3.org
-      subdomain: analytics.lv3.org
+      url: https://analytics.example.com
+      subdomain: analytics.example.com
       notes: Plausible Community Edition does not expose service-native OIDC in the
         verified upstream path, so browser access is gated at the shared edge and
         repo-managed site tracking is injected only on the declared public hostnames.
@@ -66,10 +66,10 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Plausible, its bundled databases,
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Plausible, its bundled databases,
       or its analytics publication state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, rerun the Plausible converge
+    failback_method: Restore or rebuild docker-runtime, rerun the Plausible converge
       from git, and replay the synthetic tracker verification before resuming operator
       use.
 dependency:
@@ -77,7 +77,7 @@ dependency:
     id: plausible
     service: plausible
     name: Plausible Analytics
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: observability
     adr: 0283
@@ -86,7 +86,7 @@ dependency:
       to: docker_runtime
       type: hard
       description: The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse
-        analytics store run on docker-runtime-lv3.
+        analytics store run on docker-runtime.
     - from: plausible
       to: mail_platform
       type: soft
@@ -95,7 +95,7 @@ dependency:
     - from: plausible
       to: nginx_edge
       type: soft
-      description: Dashboard publication at analytics.lv3.org and tracker injection
+      description: Dashboard publication at analytics.example.com and tracker injection
         on selected public hostnames depend on the shared NGINX edge publication path.
     - from: plausible
       to: openbao
@@ -104,13 +104,13 @@ dependency:
         into its compose environment before the main container launches.
 health:
   service_name: plausible
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: plausible_runtime
   verify_file: roles/plausible_runtime/tasks/verify.yml
   startup:
     kind: http
     description: Plausible startup completes once the local /api/health endpoint returns
-      200 on docker-runtime-lv3.
+      200 on docker-runtime.
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
@@ -120,7 +120,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: The local Plausible liveness endpoint continues to answer on docker-runtime-lv3.
+    description: The local Plausible liveness endpoint continues to answer on docker-runtime.
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
@@ -136,7 +136,7 @@ health:
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
-    url: https://analytics.lv3.org/api/system/health/ready
+    url: https://analytics.example.com/api/system/health/ready
     method: GET
     expected_status:
       - 200
@@ -152,7 +152,7 @@ health:
     monitor:
       name: Plausible Public Health
       type: http
-      url: https://analytics.lv3.org/api/system/health/ready
+      url: https://analytics.example.com/api/system/health/ready
       description: Public Plausible readiness endpoint published through the shared
         NGINX edge VM.
       interval: 60
@@ -193,7 +193,7 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://analytics.lv3.org/api/system/health/ready
+    target_url: https://analytics.example.com/api/system/health/ready
     probe_module: http_2xx_follow_redirects
     description: The public Plausible readiness endpoint remains reachable for dashboard
       access, tracker delivery, and synthetic event verification.

@@ -6,7 +6,7 @@ service:
     and Office-to-PDF conversion workflows.
   category: automation
   lifecycle_status: active
-  vm: runtime-ai-lv3
+  vm: runtime-ai
   vmid: 190
   internal_url: http://10.10.10.90:3007
   exposure: private-only
@@ -20,7 +20,7 @@ service:
   restart_domain: runtime-ai-document-extraction
   api_contract_ref: config/contracts/runtime-pools/runtime-ai/gotenberg.openapi.yaml
   mobility_tier: burst_batch
-  dashboard_url: https://grafana.lv3.org/d/lv3-gotenberg/lv3-gotenberg
+  dashboard_url: https://grafana.example.com/d/lv3-gotenberg/lv3-gotenberg
   tags:
     - documents
     - pdf
@@ -30,8 +30,8 @@ service:
     production:
       status: active
       url: http://10.10.10.90:3007
-      notes: The runtime stays private on runtime-ai-lv3; authenticated operator and
-        automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/gotenberg.
+      notes: The runtime stays private on runtime-ai; authenticated operator and automation
+        access is brokered through the shared API gateway route at https://api.example.com/v1/gotenberg.
 completeness:
   service_type: compose
   requires_subdomain: false
@@ -51,17 +51,17 @@ redundancy:
     - pbs_vm_190
   standby:
     kind: cold
-    location: runtime-ai-lv3
-    failover_trigger: Restore runtime-ai-lv3 when Gotenberg or the runtime-ai document-extraction
+    location: runtime-ai
+    failover_trigger: Restore runtime-ai when Gotenberg or the runtime-ai document-extraction
       pool state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-ai-lv3, then rerun the Gotenberg converge
+    failback_method: Restore or rebuild runtime-ai, then rerun the Gotenberg converge
       and gateway verification workflow.
 dependency:
   node:
     id: gotenberg
     service: gotenberg
     name: Gotenberg
-    vm: runtime-ai-lv3
+    vm: runtime-ai
     tier: 2
     category: automation
     adr: 0278
@@ -76,10 +76,10 @@ dependency:
       to: docker_runtime
       type: hard
       description: The Gotenberg Chromium and LibreOffice renderers are hosted on
-        runtime-ai-lv3.
+        runtime-ai.
 health:
   service_name: gotenberg
-  owning_vm: runtime-ai-lv3
+  owning_vm: runtime-ai
   role: gotenberg_runtime
   verify_file: roles/gotenberg_runtime/tasks/verify.yml
   startup:
@@ -121,8 +121,8 @@ health:
     success_rc: 0
   uptime_kuma:
     enabled: false
-    reason: The Gotenberg runtime stays private to runtime-ai-lv3 and is verified
-      through repo-managed readiness probes plus authenticated API gateway checks.
+    reason: The Gotenberg runtime stays private to runtime-ai and is verified through
+      repo-managed readiness probes plus authenticated API gateway checks.
 data:
   - id: gotenberg-transient-render-buffers
     service: gotenberg
@@ -133,9 +133,9 @@ data:
     access_role: platform-operator
     pii_risk: medium
     locations:
-      - Transient request and response buffers inside the gotenberg container on docker-runtime-lv3
+      - Transient request and response buffers inside the gotenberg container on docker-runtime
       - Ephemeral temporary files created during Chromium and LibreOffice conversions
-        on docker-runtime-lv3
+        on docker-runtime
     notes: Gotenberg is stateless and does not persist source documents or rendered
       PDFs after each synchronous conversion finishes.
 slos:
@@ -147,4 +147,4 @@ slos:
     target_url: http://10.10.10.90:3007/health
     probe_module: http_2xx_follow_redirects
     description: The private Gotenberg document rendering API remains reachable on
-      runtime-ai-lv3 for synchronous PDF conversion workflows.
+      runtime-ai for synchronous PDF conversion workflows.

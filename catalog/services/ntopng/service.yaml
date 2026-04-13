@@ -6,7 +6,7 @@ service:
     network.
   category: observability
   lifecycle_status: active
-  vm: proxmox_florin
+  vm: proxmox-host
   internal_url: http://100.64.0.1:3001
   exposure: private-only
   health_probe_id: ntopng
@@ -52,14 +52,14 @@ dependency:
     id: ntopng
     service: ntopng
     name: ntopng
-    vm: proxmox_florin
+    vm: proxmox-host
     tier: 1
     category: observability
     adr: 0059
   outbound_edges: []
 health:
   service_name: ntopng
-  owning_vm: proxmox_florin
+  owning_vm: proxmox-host
   role: proxmox_ntopng
   verify_file: roles/proxmox_ntopng/tasks/verify.yml
   liveness:

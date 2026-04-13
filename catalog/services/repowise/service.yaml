@@ -1,0 +1,109 @@
+schema_version: 1.0.0
+service:
+  id: repowise
+  name: Repowise Semantic Code Search
+  description: Local semantic code search service over the git repository using Ollama
+    embeddings and Qdrant vector storage.
+  category: automation
+  lifecycle_status: active
+  vm: docker-runtime
+  vmid: 120
+  internal_url: http://10.10.10.20:7070
+  public_url: https://repowise.example.com
+  subdomain: repowise.example.com
+  exposure: edge-published
+  adr: '0346'
+  adr_file: docs/adr/0346-repowise-semantic-search.md
+  runbook: docs/runbooks/configure-repowise.md
+  runtime_pool: runtime-general
+  deployment_surface: playbooks/services/repowise.yml
+  restart_domain: runtime-general-automation
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+  mobility_tier: movable_singleton
+  health_probe_id: repowise
+  tags:
+    - search
+    - semantic
+    - code
+    - local
+    - ollama
+    - qdrant
+  environments:
+    production:
+      status: active
+      url: https://repowise.example.com
+      subdomain: repowise.example.com
+      notes: Nightly index rebuild at 03:00 UTC keeps semantic search current with
+        main branch commits.
+completeness:
+  service_type: compose
+  requires_subdomain: true
+  requires_oidc: true
+  requires_secrets: false
+  requires_compose_secrets: false
+  suppressed_checks:
+    grafana_dashboard: '2027-01-01'
+    alert_rules: '2027-01-01'
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 1440
+    rpo_minutes: 10080
+  backup_sources:
+    - git_repository
+    - pbs_vm_120
+  standby:
+    kind: cold
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the Repowise semantic search service
+      cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Repowise converge
+      and rebuild the vector index from the git repository.
+dependency:
+  node:
+    id: repowise
+    service: repowise
+    name: Repowise Semantic Code Search
+    vm: docker-runtime
+    tier: 1
+    category: automation
+    adr: '0346'
+  outbound_edges: []
+health:
+  service_name: repowise
+  owning_vm: docker-runtime
+  role: null
+  liveness:
+    kind: http
+    description: Repowise semantic search service responds on its local health endpoint.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:7070/health
+    method: GET
+    expected_status:
+      - 200
+  readiness:
+    kind: http
+    description: Repowise search endpoint accepts queries after the vector index is
+      loaded.
+    timeout_seconds: 120
+    retries: 24
+    delay_seconds: 5
+    url: http://127.0.0.1:7070/health
+    method: GET
+    expected_status:
+      - 200
+  uptime_kuma:
+    enabled: true
+    monitor:
+      name: Repowise Private
+      type: http
+      url: http://10.10.10.20:7070/health
+      description: Private Repowise health endpoint on docker-runtime.
+      interval: 60
+      retryInterval: 60
+      maxretries: 0
+      maxredirects: 10
+      accepted_statuscodes:
+        - 200-299

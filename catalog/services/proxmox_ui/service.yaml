@@ -5,10 +5,10 @@ service:
   description: Private Proxmox management interface for host and guest administration.
   category: access
   lifecycle_status: active
-  vm: proxmox_florin
+  vm: proxmox-host
   internal_url: https://100.64.0.1:8006
-  public_url: https://proxmox.lv3.org
-  subdomain: proxmox.lv3.org
+  public_url: https://proxmox.example.com
+  subdomain: proxmox.example.com
   exposure: informational-only
   uptime_monitor_name: Proxmox UI Port
   health_probe_id: proxmox_ui
@@ -28,8 +28,8 @@ service:
   environments:
     production:
       status: active
-      url: https://proxmox.lv3.org
-      subdomain: proxmox.lv3.org
+      url: https://proxmox.example.com
+      subdomain: proxmox.example.com
 completeness:
   service_type: vm-service
   requires_subdomain: true
@@ -57,14 +57,14 @@ dependency:
     id: proxmox_ui
     service: proxmox_ui
     name: Proxmox UI
-    vm: proxmox_florin
+    vm: proxmox-host
     tier: 1
     category: infrastructure
     adr: '0004'
   outbound_edges: []
 health:
   service_name: proxmox-ui
-  owning_vm: proxmox_florin
+  owning_vm: proxmox-host
   role: null
   verify_file: null
   liveness:

@@ -6,11 +6,11 @@ service:
     runbook launchers, and deployment streaming.
   category: access
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8092
-  public_url: https://ops.lv3.org
-  subdomain: ops.lv3.org
+  public_url: https://ops.example.com
+  subdomain: ops.example.com
   exposure: edge-published
   health_probe_id: ops_portal
   adr: 0093
@@ -28,14 +28,14 @@ service:
   environments:
     production:
       status: active
-      url: https://ops.lv3.org
-      subdomain: ops.lv3.org
+      url: https://ops.example.com
+      subdomain: ops.example.com
       notes: Interactive runtime now ships from the repo, but live cutover from the
         static portal still requires apply from main.
     staging:
       status: planned
-      url: https://ops.staging.lv3.org
-      subdomain: ops.staging.lv3.org
+      url: https://ops.staging.example.com
+      subdomain: ops.staging.example.com
       notes: Planned staging portal for the interactive runtime.
 completeness:
   service_type: nginx-plugin
@@ -54,17 +54,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the ops portal runtime cannot
-      be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then regenerate and redeploy
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the ops portal runtime cannot be
+      recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then regenerate and redeploy
       the ops portal from git.
 dependency:
   node:
     id: ops_portal
     service: ops_portal
     name: Ops Portal
-    vm: nginx-lv3
+    vm: nginx
     tier: 4
     category: automation
     adr: '0074'
@@ -77,15 +77,15 @@ dependency:
     - from: ops_portal
       to: keycloak
       type: hard
-      description: ops.lv3.org is gated behind oauth2-proxy and Keycloak-backed browser
-        authentication.
+      description: ops.example.com is gated behind oauth2-proxy and Keycloak-backed
+        browser authentication.
     - from: ops_portal
       to: nginx_edge
       type: hard
-      description: The generated portal is published as static content on nginx-lv3.
+      description: The generated portal is published as static content on nginx.
 health:
   service_name: ops-portal
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: ops_portal_runtime
   verify_file: roles/ops_portal_runtime/tasks/verify.yml
   liveness:
@@ -115,7 +115,7 @@ health:
     monitor:
       name: Ops Portal Public
       type: http
-      url: https://ops.lv3.org/health
+      url: https://ops.example.com/health
       description: Interactive ops portal health endpoint published through the NGINX
         edge VM.
       interval: 60

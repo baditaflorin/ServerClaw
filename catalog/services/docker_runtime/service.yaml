@@ -5,11 +5,11 @@ service:
   description: Primary runtime for containerised control-plane and platform services.
   category: infrastructure
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: ssh://ops@10.10.10.20
-  public_url: https://docker.lv3.org
-  subdomain: docker.lv3.org
+  public_url: https://docker.example.com
+  subdomain: docker.example.com
   exposure: informational-only
   health_probe_id: docker_runtime
   adr: '0023'
@@ -19,7 +19,7 @@ service:
   restart_domain: runtime-general-core
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3
+  dashboard_url: https://grafana.example.com/d/lv3-vm-docker-runtime/lv3-vm-docker-runtime
   tags:
     - docker
     - runtime
@@ -27,8 +27,8 @@ service:
   environments:
     production:
       status: active
-      url: https://docker.lv3.org
-      subdomain: docker.lv3.org
+      url: https://docker.example.com
+      subdomain: docker.example.com
 completeness:
   service_type: vm-service
   requires_subdomain: true
@@ -46,29 +46,29 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the runtime VM or its shared
-      service state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then replay the required
-      service converges from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the runtime VM or its shared service
+      state cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then replay the required service
+      converges from git.
 dependency:
   node:
     id: docker_runtime
     service: docker_runtime
     name: Docker Runtime VM
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: infrastructure
     adr: '0023'
   outbound_edges: []
 health:
   service_name: docker-runtime
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: docker_runtime
   verify_file: roles/docker_runtime/tasks/verify.yml
   liveness:
     kind: systemd
-    description: The Docker daemon is active on docker-runtime-lv3.
+    description: The Docker daemon is active on docker-runtime.
     timeout_seconds: 30
     retries: 1
     delay_seconds: 0

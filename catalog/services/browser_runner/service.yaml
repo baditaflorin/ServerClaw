@@ -6,7 +6,7 @@ service:
     screenshots, and PDF capture.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8096
   exposure: private-only
@@ -19,7 +19,7 @@ service:
   restart_domain: runtime-ai-execution
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
   mobility_tier: burst_batch
-  dashboard_url: https://grafana.lv3.org/d/lv3-browser-runner/lv3-browser-runner
+  dashboard_url: https://grafana.example.com/d/lv3-browser-runner/lv3-browser-runner
   tags:
     - browser
     - playwright
@@ -50,17 +50,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the browser-runner runtime,
-      its Playwright image build, or its artifact path cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the browser-runner
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the browser-runner runtime, its
+      Playwright image build, or its artifact path cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the browser-runner
       converge and smoke verification from git.
 dependency:
   node:
     id: browser_runner
     service: browser_runner
     name: Browser Runner
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: '0261'
@@ -73,10 +73,10 @@ dependency:
     - from: browser_runner
       to: docker_runtime
       type: hard
-      description: The private Playwright browser runner is hosted on docker-runtime-lv3.
+      description: The private Playwright browser runner is hosted on docker-runtime.
 health:
   service_name: browser-runner
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: browser_runner_runtime
   verify_file: roles/browser_runner_runtime/tasks/verify.yml
   liveness:
@@ -107,7 +107,7 @@ health:
       name: Browser Runner Private
       type: http
       url: http://10.10.10.20:8096/healthz
-      description: Private browser-runner health endpoint on docker-runtime-lv3.
+      description: Private browser-runner health endpoint on docker-runtime.
       interval: 60
       retryInterval: 60
       maxretries: 0
@@ -137,5 +137,5 @@ slos:
     window_days: 30
     target_url: http://10.10.10.20:8096/healthz
     probe_module: http_2xx_follow_redirects
-    description: The private browser runner remains reachable on docker-runtime-lv3
-      for governed Playwright session execution.
+    description: The private browser runner remains reachable on docker-runtime for
+      governed Playwright session execution.

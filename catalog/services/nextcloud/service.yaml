@@ -6,11 +6,11 @@ service:
     DAV-backed calendars, contacts, and tasks.
   category: data
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8084
-  public_url: https://cloud.lv3.org
-  subdomain: cloud.lv3.org
+  public_url: https://cloud.example.com
+  subdomain: cloud.example.com
   exposure: edge-published
   uptime_monitor_name: Nextcloud Public Status
   health_probe_id: nextcloud
@@ -37,8 +37,8 @@ service:
   environments:
     production:
       status: active
-      url: https://cloud.lv3.org
-      subdomain: cloud.lv3.org
+      url: https://cloud.example.com
+      subdomain: cloud.example.com
       notes: Published through the shared NGINX edge while Nextcloud itself enforces
         session, login, and DAV discovery behavior.
 completeness:
@@ -62,17 +62,17 @@ redundancy:
     - pbs_vm_150
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Nextcloud or its runtime state
-      cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Nextcloud
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Nextcloud or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Nextcloud converge
+      from git.
 dependency:
   node:
     id: nextcloud
     service: nextcloud
     name: Nextcloud
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: data
     adr: '0260'
@@ -80,7 +80,7 @@ dependency:
     - from: nextcloud
       to: nginx_edge
       type: soft
-      description: Public reachability for cloud.lv3.org and DAV discovery redirects
+      description: Public reachability for cloud.example.com and DAV discovery redirects
         depends on the shared NGINX edge publication path.
     - from: nextcloud
       to: openbao
@@ -93,7 +93,7 @@ dependency:
       description: Nextcloud stores account, sharing, file, and app metadata in Postgres.
 health:
   service_name: nextcloud
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: nextcloud_runtime
   verify_file: roles/nextcloud_runtime/tasks/verify.yml
   startup:
@@ -109,7 +109,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: The local Nextcloud status endpoint responds on docker-runtime-lv3.
+    description: The local Nextcloud status endpoint responds on docker-runtime.
     timeout_seconds: 300
     retries: 60
     delay_seconds: 5
@@ -124,7 +124,7 @@ health:
     timeout_seconds: 300
     retries: 60
     delay_seconds: 5
-    url: https://cloud.lv3.org/status.php
+    url: https://cloud.example.com/status.php
     method: GET
     expected_status:
       - 200
@@ -140,7 +140,7 @@ health:
     monitor:
       name: Nextcloud Public Status
       type: http
-      url: https://cloud.lv3.org/status.php
+      url: https://cloud.example.com/status.php
       description: Public Nextcloud status endpoint published through the shared NGINX
         edge VM.
       interval: 60
@@ -180,7 +180,7 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://cloud.lv3.org/status.php
+    target_url: https://cloud.example.com/status.php
     probe_module: http_2xx_follow_redirects
     description: The public Nextcloud status endpoint remains reachable for the canonical
       personal file and DAV data plane.

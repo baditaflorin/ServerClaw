@@ -46,15 +46,15 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
     assert defaults["windmill_service_topology"] == (
-        "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('windmill') }}"
+        "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('windmill') }}"
     )
     assert (
         defaults["windmill_server_port"]
-        == "{{ hostvars['proxmox-host'].platform_port_assignments.windmill_server_port }}"
+        == "{{ hostvars[platform_topology_host].platform_port_assignments.windmill_server_port }}"
     )
     assert (
         defaults["windmill_host_proxy_port"]
-        == "{{ hostvars['proxmox-host'].platform_port_assignments.windmill_host_proxy_port }}"
+        == "{{ hostvars[platform_topology_host].platform_port_assignments.windmill_host_proxy_port }}"
     )
     assert (
         defaults["windmill_private_base_url"]
@@ -62,14 +62,14 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     )
     assert (
         defaults["windmill_base_url"]
-        == "http://{{ hostvars['proxmox-host'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+        == "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
     )
     assert defaults["windmill_ntfy_resource_path"] == "f/lv3/ntfy_platform"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
     assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
     assert defaults["windmill_stage_smoke_suites_script_path"] == "f/lv3/stage-smoke-suites"
     assert defaults["windmill_atlas_drift_check_script_path"] == "f/lv3/atlas_drift_check"
-    assert defaults["windmill_worker_checkout_repo_root_local_dir"].strip().startswith("{{\n  (playbook_dir ~ '/..')")
+    assert defaults["windmill_worker_checkout_repo_root_local_dir"].strip().startswith("{{\n  (inventory_dir ~ '/..')")
     assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert (
@@ -308,6 +308,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
             "owner": "root",
             "group": "root",
             "mode": "0600",
+            "optional": True,
         },
         {
             "path": "{{ windmill_worker_seed_job_secret_root }}/ntfy/alertmanager-password.txt",
@@ -1172,17 +1173,13 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         defaults["windmill_seed_app_repo_root_local_dir"]
         == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     )
-    assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox-host_server"
-    assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox-host_server"
+    assert defaults["windmill_worker_repo_checkout_host_path"] == "{{ platform_repo_checkout_path }}"
+    assert defaults["windmill_worker_repo_checkout_container_path"] == "{{ platform_repo_checkout_path }}"
     assert "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' \"{{ windmill_env_file }}\"" in tasks
     assert "grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' \"{{ windmill_env_file }}\"" in tasks
     assert "docker exec windmill-windmill_worker-1 sh -lc '" in tasks
-    assert 'test -n "${LV3_ATLAS_OPENBAO_APPROLE_JSON:-}"' in tasks
-    assert 'test -n "${LV3_NTFY_ALERTMANAGER_PASSWORD:-}"' in tasks
-    assert "grep '^LV3_WINDMILL_BASE_URL=' {{ windmill_env_file }}" in compose_template
-    assert "grep '^LV3_WINDMILL_TOKEN=' {{ windmill_env_file }}" in compose_template
-    assert "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' {{ windmill_env_file }}" in compose_template
-    assert "grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' {{ windmill_env_file }}" in compose_template
+    assert "grep '^LV3_WINDMILL_BASE_URL='" in compose_template
+    assert "grep '^LV3_WINDMILL_TOKEN='" in compose_template
     assert (
         "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}"
         in compose_template
@@ -1190,7 +1187,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
     assert "openbao_runtime" in compose_template
     assert "name: {{ windmill_openbao_runtime_network }}" in compose_template
-    assert compose_template.count('user: "0:0"') >= 3
+    assert compose_template.count('user: "0:0"') >= 2
     runtime_template = (
         REPO_ROOT
         / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2"

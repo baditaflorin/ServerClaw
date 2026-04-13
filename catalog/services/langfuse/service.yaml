@@ -6,11 +6,11 @@ service:
     for repo-managed agents.
   category: observability
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:3002
-  public_url: https://langfuse.lv3.org
-  subdomain: langfuse.lv3.org
+  public_url: https://langfuse.example.com
+  subdomain: langfuse.example.com
   exposure: edge-published
   uptime_monitor_name: Langfuse Public Health
   health_probe_id: langfuse
@@ -40,8 +40,8 @@ service:
   environments:
     production:
       status: active
-      url: https://langfuse.lv3.org
-      subdomain: langfuse.lv3.org
+      url: https://langfuse.example.com
+      subdomain: langfuse.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -59,17 +59,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Langfuse or its runtime state
-      cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Langfuse
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Langfuse or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Langfuse converge
+      from git.
 dependency:
   node:
     id: langfuse
     service: langfuse
     name: Langfuse
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: observability
     adr: '0146'
@@ -88,8 +88,8 @@ dependency:
     - from: langfuse
       to: nginx_edge
       type: soft
-      description: Public access to langfuse.lv3.org depends on the shared NGINX edge
-        publication path.
+      description: Public access to langfuse.example.com depends on the shared NGINX
+        edge publication path.
     - from: langfuse
       to: openbao
       type: startup_only
@@ -102,7 +102,7 @@ dependency:
         state in Postgres.
 health:
   service_name: langfuse
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: langfuse_runtime
   verify_file: roles/langfuse_runtime/tasks/verify.yml
   startup:
@@ -150,7 +150,7 @@ health:
     monitor:
       name: Langfuse Public Health
       type: http
-      url: https://langfuse.lv3.org/api/public/health
+      url: https://langfuse.example.com/api/public/health
       description: Public Langfuse health endpoint published through the shared NGINX
         edge VM.
       interval: 60
@@ -192,7 +192,7 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://langfuse.lv3.org/api/public/health
+    target_url: https://langfuse.example.com/api/public/health
     probe_module: http_2xx_follow_redirects
     description: Langfuse remains reachable through the public LV3 edge for trace
       ingestion and operator access.

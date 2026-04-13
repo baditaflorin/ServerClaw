@@ -6,10 +6,10 @@ service:
     passwords, recovery codes, and TOTP material.
   category: security
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
-  internal_url: https://vault.lv3.org
-  subdomain: vault.lv3.org
+  internal_url: https://vault.example.com
+  subdomain: vault.example.com
   exposure: private-only
   health_probe_id: vaultwarden
   image_catalog_ids:
@@ -24,7 +24,7 @@ service:
   restart_domain: runtime-control-secrets
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden
+  dashboard_url: https://grafana.example.com/d/lv3-vaultwarden/lv3-vaultwarden
   tags:
     - credentials
     - totp
@@ -33,8 +33,8 @@ service:
   environments:
     production:
       status: active
-      url: https://vault.lv3.org
-      subdomain: vault.lv3.org
+      url: https://vault.example.com
+      subdomain: vault.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -54,17 +54,17 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when Vaultwarden or its persistent
-      state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Vaultwarden
+    location: runtime-control
+    failover_trigger: Restore runtime-control when Vaultwarden or its persistent state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control, then rerun the Vaultwarden
       converge from git.
 dependency:
   node:
     id: vaultwarden
     service: vaultwarden
     name: Vaultwarden
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: security
     adr: '0147'
@@ -81,7 +81,7 @@ dependency:
         Tailscale-only HTTPS surface and managed renewal path.
 health:
   service_name: vaultwarden
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: vaultwarden_runtime
   verify_file: roles/vaultwarden_runtime/tasks/verify.yml
   liveness:
@@ -138,6 +138,6 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://vault.lv3.org/alive
+    target_url: https://vault.example.com/alive
     probe_module: http_2xx_insecure_tls
     description: Vaultwarden remains reachable on the private Tailscale operator path.

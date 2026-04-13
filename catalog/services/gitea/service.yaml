@@ -3,13 +3,13 @@ service:
   id: gitea
   name: Gitea
   description: Private self-hosted Git service with Keycloak SSO, repo bootstrap automation,
-    and a dedicated Actions runner on docker-build-lv3.
+    and a dedicated Actions runner on docker-build.
   category: automation
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: http://100.64.0.1:3009
-  subdomain: git.lv3.org
+  subdomain: git.example.com
   exposure: private-only
   uptime_monitor_name: Gitea Private
   health_probe_id: gitea
@@ -35,7 +35,7 @@ service:
     production:
       status: active
       url: http://100.64.0.1:3009
-      subdomain: git.lv3.org
+      subdomain: git.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -53,17 +53,17 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when the Gitea runtime or its persistent
+    location: runtime-control
+    failover_trigger: Restore runtime-control when the Gitea runtime or its persistent
       state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Gitea
-      converge and runner reconnect workflow.
+    failback_method: Restore or rebuild runtime-control, then rerun the Gitea converge
+      and runner reconnect workflow.
 dependency:
   node:
     id: gitea
     service: gitea
     name: Gitea
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: '0143'
@@ -71,7 +71,7 @@ dependency:
     - from: gitea
       to: docker_build
       type: soft
-      description: Gitea Actions jobs are delegated to the dedicated runner on docker-build-lv3,
+      description: Gitea Actions jobs are delegated to the dedicated runner on docker-build,
         but repository hosting remains available without the runner.
     - from: gitea
       to: keycloak
@@ -99,7 +99,7 @@ dependency:
       description: Gitea persists repositories, metadata, and issue state in Postgres.
 health:
   service_name: gitea
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: gitea_runtime
   verify_file: roles/gitea_runtime/tasks/verify.yml
   liveness:
@@ -121,7 +121,7 @@ health:
     argv:
       - test
       - -x
-      - /opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive
+      - /opt/gitea/data/git/repositories/ops/platform_server.git/custom_hooks/pre-receive
     success_rc: 0
     docker_publication:
       container_name: gitea
@@ -133,7 +133,7 @@ health:
       name: Gitea Private
       type: http
       url: http://10.10.10.92:3003/api/healthz
-      description: Private Gitea health endpoint on runtime-control-lv3.
+      description: Private Gitea health endpoint on runtime-control.
       interval: 60
       retryInterval: 60
       maxretries: 0

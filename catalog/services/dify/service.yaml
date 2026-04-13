@@ -6,11 +6,11 @@ service:
     trace export support.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8094
-  public_url: https://agents.lv3.org
-  subdomain: agents.lv3.org
+  public_url: https://agents.example.com
+  subdomain: agents.example.com
   exposure: edge-published
   uptime_monitor_name: Dify Public
   health_probe_id: dify
@@ -50,8 +50,8 @@ service:
   environments:
     production:
       status: active
-      url: https://agents.lv3.org
-      subdomain: agents.lv3.org
+      url: https://agents.example.com
+      subdomain: agents.example.com
       notes: Branch-local rollout uses a Dify-local Qdrant sidecar until ADR 0198
         lands on main.
 completeness:
@@ -71,17 +71,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Dify or its runtime state cannot
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Dify or its runtime state cannot
       be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Dify converge
+    failback_method: Restore or rebuild docker-runtime, then rerun the Dify converge
       from git.
 dependency:
   node:
     id: dify
     service: dify
     name: Dify
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: 0197
@@ -104,8 +104,8 @@ dependency:
     - from: dify
       to: nginx_edge
       type: soft
-      description: Public reachability for agents.lv3.org depends on the shared NGINX
-        edge publication path.
+      description: Public reachability for agents.example.com depends on the shared
+        NGINX edge publication path.
     - from: dify
       to: ollama
       type: soft
@@ -123,7 +123,7 @@ dependency:
         workflow definitions in Postgres.
 health:
   service_name: dify
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: dify_runtime
   verify_file: roles/dify_runtime/tasks/verify.yml
   startup:
@@ -167,7 +167,7 @@ health:
     monitor:
       name: Dify Public
       type: http
-      url: https://agents.lv3.org/healthz
+      url: https://agents.example.com/healthz
       description: Dify publication through the shared NGINX edge and oauth2-proxy
         gate.
       interval: 60

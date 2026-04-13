@@ -5,7 +5,7 @@ service:
   description: Private read-mostly Docker runtime operations UI and API.
   category: access
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: https://100.64.0.1:9444
   exposure: private-only
@@ -47,24 +47,24 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Portainer or its runtime state
-      cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Portainer
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Portainer or its runtime state cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Portainer converge
+      from git.
 dependency:
   node:
     id: portainer
     service: portainer
     name: Portainer
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: automation
     adr: '0055'
   outbound_edges: []
 health:
   service_name: portainer
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: portainer_runtime
   verify_file: roles/portainer_runtime/tasks/verify.yml
   liveness:
@@ -94,7 +94,7 @@ health:
       name: Portainer Private
       type: http
       url: https://10.10.10.20:9443/api/status
-      description: Private Portainer status endpoint on docker-runtime-lv3.
+      description: Private Portainer status endpoint on docker-runtime.
       interval: 60
       retryInterval: 60
       maxretries: 0

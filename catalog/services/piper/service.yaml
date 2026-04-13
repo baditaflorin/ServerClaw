@@ -6,7 +6,7 @@ service:
     notifications, and LiveKit-bound spoken responses.
   category: communication
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8100
   exposure: private-only
@@ -19,7 +19,7 @@ service:
   restart_domain: runtime-ai-inference
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
   mobility_tier: burst_batch
-  dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability
+  dashboard_url: https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=piper-availability
   tags:
     - tts
     - speech
@@ -29,7 +29,7 @@ service:
     production:
       status: active
       url: http://10.10.10.20:8100
-      notes: Piper remains private to docker-runtime-lv3 and the managed guest network;
+      notes: Piper remains private to docker-runtime and the managed guest network;
         there is no public hostname or shared API gateway route.
 completeness:
   service_type: compose
@@ -51,24 +51,24 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Piper or its voice-model cache
-      cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Piper converge
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Piper or its voice-model cache cannot
+      be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Piper converge
       and synthesis verification workflow from git.
 dependency:
   node:
     id: piper
     service: piper
     name: Piper
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: communication
     adr: 0284
   outbound_edges: []
 health:
   service_name: piper
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: piper_runtime
   verify_file: roles/piper_runtime/tasks/verify.yml
   startup:
@@ -84,7 +84,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: The private Piper health endpoint responds on docker-runtime-lv3.
+    description: The private Piper health endpoint responds on docker-runtime.
     timeout_seconds: 300
     retries: 60
     delay_seconds: 5
@@ -125,8 +125,8 @@ data:
     access_role: platform-operator
     pii_risk: high
     locations:
-      - Transient request and response buffers inside the piper container on docker-runtime-lv3
-      - Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime-lv3
+      - Transient request and response buffers inside the piper container on docker-runtime
+      - Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime
     notes: Piper does not persist input text or synthesized audio after each request
       completes, but both may contain sensitive operator or agent content while the
       request is in flight.
@@ -139,7 +139,7 @@ data:
     access_role: platform-operator
     pii_risk: low
     locations:
-      - Docker volume piper-models on docker-runtime-lv3
+      - Docker volume piper-models on docker-runtime
     notes: Piper stores downloaded voice models in a named Docker volume so the private
       TTS runtime can restart without re-fetching the declared model set.
 slos:
@@ -150,5 +150,5 @@ slos:
     window_days: 30
     target_url: http://10.10.10.20:8100/healthz
     probe_module: http_2xx_follow_redirects
-    description: The private Piper TTS health endpoint remains reachable on docker-runtime-lv3
+    description: The private Piper TTS health endpoint remains reachable on docker-runtime
       for real-time voice synthesis workflows.

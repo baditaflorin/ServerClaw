@@ -5,7 +5,7 @@ service:
   description: Private secrets authority for controller automation and runtime credentials.
   category: security
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: https://100.64.0.1:8200
   exposure: private-only
@@ -56,24 +56,24 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when OpenBao or its sealed runtime
-      state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the OpenBao
-      converge and unseal workflow from git.
+    location: runtime-control
+    failover_trigger: Restore runtime-control when OpenBao or its sealed runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control, then rerun the OpenBao converge
+      and unseal workflow from git.
 dependency:
   node:
     id: openbao
     service: openbao
     name: OpenBao
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: security
     adr: '0043'
   outbound_edges: []
 health:
   service_name: openbao
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: openbao_runtime
   verify_file: roles/openbao_runtime/tasks/verify.yml
   startup:
@@ -116,6 +116,15 @@ health:
         - openbao_default
   tls_certificate_ids:
     - openbao-proxy
+  watchdog:
+    kind: identity_core_watchdog
+    description: On-VM identity-core watchdog probes OpenBao health every 15 seconds
+      and auto-restarts on 2 consecutive failures (ADR 0376).
+    interval_seconds: 15
+    failure_threshold: 2
+    max_restarts_per_hour: 6
+    url: http://127.0.0.1:8201/v1/sys/health
+    ntfy_topic: platform-identity-critical
   uptime_kuma:
     enabled: false
     reason: The operator-facing TLS surface requires client-certificate authentication,

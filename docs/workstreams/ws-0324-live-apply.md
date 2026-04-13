@@ -9,9 +9,9 @@
 - Implemented On: 2026-04-04
 - Live Applied On: 2026-04-04
 - Live Applied In Platform Version: 0.130.98
-- Latest Verified Base: `origin/main@20a66bbf088d1aa456d34f173fd8e2c8664f4c20` (`repo 0.178.3`, `platform 0.130.98`)
-- Branch: `codex/ws-0324-live-apply`
-- Worktree: `.worktrees/ws-0324-live-apply`
+- Latest Verified Base: `origin/main@79266f960bfe4616ce2edd9a74c4cc0a9d846679` (`repo 0.178.132`, `platform 0.178.132`)
+- Branch: `codex/ws-0324-main-integration-r4`
+- Worktree: `.worktrees/ws-0324-main-integration-r4`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0107-platform-extension-model`, `adr-0174-integration-only-canonical-truth-assembly`, `adr-0179-service-redundancy-tier-matrix`
 - Conflicts With: none

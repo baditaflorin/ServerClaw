@@ -3,14 +3,14 @@ service:
   id: coolify_apps
   name: Coolify Apps Ingress
   description: Shared public ingress surface for Coolify-managed applications published
-    from the dedicated coolify-apps-lv3 runtime.
+    from the dedicated coolify-apps runtime.
   category: infrastructure
   lifecycle_status: active
-  vm: coolify-apps-lv3
+  vm: coolify-apps
   vmid: 171
   internal_url: https://10.10.10.71:443
-  public_url: https://apps.lv3.org
-  subdomain: apps.lv3.org
+  public_url: https://apps.example.com
+  subdomain: apps.example.com
   exposure: edge-published
   health_probe_id: coolify_apps
   adr: '0340'
@@ -28,10 +28,10 @@ service:
   environments:
     production:
       status: active
-      url: https://apps.lv3.org
-      subdomain: apps.lv3.org
+      url: https://apps.example.com
+      subdomain: apps.example.com
       notes: Shared entrypoint for repo-managed Coolify applications, with wildcard
-        alias coverage handled by the edge topology on coolify-apps-lv3.
+        alias coverage handled by the edge topology on coolify-apps.
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -46,7 +46,7 @@ completeness:
     data_catalog: '2026-09-23'
     alert_rules: '2026-09-23'
   notes: The coolify_apps runtime is intentionally deployed and updated through Coolify
-    on coolify-apps-lv3 rather than a repo-managed Ansible role directory.
+    on coolify-apps rather than a repo-managed Ansible role directory.
 redundancy:
   tier: R1
   recovery_objective:
@@ -57,18 +57,18 @@ redundancy:
     - pbs_vm_171
   standby:
     kind: cold
-    location: coolify-apps-lv3
-    failover_trigger: Restore coolify-apps-lv3 when the Coolify applications runtime
-      or its managed proxy state cannot be recovered in place.
-    failback_method: Restore or rebuild coolify-apps-lv3, register it as the Coolify
-      deployment server, then rerun the Coolify converge and repo-backed smoke deployment
-      verification from git.
+    location: coolify-apps
+    failover_trigger: Restore coolify-apps when the Coolify applications runtime or
+      its managed proxy state cannot be recovered in place.
+    failback_method: Restore or rebuild coolify-apps, register it as the Coolify deployment
+      server, then rerun the Coolify converge and repo-backed smoke deployment verification
+      from git.
 dependency:
   node:
     id: coolify_apps
     service: coolify_apps
     name: Coolify Apps Ingress
-    vm: coolify-lv3
+    vm: coolify
     tier: 2
     category: infrastructure
     adr: 0194
@@ -81,11 +81,11 @@ dependency:
     - from: coolify_apps
       to: nginx_edge
       type: soft
-      description: Public access to apps.lv3.org depends on the shared NGINX edge
+      description: Public access to apps.example.com depends on the shared NGINX edge
         publication while the guest-local ingress remains reachable for direct verification.
 health:
   service_name: coolify-apps
-  owning_vm: coolify-apps-lv3
+  owning_vm: coolify-apps
   role: coolify_apps_runtime
   verify_file: roles/coolify_runtime/tasks/verify.yml
   liveness:
@@ -100,7 +100,7 @@ health:
     expected_status:
       - 200
     headers:
-      Host: apps.lv3.org
+      Host: apps.example.com
   readiness:
     kind: http
     description: The managed smoke deployment is served through the Coolify public
@@ -113,7 +113,7 @@ health:
     expected_status:
       - 200
     headers:
-      Host: apps.lv3.org
+      Host: apps.example.com
   uptime_kuma:
     enabled: false
     reason: The ingress currently serves a repo-managed smoke deployment and is verified

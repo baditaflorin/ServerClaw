@@ -517,6 +517,16 @@ windmill_seed_scripts:
     language: python3
     summary: Post-merge validation gate
     description: Repo-managed Windmill wrapper that re-runs the repository validation gate from the worker checkout after mainline changes land.
+  - path: f/lv3/reconcile_portals
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/reconcile-portals.py"
+    language: python3
+    summary: ADR 0399 portal reconciliation
+    description: Repo-managed Windmill wrapper that detects portal drift and regenerates stale artifacts from their canonical sources.
+  - path: f/lv3/portal_health_sweep
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/portal-health-sweep.py"
+    language: python3
+    summary: ADR 0399 portal health sweep
+    description: Repo-managed Windmill wrapper that checks live portal reachability and content drift against the canonical catalogs.
   - path: f/lv3/nightly_integration_tests
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/nightly-integration-tests.py"
     language: python3
@@ -602,6 +612,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0105 weekly capacity report
     description: Repo-managed Windmill wrapper that renders the weekly platform capacity summary payload from the committed model.
+  - path: f/lv3/disk_space_monitor
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/disk-space-monitor.py"
+    language: python3
+    summary: ADR 0386 disk space monitor
+    description: Repo-managed Windmill wrapper that queries disk usage across platform VMs and returns the thresholded alert payload.
   - path: f/lv3/k6_load_testing
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/k6-load-testing.py"
     language: python3

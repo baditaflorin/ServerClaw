@@ -6,11 +6,11 @@ service:
     database.
   category: access
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8055
-  public_url: https://data.lv3.org
-  subdomain: data.lv3.org
+  public_url: https://data.example.com
+  subdomain: data.example.com
   exposure: edge-published
   uptime_monitor_name: Directus Public Health
   health_probe_id: directus
@@ -38,15 +38,15 @@ service:
     - postgres
     - rest
     - oidc
-  notes: Directus runs on docker-runtime-lv3, uses a dedicated PostgreSQL database
-    named directus, publishes data.lv3.org through the shared NGINX edge, delegates
+  notes: Directus runs on docker-runtime, uses a dedicated PostgreSQL database named
+    directus, publishes data.example.com through the shared NGINX edge, delegates
     routine browser sign-in to Keycloak, and retains a repo-managed break-glass local
     admin password for recovery.
   environments:
     production:
       status: active
-      url: https://data.lv3.org
-      subdomain: data.lv3.org
+      url: https://data.example.com
+      subdomain: data.example.com
       notes: Repo automation verifies the public /server/health endpoint, the Keycloak
         login redirect, and scoped REST plus GraphQL token access against the governed
         service_registry collection.
@@ -72,17 +72,17 @@ redundancy:
     - pbs_vm_130
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 or postgres-lv3 when Directus or
-      the dedicated directus database cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3 and postgres-lv3 as needed,
-      then rerun the Directus converge plus public token verification workflow.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime or postgres when Directus or the dedicated
+      directus database cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime and postgres as needed, then
+      rerun the Directus converge plus public token verification workflow.
 dependency:
   node:
     id: directus
     service: directus
     name: Directus
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: access
     adr: 0289
@@ -91,7 +91,7 @@ dependency:
       to: docker_runtime
       type: hard
       description: The Directus runtime container and guest-local listener are hosted
-        on docker-runtime-lv3.
+        on docker-runtime.
     - from: directus
       to: keycloak
       type: soft
@@ -100,8 +100,8 @@ dependency:
     - from: directus
       to: nginx_edge
       type: soft
-      description: The shared NGINX edge publishes data.lv3.org directly to Directus
-        on docker-runtime-lv3.
+      description: The shared NGINX edge publishes data.example.com directly to Directus
+        on docker-runtime.
     - from: directus
       to: openbao
       type: startup_only
@@ -111,16 +111,16 @@ dependency:
       to: postgres
       type: hard
       description: Directus persists its system state and governed collections in
-        the dedicated PostgreSQL database directus on postgres-lv3.
+        the dedicated PostgreSQL database directus on postgres.
 health:
   service_name: directus
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: directus_runtime
   verify_file: roles/directus_runtime/tasks/verify.yml
   startup:
     kind: http
     description: Directus startup completes once the loopback /server/health endpoint
-      responds on docker-runtime-lv3.
+      responds on docker-runtime.
     timeout_seconds: 180
     retries: 36
     delay_seconds: 5
@@ -130,7 +130,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: Directus keeps serving the loopback /server/health contract on docker-runtime-lv3.
+    description: Directus keeps serving the loopback /server/health contract on docker-runtime.
     timeout_seconds: 180
     retries: 36
     delay_seconds: 5
@@ -152,7 +152,7 @@ health:
     docker_publication:
       container_name: directus
       bindings:
-        - host: 10.10.10.92
+        - host: 10.10.10.20
           port: 8055
       required_networks:
         - directus_default
@@ -161,7 +161,7 @@ health:
     monitor:
       name: Directus Public Health
       type: http
-      url: https://data.lv3.org/server/health
+      url: https://data.example.com/server/health
       description: Public Directus health endpoint published through the shared NGINX
         edge.
       interval: 60
@@ -180,7 +180,7 @@ data:
     access_role: platform-operator
     pii_risk: low
     locations:
-      - PostgreSQL database directus on postgres-lv3
+      - PostgreSQL database directus on postgres
       - Directus system tables plus governed collections in the public schema of the
         dedicated directus database
     notes: Directus persists repo-governed operational metadata in a dedicated PostgreSQL
@@ -193,7 +193,7 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://data.lv3.org/server/health
+    target_url: https://data.example.com/server/health
     probe_module: http_2xx_follow_redirects
-    description: Directus should keep the public health contract on data.lv3.org reachable
-      through the shared edge.
+    description: Directus should keep the public health contract on data.example.com
+      reachable through the shared edge.

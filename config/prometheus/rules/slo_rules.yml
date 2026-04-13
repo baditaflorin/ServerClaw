@@ -392,62 +392,6 @@ groups:
           slo_id: gitea-availability
           service_id: gitea
           indicator: availability
-      - record: slo:gotenberg_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="gotenberg-availability"}[5m])
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="gotenberg-availability"}[1h])
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="gotenberg-availability"}[30d])
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:error_rate_5m
-        expr: 1 - slo:gotenberg_availability:success_ratio_5m
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:error_rate_1h
-        expr: 1 - slo:gotenberg_availability:success_ratio_1h
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:error_rate_30d
-        expr: 1 - slo:gotenberg_availability:success_ratio_30d
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:budget_remaining
-        expr: clamp_min(1 - (slo:gotenberg_availability:error_rate_30d / 0.010000),
-          0)
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:burn_rate_1h
-        expr: slo:gotenberg_availability:error_rate_1h / 0.010000
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
-      - record: slo:gotenberg_availability:time_to_budget_exhaustion_days
-        expr: (slo:gotenberg_availability:budget_remaining * 30) / clamp_min(slo:gotenberg_availability:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: gotenberg-availability
-          service_id: gotenberg
-          indicator: availability
       - record: slo:glitchtip_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="glitchtip-availability"}[5m])
         labels:
@@ -504,6 +448,62 @@ groups:
           slo_id: glitchtip-availability
           service_id: glitchtip
           indicator: availability
+      - record: slo:gotenberg_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="gotenberg-availability"}[5m])
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="gotenberg-availability"}[1h])
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="gotenberg-availability"}[30d])
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:error_rate_5m
+        expr: 1 - slo:gotenberg_availability:success_ratio_5m
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:error_rate_1h
+        expr: 1 - slo:gotenberg_availability:success_ratio_1h
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:error_rate_30d
+        expr: 1 - slo:gotenberg_availability:success_ratio_30d
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:budget_remaining
+        expr: clamp_min(1 - (slo:gotenberg_availability:error_rate_30d / 0.010000),
+          0)
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:burn_rate_1h
+        expr: slo:gotenberg_availability:error_rate_1h / 0.010000
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
+      - record: slo:gotenberg_availability:time_to_budget_exhaustion_days
+        expr: (slo:gotenberg_availability:budget_remaining * 30) / clamp_min(slo:gotenberg_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: gotenberg-availability
+          service_id: gotenberg
+          indicator: availability
       - record: slo:grafana_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grafana-availability"}[5m])
         labels:
@@ -559,6 +559,61 @@ groups:
         labels:
           slo_id: grafana-availability
           service_id: grafana
+          indicator: availability
+      - record: slo:grist_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grist-availability"}[5m])
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grist-availability"}[1h])
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grist-availability"}[30d])
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:error_rate_5m
+        expr: 1 - slo:grist_availability:success_ratio_5m
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:error_rate_1h
+        expr: 1 - slo:grist_availability:success_ratio_1h
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:error_rate_30d
+        expr: 1 - slo:grist_availability:success_ratio_30d
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:budget_remaining
+        expr: clamp_min(1 - (slo:grist_availability:error_rate_30d / 0.005000), 0)
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:burn_rate_1h
+        expr: slo:grist_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: grist-availability
+          service_id: grist
+          indicator: availability
+      - record: slo:grist_availability:time_to_budget_exhaustion_days
+        expr: (slo:grist_availability:budget_remaining * 30) / clamp_min(slo:grist_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: grist-availability
+          service_id: grist
           indicator: availability
       - record: slo:harbor_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="harbor-availability"}[5m])
@@ -785,6 +840,62 @@ groups:
           slo_id: keycloak-latency
           service_id: keycloak
           indicator: latency
+      - record: slo:label_studio_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[5m])
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[1h])
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[30d])
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:error_rate_5m
+        expr: 1 - slo:label_studio_availability:success_ratio_5m
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:error_rate_1h
+        expr: 1 - slo:label_studio_availability:success_ratio_1h
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:error_rate_30d
+        expr: 1 - slo:label_studio_availability:success_ratio_30d
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:budget_remaining
+        expr: clamp_min(1 - (slo:label_studio_availability:error_rate_30d / 0.010000),
+          0)
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:burn_rate_1h
+        expr: slo:label_studio_availability:error_rate_1h / 0.010000
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
+      - record: slo:label_studio_availability:time_to_budget_exhaustion_days
+        expr: (slo:label_studio_availability:budget_remaining * 30) / clamp_min(slo:label_studio_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: label-studio-availability
+          service_id: label_studio
+          indicator: availability
       - record: slo:langfuse_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="langfuse-availability"}[5m])
         labels:
@@ -897,61 +1008,6 @@ groups:
           slo_id: mailpit-availability
           service_id: mailpit
           indicator: availability
-      - record: slo:minio_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="minio-availability"}[5m])
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="minio-availability"}[1h])
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="minio-availability"}[30d])
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:error_rate_5m
-        expr: 1 - slo:minio_availability:success_ratio_5m
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:error_rate_1h
-        expr: 1 - slo:minio_availability:success_ratio_1h
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:error_rate_30d
-        expr: 1 - slo:minio_availability:success_ratio_30d
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:budget_remaining
-        expr: clamp_min(1 - (slo:minio_availability:error_rate_30d / 0.005000), 0)
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:burn_rate_1h
-        expr: slo:minio_availability:error_rate_1h / 0.005000
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
-      - record: slo:minio_availability:time_to_budget_exhaustion_days
-        expr: (slo:minio_availability:budget_remaining * 30) / clamp_min(slo:minio_availability:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: minio-availability
-          service_id: minio
-          indicator: availability
       - record: slo:matrix_synapse_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="matrix-synapse-availability"}[5m])
         labels:
@@ -1007,6 +1063,61 @@ groups:
         labels:
           slo_id: matrix-synapse-availability
           service_id: matrix_synapse
+          indicator: availability
+      - record: slo:minio_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="minio-availability"}[5m])
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="minio-availability"}[1h])
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="minio-availability"}[30d])
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:error_rate_5m
+        expr: 1 - slo:minio_availability:success_ratio_5m
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:error_rate_1h
+        expr: 1 - slo:minio_availability:success_ratio_1h
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:error_rate_30d
+        expr: 1 - slo:minio_availability:success_ratio_30d
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:budget_remaining
+        expr: clamp_min(1 - (slo:minio_availability:error_rate_30d / 0.005000), 0)
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:burn_rate_1h
+        expr: slo:minio_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: minio-availability
+          service_id: minio
+          indicator: availability
+      - record: slo:minio_availability:time_to_budget_exhaustion_days
+        expr: (slo:minio_availability:budget_remaining * 30) / clamp_min(slo:minio_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: minio-availability
+          service_id: minio
           indicator: availability
       - record: slo:netbox_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="netbox-availability"}[5m])
@@ -1174,61 +1285,6 @@ groups:
         labels:
           slo_id: nginx-edge-availability
           service_id: nginx_edge
-          indicator: availability
-      - record: slo:grist_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grist-availability"}[5m])
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grist-availability"}[1h])
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grist-availability"}[30d])
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:error_rate_5m
-        expr: 1 - slo:grist_availability:success_ratio_5m
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:error_rate_1h
-        expr: 1 - slo:grist_availability:success_ratio_1h
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:error_rate_30d
-        expr: 1 - slo:grist_availability:success_ratio_30d
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:budget_remaining
-        expr: clamp_min(1 - (slo:grist_availability:error_rate_30d / 0.005000), 0)
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:burn_rate_1h
-        expr: slo:grist_availability:error_rate_1h / 0.005000
-        labels:
-          slo_id: grist-availability
-          service_id: grist
-          indicator: availability
-      - record: slo:grist_availability:time_to_budget_exhaustion_days
-        expr: (slo:grist_availability:budget_remaining * 30) / clamp_min(slo:grist_availability:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: grist-availability
-          service_id: grist
           indicator: availability
       - record: slo:openfga_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="openfga-availability"}[5m])
@@ -1400,117 +1456,6 @@ groups:
           slo_id: outline-availability
           service_id: outline
           indicator: availability
-      - record: slo:label_studio_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[5m])
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[1h])
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[30d])
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:error_rate_5m
-        expr: 1 - slo:label_studio_availability:success_ratio_5m
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:error_rate_1h
-        expr: 1 - slo:label_studio_availability:success_ratio_1h
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:error_rate_30d
-        expr: 1 - slo:label_studio_availability:success_ratio_30d
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:budget_remaining
-        expr: clamp_min(1 - (slo:label_studio_availability:error_rate_30d / 0.010000),
-          0)
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:burn_rate_1h
-        expr: slo:label_studio_availability:error_rate_1h / 0.010000
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:label_studio_availability:time_to_budget_exhaustion_days
-        expr: (slo:label_studio_availability:budget_remaining * 30) / clamp_min(slo:label_studio_availability:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: label-studio-availability
-          service_id: label_studio
-          indicator: availability
-      - record: slo:piper_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="piper-availability"}[5m])
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="piper-availability"}[1h])
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="piper-availability"}[30d])
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:error_rate_5m
-        expr: 1 - slo:piper_availability:success_ratio_5m
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:error_rate_1h
-        expr: 1 - slo:piper_availability:success_ratio_1h
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:error_rate_30d
-        expr: 1 - slo:piper_availability:success_ratio_30d
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:budget_remaining
-        expr: clamp_min(1 - (slo:piper_availability:error_rate_30d / 0.010000), 0)
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:burn_rate_1h
-        expr: slo:piper_availability:error_rate_1h / 0.010000
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
-      - record: slo:piper_availability:time_to_budget_exhaustion_days
-        expr: (slo:piper_availability:budget_remaining * 30) / clamp_min(slo:piper_availability:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: piper-availability
-          service_id: piper
-          indicator: availability
       - record: slo:paperless_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="paperless-availability"}[5m])
         labels:
@@ -1566,6 +1511,61 @@ groups:
         labels:
           slo_id: paperless-availability
           service_id: paperless
+          indicator: availability
+      - record: slo:piper_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="piper-availability"}[5m])
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="piper-availability"}[1h])
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="piper-availability"}[30d])
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:error_rate_5m
+        expr: 1 - slo:piper_availability:success_ratio_5m
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:error_rate_1h
+        expr: 1 - slo:piper_availability:success_ratio_1h
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:error_rate_30d
+        expr: 1 - slo:piper_availability:success_ratio_30d
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:budget_remaining
+        expr: clamp_min(1 - (slo:piper_availability:error_rate_30d / 0.010000), 0)
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:burn_rate_1h
+        expr: slo:piper_availability:error_rate_1h / 0.010000
+        labels:
+          slo_id: piper-availability
+          service_id: piper
+          indicator: availability
+      - record: slo:piper_availability:time_to_budget_exhaustion_days
+        expr: (slo:piper_availability:budget_remaining * 30) / clamp_min(slo:piper_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: piper-availability
+          service_id: piper
           indicator: availability
       - record: slo:plane_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="plane-availability"}[5m])
@@ -1958,61 +1958,6 @@ groups:
           slo_id: superset-availability
           service_id: superset
           indicator: availability
-      - record: slo:tika_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="tika-availability"}[5m])
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="tika-availability"}[1h])
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="tika-availability"}[30d])
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:error_rate_5m
-        expr: 1 - slo:tika_availability:success_ratio_5m
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:error_rate_1h
-        expr: 1 - slo:tika_availability:success_ratio_1h
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:error_rate_30d
-        expr: 1 - slo:tika_availability:success_ratio_30d
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:budget_remaining
-        expr: clamp_min(1 - (slo:tika_availability:error_rate_30d / 0.010000), 0)
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:burn_rate_1h
-        expr: slo:tika_availability:error_rate_1h / 0.010000
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
-      - record: slo:tika_availability:time_to_budget_exhaustion_days
-        expr: (slo:tika_availability:budget_remaining * 30) / clamp_min(slo:tika_availability:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: tika-availability
-          service_id: tika
-          indicator: availability
       - record: slo:tesseract_ocr_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="tesseract-ocr-availability"}[5m])
         labels:
@@ -2068,6 +2013,61 @@ groups:
         labels:
           slo_id: tesseract-ocr-availability
           service_id: tesseract_ocr
+          indicator: availability
+      - record: slo:tika_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="tika-availability"}[5m])
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="tika-availability"}[1h])
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="tika-availability"}[30d])
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:error_rate_5m
+        expr: 1 - slo:tika_availability:success_ratio_5m
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:error_rate_1h
+        expr: 1 - slo:tika_availability:success_ratio_1h
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:error_rate_30d
+        expr: 1 - slo:tika_availability:success_ratio_30d
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:budget_remaining
+        expr: clamp_min(1 - (slo:tika_availability:error_rate_30d / 0.010000), 0)
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:burn_rate_1h
+        expr: slo:tika_availability:error_rate_1h / 0.010000
+        labels:
+          slo_id: tika-availability
+          service_id: tika
+          indicator: availability
+      - record: slo:tika_availability:time_to_budget_exhaustion_days
+        expr: (slo:tika_availability:budget_remaining * 30) / clamp_min(slo:tika_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: tika-availability
+          service_id: tika
           indicator: availability
       - record: slo:typesense_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="typesense-availability"}[5m])

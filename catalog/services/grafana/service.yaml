@@ -5,11 +5,11 @@ service:
   description: Metrics dashboards, platform overview, and service detail dashboards.
   category: observability
   lifecycle_status: active
-  vm: monitoring-lv3
+  vm: monitoring
   vmid: 140
   internal_url: http://10.10.10.40:3000
-  public_url: https://grafana.lv3.org
-  subdomain: grafana.lv3.org
+  public_url: https://grafana.example.com
+  subdomain: grafana.example.com
   exposure: edge-published
   uptime_monitor_name: Grafana Public
   health_probe_id: grafana
@@ -24,7 +24,7 @@ service:
   restart_domain: dedicated-monitoring-core
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-monitoring
   mobility_tier: anchor
-  dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+  dashboard_url: https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview
   tags:
     - metrics
     - dashboards
@@ -32,12 +32,12 @@ service:
   environments:
     production:
       status: active
-      url: https://grafana.lv3.org
-      subdomain: grafana.lv3.org
+      url: https://grafana.example.com
+      subdomain: grafana.example.com
     staging:
       status: planned
-      url: https://grafana.staging.lv3.org
-      subdomain: grafana.staging.lv3.org
+      url: https://grafana.staging.example.com
+      subdomain: grafana.staging.example.com
       notes: Planned shared-edge staging hostname; live publication remains pending.
 completeness:
   service_type: vm-service
@@ -56,17 +56,17 @@ redundancy:
     - pbs_vm_140
   standby:
     kind: cold
-    location: monitoring-lv3
-    failover_trigger: Restore or rebuild monitoring-lv3 when Grafana or the monitoring
+    location: monitoring
+    failover_trigger: Restore or rebuild monitoring when Grafana or the monitoring
       guest cannot be recovered in place.
-    failback_method: Replay the monitoring stack converge on monitoring-lv3 after
-      the restored guest is healthy.
+    failback_method: Replay the monitoring stack converge on monitoring after the
+      restored guest is healthy.
 dependency:
   node:
     id: grafana
     service: grafana
     name: Grafana
-    vm: monitoring-lv3
+    vm: monitoring
     tier: 1
     category: observability
     adr: '0011'
@@ -85,11 +85,11 @@ dependency:
     - from: grafana
       to: nginx_edge
       type: soft
-      description: Public access to grafana.lv3.org depends on the shared NGINX edge;
-        private reachability remains available if the edge is degraded.
+      description: Public access to grafana.example.com depends on the shared NGINX
+        edge; private reachability remains available if the edge is degraded.
 health:
   service_name: grafana
-  owning_vm: monitoring-lv3
+  owning_vm: monitoring
   role: monitoring_vm
   verify_file: roles/monitoring_vm/tasks/verify.yml
   liveness:
@@ -119,7 +119,7 @@ health:
     monitor:
       name: Grafana Public
       type: http
-      url: https://grafana.lv3.org
+      url: https://grafana.example.com
       description: Grafana publication through the NGINX edge VM.
       interval: 60
       retryInterval: 60
@@ -172,6 +172,6 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://grafana.lv3.org
+    target_url: https://grafana.example.com
     probe_module: http_2xx_follow_redirects
     description: Grafana remains reachable through the public LV3 edge.

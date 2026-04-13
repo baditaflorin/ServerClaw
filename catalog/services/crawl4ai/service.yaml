@@ -6,7 +6,7 @@ service:
     and bounded browser-assisted fetches.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:11235
   exposure: private-only
@@ -21,7 +21,7 @@ service:
   restart_domain: runtime-ai-execution
   api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
   mobility_tier: burst_batch
-  dashboard_url: https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability
+  dashboard_url: https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview?var-slo=crawl4ai-availability
   tags:
     - crawl
     - markdown
@@ -31,8 +31,8 @@ service:
     production:
       status: active
       url: http://10.10.10.20:11235
-      notes: The runtime stays private to docker-runtime-lv3 and the guest network;
-        there is no public DNS record and no shared API gateway route for Crawl4AI.
+      notes: The runtime stays private to docker-runtime and the guest network; there
+        is no public DNS record and no shared API gateway route for Crawl4AI.
 completeness:
   service_type: compose
   requires_subdomain: false
@@ -53,17 +53,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the Crawl4AI runtime, its browser-backed
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the Crawl4AI runtime, its browser-backed
       crawl path, or the shared runtime state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Crawl4AI
-      converge and private guest-network verification workflow.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Crawl4AI converge
+      and private guest-network verification workflow.
 dependency:
   node:
     id: crawl4ai
     service: crawl4ai
     name: Crawl4AI
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: 0288
@@ -72,10 +72,10 @@ dependency:
       to: docker_runtime
       type: hard
       description: The Crawl4AI runtime and its bounded headless-browser worker pool
-        are hosted on docker-runtime-lv3.
+        are hosted on docker-runtime.
 health:
   service_name: crawl4ai
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: crawl4ai_runtime
   verify_file: roles/crawl4ai_runtime/tasks/verify.yml
   startup:
@@ -91,7 +91,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: Crawl4AI keeps serving the private health endpoint on docker-runtime-lv3.
+    description: Crawl4AI keeps serving the private health endpoint on docker-runtime.
     timeout_seconds: 180
     retries: 24
     delay_seconds: 5
@@ -135,9 +135,9 @@ data:
     access_role: platform-operator
     pii_risk: medium
     locations:
-      - Transient request and response buffers inside the crawl4ai container on docker-runtime-lv3
+      - Transient request and response buffers inside the crawl4ai container on docker-runtime
       - Ephemeral browser session and temporary extraction state inside the Crawl4AI
-        runtime on docker-runtime-lv3
+        runtime on docker-runtime
     notes: Crawl4AI is stateless in this deployment and does not persist crawl history
       after each synchronous Markdown or extraction response completes.
 slos:
@@ -148,5 +148,5 @@ slos:
     window_days: 30
     target_url: http://10.10.10.20:11235/health
     probe_module: http_2xx_follow_redirects
-    description: The private Crawl4AI runtime remains reachable on docker-runtime-lv3
+    description: The private Crawl4AI runtime remains reachable on docker-runtime
       for LLM-oriented Markdown extraction and bounded browser-assisted fetches.

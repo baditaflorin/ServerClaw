@@ -411,6 +411,15 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "neko": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service",
+      "suppressed_checks": {}
+    },
     "netbox": {
       "service_type": "compose",
       "requires_subdomain": false,
@@ -470,15 +479,6 @@
       "requires_secrets": false,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
-    },
-    "neko": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service",
-      "suppressed_checks": {}
     },
     "openbao": {
       "service_type": "compose",
@@ -607,6 +607,14 @@
         "alert_rules": "2026-09-23"
       }
     },
+    "repo_intake": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppressed_checks": {}
+    },
     "repowise": {
       "service_type": "compose",
       "requires_subdomain": true,
@@ -644,6 +652,15 @@
       "keycloak_client_generated": true,
       "dashboard_file": "config/grafana/dashboards/serverclaw.json",
       "alert_rule_file": "config/alertmanager/rules/serverclaw.yml",
+      "suppressed_checks": {}
+    },
+    "sftpgo": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true,
       "suppressed_checks": {}
     },
     "status_page": {

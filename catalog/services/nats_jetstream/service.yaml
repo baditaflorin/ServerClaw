@@ -6,7 +6,7 @@ service:
     and RAG lifecycle events.
   category: automation
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: nats://10.10.10.92:4222
   exposure: private-only
@@ -22,7 +22,7 @@ service:
     - nats
     - jetstream
     - private
-  notes: The monitoring endpoint stays loopback-only on runtime-control-lv3 at http://127.0.0.1:8222/healthz.
+  notes: The monitoring endpoint stays loopback-only on runtime-control at http://127.0.0.1:8222/healthz.
   environments:
     production:
       status: active
@@ -44,17 +44,17 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when the NATS JetStream runtime
-      or its persisted stream state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the NATS JetStream
+    location: runtime-control
+    failover_trigger: Restore runtime-control when the NATS JetStream runtime or its
+      persisted stream state cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control, then rerun the NATS JetStream
       converge and stream reconcile from git.
 dependency:
   node:
     id: nats_jetstream
     service: nats_jetstream
     name: NATS JetStream
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: automation
     adr: '0276'

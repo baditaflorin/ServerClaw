@@ -244,65 +244,6 @@
         "reason": "Changedetection stays private and uses an authenticated API contract; repo-managed runtime verification plus the governed API gateway check are the supported health path."
       }
     },
-    "crawl4ai": {
-      "service_name": "crawl4ai",
-      "owning_vm": "docker-runtime",
-      "role": "crawl4ai_runtime",
-      "verify_file": "roles/crawl4ai_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Crawl4AI startup completes once the private health endpoint responds on the local listener.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:11235/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "Crawl4AI keeps serving the private health endpoint on docker-runtime.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:11235/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ],
-        "docker_publication": {
-          "container_name": "crawl4ai",
-          "bindings": [
-            {
-              "host": "10.10.10.20",
-              "port": 11235
-            }
-          ],
-          "required_networks": [
-            "crawl4ai_runtime"
-          ]
-        }
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "The private monitor endpoint reports an active permanent browser pool after startup settles.",
-        "timeout_seconds": 120,
-        "retries": 3,
-        "delay_seconds": 5,
-        "argv": [
-          "/bin/bash",
-          "-lc",
-          "set -euo pipefail; payload=$(mktemp); trap 'rm -f \"$payload\"' EXIT; curl -fsS http://127.0.0.1:11235/monitor/health > \"$payload\"; python3 -c 'import json, pathlib, sys; monitor=json.loads(pathlib.Path(sys.argv[1]).read_text()); assert monitor[\"pool\"][\"permanent\"][\"active\"] is True' \"$payload\""
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Crawl4AI stays private-only and is verified through repo-managed health, monitor, and markdown smoke probes instead of a public uptime monitor."
-      }
-    },
     "coolify": {
       "service_name": "coolify",
       "owning_vm": "coolify",
@@ -387,6 +328,65 @@
       "uptime_kuma": {
         "enabled": false,
         "reason": "The ingress currently serves a repo-managed smoke deployment and is verified directly during ADR 0194 live apply."
+      }
+    },
+    "crawl4ai": {
+      "service_name": "crawl4ai",
+      "owning_vm": "docker-runtime",
+      "role": "crawl4ai_runtime",
+      "verify_file": "roles/crawl4ai_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Crawl4AI startup completes once the private health endpoint responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:11235/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "Crawl4AI keeps serving the private health endpoint on docker-runtime.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:11235/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "crawl4ai",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 11235
+            }
+          ],
+          "required_networks": [
+            "crawl4ai_runtime"
+          ]
+        }
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The private monitor endpoint reports an active permanent browser pool after startup settles.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; payload=$(mktemp); trap 'rm -f \"$payload\"' EXIT; curl -fsS http://127.0.0.1:11235/monitor/health > \"$payload\"; python3 -c 'import json, pathlib, sys; monitor=json.loads(pathlib.Path(sys.argv[1]).read_text()); assert monitor[\"pool\"][\"permanent\"][\"active\"] is True' \"$payload\""
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Crawl4AI stays private-only and is verified through repo-managed health, monitor, and markdown smoke probes instead of a public uptime monitor."
       }
     },
     "dify": {
@@ -817,6 +817,79 @@
         }
       }
     },
+    "glitchtip": {
+      "service_name": "glitchtip",
+      "owning_vm": "docker-runtime",
+      "role": "glitchtip_runtime",
+      "verify_file": "roles/glitchtip_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "GlitchTip startup completes once the local internal health endpoint returns 200 on docker-runtime.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3005/api/0/internal/health/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local GlitchTip health endpoint continues to answer on docker-runtime.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3005/api/0/internal/health/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public GlitchTip health endpoint answers through the shared NGINX edge with Keycloak OIDC settings and project ingestion online.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "https://errors.example.com/api/0/internal/health/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "glitchtip",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 3005
+            }
+          ],
+          "required_networks": [
+            "glitchtip_default"
+          ]
+        }
+      },
+      "tls_certificate_ids": [
+        "errors-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "GlitchTip Public Health",
+          "type": "http",
+          "url": "https://errors.example.com/api/0/internal/health/",
+          "description": "Public GlitchTip health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "gotenberg": {
       "service_name": "gotenberg",
       "owning_vm": "runtime-ai",
@@ -909,6 +982,64 @@
           "maxredirects": 10,
           "accepted_statuscodes": [
             "200-399"
+          ]
+        }
+      }
+    },
+    "grist": {
+      "service_name": "grist",
+      "owning_vm": "docker-runtime",
+      "role": "grist_runtime",
+      "verify_file": "roles/grist_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Grist startup completes once the public status endpoint answers through the shared edge publication path.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://grist.example.com/status",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Grist status endpoint responds on the runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8484/status",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Grist status endpoint renders through the shared edge while authenticated document routes remain OIDC-gated.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://grist.example.com/status",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Grist Public Status",
+          "type": "http",
+          "url": "https://grist.example.com/status",
+          "description": "Public Grist status endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
           ]
         }
       }
@@ -1157,6 +1288,65 @@
         }
       }
     },
+    "label_studio": {
+      "service_name": "label_studio",
+      "owning_vm": "docker-runtime",
+      "role": "label_studio_runtime",
+      "verify_file": "roles/label_studio_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Label Studio startup completes once the local /api/version endpoint returns 200 on the runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8110/api/version",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Label Studio /api/version endpoint responds on docker-runtime.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8110/api/version",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Label Studio root redirects through the shared edge auth boundary while the private runtime listener remains bound for automation and the operator gateway route.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://annotate.example.com/",
+        "method": "GET",
+        "expected_status": [
+          302,
+          303
+        ],
+        "docker_publication": {
+          "container_name": "label-studio",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8110
+            }
+          ],
+          "required_networks": [
+            "label_studio_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The public anonymous contract is intentionally a shared-edge auth redirect rather than a stable unauthenticated health endpoint; the role-level verify_public tasks and live-apply evidence cover that boundary."
+      }
+    },
     "lago": {
       "service_name": "lago",
       "owning_vm": "docker-runtime",
@@ -1295,6 +1485,110 @@
             "200-299"
           ]
         }
+      }
+    },
+    "librechat": {
+      "service_name": "librechat",
+      "owning_vm": "coolify",
+      "role": "librechat_runtime",
+      "verify_file": "roles/librechat_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "LibreChat startup completes once the health API endpoint answers.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The LibreChat health API endpoint continues to answer.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "LibreChat is ready to serve requests.",
+        "timeout_seconds": 120,
+        "retries": 12,
+        "delay_seconds": 2,
+        "url": "http://127.0.0.1:8096/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "LibreChat Public",
+          "type": "http",
+          "url": "https://chat.example.com",
+          "description": "Public LibreChat chat surface.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-302"
+          ]
+        }
+      }
+    },
+    "litellm": {
+      "service_name": "litellm",
+      "owning_vm": "docker-runtime",
+      "role": "litellm_runtime",
+      "verify_file": "roles/litellm_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "LiteLLM Proxy startup completes once the liveliness endpoint answers.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:4000/health/liveliness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The LiteLLM Proxy liveliness endpoint continues to answer.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:4000/health/liveliness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The LiteLLM Proxy health endpoint confirms readiness.",
+        "timeout_seconds": 120,
+        "retries": 12,
+        "delay_seconds": 2,
+        "url": "http://127.0.0.1:4000/health/readiness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The private LiteLLM Proxy surface is verified through repo-managed local health probes."
       }
     },
     "livekit": {
@@ -1436,117 +1730,6 @@
         "reason": "Mailpit is intentionally private-only and is verified through role-level HTTP and SMTP probes instead of an always-on public monitor."
       }
     },
-    "minio": {
-      "service_name": "minio",
-      "owning_vm": "docker-runtime",
-      "role": "minio_runtime",
-      "verify_file": "roles/minio_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "MinIO startup completes once the local ready endpoint reports the S3 API is ready to serve requests.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:9010/minio/health/ready",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The MinIO live health endpoint responds on the local S3 API listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:9010/minio/health/live",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The MinIO ready health endpoint confirms the shared object store is ready for bucket operations.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:9010/minio/health/ready",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "tls_certificate_ids": [
-        "minio-edge",
-        "minio-console-edge"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "MinIO Public Health",
-          "type": "http",
-          "url": "https://minio.example.com/minio/health/live",
-          "description": "Public MinIO S3 API health endpoint published through the shared NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "redpanda": {
-      "service_name": "redpanda",
-      "owning_vm": "docker-runtime",
-      "role": "redpanda_runtime",
-      "verify_file": "roles/redpanda_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "command",
-        "description": "Redpanda startup completes once the authenticated Admin API ready endpoint answers with the repo-managed admin principal.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "argv": [
-          "python3",
-          "-c",
-          "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\".encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n    'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    raise SystemExit(0 if response.status == 200 else 1)"
-        ],
-        "success_rc": 0
-      },
-      "liveness": {
-        "kind": "command",
-        "description": "The authenticated Redpanda Admin API ready endpoint answers through the rendered runtime env credentials.",
-        "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "python3",
-          "-c",
-          "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\".encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n    'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    raise SystemExit(0 if response.status == 200 else 1)"
-        ],
-        "success_rc": 0
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "Redpanda accepts a smoke record through the HTTP Proxy and returns the registered smoke schema through the Schema Registry.",
-        "timeout_seconds": 180,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "python3",
-          "-c",
-          "from pathlib import Path\nimport base64\nimport json\nimport time\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ndef auth(user_key, password_key):\n    return base64.b64encode(\n        f\"{env[user_key]}:{env[password_key]}\".encode('utf-8')\n    ).decode('ascii')\n\nmarker = f\"health-probe-redpanda-{int(time.time())}\"\npayload = json.dumps(\n    {\n        'records': [\n            {\n                'value': {\n                    'marker': marker,\n                    'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),\n                    'producer': 'health-probe',\n                }\n            }\n        ]\n    }\n).encode('utf-8')\nproduce_request = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke',\n    data=payload,\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Content-Type': 'application/vnd.kafka.json.v2+json',\n        'Accept': 'application/vnd.kafka.v2+json',\n    },\n    method='POST',\n)\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576',\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.kafka.json.v2+json',\n    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('utf-8'))\nif not any(item.get('value', {}).get('marker') == marker for item in records):\n    raise SystemExit(1)\n\nschema_request = urllib.request.Request(\n    'http://127.0.0.1:8104/subjects/platform.redpanda.smoke-value/versions/latest',\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.schemaregistry.v1+json',\n    },\n)\nschema_payload = json.loads(urllib.request.urlopen(schema_request, timeout=30).read().decode('utf-8'))\nraise SystemExit(0 if schema_payload.get('subject') == 'platform.redpanda.smoke-value' else 1)"
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Redpanda is intentionally private-only and its Admin API, HTTP Proxy, and Schema Registry listeners require credentials, so governed role verification remains the authoritative health signal."
-      }
-    },
     "matrix_synapse": {
       "service_name": "matrix-synapse",
       "owning_vm": "docker-runtime",
@@ -1652,6 +1835,68 @@
         }
       }
     },
+    "minio": {
+      "service_name": "minio",
+      "owning_vm": "docker-runtime",
+      "role": "minio_runtime",
+      "verify_file": "roles/minio_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "MinIO startup completes once the local ready endpoint reports the S3 API is ready to serve requests.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/minio/health/ready",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The MinIO live health endpoint responds on the local S3 API listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/minio/health/live",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The MinIO ready health endpoint confirms the shared object store is ready for bucket operations.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/minio/health/ready",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "tls_certificate_ids": [
+        "minio-edge",
+        "minio-console-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "MinIO Public Health",
+          "type": "http",
+          "url": "https://minio.example.com/minio/health/live",
+          "description": "Public MinIO S3 API health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "n8n": {
       "service_name": "n8n",
       "owning_vm": "docker-runtime",
@@ -1704,6 +1949,111 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "neko": {
+      "service_name": "neko",
+      "owning_vm": "runtime-comms",
+      "role": "neko_runtime",
+      "verify_file": "collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Neko responds on its local WebRTC signalling health endpoint.",
+        "timeout_seconds": 30,
+        "retries": 10,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Neko WebRTC signalling is ready to accept WebSocket connections after Docker container health checks pass.",
+        "timeout_seconds": 30,
+        "retries": 10,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Neko Browser",
+          "type": "http",
+          "url": "https://browser.example.com",
+          "description": "Public Neko browser entrypoint published through the shared edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        },
+        "reason": "Neko is operator-facing and published through the edge at browser.example.com; public health monitoring is essential for remote access availability."
+      }
+    },
+    "netbox": {
+      "service_name": "netbox",
+      "owning_vm": "docker-runtime",
+      "role": "netbox_runtime",
+      "verify_file": "roles/netbox_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "NetBox startup completes once the repo-managed API token can read the users API.",
+        "timeout_seconds": 300,
+        "retries": 30,
+        "delay_seconds": 10,
+        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The NetBox login page responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 30,
+        "delay_seconds": 10,
+        "url": "http://127.0.0.1:8082/login/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The repo-managed NetBox API token can read the users API.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "NetBox Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8082/login/",
+          "description": "Private NetBox login surface on docker-runtime.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
           "accepted_statuscodes": [
             "200-299"
           ]
@@ -1778,110 +2128,6 @@
             "200-299"
           ]
         }
-      }
-    },
-    "netbox": {
-      "service_name": "netbox",
-      "owning_vm": "docker-runtime",
-      "role": "netbox_runtime",
-      "verify_file": "roles/netbox_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "NetBox startup completes once the repo-managed API token can read the users API.",
-        "timeout_seconds": 300,
-        "retries": 30,
-        "delay_seconds": 10,
-        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The NetBox login page responds on the local runtime listener.",
-        "timeout_seconds": 300,
-        "retries": 30,
-        "delay_seconds": 10,
-        "url": "http://127.0.0.1:8082/login/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The repo-managed NetBox API token can read the users API.",
-        "timeout_seconds": 60,
-        "retries": 12,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "NetBox Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8082/login/",
-          "description": "Private NetBox login surface on docker-runtime.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "typesense": {
-      "service_name": "typesense",
-      "owning_vm": "docker-runtime",
-      "role": "typesense_runtime",
-      "verify_file": "roles/typesense_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Typesense startup completes once the local health endpoint responds on docker-runtime.",
-        "timeout_seconds": 180,
-        "retries": 36,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8108/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The Typesense health endpoint responds on the private listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8108/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Typesense runtime remains ready to accept private structured-search queries.",
-        "timeout_seconds": 120,
-        "retries": 6,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8108/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Typesense is private-only and is verified directly by the runtime role plus API gateway structured-search checks."
       }
     },
     "nginx_edge": {
@@ -2083,157 +2329,6 @@
         "reason": "The Ollama inference API remains private to the docker-runtime VM and internal guest network."
       }
     },
-    "piper": {
-      "service_name": "piper",
-      "owning_vm": "docker-runtime",
-      "role": "piper_runtime",
-      "verify_file": "roles/piper_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Piper startup completes once the local health endpoint reports the declared default voice on the private listener.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8100/healthz",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The private Piper health endpoint responds on docker-runtime.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8100/healthz",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "Piper reports the declared voice and synthesizes a WAV payload from the repo-managed private `/api/tts` contract.",
-        "timeout_seconds": 300,
-        "retries": 3,
-        "delay_seconds": 5,
-        "argv": [
-          "python3",
-          "-c",
-          "import json, urllib.request; voices=json.loads(urllib.request.urlopen('http://127.0.0.1:8100/api/voices', timeout=60).read().decode('utf-8')); assert 'en_US-ryan-medium' in voices['voices']; request=urllib.request.Request('http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium', data=b'LV3 Piper readiness', headers={'Content-Type': 'text/plain; charset=utf-8'}, method='POST'); response=urllib.request.urlopen(request, timeout=180); payload=response.read(); content_type=response.headers.get('Content-Type', ''); assert content_type.startswith('audio/wav'); assert payload[:4] == b'RIFF'; assert payload[8:12] == b'WAVE'; assert len(payload) > 1024"
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Piper is intentionally private-only and is verified through the repo-managed health, voice-catalog, and WAV synthesis probes instead of a public monitor."
-      }
-    },
-    "litellm": {
-      "service_name": "litellm",
-      "owning_vm": "docker-runtime",
-      "role": "litellm_runtime",
-      "verify_file": "roles/litellm_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "LiteLLM Proxy startup completes once the liveliness endpoint answers.",
-        "timeout_seconds": 180,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:4000/health/liveliness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The LiteLLM Proxy liveliness endpoint continues to answer.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:4000/health/liveliness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The LiteLLM Proxy health endpoint confirms readiness.",
-        "timeout_seconds": 120,
-        "retries": 12,
-        "delay_seconds": 2,
-        "url": "http://127.0.0.1:4000/health/readiness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The private LiteLLM Proxy surface is verified through repo-managed local health probes."
-      }
-    },
-    "librechat": {
-      "service_name": "librechat",
-      "owning_vm": "coolify",
-      "role": "librechat_runtime",
-      "verify_file": "roles/librechat_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "LibreChat startup completes once the health API endpoint answers.",
-        "timeout_seconds": 180,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The LibreChat health API endpoint continues to answer.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "LibreChat is ready to serve requests.",
-        "timeout_seconds": 120,
-        "retries": 12,
-        "delay_seconds": 2,
-        "url": "http://127.0.0.1:8096/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "LibreChat Public",
-          "type": "http",
-          "url": "https://chat.example.com",
-          "description": "Public LibreChat chat surface.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-302"
-          ]
-        }
-      }
-    },
     "openbao": {
       "service_name": "openbao",
       "owning_vm": "runtime-control",
@@ -2350,76 +2445,6 @@
         "reason": "The private authenticated OpenFGA contract is verified directly by the repo-managed bootstrap and bearer-auth checks instead of an unauthenticated Uptime Kuma monitor."
       }
     },
-    "temporal": {
-      "service_name": "temporal",
-      "owning_vm": "runtime-control",
-      "role": "temporal_runtime",
-      "verify_file": "roles/temporal_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "command",
-        "description": "Temporal startup completes once the cluster health command succeeds through the repo-managed admin-tools profile.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "argv": [
-          "docker",
-          "compose",
-          "--profile",
-          "tools",
-          "--file",
-          "/opt/temporal/docker-compose.yml",
-          "run",
-          "--rm",
-          "temporal-admin-tools",
-          "temporal",
-          "operator",
-          "cluster",
-          "health"
-        ],
-        "success_rc": 0
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The Temporal UI renders on the loopback diagnostic endpoint after the runtime settles.",
-        "timeout_seconds": 60,
-        "retries": 12,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8099",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "Temporal is ready once the repo-managed `lv3` namespace can be described through the admin-tools profile.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "argv": [
-          "docker",
-          "compose",
-          "--profile",
-          "tools",
-          "--file",
-          "/opt/temporal/docker-compose.yml",
-          "run",
-          "--rm",
-          "temporal-admin-tools",
-          "temporal",
-          "operator",
-          "namespace",
-          "describe",
-          "--namespace",
-          "lv3"
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Temporal is intentionally private-only and loopback-bound; the repo-managed admin-tools and smoke workflow verification path provides the authoritative health signal."
-      }
-    },
     "ops_portal": {
       "service_name": "ops-portal",
       "owning_vm": "docker-runtime",
@@ -2456,110 +2481,6 @@
           "type": "http",
           "url": "https://ops.example.com/health",
           "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "repo_intake": {
-      "service_name": "repo-intake",
-      "owning_vm": "docker-runtime",
-      "role": "repo_intake_runtime",
-      "verify_file": "roles/repo_intake_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Repo-intake startup completes once the private health endpoint responds on the local listener.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8101/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The repo-intake health endpoint responds on the private runtime listener.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8101/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The repo-intake dashboard shell renders locally after the runtime and mirrored controller secrets settle.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8101/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Repo-intake is published behind the shared edge auth boundary; the repo-managed local health and dashboard verification path is the authoritative contract."
-      }
-    },
-    "grist": {
-      "service_name": "grist",
-      "owning_vm": "docker-runtime",
-      "role": "grist_runtime",
-      "verify_file": "roles/grist_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Grist startup completes once the public status endpoint answers through the shared edge publication path.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "https://grist.example.com/status",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The local Grist status endpoint responds on the runtime listener.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8484/status",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The public Grist status endpoint renders through the shared edge while authenticated document routes remain OIDC-gated.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "https://grist.example.com/status",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Grist Public Status",
-          "type": "http",
-          "url": "https://grist.example.com/status",
-          "description": "Public Grist status endpoint published through the shared NGINX edge VM.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -2701,6 +2622,53 @@
         }
       }
     },
+    "piper": {
+      "service_name": "piper",
+      "owning_vm": "docker-runtime",
+      "role": "piper_runtime",
+      "verify_file": "roles/piper_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Piper startup completes once the local health endpoint reports the declared default voice on the private listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8100/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The private Piper health endpoint responds on docker-runtime.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8100/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Piper reports the declared voice and synthesizes a WAV payload from the repo-managed private `/api/tts` contract.",
+        "timeout_seconds": 300,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "python3",
+          "-c",
+          "import json, urllib.request; voices=json.loads(urllib.request.urlopen('http://127.0.0.1:8100/api/voices', timeout=60).read().decode('utf-8')); assert 'en_US-ryan-medium' in voices['voices']; request=urllib.request.Request('http://127.0.0.1:8100/api/tts?voice=en_US-ryan-medium', data=b'LV3 Piper readiness', headers={'Content-Type': 'text/plain; charset=utf-8'}, method='POST'); response=urllib.request.urlopen(request, timeout=180); payload=response.read(); content_type=response.headers.get('Content-Type', ''); assert content_type.startswith('audio/wav'); assert payload[:4] == b'RIFF'; assert payload[8:12] == b'WAVE'; assert len(payload) > 1024"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Piper is intentionally private-only and is verified through the repo-managed health, voice-catalog, and WAV synthesis probes instead of a public monitor."
+      }
+    },
     "plane": {
       "service_name": "plane",
       "owning_vm": "docker-runtime",
@@ -2745,65 +2713,6 @@
             "200-399"
           ]
         }
-      }
-    },
-    "label_studio": {
-      "service_name": "label_studio",
-      "owning_vm": "docker-runtime",
-      "role": "label_studio_runtime",
-      "verify_file": "roles/label_studio_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Label Studio startup completes once the local /api/version endpoint returns 200 on the runtime listener.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8110/api/version",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The local Label Studio /api/version endpoint responds on docker-runtime.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8110/api/version",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The public Label Studio root redirects through the shared edge auth boundary while the private runtime listener remains bound for automation and the operator gateway route.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "https://annotate.example.com/",
-        "method": "GET",
-        "expected_status": [
-          302,
-          303
-        ],
-        "docker_publication": {
-          "container_name": "label-studio",
-          "bindings": [
-            {
-              "host": "10.10.10.20",
-              "port": 8110
-            }
-          ],
-          "required_networks": [
-            "label_studio_default"
-          ]
-        }
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The public anonymous contract is intentionally a shared-edge auth redirect rather than a stable unauthenticated health endpoint; the role-level verify_public tasks and live-apply evidence cover that boundary."
       }
     },
     "platform_context_api": {
@@ -3068,6 +2977,146 @@
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "redpanda": {
+      "service_name": "redpanda",
+      "owning_vm": "docker-runtime",
+      "role": "redpanda_runtime",
+      "verify_file": "roles/redpanda_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "command",
+        "description": "Redpanda startup completes once the authenticated Admin API ready endpoint answers with the repo-managed admin principal.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\".encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n    'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    raise SystemExit(0 if response.status == 200 else 1)"
+        ],
+        "success_rc": 0
+      },
+      "liveness": {
+        "kind": "command",
+        "description": "The authenticated Redpanda Admin API ready endpoint answers through the rendered runtime env credentials.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path\nimport base64\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ntoken = base64.b64encode(\n    f\"{env['REDPANDA_ADMIN_USER']}:{env['REDPANDA_ADMIN_PASSWORD']}\".encode('utf-8')\n).decode('ascii')\nrequest = urllib.request.Request(\n    'http://127.0.0.1:9644/v1/status/ready',\n    headers={'Authorization': f'Basic {token}'},\n)\nwith urllib.request.urlopen(request, timeout=30) as response:\n    raise SystemExit(0 if response.status == 200 else 1)"
+        ],
+        "success_rc": 0
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Redpanda accepts a smoke record through the HTTP Proxy and returns the registered smoke schema through the Schema Registry.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path\nimport base64\nimport json\nimport time\nimport urllib.request\n\nenv = {}\nfor line in Path('/run/lv3-secrets/redpanda/runtime.env').read_text(encoding='utf-8').splitlines():\n    if '=' in line:\n        key, value = line.split('=', 1)\n        env[key] = value\n\ndef auth(user_key, password_key):\n    return base64.b64encode(\n        f\"{env[user_key]}:{env[password_key]}\".encode('utf-8')\n    ).decode('ascii')\n\nmarker = f\"health-probe-redpanda-{int(time.time())}\"\npayload = json.dumps(\n    {\n        'records': [\n            {\n                'value': {\n                    'marker': marker,\n                    'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),\n                    'producer': 'health-probe',\n                }\n            }\n        ]\n    }\n).encode('utf-8')\nproduce_request = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke',\n    data=payload,\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Content-Type': 'application/vnd.kafka.json.v2+json',\n        'Accept': 'application/vnd.kafka.v2+json',\n    },\n    method='POST',\n)\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576',\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.kafka.json.v2+json',\n    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('utf-8'))\nif not any(item.get('value', {}).get('marker') == marker for item in records):\n    raise SystemExit(1)\n\nschema_request = urllib.request.Request(\n    'http://127.0.0.1:8104/subjects/platform.redpanda.smoke-value/versions/latest',\n    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.schemaregistry.v1+json',\n    },\n)\nschema_payload = json.loads(urllib.request.urlopen(schema_request, timeout=30).read().decode('utf-8'))\nraise SystemExit(0 if schema_payload.get('subject') == 'platform.redpanda.smoke-value' else 1)"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Redpanda is intentionally private-only and its Admin API, HTTP Proxy, and Schema Registry listeners require credentials, so governed role verification remains the authoritative health signal."
+      }
+    },
+    "repo_intake": {
+      "service_name": "repo-intake",
+      "owning_vm": "docker-runtime",
+      "role": "repo_intake_runtime",
+      "verify_file": "roles/repo_intake_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Repo-intake startup completes once the private health endpoint responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8101/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The repo-intake health endpoint responds on the private runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8101/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The repo-intake dashboard shell renders locally after the runtime and mirrored controller secrets settle.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8101/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Repo-intake is published behind the shared edge auth boundary; the repo-managed local health and dashboard verification path is the authoritative contract."
+      }
+    },
+    "repowise": {
+      "service_name": "repowise",
+      "owning_vm": "docker-runtime",
+      "role": null,
+      "liveness": {
+        "kind": "http",
+        "description": "Repowise semantic search service responds on its local health endpoint.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:7070/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Repowise search endpoint accepts queries after the vector index is loaded.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:7070/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Repowise Private",
+          "type": "http",
+          "url": "http://10.10.10.20:7070/health",
+          "description": "Private Repowise health endpoint on docker-runtime.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
           "accepted_statuscodes": [
             "200-299"
           ]
@@ -3401,6 +3450,123 @@
         }
       }
     },
+    "temporal": {
+      "service_name": "temporal",
+      "owning_vm": "runtime-control",
+      "role": "temporal_runtime",
+      "verify_file": "roles/temporal_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "command",
+        "description": "Temporal startup completes once the cluster health command succeeds through the repo-managed admin-tools profile.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "argv": [
+          "docker",
+          "compose",
+          "--profile",
+          "tools",
+          "--file",
+          "/opt/temporal/docker-compose.yml",
+          "run",
+          "--rm",
+          "temporal-admin-tools",
+          "temporal",
+          "operator",
+          "cluster",
+          "health"
+        ],
+        "success_rc": 0
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Temporal UI renders on the loopback diagnostic endpoint after the runtime settles.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8099",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Temporal is ready once the repo-managed `lv3` namespace can be described through the admin-tools profile.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "argv": [
+          "docker",
+          "compose",
+          "--profile",
+          "tools",
+          "--file",
+          "/opt/temporal/docker-compose.yml",
+          "run",
+          "--rm",
+          "temporal-admin-tools",
+          "temporal",
+          "operator",
+          "namespace",
+          "describe",
+          "--namespace",
+          "lv3"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Temporal is intentionally private-only and loopback-bound; the repo-managed admin-tools and smoke workflow verification path provides the authoritative health signal."
+      }
+    },
+    "tesseract_ocr": {
+      "service_name": "tesseract-ocr",
+      "owning_vm": "runtime-ai",
+      "role": "tesseract_ocr_runtime",
+      "verify_file": "roles/tesseract_ocr_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "The Tesseract OCR health endpoint responds on the local listener after the repo-built runtime starts.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3008/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Tesseract OCR health endpoint responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3008/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Tesseract OCR extracts deterministic text from the repo-managed verification image fixture.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "python3",
+          "-c",
+          "import base64, json, urllib.request, uuid; boundary='lv3-boundary-' + uuid.uuid4().hex; image=base64.b64decode('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MmXKzJs376uvvipVqpTqsRhLVFRU8+bNxeukp6dHRUVpDoHO4Hg6d+4cGhoqq9rAgQOTk5NlVQPMhTAqX61atQ4cOPDGG29o5lG/fv24uDjp29mL8/DwmDp1alxcXLNmzTQjadGixbFjx/r37696IEZksVgWLVrk6ekpXmrNmjX2WczcDugMjic6OlrWn8rXr1+32zp6gNEQRm2idOnSCxcujI2NDQoK0ozNw8NjzJgx+/fvr1mzpmZU9erV27179+eff26ET8OrVKmyZMmS//znPyEhIarHYlyPPvroBx98IKVUVFRUenq65hDoDA6mdu3aEm/3/PLLL7ds2SKrGmAmqlfdd3AZGRljx46VconIFtq1a3f27FndPLKysubMmSPruYEHVbFixSlTpmRlZdnzWzbLDky/l5+f37hxYwNuamUEdAaT7sD0e8nJyf7+/lJe55qmhYSEpKenq/peAFUIo/YQHx/ftWtXQz1oX6dOnTVr1ujmlJeXt2TJEns+29SgQYPFixfn5OTY/5s1bxjVdf348eNSHoZzdXU9fPiw7nDoDA4QRnVdX7BggSbPkCFDFH4vgBKEUfs5f/58VFSU8mftW7duvX79eqvVqpvf+fPnP/zwwzp16thorqpXrz5mzJijR48q/B5NHUZ1XR8/fryUn0Xjxo0LCgp0R0RnMHsYLSgoaNiwocRbrvft26fw2wHsjzBqb8nJyVOmTKlbt65mX76+vr1793bIy0u6rv/8888LFizo2bOn+H2cFStW7NKly5w5c06dOqUbgNnDaF5eXoMGDTQZZs2apTsuOoN5w6iu63v27HFxcZH4yZWSz2EAVVz+L5BChbNnz66658iRI7Y7i5+fX3h4eERERGhoqLu7u+YErl69eurUqfPnz8fHx58/f/7ixYt3797NuCczMzM3N9fDw8PzHh8fn8BfVa9evU6dOk888UT58uU1I2nVqtXOnTtLduyECRPGjh2rqXbkyJG//e1v+fn5gnUeeuih06dPO/zmAk7bGUaMGFHilTvDw8OVr7rQs2fPpUuXyqr23nvvyXoEEDA+wqh6V65c2bt37/57Dh8+nJ2dLViwatWqTX/15JNPGnORTgB/jc4AwEkQRo0lLy/vzJkzCQkJF3515cqVu3fvZmVlZd6TlZVlsVi8vb29fuXn51e1atWQkJDg4OCQkJDHHnvMCOsfAZCIzgDAgRFGAQAAoIyBFhsCAACAsyGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAAA0Vf4fxPRvjKGBw3AAAAAASUVORK5CYII='); chunks=[f'--{boundary}\\r\\n'.encode(), b'Content-Disposition: form-data; name=\"file\"; filename=\"ocr-ok.png\"\\r\\n', b'Content-Type: image/png\\r\\n\\r\\n', image, b'\\r\\n', f'--{boundary}--\\r\\n'.encode()]; request=urllib.request.Request('http://127.0.0.1:3008/ocr', data=b''.join(chunks), method='POST', headers={'Content-Type': f'multipart/form-data; boundary={boundary}', 'Accept': 'application/json'}); payload=json.loads(urllib.request.urlopen(request, timeout=60).read().decode('utf-8')); text=str(payload.get('text', '')).upper(); raise SystemExit(0 if 'OCR' in text and 'OK' in text and payload.get('page_count') == 1 else 1)"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The Tesseract OCR runtime remains private to runtime-ai and is verified through repo-managed readiness probes and helper-path checks."
+      }
+    },
     "tika": {
       "service_name": "tika",
       "owning_vm": "runtime-ai",
@@ -3460,18 +3626,18 @@
         }
       }
     },
-    "tesseract_ocr": {
-      "service_name": "tesseract-ocr",
-      "owning_vm": "runtime-ai",
-      "role": "tesseract_ocr_runtime",
-      "verify_file": "roles/tesseract_ocr_runtime/tasks/verify.yml",
+    "typesense": {
+      "service_name": "typesense",
+      "owning_vm": "docker-runtime",
+      "role": "typesense_runtime",
+      "verify_file": "roles/typesense_runtime/tasks/verify.yml",
       "startup": {
         "kind": "http",
-        "description": "The Tesseract OCR health endpoint responds on the local listener after the repo-built runtime starts.",
+        "description": "Typesense startup completes once the local health endpoint responds on docker-runtime.",
         "timeout_seconds": 180,
-        "retries": 24,
+        "retries": 36,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:3008/healthz",
+        "url": "http://127.0.0.1:8108/health",
         "method": "GET",
         "expected_status": [
           200
@@ -3479,32 +3645,31 @@
       },
       "liveness": {
         "kind": "http",
-        "description": "The Tesseract OCR health endpoint responds on the local listener.",
-        "timeout_seconds": 180,
+        "description": "The Typesense health endpoint responds on the private listener.",
+        "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:3008/healthz",
+        "url": "http://127.0.0.1:8108/health",
         "method": "GET",
         "expected_status": [
           200
         ]
       },
       "readiness": {
-        "kind": "command",
-        "description": "Tesseract OCR extracts deterministic text from the repo-managed verification image fixture.",
+        "kind": "http",
+        "description": "The Typesense runtime remains ready to accept private structured-search queries.",
         "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "python3",
-          "-c",
-          "import base64, json, urllib.request, uuid; boundary='lv3-boundary-' + uuid.uuid4().hex; image=base64.b64decode('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MmXKzJs376uvvipVqpTqsRhLVFRU8+bNxeukp6dHRUVpDoHO4Hg6d+4cGhoqq9rAgQOTk5NlVQPMhTAqX61atQ4cOPDGG29o5lG/fv24uDjp29mL8/DwmDp1alxcXLNmzTQjadGixbFjx/r37696IEZksVgWLVrk6ekpXmrNmjX2WczcDugMjic6OlrWn8rXr1+32zp6gNEQRm2idOnSCxcujI2NDQoK0ozNw8NjzJgx+/fvr1mzpmZU9erV27179+eff26ET8OrVKmyZMmS//znPyEhIarHYlyPPvroBx98IKVUVFRUenq65hDoDA6mdu3aEm/3/PLLL7ds2SKrGmAmqlfdd3AZGRljx46VconIFtq1a3f27FndPLKysubMmSPruYEHVbFixSlTpmRlZdnzWzbLDky/l5+f37hxYwNuamUEdAaT7sD0e8nJyf7+/lJe55qmhYSEpKenq/peAFUIo/YQHx/ftWtXQz1oX6dOnTVr1ujmlJeXt2TJEns+29SgQYPFixfn5OTY/5s1bxjVdf348eNSHoZzdXU9fPiw7nDoDA4QRnVdX7BggSbPkCFDFH4vgBKEUfs5f/58VFSU8mftW7duvX79eqvVqpvf+fPnP/zwwzp16thorqpXrz5mzJijR48q/B5NHUZ1XR8/fryUn0Xjxo0LCgp0R0RnMHsYLSgoaNiwocRbrvft26fw2wHsjzBqb8nJyVOmTKlbt65mX76+vr1793bIy0u6rv/8888LFizo2bOn+H2cFStW7NKly5w5c06dOqUbgNnDaF5eXoMGDTQZZs2apTsuOoN5w6iu63v27HFxcZH4yZWSz2EAVVz+L5BChbNnz66658iRI7Y7i5+fX3h4eERERGhoqLu7u+YErl69eurUqfPnz8fHx58/f/7ixYt3797NuCczMzM3N9fDw8PzHh8fn8BfVa9evU6dOk888UT58uU1I2nVqtXOnTtLduyECRPGjh2rqXbkyJG//e1v+fn5gnUeeuih06dPO/zmAk7bGUaMGFHilTvDw8OVr7rQs2fPpUuXyqr23nvvyXoEEDA+wqh6V65c2bt37/57Dh8+nJ2dLViwatWqTX/15JNPGnORTgB/jc4AwEkQRo0lLy/vzJkzCQkJF3515cqVu3fvZmVlZd6TlZVlsVi8vb29fuXn51e1atWQkJDg4OCQkJDHHnvMCOsfAZCIzgDAgRFGAQAAoIyBFhsCAACAsyGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAACUIYwCAABAGcIoAAAAlCGMAgAAQBnCKAAAAJQhjAIAAEAZwigAAAA0Vf4fxPRvjKGBw3AAAAAASUVORK5CYII='); chunks=[f'--{boundary}\\r\\n'.encode(), b'Content-Disposition: form-data; name=\"file\"; filename=\"ocr-ok.png\"\\r\\n', b'Content-Type: image/png\\r\\n\\r\\n', image, b'\\r\\n', f'--{boundary}--\\r\\n'.encode()]; request=urllib.request.Request('http://127.0.0.1:3008/ocr', data=b''.join(chunks), method='POST', headers={'Content-Type': f'multipart/form-data; boundary={boundary}', 'Accept': 'application/json'}); payload=json.loads(urllib.request.urlopen(request, timeout=60).read().decode('utf-8')); text=str(payload.get('text', '')).upper(); raise SystemExit(0 if 'OCR' in text and 'OK' in text and payload.get('page_count') == 1 else 1)"
-        ],
-        "success_rc": 0
+        "retries": 6,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8108/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": false,
-        "reason": "The Tesseract OCR runtime remains private to runtime-ai and is verified through repo-managed readiness probes and helper-path checks."
+        "reason": "Typesense is private-only and is verified directly by the runtime role plus API gateway structured-search checks."
       }
     },
     "uptime_kuma": {
@@ -3702,171 +3867,6 @@
             "200-299"
           ]
         }
-      }
-    },
-    "glitchtip": {
-      "service_name": "glitchtip",
-      "owning_vm": "docker-runtime",
-      "role": "glitchtip_runtime",
-      "verify_file": "roles/glitchtip_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "GlitchTip startup completes once the local internal health endpoint returns 200 on docker-runtime.",
-        "timeout_seconds": 300,
-        "retries": 36,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:3005/api/0/internal/health/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The local GlitchTip health endpoint continues to answer on docker-runtime.",
-        "timeout_seconds": 300,
-        "retries": 36,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:3005/api/0/internal/health/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The public GlitchTip health endpoint answers through the shared NGINX edge with Keycloak OIDC settings and project ingestion online.",
-        "timeout_seconds": 300,
-        "retries": 36,
-        "delay_seconds": 5,
-        "url": "https://errors.example.com/api/0/internal/health/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ],
-        "docker_publication": {
-          "container_name": "glitchtip",
-          "bindings": [
-            {
-              "host": "10.10.10.20",
-              "port": 3005
-            }
-          ],
-          "required_networks": [
-            "glitchtip_default"
-          ]
-        }
-      },
-      "tls_certificate_ids": [
-        "errors-edge"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "GlitchTip Public Health",
-          "type": "http",
-          "url": "https://errors.example.com/api/0/internal/health/",
-          "description": "Public GlitchTip health endpoint published through the shared NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "repowise": {
-      "service_name": "repowise",
-      "owning_vm": "docker-runtime",
-      "role": null,
-      "liveness": {
-        "kind": "http",
-        "description": "Repowise semantic search service responds on its local health endpoint.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:7070/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "Repowise search endpoint accepts queries after the vector index is loaded.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:7070/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Repowise Private",
-          "type": "http",
-          "url": "http://10.10.10.20:7070/health",
-          "description": "Private Repowise health endpoint on docker-runtime.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "neko": {
-      "service_name": "neko",
-      "owning_vm": "runtime-comms",
-      "role": "neko_runtime",
-      "verify_file": "collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "Neko responds on its local WebRTC signalling health endpoint.",
-        "timeout_seconds": 30,
-        "retries": 10,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:8080/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "Neko WebRTC signalling is ready to accept WebSocket connections after Docker container health checks pass.",
-        "timeout_seconds": 30,
-        "retries": 10,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:8080/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Neko Browser",
-          "type": "http",
-          "url": "https://browser.example.com",
-          "description": "Public Neko browser entrypoint published through the shared edge.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        },
-        "reason": "Neko is operator-facing and published through the edge at browser.example.com; public health monitoring is essential for remote access availability."
       }
     }
   }

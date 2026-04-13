@@ -6,7 +6,7 @@ service:
     monitoring stack.
   category: observability
   lifecycle_status: active
-  vm: monitoring-lv3
+  vm: monitoring
   vmid: 140
   internal_url: http://10.10.10.40:9093
   exposure: private-only
@@ -43,17 +43,17 @@ redundancy:
     - pbs_vm_140
   standby:
     kind: cold
-    location: monitoring-lv3
-    failover_trigger: Restore or rebuild monitoring-lv3 when Alertmanager or the guest
+    location: monitoring
+    failover_trigger: Restore or rebuild monitoring when Alertmanager or the guest
       cannot be recovered in place.
-    failback_method: Replay the monitoring stack converge on monitoring-lv3 after
-      the restored guest is healthy.
+    failback_method: Replay the monitoring stack converge on monitoring after the
+      restored guest is healthy.
 dependency:
   node:
     id: alertmanager
     service: alertmanager
     name: Alertmanager
-    vm: monitoring-lv3
+    vm: monitoring
     tier: 1
     category: observability
     adr: 0097
@@ -72,7 +72,7 @@ dependency:
         the team-visible fallback channel.
 health:
   service_name: alertmanager
-  owning_vm: monitoring-lv3
+  owning_vm: monitoring
   role: alertmanager_runtime
   verify_file: roles/alertmanager_runtime/tasks/verify.yml
   liveness:
@@ -99,4 +99,4 @@ health:
   uptime_kuma:
     enabled: false
     reason: Alertmanager is private-only and its operator value is already covered
-      by role verification on monitoring-lv3.
+      by role verification on monitoring.

@@ -2,10 +2,11 @@ schema_version: 1.0.0
 service:
   id: semaphore
   name: Semaphore
-  description: Private Semaphore UI and API for bounded Ansible job execution.
+  description: Private Semaphore UI and API for bounded Ansible job execution with
+    a repo-managed Keycloak OIDC login path and retained break-glass admin access.
   category: automation
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: http://100.118.189.95:8020
   exposure: private-only
@@ -17,6 +18,7 @@ service:
     - semaphore_database_password
     - semaphore_admin_password
     - semaphore_api_token
+    - keycloak_semaphore_client_secret
   adr: 0149
   runbook: docs/runbooks/configure-semaphore.md
   runtime_pool: runtime-control
@@ -28,6 +30,7 @@ service:
     - ansible
     - automation
     - jobs
+    - oidc
   environments:
     production:
       status: active
@@ -35,9 +38,11 @@ service:
 completeness:
   service_type: compose
   requires_subdomain: false
-  requires_oidc: false
+  requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
+  keycloak_client_generated: true
+  suppressed_checks: {}
 redundancy:
   tier: R1
   recovery_objective:
@@ -48,21 +53,26 @@ redundancy:
     - pbs_vm_192
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 when Semaphore or its runtime state
+    location: runtime-control
+    failover_trigger: Restore runtime-control when Semaphore or its runtime state
       cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-control-lv3, then rerun the Semaphore
+    failback_method: Restore or rebuild runtime-control, then rerun the Semaphore
       converge from git.
 dependency:
   node:
     id: semaphore
     service: semaphore
     name: Semaphore
-    vm: docker-runtime-lv3
+    vm: runtime-control
     tier: 2
     category: automation
     adr: 0149
   outbound_edges:
+    - from: semaphore
+      to: keycloak
+      type: soft
+      description: Semaphore delegates routine browser sign-in to the shared Keycloak
+        OIDC broker while retaining a repo-managed break-glass admin login.
     - from: semaphore
       to: openbao
       type: startup_only
@@ -75,7 +85,7 @@ dependency:
         task history in Postgres.
 health:
   service_name: semaphore
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: semaphore_runtime
   verify_file: roles/semaphore_runtime/tasks/verify.yml
   liveness:
@@ -105,7 +115,7 @@ health:
       name: Semaphore Private
       type: http
       url: http://10.10.10.92:3004/api/ping
-      description: Private Semaphore ping endpoint on runtime-control-lv3.
+      description: Private Semaphore ping endpoint on runtime-control.
       interval: 60
       retryInterval: 60
       maxretries: 0

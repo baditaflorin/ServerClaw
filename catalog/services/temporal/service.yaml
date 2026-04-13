@@ -6,7 +6,7 @@ service:
     automation that must survive worker crashes and retries.
   category: automation
   lifecycle_status: active
-  vm: runtime-control-lv3
+  vm: runtime-control
   vmid: 192
   internal_url: grpc://127.0.0.1:7233
   exposure: private-only
@@ -31,7 +31,7 @@ service:
     - temporal
     - private
   notes: The frontend gRPC port, HTTP port, and UI are intentionally loopback-only
-    on runtime-control-lv3; operators reach them through SSH tunneling or repo-managed
+    on runtime-control; operators reach them through SSH tunneling or repo-managed
     admin-tools commands.
   environments:
     production:
@@ -62,18 +62,17 @@ redundancy:
     - pbs_vm_150
   standby:
     kind: cold
-    location: runtime-control-lv3
-    failover_trigger: Restore runtime-control-lv3 or postgres-lv3 when the Temporal
-      runtime, namespace bootstrap, or workflow history stores cannot be recovered
-      in place.
-    failback_method: Restore or rebuild runtime-control-lv3 and postgres-lv3 as needed,
-      then rerun the Temporal converge from git and replay the smoke verification.
+    location: runtime-control
+    failover_trigger: Restore runtime-control or postgres when the Temporal runtime,
+      namespace bootstrap, or workflow history stores cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-control and postgres as needed, then
+      rerun the Temporal converge from git and replay the smoke verification.
 dependency:
   node:
     id: temporal
     service: temporal
     name: Temporal
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: 0293
@@ -90,7 +89,7 @@ dependency:
         in PostgreSQL.
 health:
   service_name: temporal
-  owning_vm: runtime-control-lv3
+  owning_vm: runtime-control
   role: temporal_runtime
   verify_file: roles/temporal_runtime/tasks/verify.yml
   startup:
@@ -122,7 +121,7 @@ health:
     timeout_seconds: 60
     retries: 12
     delay_seconds: 5
-    url: http://127.0.0.1:8100
+    url: http://127.0.0.1:8099
     method: GET
     expected_status:
       - 200
@@ -165,7 +164,7 @@ data:
     access_role: platform-operator
     pii_risk: medium
     locations:
-      - PostgreSQL temporal database on postgres-lv3
-      - PostgreSQL temporal_visibility database on postgres-lv3
+      - PostgreSQL temporal database on postgres
+      - PostgreSQL temporal_visibility database on postgres
     notes: Temporal persists workflow event history, timers, and visibility records
       for the repo-managed `lv3` namespace using the declared retention window.

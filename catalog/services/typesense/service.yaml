@@ -6,7 +6,7 @@ service:
     and faceted operator lookups.
   category: data
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://100.64.0.1:8016
   exposure: private-only
@@ -51,18 +51,18 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Typesense, its private controller
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Typesense, its private controller
       proxy contract, or the derived search index volume cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Typesense
-      converge and API gateway converge from git to rebuild the repo-managed structured-search
+    failback_method: Restore or rebuild docker-runtime, then rerun the Typesense converge
+      and API gateway converge from git to rebuild the repo-managed structured-search
       collections.
 dependency:
   node:
     id: typesense
     service: typesense
     name: Typesense
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: data
     adr: '0277'
@@ -71,7 +71,7 @@ dependency:
       to: docker_runtime
       type: hard
       description: The Typesense runtime and its derived index volume are hosted on
-        docker-runtime-lv3.
+        docker-runtime.
     - from: typesense
       to: openbao
       type: startup_only
@@ -79,13 +79,13 @@ dependency:
         secret path before startup.
 health:
   service_name: typesense
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: typesense_runtime
   verify_file: roles/typesense_runtime/tasks/verify.yml
   startup:
     kind: http
     description: Typesense startup completes once the local health endpoint responds
-      on docker-runtime-lv3.
+      on docker-runtime.
     timeout_seconds: 180
     retries: 36
     delay_seconds: 5
@@ -128,7 +128,7 @@ data:
     access_role: platform-read
     pii_risk: low
     locations:
-      - Docker volume typesense-data on docker-runtime-lv3
+      - Docker volume typesense-data on docker-runtime
       - Typesense collection platform-services
     notes: The repo-managed platform service catalog is materialized into Typesense
       as a derived full-text and faceted-search index and can be replayed from git

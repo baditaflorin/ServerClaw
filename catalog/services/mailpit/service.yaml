@@ -6,7 +6,7 @@ service:
     email verification.
   category: communication
   lifecycle_status: active
-  vm: runtime-general-lv3
+  vm: runtime-general
   vmid: 191
   internal_url: http://10.10.10.91:8025
   exposure: private-only
@@ -29,9 +29,9 @@ service:
     production:
       status: active
       url: http://10.10.10.91:8025
-      notes: Mailpit runs privately on runtime-general-lv3 for non-production SMTP
-        interception and operator inspection; production services must continue to
-        relay through Stalwart.
+      notes: Mailpit runs privately on runtime-general for non-production SMTP interception
+        and operator inspection; production services must continue to relay through
+        Stalwart.
 completeness:
   service_type: compose
   requires_subdomain: false
@@ -52,24 +52,24 @@ redundancy:
     - pbs_vm_191
   standby:
     kind: cold
-    location: runtime-general-lv3
-    failover_trigger: Restore runtime-general-lv3 when Mailpit or its private SMTP
-      capture surface cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-general-lv3, then rerun the Mailpit
-      converge from git.
+    location: runtime-general
+    failover_trigger: Restore runtime-general when Mailpit or its private SMTP capture
+      surface cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-general, then rerun the Mailpit converge
+      from git.
 dependency:
   node:
     id: mailpit
     service: mailpit
     name: Mailpit
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: communication
     adr: 0282
   outbound_edges: []
 health:
   service_name: mailpit
-  owning_vm: runtime-general-lv3
+  owning_vm: runtime-general
   role: mailpit_runtime
   verify_file: roles/mailpit_runtime/tasks/verify.yml
   liveness:
@@ -95,8 +95,8 @@ health:
       - import json, smtplib, urllib.request; from email.message import EmailMessage;
         subject = 'LV3 health-probe Mailpit'; delete_request = urllib.request.Request('http://127.0.0.1:8025/api/v1/messages',
         method='DELETE'); urllib.request.urlopen(delete_request, timeout=30).read();
-        message = EmailMessage(); message['From'] = 'healthcheck@lv3.org'; message['To']
-        = 'mailpit-health@lv3.org'; message['Subject'] = subject; message.set_content('Mailpit
+        message = EmailMessage(); message['From'] = 'healthcheck@example.com'; message['To']
+        = 'mailpit-health@example.com'; message['Subject'] = subject; message.set_content('Mailpit
         readiness probe'); client = smtplib.SMTP('127.0.0.1', 1025, timeout=30); client.send_message(message);
         client.quit(); response = urllib.request.urlopen('http://127.0.0.1:8025/api/v1/messages',
         timeout=30); payload = json.loads(response.read().decode('utf-8')); messages
@@ -117,7 +117,7 @@ data:
     access_role: platform-operator
     pii_risk: medium
     locations:
-      - Mailpit in-memory message store on docker-runtime-lv3
+      - Mailpit in-memory message store on docker-runtime
     notes: Mailpit intentionally keeps intercepted staging and development messages
       in ephemeral in-memory storage so assertion traffic is inspectable but lost
       on restart.

@@ -6,16 +6,14 @@ service:
     local model and search integrations.
   category: access
   lifecycle_status: active
-  vm: coolify-lv3
+  vm: coolify
   vmid: 170
   internal_url: http://10.10.10.70:8096
-  public_url: https://chat.lv3.org
-  subdomain: chat.lv3.org
+  public_url: https://chat.example.com
   exposure: edge-published
   uptime_monitor_name: ServerClaw
   health_probe_id: serverclaw
-  image_catalog_ids:
-    - open_webui_runtime
+  image_catalog_ids: []
   secret_catalog_ids:
     - serverclaw_admin_password
     - serverclaw_secret_key
@@ -35,8 +33,7 @@ service:
   environments:
     production:
       status: active
-      url: https://chat.lv3.org
-      subdomain: chat.lv3.org
+      url: https://chat.example.com
       notes: ServerClaw uses in-app Keycloak OIDC for routine browser login while
         retaining a repo-managed bootstrap admin as break-glass access.
 completeness:
@@ -59,18 +56,18 @@ redundancy:
     - pbs_vm_170
   standby:
     kind: cold
-    location: coolify-lv3
-    failover_trigger: Restore coolify-lv3 when ServerClaw or its runtime state cannot
+    location: coolify
+    failover_trigger: Restore coolify when ServerClaw or its runtime state cannot
       be recovered in place.
-    failback_method: Restore or rebuild coolify-lv3, then rerun the ServerClaw converge
+    failback_method: Restore or rebuild coolify, then rerun the ServerClaw converge
       from git.
 dependency:
   node:
     id: serverclaw
     service: serverclaw
     name: ServerClaw
-    vm: coolify-lv3
-    tier: 3
+    vm: coolify
+    tier: 2
     category: access
     adr: '0254'
   outbound_edges:
@@ -82,18 +79,13 @@ dependency:
     - from: serverclaw
       to: nginx_edge
       type: soft
-      description: Public access to chat.lv3.org depends on the shared NGINX edge
+      description: Public access to chat.example.com depends on the shared NGINX edge
         publication path.
     - from: serverclaw
       to: ollama
       type: hard
       description: ServerClaw routes its default local model connector to the private
-        Ollama runtime on docker-runtime-lv3.
-    - from: serverclaw
-      to: one_api
-      type: hard
-      description: ServerClaw uses the private One-API runtime for repo-managed local
-        model access.
+        Ollama runtime on docker-runtime.
     - from: serverclaw
       to: openbao
       type: startup_only
@@ -106,9 +98,9 @@ dependency:
         SearXNG runtime when the feature is enabled.
 health:
   service_name: serverclaw
-  owning_vm: coolify-lv3
-  role: open_webui_runtime
-  verify_file: roles/open_webui_runtime/tasks/verify.yml
+  owning_vm: coolify
+  role: null
+  verify_file: null
   startup:
     kind: http
     description: ServerClaw startup completes once the local HTTP surface answers
@@ -146,7 +138,7 @@ health:
     monitor:
       name: ServerClaw
       type: http
-      url: https://chat.lv3.org
+      url: https://chat.example.com
       description: Public ServerClaw assistant surface published through the shared
         NGINX edge.
       interval: 60
@@ -156,6 +148,18 @@ health:
       accepted_statuscodes:
         - 200-299
 data:
+  - id: serverclaw-workbench-state
+    service: serverclaw
+    name: ServerClaw workbench state
+    class: confidential
+    retention_days: 90
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - http://100.64.0.1:8008
+    notes: ServerClaw persists conversations, workspace artifacts, prompt history,
+      and user-specific workbench settings in its local runtime data volume on docker-runtime.
   - id: serverclaw-workspace-store
     service: serverclaw
     name: ServerClaw workspace and chat state
@@ -166,17 +170,17 @@ data:
     pii_risk: high
     locations:
       - /opt/serverclaw/data
-      - https://chat.lv3.org
+      - https://chat.example.com
     notes: ServerClaw persists chat history, workspace metadata, uploaded knowledge
-      artifacts, and user-facing assistant settings in its Open WebUI data volume
-      on coolify-lv3.
+      artifacts, and user-facing assistant settings in its ServerClaw data volume
+      on coolify.
 slos:
   - id: serverclaw-availability
     service_id: serverclaw
     indicator: availability
     objective_percent: 99.0
     window_days: 30
-    target_url: https://chat.lv3.org
+    target_url: https://chat.example.com
     probe_module: http_2xx_follow_redirects
     description: ServerClaw remains reachable through the public LV3 edge for chat-first
       assistant access.

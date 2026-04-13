@@ -6,11 +6,11 @@ service:
     URL, and a private controller path on the Proxmox host.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://100.64.0.1:8017
-  public_url: https://ci.lv3.org
-  subdomain: ci.lv3.org
+  public_url: https://ci.example.com
+  subdomain: ci.example.com
   exposure: edge-published
   uptime_monitor_name: Woodpecker Public
   health_probe_id: woodpecker
@@ -47,8 +47,8 @@ service:
   environments:
     production:
       status: active
-      url: https://ci.lv3.org
-      subdomain: ci.lv3.org
+      url: https://ci.example.com
+      subdomain: ci.example.com
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -68,17 +68,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Woodpecker or its runtime state
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Woodpecker or its runtime state
       cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Woodpecker
+    failback_method: Restore or rebuild docker-runtime, then rerun the Woodpecker
       converge from git.
 dependency:
   node:
     id: woodpecker
     service: woodpecker
     name: Woodpecker CI
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 3
     category: automation
     adr: 0287
@@ -91,8 +91,9 @@ dependency:
     - from: woodpecker
       to: nginx_edge
       type: soft
-      description: Public operator access to ci.lv3.org depends on the shared NGINX
-        edge, while the controller path remains reachable on the Proxmox host tailnet.
+      description: Public operator access to ci.example.com depends on the shared
+        NGINX edge, while the controller path remains reachable on the Proxmox host
+        tailnet.
     - from: woodpecker
       to: openbao
       type: startup_only
@@ -105,7 +106,7 @@ dependency:
         history in Postgres.
 health:
   service_name: woodpecker
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: woodpecker_runtime
   verify_file: roles/woodpecker_runtime/tasks/verify.yml
   liveness:
@@ -126,7 +127,7 @@ health:
     timeout_seconds: 90
     retries: 18
     delay_seconds: 5
-    url: https://ci.lv3.org/healthz
+    url: https://ci.example.com/healthz
     method: GET
     expected_status:
       - 200
@@ -136,7 +137,7 @@ health:
     monitor:
       name: Woodpecker Public
       type: http
-      url: https://ci.lv3.org/healthz
+      url: https://ci.example.com/healthz
       description: Woodpecker health endpoint published through the shared NGINX edge.
       interval: 60
       retryInterval: 60
@@ -165,7 +166,7 @@ slos:
     indicator: availability
     objective_percent: 99.5
     window_days: 30
-    target_url: https://ci.lv3.org/healthz
+    target_url: https://ci.example.com/healthz
     probe_module: http_2xx_follow_redirects
     description: Woodpecker stays reachable for repo-managed CI bootstrap, API inspection,
       and manual validation pipeline triggers.

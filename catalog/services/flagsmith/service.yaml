@@ -6,11 +6,11 @@ service:
     environment and baseline feature seeding.
   category: automation
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: http://10.10.10.20:8017
-  public_url: https://flags.lv3.org
-  subdomain: flags.lv3.org
+  public_url: https://flags.example.com
+  subdomain: flags.example.com
   exposure: edge-published
   uptime_monitor_name: Flagsmith Public Health
   health_probe_id: flagsmith
@@ -40,8 +40,8 @@ service:
   environments:
     production:
       status: active
-      url: https://flags.lv3.org
-      subdomain: flags.lv3.org
+      url: https://flags.example.com
+      subdomain: flags.example.com
       notes: The bootstrap org, project, environments, feature definitions, and environment
         API keys are seeded from the repo-managed Flagsmith runtime role.
 completeness:
@@ -66,10 +66,10 @@ redundancy:
     - pbs_vm_150
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 or the shared postgres leader when
-      Flagsmith, its seeded control-plane metadata, or the authenticated edge publication
-      path cannot be recovered in place.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime or the shared postgres leader when Flagsmith,
+      its seeded control-plane metadata, or the authenticated edge publication path
+      cannot be recovered in place.
     failback_method: Restore the affected guest, confirm postgres leadership and OpenBao
       state, then rerun the Flagsmith converge and seeded-state verification from
       git.
@@ -78,7 +78,7 @@ dependency:
     id: flagsmith
     service: flagsmith
     name: Flagsmith
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: automation
     adr: 0288
@@ -87,18 +87,18 @@ dependency:
       to: docker_runtime
       type: hard
       description: The Flagsmith Community Edition runtime and task processor are
-        hosted on docker-runtime-lv3.
+        hosted on docker-runtime.
     - from: flagsmith
       to: keycloak
       type: soft
-      description: Browser access to flags.lv3.org is gated by the shared oauth2-proxy
+      description: Browser access to flags.example.com is gated by the shared oauth2-proxy
         and Keycloak edge-auth path, while private environment-key consumers continue
         to use the internal runtime directly.
     - from: flagsmith
       to: nginx_edge
       type: soft
-      description: Public reachability for flags.lv3.org depends on the shared NGINX
-        edge publication path.
+      description: Public reachability for flags.example.com depends on the shared
+        NGINX edge publication path.
     - from: flagsmith
       to: openbao
       type: startup_only
@@ -111,7 +111,7 @@ dependency:
         state, and audit metadata in the shared PostgreSQL cluster.
 health:
   service_name: flagsmith
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: flagsmith_runtime
   verify_file: roles/flagsmith_runtime/tasks/verify.yml
   startup:
@@ -127,7 +127,7 @@ health:
       - 200
   liveness:
     kind: http
-    description: The local Flagsmith health endpoint continues to answer on docker-runtime-lv3.
+    description: The local Flagsmith health endpoint continues to answer on docker-runtime.
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
@@ -143,7 +143,7 @@ health:
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5
-    url: https://flags.lv3.org/health
+    url: https://flags.example.com/health
     method: GET
     expected_status:
       - 200
@@ -159,7 +159,7 @@ health:
     monitor:
       name: Flagsmith Public Health
       type: http
-      url: https://flags.lv3.org/health
+      url: https://flags.example.com/health
       description: Public Flagsmith health endpoint published through the shared NGINX
         edge VM.
       interval: 60
@@ -178,7 +178,7 @@ data:
     access_role: platform-operator
     pii_risk: medium
     locations:
-      - Flagsmith PostgreSQL database on postgres-lv3
+      - Flagsmith PostgreSQL database on postgres
     notes: Flagsmith persists organisations, projects, environments, feature definitions,
       segment metadata, and environment-specific flag state in the shared PostgreSQL
       cluster.

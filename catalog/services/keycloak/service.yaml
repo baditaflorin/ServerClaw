@@ -6,11 +6,11 @@ service:
     applications.
   category: access
   lifecycle_status: active
-  vm: docker-runtime-lv3
-  vmid: 120
-  internal_url: http://10.10.10.20:8091
-  public_url: https://sso.lv3.org
-  subdomain: sso.lv3.org
+  vm: runtime-control
+  vmid: 192
+  internal_url: http://10.10.10.92:8091
+  public_url: https://sso.example.com
+  subdomain: sso.example.com
   exposure: edge-published
   uptime_monitor_name: Keycloak OIDC Discovery
   health_probe_id: keycloak
@@ -23,12 +23,12 @@ service:
   environments:
     production:
       status: active
-      url: https://sso.lv3.org
-      subdomain: sso.lv3.org
+      url: https://sso.example.com
+      subdomain: sso.example.com
     staging:
       status: planned
-      url: https://sso.staging.lv3.org
-      subdomain: sso.staging.lv3.org
+      url: https://sso.staging.example.com
+      subdomain: sso.staging.example.com
       notes: Planned staging identity hostname on the shared edge.
   runtime_pool: runtime-control
   deployment_surface: playbooks/keycloak.yml
@@ -49,20 +49,20 @@ redundancy:
     rpo_minutes: 1440
   backup_sources:
     - git_repository
-    - pbs_vm_120
+    - pbs_vm_192
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when Keycloak or its dependent runtime
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when Keycloak or its dependent runtime
       state cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Keycloak
-      converge and identity verification flow.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Keycloak converge
+      and identity verification flow.
 dependency:
   node:
     id: keycloak
     service: keycloak
     name: Keycloak
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 2
     category: access
     adr: '0056'
@@ -75,7 +75,7 @@ dependency:
     - from: keycloak
       to: nginx_edge
       type: soft
-      description: Public reachability for sso.lv3.org depends on the shared edge
+      description: Public reachability for sso.example.com depends on the shared edge
         publication path.
     - from: keycloak
       to: openbao
@@ -93,7 +93,7 @@ dependency:
         internal TLS material is refreshed.
 health:
   service_name: keycloak
-  owning_vm: docker-runtime-lv3
+  owning_vm: runtime-control
   role: keycloak_runtime
   verify_file: roles/keycloak_runtime/tasks/verify.yml
   startup:
@@ -132,23 +132,32 @@ health:
     docker_publication:
       container_name: keycloak-keycloak-1
       bindings:
-        - host: 10.10.10.20
+        - host: 10.10.10.92
           port: 8091
       required_networks:
         - keycloak_default
         - mail-platform_default
   tls_certificate_ids:
     - keycloak-edge
+  watchdog:
+    kind: identity_core_watchdog
+    description: On-VM identity-core watchdog probes Keycloak management liveness
+      every 15 seconds and auto-restarts on 2 consecutive failures (ADR 0376).
+    interval_seconds: 15
+    failure_threshold: 2
+    max_restarts_per_hour: 6
+    url: http://127.0.0.1:19000/health/live
+    ntfy_topic: platform-identity-critical
   uptime_kuma:
     enabled: true
     monitor:
       name: Keycloak OIDC Discovery
       type: http
-      url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+      url: https://sso.example.com/realms/lv3/.well-known/openid-configuration
       description: Shared SSO discovery endpoint published through the NGINX edge
         VM.
-      interval: 60
-      retryInterval: 60
+      interval: 15
+      retryInterval: 15
       maxretries: 0
       maxredirects: 5
       accepted_statuscodes:
@@ -159,7 +168,7 @@ slos:
     indicator: availability
     objective_percent: 99.7
     window_days: 30
-    target_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+    target_url: https://sso.example.com/realms/lv3/.well-known/openid-configuration
     probe_module: http_2xx_follow_redirects
     description: Keycloak discovery remains reachable for operator and service authentication.
   - id: keycloak-latency
@@ -167,7 +176,7 @@ slos:
     indicator: latency
     objective_percent: 95.0
     window_days: 30
-    target_url: https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+    target_url: https://sso.example.com/realms/lv3/.well-known/openid-configuration
     probe_module: http_2xx_follow_redirects
     latency_threshold_ms: 500
     description: Keycloak discovery responds in under 500ms for 95% of probes.

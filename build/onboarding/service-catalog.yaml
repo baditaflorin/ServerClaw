@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-11'
+generated: '2026-04-14'
 generated_from:
   - docs/discovery/onboarding-packs.yaml
   - docs/discovery/repo-structure/automation-and-infrastructure.yaml
@@ -117,6 +117,23 @@ repo_structure_sections:
             network-impairment-matrix.yaml: ADR 0189 governed preview/staging network impairment catalog
             stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites mapped to service/environment bindings
             integrations/: ADR 0353 integration contracts; validate with scripts/validate_integrations.py
+        catalog:
+          purpose: ADR 0324 service-definition source bundles and assembly metadata
+          contains: services/<service-id>/service.yaml plus services/_metadata.yaml
+          concern: canonical-service-metadata, generated-aggregates
+          keywords:
+            - catalog
+            - services
+            - shards
+            - source
+            - generated
+            - metadata
+          for_agents: 'Edit service-local metadata here instead of hand-editing the generated config/* service catalogs. Regenerate and validate with scripts/service_definition_catalog.py.
+
+            '
+          key_files:
+            services/_metadata.yaml: Top-level metadata preserved while assembling generated aggregate service catalogs
+            services/<service-id>/service.yaml: Primary service bundle; optional fragment files may later split health, data, slo, completeness, redundancy, or dependency sections
         policy:
           purpose: Shared Rego policy bundles and tests for OPA and Conftest
           contains: decisions/, conftest/, tests/
@@ -153,6 +170,9 @@ repo_structure_sections:
             stage_smoke_suites.py: ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence
             validate_integrations.py: ADR 0353 validator for config/integrations/ contracts; run with --check-dead to detect stale integrations
             check_provenance_headers.py: ADR 0351 audit tool reporting which Jinja2 templates lack managed-by provenance headers
+            service_definition_catalog.py: ADR 0324 bundle validator and aggregate catalog writer for catalog/services/
+            scaffold_service.py: Scaffold entrypoint that creates new service bundles, playbooks, roles, and workstream/docs surfaces together
+            service_catalog.py: Read-only CLI for querying the assembled service capability catalog and bundle provenance
         tests:
           purpose: Test suites for automated validation
           contains: pytest unit + integration tests, molecule scenarios
@@ -734,6 +754,20 @@ config_location_sections:
     when_to_read: Use this section when changing a service-specific config file or template.
     file: docs/discovery/config-locations/service-configuration.yaml
     entries:
+      catalog/services/:
+        purpose: ADR 0324 canonical per-service bundle source tree for generated service catalogs
+        owner: human
+        format: YAML
+        use_for: Editing service-local metadata, health checks, redundancy, dependency, data, and SLO definitions in one canonical place
+        update_when: Changing governed service metadata or scaffolding a new service bundle
+        update_by: scripts/scaffold_service.py and hand edits to catalog/services/<service-id>/service.yaml
+        validation: uv run --with pyyaml --with jsonschema python scripts/service_definition_catalog.py --check
+        related_files:
+          - 'catalog/services/_metadata.yaml: output contract metadata for the aggregate catalog assembly'
+          - 'scripts/service_definition_catalog.py: bundle validator and aggregate catalog writer'
+          - 'docs/runbooks/service-capability-catalog.md: operator workflow for the service-bundle source model'
+          - 'docs/runbooks/add-a-new-service.md: add-service workflow under the bundle model'
+          - 'docs/runbooks/scaffold-new-service.md: scaffold workflow under the bundle model'
       config/:
         purpose: Service configuration files for all deployed services
         owner: human
@@ -759,7 +793,18 @@ config_location_sections:
         owner: automation
         format: JSON
         use_for: Declaring service metadata, environment bindings, and ADR 0251 stage-ready smoke suite ids per environment
-        update_by: scripts/service_catalog.py --write
+        update_by: uv run --with pyyaml --with jsonschema python scripts/service_definition_catalog.py --write
+        validation: uv run --with pyyaml --with jsonschema python scripts/service_definition_catalog.py --check
+        related_files:
+          - 'catalog/services/: canonical service-definition bundle source tree'
+          - 'scripts/service_definition_catalog.py: aggregate catalog writer and bundle validator'
+          - 'scripts/service_catalog.py: read-only CLI for querying the assembled service catalog'
+          - 'config/health-probe-catalog.json: generated health-check aggregate sourced from the same bundles'
+          - 'config/service-completeness.json: generated completeness aggregate sourced from the same bundles'
+          - 'config/service-redundancy-catalog.json: generated redundancy aggregate sourced from the same bundles'
+          - 'config/dependency-graph.json: generated dependency aggregate sourced from the same bundles'
+          - 'config/data-catalog.json: generated data-store aggregate sourced from the same bundles'
+          - 'config/slo-catalog.json: generated SLO aggregate sourced from the same bundles'
       config/stage-smoke-suites.json:
         purpose: Canonical ADR 0251 catalog of stage-scoped smoke suites mapped to service ids and environments
         owner: human

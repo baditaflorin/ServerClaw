@@ -6,11 +6,11 @@ service:
     reachability.
   category: observability
   lifecycle_status: active
-  vm: runtime-general-lv3
+  vm: runtime-general
   vmid: 191
   internal_url: http://10.10.10.91:3001
-  public_url: https://uptime.lv3.org
-  subdomain: uptime.lv3.org
+  public_url: https://uptime.example.com
+  subdomain: uptime.example.com
   exposure: edge-published
   uptime_monitor_name: Uptime Kuma Public
   health_probe_id: uptime_kuma
@@ -30,12 +30,12 @@ service:
   environments:
     production:
       status: active
-      url: https://uptime.lv3.org
-      subdomain: uptime.lv3.org
+      url: https://uptime.example.com
+      subdomain: uptime.example.com
     staging:
       status: planned
-      url: https://uptime.staging.lv3.org
-      subdomain: uptime.staging.lv3.org
+      url: https://uptime.staging.example.com
+      subdomain: uptime.staging.example.com
       notes: Planned staged monitor surface on the shared edge.
 completeness:
   service_type: compose
@@ -54,29 +54,29 @@ redundancy:
     - pbs_vm_191
   standby:
     kind: cold
-    location: runtime-general-lv3
-    failover_trigger: Restore runtime-general-lv3 when Uptime Kuma or its runtime
-      state cannot be recovered in place.
-    failback_method: Restore or rebuild runtime-general-lv3, then rerun the Uptime
-      Kuma converge from git.
+    location: runtime-general
+    failover_trigger: Restore runtime-general when Uptime Kuma or its runtime state
+      cannot be recovered in place.
+    failback_method: Restore or rebuild runtime-general, then rerun the Uptime Kuma
+      converge from git.
 dependency:
   node:
     id: uptime_kuma
     service: uptime_kuma
     name: Uptime Kuma
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: observability
     adr: '0027'
   outbound_edges: []
 health:
   service_name: uptime-kuma
-  owning_vm: runtime-general-lv3
+  owning_vm: runtime-general
   role: uptime_kuma_runtime
   verify_file: roles/uptime_kuma_runtime/tasks/verify.yml
   liveness:
     kind: command
-    description: The Uptime Kuma container is running on runtime-general-lv3.
+    description: The Uptime Kuma container is running on runtime-general.
     timeout_seconds: 30
     retries: 1
     delay_seconds: 0
@@ -107,7 +107,7 @@ health:
     monitor:
       name: Uptime Kuma Public
       type: http
-      url: https://uptime.lv3.org
+      url: https://uptime.example.com
       description: Public Uptime Kuma entrypoint through the NGINX edge.
       interval: 60
       retryInterval: 60
@@ -121,6 +121,6 @@ slos:
     indicator: availability
     objective_percent: 99.9
     window_days: 30
-    target_url: https://uptime.lv3.org
+    target_url: https://uptime.example.com
     probe_module: http_2xx_follow_redirects
     description: Uptime Kuma remains reachable through the public status surface.

@@ -6,7 +6,7 @@ service:
     event logs and schema-managed topics.
   category: data
   lifecycle_status: active
-  vm: docker-runtime-lv3
+  vm: docker-runtime
   vmid: 120
   internal_url: kafka://10.10.10.20:9092
   exposure: private-only
@@ -30,8 +30,8 @@ service:
     - redpanda
     - private
   notes: The private Kafka listener stays on 9092 while the authenticated Admin API,
-    HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime-lv3
-    already reserves 8097 for JupyterHub and 8099 for the Temporal UI.
+    HTTP Proxy, and Schema Registry listeners use 9644, 8103, and 8104 because docker-runtime
+    reserves 8099 for the Temporal UI.
   environments:
     production:
       status: active
@@ -60,17 +60,17 @@ redundancy:
     - pbs_vm_120
   standby:
     kind: cold
-    location: docker-runtime-lv3
-    failover_trigger: Restore docker-runtime-lv3 when the Redpanda runtime or its
-      durable log volume cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime-lv3, then rerun the Redpanda
-      converge from git.
+    location: docker-runtime
+    failover_trigger: Restore docker-runtime when the Redpanda runtime or its durable
+      log volume cannot be recovered in place.
+    failback_method: Restore or rebuild docker-runtime, then rerun the Redpanda converge
+      from git.
 dependency:
   node:
     id: redpanda
     service: redpanda
     name: Redpanda
-    vm: docker-runtime-lv3
+    vm: docker-runtime
     tier: 1
     category: data
     adr: 0290
@@ -82,7 +82,7 @@ dependency:
         through the OpenBao agent before startup.
 health:
   service_name: redpanda
-  owning_vm: docker-runtime-lv3
+  owning_vm: docker-runtime
   role: redpanda_runtime
   verify_file: roles/redpanda_runtime/tasks/verify.yml
   startup:
@@ -177,7 +177,7 @@ data:
     access_role: platform-operator
     pii_risk: high
     locations:
-      - Docker volume lv3-redpanda-data on docker-runtime-lv3
+      - Docker volume lv3-redpanda-data on docker-runtime
     notes: Topic retention remains per-topic and repo-managed; the named Docker volume
-      must be covered by docker-runtime-lv3 backup evidence whenever the Redpanda
-      runtime contract changes.
+      must be covered by docker-runtime backup evidence whenever the Redpanda runtime
+      contract changes.

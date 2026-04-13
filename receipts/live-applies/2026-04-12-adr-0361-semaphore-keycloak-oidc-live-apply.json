@@ -1,12 +1,73 @@
 {
-  "workstream_id": "ws-0361-live-apply",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-12-adr-0361-semaphore-keycloak-oidc-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-12",
+  "recorded_on": "2026-04-12",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0361-semaphore-keycloak-oidc-live-apply",
   "adr": "0361",
+  "workstream": "ws-0361-live-apply",
+  "workstream_id": "ws-0361-live-apply",
   "title": "Semaphore Keycloak OIDC integration live apply",
   "status": "blocked",
   "live_applied": false,
   "platform_changed": false,
-  "attempted_on": "2026-04-12",
-  "source_commit_at_attempt": "cdcc806bebd22d18a67c4591049eb2250f488413",
+  "source_branch": "codex/ws-0361-live-apply",
+  "source_commit": "cdcc806bebd22d18a67c4591049eb2250f488413",
+  "repo_version_context": "0.178.118",
+  "summary": "Re-check ADR 0361 on the 0.178.118 source tree, confirm the focused Semaphore and Keycloak repo validation still passes, then leave the live apply blocked because the workstation is logged out of the tailnet and cannot reach headscale, proxmox-host, or runtime-control.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control",
+      "address": "10.10.10.92"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Semaphore and Keycloak repo tests",
+      "result": "pass",
+      "observed": "The targeted pytest slice for Semaphore runtime, Semaphore playbook, and Keycloak runtime passed with 32 tests."
+    },
+    {
+      "check": "Controller-side preflight and workstream surfaces",
+      "result": "pass",
+      "observed": "make preflight WORKFLOW=converge-semaphore and ./scripts/validate_repo.sh workstream-surfaces both passed, and preflight again reported the client secret as absent-before-apply."
+    },
+    {
+      "check": "Headscale and management-path reachability",
+      "result": "fail",
+      "observed": "tailscale status --json showed the workstation logged out with no assigned Tailscale IPs, headscale health timed out, and SSH probes to proxmox-host and runtime-control failed."
+    },
+    {
+      "check": "Production live apply readiness",
+      "result": "fail",
+      "observed": "The live apply did not proceed because there was no reachable operator path to the production management surfaces from this workstation."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0361-semaphore-keycloak-oidc-integration.md",
+    "docs/adr/implementation-status/adr-0361.yaml",
+    "docs/workstreams/ws-0361-live-apply.md",
+    "workstreams/done/ws-0361-live-apply.yaml",
+    "receipts/live-applies/evidence/2026-04-12-ws-0361-summary.txt"
+  ],
+  "notes": [
+    "This historical blocked receipt was normalized to the current schema on 2026-04-14 from the original branch evidence.",
+    "The workstation was logged out of the Headscale-managed tailnet during this follow-up attempt, so there was no viable path to rerun the production converge.",
+    "Restoring mesh access or using a reachable operator host remained the prerequisite for a later successful live apply."
+  ],
   "attempted_commands": [],
   "repo_validation": [
     {
@@ -60,9 +121,9 @@
     "Re-enrollment in the tailnet or an alternative reachability path is required before rerunning make converge-semaphore env=production."
   ],
   "next_steps": [
-    "Restore Headscale/Tailscale connectivity for this workstation (or use a reachable operator host).",
+    "Restore Headscale or Tailscale connectivity for this workstation or use a reachable operator host.",
     "Rerun make converge-semaphore env=production once SSH to proxmox-host and routed guests is confirmed.",
     "Verify /api/ping, /auth/oidc/login, make semaphore-manage ACTION=list-projects, and the seeded Semaphore Self-Test template.",
-    "Record the successful live-apply receipt(s), update ADR 0361 from Partial to Live applied, and perform the exact-main integration step."
+    "Record the successful live-apply receipt, update ADR 0361 from Partial to Live applied, and then perform the exact-main integration step."
   ]
 }
