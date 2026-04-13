@@ -2543,7 +2543,7 @@
       "runtime_pool": "runtime-general",
       "deployment_surface": "playbooks/services/repo-intake.yml",
       "restart_domain": "runtime-general",
-      "mobility_tier": "portable",
+      "mobility_tier": "elastic_stateless",
       "tags": [
         "webhook",
         "intake",
@@ -2740,7 +2740,7 @@
       "runtime_pool": "runtime-general",
       "deployment_surface": "playbooks/sftpgo.yml",
       "restart_domain": "runtime-general-data-apps",
-      "mobility_tier": "portable",
+      "mobility_tier": "elastic_stateless",
       "tags": [
         "sftp",
         "file-transfer",
