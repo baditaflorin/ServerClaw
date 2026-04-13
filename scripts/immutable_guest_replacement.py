@@ -22,7 +22,7 @@ if existing_platform is not None and not hasattr(existing_platform, "__path__"):
 
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 
-from validation_toolkit import require_int, require_list, require_mapping, require_str
+from validation_toolkit import require_enum, require_int, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 
@@ -52,14 +52,7 @@ CLASSIFICATIONS = {"edge", "stateful", "edge_and_stateful"}
 VALIDATION_MODES = {"inactive_edge_peer", "preview_guest", "restore_preview", "warm_standby"}
 
 
-def require_enum(value: Any, path: str, allowed: set[str]) -> str:
-    value = require_str(value, path)
-    if value not in allowed:
-        raise ValueError(f"{path} must be one of {sorted(allowed)}")
-    return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     normalized: list[str] = []
     seen: set[str] = set()
@@ -146,7 +139,7 @@ def validate_guest_replacement_catalog(catalog: dict[str, Any]) -> None:
 
     platform = require_mapping(catalog.get("platform"), "platform")
     require_str(platform.get("default_exception_rule"), "platform.default_exception_rule")
-    require_string_list(platform.get("notes"), "platform.notes")
+    unique_string_list(platform.get("notes"), "platform.notes")
 
     guest_policies = require_mapping(catalog.get("guests"), "guests")
     inventory_guest_index = load_inventory_guest_index()
@@ -179,7 +172,7 @@ def validate_guest_replacement_catalog(catalog: dict[str, Any]) -> None:
         if policy.get("exception_rule") is not None:
             require_str(policy.get("exception_rule"), f"guests.{guest_name}.exception_rule")
         if policy.get("notes") is not None:
-            require_string_list(policy.get("notes"), f"guests.{guest_name}.notes")
+            unique_string_list(policy.get("notes"), f"guests.{guest_name}.notes")
 
         if not any(
             service_redundancy.TIER_ORDER[item["tier"]] >= service_redundancy.TIER_ORDER["R1"]
