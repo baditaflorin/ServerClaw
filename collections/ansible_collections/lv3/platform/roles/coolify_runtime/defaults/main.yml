@@ -28,8 +28,8 @@ coolify_bootstrap_private_key_file: "{{ coolify_bootstrap_dir }}/server-key"
 coolify_proxy_path: "{{ coolify_data_root }}/proxy"
 
 coolify_dashboard_port: "{{ coolify_internal_port }}"
-coolify_proxy_port: "{{ platform_service_topology | platform_service_port('coolify_apps', 'internal') }}"
-coolify_controller_url: "{{ platform_service_topology | platform_service_url('coolify', 'controller') }}"
+coolify_proxy_port: 80
+coolify_controller_url: "http://{{ ansible_host }}:{{ coolify_dashboard_port }}"
 coolify_private_url: "http://{{ ansible_host }}:{{ coolify_dashboard_port }}"
 coolify_public_url: https://coolify.{{ platform_domain }}
 coolify_apps_public_url: https://apps.{{ platform_domain }}
