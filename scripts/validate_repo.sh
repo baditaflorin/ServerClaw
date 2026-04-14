@@ -322,7 +322,7 @@ validate_ansible_syntax() {
   install_collections
   load_lines_into_array playbooks < <(
     tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
-      awk -F/ '$1 == "playbooks" && $2 != "tasks" && $2 != "vars" && $NF !~ /^\./ { print }'
+      awk -F/ '(( $1 == "playbooks" && NF == 2 ) || ( $1 == "playbooks" && $2 == "groups" && NF == 3 ) || ( $1 == "playbooks" && $2 == "services" && NF == 3 )) && $NF !~ /^\./ { print }'
   )
   if [[ ${#playbooks[@]} -eq 0 ]]; then
     return 0
@@ -373,10 +373,8 @@ validate_ansible_lint() {
   echo "Ansible lint"
   install_collections
   load_lines_into_array lint_targets < <(
-    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
-      awk -F/ '
-        $1 == "playbooks" && $2 != "tasks" && $2 != "vars" && $NF ~ /\.yml$/ && $NF !~ /^\./ { print }
-      ' |
+    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' |
+      awk -F/ '(( $1 == "playbooks" && NF == 2 ) || ( $1 == "playbooks" && $2 == "groups" && NF == 3 )) && $NF ~ /\.yml$/ && $NF !~ /^\./ { print }' |
       awk '!seen[$0]++'
   )
   lint_targets+=("collections/ansible_collections/lv3/platform")
@@ -385,7 +383,7 @@ validate_ansible_lint() {
   fi
   (
     cd "$REPO_ROOT"
-    ANSIBLE_LINT_NODEPS=1 "${ANSIBLE_LINT_CMD[@]}" --offline "${lint_targets[@]}"
+    "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}"
   )
 }
 

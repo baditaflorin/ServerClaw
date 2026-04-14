@@ -23,9 +23,13 @@ ownership_manifest:
     paths:
     - scripts/certificate_validator.py
     - playbooks/certificate-validation.yml
-    - playbooks/fix-edge-certificate.yml
     - .githooks/pre-push
     mode: exclusive
+  - id: certificate_validator_recovery_playbook
+    paths:
+    - playbooks/fix-edge-certificate.yml
+    mode: shared_contract
+    contract: certificate-edge-recovery-v1
   - id: ws_0375_cert_validation_workstream
     paths:
     - workstreams/active/ws-0375-certificate-validation.yaml
