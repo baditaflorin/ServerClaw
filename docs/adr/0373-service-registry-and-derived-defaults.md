@@ -361,7 +361,7 @@ If a role's migration breaks, the fix is to temporarily re-add the removed defau
   - `repo_intake` converged successfully on `docker-runtime`
   - direct health checks on `http://127.0.0.1:8101/health` returned `{"status":"ok"}`
   - edge verification from the `nginx` guest returned the expected OAuth redirect
-    for `https://repo-intake.lv3.org/`
+    for `https://repo-intake.example.com/`
   - governed restic backup receipts were refreshed at
     `receipts/restic-backups/20260413T105157Z.json`,
     `receipts/restic-backups/20260413T110651Z.json`, and

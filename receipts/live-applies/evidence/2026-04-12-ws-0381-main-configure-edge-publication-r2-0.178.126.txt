@@ -3,29 +3,29 @@ Preflight workflow: configure-edge-publication
 Description: Publish repo-managed public hostnames at the NGINX edge.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/.local/packer-plugin-cache
 Bootstrap manifest: live-apply-generated-artifacts
 Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
-PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/inventory/group_vars/platform.yml
-PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/receipts/gate-bypasses/.gitkeep
-PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/config/prometheus/rules/https_tls_alerts.yml
-PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/receipts/drift-reports
-PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/config/prometheus/file_sd/https_tls_targets.yml
-PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/receipts/image-scans
-PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/config/uptime-kuma/monitors.json
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/inventory/group_vars/platform.yml
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/receipts/drift-reports
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/receipts/image-scans
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/config/uptime-kuma/monitors.json
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/ops-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/docs-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/changelog-portal
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/ops-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/docs-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/changelog-portal
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
 Result: PASS (configure-edge-publication)
 /Applications/Xcode.app/Contents/Developer/usr/bin/make generate-platform-vars
 /Applications/Xcode.app/Contents/Developer/usr/bin/make generate-cross-cutting-artifacts
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_cross_cutting_artifacts.py --write
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/generate_cross_cutting_artifacts.py --write
 Loading registry from inventory/group_vars/all/platform_services.yml ...
 
 [HAIRPIN]
@@ -59,15 +59,15 @@ Loading registry from inventory/group_vars/all/platform_services.yml ...
   Wrote 16 SSO client declarations to config/generated/sso-clients.yaml
 
 All concerns passed.
-PYTHONPATH=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_platform_vars.py --write
-Wrote generated platform vars to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/inventory/group_vars/platform.yml
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/subdomain_exposure_audit.py --write-registry --validate
+PYTHONPATH=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/generate_platform_vars.py --write
+Wrote generated platform vars to /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/inventory/group_vars/platform.yml
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/subdomain_exposure_audit.py --write-registry --validate
 WARN Broken interpreter cache entry at /Users/live/.cache/uv/interpreter-v4/690e8bc5fc3a5e7e/db96087e7e6677f4.msgpack, removing: invalid length 16, expected struct InterpreterInfo with 17 elements
 /Applications/Xcode.app/Contents/Developer/usr/bin/make generate-changelog-portal docs
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_changelog_portal.py --write
-uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main --path build/changelog-portal
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/generate_changelog_portal.py --write
+uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main --path build/changelog-portal
 Published artifact secret scan passed: 244 file(s) checked with builtin.
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/build_docs_portal.py
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/build_docs_portal.py
 
 [31m │  ⚠  Warning from the Material for MkDocs team[0m
 [31m │[0m
@@ -85,7 +85,7 @@ uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_
 [31m │[0m  [4mhttps://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/[0m
 [0m
 INFO    -  Cleaning site directory
-INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/docs-portal
+INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/docs-portal
 INFO    -  Doc file 'architecture/decisions/0031-repository-validation-pipeline-for-automation-changes.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repo.sh', it was left as is.
 INFO    -  Doc file 'architecture/decisions/0031-repository-validation-pipeline-for-automation-changes.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.github/workflows/validate.yml', it was left as is.
 INFO    -  Doc file 'architecture/decisions/0031-repository-validation-pipeline-for-automation-changes.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/collections/requirements.yml', it was left as is.
@@ -890,7 +890,7 @@ INFO    -  mkdocs_swagger_ui_tag: Copying swagger ui assets.
 INFO    -  Documentation built in 14.08 seconds
 
 Running Pagefind v1.5.2 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -924,10 +924,10 @@ Total:
 
 Finished in 4.094 seconds
 Published artifact secret scan passed: 1610 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/docs-portal
-ANSIBLE_HOST_KEY_CHECKING=False LV3_RUN_ID=ca4c7b91854844d58b3a2e82a5f9fb66 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/inventory/hosts.yml --run-id 94649c542a524f6a9264dab94c01eabc --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/public-edge.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/public-edge.yml (env=production)
-Running scoped playbook: playbooks/public-edge.yml limit=nginx shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/.ansible/shards/94649c542a524f6a9264dab94c01eabc/public-edge-production.json
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/docs-portal
+ANSIBLE_HOST_KEY_CHECKING=False LV3_RUN_ID=ca4c7b91854844d58b3a2e82a5f9fb66 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/inventory/hosts.yml --run-id 94649c542a524f6a9264dab94c01eabc --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/playbooks/public-edge.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/playbooks/public-edge.yml (env=production)
+Running scoped playbook: playbooks/public-edge.yml limit=nginx shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/.ansible/shards/94649c542a524f6a9264dab94c01eabc/public-edge-production.json
 
 PLAY [Configure public publication on the NGINX edge VM] ***********************
 
@@ -945,7 +945,7 @@ TASK [lv3.platform.preflight : Assert the target distribution is supported] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:41:26.378Z","vm":"controller","workflow_id":"ansible-playbook"}
 [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/preflight/tasks/main.yml:14:15
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/preflight/tasks/main.yml:14:15
 
 12       - ansible_distribution in preflight_allowed_distributions
 13       - ansible_distribution_major_version in preflight_allowed_major_versions
@@ -955,7 +955,7 @@ Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/w
 Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
 
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/preflight/tasks/main.yml:12:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/preflight/tasks/main.yml:12:9
 
 10   ansible.builtin.assert:
 11     that:
@@ -965,7 +965,7 @@ Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/w
 Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
 
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/preflight/tasks/main.yml:13:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/preflight/tasks/main.yml:13:9
 
 11     that:
 12       - ansible_distribution in preflight_allowed_distributions
@@ -1078,7 +1078,7 @@ ok: [nginx]
 TASK [lv3.platform.common : Detect whether the Docker service is active (systemd hosts only)] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Detect whether the Docker service is active (systemd hosts only)","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:41:31.992Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml:26:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml:26:9
 
 24   changed_when: false
 25   failed_when: _common_docker_bridge_chains_systemctl.rc not in [0, 3, 4]
@@ -1093,7 +1093,7 @@ ok: [nginx]
 TASK [lv3.platform.common : Resolve Docker service active state (non-systemd hosts report inactive)] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Resolve Docker service active state (non-systemd hosts report inactive)","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:41:34.481Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml:30:47
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml:30:47
 
 28 - name: Resolve Docker service active state (non-systemd hosts report inactive)
 29   ansible.builtin.set_fact:
@@ -1235,7 +1235,7 @@ ok: [nginx]
 TASK [lv3.platform.common : Assert required variables are defined and non-empty] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert required variables are defined and non-empty","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:41:45.023Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: The internal "vars" dictionary is deprecated. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:12:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:12:9
 
 10   ansible.builtin.assert:
 11     that:
@@ -1245,7 +1245,7 @@ Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/w
 Use the `vars` and `varnames` lookups instead.
 
 [DEPRECATION WARNING]: The internal "vars" dictionary is deprecated. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:13:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:13:9
 
 11     that:
 12       - item in vars
@@ -1255,7 +1255,7 @@ Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/w
 Use the `vars` and `varnames` lookups instead.
 
 [DEPRECATION WARNING]: The internal "vars" dictionary is deprecated. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:14:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:14:9
 
 12       - item in vars
 13       - vars[item] is not none
@@ -1265,7 +1265,7 @@ Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/w
 Use the `vars` and `varnames` lookups instead.
 
 [DEPRECATION WARNING]: The internal "vars" dictionary is deprecated. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:15:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:15:9
 
 13       - vars[item] is not none
 14       - vars[item] is not string or (vars[item] | trim | length > 0)
@@ -1275,7 +1275,7 @@ Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/w
 Use the `vars` and `varnames` lookups instead.
 
 [DEPRECATION WARNING]: The internal "vars" dictionary is deprecated. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:16:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/assert_vars.yml:16:9
 
 14       - vars[item] is not string or (vars[item] | trim | length > 0)
 15       - vars[item] is not mapping or (vars[item] | length > 0)
@@ -1403,7 +1403,7 @@ ok: [nginx]
 TASK [lv3.platform.public_edge_oidc_auth : Restart the public edge OIDC auth proxy when inputs changed] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.public_edge_oidc_auth : Restart the public edge OIDC auth proxy when inputs changed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:00.536Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/tasks/main.yml:153:7
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/tasks/main.yml:153:7
 
 151     daemon_reload: true
 152   when:
@@ -1433,7 +1433,7 @@ ok: [nginx]
 TASK [lv3.platform.common : Skip systemd management — systemd not available on this host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Skip systemd management \u2014 systemd not available on this host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:00.786Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:12:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:12:9
 
 10   ansible.builtin.debug:
 11     msg: "Skipping systemd unit management for {{ common_systemd_unit_name }} — ansible_service_mgr={{ ansible_ser...
@@ -1448,7 +1448,7 @@ skipping: [nginx]
 TASK [lv3.platform.common : Ensure the managed systemd unit matches the requested state] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:00.824Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:20:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:20:9
 
 18     state: "{{ common_systemd_unit_state }}"
 19     daemon_reload: "{{ common_systemd_unit_daemon_reload }}"
@@ -1513,7 +1513,7 @@ ok: [nginx]
 TASK [lv3.platform.common : Verify the managed systemd unit active state] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:08.678Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:33:7
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:33:7
 
 31   when:
 32     - common_systemd_unit_verify_active | bool
@@ -1528,7 +1528,7 @@ ok: [nginx]
 TASK [lv3.platform.public_edge_oidc_auth : Verify the public edge OIDC auth proxy answers unauthenticated auth checks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.public_edge_oidc_auth : Verify the public edge OIDC auth proxy answers unauthenticated auth checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:09.326Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/tasks/main.yml:226:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/tasks/main.yml:226:9
 
 224   register: public_edge_oidc_auth_verify
 225   changed_when: false
@@ -1577,7 +1577,7 @@ ok: [nginx] => (item=/etc/letsencrypt)
 TASK [lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:16.203Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml:71:38
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml:71:38
 
 69 - name: Record the Certbot plugin path for local Python packages
 70   ansible.builtin.set_fact:
@@ -1611,11 +1611,11 @@ skipping: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:16.349Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
-ok: [nginx] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:42:24.601Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -1625,8 +1625,8 @@ ok: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:26.290Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [nginx -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-changed: [nginx -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+changed: [nginx -> localhost] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+changed: [nginx -> localhost] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:42:35.111Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***
@@ -1651,50 +1651,50 @@ ok: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:36.420Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx] => (item={'hostname': 'minio-console.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:9011', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False, 'preserve_upstream_security_headers': True})
-skipping: [nginx] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-skipping: [nginx] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
-skipping: [nginx] => (item={'hostname': 'nginx.lv3.org', 'kind': 'static', 'slug': 'nginx'})
-skipping: [nginx] => (item={'hostname': 'grafana.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
-skipping: [nginx] => (item={'hostname': 'headscale.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
-skipping: [nginx] => (item={'hostname': 'proxmox.lv3.org', 'kind': 'static', 'slug': 'proxmox'})
-skipping: [nginx] => (item={'hostname': 'docker.lv3.org', 'kind': 'static', 'slug': 'docker'})
-skipping: [nginx] => (item={'hostname': 'build.lv3.org', 'kind': 'static', 'slug': 'build'})
-skipping: [nginx] => (item={'hostname': 'uptime.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001'})
-skipping: [nginx] => (item={'hostname': 'status.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001', 'root_proxy_path': '/status/lv3-platform'})
-skipping: [nginx] => (item={'hostname': 'mail.lv3.org', 'kind': 'static', 'slug': 'mail'})
-ok: [nginx] => (item={'hostname': 'livekit.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
-ok: [nginx] => (item={'hostname': 'scheduler.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.40:4646', 'upstream_ssl_verify': False})
-skipping: [nginx] => (item={'hostname': 'matrix.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
-skipping: [nginx] => (item={'hostname': 'langfuse.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
-skipping: [nginx] => (item={'hostname': 'flags.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
-skipping: [nginx] => (item={'hostname': 'analytics.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-ok: [nginx] => (item={'hostname': 'minio.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:9010', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'crawl_policy_enabled': False, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False})
-ok: [nginx] => (item={'hostname': 'errors.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3005'})
-ok: [nginx] => (item={'hostname': 'billing.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8100', 'prefix_proxy_routes': [{'path': '/api/', 'upstream': 'http://10.10.10.20:8099'}]})
-skipping: [nginx] => (item={'hostname': 'agents.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
-skipping: [nginx] => (item={'hostname': 'tasks.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
-ok: [nginx] => (item={'hostname': 'ci.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
-skipping: [nginx] => (item={'hostname': 'wiki.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
-ok: [nginx] => (item={'hostname': 'grist.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8484'})
-ok: [nginx] => (item={'hostname': 'paperless.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'logs.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
-skipping: [nginx] => (item={'hostname': 'draw.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
-skipping: [nginx] => (item={'hostname': 'chat.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
-skipping: [nginx] => (item={'hostname': 'n8n.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
-skipping: [nginx] => (item={'hostname': 'cloud.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'coolify.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
-skipping: [nginx] => (item={'hostname': 'apps.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.71:443', 'aliases': ['*.apps.lv3.org'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'api.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8083'})
-skipping: [nginx] => (item={'hostname': 'sso.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8091'})
-skipping: [nginx] => (item={'hostname': 'registry.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8095', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
-skipping: [nginx] => (item={'hostname': 'ops.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
-skipping: [nginx] => (item={'hostname': 'home.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3090'})
-ok: [nginx] => (item={'hostname': 'ntfy.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:2586', 'chunked_transfer_encoding': True, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
-skipping: [nginx] => (item={'hostname': 'data.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
-ok: [nginx] => (item={'hostname': 'annotate.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8110'})
-ok: [nginx] => (item={'hostname': 'bi.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8105'})
-ok: [nginx] => (item={'hostname': 'repowise.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:7070'})
+ok: [nginx] => (item={'hostname': 'minio-console.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:9011', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False, 'preserve_upstream_security_headers': True})
+skipping: [nginx] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+skipping: [nginx] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+skipping: [nginx] => (item={'hostname': 'nginx.example.com', 'kind': 'static', 'slug': 'nginx'})
+skipping: [nginx] => (item={'hostname': 'grafana.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
+skipping: [nginx] => (item={'hostname': 'headscale.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
+skipping: [nginx] => (item={'hostname': 'proxmox.example.com', 'kind': 'static', 'slug': 'proxmox'})
+skipping: [nginx] => (item={'hostname': 'docker.example.com', 'kind': 'static', 'slug': 'docker'})
+skipping: [nginx] => (item={'hostname': 'build.example.com', 'kind': 'static', 'slug': 'build'})
+skipping: [nginx] => (item={'hostname': 'uptime.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001'})
+skipping: [nginx] => (item={'hostname': 'status.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001', 'root_proxy_path': '/status/lv3-platform'})
+skipping: [nginx] => (item={'hostname': 'mail.example.com', 'kind': 'static', 'slug': 'mail'})
+ok: [nginx] => (item={'hostname': 'livekit.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
+ok: [nginx] => (item={'hostname': 'scheduler.example.com', 'kind': 'proxy', 'upstream': 'https://10.10.10.40:4646', 'upstream_ssl_verify': False})
+skipping: [nginx] => (item={'hostname': 'matrix.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
+skipping: [nginx] => (item={'hostname': 'langfuse.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
+skipping: [nginx] => (item={'hostname': 'flags.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
+skipping: [nginx] => (item={'hostname': 'analytics.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+ok: [nginx] => (item={'hostname': 'minio.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:9010', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'crawl_policy_enabled': False, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False})
+ok: [nginx] => (item={'hostname': 'errors.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3005'})
+ok: [nginx] => (item={'hostname': 'billing.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8100', 'prefix_proxy_routes': [{'path': '/api/', 'upstream': 'http://10.10.10.20:8099'}]})
+skipping: [nginx] => (item={'hostname': 'agents.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
+skipping: [nginx] => (item={'hostname': 'tasks.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
+ok: [nginx] => (item={'hostname': 'ci.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
+skipping: [nginx] => (item={'hostname': 'wiki.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
+ok: [nginx] => (item={'hostname': 'grist.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8484'})
+ok: [nginx] => (item={'hostname': 'paperless.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'logs.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
+skipping: [nginx] => (item={'hostname': 'draw.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
+skipping: [nginx] => (item={'hostname': 'chat.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
+skipping: [nginx] => (item={'hostname': 'n8n.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
+skipping: [nginx] => (item={'hostname': 'cloud.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'coolify.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
+skipping: [nginx] => (item={'hostname': 'apps.example.com', 'kind': 'proxy', 'upstream': 'https://10.10.10.71:443', 'aliases': ['*.apps.example.com'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'api.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8083'})
+skipping: [nginx] => (item={'hostname': 'sso.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8091'})
+skipping: [nginx] => (item={'hostname': 'registry.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8095', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx] => (item={'hostname': 'ops.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
+skipping: [nginx] => (item={'hostname': 'home.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3090'})
+ok: [nginx] => (item={'hostname': 'ntfy.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:2586', 'chunked_transfer_encoding': True, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx] => (item={'hostname': 'data.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
+ok: [nginx] => (item={'hostname': 'annotate.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8110'})
+ok: [nginx] => (item={'hostname': 'bi.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8105'})
+ok: [nginx] => (item={'hostname': 'repowise.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:7070'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:42:36.691Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render NGINX public edge configuration] ***
@@ -1720,7 +1720,7 @@ ok: [nginx]
 TASK [lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:41.573Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml:259:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml:259:9
 
 257     name: nginx
 258     state: reloaded
@@ -1739,36 +1739,36 @@ skipping: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:42.438Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx] => (item={'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org']})
-ok: [nginx] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']})
-ok: [nginx] => (item={'hostname': 'scheduler.lv3.org', 'cert_name': 'scheduler.lv3.org', 'domains': ['scheduler.lv3.org']})
-ok: [nginx] => (item={'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org']})
-ok: [nginx] => (item={'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org']})
-ok: [nginx] => (item={'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org']})
-ok: [nginx] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']})
-ok: [nginx] => (item={'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org']})
-ok: [nginx] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']})
-ok: [nginx] => (item={'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org']})
-ok: [nginx] => (item={'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org']})
-ok: [nginx] => (item={'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org']})
-ok: [nginx] => (item={'hostname': 'repowise.lv3.org', 'cert_name': 'repowise.lv3.org', 'domains': ['repowise.lv3.org']})
+ok: [nginx] => (item={'hostname': 'minio-console.example.com', 'cert_name': 'minio-console.example.com', 'domains': ['minio-console.example.com']})
+ok: [nginx] => (item={'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com']})
+ok: [nginx] => (item={'hostname': 'scheduler.example.com', 'cert_name': 'scheduler.example.com', 'domains': ['scheduler.example.com']})
+ok: [nginx] => (item={'hostname': 'minio.example.com', 'cert_name': 'minio.example.com', 'domains': ['minio.example.com']})
+ok: [nginx] => (item={'hostname': 'errors.example.com', 'cert_name': 'errors.example.com', 'domains': ['errors.example.com']})
+ok: [nginx] => (item={'hostname': 'billing.example.com', 'cert_name': 'billing.example.com', 'domains': ['billing.example.com']})
+ok: [nginx] => (item={'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com']})
+ok: [nginx] => (item={'hostname': 'grist.example.com', 'cert_name': 'grist.example.com', 'domains': ['grist.example.com']})
+ok: [nginx] => (item={'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com']})
+ok: [nginx] => (item={'hostname': 'ntfy.example.com', 'cert_name': 'ntfy.example.com', 'domains': ['ntfy.example.com']})
+ok: [nginx] => (item={'hostname': 'annotate.example.com', 'cert_name': 'annotate.example.com', 'domains': ['annotate.example.com']})
+ok: [nginx] => (item={'hostname': 'bi.example.com', 'cert_name': 'bi.example.com', 'domains': ['bi.example.com']})
+ok: [nginx] => (item={'hostname': 'repowise.example.com', 'cert_name': 'repowise.example.com', 'domains': ['repowise.example.com']})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:42:49.998Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:50.010Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/minio-console.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 50, 'inode': 524586, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.42, 'mtime': 1774990710.1163633, 'ctime': 1774990710.1163633, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/minio-console.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/minio-console.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/minio-console.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524437, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.456, 'mtime': 1774934605.4875712, 'ctime': 1774934605.4875712, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/livekit.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/livekit.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/scheduler.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 46, 'inode': 655473, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.46, 'mtime': 1775467788.740721, 'ctime': 1775467788.740721, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/scheduler.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/scheduler.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/scheduler.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'scheduler.lv3.org', 'cert_name': 'scheduler.lv3.org', 'domains': ['scheduler.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/minio.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 42, 'inode': 524597, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.468, 'mtime': 1774990714.3204145, 'ctime': 1774990714.3204145, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/minio.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/minio.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/minio.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/errors.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 43, 'inode': 524465, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.472, 'mtime': 1774935606.903803, 'ctime': 1774935606.903803, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/errors.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/errors.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/errors.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/billing.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524490, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.476, 'mtime': 1774943944.6895537, 'ctime': 1774943944.6895537, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/billing.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/billing.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/billing.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ci.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524300, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.492, 'mtime': 1774903704.395339, 'ctime': 1774903704.395339, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ci.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/ci.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ci.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/grist.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 42, 'inode': 524384, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.492, 'mtime': 1774934721.2289627, 'ctime': 1774934721.2289627, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/grist.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/grist.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/grist.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/paperless.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 46, 'inode': 524497, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.496, 'mtime': 1774946480.580403, 'ctime': 1774946480.580403, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/paperless.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/paperless.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/paperless.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ntfy.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 41, 'inode': 524725, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.5, 'mtime': 1775197839.7778702, 'ctime': 1775197839.7778702, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ntfy.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/ntfy.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ntfy.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/annotate.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 45, 'inode': 524646, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.504, 'mtime': 1775072493.345596, 'ctime': 1775072493.345596, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/annotate.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/annotate.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/annotate.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/bi.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524634, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.508, 'mtime': 1775033601.8382256, 'ctime': 1775033601.8382256, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/bi.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/bi.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/bi.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/repowise.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 45, 'inode': 526452, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.508, 'mtime': 1775315467.2048142, 'ctime': 1775315467.2048142, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/repowise.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/repowise.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/repowise.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'repowise.lv3.org', 'cert_name': 'repowise.lv3.org', 'domains': ['repowise.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/minio-console.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 50, 'inode': 524586, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.42, 'mtime': 1774990710.1163633, 'ctime': 1774990710.1163633, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/minio-console.example.com/fullchain1.pem', 'lnk_target': '../../archive/minio-console.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/minio-console.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'minio-console.example.com', 'cert_name': 'minio-console.example.com', 'domains': ['minio-console.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/livekit.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524437, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.456, 'mtime': 1774934605.4875712, 'ctime': 1774934605.4875712, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/livekit.example.com/fullchain1.pem', 'lnk_target': '../../archive/livekit.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/livekit.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/scheduler.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 46, 'inode': 655473, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.46, 'mtime': 1775467788.740721, 'ctime': 1775467788.740721, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/scheduler.example.com/fullchain1.pem', 'lnk_target': '../../archive/scheduler.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/scheduler.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'scheduler.example.com', 'cert_name': 'scheduler.example.com', 'domains': ['scheduler.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/minio.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 42, 'inode': 524597, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.468, 'mtime': 1774990714.3204145, 'ctime': 1774990714.3204145, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/minio.example.com/fullchain1.pem', 'lnk_target': '../../archive/minio.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/minio.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'minio.example.com', 'cert_name': 'minio.example.com', 'domains': ['minio.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/errors.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 43, 'inode': 524465, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.472, 'mtime': 1774935606.903803, 'ctime': 1774935606.903803, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/errors.example.com/fullchain1.pem', 'lnk_target': '../../archive/errors.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/errors.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'errors.example.com', 'cert_name': 'errors.example.com', 'domains': ['errors.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/billing.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524490, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.476, 'mtime': 1774943944.6895537, 'ctime': 1774943944.6895537, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/billing.example.com/fullchain1.pem', 'lnk_target': '../../archive/billing.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/billing.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'billing.example.com', 'cert_name': 'billing.example.com', 'domains': ['billing.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ci.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524300, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.492, 'mtime': 1774903704.395339, 'ctime': 1774903704.395339, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ci.example.com/fullchain1.pem', 'lnk_target': '../../archive/ci.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ci.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/grist.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 42, 'inode': 524384, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.492, 'mtime': 1774934721.2289627, 'ctime': 1774934721.2289627, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/grist.example.com/fullchain1.pem', 'lnk_target': '../../archive/grist.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/grist.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'grist.example.com', 'cert_name': 'grist.example.com', 'domains': ['grist.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/paperless.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 46, 'inode': 524497, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.496, 'mtime': 1774946480.580403, 'ctime': 1774946480.580403, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/paperless.example.com/fullchain1.pem', 'lnk_target': '../../archive/paperless.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/paperless.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ntfy.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 41, 'inode': 524725, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.5, 'mtime': 1775197839.7778702, 'ctime': 1775197839.7778702, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ntfy.example.com/fullchain1.pem', 'lnk_target': '../../archive/ntfy.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ntfy.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ntfy.example.com', 'cert_name': 'ntfy.example.com', 'domains': ['ntfy.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/annotate.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 45, 'inode': 524646, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.504, 'mtime': 1775072493.345596, 'ctime': 1775072493.345596, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/annotate.example.com/fullchain1.pem', 'lnk_target': '../../archive/annotate.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/annotate.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'annotate.example.com', 'cert_name': 'annotate.example.com', 'domains': ['annotate.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/bi.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524634, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.508, 'mtime': 1775033601.8382256, 'ctime': 1775033601.8382256, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/bi.example.com/fullchain1.pem', 'lnk_target': '../../archive/bi.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/bi.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'bi.example.com', 'cert_name': 'bi.example.com', 'domains': ['bi.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/repowise.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 45, 'inode': 526452, 'dev': 2049, 'nlink': 1, 'atime': 1775955429.508, 'mtime': 1775315467.2048142, 'ctime': 1775315467.2048142, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/repowise.example.com/fullchain1.pem', 'lnk_target': '../../archive/repowise.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/repowise.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'get_selinux_context': False, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'repowise.example.com', 'cert_name': 'repowise.example.com', 'domains': ['repowise.example.com']}, 'ansible_loop_var': 'item'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:42:57.603Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Build the site-local certificate SAN catalog] ***
@@ -1778,36 +1778,36 @@ ok: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:57.663Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx] => (item={'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org']})
-ok: [nginx] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']})
-ok: [nginx] => (item={'hostname': 'scheduler.lv3.org', 'cert_name': 'scheduler.lv3.org', 'domains': ['scheduler.lv3.org']})
-ok: [nginx] => (item={'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org']})
-ok: [nginx] => (item={'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org']})
-ok: [nginx] => (item={'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org']})
-ok: [nginx] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']})
-ok: [nginx] => (item={'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org']})
-ok: [nginx] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']})
-ok: [nginx] => (item={'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org']})
-ok: [nginx] => (item={'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org']})
-ok: [nginx] => (item={'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org']})
-ok: [nginx] => (item={'hostname': 'repowise.lv3.org', 'cert_name': 'repowise.lv3.org', 'domains': ['repowise.lv3.org']})
+ok: [nginx] => (item={'hostname': 'minio-console.example.com', 'cert_name': 'minio-console.example.com', 'domains': ['minio-console.example.com']})
+ok: [nginx] => (item={'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com']})
+ok: [nginx] => (item={'hostname': 'scheduler.example.com', 'cert_name': 'scheduler.example.com', 'domains': ['scheduler.example.com']})
+ok: [nginx] => (item={'hostname': 'minio.example.com', 'cert_name': 'minio.example.com', 'domains': ['minio.example.com']})
+ok: [nginx] => (item={'hostname': 'errors.example.com', 'cert_name': 'errors.example.com', 'domains': ['errors.example.com']})
+ok: [nginx] => (item={'hostname': 'billing.example.com', 'cert_name': 'billing.example.com', 'domains': ['billing.example.com']})
+ok: [nginx] => (item={'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com']})
+ok: [nginx] => (item={'hostname': 'grist.example.com', 'cert_name': 'grist.example.com', 'domains': ['grist.example.com']})
+ok: [nginx] => (item={'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com']})
+ok: [nginx] => (item={'hostname': 'ntfy.example.com', 'cert_name': 'ntfy.example.com', 'domains': ['ntfy.example.com']})
+ok: [nginx] => (item={'hostname': 'annotate.example.com', 'cert_name': 'annotate.example.com', 'domains': ['annotate.example.com']})
+ok: [nginx] => (item={'hostname': 'bi.example.com', 'cert_name': 'bi.example.com', 'domains': ['bi.example.com']})
+ok: [nginx] => (item={'hostname': 'repowise.example.com', 'cert_name': 'repowise.example.com', 'domains': ['repowise.example.com']})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-12T18:42:57.834Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:42:57.841Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [nginx] => (item={'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'scheduler.lv3.org', 'cert_name': 'scheduler.lv3.org', 'domains': ['scheduler.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org'], 'missing_domains': []})
-skipping: [nginx] => (item={'hostname': 'repowise.lv3.org', 'cert_name': 'repowise.lv3.org', 'domains': ['repowise.lv3.org'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'minio-console.example.com', 'cert_name': 'minio-console.example.com', 'domains': ['minio-console.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'scheduler.example.com', 'cert_name': 'scheduler.example.com', 'domains': ['scheduler.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'minio.example.com', 'cert_name': 'minio.example.com', 'domains': ['minio.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'errors.example.com', 'cert_name': 'errors.example.com', 'domains': ['errors.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'billing.example.com', 'cert_name': 'billing.example.com', 'domains': ['billing.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'grist.example.com', 'cert_name': 'grist.example.com', 'domains': ['grist.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'ntfy.example.com', 'cert_name': 'ntfy.example.com', 'domains': ['ntfy.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'annotate.example.com', 'cert_name': 'annotate.example.com', 'domains': ['annotate.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'bi.example.com', 'cert_name': 'bi.example.com', 'domains': ['bi.example.com'], 'missing_domains': []})
+skipping: [nginx] => (item={'hostname': 'repowise.example.com', 'cert_name': 'repowise.example.com', 'domains': ['repowise.example.com'], 'missing_domains': []})
 skipping: [nginx]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx","task_status":"skipped","trace_id":"background","ts":"2026-04-12T18:42:57.898Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
@@ -1839,7 +1839,7 @@ ok: [nginx]
 TASK [lv3.platform.nginx_edge_publication : Enable and reload NGINX] ***********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Enable and reload NGINX","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:03.761Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml:436:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml:436:9
 
 434     enabled: true
 435     state: reloaded
@@ -1854,7 +1854,7 @@ changed: [nginx]
 TASK [lv3.platform.nginx_edge_publication : Verify the NGINX service is active] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the NGINX service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:04.577Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/verify.yml:7:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/verify.yml:7:9
 
 5   changed_when: false
 6   failed_when: public_edge_verify_service.stdout | trim != "active"
@@ -1869,7 +1869,7 @@ ok: [nginx]
 TASK [lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:05.234Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/verify.yml:23:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/verify.yml:23:9
 
 21   register: public_edge_verify_http
 22   changed_when: false
@@ -1910,5 +1910,5 @@ PLAY RECAP *********************************************************************
 nginx                      : ok=100  changed=5    unreachable=0    failed=0    skipped=22   rescued=0    ignored=0
 
 /Applications/Xcode.app/Contents/Developer/usr/bin/make validate-certificates
-uv run python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/certificate_validator.py --check-all
+uv run python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/certificate_validator.py --check-all
 [info] No real platform_domain in .local/identity.yml — skipping TLS validation (committed catalog uses example.com placeholder). Configure .local/identity.yml with your real domain to enable certificate checks.
