@@ -118,12 +118,13 @@ def test_verify_tasks_probe_health_buckets_cors_and_lifecycle() -> None:
     names = {task["name"] for task in tasks}
     verify_text = VERIFY_PATH.read_text()
 
-    assert "Verify the MinIO live health endpoint responds locally" in names
-    assert "Verify the MinIO ready health endpoint responds locally" in names
+    assert "Verify the MinIO runtime health" in names
     assert "Verify the managed MinIO buckets are reachable" in names
     assert "Verify the Langfuse bucket default CORS behavior" in names
     assert "Verify the RAG staging bucket lifecycle rule" in names
     assert "minio_managed_consumers_resolved" in verify_text
+    assert "/minio/health/live" in verify_text
+    assert "/minio/health/ready" in verify_text
     assert "share download --json --expire 5m" in verify_text
     assert "--retry-connrefused" in verify_text
     assert "--connect-timeout 5 --max-time 30" in verify_text

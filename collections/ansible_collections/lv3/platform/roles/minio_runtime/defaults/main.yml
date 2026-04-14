@@ -8,6 +8,9 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+# Keep an explicit image fallback so direct role validation and focused tests
+# still see the pinned runtime ref before derive_service_defaults runs.
+minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
 minio_policy_dir: "{{ minio_site_dir }}/policies"
 minio_api_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('minio', 'internal') }}"
 minio_console_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('minio', 'console') }}"
