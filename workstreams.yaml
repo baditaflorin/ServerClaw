@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 314
+  total_workstreams: 315
   by_year:
-    '2026': 314
+    '2026': 315
 workstreams:
 - id: ws-0417-attack-surface-hardening
   title: "ADR 0417 \u2014 External Attack Surface Hardening"
@@ -271,95 +271,6 @@ workstreams:
     '
   blockers: []
   plane_issue_id: 42ea1e56-38e5-4a5d-a25d-392abad9e3e8
-- id: adr-0369-python-validation-toolkit
-  adr: 0369
-  title: Shared Python validation toolkit for catalog and registry scripts
-  status: in_progress
-  owner: codex
-  branch: codex/adr-0369-mainline
-  worktree_path: .worktrees/adr-0369-mainline
-  doc: docs/workstreams/adr-0369-python-validation-toolkit.md
-  depends_on:
-  - adr-0039-controller-automation-toolkit
-  - adr-0048-command-catalog-pattern
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0369-python-validation-toolkit.md
-  - docs/workstreams/adr-0369-python-validation-toolkit.md
-  - scripts/validation_toolkit.py
-  - scripts/test_validation_toolkit.py
-  - scripts/identity_yaml.py
-  - scripts/generate_cross_cutting_artifacts.py
-  - scripts/generate_ops_portal.py
-  - scripts/capability_contracts.py
-  - scripts/container_image_policy.py
-  - scripts/environment_topology.py
-  - scripts/failure_domain_policy.py
-  - scripts/gate_bypass_waivers.py
-  - scripts/generate_platform_vars.py
-  - scripts/immutable_guest_replacement.py
-  - scripts/maintenance_window_tool.py
-  - scripts/ntfy_publish.py
-  - scripts/provider_boundary_catalog.py
-  - scripts/runtime_assurance.py
-  - scripts/service_catalog.py
-  - scripts/service_completeness.py
-  - scripts/service_redundancy.py
-  - scripts/shared_policy_packs.py
-  - scripts/stage_smoke_suites.py
-  - scripts/token_lifecycle.py
-  - scripts/typesense_catalog_sync.py
-  - scripts/validate_nats_topics.py
-  - scripts/validate_repository_data_models.py
-  - scripts/validation_runner_contracts.py
-  - scripts/vulnerability_budget.py
-  - workstreams/active/adr-0369-python-validation-toolkit.yaml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: adr_0369_workstream_docs
-      paths:
-      - docs/workstreams/adr-0369-python-validation-toolkit.md
-      - workstreams/active/adr-0369-python-validation-toolkit.yaml
-      mode: exclusive
-    - id: adr_0369_validation_toolkit
-      paths:
-      - scripts/validation_toolkit.py
-      - scripts/test_validation_toolkit.py
-      - scripts/identity_yaml.py
-      - scripts/generate_cross_cutting_artifacts.py
-      - scripts/generate_ops_portal.py
-      - scripts/capability_contracts.py
-      - scripts/container_image_policy.py
-      - scripts/environment_topology.py
-      - scripts/failure_domain_policy.py
-      - scripts/gate_bypass_waivers.py
-      - scripts/generate_platform_vars.py
-      - scripts/immutable_guest_replacement.py
-      - scripts/maintenance_window_tool.py
-      - scripts/ntfy_publish.py
-      - scripts/provider_boundary_catalog.py
-      - scripts/runtime_assurance.py
-      - scripts/service_catalog.py
-      - scripts/service_completeness.py
-      - scripts/service_redundancy.py
-      - scripts/shared_policy_packs.py
-      - scripts/stage_smoke_suites.py
-      - scripts/token_lifecycle.py
-      - scripts/typesense_catalog_sync.py
-      - scripts/validate_nats_topics.py
-      - scripts/validate_repository_data_models.py
-      - scripts/validation_runner_contracts.py
-      - scripts/vulnerability_budget.py
-      mode: exclusive
-  ready_to_merge: false
-  live_applied: false
-  plane_issue_id: f2097c3e-b37d-4c84-a5cc-b1518ceb3378
 - id: ws-0364-service-api-agent-tools
   adr: '0364'
   title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR

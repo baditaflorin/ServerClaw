@@ -1,7 +1,7 @@
 id: adr-0369-python-validation-toolkit
 adr: 0369
 title: Shared Python validation toolkit for catalog and registry scripts
-status: in_progress
+status: merged
 owner: codex
 branch: codex/adr-0369-mainline
 worktree_path: .worktrees/adr-0369-mainline
@@ -40,7 +40,7 @@ shared_surfaces:
 - scripts/validate_repository_data_models.py
 - scripts/validation_runner_contracts.py
 - scripts/vulnerability_budget.py
-- workstreams/active/adr-0369-python-validation-toolkit.yaml
+- workstreams/archive/2026/adr-0369-python-validation-toolkit.yaml
 - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
@@ -52,7 +52,7 @@ ownership_manifest:
   - id: adr_0369_workstream_docs
     paths:
     - docs/workstreams/adr-0369-python-validation-toolkit.md
-    - workstreams/active/adr-0369-python-validation-toolkit.yaml
+    - workstreams/archive/2026/adr-0369-python-validation-toolkit.yaml
     mode: exclusive
   - id: adr_0369_validation_toolkit
     paths:
@@ -84,6 +84,23 @@ ownership_manifest:
     - scripts/validation_runner_contracts.py
     - scripts/vulnerability_budget.py
     mode: exclusive
-ready_to_merge: false
+ready_to_merge: true
 live_applied: false
 plane_issue_id: f2097c3e-b37d-4c84-a5cc-b1518ceb3378
+notes: |
+  Rebased ADR 0369 onto origin/main @ fc3e43931 (repo version 0.178.139),
+  reran the validator discovery step on that exact tree, and confirmed the
+  remaining local require_* definitions were centralized into
+  scripts/validation_toolkit.py with plain-assert coverage in
+  scripts/test_validation_toolkit.py.
+
+  Verification completed before merge:
+  - python3 scripts/test_validation_toolkit.py
+  - uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate
+  - make validate-data-models
+  - make validate-cross-catalog
+  - uv run --with pyyaml --with jsonschema python scripts/service_catalog.py --validate
+
+  Note:
+  - make validate-schemas is referenced by ADR 0369 but is not a current Makefile target on latest origin/main; the merge used the repo's current validation targets instead.
+blockers: []
