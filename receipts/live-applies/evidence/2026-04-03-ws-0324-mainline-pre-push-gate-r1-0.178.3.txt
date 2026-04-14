@@ -1,0 +1,32 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, atlas-lint, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: .config-locations.yaml, .repo-structure.yaml, .yamllint, Makefile, build/onboarding/agent-core.yaml, build/onboarding/automation.yaml, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 3.86
+alert-rule-validation passed 3.75
+ansible-lint          passed 279.35
+ansible-syntax        passed 178.37
+artifact-secret-scan  passed 3.97
+atlas-lint            passed 5.70
+dependency-direction  passed 2.42
+dependency-graph      passed 3.18
+documentation-index   passed 4.35
+generated-docs        passed 9.59
+generated-portals     passed 33.09
+iac-policy-scan       passed 40.99
+integration-tests     passed 1.72
+packer-validate       passed 7.40
+policy-validation     passed 1.80
+schema-validation     passed 18.25
+security-scan         passed 43.94
+semgrep-sast          passed 63.35
+service-completeness  passed 2.03
+tofu-validate         passed 1.53
+type-check            passed 8.87
+workstream-surfaces   passed 2.86
+yaml-lint             passed 1.23

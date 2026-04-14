@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import ssl
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +20,109 @@ import subdomain_exposure_audit as audit  # noqa: E402
 
 
 class SubdomainExposureAuditTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._disable_overlay = patch.dict(os.environ, {"LV3_DISABLE_SHARED_LOCAL_IDENTITY": "1"})
+        self._disable_overlay.start()
+        self.addCleanup(self._disable_overlay.stop)
+
+    def test_build_registry_resolves_placeholder_domains_for_private_overlay(self) -> None:
+        catalog = {
+            "subdomains": [
+                {
+                    "fqdn": "api.lv3.org",
+                    "environment": "production",
+                    "status": "active",
+                    "owner_adr": "0371",
+                    "exposure": "edge-published",
+                    "auth_requirement": "none",
+                    "target": "203.0.113.1",
+                    "target_port": 443,
+                    "tls": {"provider": "letsencrypt", "auto_renew": True},
+                }
+            ]
+        }
+        host_vars = {"lv3_service_topology": {}}
+        public_edge_defaults = {
+            "public_edge_authenticated_sites": {},
+            "public_edge_extra_sites": [],
+        }
+        service_catalog = {
+            "services": [
+                {
+                    "id": "api_gateway",
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "https://api.example.com",
+                        }
+                    },
+                }
+            ]
+        }
+
+        with (
+            patch.object(audit.subdomain_catalog, "load_json", return_value=service_catalog),
+            patch.object(
+                audit.subdomain_catalog,
+                "resolve_public_domain_placeholders",
+                side_effect=_replace_example_domain,
+            ),
+            patch.object(
+                audit.subdomain_catalog,
+                "validate_subdomain_catalog",
+                side_effect=lambda catalog, resolved_service_catalog, *_args: self.assertEqual(
+                    resolved_service_catalog["services"][0]["environments"]["production"]["url"],
+                    "https://api.lv3.org",
+                ),
+            ),
+        ):
+            registry = audit.build_registry(
+                catalog=catalog,
+                host_vars=host_vars,
+                public_edge_defaults=public_edge_defaults,
+            )
+
+        self.assertEqual(registry["publications"][0]["fqdn"], "api.lv3.org")
+
+    def test_load_certificate_catalog_resolves_placeholder_domains_for_private_overlay(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="certificate-catalog-"))
+        try:
+            certificate_catalog_path = temp_dir / "certificate-catalog.json"
+            certificate_catalog_path.write_text(
+                json.dumps(
+                    {
+                        "certificates": [
+                            {
+                                "endpoint": {
+                                    "host": "docs.example.com",
+                                    "server_name": "docs.example.com",
+                                }
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            original = audit.CERTIFICATE_CATALOG_PATH
+            audit.CERTIFICATE_CATALOG_PATH = certificate_catalog_path
+            try:
+                with patch.object(
+                    audit.subdomain_catalog,
+                    "resolve_public_domain_placeholders",
+                    side_effect=_replace_example_domain,
+                ):
+                    certificate_catalog = audit.load_certificate_catalog()
+            finally:
+                audit.CERTIFICATE_CATALOG_PATH = original
+        finally:
+            shutil.rmtree(temp_dir)
+
+        self.assertEqual(
+            certificate_catalog["certificates"][0]["endpoint"]["host"],
+            "docs.lv3.org",
+        )
+
     def test_repo_registry_tracks_known_hostnames(self) -> None:
         registry = audit.build_registry()
         by_fqdn = {entry["fqdn"]: entry for entry in registry["publications"]}
@@ -432,6 +537,16 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         }
 
         self.assertEqual(audit.resolve_route_for_hostname("repo-smoke.apps.example.com", [route]), route)
+
+
+def _replace_example_domain(value):
+    if isinstance(value, str):
+        return value.replace("example.com", "lv3.org")
+    if isinstance(value, list):
+        return [_replace_example_domain(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _replace_example_domain(item) for key, item in value.items()}
+    return value
 
 
 if __name__ == "__main__":

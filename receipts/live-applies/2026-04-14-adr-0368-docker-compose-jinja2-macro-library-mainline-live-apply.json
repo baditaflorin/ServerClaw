@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-14T06:06:02Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply",
+  "adr": "0368",
+  "workstream": "ws-0368-live-apply",
+  "source_branch": "codex/ws-0368-main-publish-r4",
+  "source_commit": "603490f501ebfce5997efa23d2805dfc3521b599",
+  "repo_version_context": "0.178.137",
+  "platform_version_context": "0.178.133",
+  "integrated_repo_version": "0.178.138",
+  "integrated_platform_version": "0.178.138",
+  "summary": "Replay ADR 0368 from the latest realistic 0.178.137 origin/main base, materialize the missing fresh-worktree generated artifacts that blocked the exact-main MinIO DNS replay, rerun MinIO, Gitea, and Redpanda from the merged main tree, and carry the verified result into integrated repo and platform version 0.178.138.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "MinIO public API"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "MinIO console"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private Gitea API"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Redpanda admin, HTTP proxy, and schema registry"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ws-0368 regression slice on the exact-main integration tree",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with jsonschema pytest -q tests/test_gitea_runtime_role.py tests/test_minio_runtime_role.py tests/test_redpanda_runtime_role.py tests/test_service_definition_catalog.py tests/test_sbom_scanner.py tests/test_upgrade_container_image.py` passed with `46 passed in 1.08s`; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-pytest-r1-0.178.138.txt`."
+    },
+    {
+      "check": "Exact-main MinIO replay and public publication verification",
+      "result": "pass",
+      "observed": "After materializing `inventory/group_vars/platform.yml` plus the generated TLS, Uptime Kuma, and SLO surfaces into the fresh worktree, `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=minio env=production` completed cleanly. `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-minio-live-apply-r3-0.178.138.txt` recorded `docker-runtime ok=240 changed=7 failed=0`, `nginx ok=46 changed=3 failed=0`, `proxmox-host ok=373 changed=0 failed=0`, and localhost MinIO health plus oauth2-proxy redirect verification."
+    },
+    {
+      "check": "Exact-main Gitea replay plus private API and signed release-bundle verification",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=gitea env=production` completed with `proxmox-host ok=41 changed=4 failed=0`, `postgres ok=28 changed=0 failed=0`, `runtime-control ok=408 changed=6 failed=0`, and `docker-build ok=216 changed=2 failed=0` in `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-live-apply-r1-0.178.138.txt`. The direct follow-up controller checks in `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-verify-r1-0.178.138.txt` returned `{\"version\":\"1.25.5\"}`, confirmed `/api/swagger`, and validated the signed release bundle with status `ok`."
+    },
+    {
+      "check": "Exact-main Redpanda replay and stream contract verification",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=redpanda env=production` completed with `docker-runtime ok=226 changed=4 failed=0` in `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-redpanda-live-apply-r1-0.178.138.txt` after using the repaired readiness source that reads back from the produced Kafka offset instead of hard-coding `offset=0`. The same evidence file shows the role-level Redpanda verify path passed through the admin ready endpoint, HTTP proxy smoke record round-trip, and schema registry subject validation."
+    },
+    {
+      "check": "Build-server reachability from the integrated main candidate",
+      "result": "pass",
+      "observed": "`./scripts/remote_exec.sh check-build-server` passed from the integrated main candidate; evidence is `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-check-build-server-r1-0.178.138.txt`."
+    },
+    {
+      "check": "Direct repository gate bundle on the archived mainline candidate",
+      "result": "pass",
+      "observed": "`LV3_SNAPSHOT_BRANCH=HEAD ./scripts/validate_repo.sh agent-standards service-definitions health-probes data-models workstream-surfaces generated-docs generated-portals alert-rules` passed after regenerating the canonical SLO and dependency-diagram artifacts; evidence is `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-repo-gates-r1-0.178.138.txt`."
+    },
+    {
+      "check": "Live-apply receipt schema validation and whitespace diff check",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate` passed with evidence `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-live-apply-receipts-r1-0.178.138.txt`, and `git diff --check` passed with evidence `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-git-diff-check-r1-0.178.138.txt`."
+    },
+    {
+      "check": "Remote validate failure-and-recovery path from the integrated candidate",
+      "result": "pass",
+      "observed": "`make remote-validate` first failed on the build server because the runner images under `registry.example.com` were not resolvable there, then reran the unresolved checks locally and passed `workstream-surfaces`, `agent-standards`, `ansible-syntax`, `schema-validation`, `atlas-lint`, `policy-validation`, `iac-policy-scan`, `alert-rule-validation`, `type-check`, and `dependency-graph`; evidence is `receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-remote-validate-r1-0.178.138.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0368-docker-compose-jinja2-macro-library.md",
+    "docs/workstreams/ws-0368-live-apply.md",
+    "workstreams/archive/2026/ws-0368-live-apply.yaml",
+    "catalog/services/redpanda/service.yaml",
+    "config/health-probe-catalog.json",
+    "scripts/generate_platform_vars.py",
+    "scripts/materialize_live_apply_worktree_artifacts.py",
+    "scripts/generate_slo_rules.py",
+    "scripts/generate_dependency_diagram.py",
+    "scripts/sbom_scanner.py",
+    "scripts/managed_image_gate.py",
+    "scripts/upgrade_container_image.py",
+    "tests/test_gitea_runtime_role.py",
+    "tests/test_minio_runtime_role.py",
+    "tests/test_redpanda_runtime_role.py",
+    "tests/test_service_definition_catalog.py",
+    "tests/test_sbom_scanner.py",
+    "tests/test_upgrade_container_image.py",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-minio-live-apply-r3-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-live-apply-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-verify-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-redpanda-live-apply-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-pytest-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-repo-gates-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-live-apply-receipts-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-git-diff-check-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-check-build-server-r1-0.178.138.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-remote-validate-r1-0.178.138.txt"
+  ],
+  "notes": [
+    "The exact-main replay started from origin/main@6aeb26434724680c6da2162cd3544031b5a93f03, the latest realistic reachable mainline revision with repo VERSION 0.178.137 and platform VERSION 0.178.133 at apply time.",
+    "The first mainline MinIO replay failed in the Hetzner DNS publication preflight because the fresh worktree had not materialized generated surfaces such as inventory/group_vars/platform.yml; materializing those controller-local artifacts cleared the blocker without changing ADR 0368 runtime logic.",
+    "The integrated closeout keeps VERSION, changelog, README, versions/stack truth, the archived ws-0368 workstream metadata, and this receipt aligned with the exact-main replay so repo version 0.178.138 and platform version 0.178.138 describe the same verified state.",
+    "Final validation used LV3_SNAPSHOT_BRANCH=HEAD for the archived workstream ownership checks and confirmed the direct repo gates, check-build-server, live-apply receipt validation, and remote-validate fallback path from the integrated candidate."
+  ]
+}

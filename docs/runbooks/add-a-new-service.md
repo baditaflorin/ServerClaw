@@ -22,7 +22,7 @@ make scaffold-service \
 ```
 
 4. Fill the generated stubs.
-   Complete the role, playbooks, catalog entries, dependency edges, SLO description, dashboard, alert rules, runbook, and any generated ADR/workstream placeholders.
+   Complete the role, playbooks, service bundle under `catalog/services/<service-id>/service.yaml`, dashboard, alert rules, runbook, and any generated ADR/workstream placeholders. The generated aggregate catalogs under `config/` are refreshed from that bundle.
 5. Run the completeness check.
 
 ```bash
@@ -38,18 +38,17 @@ make validate
 
 ## What The Scaffold Adds
 
-- service capability catalog entry
-- health probe definition
+- ADR 0324 service bundle under `catalog/services/<service-id>/service.yaml`
 - subdomain entry when a hostname is declared
 - API gateway route stub
-- dependency graph node and dependency edges
+- dependency graph node and dependency edges assembled from the service bundle
 - secret catalog stub
-- SLO stub
-- data catalog stub
+- SLO stub assembled from the service bundle
+- data catalog stub assembled from the service bundle
 - Grafana dashboard template
 - alert rule template
 - runbook template
-- service completeness profile for ADR 0107 validation
+- service completeness and redundancy profile for ADR 0107 and ADR 0179 validation
 
 ## Grandfathering Model
 

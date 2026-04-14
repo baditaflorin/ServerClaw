@@ -1,13 +1,79 @@
 {
-  "workstream_id": "ws-0361-live-apply",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-13",
+  "recorded_on": "2026-04-13",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0361-semaphore-keycloak-oidc-live-apply",
   "adr": "0361",
+  "workstream": "ws-0361-live-apply",
+  "workstream_id": "ws-0361-live-apply",
   "title": "Semaphore Keycloak OIDC integration live apply",
   "status": "completed",
   "live_applied": true,
   "platform_changed": true,
-  "attempted_on": "2026-04-13",
-  "source_commit_at_attempt": "0414f3f1991be54278374b0ee7789e04f6ba0b1c",
-  "latest_upstream_checked": "307cdbb6961b18d80f93f85024c3539589ce18fa",
+  "source_branch": "codex/ws-0361-live-apply",
+  "source_commit": "0414f3f1991be54278374b0ee7789e04f6ba0b1c",
+  "repo_version_context": "0.178.127",
+  "summary": "Live-apply ADR 0361 from the 0.178.127 source tree, recover the dependent docker-runtime stacks needed for Keycloak readiness, run the production Semaphore converge, and verify the controller API, OIDC login flow, project listing, and seeded self-test template end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control",
+      "address": "10.10.10.92"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres",
+      "address": "10.10.10.50"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Production Semaphore converge",
+      "result": "pass",
+      "observed": "make converge-semaphore env=production completed successfully after restarting the mail-platform and netbox compose stacks and force-recreating the Keycloak compose stack on docker-runtime."
+    },
+    {
+      "check": "Semaphore controller API and OIDC entrypoint",
+      "result": "pass",
+      "observed": "Controller verification returned pong from /api/ping and HTTP 200 from /auth/oidc/login at the live Semaphore base URL."
+    },
+    {
+      "check": "Semaphore operational smoke tests",
+      "result": "pass",
+      "observed": "make semaphore-manage ACTION=list-projects listed LV3 Semaphore and the seeded Semaphore Self-Test template completed with status success."
+    },
+    {
+      "check": "Focused repo validation",
+      "result": "pass",
+      "observed": "./scripts/validate_repo.sh workstream-surfaces, make preflight WORKFLOW=converge-semaphore, and the targeted Semaphore and Keycloak pytest slice all passed on the source tree used for the live apply."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0361-semaphore-keycloak-oidc-integration.md",
+    "docs/adr/implementation-status/adr-0361.yaml",
+    "docs/workstreams/ws-0361-live-apply.md",
+    "workstreams/done/ws-0361-live-apply.yaml",
+    "receipts/live-applies/ws-0361-live-apply-apply-receipt.yaml",
+    "receipts/live-applies/evidence/2026-04-13-ws-0361-summary.txt"
+  ],
+  "notes": [
+    "This historical completed receipt was normalized to the current schema on 2026-04-14 from the original branch evidence.",
+    "Pre-apply recovery on docker-runtime restarted the mail-platform and netbox compose stacks and force-recreated the Keycloak compose stack before the successful converge.",
+    "./scripts/validate_repo.sh agent-standards still reported a topology snapshot warning outside the live-apply success criteria."
+  ],
   "attempted_commands": [
     {
       "command": "make converge-semaphore env=production",
@@ -56,12 +122,12 @@
     }
   ],
   "environment_notes": [
-    "Pre-apply recovery on docker-runtime restarted mail-platform and netbox compose stacks and force-recreated the keycloak compose stack before converge."
+    "Pre-apply recovery on docker-runtime restarted mail-platform and netbox compose stacks and force-recreated the Keycloak compose stack before converge."
   ],
   "evidence": [
     "receipts/live-applies/evidence/2026-04-13-ws-0361-summary.txt"
   ],
   "next_steps": [
-    "Integrate to main, bump VERSION, update changelog, versions/stack.yaml, and README integrated status summary."
+    "Integrate the live-applied work to main, bump VERSION, and update the protected release surfaces."
   ]
 }

@@ -14,6 +14,8 @@ DOCKERFILE_TEMPLATE = REPO_ROOT / "roles" / "repo_intake_runtime" / "templates" 
 APP_PATH = REPO_ROOT / "scripts" / "repo_intake" / "app.py"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 HEALTH_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
+SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
+PARTITION_CATALOG_PATH = REPO_ROOT / "config" / "contracts" / "service-partitions" / "catalog.json"
 RUNBOOK_PATH = REPO_ROOT / "docs" / "runbooks" / "repo-intake.md"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "repo-intake.yml"
 
@@ -89,9 +91,12 @@ def test_templates_and_app_use_the_single_internal_port_contract() -> None:
 def test_inventory_and_health_catalog_capture_repo_intake_runtime_contract() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
     health_catalog = json.loads(HEALTH_CATALOG_PATH.read_text(encoding="utf-8"))
+    service_catalog = json.loads(SERVICE_CATALOG_PATH.read_text(encoding="utf-8"))
+    partition_catalog = json.loads(PARTITION_CATALOG_PATH.read_text(encoding="utf-8"))
 
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx" and 8101 in rule["ports"])
+    repo_intake_service = next(item for item in service_catalog["services"] if item["id"] == "repo_intake")
 
     assert nginx_rule["description"] == "Reverse proxy access to the repo-intake deployment surface"
     assert host_vars["lv3_service_topology"]["repo_intake"]["public_hostname"] == "repo-intake.{{ platform_domain }}"
@@ -99,6 +104,12 @@ def test_inventory_and_health_catalog_capture_repo_intake_runtime_contract() -> 
     assert health_catalog["services"]["repo_intake"]["verify_file"] == "roles/repo_intake_runtime/tasks/verify.yml"
     assert health_catalog["services"]["repo_intake"]["liveness"]["url"] == "http://127.0.0.1:8101/health"
     assert health_catalog["services"]["repo_intake"]["uptime_kuma"]["enabled"] is False
+    assert repo_intake_service["public_url"] == "https://repo-intake.example.com"
+    assert repo_intake_service["subdomain"] == "repo-intake.example.com"
+    assert repo_intake_service["runbook"] == "docs/runbooks/repo-intake.md"
+    assert repo_intake_service["runtime_pool"] == "runtime-general"
+    assert repo_intake_service["deployment_surface"] == "playbooks/services/repo-intake.yml"
+    assert "repo_intake" in partition_catalog["partitions"]["runtime-general"]["services"]
     assert "make converge-repo-intake" in RUNBOOK_PATH.read_text(encoding="utf-8")
 
 

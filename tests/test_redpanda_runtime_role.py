@@ -19,7 +19,7 @@ def test_defaults_define_private_redpanda_runtime_contract() -> None:
 
     assert (
         defaults["redpanda_service_topology"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service('redpanda') }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology | platform_service('redpanda') }}"
     )
     assert defaults["redpanda_site_dir"] == "/opt/redpanda"
     assert defaults["redpanda_compose_file"] == "{{ redpanda_site_dir }}/docker-compose.yml"
@@ -103,6 +103,14 @@ def test_main_tasks_prepare_users_topics_and_schema() -> None:
     assert start_task["ansible.builtin.template"]["owner"] == "101"
     assert start_task["ansible.builtin.template"]["group"] == "101"
     assert start_task["register"] == "redpanda_start_script_template"
+
+    secret_fact = next(task for task in tasks if task["name"] == "Record the Redpanda runtime secrets")
+    runtime_payload = secret_fact["ansible.builtin.set_fact"]["redpanda_runtime_secret_payload"]
+    assert runtime_payload["REDPANDA_ADMIN_USER"] == "{{ redpanda_admin_user }}"
+    assert runtime_payload["REDPANDA_PLATFORM_USER"] == "{{ redpanda_platform_user }}"
+    assert runtime_payload["REDPANDA_SASL_MECHANISM"] == "{{ redpanda_sasl_mechanism }}"
+    assert "redpanda_password_reads.results" in runtime_payload["REDPANDA_ADMIN_PASSWORD"]
+    assert "redpanda_password_reads.results" in runtime_payload["REDPANDA_PLATFORM_PASSWORD"]
 
     compose_task = next(task for task in tasks if task["name"] == "Render the Redpanda compose file")
     assert compose_task["register"] == "redpanda_compose_template"
@@ -198,12 +206,18 @@ def test_verify_tasks_exercise_http_proxy_and_schema_registry() -> None:
     tasks = yaml.safe_load(ROLE_VERIFY.read_text())
     names = [task["name"] for task in tasks]
 
-    assert "Verify the Redpanda admin ready endpoint responds" in names
+    assert "Verify the Redpanda runtime health" in names
     assert "Produce a Redpanda HTTP Proxy smoke record" in names
     assert "Assert the Redpanda HTTP Proxy smoke produce request succeeded" in names
     assert "Read Redpanda smoke records through the HTTP Proxy" in names
     assert "Read the Redpanda smoke schema subject" in names
     assert "Assert the Redpanda runtime contract" in names
+
+    health_task = next(task for task in tasks if task["name"] == "Verify the Redpanda runtime health")
+    assert health_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert health_task["ansible.builtin.include_role"]["tasks_from"] == "verify_service_health"
+    assert health_task["vars"]["common_verify_service_name"] == "redpanda"
+    assert health_task["vars"]["common_verify_health_url"] == "{{ redpanda_admin_api_url }}/v1/status/ready"
 
     produce_task = next(task for task in tasks if task["name"] == "Produce a Redpanda HTTP Proxy smoke record")
     assert (
@@ -219,11 +233,19 @@ def test_verify_tasks_exercise_http_proxy_and_schema_registry() -> None:
     assert "error_code" in produce_conditions[1]
     assert "offset" in produce_conditions[2]
 
-    read_task = next(task for task in tasks if task["name"] == "Read Redpanda smoke records through the HTTP Proxy")
+    offset_task = next(task for task in tasks if task["name"] == "Record the Redpanda smoke readback offset")
+    assert "redpanda_verify_offset" in offset_task["ansible.builtin.set_fact"]
     assert (
-        read_task["ansible.builtin.uri"]["url"]
-        == "{{ redpanda_http_proxy_url }}/topics/{{ redpanda_smoke_topic }}/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576"
+        "redpanda_produce_result.content | from_json"
+        in offset_task["ansible.builtin.set_fact"]["redpanda_verify_offset"]
     )
+
+    read_task = next(task for task in tasks if task["name"] == "Read Redpanda smoke records through the HTTP Proxy")
+    read_url = read_task["ansible.builtin.uri"]["url"]
+    assert "redpanda_http_proxy_url" in read_url
+    assert "/topics/{{ redpanda_smoke_topic }}/partitions/0/records?offset=" in read_url
+    assert "redpanda_verify_offset" in read_url
+    assert "&timeout=3000&max_bytes=1048576" in read_url
     assert read_task["ansible.builtin.uri"]["return_content"] is True
     until_expr = read_task["until"]
     assert "redpanda_verify_marker in" in until_expr

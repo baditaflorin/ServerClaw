@@ -26,6 +26,7 @@
     tasks_from: verify_service_health
   vars:
     common_verify_service_name: gitea
+    common_verify_port_host: "{{ ansible_host }}"
     common_verify_port: "{{ gitea_http_port }}"
     common_verify_health_url: "{{ gitea_private_base_url }}/user/login"
     common_verify_extra_endpoints:

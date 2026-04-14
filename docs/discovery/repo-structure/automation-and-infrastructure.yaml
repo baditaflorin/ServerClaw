@@ -103,6 +103,27 @@ entries:
         stage-smoke-suites.json: ADR 0251 catalog of stage-scoped smoke suites
           mapped to service/environment bindings
         integrations/: ADR 0353 integration contracts; validate with scripts/validate_integrations.py
+    catalog:
+      purpose: ADR 0324 service-definition source bundles and assembly metadata
+      contains: services/<service-id>/service.yaml plus services/_metadata.yaml
+      concern: canonical-service-metadata, generated-aggregates
+      keywords:
+        - catalog
+        - services
+        - shards
+        - source
+        - generated
+        - metadata
+      for_agents: 'Edit service-local metadata here instead of hand-editing the
+        generated config/* service catalogs. Regenerate and validate with scripts/service_definition_catalog.py.
+
+        '
+      key_files:
+        services/_metadata.yaml: Top-level metadata preserved while assembling generated
+          aggregate service catalogs
+        services/<service-id>/service.yaml: Primary service bundle; optional fragment
+          files may later split health, data, slo, completeness, redundancy, or
+          dependency sections
     policy:
       purpose: Shared Rego policy bundles and tests for OPA and Conftest
       contains: decisions/, conftest/, tests/
@@ -150,6 +171,12 @@ entries:
           smoke suite catalogs and receipt-ready evidence
         validate_integrations.py: ADR 0353 validator for config/integrations/ contracts; run with --check-dead to detect stale integrations
         check_provenance_headers.py: ADR 0351 audit tool reporting which Jinja2 templates lack managed-by provenance headers
+        service_definition_catalog.py: ADR 0324 bundle validator and aggregate catalog
+          writer for catalog/services/
+        scaffold_service.py: Scaffold entrypoint that creates new service bundles,
+          playbooks, roles, and workstream/docs surfaces together
+        service_catalog.py: Read-only CLI for querying the assembled service capability
+          catalog and bundle provenance
     tests:
       purpose: Test suites for automated validation
       contains: pytest unit + integration tests, molecule scenarios

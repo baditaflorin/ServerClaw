@@ -304,6 +304,7 @@
   ansible.builtin.uri:
     url: "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
     method: GET
+    timeout: 10
     headers:
       Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
     status_code:
@@ -417,6 +418,7 @@
   ansible.builtin.uri:
     url: "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
     method: GET
+    timeout: 10
     headers:
       Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
     status_code:

@@ -12,27 +12,17 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end
-- align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
-
-## 0.178.78 (2026-04-10)
-
-- fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
-- fix: Remove duplicate repo_intake entry in platform_services.yml registry
-- fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
-- fix: Escape Prometheus template syntax in alert rules for Jinja2 rendering compatibility
-- verified: Phase 6 cosmetic cleanup stable in production (118/118 convergence tasks passing)
-
-## 0.178.77
-
-- Harbor OIDC fix, public release readiness, ADR 0385-0388 IoC + OIDC centralization, bootstrap and Docker dev, ADR 0373 Phase 4, multi-instance deployment, operator provisioning, operational fixes
-
 ## Latest Release
 
-- [0.178.133 release notes](docs/release-notes/0.178.133.md)
+- [0.178.138 release notes](docs/release-notes/0.178.138.md)
 
 ## Previous Releases
 
+- [0.178.137 release notes](docs/release-notes/0.178.137.md)
+- [0.178.136 release notes](docs/release-notes/0.178.136.md)
+- [0.178.135 release notes](docs/release-notes/0.178.135.md)
+- [0.178.134 release notes](docs/release-notes/0.178.134.md)
+- [0.178.133 release notes](docs/release-notes/0.178.133.md)
 - [0.178.131 release notes](docs/release-notes/0.178.131.md)
 - [0.178.129 release notes](docs/release-notes/0.178.129.md)
 - [0.178.123 release notes](docs/release-notes/0.178.123.md)
@@ -40,13 +30,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.121 release notes](docs/release-notes/0.178.121.md)
 - [0.178.120 release notes](docs/release-notes/0.178.120.md)
 - [0.178.119 release notes](docs/release-notes/0.178.119.md)
-- [0.178.118 release notes](docs/release-notes/0.178.118.md)
-- [0.178.117 release notes](docs/release-notes/0.178.117.md)
-- [0.178.116 release notes](docs/release-notes/0.178.116.md)
-- [0.178.115 release notes](docs/release-notes/0.178.115.md)
-- [0.178.114 release notes](docs/release-notes/0.178.114.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (459 releases)](docs/release-notes/index/2026.md)
+- [2026 (464 releases)](docs/release-notes/index/2026.md)

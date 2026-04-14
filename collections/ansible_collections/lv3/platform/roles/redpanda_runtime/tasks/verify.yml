@@ -48,9 +48,21 @@
       Redpanda acknowledged the HTTP Proxy request itself, but the broker rejected
       the smoke record before it was committed.
 
+- name: Record the Redpanda smoke readback offset
+  ansible.builtin.set_fact:
+    redpanda_verify_offset: >-
+      {{
+        (((redpanda_produce_result.content | from_json).offsets[0].offset | default(-1)) | int)
+      }}
+
 - name: Read Redpanda smoke records through the HTTP Proxy
   ansible.builtin.uri:
-    url: "{{ redpanda_http_proxy_url }}/topics/{{ redpanda_smoke_topic }}/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576"
+    url: >-
+      {{
+        redpanda_http_proxy_url
+      }}/topics/{{ redpanda_smoke_topic }}/partitions/0/records?offset={{
+        redpanda_verify_offset
+      }}&timeout=3000&max_bytes=1048576
     method: GET
     url_username: "{{ redpanda_platform_user }}"
     url_password: "{{ redpanda_platform_password }}"

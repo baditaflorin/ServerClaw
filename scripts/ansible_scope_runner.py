@@ -17,6 +17,7 @@ from platform.ansible.execution_scopes import (
     AnsibleExecutionScopeError,
     CATALOG_PATH,
     INVENTORY_PATH,
+    extract_extra_vars_from_passthrough,
     plan_playbook_execution,
     run_planned_playbook,
     validate_scope_catalog,
@@ -105,12 +106,14 @@ def handle_run(args: argparse.Namespace) -> int:
     passthrough_args = list(args.ansible_args)
     if passthrough_args and passthrough_args[0] == "--":
         passthrough_args = passthrough_args[1:]
+    extra_vars = extract_extra_vars_from_passthrough(passthrough_args, repo_root=REPO_ROOT)
     print(f"Planning scoped playbook: {args.playbook} (env={args.env})", flush=True)
     plan = plan_playbook_execution(
         args.playbook,
         env=args.env,
         run_id=args.run_id,
         shard_root=args.shard_root,
+        extra_vars=extra_vars,
         catalog_path=args.catalog,
         inventory_path=args.inventory,
     )
@@ -145,6 +148,7 @@ def handle_parallel_run(args: argparse.Namespace) -> int:
     passthrough_args = list(args.ansible_args)
     if passthrough_args and passthrough_args[0] == "--":
         passthrough_args = passthrough_args[1:]
+    extra_vars = extract_extra_vars_from_passthrough(passthrough_args, repo_root=REPO_ROOT)
 
     # Plan all playbooks and group by target lane
     plans = []
@@ -152,6 +156,7 @@ def handle_parallel_run(args: argparse.Namespace) -> int:
         plan = plan_playbook_execution(
             playbook,
             env=args.env,
+            extra_vars=extra_vars,
             catalog_path=args.catalog,
             inventory_path=args.inventory,
         )

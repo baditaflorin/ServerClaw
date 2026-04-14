@@ -7,6 +7,20 @@ section:
   when_to_read: Use this section when changing a service-specific config file or
     template.
 entries:
+  catalog/services/:
+    purpose: ADR 0324 canonical per-service bundle source tree for generated service catalogs
+    owner: human
+    format: YAML
+    use_for: Editing service-local metadata, health checks, redundancy, dependency, data, and SLO definitions in one canonical place
+    update_when: Changing governed service metadata or scaffolding a new service bundle
+    update_by: scripts/scaffold_service.py and hand edits to catalog/services/<service-id>/service.yaml
+    validation: uv run --with pyyaml --with jsonschema python scripts/service_definition_catalog.py --check
+    related_files:
+    - 'catalog/services/_metadata.yaml: output contract metadata for the aggregate catalog assembly'
+    - 'scripts/service_definition_catalog.py: bundle validator and aggregate catalog writer'
+    - 'docs/runbooks/service-capability-catalog.md: operator workflow for the service-bundle source model'
+    - 'docs/runbooks/add-a-new-service.md: add-service workflow under the bundle model'
+    - 'docs/runbooks/scaffold-new-service.md: scaffold workflow under the bundle model'
   config/:
     purpose: Service configuration files for all deployed services
     owner: human
@@ -39,7 +53,18 @@ entries:
     format: JSON
     use_for: Declaring service metadata, environment bindings, and ADR 0251
       stage-ready smoke suite ids per environment
-    update_by: scripts/service_catalog.py --write
+    update_by: uv run --with pyyaml --with jsonschema python scripts/service_definition_catalog.py --write
+    validation: uv run --with pyyaml --with jsonschema python scripts/service_definition_catalog.py --check
+    related_files:
+      - 'catalog/services/: canonical service-definition bundle source tree'
+      - 'scripts/service_definition_catalog.py: aggregate catalog writer and bundle validator'
+      - 'scripts/service_catalog.py: read-only CLI for querying the assembled service catalog'
+      - 'config/health-probe-catalog.json: generated health-check aggregate sourced from the same bundles'
+      - 'config/service-completeness.json: generated completeness aggregate sourced from the same bundles'
+      - 'config/service-redundancy-catalog.json: generated redundancy aggregate sourced from the same bundles'
+      - 'config/dependency-graph.json: generated dependency aggregate sourced from the same bundles'
+      - 'config/data-catalog.json: generated data-store aggregate sourced from the same bundles'
+      - 'config/slo-catalog.json: generated SLO aggregate sourced from the same bundles'
   config/stage-smoke-suites.json:
     purpose: Canonical ADR 0251 catalog of stage-scoped smoke suites mapped to
       service ids and environments

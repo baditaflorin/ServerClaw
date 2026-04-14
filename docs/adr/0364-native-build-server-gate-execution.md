@@ -6,8 +6,8 @@
 **Implemented In Platform Version**: 0.178.77
 **Date**: 2026-04-06
 **Tags**: ci-cd, automation, platform
-**First repo version**: 0.179.0
-**First platform version**: n/a (operator toolchain change only)
+**First repo version**: 0.178.58
+**First platform version**: 0.178.77
 
 ## Context
 

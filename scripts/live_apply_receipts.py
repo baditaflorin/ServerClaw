@@ -32,6 +32,7 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 HISTORICAL_WORKFLOW_ID_PATTERNS = (
     re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$"),
+    re.compile(r"^ws-\d{4}-live-apply$"),
     re.compile(r"^ws-\d{4}-[a-z0-9-]+-live-apply$"),
 )
 # Historical receipts can legitimately reference workflow ids that were later

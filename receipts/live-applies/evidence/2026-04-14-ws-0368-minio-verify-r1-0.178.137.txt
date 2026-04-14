@@ -1,0 +1,5 @@
+$ docker-runtime minio live
+
+$ docker-runtime minio ready
+
+PASS minio-verify

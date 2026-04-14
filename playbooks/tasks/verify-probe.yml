@@ -1,5 +1,30 @@
 ---
-- name: Run HTTP probe {{ playbook_execution_probe_stage }}
+# Purpose: Execute a shared HTTP, TCP, command, or systemd probe contract during playbook verification.
+# Use case: Included by post-verify and service-specific readiness flows when a declarative probe must be evaluated consistently.
+#
+# Inputs (required):
+#   - playbook_execution_probe (mapping): Probe definition including kind, target details, timeouts, and success criteria.
+#
+# Inputs (optional):
+#   - playbook_execution_probe_stage (string, optional, default=probe): Human-readable label describing the verification phase.
+#
+# Outputs:
+#   - The selected probe is executed and its result is registered for downstream readiness evaluation.
+#
+# Idempotency: Fully idempotent
+#              All supported probe kinds are read-only verification steps.
+#
+# Dependencies:
+#   - ADR 0165: Requires metadata headers on shared playbooks and task files.
+#   - Task consumers must provide a valid playbook_execution_probe contract before including this file.
+#
+# Related ADRs: 0165, 0246
+# Related Runbooks: docs/runbooks/service-verification.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
+
+- name: Run HTTP probe {{ playbook_execution_probe_stage | default('probe') }}
   ansible.builtin.uri:
     url: "{{ playbook_execution_probe.url }}"
     method: "{{ playbook_execution_probe.method | default('GET') }}"
@@ -17,7 +42,7 @@
   changed_when: false
   when: playbook_execution_probe.kind == 'http'
 
-- name: Run TCP probe {{ playbook_execution_probe_stage }}
+- name: Run TCP probe {{ playbook_execution_probe_stage | default('probe') }}
   ansible.builtin.wait_for:
     host: "{{ playbook_execution_probe.host }}"
     port: "{{ playbook_execution_probe.port }}"
@@ -26,7 +51,7 @@
   changed_when: false
   when: playbook_execution_probe.kind == 'tcp'
 
-- name: Run command probe {{ playbook_execution_probe_stage }}
+- name: Run command probe {{ playbook_execution_probe_stage | default('probe') }}
   ansible.builtin.command:
     argv: "{{ playbook_execution_probe.argv }}"
   register: playbook_execution_probe_command_result
@@ -36,7 +61,7 @@
   changed_when: false
   when: playbook_execution_probe.kind == 'command'
 
-- name: Run systemd probe {{ playbook_execution_probe_stage }}
+- name: Run systemd probe {{ playbook_execution_probe_stage | default('probe') }}
   ansible.builtin.command:
     argv:
       - systemctl

@@ -120,10 +120,11 @@ produce_request = urllib.request.Request(
     },
     method="POST",
 )
-urllib.request.urlopen(produce_request, timeout=30).read()
+produce_payload = json.loads(urllib.request.urlopen(produce_request, timeout=30).read().decode("utf-8"))
+offset = int(produce_payload["offsets"][0]["offset"])
 
 records_request = urllib.request.Request(
-    "http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576",
+    f"http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset={offset}&timeout=3000&max_bytes=1048576",
     headers={
         "Authorization": f"Basic {auth('REDPANDA_PLATFORM_USER', 'REDPANDA_PLATFORM_PASSWORD')}",
         "Accept": "application/vnd.kafka.json.v2+json",

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "minio_runtime",
+  "image_ref": "docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-04-13",
+  "sbom_receipt": "receipts/sbom/f6efb212cad3.cdx.json",
+  "cve_receipt": "receipts/cve/f6efb212cad3-20260413T222257Z.grype.json",
+  "summary": {
+    "critical": 4,
+    "high": 29,
+    "medium": 52,
+    "low": 22,
+    "unknown": 12,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 119
+  }
+}

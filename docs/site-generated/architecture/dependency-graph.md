@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, LiveKit, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, LiveKit, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Repo Intake, SFTPGo, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -90,8 +90,10 @@ graph TD
     plane["Plane\nTier 2"]
     plausible["Plausible Analytics\nTier 2"]
     status_page["Public Status Page\nTier 2"]
+    repo_intake["Repo Intake\nTier 2"]
     semaphore["Semaphore\nTier 2"]
     serverclaw["ServerClaw\nTier 2"]
+    sftpgo["SFTPGo\nTier 2"]
     temporal["Temporal\nTier 2"]
     tesseract_ocr["Tesseract OCR\nTier 2"]
     typesense["Typesense\nTier 2"]
@@ -251,6 +253,10 @@ graph TD
     plausible -->|soft| nginx_edge
     plausible -->|startup_only| openbao
     redpanda -->|startup_only| openbao
+    repo_intake -->|hard| docker_runtime
+    repo_intake -->|soft| keycloak
+    repo_intake -->|soft| nginx_edge
+    semaphore -->|soft| keycloak
     semaphore -->|startup_only| openbao
     semaphore -->|hard| postgres
     serverclaw -->|soft| keycloak
@@ -258,6 +264,10 @@ graph TD
     serverclaw -->|hard| ollama
     serverclaw -->|startup_only| openbao
     serverclaw -->|soft| searxng
+    sftpgo -->|hard| docker_runtime
+    sftpgo -->|soft| keycloak
+    sftpgo -->|soft| nginx_edge
+    sftpgo -->|hard| postgres
     status_page -->|hard| nginx_edge
     status_page -->|hard| uptime_kuma
     superset -->|hard| docker_runtime

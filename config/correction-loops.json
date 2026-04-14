@@ -341,7 +341,6 @@
           "install-hooks",
           "merge-config-changes",
           "packer-template-rebuild",
-          "refresh-discovery-surfaces",
           "weekly-capacity-report"
         ]
       },
@@ -400,9 +399,6 @@
       "description": "Operational surface hygiene workflows regenerate bounded portal, discovery, and capacity-reporting artifacts from repo-managed truth before operators intervene.",
       "applies_to": {
         "workflow_ids": [
-          "disk-space-monitor",
-          "portal-health-sweep",
-          "reconcile-portals",
           "refresh-discovery-surfaces"
         ]
       },

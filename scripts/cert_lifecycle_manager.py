@@ -47,7 +47,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Optional
 
@@ -148,10 +148,20 @@ def _out(obj, json_mode: bool) -> None:
             print(json.dumps(obj, indent=2))
 
 
+def _uv_python() -> list[str]:
+    """Return the command prefix to run Python via uv (handles Python version compat)."""
+    for candidate in ("/opt/homebrew/bin/uv", "/usr/local/bin/uv", "uv"):
+        try:
+            subprocess.run([candidate, "--version"], capture_output=True, check=True)
+            return [candidate, "run", "python3"]
+        except (OSError, subprocess.CalledProcessError):
+            continue
+    return [sys.executable]
+
+
 def _run_cert_validator(args_extra: list = None) -> list:
     """Run certificate_validator.py --check-all --json, return parsed results."""
-    cmd = [
-        sys.executable,
+    cmd = _uv_python() + [
         str(REPO_ROOT / "scripts" / "certificate_validator.py"),
         "--check-all",
         "--json",
@@ -282,7 +292,7 @@ def cmd_create_subdomain(args) -> int:
         "service_id": service_id,
         "status": "active",
         "added_by": "cert_lifecycle_manager",
-        "added_date": datetime.utcnow().strftime("%Y-%m-%d"),
+        "added_date": datetime.now(UTC).strftime("%Y-%m-%d"),
     }
 
     new_cert = {
@@ -297,7 +307,7 @@ def cmd_create_subdomain(args) -> int:
             "warn_days": 21,
         },
         "added_by": "cert_lifecycle_manager",
-        "added_date": datetime.utcnow().strftime("%Y-%m-%d"),
+        "added_date": datetime.now(UTC).strftime("%Y-%m-%d"),
     }
 
     if args.dry_run:
@@ -508,7 +518,7 @@ def cmd_revoke(args) -> int:
     for cert in cert_data.get("certificates", []):
         if cert.get("endpoint", {}).get("server_name") == domain:
             cert["status"] = "revoked"
-            cert["revoked_date"] = datetime.utcnow().strftime("%Y-%m-%d")
+            cert["revoked_date"] = datetime.now(UTC).strftime("%Y-%m-%d")
             changed = True
 
     if not changed:
@@ -641,7 +651,7 @@ def cmd_sync_missing(args) -> int:
         },
         "fixed": [r["fqdn"] for r in fixed],
         "remaining_issues": after_mismatches,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(UTC).isoformat() + "Z",
     }
 
     _out(result, args.json)
@@ -649,7 +659,7 @@ def cmd_sync_missing(args) -> int:
     # Write log file for cron audit trail
     log_dir = Path("/var/log")
     if log_dir.exists() and os.access(log_dir, os.W_OK):
-        log_path = log_dir / f"cert-sync-{datetime.utcnow().strftime('%Y%m%d')}.json"
+        log_path = log_dir / f"cert-sync-{datetime.now(UTC).strftime('%Y%m%d')}.json"
         try:
             log_path.write_text(json.dumps(result, indent=2) + "\n")
         except Exception:
@@ -718,10 +728,25 @@ def main():
     )
     parser.add_argument("--env", default="production", help="Ansible environment")
 
+    def _add_common(p, *, apply=False):
+        """Add --json, --skip-cert-validation, --env, and optionally --apply to a subparser."""
+        p.add_argument("--json", action="store_true", dest="json", help="JSON output")
+        p.add_argument(
+            "--skip-cert-validation",
+            action="store_true",
+            dest="skip_cert_validation",
+            help="Skip TLS validation (for forks without Hetzner DNS API)",
+        )
+        p.add_argument("--env", default="production", help="Ansible environment")
+        if apply:
+            p.add_argument("--apply", action="store_false", dest="dry_run", help="Apply changes (default: dry-run)")
+            p.set_defaults(dry_run=True)
+
     sub = parser.add_subparsers(dest="command", required=True)
 
     # list
-    sub.add_parser("list", help="List all subdomains with cert status")
+    p_list = sub.add_parser("list", help="List all subdomains with cert status")
+    _add_common(p_list)
 
     # create-subdomain
     p_create = sub.add_parser("create-subdomain", help="Add subdomain + issue cert")
@@ -729,42 +754,33 @@ def main():
     p_create.add_argument("--target", required=True, help="Backend host/IP")
     p_create.add_argument("--target-port", type=int, default=443, help="Backend port")
     p_create.add_argument("--service-id", help="Service ID for catalog")
-    p_create.add_argument("--apply", action="store_false", dest="dry_run", help="Apply changes")
-    p_create.set_defaults(dry_run=True)
+    _add_common(p_create, apply=True)
 
     # delete-subdomain
     p_delete = sub.add_parser("delete-subdomain", help="Remove subdomain + clean cert")
     p_delete.add_argument("--domain", required=True, help="FQDN to delete")
-    p_delete.add_argument("--apply", action="store_false", dest="dry_run", help="Apply changes")
-    p_delete.set_defaults(dry_run=True)
+    _add_common(p_delete, apply=True)
 
     # renew
     p_renew = sub.add_parser("renew", help="Force-renew cert for domain or all domains")
     p_renew.add_argument("--domain", help="FQDN to renew (omit for all)")
-    p_renew.add_argument("--apply", action="store_false", dest="dry_run", help="Apply changes")
-    p_renew.set_defaults(dry_run=True)
+    _add_common(p_renew, apply=True)
 
     # revoke
     p_revoke = sub.add_parser("revoke", help="Revoke cert for a domain")
     p_revoke.add_argument("--domain", required=True, help="FQDN to revoke")
-    p_revoke.add_argument("--apply", action="store_false", dest="dry_run", help="Apply changes")
-    p_revoke.set_defaults(dry_run=True)
+    _add_common(p_revoke, apply=True)
 
     # sync-missing
     p_sync = sub.add_parser("sync-missing", help="Detect and repair cert mismatches (cron-safe)")
-    p_sync.add_argument("--apply", action="store_false", dest="dry_run", help="Apply changes")
-    p_sync.set_defaults(dry_run=True)
+    _add_common(p_sync, apply=True)
 
     # status
     p_status = sub.add_parser("status", help="Show status for a specific FQDN")
     p_status.add_argument("--domain", required=True, help="FQDN to check")
+    _add_common(p_status)
 
     args = parser.parse_args()
-
-    # Propagate global flags to subcommand namespace
-    for flag in ("json", "skip_cert_validation", "env"):
-        if not hasattr(args, flag):
-            setattr(args, flag, getattr(parser.parse_args([args.command] + sys.argv[2:]), flag, None))
 
     commands = {
         "list": cmd_list,

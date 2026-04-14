@@ -65,7 +65,7 @@ shared_surfaces:
 - playbooks/services/repowise.yml
 - playbooks/templates/compose_macros.j2
 - platform/repo.py
-  - platform/ansible/execution_scopes.py
+- platform/ansible/execution_scopes.py
 - receipts/live-applies/*adr-0371*
 - receipts/live-applies/evidence/*ws0371*
 - receipts/live-applies/evidence/*ws-0371*
@@ -123,7 +123,7 @@ shared_surfaces:
 - tests/test_validation_toolkit.py
 - tests/test_vulnerability_budget.py
 - workstreams/active/ws-0371-live-apply.yaml
-- workstreams/active/ws-0368-live-apply.yaml
+- workstreams/archive/2026/ws-0368-live-apply.yaml
 - workstreams/active/ws-0373-live-apply.yaml
 - workstreams/active/ws-0377-repo-intake-subdomain.yaml
 - workstreams/done/ws-0364-live-apply.yaml
@@ -293,7 +293,7 @@ ownership_manifest:
   - id: ws_0371_workstream_registry
     paths:
     - workstreams/active/ws-0371-live-apply.yaml
-    - workstreams/active/ws-0368-live-apply.yaml
+    - workstreams/archive/2026/ws-0368-live-apply.yaml
     - workstreams/active/ws-0373-live-apply.yaml
     - workstreams/active/ws-0377-repo-intake-subdomain.yaml
     - workstreams/done/ws-0364-live-apply.yaml

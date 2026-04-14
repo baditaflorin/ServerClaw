@@ -1,20 +1,12 @@
-# Release 0.178.133
+# Release 0.178.138
 
 - Date: 2026-04-14
 
 ## Summary
-- live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end
-- align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
-- ADR 0414/0415: fix SKIP_CERT_VALIDATION=1 gate bypass (was silently ignored), add cert_lifecycle_manager.py for programmatic cert+subdomain lifecycle, add daily cert-sync cron for auto-repair, add skip/warn mode for forks without Hetzner DNS API
-- fix: Quote unquoted Jinja2 template in backup_vm_api_token_local_file for shell safety
-- fix: Remove duplicate repo_intake entry in platform_services.yml registry
-- fix: Escape $PLATFORM_OPERATOR_EMAIL in workflow-catalog.json for Jinja2 compatibility
-- fix: Escape Prometheus template syntax in alert rules for Jinja2 rendering compatibility
-- verified: Phase 6 cosmetic cleanup stable in production (118/118 convergence tasks passing)
-- Harbor OIDC fix, public release readiness, ADR 0385-0388 IoC + OIDC centralization, bootstrap and Docker dev, ADR 0373 Phase 4, multi-instance deployment, operator provisioning, operational fixes
+- live-apply ADR 0368 from the latest realistic origin/main base by repairing the Redpanda readiness probe offset handling, refreshing shared-worktree SBOM and image receipt paths, and re-verifying MinIO, Gitea, Redpanda, check-build-server, and remote-validate end to end
 
 ## Platform Impact
-- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+- platform version advances to 0.178.138 after replaying ADR 0368 from the merged main tree across MinIO, Gitea, and Redpanda
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

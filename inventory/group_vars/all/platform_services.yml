@@ -445,7 +445,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: gotenberg_runtime
     internal_port: 3007
-    host_group: docker-runtime
+    host_group: runtime-ai
     site_dir: /opt/gotenberg
     container_name: gotenberg
     needs_openbao: false
@@ -751,7 +751,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: mail_platform_stalwart_runtime
     internal_port: 8081
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/mail-platform
     container_name: lv3-mail-stalwart
     needs_openbao: true
@@ -993,7 +993,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ollama_runtime
     internal_port: 11434
-    host_group: runtime-ai
+    host_group: docker-runtime
     site_dir: /opt/ollama
     container_name: ollama
     needs_openbao: false
@@ -1218,7 +1218,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # built locally from python base image
     internal_port: 8106
-    host_group: runtime-ai
+    host_group: docker-runtime
     site_dir: /opt/piper
     container_name: piper
     needs_openbao: false
@@ -1315,7 +1315,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: redpanda_runtime
     internal_port: 9092
-    host_group: runtime-control
+    host_group: docker-runtime
     site_dir: /opt/redpanda
     container_name: lv3-redpanda
     needs_openbao: true
@@ -1540,7 +1540,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: uptime_kuma_runtime
     internal_port: 3001
-    host_group: docker-runtime
+    host_group: runtime-general
     site_dir: /opt/uptime-kuma
     container_name: uptime-kuma
     needs_openbao: false

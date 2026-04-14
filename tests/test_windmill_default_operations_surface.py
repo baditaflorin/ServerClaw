@@ -113,6 +113,18 @@ def test_default_operations_surface_preserves_token_lifecycle_runtime_root() -> 
     assert "{{ windmill_worker_repo_checkout_host_path }}/receipts/security-incidents" not in writable_paths
 
 
+def test_default_operations_surface_declares_validation_gate_runtime_root() -> None:
+    defaults = yaml.safe_load(
+        (
+            REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+        ).read_text()
+    )
+    mutable_paths = {entry["path"]: entry["mode"] for entry in defaults["windmill_worker_repo_mutable_directories"]}
+
+    assert mutable_paths["{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate"] == "0777"
+    assert mutable_paths["{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate/docker-cids"] == "0777"
+
+
 def test_worker_checkout_staging_paths_are_per_run() -> None:
     tasks = (
         REPO_ROOT

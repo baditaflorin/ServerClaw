@@ -1,0 +1,1 @@
+{"marker": "ws-0368-redpanda-1776142785", "offset": 35, "status": "PASS redpanda-verify", "subject": "platform.redpanda.smoke-value"}

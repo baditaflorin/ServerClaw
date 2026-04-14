@@ -121,6 +121,8 @@
         tasks_from: docker_bridge_chains
       vars:
         common_docker_bridge_chains_service_name: "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
+        common_docker_bridge_chains_retries: "{{ linux_guest_firewall_docker_bridge_chain_recovery_retries }}"
+        common_docker_bridge_chains_delay: "{{ linux_guest_firewall_docker_bridge_chain_recovery_delay }}"
       when: linux_guest_firewall_recover_missing_docker_bridge_chains | bool
 
     - name: Surface Docker bridge-chain failures after guest firewall evaluation when recovery is disabled

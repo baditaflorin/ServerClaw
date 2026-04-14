@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-11'
+generated: '2026-04-14'
 source_root: docs/discovery/config-locations
 pack_manifest: docs/discovery/onboarding-packs.yaml
 purpose: Generated root configuration discovery entrypoint. Use the section summaries below to choose the right canonical source file under docs/discovery/config-locations/.
@@ -60,7 +60,7 @@ section_index:
     file: docs/discovery/config-locations/service-configuration.yaml
     summary: Per-service configuration roots and the files that drive service runtime behavior.
     when_to_read: Use this section when changing a service-specific config file or template.
-    entry_count: 13
+    entry_count: 14
   - id: versioning
     title: Versioning And Releases
     file: docs/discovery/config-locations/versioning.yaml

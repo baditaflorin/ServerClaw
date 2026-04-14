@@ -116,10 +116,18 @@ def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_eval
     assert reassert_task["vars"]["common_docker_bridge_chains_service_name"] == (
         "{{ linux_guest_firewall_docker_bridge_chain_service_name }}"
     )
+    assert reassert_task["vars"]["common_docker_bridge_chains_retries"] == (
+        "{{ linux_guest_firewall_docker_bridge_chain_recovery_retries }}"
+    )
+    assert reassert_task["vars"]["common_docker_bridge_chains_delay"] == (
+        "{{ linux_guest_firewall_docker_bridge_chain_recovery_delay }}"
+    )
     assert reassert_task["when"] == "linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
     assert fail_task["when"] == "not linux_guest_firewall_recover_missing_docker_bridge_chains | bool"
     assert defaults["linux_guest_firewall_docker_bridge_chain_service_name"] == "docker"
     assert defaults["linux_guest_firewall_recover_missing_docker_bridge_chains"] is True
+    assert defaults["linux_guest_firewall_docker_bridge_chain_recovery_retries"] == 30
+    assert defaults["linux_guest_firewall_docker_bridge_chain_recovery_delay"] == 5
 
 
 def test_linux_guest_firewall_only_resets_ssh_when_the_rendered_policy_changes() -> None:

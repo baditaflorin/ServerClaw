@@ -721,6 +721,12 @@ playbooks:
       - config/build-server.json
       - config/validation-gate.json
       - inventory/host_vars/proxmox-host.yml
+  playbooks/services/_teardown_service.yml:
+    playbook_id: teardown-service
+    mutation_scope: host
+    host_pattern_var: teardown_host
+    shared_surfaces:
+      - inventory/host_vars/proxmox-host.yml
   playbooks/services/docker-build-observability.yml:
     playbook_id: docker-build-observability
     mutation_scope: host

@@ -1,0 +1,12 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-integration-r3/scripts/remote_exec.sh check-build-server
+Checking SSH connectivity to ops@10.10.10.30
+build-server-ok
+Checking remote workspace root /home/ops/builds/serverclaw-platform
+Checking remote session workspace /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0368-main-integration-r3-d70a0c5be8/repo
+/home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0368-main-integration-r3-d70a0c5be8/repo
+Checking immutable snapshot dry-run upload from codex/ws-0368-main-integration-r3@daa181c7459fc13b694780141ac4c5ac9497a24d
+Transfer starting: 1 files
+repository-snapshot-e14c8e812d4ee24329c492824f2f6c649a3f5b521cfb56a43b61a95a671b2b1b.tar.gz
+
+sent 186 bytes  received 26 bytes  1441 bytes/sec
+total size is 25100611  speedup is 118398.55

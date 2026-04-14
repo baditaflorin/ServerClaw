@@ -23,10 +23,19 @@
 #   - ADR 0233: Adds the release-bundle bootstrap contract.
 #   - ADR 0274: Moves Gitea LFS storage to the shared MinIO object layer.
 
-# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
-# openbao_*, container_name, internal_port, local_artifact_dir) are DERIVED
-# from platform_service_registry via derive_service_defaults task. Do not redefine here.
+# NOTE: Conventional variables are still derived from platform_service_registry
+# via derive_service_defaults.yml. The fallback values below exist so Ansible's
+# role argument-spec validation can evaluate before that task runs.
 
+gitea_site_dir: /opt/gitea
+gitea_data_dir: "{{ gitea_site_dir }}/data"
+gitea_secret_dir: /etc/lv3/gitea
+gitea_compose_file: "{{ gitea_site_dir }}/docker-compose.yml"
+gitea_env_file: "{{ compose_runtime_secret_root }}/gitea/runtime.env"
+gitea_legacy_env_file: "{{ gitea_site_dir }}/gitea.env"
+gitea_container_name: gitea
+gitea_image: docker.io/gitea/gitea:1.25.5
+gitea_internal_port: 3003
 gitea_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('gitea') }}"
 gitea_keycloak_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('keycloak') }}"
 gitea_bootstrap_script: "{{ gitea_site_dir }}/bootstrap-gitea.sh"
@@ -42,6 +51,7 @@ gitea_database_name: gitea
 gitea_database_user: gitea
 gitea_database_host: "{{ hostvars[playbook_execution_host_patterns.postgres[playbook_execution_env]].ansible_host }}"
 gitea_database_port: 5432
+gitea_local_artifact_dir: "{{ repo_shared_local_root }}/gitea"
 gitea_database_password_local_file: "{{ gitea_local_artifact_dir }}/database-password.txt"
 gitea_oidc_client_id: gitea-oauth
 gitea_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/gitea-client-secret.txt"

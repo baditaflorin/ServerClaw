@@ -10,7 +10,13 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, repo_path
-from sbom_scanner import DEFAULT_GRYPE_DB_CACHE_DIR, DEFAULT_SYFT_CACHE_DIR, load_scanner_config, scan_catalog_image
+from sbom_scanner import (
+    DEFAULT_GRYPE_DB_CACHE_DIR,
+    DEFAULT_SYFT_CACHE_DIR,
+    load_scanner_config,
+    relpath,
+    scan_catalog_image,
+)
 
 
 REPO_ROOT = repo_path()
@@ -31,7 +37,7 @@ def git_output(*args: str) -> str:
 
 
 def load_catalog_from_git(revision: str, path: Path) -> dict[str, Any]:
-    payload = git_output("show", f"{revision}:{path.relative_to(REPO_ROOT)}")
+    payload = git_output("show", f"{revision}:{relpath(path)}")
     return json.loads(payload)
 
 
@@ -101,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "image_id": image_id,
                     "image_ref": entry["ref"],
-                    "cve_receipt": str(cve_path.relative_to(REPO_ROOT)),
+                    "cve_receipt": relpath(cve_path),
                     "summary": receipt["summary"],
                 }
             )

@@ -66,7 +66,7 @@ canonical_truth:
   release_bump: patch
   included_in_repo_version: null
   latest_receipts:
-    keycloak: 2026-04-13-keycloak-topology-fix-runtime-control-live-apply
+    keycloak: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
 notes: |
   Replay ADR 0373 from the latest origin/main worktree, verify the
   service-registry automation and governed live-apply path end to end,

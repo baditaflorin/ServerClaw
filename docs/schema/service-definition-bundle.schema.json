@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-definition-bundle.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "service",
+    "completeness",
+    "redundancy",
+    "dependency"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "service": {
+      "type": "object"
+    },
+    "health": {
+      "type": "object"
+    },
+    "completeness": {
+      "type": "object"
+    },
+    "redundancy": {
+      "type": "object"
+    },
+    "dependency": {
+      "type": "object",
+      "required": [
+        "node"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "node": {
+          "type": "object"
+        },
+        "outbound_edges": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "slos": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

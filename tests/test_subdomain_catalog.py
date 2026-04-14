@@ -229,6 +229,57 @@ class SubdomainCatalogTests(unittest.TestCase):
             "edge",
         )
 
+    def test_main_validate_resolves_placeholder_domains_for_private_overlay(self) -> None:
+        catalog = {"schema_version": "1.0.0", "reserved_prefixes": [], "subdomains": []}
+        service_catalog = {
+            "services": [
+                {
+                    "id": "api_gateway",
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "https://api.example.com",
+                        }
+                    },
+                }
+            ]
+        }
+
+        with (
+            patch.object(subdomain_catalog, "load_subdomain_catalog", return_value=catalog),
+            patch.object(subdomain_catalog, "load_host_vars", return_value={}),
+            patch.object(
+                subdomain_catalog,
+                "load_public_edge_defaults",
+                return_value={"public_edge_authenticated_sites": {}, "public_edge_extra_sites": []},
+            ),
+            patch.object(subdomain_catalog, "load_json", return_value=service_catalog),
+            patch.object(
+                subdomain_catalog,
+                "resolve_public_domain_placeholders",
+                side_effect=_replace_example_domain,
+            ),
+            patch.object(
+                subdomain_catalog,
+                "validate_subdomain_catalog",
+                side_effect=lambda _catalog, resolved_service_catalog, *_args: self.assertEqual(
+                    resolved_service_catalog["services"][0]["environments"]["production"]["url"],
+                    "https://api.lv3.org",
+                ),
+            ),
+        ):
+            self.assertEqual(subdomain_catalog.main(["--validate"]), 0)
+
+
+def _replace_example_domain(value):
+    if isinstance(value, str):
+        return value.replace("example.com", "lv3.org")
+    if isinstance(value, list):
+        return [_replace_example_domain(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _replace_example_domain(item) for key, item in value.items()}
+    return value
+
 
 if __name__ == "__main__":
     unittest.main()

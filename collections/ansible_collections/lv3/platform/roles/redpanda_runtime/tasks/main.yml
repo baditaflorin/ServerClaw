@@ -96,6 +96,28 @@
 
 - name: Record the Redpanda runtime secrets
   ansible.builtin.set_fact:
+    redpanda_runtime_secret_payload:
+      REDPANDA_ADMIN_USER: "{{ redpanda_admin_user }}"
+      REDPANDA_ADMIN_PASSWORD: >-
+        {{
+          (
+            redpanda_password_reads.results
+            | selectattr('item.key', 'equalto', 'admin')
+            | map(attribute='content')
+            | first
+          ) | b64decode | trim
+        }}
+      REDPANDA_PLATFORM_USER: "{{ redpanda_platform_user }}"
+      REDPANDA_PLATFORM_PASSWORD: >-
+        {{
+          (
+            redpanda_password_reads.results
+            | selectattr('item.key', 'equalto', 'platform')
+            | map(attribute='content')
+            | first
+          ) | b64decode | trim
+        }}
+      REDPANDA_SASL_MECHANISM: "{{ redpanda_sasl_mechanism }}"
     redpanda_admin_password: >-
       {{
         (
@@ -114,25 +136,6 @@
           | first
         ) | b64decode | trim
       }}
-    redpanda_runtime_secret_payload:
-      REDPANDA_ADMIN_PASSWORD: >-
-        {{
-          (
-            redpanda_password_reads.results
-            | selectattr('item.key', 'equalto', 'admin')
-            | map(attribute='content')
-            | first
-          ) | b64decode | trim
-        }}
-      REDPANDA_PLATFORM_PASSWORD: >-
-        {{
-          (
-            redpanda_password_reads.results
-            | selectattr('item.key', 'equalto', 'platform')
-            | map(attribute='content')
-            | first
-          ) | b64decode | trim
-        }}
   no_log: true
 
 - name: Ensure the Redpanda runtime directories exist

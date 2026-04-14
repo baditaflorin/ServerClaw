@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.133",
-  "platform_version": "0.178.132",
-  "generated_at": "2026-04-13T21:38:00Z",
-  "next_refresh_at": "2026-04-13T22:38:00Z",
+  "repo_version": "0.178.138",
+  "platform_version": "0.178.138",
+  "generated_at": "2026-04-14T06:21:07Z",
+  "next_refresh_at": "2026-04-14T07:21:07Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -765,11 +765,11 @@
       },
       "sftpgo": {
         "service_name": "SFTPGo",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
+        "status": "degraded",
+        "score": 0.75,
+        "safe_to_act": false,
         "source": "repo_evidence",
-        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://files.example.com",
         "last_live_apply": "2026-04-12T00:00:00Z"
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.131",
-    "deployed_at": "2026-04-13",
-    "summary": "live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests",
-    "release_notes_url": "docs/release-notes/0.178.133.md"
+    "last_version": "0.178.137",
+    "deployed_at": "2026-04-14",
+    "summary": "live-apply ADR 0368 from the latest realistic origin/main base by repairing the Redpanda readiness probe offset handling, refreshing shared-worktree SBOM and image receipt paths, and re-verifying MinIO, Gitea, Redpanda, check-build-server, and remote-validate end to end",
+    "release_notes_url": "docs/release-notes/0.178.138.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

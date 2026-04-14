@@ -222,6 +222,7 @@ def build_execution_payload(
     command_catalog: dict[str, Any],
     secret_manifest: dict[str, Any],
     parameters: dict[str, Any],
+    include_controller_secrets: bool = True,
 ) -> dict[str, Any]:
     execution = contract["execution"]
     profile = command_catalog["execution_profiles"][execution["profile"]]
@@ -235,7 +236,10 @@ def build_execution_payload(
             profile.get("env", {}), f"execution_profiles.{execution['profile']}.env"
         ).items()
     }
-    staged_files, secret_env = build_secret_materialization(contract, secret_manifest, runtime_repo_root)
+    if include_controller_secrets:
+        staged_files, secret_env = build_secret_materialization(contract, secret_manifest, runtime_repo_root)
+    else:
+        staged_files, secret_env = [], {}
     env = {**profile_env, **secret_env, **operator_parameters}
     env.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
     env.setdefault("MAKEFLAGS", "--no-print-directory")
@@ -335,6 +339,7 @@ def execute_governed_command(
         command_catalog=command_catalog,
         secret_manifest=secret_manifest,
         parameters=parameters or {},
+        include_controller_secrets=not dry_run,
     )
     response = {
         "approved": True,

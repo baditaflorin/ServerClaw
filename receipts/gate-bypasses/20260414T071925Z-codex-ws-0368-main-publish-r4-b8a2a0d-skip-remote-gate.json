@@ -1,0 +1,26 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-14T07:19:25Z",
+  "bypass": "skip_remote_gate",
+  "source": "ws-0368-main-finalize",
+  "branch": "codex/ws-0368-main-publish-r4",
+  "commit": "b8a2a0d1a001f280582687cf49ab958984d8a817",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "origin/main@6aeb26434 still reproduces the whole-repo ansible-lint fatal baseline, while ws-0368 branch-local regressions were cleared by fresh worktree dry-run fixes and focused local revalidation before the main push.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "python3 -m pytest tests/test_governed_command.py tests/test_agent_tool_registry.py::AgentToolRegistryTests::test_execute_call_dry_run_returns_bounded_runtime_metadata -q --import-mode=importlib",
+      "./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --check",
+      "./scripts/validate_repo.sh data-models",
+      "./scripts/validate_repo.sh semgrep",
+      "cd /private/tmp/ws0368-origin-main-verify && ./scripts/validate_repo.sh ansible-lint"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-15",
+    "remediation_ref": "docs/workstreams/ws-0364-post-merge-validation.md"
+  }
+}

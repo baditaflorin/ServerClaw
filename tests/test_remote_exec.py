@@ -321,7 +321,17 @@ def test_remote_exec_exports_validate_python_bin_for_local_fallback(tmp_path: Pa
     )
 
     assert completed.returncode == 0
-    assert completed.marker.read_text() == (shutil.which("python3") or "")  # type: ignore[attr-defined]
+    selected_python = completed.marker.read_text()  # type: ignore[attr-defined]
+    assert selected_python
+    assert Path(selected_python).exists()
+    version = subprocess.run(
+        [selected_python, "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    major, minor = [int(part) for part in version.split(".")]
+    assert (major, minor) >= (3, 10)
 
 
 def test_remote_exec_preserves_validation_lane_context_for_local_fallback(tmp_path: Path) -> None:

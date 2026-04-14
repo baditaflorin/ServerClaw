@@ -1,0 +1,25 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-14T02:37:56Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "HEAD",
+  "commit": "d156331364cac76fa30d864e0c1e312bfc5b249e",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "Detached HEAD pre-push gate on d15633136 exposed only pre-existing baseline failures unrelated to this release tree: ansible-lint fatal violations in untouched Ansible files and Trivy DS-0002 findings in untouched Dockerfiles; local substitute checks on the same commit stayed green.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "make check-build-server on HEAD@d15633136",
+      "make remote-validate on HEAD@d15633136",
+      "./scripts/run_python_with_packages.sh pytest -- -m pytest tests/test_agent_tool_registry.py -q",
+      "exact schema-validation chain passed locally on HEAD@d15633136"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-15",
+    "remediation_ref": "ws-0364-post-merge-validation"
+  }
+}

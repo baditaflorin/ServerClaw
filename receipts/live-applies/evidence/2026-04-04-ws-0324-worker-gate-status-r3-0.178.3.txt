@@ -1,0 +1,422 @@
+{
+  "command": "/srv/proxmox_florin_server/scripts/run_python_with_packages.sh pyyaml -- /srv/proxmox_florin_server/scripts/gate_status.py --format json",
+  "gate_status": {
+    "enabled_checks": [
+      {
+        "description": "Enforce the ADR 0163 through ADR 0168 agent handoff, ADR index, and workstream registration standards.",
+        "id": "agent-standards",
+        "severity": "error"
+      },
+      {
+        "description": "Regenerate SLO and HTTPS/TLS Prometheus rules and enforce severity plus runbook annotations on committed alert rules.",
+        "id": "alert-rule-validation",
+        "severity": "error"
+      },
+      {
+        "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
+        "id": "ansible-lint",
+        "severity": "error"
+      },
+      {
+        "description": "Syntax check every tracked playbook outside the shared playbook task includes.",
+        "id": "ansible-syntax",
+        "severity": "error"
+      },
+      {
+        "description": "Scan published receipts and generated publication artifacts for secrets with the repo-managed gitleaks rules.",
+        "id": "artifact-secret-scan",
+        "severity": "error"
+      },
+      {
+        "description": "Run Atlas pre-migration lint for the repo-managed SQL migration directories using the pinned Atlas image and an ephemeral PostgreSQL dev database.",
+        "id": "atlas-lint",
+        "severity": "error"
+      },
+      {
+        "description": "Reject reusable platform modules that import outward into scripts/ composition roots or dynamically load script-only helpers.",
+        "id": "dependency-direction",
+        "severity": "error"
+      },
+      {
+        "description": "Validate the service dependency graph schema, cross references, generated Mermaid markdown, and generated Excalidraw architecture scenes.",
+        "id": "dependency-graph",
+        "severity": "error"
+      },
+      {
+        "description": "Verify that the generated ADR root manifest, facet shards, and reservation summary are current for documentation and workstream changes.",
+        "id": "documentation-index",
+        "severity": "error"
+      },
+      {
+        "description": "Regenerate the canonical generated documentation surfaces and fail if committed status docs drift.",
+        "id": "generated-docs",
+        "severity": "error"
+      },
+      {
+        "description": "Regenerate the portal build outputs and fail if committed publication artifacts drift.",
+        "id": "generated-portals",
+        "severity": "error"
+      },
+      {
+        "description": "Run the repo-managed Checkov IaC policy scan across the governed OpenTofu and Ansible surfaces and emit summary plus SARIF receipts.",
+        "id": "iac-policy-scan",
+        "severity": "error"
+      },
+      {
+        "description": "Run the ADR 0111 non-destructive integration suite against staging if active, or record a repo-managed skip if no integration target is currently available.",
+        "id": "integration-tests",
+        "severity": "error"
+      },
+      {
+        "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
+        "id": "packer-validate",
+        "severity": "error"
+      },
+      {
+        "description": "Run the ADR 0230 shared OPA and Conftest policy checks against command approval, promotion eligibility, runner admission, and service-boundary invariants.",
+        "id": "policy-validation",
+        "severity": "error"
+      },
+      {
+        "description": "Validate canonical repository data models, provider-boundary anti-corruption guards, capability-contract catalogs, Atlas schema catalog contracts, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.",
+        "id": "schema-validation",
+        "severity": "error"
+      },
+      {
+        "description": "Run the repository filesystem through the pinned Trivy security scan policy.",
+        "id": "security-scan",
+        "severity": "error"
+      },
+      {
+        "description": "Run the repo-managed Semgrep SAST, secret-pattern, and Dockerfile policy scan and write the SARIF receipt.",
+        "id": "semgrep-sast",
+        "severity": "error"
+      },
+      {
+        "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
+        "id": "service-completeness",
+        "severity": "error"
+      },
+      {
+        "description": "Validate OpenTofu configuration if the repo carries a tofu root; otherwise report a no-op pass.",
+        "id": "tofu-validate",
+        "severity": "error"
+      },
+      {
+        "description": "Type check the gate orchestration code, Atlas schema helpers, and the manifest-backed Docker runner surfaces.",
+        "id": "type-check",
+        "severity": "error"
+      },
+      {
+        "description": "Validate the current branch against its declared workstream ownership manifest and shared-surface contract.",
+        "id": "workstream-surfaces",
+        "severity": "error"
+      },
+      {
+        "description": "Run full-repository yamllint across tracked YAML files.",
+        "id": "yaml-lint",
+        "severity": "error"
+      }
+    ],
+    "enabled_lanes": [
+      {
+        "checks": [
+          "documentation-index"
+        ],
+        "id": "documentation-and-adr",
+        "title": "Documentation and ADR lane"
+      },
+      {
+        "checks": [
+          "yaml-lint",
+          "schema-validation",
+          "atlas-lint",
+          "policy-validation",
+          "alert-rule-validation",
+          "dependency-direction"
+        ],
+        "id": "repository-structure-and-schema",
+        "title": "Repository structure and schema lane"
+      },
+      {
+        "checks": [
+          "generated-docs",
+          "generated-portals",
+          "dependency-graph",
+          "artifact-secret-scan"
+        ],
+        "id": "generated-artifact-and-canonical-truth",
+        "title": "Generated artifact and canonical-truth lane"
+      },
+      {
+        "checks": [
+          "ansible-syntax",
+          "ansible-lint",
+          "iac-policy-scan",
+          "type-check",
+          "service-completeness"
+        ],
+        "id": "service-syntax-and-unit",
+        "title": "Service-specific syntax and unit lane"
+      },
+      {
+        "checks": [
+          "packer-validate",
+          "tofu-validate",
+          "security-scan",
+          "semgrep-sast",
+          "iac-policy-scan"
+        ],
+        "id": "remote-builder",
+        "title": "Remote builder lane"
+      },
+      {
+        "checks": [
+          "integration-tests"
+        ],
+        "id": "live-apply-and-promotion",
+        "title": "Live-apply and promotion lane"
+      }
+    ],
+    "lane_catalog_path": "/srv/proxmox_florin_server/config/validation-lanes.yaml",
+    "last_run": null,
+    "latest_bypass": {
+      "path": "/srv/proxmox_florin_server/receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json",
+      "payload": {
+        "branch": "claude/affectionate-galileo",
+        "bypass": "skip_remote_gate",
+        "commit": "42e2da272e503b47afbfa55cc283614ba1e3bc4e",
+        "created_at": "2026-04-03T09:19:10Z",
+        "schema_version": "2.0.0",
+        "source": "pre-push-hook",
+        "waiver": {
+          "detail": "uv_not_in_path_on_worktree_controller",
+          "expires_on": "2026-04-06",
+          "impacted_lanes": [
+            "remote-pre-push-gate"
+          ],
+          "owner": "baditaflorin@gmail.com",
+          "reason_code": "controller_dependency_gap",
+          "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
+          "remediation_ref": "local-controller-missing-uv",
+          "substitute_evidence": [
+            "pre-commit-hooks-passed"
+          ]
+        }
+      }
+    },
+    "manifest_path": "/srv/proxmox_florin_server/config/validation-gate.json",
+    "post_merge_run": {
+      "checks": [
+        {
+          "commands": [
+            {
+              "command": "./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals",
+              "returncode": 1
+            }
+          ],
+          "description": "Run the worker-local validate_repo fallback when runner images are unavailable on the worker host.",
+          "docker_command": [],
+          "duration_seconds": 6.7,
+          "id": "local-fallback",
+          "returncode": 1,
+          "severity": "error",
+          "status": "failed"
+        }
+      ],
+      "executed_at": "2026-04-04T12:36:33.540612+00:00",
+      "manifest": "/srv/proxmox_florin_server/config/validation-gate.json",
+      "requested_checks": [
+        "local-fallback"
+      ],
+      "runner": {
+        "capability_contract": {
+          "container_runtime": {
+            "engine": "docker",
+            "supported": true
+          },
+          "cpu_architectures": [
+            "x86_64"
+          ],
+          "description": "Worker-side validation runner for the post-merge gate replay from the live mirrored checkout.",
+          "emulation_support": [],
+          "execution_surface": "windmill_worker",
+          "network_reachability_class": "private_worker_checkout",
+          "required_tools": [
+            "docker",
+            "git",
+            "python3",
+            "tar",
+            "uv"
+          ],
+          "scratch_cleanup_guarantee": "worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable",
+          "supported_validation_lanes": [
+            "workstream-surfaces",
+            "agent-standards",
+            "documentation-index",
+            "generated-docs",
+            "generated-portals",
+            "ansible-syntax",
+            "schema-validation",
+            "atlas-lint",
+            "policy-validation",
+            "alert-rule-validation",
+            "type-check",
+            "dependency-direction",
+            "dependency-graph",
+            "integration-tests",
+            "security-scan",
+            "semgrep-sast",
+            "iac-policy-scan",
+            "artifact-secret-scan",
+            "service-completeness",
+            "tofu-validate",
+            "packer-validate"
+          ]
+        },
+        "environment_attestation": {
+          "attested_at": "2026-04-04T12:36:33.532627+00:00",
+          "container_runtime": {
+            "available": true,
+            "engine": "docker",
+            "error": "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?",
+            "path": "/usr/bin/docker",
+            "server_reachable": false,
+            "supported": true
+          },
+          "cpu_architecture": "x86_64",
+          "emulation_support": [],
+          "hostname": "runtime-control-lv3",
+          "network_reachability_class": "private_worker_checkout",
+          "platform": "linux",
+          "scratch_space": {
+            "cleanup_guarantee": "worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable",
+            "exists": true,
+            "free_bytes": 102882541568,
+            "workspace": "/srv/proxmox_florin_server"
+          },
+          "tooling": {
+            "docker": {
+              "available": true,
+              "path": "/usr/bin/docker",
+              "version": "Docker version 29.3.1, build c2be9cc"
+            },
+            "git": {
+              "available": true,
+              "path": "/usr/bin/git",
+              "version": "git version 2.47.3"
+            },
+            "python3": {
+              "available": true,
+              "path": "/usr/bin/python3",
+              "version": "Python 3.13.5"
+            },
+            "tar": {
+              "available": true,
+              "path": "/usr/bin/tar",
+              "version": "tar (GNU tar) 1.35"
+            },
+            "uv": {
+              "available": true,
+              "path": "/usr/local/bin/uv",
+              "version": "uv 0.9.21"
+            }
+          }
+        },
+        "execution_surface": "windmill_worker",
+        "id": "windmill-post-merge-worker",
+        "lane_evaluations": {}
+      },
+      "source": "windmill-post-merge-local-fallback",
+      "status": "failed",
+      "workspace": "/srv/proxmox_florin_server"
+    },
+    "remote_validate_run": null,
+    "waiver_summary": {
+      "expiring_soon": [
+        {
+          "expires_on": "2026-04-06",
+          "path": "receipts/gate-bypasses/20260403T083912Z-claude-affectionate-galileo-12405e2-skip-remote-gate.json",
+          "reason_code": "controller_dependency_gap"
+        },
+        {
+          "expires_on": "2026-04-06",
+          "path": "receipts/gate-bypasses/20260403T083954Z-claude-affectionate-galileo-e5e9d16-skip-remote-gate.json",
+          "reason_code": "controller_dependency_gap"
+        },
+        {
+          "expires_on": "2026-04-06",
+          "path": "receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json",
+          "reason_code": "controller_dependency_gap"
+        }
+      ],
+      "invalid_receipts": [],
+      "latest_receipt": {
+        "bypass": "skip_remote_gate",
+        "created_at": "2026-04-03T09:19:10Z",
+        "expires_on": "2026-04-06",
+        "path": "receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json",
+        "reason_code": "controller_dependency_gap",
+        "schema_mode": "v2"
+      },
+      "open_waivers": [
+        {
+          "bypass": "skip_remote_gate",
+          "created_at": "2026-04-03T08:39:12Z",
+          "expires_on": "2026-04-06",
+          "owner": "baditaflorin@gmail.com",
+          "path": "receipts/gate-bypasses/20260403T083912Z-claude-affectionate-galileo-12405e2-skip-remote-gate.json",
+          "reason_code": "controller_dependency_gap",
+          "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
+          "remediation_ref": "local-controller-missing-uv"
+        },
+        {
+          "bypass": "skip_remote_gate",
+          "created_at": "2026-04-03T08:39:54Z",
+          "expires_on": "2026-04-06",
+          "owner": "baditaflorin@gmail.com",
+          "path": "receipts/gate-bypasses/20260403T083954Z-claude-affectionate-galileo-e5e9d16-skip-remote-gate.json",
+          "reason_code": "controller_dependency_gap",
+          "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
+          "remediation_ref": "local-controller-missing-uv"
+        },
+        {
+          "bypass": "skip_remote_gate",
+          "created_at": "2026-04-03T09:19:10Z",
+          "expires_on": "2026-04-06",
+          "owner": "baditaflorin@gmail.com",
+          "path": "receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json",
+          "reason_code": "controller_dependency_gap",
+          "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
+          "remediation_ref": "local-controller-missing-uv"
+        }
+      ],
+      "release_blockers": [
+        {
+          "expired_waivers": 1,
+          "latest_created_at": "2026-04-03T09:19:10Z",
+          "latest_expires_on": "2026-04-06",
+          "open_waivers": 3,
+          "reason_code": "controller_dependency_gap",
+          "receipt_count": 4,
+          "repeat_after_expiry_occurrences": 3,
+          "status": "release_blocker",
+          "summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate."
+        }
+      ],
+      "totals": {
+        "all_receipts": 67,
+        "compliant_receipts": 4,
+        "expired_waivers": 1,
+        "invalid_receipts": 0,
+        "legacy_receipts": 63,
+        "open_waivers": 3
+      },
+      "warnings": []
+    }
+  },
+  "returncode": 0,
+  "status": "ok",
+  "stderr": "Installed 1 package in 5ms",
+  "stdout": "{\n  \"enabled_checks\": [\n    {\n      \"description\": \"Enforce the ADR 0163 through ADR 0168 agent handoff, ADR index, and workstream registration standards.\",\n      \"id\": \"agent-standards\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Regenerate SLO and HTTPS/TLS Prometheus rules and enforce severity plus runbook annotations on committed alert rules.\",\n      \"id\": \"alert-rule-validation\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run the repo-managed ansible-lint policy against playbooks and the packaged collection.\",\n      \"id\": \"ansible-lint\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Syntax check every tracked playbook outside the shared playbook task includes.\",\n      \"id\": \"ansible-syntax\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Scan published receipts and generated publication artifacts for secrets with the repo-managed gitleaks rules.\",\n      \"id\": \"artifact-secret-scan\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run Atlas pre-migration lint for the repo-managed SQL migration directories using the pinned Atlas image and an ephemeral PostgreSQL dev database.\",\n      \"id\": \"atlas-lint\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Reject reusable platform modules that import outward into scripts/ composition roots or dynamically load script-only helpers.\",\n      \"id\": \"dependency-direction\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Validate the service dependency graph schema, cross references, generated Mermaid markdown, and generated Excalidraw architecture scenes.\",\n      \"id\": \"dependency-graph\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Verify that the generated ADR root manifest, facet shards, and reservation summary are current for documentation and workstream changes.\",\n      \"id\": \"documentation-index\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Regenerate the canonical generated documentation surfaces and fail if committed status docs drift.\",\n      \"id\": \"generated-docs\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Regenerate the portal build outputs and fail if committed publication artifacts drift.\",\n      \"id\": \"generated-portals\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run the repo-managed Checkov IaC policy scan across the governed OpenTofu and Ansible surfaces and emit summary plus SARIF receipts.\",\n      \"id\": \"iac-policy-scan\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run the ADR 0111 non-destructive integration suite against staging if active, or record a repo-managed skip if no integration target is currently available.\",\n      \"id\": \"integration-tests\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Validate all Packer templates when the repo carries them; otherwise report a no-op pass.\",\n      \"id\": \"packer-validate\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run the ADR 0230 shared OPA and Conftest policy checks against command approval, promotion eligibility, runner admission, and service-boundary invariants.\",\n      \"id\": \"policy-validation\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Validate canonical repository data models, provider-boundary anti-corruption guards, capability-contract catalogs, Atlas schema catalog contracts, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.\",\n      \"id\": \"schema-validation\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run the repository filesystem through the pinned Trivy security scan policy.\",\n      \"id\": \"security-scan\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run the repo-managed Semgrep SAST, secret-pattern, and Dockerfile policy scan and write the SARIF receipt.\",\n      \"id\": \"semgrep-sast\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Enforce the ADR 0107 extension checklist for non-grandfathered services.\",\n      \"id\": \"service-completeness\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Validate OpenTofu configuration if the repo carries a tofu root; otherwise report a no-op pass.\",\n      \"id\": \"tofu-validate\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Type check the gate orchestration code, Atlas schema helpers, and the manifest-backed Docker runner surfaces.\",\n      \"id\": \"type-check\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Validate the current branch against its declared workstream ownership manifest and shared-surface contract.\",\n      \"id\": \"workstream-surfaces\",\n      \"severity\": \"error\"\n    },\n    {\n      \"description\": \"Run full-repository yamllint across tracked YAML files.\",\n      \"id\": \"yaml-lint\",\n      \"severity\": \"error\"\n    }\n  ],\n  \"enabled_lanes\": [\n    {\n      \"checks\": [\n        \"documentation-index\"\n      ],\n      \"id\": \"documentation-and-adr\",\n      \"title\": \"Documentation and ADR lane\"\n    },\n    {\n      \"checks\": [\n        \"yaml-lint\",\n        \"schema-validation\",\n        \"atlas-lint\",\n        \"policy-validation\",\n        \"alert-rule-validation\",\n        \"dependency-direction\"\n      ],\n      \"id\": \"repository-structure-and-schema\",\n      \"title\": \"Repository structure and schema lane\"\n    },\n    {\n      \"checks\": [\n        \"generated-docs\",\n        \"generated-portals\",\n        \"dependency-graph\",\n        \"artifact-secret-scan\"\n      ],\n      \"id\": \"generated-artifact-and-canonical-truth\",\n      \"title\": \"Generated artifact and canonical-truth lane\"\n    },\n    {\n      \"checks\": [\n        \"ansible-syntax\",\n        \"ansible-lint\",\n        \"iac-policy-scan\",\n        \"type-check\",\n        \"service-completeness\"\n      ],\n      \"id\": \"service-syntax-and-unit\",\n      \"title\": \"Service-specific syntax and unit lane\"\n    },\n    {\n      \"checks\": [\n        \"packer-validate\",\n        \"tofu-validate\",\n        \"security-scan\",\n        \"semgrep-sast\",\n        \"iac-policy-scan\"\n      ],\n      \"id\": \"remote-builder\",\n      \"title\": \"Remote builder lane\"\n    },\n    {\n      \"checks\": [\n        \"integration-tests\"\n      ],\n      \"id\": \"live-apply-and-promotion\",\n      \"title\": \"Live-apply and promotion lane\"\n    }\n  ],\n  \"lane_catalog_path\": \"/srv/proxmox_florin_server/config/validation-lanes.yaml\",\n  \"last_run\": null,\n  \"latest_bypass\": {\n    \"path\": \"/srv/proxmox_florin_server/receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json\",\n    \"payload\": {\n      \"branch\": \"claude/affectionate-galileo\",\n      \"bypass\": \"skip_remote_gate\",\n      \"commit\": \"42e2da272e503b47afbfa55cc283614ba1e3bc4e\",\n      \"created_at\": \"2026-04-03T09:19:10Z\",\n      \"schema_version\": \"2.0.0\",\n      \"source\": \"pre-push-hook\",\n      \"waiver\": {\n        \"detail\": \"uv_not_in_path_on_worktree_controller\",\n        \"expires_on\": \"2026-04-06\",\n        \"impacted_lanes\": [\n          \"remote-pre-push-gate\"\n        ],\n        \"owner\": \"baditaflorin@gmail.com\",\n        \"reason_code\": \"controller_dependency_gap\",\n        \"reason_summary\": \"The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.\",\n        \"remediation_ref\": \"local-controller-missing-uv\",\n        \"substitute_evidence\": [\n          \"pre-commit-hooks-passed\"\n        ]\n      }\n    }\n  },\n  \"manifest_path\": \"/srv/proxmox_florin_server/config/validation-gate.json\",\n  \"post_merge_run\": {\n    \"checks\": [\n      {\n        \"commands\": [\n          {\n            \"command\": \"./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals\",\n            \"returncode\": 1\n          }\n        ],\n        \"description\": \"Run the worker-local validate_repo fallback when runner images are unavailable on the worker host.\",\n        \"docker_command\": [],\n        \"duration_seconds\": 6.7,\n        \"id\": \"local-fallback\",\n        \"returncode\": 1,\n        \"severity\": \"error\",\n        \"status\": \"failed\"\n      }\n    ],\n    \"executed_at\": \"2026-04-04T12:36:33.540612+00:00\",\n    \"manifest\": \"/srv/proxmox_florin_server/config/validation-gate.json\",\n    \"requested_checks\": [\n      \"local-fallback\"\n    ],\n    \"runner\": {\n      \"capability_contract\": {\n        \"container_runtime\": {\n          \"engine\": \"docker\",\n          \"supported\": true\n        },\n        \"cpu_architectures\": [\n          \"x86_64\"\n        ],\n        \"description\": \"Worker-side validation runner for the post-merge gate replay from the live mirrored checkout.\",\n        \"emulation_support\": [],\n        \"execution_surface\": \"windmill_worker\",\n        \"network_reachability_class\": \"private_worker_checkout\",\n        \"required_tools\": [\n          \"docker\",\n          \"git\",\n          \"python3\",\n          \"tar\",\n          \"uv\"\n        ],\n        \"scratch_cleanup_guarantee\": \"worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable\",\n        \"supported_validation_lanes\": [\n          \"workstream-surfaces\",\n          \"agent-standards\",\n          \"documentation-index\",\n          \"generated-docs\",\n          \"generated-portals\",\n          \"ansible-syntax\",\n          \"schema-validation\",\n          \"atlas-lint\",\n          \"policy-validation\",\n          \"alert-rule-validation\",\n          \"type-check\",\n          \"dependency-direction\",\n          \"dependency-graph\",\n          \"integration-tests\",\n          \"security-scan\",\n          \"semgrep-sast\",\n          \"iac-policy-scan\",\n          \"artifact-secret-scan\",\n          \"service-completeness\",\n          \"tofu-validate\",\n          \"packer-validate\"\n        ]\n      },\n      \"environment_attestation\": {\n        \"attested_at\": \"2026-04-04T12:36:33.532627+00:00\",\n        \"container_runtime\": {\n          \"available\": true,\n          \"engine\": \"docker\",\n          \"error\": \"Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?\",\n          \"path\": \"/usr/bin/docker\",\n          \"server_reachable\": false,\n          \"supported\": true\n        },\n        \"cpu_architecture\": \"x86_64\",\n        \"emulation_support\": [],\n        \"hostname\": \"runtime-control-lv3\",\n        \"network_reachability_class\": \"private_worker_checkout\",\n        \"platform\": \"linux\",\n        \"scratch_space\": {\n          \"cleanup_guarantee\": \"worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable\",\n          \"exists\": true,\n          \"free_bytes\": 102882541568,\n          \"workspace\": \"/srv/proxmox_florin_server\"\n        },\n        \"tooling\": {\n          \"docker\": {\n            \"available\": true,\n            \"path\": \"/usr/bin/docker\",\n            \"version\": \"Docker version 29.3.1, build c2be9cc\"\n          },\n          \"git\": {\n            \"available\": true,\n            \"path\": \"/usr/bin/git\",\n            \"version\": \"git version 2.47.3\"\n          },\n          \"python3\": {\n            \"available\": true,\n            \"path\": \"/usr/bin/python3\",\n            \"version\": \"Python 3.13.5\"\n          },\n          \"tar\": {\n            \"available\": true,\n            \"path\": \"/usr/bin/tar\",\n            \"version\": \"tar (GNU tar) 1.35\"\n          },\n          \"uv\": {\n            \"available\": true,\n            \"path\": \"/usr/local/bin/uv\",\n            \"version\": \"uv 0.9.21\"\n          }\n        }\n      },\n      \"execution_surface\": \"windmill_worker\",\n      \"id\": \"windmill-post-merge-worker\",\n      \"lane_evaluations\": {}\n    },\n    \"source\": \"windmill-post-merge-local-fallback\",\n    \"status\": \"failed\",\n    \"workspace\": \"/srv/proxmox_florin_server\"\n  },\n  \"remote_validate_run\": null,\n  \"waiver_summary\": {\n    \"expiring_soon\": [\n      {\n        \"expires_on\": \"2026-04-06\",\n        \"path\": \"receipts/gate-bypasses/20260403T083912Z-claude-affectionate-galileo-12405e2-skip-remote-gate.json\",\n        \"reason_code\": \"controller_dependency_gap\"\n      },\n      {\n        \"expires_on\": \"2026-04-06\",\n        \"path\": \"receipts/gate-bypasses/20260403T083954Z-claude-affectionate-galileo-e5e9d16-skip-remote-gate.json\",\n        \"reason_code\": \"controller_dependency_gap\"\n      },\n      {\n        \"expires_on\": \"2026-04-06\",\n        \"path\": \"receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json\",\n        \"reason_code\": \"controller_dependency_gap\"\n      }\n    ],\n    \"invalid_receipts\": [],\n    \"latest_receipt\": {\n      \"bypass\": \"skip_remote_gate\",\n      \"created_at\": \"2026-04-03T09:19:10Z\",\n      \"expires_on\": \"2026-04-06\",\n      \"path\": \"receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json\",\n      \"reason_code\": \"controller_dependency_gap\",\n      \"schema_mode\": \"v2\"\n    },\n    \"open_waivers\": [\n      {\n        \"bypass\": \"skip_remote_gate\",\n        \"created_at\": \"2026-04-03T08:39:12Z\",\n        \"expires_on\": \"2026-04-06\",\n        \"owner\": \"baditaflorin@gmail.com\",\n        \"path\": \"receipts/gate-bypasses/20260403T083912Z-claude-affectionate-galileo-12405e2-skip-remote-gate.json\",\n        \"reason_code\": \"controller_dependency_gap\",\n        \"reason_summary\": \"The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.\",\n        \"remediation_ref\": \"local-controller-missing-uv\"\n      },\n      {\n        \"bypass\": \"skip_remote_gate\",\n        \"created_at\": \"2026-04-03T08:39:54Z\",\n        \"expires_on\": \"2026-04-06\",\n        \"owner\": \"baditaflorin@gmail.com\",\n        \"path\": \"receipts/gate-bypasses/20260403T083954Z-claude-affectionate-galileo-e5e9d16-skip-remote-gate.json\",\n        \"reason_code\": \"controller_dependency_gap\",\n        \"reason_summary\": \"The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.\",\n        \"remediation_ref\": \"local-controller-missing-uv\"\n      },\n      {\n        \"bypass\": \"skip_remote_gate\",\n        \"created_at\": \"2026-04-03T09:19:10Z\",\n        \"expires_on\": \"2026-04-06\",\n        \"owner\": \"baditaflorin@gmail.com\",\n        \"path\": \"receipts/gate-bypasses/20260403T091910Z-claude-affectionate-galileo-42e2da2-skip-remote-gate.json\",\n        \"reason_code\": \"controller_dependency_gap\",\n        \"reason_summary\": \"The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.\",\n        \"remediation_ref\": \"local-controller-missing-uv\"\n      }\n    ],\n    \"release_blockers\": [\n      {\n        \"expired_waivers\": 1,\n        \"latest_created_at\": \"2026-04-03T09:19:10Z\",\n        \"latest_expires_on\": \"2026-04-06\",\n        \"open_waivers\": 3,\n        \"reason_code\": \"controller_dependency_gap\",\n        \"receipt_count\": 4,\n        \"repeat_after_expiry_occurrences\": 3,\n        \"status\": \"release_blocker\",\n        \"summary\": \"The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.\"\n      }\n    ],\n    \"totals\": {\n      \"all_receipts\": 67,\n      \"compliant_receipts\": 4,\n      \"expired_waivers\": 1,\n      \"invalid_receipts\": 0,\n      \"legacy_receipts\": 63,\n      \"open_waivers\": 3\n    },\n    \"warnings\": []\n  }\n}"
+}

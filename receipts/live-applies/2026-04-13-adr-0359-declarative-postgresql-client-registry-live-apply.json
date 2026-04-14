@@ -6,7 +6,7 @@
   "recorded_on": "2026-04-13",
   "recorded_at": "2026-04-13T14:44:28Z",
   "recorded_by": "codex",
-  "workflow_id": "ws-0359-live-apply",
+  "workflow_id": "live-apply-service",
   "adr": "0359",
   "workstream": "ws-0359-live-apply",
   "source_branch": "codex/ws-0359-main-merge-r2",

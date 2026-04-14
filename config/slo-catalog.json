@@ -74,16 +74,6 @@
       "description": "The private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration."
     },
     {
-      "id": "gotenberg-availability",
-      "service_id": "gotenberg",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "http://10.10.10.90:3007/health",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The private Gotenberg document rendering API remains reachable on runtime-ai for synchronous PDF conversion workflows."
-    },
-    {
       "id": "glitchtip-availability",
       "service_id": "glitchtip",
       "description": "The public GlitchTip health endpoint remains reachable for browser sign-in, DSN ingestion, and repo-managed smoke verification.",
@@ -94,6 +84,16 @@
       "window_days": 30
     },
     {
+      "id": "gotenberg-availability",
+      "service_id": "gotenberg",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.90:3007/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Gotenberg document rendering API remains reachable on runtime-ai for synchronous PDF conversion workflows."
+    },
+    {
       "id": "grafana-availability",
       "service_id": "grafana",
       "indicator": "availability",
@@ -102,6 +102,16 @@
       "target_url": "https://grafana.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Grafana remains reachable through the public LV3 edge."
+    },
+    {
+      "id": "grist-availability",
+      "service_id": "grist",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://grist.example.com/status",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Grist remains reachable through the public LV3 edge for operator-managed spreadsheet databases and workflow tables."
     },
     {
       "id": "harbor-availability",
@@ -145,6 +155,16 @@
       "description": "Keycloak discovery responds in under 500ms for 95% of probes."
     },
     {
+      "id": "label-studio-availability",
+      "service_id": "label_studio",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8110/api/version",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Label Studio runtime remains reachable on docker-runtime for governed annotation queues and API automation."
+    },
+    {
       "id": "langfuse-availability",
       "service_id": "langfuse",
       "indicator": "availability",
@@ -165,16 +185,6 @@
       "description": "Mailpit remains reachable on the private guest-network listener for staging and development SMTP capture flows."
     },
     {
-      "id": "minio-availability",
-      "service_id": "minio",
-      "indicator": "availability",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "target_url": "https://minio.example.com/minio/health/live",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge."
-    },
-    {
       "id": "matrix-synapse-availability",
       "service_id": "matrix_synapse",
       "indicator": "availability",
@@ -183,6 +193,16 @@
       "target_url": "https://matrix.example.com/_matrix/client/versions",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Matrix Synapse remains reachable on the public client versions endpoint."
+    },
+    {
+      "id": "minio-availability",
+      "service_id": "minio",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://minio.example.com/minio/health/live",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge."
     },
     {
       "id": "netbox-availability",
@@ -213,16 +233,6 @@
       "target_url": "https://nginx.example.com",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The edge reverse proxy remains reachable for published services."
-    },
-    {
-      "id": "grist-availability",
-      "service_id": "grist",
-      "indicator": "availability",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "target_url": "https://grist.example.com/status",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "Grist remains reachable through the public LV3 edge for operator-managed spreadsheet databases and workflow tables."
     },
     {
       "id": "openfga-availability",
@@ -256,14 +266,14 @@
       "description": "Outline remains reachable through the public LV3 edge for living knowledge browsing and sync automation."
     },
     {
-      "id": "label-studio-availability",
-      "service_id": "label_studio",
+      "id": "paperless-availability",
+      "service_id": "paperless",
       "indicator": "availability",
       "objective_percent": 99.0,
       "window_days": 30,
-      "target_url": "http://10.10.10.20:8110/api/version",
+      "target_url": "https://paperless.example.com/",
       "probe_module": "http_2xx_follow_redirects",
-      "description": "The private Label Studio runtime remains reachable on docker-runtime for governed annotation queues and API automation."
+      "description": "Paperless remains reachable through the public LV3 edge for document archive access and governed API reconciliation."
     },
     {
       "id": "piper-availability",
@@ -274,16 +284,6 @@
       "target_url": "http://10.10.10.20:8100/healthz",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The private Piper TTS health endpoint remains reachable on docker-runtime for real-time voice synthesis workflows."
-    },
-    {
-      "id": "paperless-availability",
-      "service_id": "paperless",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "https://paperless.example.com/",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "Paperless remains reachable through the public LV3 edge for document archive access and governed API reconciliation."
     },
     {
       "id": "plane-availability",
@@ -356,16 +356,6 @@
       "description": "Superset remains reachable through the public LV3 edge for SQL-first BI exploration, dashboard viewing, and governed datasource verification."
     },
     {
-      "id": "tika-availability",
-      "service_id": "tika",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "http://10.10.10.90:9998/version",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The private Apache Tika extraction API remains reachable on runtime-ai for synchronous document text and metadata extraction workflows."
-    },
-    {
       "id": "tesseract-ocr-availability",
       "service_id": "tesseract_ocr",
       "indicator": "availability",
@@ -374,6 +364,16 @@
       "target_url": "http://10.10.10.90:3008/healthz",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The private Tesseract OCR runtime remains reachable on runtime-ai for scanned-image and image-only document fallback extraction."
+    },
+    {
+      "id": "tika-availability",
+      "service_id": "tika",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.90:9998/version",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Apache Tika extraction API remains reachable on runtime-ai for synchronous document text and metadata extraction workflows."
     },
     {
       "id": "typesense-availability",

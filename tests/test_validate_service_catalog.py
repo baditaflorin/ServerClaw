@@ -49,6 +49,7 @@ class ValidateServiceCatalogTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn("Service: api_gateway", output)
         self.assertIn("Runbook: docs/runbooks/configure-api-gateway.md", output)
+        self.assertIn("Source bundle: catalog/services/api_gateway/service.yaml", output)
         self.assertIn("smoke suites (inherited):", output)
         self.assertIn("Degradation modes:", output)
 

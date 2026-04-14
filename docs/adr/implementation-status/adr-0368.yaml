@@ -5,144 +5,249 @@ canonical_implementation_status: Implemented
 detected_markers:
 - marker_type: git-commit
   adr_number: 0368
-  location: git:8921e73ed
-  evidence: 8921e73ed [workstreams] open ws-0368 live-apply lane
+  location: git:90004bc48
+  evidence: 90004bc48 [ws-0368] Record live-apply repair artifacts and receipt paths
   confidence: 0.6
-  detected_on: '2026-04-12T00:46:23.303821'
+  detected_on: '2026-04-14T08:15:19.599188'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:daa181c74
+  evidence: daa181c74 [ws-0368] Refresh MinIO vulnerability gate evidence
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599225'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:bf50fcdbd
+  evidence: bf50fcdbd [ws-0368] Repair latest-main validation handoff
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599230'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:d267be6e4
+  evidence: d267be6e4 [ws-0368] Stabilize Gitea exact-main live replay
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599235'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:82e07e8e8
+  evidence: 82e07e8e8 [ws-0368] Export compose macros to include loaders
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599239'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:48a65f362
+  evidence: 48a65f362 [ws-0368] Fix MinIO role validation and focused playbook tests
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599244'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:7085bab07
+  evidence: 7085bab07 [ws-0368] Refresh exact-main integration surfaces
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599248'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:c4183bbc2
+  evidence: c4183bbc2 [ws-0368] Fix exact-main Redpanda replay and scope validation
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599252'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:ca3c85020
+  evidence: ca3c85020 [ws-0368] Fix exact-main Redpanda replay and scope validation
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599507'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:b732f43f0
+  evidence: b732f43f0 [workstreams] move ws-0368 to exact-main lane
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.599760'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:721307de6
+  evidence: "721307de6 [fix] Add compose_macros.j2 symlinks to all role template dirs\
+    \ \u2014 ADR 0368"
+  confidence: 1.0
+  detected_on: '2026-04-14T08:15:19.600011'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:58389cbe6
+  evidence: 58389cbe6 [workstreams] track ws-0368 mainline lane
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.600081'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:b68194664
+  evidence: "b68194664 [release] Bump to 0.178.121 \u2014 ADR 0368 macro adoption\
+    \ + expand changelog budget"
+  confidence: 1.0
+  detected_on: '2026-04-14T08:15:19.600208'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:67af788c7
+  evidence: "67af788c7 Merge codex/ws-0368-live-apply \u2014 ADR 0368 macro adoption\
+    \ complete"
+  confidence: 1.0
+  detected_on: '2026-04-14T08:15:19.600211'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:c864002a8
+  evidence: c864002a8 [adr-0368] Finish macro adoption and record live-apply blocker
+  confidence: 0.8
+  detected_on: '2026-04-14T08:15:19.600231'
+- marker_type: git-commit
+  adr_number: 0368
+  location: git:bf9aa3849
+  evidence: bf9aa3849 [workstreams] open ws-0368 live-apply lane
+  confidence: 0.6
+  detected_on: '2026-04-14T08:15:19.600236'
 - marker_type: git-commit
   adr_number: 0368
   location: git:53009c1d0
   evidence: "53009c1d0 [release] Bump to 0.178.35 \u2014 DRY centralization ADRs 0368-0374"
   confidence: 0.6
-  detected_on: '2026-04-12T00:46:23.305779'
+  detected_on: '2026-04-14T08:15:19.602461'
 - marker_type: git-commit
   adr_number: 0368
   location: git:681666d8e
   evidence: "681666d8e [merge] claude/objective-bose \u2014 implement DRY centralization\
     \ ADRs 0368-0374"
   confidence: 0.6
-  detected_on: '2026-04-12T00:46:23.305787'
+  detected_on: '2026-04-14T08:15:19.602467'
 - marker_type: git-commit
   adr_number: 0368
   location: git:95c844d52
   evidence: 95c844d52 [workstreams] Register DRY centralization ADRs 0368-0374 and
     update ADR index
   confidence: 0.6
-  detected_on: '2026-04-12T00:46:23.305793'
+  detected_on: '2026-04-14T08:15:19.602473'
 - marker_type: git-commit
   adr_number: 0368
   location: git:1076f1619
   evidence: "1076f1619 feat(grist,jupyterhub): migrate compose templates to shared\
     \ macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.305864'
+  detected_on: '2026-04-14T08:15:19.602557'
 - marker_type: git-commit
   adr_number: 0368
   location: git:2a9d8afa9
   evidence: "2a9d8afa9 feat(outline,paperless,plane,plausible,rag_context,semaphore):\
     \ migrate compose templates to shared macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.305880'
+  detected_on: '2026-04-14T08:15:19.602577'
 - marker_type: git-commit
   adr_number: 0368
   location: git:974f130c2
   evidence: "974f130c2 feat(mattermost,n8n,netbox,nextcloud,one_api,openfga): migrate\
     \ compose templates to shared macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.305886'
+  detected_on: '2026-04-14T08:15:19.602584'
 - marker_type: git-commit
   adr_number: 0368
   location: git:21df0e93d
   evidence: "21df0e93d feat(dify,glitchtip,keycloak,livekit,matrix_synapse): migrate\
     \ compose templates to shared macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.305890'
+  detected_on: '2026-04-14T08:15:19.602588'
 - marker_type: git-commit
   adr_number: 0368
   location: git:d0b7bf58d
   evidence: "d0b7bf58d feat(directus_runtime): migrate compose template to shared\
     \ macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.305902'
+  detected_on: '2026-04-14T08:15:19.602602'
 - marker_type: git-commit
   adr_number: 0368
   location: git:bbfc87a77
   evidence: "bbfc87a77 feat(common): add compose_macros.j2 macro library and platform_hairpin_nat_hosts\
     \ \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.305905'
+  detected_on: '2026-04-14T08:15:19.602606'
 - marker_type: git-commit
   adr_number: 0368
   location: git:a326f0d02
   evidence: a326f0d02 [workstreams] Register DRY centralization ADRs 0368-0374 and
     update ADR index
   confidence: 0.6
-  detected_on: '2026-04-12T00:46:23.305965'
+  detected_on: '2026-04-14T08:15:19.602676'
 - marker_type: git-commit
   adr_number: 0368
   location: git:8d06d9bb3
   evidence: "8d06d9bb3 feat(grist,jupyterhub): migrate compose templates to shared\
     \ macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.306131'
+  detected_on: '2026-04-14T08:15:19.602875'
 - marker_type: git-commit
   adr_number: 0368
   location: git:6c73e2352
   evidence: "6c73e2352 feat(outline,paperless,plane,plausible,rag_context,semaphore):\
     \ migrate compose templates to shared macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.306154'
+  detected_on: '2026-04-14T08:15:19.602901'
 - marker_type: git-commit
   adr_number: 0368
   location: git:04b4ef0ef
   evidence: "04b4ef0ef feat(mattermost,n8n,netbox,nextcloud,one_api,openfga): migrate\
     \ compose templates to shared macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.306177'
+  detected_on: '2026-04-14T08:15:19.602924'
 - marker_type: git-commit
   adr_number: 0368
   location: git:e41ccde6b
   evidence: "e41ccde6b feat(dify,glitchtip,keycloak,livekit,matrix_synapse): migrate\
     \ compose templates to shared macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.306182'
+  detected_on: '2026-04-14T08:15:19.602928'
 - marker_type: git-commit
   adr_number: 0368
   location: git:8a76a0fd4
   evidence: "8a76a0fd4 feat(directus_runtime): migrate compose template to shared\
     \ macros \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.306197'
+  detected_on: '2026-04-14T08:15:19.602945'
 - marker_type: git-commit
   adr_number: 0368
   location: git:5bd521901
   evidence: "5bd521901 feat(common): add compose_macros.j2 macro library and platform_hairpin_nat_hosts\
     \ \u2014 ADR 0368"
   confidence: 1.0
-  detected_on: '2026-04-12T00:46:23.306203'
+  detected_on: '2026-04-14T08:15:19.602953'
 - marker_type: git-commit
   adr_number: 0368
   location: git:eb7e1410d
   evidence: 'eb7e1410d chore: update ADR references to 0368-0374'
   confidence: 0.6
-  detected_on: '2026-04-12T00:46:23.306338'
+  detected_on: '2026-04-14T08:15:19.603114'
 - marker_type: git-commit
   adr_number: 0368
   location: git:2295a23f9
   evidence: '2295a23f9 chore: renumber DRY centralization ADRs 0368-0374 (0361-0367
     already exist)'
   confidence: 0.6
-  detected_on: '2026-04-12T00:46:23.306343'
+  detected_on: '2026-04-14T08:15:19.603119'
+- marker_type: live-apply-receipt
+  adr_number: 0368
+  location: receipts/live-applies/ws-0368-live-apply-apply-receipt.yaml
+  evidence: ADR reference found in committed live-apply evidence
+  confidence: 0.95
+  detected_on: '2026-04-14T08:15:19.724629'
+- marker_type: live-apply-receipt
+  adr_number: 0368
+  location: receipts/live-applies/2026-04-14-adr-0368-docker-compose-jinja2-macro-library-live-apply.json
+  evidence: Committed live-apply evidence references the ADR
+  confidence: 1.0
+  detected_on: '2026-04-14T08:15:19.725229'
 inferred_implementation_status: Likely Implemented
 status_match: true
-summary: 'Canonical Status: Accepted
-
-  Inferred Status: Likely Implemented
+summary: 'Canonical Decision Status: Accepted
 
   Canonical Implementation Status: Implemented
 
-  Markers Found: 19
+  Inferred Implementation Status: Likely Implemented
 
-  Breakdown: git-commit=19
+  Markers Found: 36
+
+  Breakdown: git-commit=34, live-apply-receipt=2
 
   Implemented On: 2026-04-11'

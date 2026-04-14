@@ -8,6 +8,10 @@
 argument_specs:
   main:
     short_description: Converge the shared MinIO object-storage runtime and launch buckets.
+    description: >-
+      Converges the shared MinIO object-storage runtime on docker-runtime.
+      The pinned runtime image is derived from the platform_service_registry via ADR 0373,
+      so only non-derived MinIO-specific inputs are validated here.
     options:
       minio_site_dir:
         type: path
@@ -40,9 +44,6 @@ argument_specs:
         type: str
         required: true
       minio_container_name:
-        type: str
-        required: true
-      minio_image:
         type: str
         required: true
       minio_api_port:

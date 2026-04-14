@@ -3,21 +3,6 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
-      "id": "woodpecker-pipeline-history",
-      "service": "woodpecker",
-      "name": "Woodpecker pipeline history",
-      "class": "internal",
-      "retention_days": 90,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "Woodpecker PostgreSQL data",
-        "/opt/woodpecker/data/server"
-      ],
-      "notes": "Pipeline logs and repository activation metadata can contain branch names, repository details, and operator-trigger context, so they remain private and restorable with the Woodpecker control plane."
-    },
-    {
       "id": "browser-runner-artifacts",
       "service": "browser_runner",
       "name": "Browser runner bounded session artifacts",
@@ -95,23 +80,6 @@
       "notes": "Dozzle is read-only and does not persist its own datastore; it exposes recent container log buffers from the managed Docker hosts for real-time debugging."
     },
     {
-      "id": "drift-report-receipts",
-      "service": "platform_control_plane",
-      "name": "Drift detection receipts",
-      "class": "internal",
-      "retention_days": 90,
-      "backup_included": true,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "receipts/drift-reports"
-      ],
-      "retention_paths": [
-        "drift-reports"
-      ],
-      "notes": "Drift findings are operationally useful across recent investigations but are superseded by longer-term audit evidence."
-    },
-    {
       "id": "excalidraw-generated-scenes",
       "service": "excalidraw",
       "name": "Generated Excalidraw scene set",
@@ -141,40 +109,6 @@
       "notes": "Flagsmith persists organisations, projects, environments, feature definitions, segment metadata, and environment-specific flag state in the shared PostgreSQL cluster."
     },
     {
-      "id": "fixture-receipts",
-      "service": "platform_control_plane",
-      "name": "Ephemeral fixture receipts",
-      "class": "internal",
-      "retention_days": 30,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "low",
-      "locations": [
-        "receipts/fixtures"
-      ],
-      "retention_paths": [
-        "fixtures"
-      ],
-      "notes": "Fixture receipts track temporary environments and can be discarded after the short-lived debugging window closes."
-    },
-    {
-      "id": "gate-bypass-receipts",
-      "service": "platform_control_plane",
-      "name": "Validation gate bypass receipts",
-      "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "receipts/gate-bypasses"
-      ],
-      "retention_paths": [
-        "gate-bypasses"
-      ],
-      "notes": "Bypass records capture exception handling and should remain available for annual audit review."
-    },
-    {
       "id": "gitea-repositories",
       "service": "gitea",
       "name": "Gitea repositories and metadata",
@@ -189,21 +123,6 @@
         "/opt/gitea/data/gitea"
       ],
       "notes": "Repositories, issues, webhook configuration, and audit metadata are operational records that should remain restorable for multi-year incident and change reconstruction."
-    },
-    {
-      "id": "gotenberg-transient-render-buffers",
-      "service": "gotenberg",
-      "name": "Gotenberg transient render buffers",
-      "class": "internal",
-      "retention_days": null,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "Transient request and response buffers inside the gotenberg container on docker-runtime",
-        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime"
-      ],
-      "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
     },
     {
       "id": "glitchtip-issues-and-project-artifacts",
@@ -222,19 +141,19 @@
       "notes": "GlitchTip stores grouped exception payloads, issue metadata, notification state, uploaded artifacts, and the repo-managed DSN project catalogue for first-party producers."
     },
     {
-      "id": "tesseract-ocr-transient-request-buffers",
-      "service": "tesseract_ocr",
-      "name": "Tesseract OCR transient request buffers",
+      "id": "gotenberg-transient-render-buffers",
+      "service": "gotenberg",
+      "name": "Gotenberg transient render buffers",
       "class": "internal",
       "retention_days": null,
       "backup_included": false,
       "access_role": "platform-operator",
       "pii_risk": "medium",
       "locations": [
-        "Transient uploaded image and PDF buffers inside the tesseract-ocr container on docker-runtime",
-        "Ephemeral rendered page images created during PDF OCR on docker-runtime"
+        "Transient request and response buffers inside the gotenberg container on docker-runtime",
+        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime"
       ],
-      "notes": "The OCR runtime is stateless and discards uploaded source files, rendered page images, and extracted text after each synchronous request completes."
+      "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
     },
     {
       "id": "grafana-annotations",
@@ -249,6 +168,51 @@
         "Grafana SQLite/PostgreSQL annotation store"
       ],
       "notes": "Annotations capture deployment and incident context that remains useful longer than raw logs."
+    },
+    {
+      "id": "loki-logs",
+      "service": "grafana",
+      "name": "Loki log store",
+      "class": "internal",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/lib/loki",
+        "Grafana Loki datasource"
+      ],
+      "notes": "Operational logs may contain internal IP addresses, usernames, and error details."
+    },
+    {
+      "id": "tempo-traces",
+      "service": "grafana",
+      "name": "Tempo trace blocks",
+      "class": "internal",
+      "retention_days": 14,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/lib/tempo/blocks",
+        "Grafana Tempo datasource"
+      ],
+      "notes": "Trace payloads support short-lived troubleshooting and should remain bounded to protect monitoring disk capacity."
+    },
+    {
+      "id": "grist-document-store",
+      "service": "grist",
+      "name": "Grist document and instance store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/grist/persist/docs",
+        "/opt/grist/persist/home.sqlite3"
+      ],
+      "notes": "Grist persists operator-managed spreadsheet documents and instance metadata as SQLite files under /persist on docker-runtime."
     },
     {
       "id": "harbor-registry-artifacts",
@@ -295,35 +259,60 @@
       "notes": "Homepage stores only repo-generated dashboard configuration and lightweight runtime state for the unified service dashboard."
     },
     {
-      "id": "image-scan-reports",
-      "service": "platform_control_plane",
-      "name": "Image scan receipts",
-      "class": "internal",
+      "id": "label-studio-annotation-database",
+      "service": "label_studio",
+      "name": "Label Studio annotation metadata database",
+      "class": "confidential",
       "retention_days": 365,
       "backup_included": true,
       "access_role": "platform-operator",
-      "pii_risk": "low",
+      "pii_risk": "medium",
       "locations": [
-        "receipts/image-scans"
+        "PostgreSQL database label_studio on postgres"
       ],
-      "retention_paths": [
-        "image-scans"
-      ],
-      "notes": "Security scan evidence should remain available across one full patching and review cycle."
+      "notes": "Label Studio stores project metadata, task assignments, task payload references, and completed annotations in the dedicated PostgreSQL database."
     },
     {
-      "id": "redpanda-log-store",
-      "service": "redpanda",
-      "name": "Redpanda durable log store",
+      "id": "label-studio-runtime-state",
+      "service": "label_studio",
+      "name": "Label Studio local runtime state",
       "class": "confidential",
-      "retention_days": null,
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/label-studio/data on docker-runtime"
+      ],
+      "notes": "The Label Studio data directory stores local imports, exports, and attachment cache material that accompanies the repo-managed project catalog."
+    },
+    {
+      "id": "lago-billing-control-plane-state",
+      "service": "lago",
+      "name": "Lago billing catalog and usage state",
+      "class": "confidential",
+      "retention_days": 1825,
       "backup_included": true,
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Docker volume lv3-redpanda-data on docker-runtime"
+        "Lago PostgreSQL database on postgres"
       ],
-      "notes": "Topic retention remains per-topic and repo-managed; the named Docker volume must be covered by docker-runtime backup evidence whenever the Redpanda runtime contract changes."
+      "notes": "Lago stores billable metrics, plans, customers, subscriptions, invoices, credit notes, and aggregated usage records that may include tenant identifiers and billing contacts."
+    },
+    {
+      "id": "lago-generated-billing-artifacts",
+      "service": "lago",
+      "name": "Lago generated billing artifacts",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/lago/data/storage on docker-runtime"
+      ],
+      "notes": "The Lago storage directory retains generated invoice exports, PDF-ready billing artifacts, and other runtime files needed for billing-history reconstruction."
     },
     {
       "id": "langfuse-object-storage",
@@ -356,39 +345,6 @@
       "notes": "Langfuse captures prompt, trace, and generation payloads that may contain operator-entered context and model outputs."
     },
     {
-      "id": "live-apply-receipts",
-      "service": "platform_control_plane",
-      "name": "Live-apply receipts",
-      "class": "internal",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "receipts/live-applies",
-        "receipts/live-applies/staging"
-      ],
-      "retention_paths": [
-        "live-applies"
-      ],
-      "notes": "Deployment evidence remains part of the short-term operational timeline and is summarized into longer-lived release history."
-    },
-    {
-      "id": "loki-logs",
-      "service": "grafana",
-      "name": "Loki log store",
-      "class": "internal",
-      "retention_days": 30,
-      "backup_included": false,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "/var/lib/loki",
-        "Grafana Loki datasource"
-      ],
-      "notes": "Operational logs may contain internal IP addresses, usernames, and error details."
-    },
-    {
       "id": "mailpit-captured-messages",
       "service": "mailpit",
       "name": "Mailpit captured message cache",
@@ -401,35 +357,6 @@
         "Mailpit in-memory message store on docker-runtime"
       ],
       "notes": "Mailpit intentionally keeps intercepted staging and development messages in ephemeral in-memory storage so assertion traffic is inspectable but lost on restart."
-    },
-    {
-      "id": "piper-voice-model-cache",
-      "service": "piper",
-      "name": "Piper voice model cache",
-      "class": "internal",
-      "retention_days": null,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "low",
-      "locations": [
-        "Docker volume piper-models on docker-runtime"
-      ],
-      "notes": "Piper stores downloaded voice models in a named Docker volume so the private TTS runtime can restart without re-fetching the declared model set."
-    },
-    {
-      "id": "piper-transient-synthesis-payloads",
-      "service": "piper",
-      "name": "Piper transient synthesis payloads",
-      "class": "confidential",
-      "retention_days": null,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "Transient request and response buffers inside the piper container on docker-runtime",
-        "Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime"
-      ],
-      "notes": "Piper does not persist input text or synthesized audio after each request completes, but both may contain sensitive operator or agent content while the request is in flight."
     },
     {
       "id": "matrix-synapse-event-store",
@@ -475,20 +402,18 @@
       "notes": "ChatOps history supports incident reconstruction and should retain two years of operator discussion."
     },
     {
-      "id": "mutation-audit-log",
-      "service": "platform_control_plane",
-      "name": "Mutation audit log",
+      "id": "minio-shared-object-storage",
+      "service": "minio",
+      "name": "Shared object storage buckets and IAM metadata",
       "class": "confidential",
       "retention_days": 365,
       "backup_included": true,
       "access_role": "platform-operator",
-      "pii_risk": "medium",
+      "pii_risk": "high",
       "locations": [
-        "/var/log/platform/mutation-audit.jsonl",
-        ".local/state/mutation-audit/mutation-audit.jsonl",
-        "Loki {job=\"mutation-audit\"}"
+        "/opt/minio/data"
       ],
-      "notes": "Audit events record operator and automation identities and must remain available for at least one annual review cycle."
+      "notes": "Repo-managed MinIO stores shared service objects, bucket metadata, and bucket-level lifecycle policy state for Loki, Langfuse exports, Gitea LFS, and RAG staging."
     },
     {
       "id": "netbox-change-log",
@@ -503,34 +428,6 @@
         "NetBox PostgreSQL extras_objectchange table"
       ],
       "notes": "Object-change history should remain available through at least one quarterly planning cycle without growing unbounded."
-    },
-    {
-      "id": "paperless-document-archive",
-      "service": "paperless",
-      "name": "Paperless document archive",
-      "class": "confidential",
-      "retention_days": null,
-      "backup_included": true,
-      "access_role": "break_glass",
-      "pii_risk": "high",
-      "locations": [
-        "Docker volumes paperless-media, paperless-data, paperless-export, and paperless-consume on docker-runtime"
-      ],
-      "notes": "Paperless stores uploaded source files, OCR output, and exportable archive artifacts that must remain recoverable."
-    },
-    {
-      "id": "paperless-document-metadata",
-      "service": "paperless",
-      "name": "Paperless document metadata",
-      "class": "confidential",
-      "retention_days": null,
-      "backup_included": true,
-      "access_role": "break_glass",
-      "pii_risk": "high",
-      "locations": [
-        "Paperless PostgreSQL database on postgres"
-      ],
-      "notes": "Paperless stores document metadata, taxonomy, correspondents, and operator actions alongside the archive state."
     },
     {
       "id": "nextcloud-account-metadata",
@@ -591,50 +488,6 @@
       "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
     },
     {
-      "id": "grist-document-store",
-      "service": "grist",
-      "name": "Grist document and instance store",
-      "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "/opt/grist/persist/docs",
-        "/opt/grist/persist/home.sqlite3"
-      ],
-      "notes": "Grist persists operator-managed spreadsheet documents and instance metadata as SQLite files under /persist on docker-runtime."
-    },
-    {
-      "id": "temporal-workflow-history",
-      "service": "temporal",
-      "name": "Temporal workflow history and visibility",
-      "class": "confidential",
-      "retention_days": 7,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "PostgreSQL temporal database on postgres",
-        "PostgreSQL temporal_visibility database on postgres"
-      ],
-      "notes": "Temporal persists workflow event history, timers, and visibility records for the repo-managed `lv3` namespace using the declared retention window."
-    },
-    {
-      "id": "serverclaw-workbench-state",
-      "service": "serverclaw",
-      "name": "ServerClaw workbench state",
-      "class": "confidential",
-      "retention_days": 90,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "http://100.64.0.1:8008"
-      ],
-      "notes": "ServerClaw persists conversations, workspace artifacts, prompt history, and user-specific workbench settings in its local runtime data volume on docker-runtime."
-    },
-    {
       "id": "outline-attachment-storage",
       "service": "outline",
       "name": "Outline attachment storage",
@@ -663,32 +516,61 @@
       "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
     },
     {
-      "id": "lago-billing-control-plane-state",
-      "service": "lago",
-      "name": "Lago billing catalog and usage state",
+      "id": "paperless-document-archive",
+      "service": "paperless",
+      "name": "Paperless document archive",
       "class": "confidential",
-      "retention_days": 1825,
+      "retention_days": null,
       "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Docker volumes paperless-media, paperless-data, paperless-export, and paperless-consume on docker-runtime"
+      ],
+      "notes": "Paperless stores uploaded source files, OCR output, and exportable archive artifacts that must remain recoverable."
+    },
+    {
+      "id": "paperless-document-metadata",
+      "service": "paperless",
+      "name": "Paperless document metadata",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Paperless PostgreSQL database on postgres"
+      ],
+      "notes": "Paperless stores document metadata, taxonomy, correspondents, and operator actions alongside the archive state."
+    },
+    {
+      "id": "piper-transient-synthesis-payloads",
+      "service": "piper",
+      "name": "Piper transient synthesis payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": false,
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Lago PostgreSQL database on postgres"
+        "Transient request and response buffers inside the piper container on docker-runtime",
+        "Ephemeral synthesized WAV bytes returned synchronously to callers on docker-runtime"
       ],
-      "notes": "Lago stores billable metrics, plans, customers, subscriptions, invoices, credit notes, and aggregated usage records that may include tenant identifiers and billing contacts."
+      "notes": "Piper does not persist input text or synthesized audio after each request completes, but both may contain sensitive operator or agent content while the request is in flight."
     },
     {
-      "id": "lago-generated-billing-artifacts",
-      "service": "lago",
-      "name": "Lago generated billing artifacts",
-      "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
+      "id": "piper-voice-model-cache",
+      "service": "piper",
+      "name": "Piper voice model cache",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
       "access_role": "platform-operator",
-      "pii_risk": "medium",
+      "pii_risk": "low",
       "locations": [
-        "/opt/lago/data/storage on docker-runtime"
+        "Docker volume piper-models on docker-runtime"
       ],
-      "notes": "The Lago storage directory retains generated invoice exports, PDF-ready billing artifacts, and other runtime files needed for billing-history reconstruction."
+      "notes": "Piper stores downloaded voice models in a named Docker volume so the private TTS runtime can restart without re-fetching the declared model set."
     },
     {
       "id": "plane-object-storage",
@@ -717,6 +599,20 @@
         "Plane PostgreSQL database"
       ],
       "notes": "Plane stores project boards, issue metadata, and operator-entered planning content that should remain recoverable across normal backup cycles."
+    },
+    {
+      "id": "platform-context-staging-objects",
+      "service": "platform_context_api",
+      "name": "Platform-context staging object storage",
+      "class": "confidential",
+      "retention_days": 14,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "s3://rag-staging"
+      ],
+      "notes": "Raw document uploads stage in the shared MinIO bucket before extraction and should expire quickly to limit retained sensitive source material."
     },
     {
       "id": "plausible-analytics-events",
@@ -748,49 +644,18 @@
       "notes": "PostgreSQL-backed site configuration, dashboard state, and the bootstrap recovery user metadata remain restorable with the runtime volumes."
     },
     {
-      "id": "minio-shared-object-storage",
-      "service": "minio",
-      "name": "Shared object storage buckets and IAM metadata",
+      "id": "redpanda-log-store",
+      "service": "redpanda",
+      "name": "Redpanda durable log store",
       "class": "confidential",
-      "retention_days": 365,
+      "retention_days": null,
       "backup_included": true,
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "/opt/minio/data"
+        "Docker volume lv3-redpanda-data on docker-runtime"
       ],
-      "notes": "Repo-managed MinIO stores shared service objects, bucket metadata, and bucket-level lifecycle policy state for Loki, Langfuse exports, Gitea LFS, and RAG staging."
-    },
-    {
-      "id": "platform-context-staging-objects",
-      "service": "platform_context_api",
-      "name": "Platform-context staging object storage",
-      "class": "confidential",
-      "retention_days": 14,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "s3://rag-staging"
-      ],
-      "notes": "Raw document uploads stage in the shared MinIO bucket before extraction and should expire quickly to limit retained sensitive source material."
-    },
-    {
-      "id": "promotion-receipts",
-      "service": "platform_control_plane",
-      "name": "Promotion receipts",
-      "class": "internal",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "receipts/promotions"
-      ],
-      "retention_paths": [
-        "promotions"
-      ],
-      "notes": "Promotion evidence remains useful for release forensics for one year."
+      "notes": "Topic retention remains per-topic and repo-managed; the named Docker volume must be covered by docker-runtime backup evidence whenever the Redpanda runtime contract changes."
     },
     {
       "id": "semaphore-task-history",
@@ -808,6 +673,20 @@
       "notes": "Task output can contain operator context, playbook names, and limited execution logs, so it should stay private and be retained long enough for incident review."
     },
     {
+      "id": "serverclaw-workbench-state",
+      "service": "serverclaw",
+      "name": "ServerClaw workbench state",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "http://100.64.0.1:8008"
+      ],
+      "notes": "ServerClaw persists conversations, workspace artifacts, prompt history, and user-specific workbench settings in its local runtime data volume on docker-runtime."
+    },
+    {
       "id": "serverclaw-workspace-store",
       "service": "serverclaw",
       "name": "ServerClaw workspace and chat state",
@@ -821,36 +700,6 @@
         "https://chat.example.com"
       ],
       "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its ServerClaw data volume on coolify."
-    },
-    {
-      "id": "tempo-traces",
-      "service": "grafana",
-      "name": "Tempo trace blocks",
-      "class": "internal",
-      "retention_days": 14,
-      "backup_included": false,
-      "access_role": "platform-read",
-      "pii_risk": "low",
-      "locations": [
-        "/var/lib/tempo/blocks",
-        "Grafana Tempo datasource"
-      ],
-      "notes": "Trace payloads support short-lived troubleshooting and should remain bounded to protect monitoring disk capacity."
-    },
-    {
-      "id": "tika-transient-document-extraction",
-      "service": "tika",
-      "name": "Apache Tika transient document extraction payloads",
-      "class": "confidential",
-      "retention_days": null,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "Transient request and response buffers inside the tika container on docker-runtime",
-        "Ephemeral extracted plaintext and metadata returned synchronously to callers on docker-runtime"
-      ],
-      "notes": "Apache Tika is stateless and does not persist source documents, extracted text, or metadata after each synchronous request completes, but uploaded documents may contain sensitive content in transit."
     },
     {
       "id": "tls-private-keys",
@@ -868,6 +717,65 @@
       "notes": "Runtime keys are rotated with certificate renewal and old material should not persist beyond the overlap window."
     },
     {
+      "id": "superset-metadata-and-managed-assets",
+      "service": "superset",
+      "name": "Superset metadata and managed BI assets",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL database postgres on postgres, schema superset"
+      ],
+      "notes": "Superset persists datasource definitions, saved queries, charts, dashboards, and user-generated BI metadata in the managed superset schema, so the schema should remain recoverable with the shared PostgreSQL backup policy."
+    },
+    {
+      "id": "temporal-workflow-history",
+      "service": "temporal",
+      "name": "Temporal workflow history and visibility",
+      "class": "confidential",
+      "retention_days": 7,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL temporal database on postgres",
+        "PostgreSQL temporal_visibility database on postgres"
+      ],
+      "notes": "Temporal persists workflow event history, timers, and visibility records for the repo-managed `lv3` namespace using the declared retention window."
+    },
+    {
+      "id": "tesseract-ocr-transient-request-buffers",
+      "service": "tesseract_ocr",
+      "name": "Tesseract OCR transient request buffers",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient uploaded image and PDF buffers inside the tesseract-ocr container on docker-runtime",
+        "Ephemeral rendered page images created during PDF OCR on docker-runtime"
+      ],
+      "notes": "The OCR runtime is stateless and discards uploaded source files, rendered page images, and extracted text after each synchronous request completes."
+    },
+    {
+      "id": "tika-transient-document-extraction",
+      "service": "tika",
+      "name": "Apache Tika transient document extraction payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Transient request and response buffers inside the tika container on docker-runtime",
+        "Ephemeral extracted plaintext and metadata returned synchronously to callers on docker-runtime"
+      ],
+      "notes": "Apache Tika is stateless and does not persist source documents, extracted text, or metadata after each synchronous request completes, but uploaded documents may contain sensitive content in transit."
+    },
+    {
       "id": "typesense-platform-service-index",
       "service": "typesense",
       "name": "Typesense platform service index",
@@ -881,48 +789,6 @@
         "Typesense collection platform-services"
       ],
       "notes": "The repo-managed platform service catalog is materialized into Typesense as a derived full-text and faceted-search index and can be replayed from git after restore."
-    },
-    {
-      "id": "label-studio-annotation-database",
-      "service": "label_studio",
-      "name": "Label Studio annotation metadata database",
-      "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "PostgreSQL database label_studio on postgres"
-      ],
-      "notes": "Label Studio stores project metadata, task assignments, task payload references, and completed annotations in the dedicated PostgreSQL database."
-    },
-    {
-      "id": "label-studio-runtime-state",
-      "service": "label_studio",
-      "name": "Label Studio local runtime state",
-      "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "/opt/label-studio/data on docker-runtime"
-      ],
-      "notes": "The Label Studio data directory stores local imports, exports, and attachment cache material that accompanies the repo-managed project catalog."
-    },
-    {
-      "id": "superset-metadata-and-managed-assets",
-      "service": "superset",
-      "name": "Superset metadata and managed BI assets",
-      "class": "confidential",
-      "retention_days": 365,
-      "backup_included": true,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "PostgreSQL database postgres on postgres, schema superset"
-      ],
-      "notes": "Superset persists datasource definitions, saved queries, charts, dashboards, and user-generated BI metadata in the managed superset schema, so the schema should remain recoverable with the shared PostgreSQL backup policy."
     },
     {
       "id": "vaultwarden-shared-vault",
@@ -953,6 +819,21 @@
         "Windmill workspace logs"
       ],
       "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
+    },
+    {
+      "id": "woodpecker-pipeline-history",
+      "service": "woodpecker",
+      "name": "Woodpecker pipeline history",
+      "class": "internal",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Woodpecker PostgreSQL data",
+        "/opt/woodpecker/data/server"
+      ],
+      "notes": "Pipeline logs and repository activation metadata can contain branch names, repository details, and operator-trigger context, so they remain private and restorable with the Woodpecker control plane."
     }
   ]
 }

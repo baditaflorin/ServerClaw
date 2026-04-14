@@ -277,6 +277,91 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
     assert payload["env"]["NETWORK_IMPAIRMENT_MATRIX_ARGS"] == "target_class=staging --approve-risk"
 
 
+def test_execute_governed_command_dry_run_skips_controller_secret_materialization(monkeypatch) -> None:
+    runtime_root = Path("/srv/proxmox-host_server")
+    contract = {
+        "workflow_id": "network-impairment-matrix",
+        "inputs": [
+            {
+                "name": "bootstrap_ssh_private_key",
+                "kind": "controller_secret",
+                "required": True,
+            },
+            {
+                "name": "NETWORK_IMPAIRMENT_MATRIX_ARGS",
+                "kind": "operator_parameter",
+                "required": False,
+            },
+        ],
+        "execution": {"profile": "runtime", "timeout_seconds": 600},
+    }
+    workflow = {"preferred_entrypoint": {"kind": "make_target", "target": "network-impairment-matrix"}}
+    command_catalog = {
+        "execution_profiles": {
+            "runtime": {
+                "runtime_host": "docker-runtime",
+                "runtime_repo_root": str(runtime_root),
+                "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server",
+                "effective_user": "ops",
+                "working_directory": str(runtime_root),
+                "env": {
+                    "LV3_WINDMILL_BASE_URL": "http://127.0.0.1:8000",
+                },
+                "kill_mode": "mixed",
+                "log_directory": str(runtime_root / ".local" / "governed-command" / "logs"),
+                "receipt_directory": str(runtime_root / ".local" / "governed-command" / "receipts"),
+            }
+        },
+        "commands": {
+            "network-impairment-matrix": contract,
+        },
+    }
+    secret_manifest = {
+        "secrets": {
+            "bootstrap_ssh_private_key": {
+                "kind": "file",
+                "path": "/nonexistent/.local/ssh/bootstrap.id_ed25519",
+            }
+        }
+    }
+
+    monkeypatch.setattr(
+        command,
+        "load_catalog_context",
+        lambda: (secret_manifest, {"workflows": {"network-impairment-matrix": workflow}}, command_catalog),
+    )
+    monkeypatch.setattr(
+        command,
+        "evaluate_approval",
+        lambda *_args, **_kwargs: {
+            "approved": True,
+            "workflow_id": "network-impairment-matrix",
+            "entrypoint": "make network-impairment-matrix",
+            "reasons": [],
+        },
+    )
+
+    result, outcome = command.execute_governed_command(
+        command_id="network-impairment-matrix",
+        requester_class="human_operator",
+        approver_classes=["human_operator"],
+        preflight_passed=True,
+        validation_passed=True,
+        receipt_planned=True,
+        self_approve=False,
+        break_glass=False,
+        parameters={"NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"},
+        dry_run=True,
+    )
+
+    assert outcome == "success"
+    assert result["approved"] is True
+    assert result["executed"] is False
+    assert result["runtime_host"] == "docker-runtime"
+    assert result["parameters"] == {"NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"}
+    assert result["unit_name"].startswith("lv3-governed-network-impairment-matrix-")
+
+
 def test_parse_key_value_pairs_requires_name_equals_value() -> None:
     with pytest.raises(ValueError, match="must use NAME=VALUE"):
         command.parse_key_value_pairs(["missing-delimiter"])

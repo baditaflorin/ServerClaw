@@ -97,3 +97,65 @@ def test_validate_environment_references_rejects_unrelated_subdomain_owner() -> 
             build_subdomain_catalog("serverclaw"),
             build_host_vars(),
         )
+
+
+def test_main_validate_resolves_placeholder_domains_for_private_overlay(monkeypatch: pytest.MonkeyPatch) -> None:
+    environment_catalog = build_environment_catalog()
+    environment_catalog["environments"][0]["base_domain"] = "lv3.org"
+    environment_catalog["environments"][0]["hostname_pattern"] = "*.lv3.org"
+
+    service_catalog = {
+        "services": [
+            {
+                "id": "nginx_edge",
+                "vm": "nginx-edge",
+                "environments": {"production": {"status": "active", "url": "https://edge.example.com"}},
+            },
+            {
+                "id": "api_gateway",
+                "vm": "coolify",
+                "environments": {
+                    "production": {
+                        "status": "active",
+                        "url": "https://api.example.com",
+                        "subdomain": "api.example.com",
+                    }
+                },
+            },
+        ]
+    }
+    subdomain_catalog = {
+        "subdomains": [
+            {
+                "fqdn": "api.example.com",
+                "service_id": "api_gateway",
+                "environment": "production",
+                "status": "active",
+            }
+        ]
+    }
+
+    monkeypatch.setattr(environment_topology, "load_environment_topology", lambda: environment_catalog)
+    monkeypatch.setattr(environment_topology, "load_yaml", lambda _path: build_host_vars())
+
+    def fake_load_json(path):
+        if path == environment_topology.SERVICE_CATALOG_PATH:
+            return service_catalog
+        if path == environment_topology.SUBDOMAIN_CATALOG_PATH:
+            return subdomain_catalog
+        raise AssertionError(path)
+
+    monkeypatch.setattr(environment_topology, "load_json", fake_load_json)
+    monkeypatch.setattr(environment_topology, "resolve_public_domain_placeholders", _replace_example_domain)
+
+    assert environment_topology.main(["--validate"]) == 0
+
+
+def _replace_example_domain(value):
+    if isinstance(value, str):
+        return value.replace("example.com", "lv3.org")
+    if isinstance(value, list):
+        return [_replace_example_domain(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _replace_example_domain(item) for key, item in value.items()}
+    return value

@@ -1,9 +1,10 @@
 # ADR 0324: Service Definition Shards And Generated Service Catalog Assembly
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.98
+- Implemented On: 2026-04-04
 - Date: 2026-04-01
 - Tags: services, catalogs, generation, sharding, repo-structure
 

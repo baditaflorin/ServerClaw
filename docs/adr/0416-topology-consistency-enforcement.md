@@ -117,7 +117,29 @@ uv run --with pyyaml python scripts/validate_topology_consistency.py --check
 
 ### 4. Operator procedure when moving a service to a different VM
 
-When migrating service `<svc>` from `<old-vm>` to `<new-vm>`:
+**⚠ This manual procedure is superseded by ADR 0417. Use `make migrate-service`.**
+
+```bash
+# Preview what will change (no files touched, no converges run):
+make migrate-service-dry-run svc=<svc> to=<new-vm>
+
+# Execute: updates all three registry files + runs ordered converges + writes receipt:
+make migrate-service svc=<svc> to=<new-vm> env=production
+
+# Then commit the registry changes:
+git diff && git add inventory/ && git commit -m "migrate <svc>: <old-vm> → <new-vm>"
+git push origin main
+```
+
+`make migrate-service` updates `host_group`, `proxy.upstream_host`, and
+`lv3_service_topology.owning_vm` atomically, runs topology validation, then
+converges in the correct order (postgres → stop-old → service → nginx).
+
+The manual 5-step procedure below is kept for reference only. Do not use it
+for new migrations — it is error-prone and bypasses the receipt system.
+
+<details>
+<summary>Legacy manual procedure (reference only — use make migrate-service instead)</summary>
 
 ```yaml
 # Step 1: Update the authoritative registry
@@ -125,45 +147,49 @@ When migrating service `<svc>` from `<old-vm>` to `<new-vm>`:
   <svc>:
     host_group: <new-vm>    # was: <old-vm>
 
-# Step 2: Update the PostgreSQL client registry (if the service uses postgres)
-# inventory/group_vars/platform_postgres.yml
-  - service: <svc>
-    source_vm: <new-vm>     # was: <old-vm>
-
-# Step 3: Update nginx routing topology (if the service has a public endpoint)
+# Step 2: Update nginx routing topology (if the service has a public endpoint)
 # inventory/host_vars/proxmox-host.yml
   lv3_service_topology:
     <svc>:
       owning_vm: <new-vm>   # was: <old-vm>
       upstream: "http://{{ ... <new-vm> ... }}:..."
 
-# Step 4: Verify consistency
+# Step 3: Verify consistency
 python scripts/validate_topology_consistency.py --check
 
-# Step 5: Converge affected services
+# Step 4: Converge affected services (order matters!)
 make converge-postgres-vm env=production        # updates pg_hba.conf
-make converge-keycloak env=production           # or relevant service
+make teardown-service svc=<svc> on_vm=<old-vm> # stop old container
+make converge-<svc> env=production              # start on new VM
 make converge-nginx-edge env=production         # updates nginx upstream
 ```
+</details>
 
-### 5. Long-term: derive source_vm from host_group automatically
+### 5. Phase 2 COMPLETE: derive source_vm from host_group automatically ✅
 
-Currently `platform_postgres_clients.source_vm` must be updated manually.
-The target state is to derive it from `platform_service_registry.host_group`
-at Ansible play time, eliminating the duplicate entirely:
+**Implemented 2026-04-14** — `source_vm` has been eliminated from all 27
+`platform_postgres_clients` entries. The `pg_hba.conf.j2` template now derives
+the client IP from `platform_service_registry[service].host_group`:
 
 ```yaml
-# pg_hba.conf.j2 (target state — ADR 0416 Phase 2)
+# pg_hba.conf.j2 — ADR 0416 Phase 2 (implemented)
 {% for client in platform_postgres_clients %}
-{% set service_host = platform_service_registry[client.service].host_group %}
-{% set client_ip = platform_guest_catalog.by_name[service_host].ipv4 + '/32' %}
+{% if client.source_vm is defined %}
+{# Legacy fallback — emits LEGACY warning comment, should not occur in clean state #}
+{% set client_ip = platform_guest_catalog.by_name[client.source_vm].ipv4 + '/32' %}
+host  {{ client.database }}  {{ client.user }}  {{ client_ip }}  scram-sha-256  # LEGACY
+{% else %}
+{% set host_group = platform_service_registry[client.service].host_group %}
+{% set client_ip = platform_guest_catalog.by_name[host_group].ipv4 + '/32' %}
 host  {{ client.database }}  {{ client.user }}  {{ client_ip }}  scram-sha-256
+{% endif %}
 {% endfor %}
 ```
 
-This requires removing `source_vm` from `platform_postgres.yml` entries and
-updating the pg_hba template — a backwards-compatible one-commit change once
-the registry is fully accurate.
+The validator now checks for Phase 2 compliance — any entry with a `source_vm`
+field is flagged as `LEGACY` and fails the gate. This makes drift impossible by
+construction: moving a service's `host_group` automatically updates pg_hba.conf
+on next converge with zero other changes required.
 
 ---
 
@@ -183,27 +209,31 @@ in this session by updating `platform_service_registry.host_group`:
 | windmill | docker-runtime → runtime-control | postgres source_vm + topology both agree |
 | openbao | docker-runtime → runtime-control | topology owning_vm confirms |
 
-### Remaining Drifts Requiring Human Verification
+### Remaining Drifts — RESOLVED (2026-04-14) ✅
 
-The following 6 items need an operator to SSH into the guest and verify which
-VM is running the service before the registry is updated. They are tracked
-here as a remediation checklist:
+All 6 items were SSH-verified the same day (2026-04-14) by running `docker ps` on
+all candidate VMs. In every case the **topology was correct** and the **registry was wrong**.
 
-| Service | Registry says | Topology says | Action required |
-|---------|---------------|---------------|-----------------|
-| `uptime_kuma` | docker-runtime | runtime-general | SSH to each VM, check `docker ps | grep uptime` |
-| `mail_platform` | docker-runtime | runtime-control | SSH to runtime-control, verify mail containers |
-| `redpanda` | runtime-control | docker-runtime | SSH to runtime-control, check `docker ps | grep redpanda` |
-| `gotenberg` | docker-runtime | runtime-ai | SSH to runtime-ai, check `docker ps | grep gotenberg` |
-| `ollama` | runtime-ai | docker-runtime | SSH to docker-runtime and runtime-ai, check which has ollama |
-| `piper` | runtime-ai | docker-runtime | SSH to docker-runtime and runtime-ai, check which has piper |
+| Service | Registry (wrong) | Topology (correct) | SSH Evidence | Corrected to |
+|---------|-----------------|-------------------|--------------|--------------|
+| `uptime_kuma` | docker-runtime | runtime-general | `docker ps` on runtime-general shows `uptime-kuma` | runtime-general |
+| `mail_platform` | docker-runtime | runtime-control | `lv3-mail-stalwart` on runtime-control (+ orphaned copy on docker-runtime) | runtime-control |
+| `redpanda` | runtime-control | docker-runtime | `lv3-redpanda` on docker-runtime, not on runtime-control | docker-runtime |
+| `gotenberg` | docker-runtime | runtime-ai | `gotenberg` on runtime-ai, not on docker-runtime | runtime-ai |
+| `ollama` | runtime-ai | docker-runtime | `ollama` on docker-runtime, runtime-ai has only tesseract/tika | docker-runtime |
+| `piper` | runtime-ai | docker-runtime | `piper` on docker-runtime, not on runtime-ai | docker-runtime |
 
-For each, after verifying:
+**Finding:** `lv3_service_topology` (proxmox-host.yml) stays accurate because nginx
+breaks immediately if it's wrong. `platform_service_registry.host_group` accumulated
+drift silently because it had no operational consequence enforcement. The gate check
+closes this gap permanently.
+
+**Note — `mail_platform` orphaned containers:** `lv3-mail-gateway` and `lv3-mail-stalwart`
+were found running on BOTH runtime-control and docker-runtime. The docker-runtime copies
+are orphaned. Clean up with:
 ```bash
-# Update the correct registry, then:
-python scripts/validate_topology_consistency.py --check  # must pass
-git add inventory/
-git commit -m "[fix] Correct <svc> VM assignment: <old> → <correct>"
+ssh -J ops@10.10.10.1 ops@10.10.10.20 \
+  "docker stop lv3-mail-gateway lv3-mail-stalwart && docker rm lv3-mail-gateway lv3-mail-stalwart"
 ```
 
 ---
@@ -239,10 +269,20 @@ git commit -m "[fix] Correct <svc> VM assignment: <old> → <correct>"
 
 ## Files Changed
 
+### Initial commit (2026-04-14 morning)
 | File | Change |
 |------|--------|
 | `scripts/validate_topology_consistency.py` | New — ADR 0416 cross-registry consistency validator |
-| `inventory/group_vars/all/platform_services.yml` | Updated `host_group` for 7 migrated services |
+| `inventory/group_vars/all/platform_services.yml` | Updated `host_group` for 7 migrated services (keycloak, gitea, openfga, temporal, vaultwarden, windmill, openbao) |
 | `inventory/group_vars/platform_postgres.yml` | Updated `source_vm` for keycloak (runtime-control) |
 | `.git/hooks/pre-push` | Added topology consistency check to gate |
 | `docs/postmortems/2026-04-14-keycloak-postgres-source-vm-drift.md` | Incident postmortem |
+
+### Phase 2 commit (2026-04-14 afternoon — same day)
+| File | Change |
+|------|--------|
+| `inventory/group_vars/all/platform_services.yml` | Corrected `host_group` for 6 more services (uptime_kuma, mail_platform, redpanda, gotenberg, ollama, piper) via SSH verification |
+| `inventory/group_vars/platform_postgres.yml` | **Removed `source_vm` from all 27 entries** — field eliminated |
+| `collections/.../postgres_vm/templates/pg_hba.conf.j2` | Derive client IP from `platform_service_registry[service].host_group`; legacy `source_vm` fallback with LEGACY comment |
+| `scripts/validate_topology_consistency.py` | Updated postgres check: flag legacy `source_vm` fields; verify all services resolvable via registry |
+| `docs/postmortems/2026-04-14-topology-audit-phase2-completion.md` | Phase 2 postmortem |

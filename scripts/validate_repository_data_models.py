@@ -886,6 +886,8 @@ def validate_monitor(monitor: Any, path: str) -> str:
 
 
 def validate_uptime_monitors() -> None:
+    if not UPTIME_MONITORS_PATH.is_file():
+        return
     monitors = require_list(json.loads(UPTIME_MONITORS_PATH.read_text()), str(UPTIME_MONITORS_PATH))
     if not monitors:
         raise ValueError("config/uptime-kuma/monitors.json must not be empty")
@@ -1062,6 +1064,9 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             expected_monitors[name] = monitor
         elif "reason" in uptime_kuma:
             require_str(uptime_kuma.get("reason"), f"{service_path}.uptime_kuma.reason")
+
+    if not UPTIME_MONITORS_PATH.is_file():
+        return
 
     actual_monitors = require_list(
         json.loads(UPTIME_MONITORS_PATH.read_text()),

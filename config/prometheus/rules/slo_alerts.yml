@@ -285,46 +285,6 @@ groups:
           description: The private Gitea runtime remains reachable for repository
             hosting, webhooks, and self-hosted CI orchestration.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_gotenberg_availability
-        expr: (slo:gotenberg_availability:error_rate_5m > (14 * 0.010000)) and (slo:gotenberg_availability:error_rate_1h
-          > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: gotenberg
-          slo_id: gotenberg-availability
-          indicator: availability
-        annotations:
-          summary: gotenberg-availability is burning its error budget at 14x
-          description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai for synchronous PDF conversion workflows.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_gotenberg_availability
-        expr: slo:gotenberg_availability:error_rate_1h > (3 * 0.010000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: gotenberg
-          slo_id: gotenberg-availability
-          indicator: availability
-        annotations:
-          summary: gotenberg-availability is burning its error budget at 3x
-          description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai for synchronous PDF conversion workflows.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_gotenberg_availability
-        expr: slo:gotenberg_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: gotenberg
-          slo_id: gotenberg-availability
-          indicator: availability
-        annotations:
-          summary: gotenberg-availability has less than 10% error budget remaining
-          description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai for synchronous PDF conversion workflows.
-          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_glitchtip_availability
         expr: (slo:glitchtip_availability:error_rate_5m > (14 * 0.005000)) and (slo:glitchtip_availability:error_rate_1h
           > (14 * 0.005000))
@@ -365,6 +325,46 @@ groups:
           description: The public GlitchTip health endpoint remains reachable for
             browser sign-in, DSN ingestion, and repo-managed smoke verification.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_gotenberg_availability
+        expr: (slo:gotenberg_availability:error_rate_5m > (14 * 0.010000)) and (slo:gotenberg_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: gotenberg
+          slo_id: gotenberg-availability
+          indicator: availability
+        annotations:
+          summary: gotenberg-availability is burning its error budget at 14x
+          description: The private Gotenberg document rendering API remains reachable
+            on runtime-ai for synchronous PDF conversion workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_gotenberg_availability
+        expr: slo:gotenberg_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: gotenberg
+          slo_id: gotenberg-availability
+          indicator: availability
+        annotations:
+          summary: gotenberg-availability is burning its error budget at 3x
+          description: The private Gotenberg document rendering API remains reachable
+            on runtime-ai for synchronous PDF conversion workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_gotenberg_availability
+        expr: slo:gotenberg_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: gotenberg
+          slo_id: gotenberg-availability
+          indicator: availability
+        annotations:
+          summary: gotenberg-availability has less than 10% error budget remaining
+          description: The private Gotenberg document rendering API remains reachable
+            on runtime-ai for synchronous PDF conversion workflows.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_grafana_availability
         expr: (slo:grafana_availability:error_rate_5m > (14 * 0.005000)) and (slo:grafana_availability:error_rate_1h
           > (14 * 0.005000))
@@ -401,6 +401,46 @@ groups:
         annotations:
           summary: grafana-availability has less than 10% error budget remaining
           description: Grafana remains reachable through the public LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_grist_availability
+        expr: (slo:grist_availability:error_rate_5m > (14 * 0.005000)) and (slo:grist_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: grist
+          slo_id: grist-availability
+          indicator: availability
+        annotations:
+          summary: grist-availability is burning its error budget at 14x
+          description: Grist remains reachable through the public LV3 edge for operator-managed
+            spreadsheet databases and workflow tables.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_grist_availability
+        expr: slo:grist_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: grist
+          slo_id: grist-availability
+          indicator: availability
+        annotations:
+          summary: grist-availability is burning its error budget at 3x
+          description: Grist remains reachable through the public LV3 edge for operator-managed
+            spreadsheet databases and workflow tables.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_grist_availability
+        expr: slo:grist_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: grist
+          slo_id: grist-availability
+          indicator: availability
+        annotations:
+          summary: grist-availability has less than 10% error budget remaining
+          description: Grist remains reachable through the public LV3 edge for operator-managed
+            spreadsheet databases and workflow tables.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_harbor_availability
         expr: (slo:harbor_availability:error_rate_5m > (14 * 0.005000)) and (slo:harbor_availability:error_rate_1h
@@ -559,6 +599,46 @@ groups:
           summary: keycloak-latency has less than 10% error budget remaining
           description: Keycloak discovery responds in under 500ms for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_label_studio_availability
+        expr: (slo:label_studio_availability:error_rate_5m > (14 * 0.010000)) and
+          (slo:label_studio_availability:error_rate_1h > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: label_studio
+          slo_id: label-studio-availability
+          indicator: availability
+        annotations:
+          summary: label-studio-availability is burning its error budget at 14x
+          description: The private Label Studio runtime remains reachable on docker-runtime
+            for governed annotation queues and API automation.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_label_studio_availability
+        expr: slo:label_studio_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: label_studio
+          slo_id: label-studio-availability
+          indicator: availability
+        annotations:
+          summary: label-studio-availability is burning its error budget at 3x
+          description: The private Label Studio runtime remains reachable on docker-runtime
+            for governed annotation queues and API automation.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_label_studio_availability
+        expr: slo:label_studio_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: label_studio
+          slo_id: label-studio-availability
+          indicator: availability
+        annotations:
+          summary: label-studio-availability has less than 10% error budget remaining
+          description: The private Label Studio runtime remains reachable on docker-runtime
+            for governed annotation queues and API automation.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_langfuse_availability
         expr: (slo:langfuse_availability:error_rate_5m > (14 * 0.005000)) and (slo:langfuse_availability:error_rate_1h
           > (14 * 0.005000))
@@ -639,46 +719,6 @@ groups:
           description: Mailpit remains reachable on the private guest-network listener
             for staging and development SMTP capture flows.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_minio_availability
-        expr: (slo:minio_availability:error_rate_5m > (14 * 0.005000)) and (slo:minio_availability:error_rate_1h
-          > (14 * 0.005000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: minio
-          slo_id: minio-availability
-          indicator: availability
-        annotations:
-          summary: minio-availability is burning its error budget at 14x
-          description: The shared MinIO S3-compatible object-storage API remains reachable
-            through the public LV3 edge.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_minio_availability
-        expr: slo:minio_availability:error_rate_1h > (3 * 0.005000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: minio
-          slo_id: minio-availability
-          indicator: availability
-        annotations:
-          summary: minio-availability is burning its error budget at 3x
-          description: The shared MinIO S3-compatible object-storage API remains reachable
-            through the public LV3 edge.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_minio_availability
-        expr: slo:minio_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: minio
-          slo_id: minio-availability
-          indicator: availability
-        annotations:
-          summary: minio-availability has less than 10% error budget remaining
-          description: The shared MinIO S3-compatible object-storage API remains reachable
-            through the public LV3 edge.
-          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_matrix_synapse_availability
         expr: (slo:matrix_synapse_availability:error_rate_5m > (14 * 0.005000)) and
           (slo:matrix_synapse_availability:error_rate_1h > (14 * 0.005000))
@@ -718,6 +758,46 @@ groups:
           summary: matrix-synapse-availability has less than 10% error budget remaining
           description: Matrix Synapse remains reachable on the public client versions
             endpoint.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_minio_availability
+        expr: (slo:minio_availability:error_rate_5m > (14 * 0.005000)) and (slo:minio_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: minio
+          slo_id: minio-availability
+          indicator: availability
+        annotations:
+          summary: minio-availability is burning its error budget at 14x
+          description: The shared MinIO S3-compatible object-storage API remains reachable
+            through the public LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_minio_availability
+        expr: slo:minio_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: minio
+          slo_id: minio-availability
+          indicator: availability
+        annotations:
+          summary: minio-availability is burning its error budget at 3x
+          description: The shared MinIO S3-compatible object-storage API remains reachable
+            through the public LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_minio_availability
+        expr: slo:minio_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: minio
+          slo_id: minio-availability
+          indicator: availability
+        annotations:
+          summary: minio-availability has less than 10% error budget remaining
+          description: The shared MinIO S3-compatible object-storage API remains reachable
+            through the public LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_netbox_availability
         expr: (slo:netbox_availability:error_rate_5m > (14 * 0.005000)) and (slo:netbox_availability:error_rate_1h
@@ -835,46 +915,6 @@ groups:
         annotations:
           summary: nginx-edge-availability has less than 10% error budget remaining
           description: The edge reverse proxy remains reachable for published services.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_grist_availability
-        expr: (slo:grist_availability:error_rate_5m > (14 * 0.005000)) and (slo:grist_availability:error_rate_1h
-          > (14 * 0.005000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: grist
-          slo_id: grist-availability
-          indicator: availability
-        annotations:
-          summary: grist-availability is burning its error budget at 14x
-          description: Grist remains reachable through the public LV3 edge for operator-managed
-            spreadsheet databases and workflow tables.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_grist_availability
-        expr: slo:grist_availability:error_rate_1h > (3 * 0.005000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: grist
-          slo_id: grist-availability
-          indicator: availability
-        annotations:
-          summary: grist-availability is burning its error budget at 3x
-          description: Grist remains reachable through the public LV3 edge for operator-managed
-            spreadsheet databases and workflow tables.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_grist_availability
-        expr: slo:grist_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: grist
-          slo_id: grist-availability
-          indicator: availability
-        annotations:
-          summary: grist-availability has less than 10% error budget remaining
-          description: Grist remains reachable through the public LV3 edge for operator-managed
-            spreadsheet databases and workflow tables.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_openfga_availability
         expr: (slo:openfga_availability:error_rate_5m > (14 * 0.005000)) and (slo:openfga_availability:error_rate_1h
@@ -996,45 +1036,45 @@ groups:
           description: Outline remains reachable through the public LV3 edge for living
             knowledge browsing and sync automation.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_label_studio_availability
-        expr: (slo:label_studio_availability:error_rate_5m > (14 * 0.010000)) and
-          (slo:label_studio_availability:error_rate_1h > (14 * 0.010000))
+      - alert: SLOFastBurn_paperless_availability
+        expr: (slo:paperless_availability:error_rate_5m > (14 * 0.010000)) and (slo:paperless_availability:error_rate_1h
+          > (14 * 0.010000))
         for: 2m
         labels:
           severity: critical
-          service_id: label_studio
-          slo_id: label-studio-availability
+          service_id: paperless
+          slo_id: paperless-availability
           indicator: availability
         annotations:
-          summary: label-studio-availability is burning its error budget at 14x
-          description: The private Label Studio runtime remains reachable on docker-runtime
-            for governed annotation queues and API automation.
+          summary: paperless-availability is burning its error budget at 14x
+          description: Paperless remains reachable through the public LV3 edge for
+            document archive access and governed API reconciliation.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_label_studio_availability
-        expr: slo:label_studio_availability:error_rate_1h > (3 * 0.010000)
+      - alert: SLOSlowBurn_paperless_availability
+        expr: slo:paperless_availability:error_rate_1h > (3 * 0.010000)
         for: 60m
         labels:
           severity: warning
-          service_id: label_studio
-          slo_id: label-studio-availability
+          service_id: paperless
+          slo_id: paperless-availability
           indicator: availability
         annotations:
-          summary: label-studio-availability is burning its error budget at 3x
-          description: The private Label Studio runtime remains reachable on docker-runtime
-            for governed annotation queues and API automation.
+          summary: paperless-availability is burning its error budget at 3x
+          description: Paperless remains reachable through the public LV3 edge for
+            document archive access and governed API reconciliation.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_label_studio_availability
-        expr: slo:label_studio_availability:budget_remaining < 0.10
+      - alert: SLOBudgetCritical_paperless_availability
+        expr: slo:paperless_availability:budget_remaining < 0.10
         for: 10m
         labels:
           severity: critical
-          service_id: label_studio
-          slo_id: label-studio-availability
+          service_id: paperless
+          slo_id: paperless-availability
           indicator: availability
         annotations:
-          summary: label-studio-availability has less than 10% error budget remaining
-          description: The private Label Studio runtime remains reachable on docker-runtime
-            for governed annotation queues and API automation.
+          summary: paperless-availability has less than 10% error budget remaining
+          description: Paperless remains reachable through the public LV3 edge for
+            document archive access and governed API reconciliation.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_piper_availability
         expr: (slo:piper_availability:error_rate_5m > (14 * 0.010000)) and (slo:piper_availability:error_rate_1h
@@ -1075,46 +1115,6 @@ groups:
           summary: piper-availability has less than 10% error budget remaining
           description: The private Piper TTS health endpoint remains reachable on
             docker-runtime for real-time voice synthesis workflows.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_paperless_availability
-        expr: (slo:paperless_availability:error_rate_5m > (14 * 0.010000)) and (slo:paperless_availability:error_rate_1h
-          > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: paperless
-          slo_id: paperless-availability
-          indicator: availability
-        annotations:
-          summary: paperless-availability is burning its error budget at 14x
-          description: Paperless remains reachable through the public LV3 edge for
-            document archive access and governed API reconciliation.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_paperless_availability
-        expr: slo:paperless_availability:error_rate_1h > (3 * 0.010000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: paperless
-          slo_id: paperless-availability
-          indicator: availability
-        annotations:
-          summary: paperless-availability is burning its error budget at 3x
-          description: Paperless remains reachable through the public LV3 edge for
-            document archive access and governed API reconciliation.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_paperless_availability
-        expr: slo:paperless_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: paperless
-          slo_id: paperless-availability
-          indicator: availability
-        annotations:
-          summary: paperless-availability has less than 10% error budget remaining
-          description: Paperless remains reachable through the public LV3 edge for
-            document archive access and governed API reconciliation.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_plane_availability
         expr: (slo:plane_availability:error_rate_5m > (14 * 0.010000)) and (slo:plane_availability:error_rate_1h
@@ -1399,46 +1399,6 @@ groups:
           description: Superset remains reachable through the public LV3 edge for
             SQL-first BI exploration, dashboard viewing, and governed datasource verification.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_tika_availability
-        expr: (slo:tika_availability:error_rate_5m > (14 * 0.010000)) and (slo:tika_availability:error_rate_1h
-          > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: tika
-          slo_id: tika-availability
-          indicator: availability
-        annotations:
-          summary: tika-availability is burning its error budget at 14x
-          description: The private Apache Tika extraction API remains reachable on
-            runtime-ai for synchronous document text and metadata extraction workflows.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_tika_availability
-        expr: slo:tika_availability:error_rate_1h > (3 * 0.010000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: tika
-          slo_id: tika-availability
-          indicator: availability
-        annotations:
-          summary: tika-availability is burning its error budget at 3x
-          description: The private Apache Tika extraction API remains reachable on
-            runtime-ai for synchronous document text and metadata extraction workflows.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_tika_availability
-        expr: slo:tika_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: tika
-          slo_id: tika-availability
-          indicator: availability
-        annotations:
-          summary: tika-availability has less than 10% error budget remaining
-          description: The private Apache Tika extraction API remains reachable on
-            runtime-ai for synchronous document text and metadata extraction workflows.
-          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_tesseract_ocr_availability
         expr: (slo:tesseract_ocr_availability:error_rate_5m > (14 * 0.010000)) and
           (slo:tesseract_ocr_availability:error_rate_1h > (14 * 0.010000))
@@ -1478,6 +1438,46 @@ groups:
           summary: tesseract-ocr-availability has less than 10% error budget remaining
           description: The private Tesseract OCR runtime remains reachable on runtime-ai
             for scanned-image and image-only document fallback extraction.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_tika_availability
+        expr: (slo:tika_availability:error_rate_5m > (14 * 0.010000)) and (slo:tika_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: tika
+          slo_id: tika-availability
+          indicator: availability
+        annotations:
+          summary: tika-availability is burning its error budget at 14x
+          description: The private Apache Tika extraction API remains reachable on
+            runtime-ai for synchronous document text and metadata extraction workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_tika_availability
+        expr: slo:tika_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: tika
+          slo_id: tika-availability
+          indicator: availability
+        annotations:
+          summary: tika-availability is burning its error budget at 3x
+          description: The private Apache Tika extraction API remains reachable on
+            runtime-ai for synchronous document text and metadata extraction workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_tika_availability
+        expr: slo:tika_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: tika
+          slo_id: tika-availability
+          indicator: availability
+        annotations:
+          summary: tika-availability has less than 10% error budget remaining
+          description: The private Apache Tika extraction API remains reachable on
+            runtime-ai for synchronous document text and metadata extraction workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_typesense_availability
         expr: (slo:typesense_availability:error_rate_5m > (14 * 0.010000)) and (slo:typesense_availability:error_rate_1h

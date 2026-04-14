@@ -80,6 +80,59 @@ fail() {
   exit 1
 }
 
+python_meets_min_version() {
+  local candidate="$1"
+
+  "$candidate" - <<'PY' >/dev/null 2>&1
+import sys
+
+raise SystemExit(0 if sys.version_info >= (3, 10) else 1)
+PY
+}
+
+resolve_validate_python_bin() {
+  local candidate=""
+  local resolved=""
+  local candidates=()
+
+  if [[ -n "${LV3_VALIDATE_PYTHON_BIN:-}" ]]; then
+    resolved="$LV3_VALIDATE_PYTHON_BIN"
+    if [[ "$resolved" != */* ]]; then
+      resolved="$(command -v "$resolved" 2>/dev/null || true)"
+    fi
+    [[ -n "$resolved" ]] || fail "configured LV3_VALIDATE_PYTHON_BIN is not executable: ${LV3_VALIDATE_PYTHON_BIN}"
+    python_meets_min_version "$resolved" || fail "LV3_VALIDATE_PYTHON_BIN must resolve to Python 3.10+"
+    printf '%s\n' "$resolved"
+    return 0
+  fi
+
+  candidates=(
+    python3.13
+    python3.12
+    python3.11
+    python3.10
+    /opt/homebrew/bin/python3
+    /usr/local/bin/python3
+    python3
+  )
+
+  for candidate in "${candidates[@]}"; do
+    if [[ "$candidate" == */* ]]; then
+      [[ -x "$candidate" ]] || continue
+      resolved="$candidate"
+    else
+      resolved="$(command -v "$candidate" 2>/dev/null || true)"
+      [[ -n "$resolved" ]] || continue
+    fi
+    if python_meets_min_version "$resolved"; then
+      printf '%s\n' "$resolved"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 load_lines_into_array() {
   local target_name="$1"
   local line=""
@@ -661,7 +714,7 @@ run_local_command() {
   local env_args=()
   local validate_python_bin="${LV3_VALIDATE_PYTHON_BIN:-}"
   if [[ -z "$validate_python_bin" ]]; then
-    validate_python_bin="$(command -v python3 2>/dev/null || true)"
+    validate_python_bin="$(resolve_validate_python_bin 2>/dev/null || true)"
   fi
   if [[ -n "$LOCAL_FALLBACK_RUNNER_ID" ]]; then
     env_args+=("LV3_VALIDATION_RUNNER_ID=$LOCAL_FALLBACK_RUNNER_ID")
@@ -674,10 +727,11 @@ run_local_command() {
   fi
   if [[ -n "$validate_python_bin" ]]; then
     env_args+=("LV3_VALIDATE_PYTHON_BIN=$validate_python_bin")
+    env_args+=("PATH=$(dirname "$validate_python_bin"):$PATH")
   fi
   (
     cd "$REPO_ROOT"
-    env "${env_args[@]}" bash -lc "$LOCAL_COMMAND"
+    env "${env_args[@]}" bash -c "$LOCAL_COMMAND"
   )
 }
 

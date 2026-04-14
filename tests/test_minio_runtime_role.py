@@ -38,15 +38,16 @@ def test_tasks_install_mc_and_manage_buckets_policies_and_lifecycle() -> None:
     assert "Generate the MinIO root password when missing" in names
     assert "Generate the MinIO consumer secret keys when missing" in names
     assert "Wait for the MinIO admin API to respond via the local client alias" in names
-    assert "Check whether the managed MinIO users already exist" in names
+    assert "Reconcile the managed MinIO users with their desired secrets" in names
     assert "Render the MinIO bucket policy documents" in names
     assert "Ensure the RAG staging bucket lifecycle rule exists" in names
     assert "Verify the MinIO runtime" in names
     assert "minio_managed_consumers_resolved" in tasks_text
     assert "minio_consumer_secret_generation.stdout" in tasks_text
     assert "admin\n      - info\n      - local" in tasks_text
-    assert 'loop: "{{ minio_user_info.results }}"' in tasks_text
-    assert "when: item.rc != 0" in tasks_text
+    assert 'loop: "{{ minio_managed_consumers_resolved }}"' in tasks_text
+    assert "admin\n      - user\n      - add\n      - local" in tasks_text
+    assert "when: item.rc != 0" not in tasks_text
 
 
 def test_tasks_recover_stale_compose_network_during_startup() -> None:
@@ -118,12 +119,13 @@ def test_verify_tasks_probe_health_buckets_cors_and_lifecycle() -> None:
     names = {task["name"] for task in tasks}
     verify_text = VERIFY_PATH.read_text()
 
-    assert "Verify the MinIO live health endpoint responds locally" in names
-    assert "Verify the MinIO ready health endpoint responds locally" in names
+    assert "Verify the MinIO runtime health" in names
     assert "Verify the managed MinIO buckets are reachable" in names
     assert "Verify the Langfuse bucket default CORS behavior" in names
     assert "Verify the RAG staging bucket lifecycle rule" in names
     assert "minio_managed_consumers_resolved" in verify_text
+    assert "/minio/health/live" in verify_text
+    assert "/minio/health/ready" in verify_text
     assert "share download --json --expire 5m" in verify_text
     assert "--retry-connrefused" in verify_text
     assert "--connect-timeout 5 --max-time 30" in verify_text

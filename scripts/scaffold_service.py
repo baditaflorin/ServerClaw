@@ -13,6 +13,9 @@ from typing import Any
 import yaml
 from platform.repo import TOPOLOGY_HOST
 
+from service_completeness import CHECKLIST_IDS
+import service_definition_catalog
+
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ADR_FILENAME_PATTERN = re.compile(r"^(\d{4})-")
@@ -44,6 +47,7 @@ class RepoPaths:
     scaffold_template_dir: Path
     playbook_dir: Path
     service_playbook_dir: Path
+    service_bundle_root: Path
     workstreams_registry: Path
     host_vars_path: Path
     service_catalog_path: Path
@@ -148,6 +152,14 @@ class ServiceSpec:
     @property
     def alert_rule_path(self) -> Path:
         return Path("config/alertmanager/rules") / self.alert_rule_filename
+
+    @property
+    def service_bundle_dir(self) -> Path:
+        return Path("catalog/services") / self.service_id
+
+    @property
+    def service_bundle_path(self) -> Path:
+        return self.service_bundle_dir / "service.yaml"
 
     @property
     def adr_path(self) -> Path:
@@ -259,6 +271,7 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
         / "service_scaffold",
         playbook_dir=repo_root / "playbooks",
         service_playbook_dir=repo_root / "playbooks" / "services",
+        service_bundle_root=repo_root / "catalog" / "services",
         workstreams_registry=repo_root / "workstreams.yaml",
         host_vars_path=repo_root / "inventory" / "host_vars" / f"{TOPOLOGY_HOST}.yml",
         service_catalog_path=repo_root / "config" / "service-capability-catalog.json",
@@ -432,6 +445,7 @@ def ensure_new_paths(spec: ServiceSpec, repo_paths: RepoPaths) -> None:
         repo_paths.adr_dir / spec.adr_filename,
         repo_paths.workstream_dir / spec.workstream_filename,
         repo_paths.runbook_dir / spec.runbook_filename,
+        repo_paths.service_bundle_root / spec.service_id / "service.yaml",
         repo_paths.grafana_dashboard_dir / spec.dashboard_filename,
         repo_paths.alert_rule_dir / spec.alert_rule_filename,
         repo_paths.collection_roles_dir / spec.role_name,
@@ -652,6 +666,196 @@ def update_workstreams_registry(path: Path, spec: ServiceSpec) -> None:
         }
     )
     path.write_text(yaml.safe_dump(registry, sort_keys=False))
+
+
+def build_service_catalog_entry(spec: ServiceSpec) -> dict[str, Any]:
+    service_entry: dict[str, Any] = {
+        "id": spec.service_id,
+        "name": spec.service_catalog_name,
+        "description": spec.description,
+        "category": spec.category,
+        "lifecycle_status": "planned",
+        "vm": spec.vm,
+        "internal_url": spec.internal_url,
+        "exposure": spec.exposure,
+        "health_probe_id": spec.service_id,
+        "image_catalog_ids": [spec.image_id],
+        "secret_catalog_ids": [spec.secret_id],
+        "adr": spec.adr_id,
+        "runbook": spec.runbook_path.as_posix(),
+        "tags": ["TODO-scaffold"],
+        "notes": "TODO: replace scaffold placeholders, confirm the runtime contract, and remove TODO markers before merge.",
+        "environments": {
+            "production": {
+                "status": "planned",
+                "url": spec.public_url or spec.internal_url,
+            }
+        },
+    }
+    if spec.vmid is not None:
+        service_entry["vmid"] = spec.vmid
+    if spec.public_url:
+        service_entry["public_url"] = spec.public_url
+    if spec.public_hostname:
+        service_entry["subdomain"] = spec.public_hostname
+        service_entry["environments"]["production"]["subdomain"] = spec.public_hostname
+    return service_entry
+
+
+def build_health_probe_entry(spec: ServiceSpec) -> dict[str, Any]:
+    return {
+        "service_name": spec.service_name,
+        "owning_vm": spec.vm,
+        "role": spec.role_name,
+        "verify_file": f"roles/{spec.role_name}/tasks/verify.yml",
+        "startup": {
+            "kind": "http",
+            "description": f"TODO: replace the scaffolded startup contract for {spec.display_name}.",
+            "timeout_seconds": 60,
+            "retries": 12,
+            "delay_seconds": 5,
+            "url": f"http://127.0.0.1:{spec.port}/health",
+            "method": "GET",
+            "expected_status": [200],
+        },
+        "liveness": {
+            "kind": "http",
+            "description": f"TODO: replace the scaffolded local liveness endpoint contract for {spec.display_name}.",
+            "timeout_seconds": 60,
+            "retries": 12,
+            "delay_seconds": 5,
+            "url": f"http://127.0.0.1:{spec.port}/health",
+            "method": "GET",
+            "expected_status": [200],
+        },
+        "readiness": {
+            "kind": "http",
+            "description": f"TODO: replace the scaffolded local readiness endpoint contract for {spec.display_name}.",
+            "timeout_seconds": 60,
+            "retries": 12,
+            "delay_seconds": 5,
+            "url": f"http://127.0.0.1:{spec.port}/health",
+            "method": "GET",
+            "expected_status": [200],
+        },
+        "uptime_kuma": {
+            "enabled": False,
+            "reason": spec.uptime_reason,
+        },
+    }
+
+
+def build_dependency_node(spec: ServiceSpec, *, include_extended_fields: bool) -> dict[str, Any]:
+    node = {
+        "id": spec.service_id,
+        "service": spec.service_id,
+        "vm": spec.vm,
+        "tier": 3,
+    }
+    if include_extended_fields:
+        node["name"] = spec.display_name
+        node["category"] = spec.category
+        node["adr"] = spec.adr_id
+    return node
+
+
+def build_dependency_edges(spec: ServiceSpec) -> list[dict[str, Any]]:
+    return [
+        {
+            "from": spec.service_id,
+            "to": dependency,
+            "type": "hard",
+            "description": f"TODO: confirm why {spec.display_name} depends on {dependency}.",
+        }
+        for dependency in spec.depends_on
+    ]
+
+
+def build_slo_entry(spec: ServiceSpec) -> dict[str, Any]:
+    return {
+        "id": f"{spec.name_slug}-availability",
+        "service_id": spec.service_id,
+        "indicator": "availability",
+        "objective_percent": 99.5,
+        "window_days": 30,
+        "target_url": spec.public_url or spec.internal_url,
+        "probe_module": "http_2xx_follow_redirects",
+        "description": f"TODO: confirm the {spec.display_name} availability objective and measurement path.",
+    }
+
+
+def build_data_entry(spec: ServiceSpec) -> dict[str, Any]:
+    return {
+        "id": f"{spec.service_id}_primary_data",
+        "service": spec.service_id,
+        "name": f"{spec.display_name} primary data",
+        "class": "internal",
+        "retention_days": 30,
+        "backup_included": False,
+        "access_role": "platform-read",
+        "pii_risk": "low",
+        "locations": [f"TODO: classify the primary {spec.display_name} data store location."],
+        "notes": f"TODO: classify the primary {spec.display_name} data store.",
+    }
+
+
+def build_service_completeness_entry(spec: ServiceSpec) -> dict[str, Any]:
+    return {
+        "service_type": spec.service_type,
+        "requires_subdomain": spec.public_hostname is not None,
+        "requires_oidc": spec.requires_oidc,
+        "requires_secrets": spec.requires_secrets,
+        "requires_compose_secrets": spec.service_type == "compose",
+        "dashboard_file": spec.dashboard_path.as_posix(),
+        "alert_rule_file": spec.alert_rule_path.as_posix(),
+        "keycloak_client_generated": spec.requires_oidc,
+        "suppressed_checks": {},
+    }
+
+
+def build_service_redundancy_entry(spec: ServiceSpec) -> dict[str, Any]:
+    return {
+        "tier": "R0",
+        "recovery_objective": {
+            "rto_minutes": 240,
+            "rpo_minutes": 1440,
+        },
+        "backup_sources": [
+            "git_repository",
+            f"TODO-{spec.service_id}-backup-source",
+        ],
+        "standby": {
+            "kind": "none",
+            "location": "none",
+            "failover_trigger": f"TODO: define the {spec.display_name} rebuild or restore trigger.",
+            "failback_method": f"TODO: define the {spec.display_name} failback path.",
+        },
+    }
+
+
+def write_service_bundle(repo_paths: RepoPaths, spec: ServiceSpec) -> None:
+    metadata = service_definition_catalog.load_service_definition_metadata(
+        service_definition_catalog.metadata_path(repo_paths.service_bundle_root)
+    )
+    dependency_schema = metadata.get("outputs", {}).get("dependency_graph", {}).get("top_level", {}).get("$schema", "")
+    payload = service_definition_catalog.scaffold_service_bundle_payload(
+        service_entry=build_service_catalog_entry(spec),
+        completeness_entry=build_service_completeness_entry(spec),
+        redundancy_entry=build_service_redundancy_entry(spec),
+        dependency_node=build_dependency_node(
+            spec,
+            include_extended_fields=dependency_schema.endswith("service-dependency-graph.schema.json"),
+        ),
+        dependency_edges=build_dependency_edges(spec),
+        health_entry=build_health_probe_entry(spec),
+        data_entries=[build_data_entry(spec)],
+        slo_entries=[build_slo_entry(spec)],
+    )
+    service_definition_catalog.write_scaffold_service_bundle(
+        spec.service_id,
+        payload,
+        bundle_root=repo_paths.service_bundle_root,
+    )
 
 
 def update_service_catalog(path: Path, spec: ServiceSpec) -> None:
@@ -1065,6 +1269,7 @@ def print_checklist(spec: ServiceSpec) -> None:
     print("  [ ] Replace every scaffold TODO marker and confirm `make validate-data-models` passes before merging.")
     print(f"  [ ] Run the ADR 0107 completeness check: lv3 validate --service {spec.service_id}")
     print(f"  [ ] Pin the requested image digest: make pin-image IMAGE={spec.image.requested_ref}")
+    print(f"  [ ] Review the generated service bundle: {spec.service_bundle_path.as_posix()}")
     print(f"  [ ] Review the generated role and runtime env contract: {spec.role_path.as_posix()}")
     print(f"  [ ] Review the generated playbook entry points: {spec.playbook_path.as_posix()}")
     print(
@@ -1114,17 +1319,30 @@ def main(argv: list[str] | None = None) -> int:
         write_scaffold_files(spec, repo_paths)
         insert_topology_block(repo_paths.host_vars_path, spec)
         update_workstreams_registry(repo_paths.workstreams_registry, spec)
-        update_service_catalog(repo_paths.service_catalog_path, spec)
+        use_service_bundles = service_definition_catalog.metadata_path(repo_paths.service_bundle_root).exists()
+        if use_service_bundles:
+            write_service_bundle(repo_paths, spec)
+            assembled = service_definition_catalog.build_aggregate_catalogs(
+                bundle_root=repo_paths.service_bundle_root,
+            )
+            service_definition_catalog.validate_aggregate_catalogs(assembled)
+            service_definition_catalog.write_aggregate_catalogs(
+                assembled,
+                bundle_root=repo_paths.service_bundle_root,
+            )
+        else:
+            update_service_catalog(repo_paths.service_catalog_path, spec)
         update_subdomain_catalog(repo_paths.subdomain_catalog_path, spec)
-        update_health_probe_catalog(repo_paths.health_probe_catalog_path, spec)
         update_secret_catalog(repo_paths.secret_catalog_path, spec)
         update_secret_manifest(repo_paths.secret_manifest_path, spec)
         update_image_catalog(repo_paths.image_catalog_path, spec)
         update_api_gateway_catalog(repo_paths.api_gateway_catalog_path, spec)
-        update_dependency_graph(repo_paths.dependency_graph_path, spec)
-        update_slo_catalog(repo_paths.slo_catalog_path, spec)
-        update_data_catalog(repo_paths.data_catalog_path, spec)
-        update_service_completeness(repo_paths.service_completeness_path, spec)
+        if not use_service_bundles:
+            update_health_probe_catalog(repo_paths.health_probe_catalog_path, spec)
+            update_dependency_graph(repo_paths.dependency_graph_path, spec)
+            update_slo_catalog(repo_paths.slo_catalog_path, spec)
+            update_data_catalog(repo_paths.data_catalog_path, spec)
+            update_service_completeness(repo_paths.service_completeness_path, spec)
         update_platform_services_registry(repo_paths.platform_services_path, spec)
         update_uptime_kuma_monitors(repo_paths.uptime_kuma_monitors_path, spec)
         update_keycloak_role_defaults(repo_paths.keycloak_runtime_defaults_path, spec)

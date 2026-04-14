@@ -1,0 +1,241 @@
+.....F.....F..                                                           [100%]
+=================================== FAILURES ===================================
+___ ValidateServiceCatalogTest.test_ambiguous_adr_requires_explicit_adr_file ___
+ValueError: service 'keycloak' vm 'runtime-control-lv3' does not match topology owning_vm 'docker-runtime-lv3'
+
+During handling of the above exception, another exception occurred:
+
+self = <test_validate_service_catalog.ValidateServiceCatalogTest testMethod=test_ambiguous_adr_requires_explicit_adr_file>
+
+    def test_ambiguous_adr_requires_explicit_adr_file(self) -> None:
+        catalog = copy.deepcopy(service_catalog.load_service_catalog())
+        minio = next(item for item in catalog["services"] if item["id"] == "minio")
+        minio.pop("adr_file", None)
+
+>       with self.assertRaisesRegex(ValueError, r"adr_file is required because ADR 0274 resolves to multiple files"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: "adr_file is required because ADR 0274 resolves to multiple files" does not match "service 'keycloak' vm 'runtime-control-lv3' does not match topology owning_vm 'docker-runtime-lv3'"
+
+tests/test_validate_service_catalog.py:149: AssertionError
+____________ ValidateServiceCatalogTest.test_repo_catalog_validates ____________
+
+self = <test_validate_service_catalog.ValidateServiceCatalogTest testMethod=test_repo_catalog_validates>
+
+    def test_repo_catalog_validates(self) -> None:
+        catalog = service_catalog.load_service_catalog()
+>       service_catalog.validate_service_catalog(catalog)
+
+tests/test_validate_service_catalog.py:20:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'schema_version': '1.0.0', 'services': [{'adr': '009...rtitions/dedicated-edge', 'category': 'access', 'deployment_surface': 'playbooks/services/public-edge.yml', ...}, ...]}
+
+    def validate_service_catalog(catalog: dict[str, Any]) -> None:
+        from standby_capacity import validate_catalog_standby_policies
+
+        jsonschema.validate(
+            instance=catalog,
+            schema=load_json(SERVICE_CATALOG_SCHEMA_PATH),
+        )
+
+        services = require_list(catalog.get("services"), "services")
+        if not services:
+            raise ValueError("services must not be empty")
+
+        host_vars = load_yaml(HOST_VARS_PATH)
+        stack = load_yaml(STACK_PATH)
+        monitor_catalog = load_json(UPTIME_MONITORS_PATH)
+        topology = require_mapping(host_vars.get("lv3_service_topology"), "lv3_service_topology")
+        guest_vmids = {
+            guest["name"]: guest["vmid"]
+            for guest in require_list(host_vars.get("proxmox_guests"), "proxmox_guests")
+        }
+        observed_guests = {
+            guest["name"]
+            for guest in require_list(
+                stack["observed_state"]["guests"]["instances"],
+                "observed_state.guests.instances",
+            )
+        }
+        allowed_service_surfaces = set(observed_guests)
+        if not service_catalog_enforces_observed_guest_surfaces():
+            allowed_service_surfaces.update(guest_vmids.keys())
+        monitor_names = {monitor["name"] for monitor in monitor_catalog}
+        probe_service_ids = health_probe_service_ids()
+        known_image_ids = image_catalog_ids()
+        known_secret_ids = secret_catalog_ids()
+
+        seen_ids: set[str] = set()
+        seen_names: set[str] = set()
+        active_service_ids: set[str] = set()
+        declared_probe_service_ids: set[str] = set()
+
+        for index, service in enumerate(services):
+            service = require_mapping(service, f"services[{index}]")
+            service_id = require_str(service.get("id"), f"services[{index}].id")
+            if service_id in seen_ids:
+                raise ValueError(f"duplicate service id: {service_id}")
+            seen_ids.add(service_id)
+
+            name = require_str(service.get("name"), f"services[{index}].name")
+            if name in seen_names:
+                raise ValueError(f"duplicate service name: {name}")
+            seen_names.add(name)
+
+            require_str(service.get("description"), f"services[{index}].description")
+
+            category = require_str(service.get("category"), f"services[{index}].category")
+            if category not in ALLOWED_CATEGORIES:
+                raise ValueError(f"services[{index}].category must be one of {sorted(ALLOWED_CATEGORIES)}")
+
+            lifecycle_status = require_str(
+                service.get("lifecycle_status"),
+                f"services[{index}].lifecycle_status",
+            )
+            if lifecycle_status not in ALLOWED_LIFECYCLE_STATES:
+                raise ValueError(
+                    f"services[{index}].lifecycle_status must be one of {sorted(ALLOWED_LIFECYCLE_STATES)}"
+                )
+
+            vm = require_str(service.get("vm"), f"services[{index}].vm")
+            vmid = service.get("vmid")
+            if vmid is not None:
+                vmid = require_int(vmid, f"services[{index}].vmid")
+                if vm in guest_vmids and guest_vmids[vm] != vmid:
+                    raise ValueError(
+                        f"services[{index}].vmid must match inventory vmid {guest_vmids[vm]} for {vm}"
+                    )
+
+            exposure = require_str(service.get("exposure"), f"services[{index}].exposure")
+            if exposure not in ALLOWED_EXPOSURES:
+                raise ValueError(f"services[{index}].exposure must be one of {sorted(ALLOWED_EXPOSURES)}")
+
+            internal_url = None
+            public_url = None
+            subdomain = None
+            adr = None
+            for field in ("internal_url", "public_url", "subdomain", "dashboard_url", "runbook", "adr"):
+                if field in service:
+                    value = require_str(service.get(field), f"services[{index}].{field}")
+                    if field == "internal_url":
+                        internal_url = value
+                    if field == "public_url":
+                        public_url = value
+                    if field == "subdomain":
+                        subdomain = value
+                    if field == "adr":
+                        adr = value
+
+            adr_file = None
+            if "adr_file" in service:
+                adr_file = require_str(service.get("adr_file"), f"services[{index}].adr_file")
+                adr_path = repo_path(adr_file)
+                if not adr_path.exists():
+                    raise ValueError(f"services[{index}].adr_file references missing path {adr_file}")
+                try:
+                    adr_path.relative_to(ADR_DIR)
+                except ValueError as exc:
+                    raise ValueError(f"services[{index}].adr_file must stay under docs/adr/") from exc
+                if adr is None:
+                    raise ValueError(f"services[{index}].adr_file requires services[{index}].adr")
+                if adr_path.name.split("-", 1)[0] != adr:
+                    raise ValueError(f"services[{index}].adr_file must match ADR {adr}")
+            if adr is not None:
+                adr_matches = sorted(ADR_DIR.glob(f"{adr}-*.md"))
+                if not adr_matches:
+                    raise ValueError(f"services[{index}].adr references unknown ADR '{adr}'")
+                if len(adr_matches) > 1 and adr_file is None:
+                    raise ValueError(
+                        f"services[{index}].adr_file is required because ADR {adr} resolves to multiple files"
+                    )
+
+            require_environment_bindings(
+                service.get("environments"),
+                f"services[{index}].environments",
+                public_url=public_url,
+                internal_url=internal_url,
+                subdomain=subdomain,
+            )
+            active_environment_ids = [
+                env_id
+                for env_id, binding in service.get("environments", {}).items()
+                if isinstance(binding, dict) and binding.get("status") == "active"
+            ]
+            for env_id in active_environment_ids:
+                if not declared_smoke_suites(service, env_id):
+                    raise ValueError(
+                        f"services[{index}].environments.{env_id} must resolve at least one stage smoke suite"
+                    )
+
+            runbook = service.get("runbook")
+            if runbook is not None and not repo_path(runbook).exists():
+                raise ValueError(f"services[{index}].runbook references missing path {runbook}")
+
+            if "uptime_monitor_name" in service:
+                monitor_name = require_str(
+                    service.get("uptime_monitor_name"),
+                    f"services[{index}].uptime_monitor_name",
+                )
+                if monitor_name not in monitor_names:
+                    raise ValueError(
+                        f"services[{index}].uptime_monitor_name references unknown monitor '{monitor_name}'"
+                    )
+
+            if "health_probe_id" in service:
+                health_probe_id = require_str(
+                    service.get("health_probe_id"),
+                    f"services[{index}].health_probe_id",
+                )
+                declared_probe_service_ids.add(service_id)
+                if health_probe_id not in probe_service_ids:
+                    raise ValueError(
+                        f"services[{index}].health_probe_id references unknown health probe '{health_probe_id}'"
+                    )
+
+            for image_id in require_string_list(
+                service.get("image_catalog_ids", []),
+                f"services[{index}].image_catalog_ids",
+            ):
+                if image_id not in known_image_ids:
+                    raise ValueError(
+                        f"services[{index}].image_catalog_ids references unknown image '{image_id}'"
+                    )
+
+            for secret_id in require_string_list(
+                service.get("secret_catalog_ids", []),
+                f"services[{index}].secret_catalog_ids",
+            ):
+                if secret_id not in known_secret_ids:
+                    raise ValueError(
+                        f"services[{index}].secret_catalog_ids references unknown secret '{secret_id}'"
+                    )
+
+            if "tags" in service:
+                require_string_list(service.get("tags"), f"services[{index}].tags")
+
+            if "degradation_modes" in service:
+                require_degradation_modes(
+                    service.get("degradation_modes"),
+                    f"services[{index}].degradation_modes",
+                )
+
+            if lifecycle_status == "active":
+                active_service_ids.add(service_id)
+                if vm != "proxmox_florin" and vm not in allowed_service_surfaces:
+                    raise ValueError(
+                        f"active service '{service_id}' must reference an observed guest or host surface"
+                    )
+                if service_id in topology:
+                    topology_entry = topology[service_id]
+                    if topology_entry.get("owning_vm") != vm:
+>                       raise ValueError(
+                            f"service '{service_id}' vm '{vm}' does not match topology owning_vm "
+                            f"'{topology_entry.get('owning_vm')}'"
+                        )
+E                       ValueError: service 'keycloak' vm 'runtime-control-lv3' does not match topology owning_vm 'docker-runtime-lv3'
+
+scripts/service_catalog.py:505: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_validate_service_catalog.py::ValidateServiceCatalogTest::test_ambiguous_adr_requires_explicit_adr_file
+FAILED tests/test_validate_service_catalog.py::ValidateServiceCatalogTest::test_repo_catalog_validates
+2 failed, 12 passed in 11.58s

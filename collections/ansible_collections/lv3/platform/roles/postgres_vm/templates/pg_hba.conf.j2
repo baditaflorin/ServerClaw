@@ -1,15 +1,27 @@
-# Managed by Ansible — ADR 0359. Do not edit by hand.
+# Managed by Ansible — ADR 0359 + ADR 0416. Do not edit by hand.
 # Source: inventory/group_vars/platform_postgres.yml (platform_postgres_clients)
+#         inventory/group_vars/all/platform_services.yml (platform_service_registry)
+# IP derivation: platform_service_registry[service].host_group → platform_guest_catalog.by_name[host].ipv4
+# source_vm is intentionally absent from platform_postgres_clients — derived here (ADR 0416 Phase 2).
 local   all             postgres                                peer
 local   all             {{ postgres_vm_admin_role }}            peer
 local   all             all                                     peer
 host    all             all             127.0.0.1/32            scram-sha-256
 host    all             all             ::1/128                 scram-sha-256
-# Per-service least-privilege entries derived from platform_postgres_clients registry.
-{% set ns = namespace(seen_vms=[]) %}
+# Per-service least-privilege entries — IP derived from platform_service_registry.host_group.
 {% for client in platform_postgres_clients | default([]) %}
+{% if client.source_vm is defined %}
+{# Legacy fallback: source_vm still present — use it directly and emit a comment warning. #}
+{# Remove source_vm from this entry and let it be derived from platform_service_registry. #}
 {% set client_ip = platform_guest_catalog.by_name[client.source_vm].ipv4 + '/32' %}
+host    {{ client.database }}  {{ client.user }}  {{ client_ip }}  scram-sha-256  # LEGACY: source_vm={{ client.source_vm }}
+{% elif platform_service_registry[client.service] is defined %}
+{% set host_group = platform_service_registry[client.service].host_group %}
+{% set client_ip = platform_guest_catalog.by_name[host_group].ipv4 + '/32' %}
 host    {{ client.database }}  {{ client.user }}  {{ client_ip }}  scram-sha-256
+{% else %}
+# WARNING: No platform_service_registry entry for {{ client.service }} — skipping pg_hba entry!
+{% endif %}
 {% endfor %}
 # Docker bridge network fallback for containerised workloads that MASQUERADE to the host IP.
 {% for cidr in postgres_vm_client_allowed_sources_extra_bridge | default(['172.16.0.0/12', '192.168.0.0/16', '10.200.0.0/16']) %}

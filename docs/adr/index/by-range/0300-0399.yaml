@@ -554,7 +554,7 @@ adrs:
   - adr: '0324'
     title: Service Definition Shards And Generated Service Catalog Assembly
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-04-01'
     concern: documentation
     keywords:
@@ -571,6 +571,8 @@ adrs:
     summary: We will move service-shaped repository truth toward per-service source
     filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
     path: docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
+    implemented_in_platform_version: 0.130.98
+    implemented_on: '2026-04-04'
   - adr: '0325'
     title: Faceted ADR Index Shards And Reservation Windows
     status: Accepted
@@ -1553,7 +1555,8 @@ adrs:
     filename: 0368-docker-compose-jinja2-macro-library.md
     path: docs/adr/0368-docker-compose-jinja2-macro-library.md
     implemented_in_repo_version: 0.178.116
-    implemented_on: '2026-04-11'
+    implemented_in_platform_version: 0.178.138
+    implemented_on: '2026-04-14'
   - adr: 0369
     title: Python Validation Toolkit
     status: Accepted

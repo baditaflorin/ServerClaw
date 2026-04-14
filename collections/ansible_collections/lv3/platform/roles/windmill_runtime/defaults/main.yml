@@ -71,6 +71,7 @@ windmill_nats_password: >-
   }}
 windmill_ntfy_base_url: https://ntfy.{{ platform_domain }}
 windmill_ntfy_token_local_file: "{{ windmill_controller_repo_common_root }}/.local/ntfy/windmill-token.txt"
+windmill_resource_type_workspace: admins
 windmill_ntfy_resource_type_name: ntfy_platform_channel
 windmill_ntfy_resource_path: f/lv3/ntfy_platform
 windmill_ledger_postgres_user: patroni
@@ -191,6 +192,10 @@ windmill_worker_repo_mutable_directories:
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites"
     mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/validation-gate/docker-cids"
+    mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state/journey-analytics"
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs"
@@ -287,10 +292,13 @@ windmill_worker_checkout_integrity_files:
   - config/windmill/scripts/sbom-refresh.py
   - config/windmill/scripts/stage-smoke-suites.py
 windmill_worker_checkout_sync_paths:
+  - .config-locations.yaml
   - .gitea
+  - .repo-structure.yaml
   - README.md
   - VERSION
   - ansible.cfg
+  - build
   - callback_plugins
   - changelog.md
   - collections
@@ -509,6 +517,16 @@ windmill_seed_scripts:
     language: python3
     summary: Post-merge validation gate
     description: Repo-managed Windmill wrapper that re-runs the repository validation gate from the worker checkout after mainline changes land.
+  - path: f/lv3/reconcile_portals
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/reconcile-portals.py"
+    language: python3
+    summary: ADR 0399 portal reconciliation
+    description: Repo-managed Windmill wrapper that detects portal drift and regenerates stale artifacts from their canonical sources.
+  - path: f/lv3/portal_health_sweep
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/portal-health-sweep.py"
+    language: python3
+    summary: ADR 0399 portal health sweep
+    description: Repo-managed Windmill wrapper that checks live portal reachability and content drift against the canonical catalogs.
   - path: f/lv3/nightly_integration_tests
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/nightly-integration-tests.py"
     language: python3
@@ -594,6 +612,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0105 weekly capacity report
     description: Repo-managed Windmill wrapper that renders the weekly platform capacity summary payload from the committed model.
+  - path: f/lv3/disk_space_monitor
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/disk-space-monitor.py"
+    language: python3
+    summary: ADR 0386 disk space monitor
+    description: Repo-managed Windmill wrapper that queries disk usage across platform VMs and returns the thresholded alert payload.
   - path: f/lv3/k6_load_testing
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/k6-load-testing.py"
     language: python3

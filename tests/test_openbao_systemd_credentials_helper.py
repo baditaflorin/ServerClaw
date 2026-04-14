@@ -93,6 +93,8 @@ def test_openbao_systemd_credentials_restarts_and_rechecks_when_secret_payload_c
         in tasks
     )
     assert "Wait for the refreshed host-native credential file after OpenBao secret changes" in tasks
+    assert "common_openbao_systemd_credentials_expected_credential_lines" in tasks
+    assert "dict2items | sort(attribute='key')" in tasks
     assert "common_openbao_systemd_credentials_refreshed_credential_file" in tasks
 
 

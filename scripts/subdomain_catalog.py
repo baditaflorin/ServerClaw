@@ -476,7 +476,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         catalog = load_subdomain_catalog()
-        service_catalog = load_json(SERVICE_CATALOG_PATH)
+        service_catalog = resolve_public_domain_placeholders(load_json(SERVICE_CATALOG_PATH))
         host_vars = load_host_vars()
         public_edge_defaults = load_public_edge_defaults()
         validate_subdomain_catalog(catalog, service_catalog, host_vars, public_edge_defaults)

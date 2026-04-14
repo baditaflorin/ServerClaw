@@ -62,7 +62,9 @@ def iso_timestamp(value: datetime) -> str:
 
 
 def load_certificate_catalog() -> dict[str, Any]:
-    return json.loads(CERTIFICATE_CATALOG_PATH.read_text(encoding="utf-8"))
+    return subdomain_catalog.resolve_public_domain_placeholders(
+        json.loads(CERTIFICATE_CATALOG_PATH.read_text(encoding="utf-8"))
+    )
 
 
 def hostname_record_type(target: str) -> str:
@@ -341,7 +343,9 @@ def build_registry(
     if public_edge_defaults is None:
         public_edge_defaults = subdomain_catalog.load_public_edge_defaults()
 
-    service_catalog = subdomain_catalog.load_json(subdomain_catalog.SERVICE_CATALOG_PATH)
+    service_catalog = subdomain_catalog.resolve_public_domain_placeholders(
+        subdomain_catalog.load_json(subdomain_catalog.SERVICE_CATALOG_PATH)
+    )
     subdomain_catalog.validate_subdomain_catalog(catalog, service_catalog, host_vars, public_edge_defaults)
 
     route_index = build_edge_route_index(host_vars, public_edge_defaults)

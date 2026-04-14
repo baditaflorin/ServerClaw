@@ -30,7 +30,7 @@ release_bundle_repo_token_secret_name="{{ gitea_release_bundle_repo_token_secret
 ntfy_token_secret_name="{{ gitea_ntfy_token_secret_name }}"
 
 exec_gitea() {
-  docker exec "${container}" gitea "$@"
+  docker exec --user git "${container}" gitea "$@"
 }
 
 list_repo_action_secrets() {
@@ -70,7 +70,7 @@ PY
   rm -f "${payload_file}"
 }
 
-create_admin_output="$(docker exec "${container}" gitea admin user create \
+create_admin_output="$(exec_gitea admin user create \
   --admin \
   --username "${admin_user}" \
   --password "${admin_password}" \
@@ -82,7 +82,7 @@ if ! grep -qi "already exists" <<<"${create_admin_output}"; then
   fi
 fi
 
-create_renovate_output="$(docker exec "${container}" gitea admin user create \
+create_renovate_output="$(exec_gitea admin user create \
   --username "${renovate_user}" \
   --password "${renovate_password}" \
   --email "${renovate_email}" \
@@ -94,13 +94,13 @@ if ! grep -qi "already exists" <<<"${create_renovate_output}"; then
 fi
 
 auth_source_id="$(
-  docker exec "${container}" gitea admin auth list \
+  exec_gitea admin auth list \
     | awk -F '\t' '$2 == "Keycloak" { print $1; exit }'
 )"
 
 provider_name="openidConnect"
 if [[ -n "${auth_source_id}" ]]; then
-  docker exec "${container}" gitea admin auth update-oauth \
+  exec_gitea admin auth update-oauth \
     --id "${auth_source_id}" \
     --name Keycloak \
     --provider "${provider_name}" \
@@ -114,7 +114,7 @@ if [[ -n "${auth_source_id}" ]]; then
     --required-claim-name "${required_claim_name}" \
     --required-claim-value "${required_claim_value}" >/dev/null
 else
-  docker exec "${container}" gitea admin auth add-oauth \
+  exec_gitea admin auth add-oauth \
     --name Keycloak \
     --provider "${provider_name}" \
     --key "${oidc_client_id}" \
@@ -131,7 +131,7 @@ fi
 
 if [[ ! -s "${token_file}" ]]; then
   umask 077
-  docker exec "${container}" gitea admin user generate-access-token \
+  exec_gitea admin user generate-access-token \
     --username "${admin_user}" \
     --token-name "repo-managed-admin-$(date +%s)" \
     --scopes all \
@@ -141,7 +141,7 @@ fi
 
 if [[ ! -s "${runner_token_file}" ]]; then
   umask 077
-  docker exec "${container}" gitea actions generate-runner-token > "${runner_token_file}"
+  exec_gitea actions generate-runner-token > "${runner_token_file}"
   changed=true
 fi
 

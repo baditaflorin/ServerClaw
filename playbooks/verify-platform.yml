@@ -1,4 +1,31 @@
 ---
+# Playbook: verify-platform.yml
+# Purpose: Verify that the critical platform services and infrastructure endpoints are healthy after a full converge.
+# Use case: Run as the final gate after platform convergence, live apply, or recovery work to confirm the core runtime is up.
+#
+# Inputs (required):
+#   - inventory/hosts.yml (inventory, required): Declares the guest, postgres, nginx, and runtime-control hosts to verify.
+#
+# Inputs (optional):
+#   - playbook_execution_env (string, optional, default=production): Selects the production or staging host-pattern mapping.
+#   - playbook_execution_host_patterns (mapping, optional): Override host-pattern lookups for production or staging validation runs.
+#
+# Outputs:
+#   - Reports SSH, PostgreSQL, NGINX edge, and Docker runtime health across the critical platform surfaces.
+#
+# Idempotency: Fully idempotent
+#              The playbook only reads service and connectivity state.
+#
+# Dependencies:
+#   - ADR 0165: Playbook metadata standard required by the repository gate.
+#   - ADR 0386: Bootstrap and converge verification flow defines this end-of-run platform check.
+#
+# Related ADRs: 0165, 0386
+# Related Runbooks: docs/runbooks/validation-gate.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
+
 # Verify critical platform services are healthy — ADR 0386
 #
 # Checks that the core services needed for a functioning platform are up.
@@ -9,7 +36,18 @@
 #   ansible-playbook -i inventory/hosts.yml playbooks/verify-platform.yml
 
 - name: Verify platform critical services
-  hosts: "{{ playbook_execution_host_patterns['lv3_guests'][playbook_execution_env] }}"
+  hosts: >-
+    {{
+      (
+        playbook_execution_host_patterns
+        | default({
+            'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'},
+            'postgres': {'production': 'postgres', 'staging': 'postgres'},
+            'nginx_edge': {'production': 'nginx_edge', 'staging': 'nginx_edge'},
+            'runtime_control': {'production': 'runtime_control', 'staging': 'runtime_control'}
+          }, true)
+      )['lv3_guests'][playbook_execution_env | default('production')]
+    }}
   gather_facts: false
   tasks:
     - name: Wait for SSH
@@ -24,7 +62,18 @@
       when: not ssh_check.failed
 
 - name: Verify PostgreSQL
-  hosts: "{{ playbook_execution_host_patterns['postgres'][playbook_execution_env] }}"
+  hosts: >-
+    {{
+      (
+        playbook_execution_host_patterns
+        | default({
+            'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'},
+            'postgres': {'production': 'postgres', 'staging': 'postgres'},
+            'nginx_edge': {'production': 'nginx_edge', 'staging': 'nginx_edge'},
+            'runtime_control': {'production': 'runtime_control', 'staging': 'runtime_control'}
+          }, true)
+      )['postgres'][playbook_execution_env | default('production')]
+    }}
   gather_facts: false
   become: true
   tasks:
@@ -41,7 +90,18 @@
         msg: "PostgreSQL: {{ 'HEALTHY' if not pg_check.failed else 'UNAVAILABLE' }}"
 
 - name: Verify Nginx edge proxy
-  hosts: "{{ playbook_execution_host_patterns['nginx_edge'][playbook_execution_env] }}"
+  hosts: >-
+    {{
+      (
+        playbook_execution_host_patterns
+        | default({
+            'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'},
+            'postgres': {'production': 'postgres', 'staging': 'postgres'},
+            'nginx_edge': {'production': 'nginx_edge', 'staging': 'nginx_edge'},
+            'runtime_control': {'production': 'runtime_control', 'staging': 'runtime_control'}
+          }, true)
+      )['nginx_edge'][playbook_execution_env | default('production')]
+    }}
   gather_facts: false
   become: true
   tasks:
@@ -58,7 +118,18 @@
         msg: "Nginx edge: {{ 'HEALTHY' if not nginx_check.failed else 'UNAVAILABLE' }}"
 
 - name: Verify Docker runtime services
-  hosts: "{{ playbook_execution_host_patterns['runtime_control'][playbook_execution_env] }}"
+  hosts: >-
+    {{
+      (
+        playbook_execution_host_patterns
+        | default({
+            'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'},
+            'postgres': {'production': 'postgres', 'staging': 'postgres'},
+            'nginx_edge': {'production': 'nginx_edge', 'staging': 'nginx_edge'},
+            'runtime_control': {'production': 'runtime_control', 'staging': 'runtime_control'}
+          }, true)
+      )['runtime_control'][playbook_execution_env | default('production')]
+    }}
   gather_facts: false
   become: true
   tasks:

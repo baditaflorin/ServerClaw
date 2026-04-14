@@ -20,6 +20,11 @@ RUN pip install --no-cache-dir \
     "PyYAML>=6.0" \
     "uvicorn>=0.30.0"
 
+RUN useradd --create-home --home-dir /srv/repo --shell /usr/sbin/nologin repo \
+    && chown -R repo:repo /srv/repo
+
 EXPOSE {{ repo_intake_internal_port }}
+
+USER repo
 
 CMD ["uvicorn", "scripts.repo_intake.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "{{ repo_intake_internal_port }}"]

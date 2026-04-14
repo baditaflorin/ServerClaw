@@ -92,7 +92,7 @@ ANSIBLE_PLAYBOOK_CMD := $(RUN_ID_ENV) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
 TOFU_EXEC_CMD := $(RUN_ID_ENV) $(REPO_ROOT)/scripts/run_with_namespace.sh $(REPO_ROOT)/scripts/tofu_exec.sh
 ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_INTENT_ID),-e platform_intent_id=$(PLATFORM_INTENT_ID),)
 
-.PHONY: validate-local push-local prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-data-models validate-cross-catalog validate-types verify-waiver-escalation validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors generate-cross-cutting-artifacts validate-generated-cross-cutting docs deploy-ops-portal
+.PHONY: validate-local push-local prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-service-definitions validate-data-models validate-cross-catalog validate-types verify-waiver-escalation validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-service-definitions generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors generate-cross-cutting-artifacts validate-generated-cross-cutting docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status atlas-validate atlas-lint atlas-refresh-snapshots atlas-drift-check
 .PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
@@ -102,6 +102,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
 .PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
+.PHONY: migrate-service migrate-service-dry-run teardown-service detect-orphans purge-orphans
 .PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat
 .PHONY: syntax-check-flagsmith converge-flagsmith
 .PHONY: syntax-check-lago converge-lago
@@ -163,6 +164,9 @@ validate-semgrep:
 
 validate-compose-runtime-envs:
 	$(REPO_ROOT)/scripts/validate_repo.sh compose-runtime-envs
+
+validate-service-definitions:
+	$(REPO_ROOT)/scripts/validate_repo.sh service-definitions
 
 validate-data-models:
 	$(REPO_ROOT)/scripts/validate_repo.sh data-models
@@ -500,6 +504,9 @@ pin-image:
 scaffold-service:
 	@test -n "$(NAME)" || (echo "set NAME=<service-name>"; exit 1)
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_service_scaffold.py --repo-root $(REPO_ROOT) --name "$(NAME)" --type "$(TYPE)" $(if $(DESCRIPTION),--description "$(DESCRIPTION)",) $(if $(CATEGORY),--category "$(CATEGORY)",) $(if $(VM),--vm "$(VM)",) $(if $(VMID),--vmid $(VMID),) $(if $(DEPENDS_ON),--depends-on "$(DEPENDS_ON)",) $(if $(PORT),--port $(PORT),) $(if $(SUBDOMAIN),--subdomain "$(SUBDOMAIN)",) $(if $(EXPOSURE),--exposure "$(EXPOSURE)",) --$(if $(filter true,$(OIDC)),,no-)oidc --$(if $(filter true,$(HAS_SECRETS)),,no-)has-secrets $(if $(IMAGE),--image "$(IMAGE)",)
+
+generate-service-definitions:
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_definition_catalog.py --write
 
 generate-status-docs:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_release_notes.py --write-root-summaries
@@ -1349,6 +1356,48 @@ converge-vaultwarden:
 converge-mattermost:
 	$(MAKE) preflight WORKFLOW=converge-mattermost
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/mattermost.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+# ---------------------------------------------------------------------------
+# ADR 0417 — Service VM Migration IaC
+# Single canonical entrypoint for moving a service between VMs.
+# All three fields (host_group, proxy.upstream_host, owning_vm) are updated
+# atomically, then the correct ordered converge sequence is executed.
+#
+# Usage:
+#   make migrate-service-dry-run svc=keycloak to=runtime-control
+#   make migrate-service         svc=keycloak to=runtime-control env=production
+#   make teardown-service        svc=keycloak on_vm=docker-runtime env=production
+#   make detect-orphans
+#   make purge-orphans
+# ---------------------------------------------------------------------------
+
+migrate-service-dry-run:
+	@test -n "$(svc)" || (echo "Usage: make migrate-service-dry-run svc=<name> to=<vm>"; exit 1)
+	@test -n "$(to)"  || (echo "Usage: make migrate-service-dry-run svc=<name> to=<vm>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --dry-run
+
+migrate-service:
+	@test -n "$(svc)" || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
+	@test -n "$(to)"  || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --execute
+
+teardown-service:
+	@test -n "$(svc)"    || (echo "Usage: make teardown-service svc=<name> on_vm=<vm> [env=production]"; exit 1)
+	@test -n "$(on_vm)"  || (echo "Usage: make teardown-service svc=<name> on_vm=<vm> [env=production]"; exit 1)
+	$(eval _container_name := $(if $(container_name),$(container_name),$(svc)))
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) \
+	  --playbook $(REPO_ROOT)/playbooks/services/_teardown_service.yml \
+	  --env $(env) -- \
+	  --private-key $(BOOTSTRAP_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  -e teardown_host=$(on_vm) \
+	  -e teardown_container_name=$(_container_name)
+
+detect-orphans:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/detect_orphaned_containers.py --list
+
+purge-orphans:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/detect_orphaned_containers.py --purge
 
 rotate-secret:
 	$(MAKE) preflight WORKFLOW=rotate-secret
