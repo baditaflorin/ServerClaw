@@ -46,14 +46,14 @@ ALLOWED_SURFACE_KINDS = {
 }
 
 
-def require_identifier(value: Any, path: str) -> str:
+def require_lane_identifier(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not IDENTIFIER_PATTERN.match(value):
         raise ValueError(f"{path} must use lowercase letters, numbers, hyphens, or underscores")
     return value
 
 
-def require_semver(value: Any, path: str) -> str:
+def require_plain_semver(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not SEMVER_PATTERN.match(value):
         raise ValueError(f"{path} must use semantic version format")
@@ -63,21 +63,23 @@ def require_semver(value: Any, path: str) -> str:
 def load_workflow_ids() -> set[str]:
     catalog = require_mapping(load_json(WORKFLOW_CATALOG_PATH), str(WORKFLOW_CATALOG_PATH))
     workflows = require_mapping(catalog.get("workflows"), "workflow-catalog.workflows")
-    return {require_identifier(workflow_id, f"workflow-catalog.workflows.{workflow_id}") for workflow_id in workflows}
+    return {
+        require_lane_identifier(workflow_id, f"workflow-catalog.workflows.{workflow_id}") for workflow_id in workflows
+    }
 
 
 def load_service_and_owner_refs() -> tuple[set[str], set[str]]:
     host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     service_refs = {
-        require_identifier(service_id, f"host_vars.lv3_service_topology.{service_id}") for service_id in topology
+        require_lane_identifier(service_id, f"host_vars.lv3_service_topology.{service_id}") for service_id in topology
     }
 
-    owners = {require_identifier(TOPOLOGY_HOST_VARS_PATH.stem, "host_vars host id")}
+    owners = {require_lane_identifier(TOPOLOGY_HOST_VARS_PATH.stem, "host_vars host id")}
     guests = require_list(host_vars.get("proxmox_guests"), "host_vars.proxmox_guests")
     for index, guest in enumerate(guests):
         guest = require_mapping(guest, f"host_vars.proxmox_guests[{index}]")
-        owners.add(require_identifier(guest.get("name"), f"host_vars.proxmox_guests[{index}].name"))
+        owners.add(require_lane_identifier(guest.get("name"), f"host_vars.proxmox_guests[{index}].name"))
 
     return service_refs, owners
 
@@ -90,7 +92,7 @@ def validate_surface(
     owner_refs: set[str],
 ) -> dict[str, Any]:
     surface = require_mapping(surface, path)
-    surface_id = require_identifier(surface.get("id"), f"{path}.id")
+    surface_id = require_lane_identifier(surface.get("id"), f"{path}.id")
     kind = require_str(surface.get("kind"), f"{path}.kind")
     if kind not in ALLOWED_SURFACE_KINDS:
         raise ValueError(f"{path}.kind must be one of {sorted(ALLOWED_SURFACE_KINDS)}")
@@ -101,19 +103,19 @@ def validate_surface(
 
     service_ref_values = require_string_list(surface.get("service_refs", []), f"{path}.service_refs")
     for index, ref in enumerate(service_ref_values):
-        require_identifier(ref, f"{path}.service_refs[{index}]")
+        require_lane_identifier(ref, f"{path}.service_refs[{index}]")
         if ref not in service_refs:
             raise ValueError(f"{path}.service_refs[{index}] references unknown service '{ref}'")
 
     owner_ref_values = require_string_list(surface.get("owner_refs", []), f"{path}.owner_refs")
     for index, ref in enumerate(owner_ref_values):
-        require_identifier(ref, f"{path}.owner_refs[{index}]")
+        require_lane_identifier(ref, f"{path}.owner_refs[{index}]")
         if ref not in owner_refs:
             raise ValueError(f"{path}.owner_refs[{index}] references unknown owner '{ref}'")
 
     workflow_ref_values = require_string_list(surface.get("workflow_refs", []), f"{path}.workflow_refs")
     for index, ref in enumerate(workflow_ref_values):
-        require_identifier(ref, f"{path}.workflow_refs[{index}]")
+        require_lane_identifier(ref, f"{path}.workflow_refs[{index}]")
         if ref not in workflow_ids:
             raise ValueError(f"{path}.workflow_refs[{index}] references unknown workflow '{ref}'")
 
@@ -129,7 +131,7 @@ def validate_surface(
 
 
 def validate_lane_catalog(catalog: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    require_semver(catalog.get("schema_version"), "control-plane-lanes.schema_version")
+    require_plain_semver(catalog.get("schema_version"), "control-plane-lanes.schema_version")
     lanes = require_mapping(catalog.get("lanes"), "control-plane-lanes.lanes")
     if set(lanes.keys()) != set(ALLOWED_LANE_IDS):
         raise ValueError(f"control-plane-lanes.lanes must define exactly {list(ALLOWED_LANE_IDS)}")

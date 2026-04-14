@@ -11,7 +11,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 
 from validation_toolkit import require_list, require_mapping, require_str, require_string_list
 
-from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog, require_identifier
+from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog, require_lane_identifier
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
 
@@ -31,7 +31,7 @@ def build_lane_surface_index(catalog: dict[str, Any]) -> dict[str, dict[str, Any
                 surface,
                 f"control-plane-lanes.lanes.{lane_id}.current_surfaces[{index}]",
             )
-            surface_id = require_identifier(surface.get("id"), f"control-plane-lanes surface {lane_id}[{index}]")
+            surface_id = require_lane_identifier(surface.get("id"), f"control-plane-lanes surface {lane_id}[{index}]")
             if surface_id in surface_index:
                 raise ValueError(f"duplicate control-plane surface id '{surface_id}'")
             surface_index[surface_id] = {
@@ -88,7 +88,7 @@ def validate_api_publication_catalog(
     for index, surface in enumerate(surfaces):
         path = f"api-publication.surfaces[{index}]"
         surface = require_mapping(surface, path)
-        surface_id = require_identifier(surface.get("id"), f"{path}.id")
+        surface_id = require_lane_identifier(surface.get("id"), f"{path}.id")
         if surface_id in seen_surface_ids:
             raise ValueError(f"duplicate api-publication surface id '{surface_id}'")
         seen_surface_ids.add(surface_id)
@@ -102,7 +102,7 @@ def validate_api_publication_catalog(
         if publication_tier not in ALLOWED_PUBLICATION_TIERS:
             raise ValueError(f"{path}.publication_tier must be one of {list(ALLOWED_PUBLICATION_TIERS)}")
 
-        lane_surface_ref = require_identifier(surface.get("lane_surface_ref"), f"{path}.lane_surface_ref")
+        lane_surface_ref = require_lane_identifier(surface.get("lane_surface_ref"), f"{path}.lane_surface_ref")
         lane_surface = lane_surface_index.get(lane_surface_ref)
         if lane_surface is None:
             raise ValueError(f"{path}.lane_surface_ref references unknown lane surface '{lane_surface_ref}'")

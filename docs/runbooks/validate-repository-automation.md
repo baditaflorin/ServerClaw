@@ -64,6 +64,7 @@ runner `docker-build`.
 - the ADR 0204 correction-loop catalog covers every governed mutating workflow exactly once
 - reusable `platform/` modules do not import outward into `scripts/` composition roots or dynamically load script-only helpers
 - ADR 0339 reference deployment samples and replaceable provider profiles stay renderable, repository-relative, and example-safe for fresh forks
+- ADR 0369 validation-toolkit enforcement fails when a script redefines canonical shared validators such as `require_mapping`, `require_str`, or `require_identifier` instead of importing them from `scripts/validation_toolkit.py`
 - generated status documents are current for their canonical inputs
 - ADR 0328 root-summary rollovers keep `README.md`, `changelog.md`, and `docs/release-notes/README.md` within their declared line budgets while regenerating the deeper history ledgers under `docs/status/history/` and `docs/release-notes/index/`
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
@@ -182,4 +183,5 @@ python3 scripts/correction_loops.py --validate
 - if the build-server gate fails with `No space left on device`, prune stale session workspaces under `/home/ops/builds/proxmox-host_server/.lv3-session-workspaces` (plus `.lv3-runs` and `.lv3-snapshots`) to restore disk capacity before retrying
 - if validation reports a stale workstream registry, rerun `python3 scripts/workstream_registry.py --write` before retrying the broader gate
 - if validation reports stale root summary documents or an ADR 0328 line-budget overflow, rerun `make generate-status-docs` and commit the regenerated `README.md`, changelog, release-note indexes, and history ledgers together
+- if the validation-toolkit enforcement step fails, move the shared `require_*` helper back to `scripts/validation_toolkit.py` or rename the local helper so only domain-specific validators remain outside the toolkit
 - if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point

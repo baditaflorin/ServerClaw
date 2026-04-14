@@ -34,7 +34,7 @@ HEADER_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9-]*$")
 AUTH_SCHEMES = {"bearer", "raw"}
 
 
-def require_identifier(value: Any, path: str) -> str:
+def require_gateway_identifier(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not IDENTIFIER_PATTERN.match(value):
         raise ValueError(f"{path} must use lowercase letters, numbers, and underscores only")
@@ -48,7 +48,7 @@ def require_path_prefix(value: Any, path: str) -> str:
     return value.rstrip("/") or "/"
 
 
-def require_http_url(value: Any, path: str) -> str:
+def require_upstream_http_url(value: Any, path: str) -> str:
     value = require_str(value, path)
     parsed = urlparse(value)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
@@ -61,7 +61,7 @@ def load_service_catalog_ids(service_catalog_path: Any = SERVICE_CATALOG_PATH) -
     catalog = require_mapping(load_json(service_catalog_path), str(service_catalog_path))
     services = require_list(catalog.get("services"), "service-capability-catalog.services")
     return {
-        require_identifier(
+        require_gateway_identifier(
             require_mapping(service, f"service-capability-catalog.services[{index}]").get("id"),
             f"service-capability-catalog.services[{index}].id",
         )
@@ -89,7 +89,7 @@ def validate_api_gateway_catalog(
     for index, service in enumerate(services):
         path = f"api-gateway-catalog.services[{index}]"
         service = require_mapping(service, path)
-        service_id = require_identifier(service.get("id"), f"{path}.id")
+        service_id = require_gateway_identifier(service.get("id"), f"{path}.id")
         if service_id in seen_ids:
             raise ValueError(f"duplicate gateway service id '{service_id}'")
         if service_id not in known_service_ids:
@@ -103,7 +103,7 @@ def validate_api_gateway_catalog(
             raise ValueError(f"{path}.gateway_prefix must stay under /v1/")
         seen_prefixes.add(gateway_prefix)
 
-        upstream = require_http_url(service.get("upstream"), f"{path}.upstream")
+        upstream = require_upstream_http_url(service.get("upstream"), f"{path}.upstream")
         auth = require_str(service.get("auth"), f"{path}.auth")
         if auth != "keycloak_jwt":
             raise ValueError(f"{path}.auth must stay 'keycloak_jwt' in this iteration")

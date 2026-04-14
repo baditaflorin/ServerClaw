@@ -22,7 +22,7 @@ ALLOWED_CLASSES = {"secret", "confidential", "internal", "public"}
 ALLOWED_PII_RISKS = {"none", "low", "medium", "high"}
 
 
-def require_identifier(value: Any, path: str) -> str:
+def require_data_identifier(value: Any, path: str) -> str:
     value = require_str(value, path)
     allowed = set("abcdefghijklmnopqrstuvwxyz0123456789_-")
     if value[0] not in "abcdefghijklmnopqrstuvwxyz0123456789":
@@ -50,12 +50,12 @@ def validate_data_catalog(catalog: dict[str, Any]) -> None:
     for index, store in enumerate(data_stores):
         path = f"config/data-catalog.json.data_stores[{index}]"
         store = require_mapping(store, path)
-        store_id = require_identifier(store.get("id"), f"{path}.id")
+        store_id = require_data_identifier(store.get("id"), f"{path}.id")
         if store_id in seen_ids:
             raise ValueError(f"duplicate data store id: {store_id}")
         seen_ids.add(store_id)
 
-        require_identifier(store.get("service"), f"{path}.service")
+        require_data_identifier(store.get("service"), f"{path}.service")
         require_str(store.get("name"), f"{path}.name")
 
         data_class = require_str(store.get("class"), f"{path}.class")

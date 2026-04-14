@@ -25,7 +25,14 @@ if str(REPO_ROOT) not in sys.path:
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_bool, require_list, require_mapping, require_str, require_string_list
+from validation_toolkit import (
+    require_bool,
+    require_enum,
+    require_list,
+    require_mapping,
+    require_str,
+    require_string_list,
+)
 
 # controller_automation_toolkit may have imported the stdlib platform module first.
 # Drop that non-package entry so the repo's platform/ package can be imported.
@@ -65,13 +72,6 @@ SEVERITY_CODES = {"clean": 0, "warn": 2, "high": 1, "critical": 1}
 class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
         return None
-
-
-def require_enum(value: Any, path: str, allowed: set[str]) -> str:
-    value = require_str(value, path)
-    if value not in allowed:
-        raise ValueError(f"{path} must be one of {sorted(allowed)}")
-    return value
 
 
 def load_public_surface_scan_policy(path: Path = DEFAULT_POLICY_PATH) -> dict[str, Any]:

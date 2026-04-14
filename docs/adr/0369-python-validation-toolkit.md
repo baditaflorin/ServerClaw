@@ -1,22 +1,26 @@
 # ADR 0369: Python Validation Toolkit
 
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.178.140
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-04-14
 - **Date**: 2026-04-06
 - **Status**: Accepted
 - **Deciders**: platform team
 - **Concern**: platform, dry
 - **Tags**: python, validation, scripts, dry, tooling
 
-## Implementation Summary (2026-04-10)
+## Implementation Summary (2026-04-14)
 
-**Status: COMPLETE ✅**
+**Status: COMPLETE**
 
-- ✓ Created `scripts/validation_toolkit.py` with 15 canonical validation functions
-- ✓ Migrated 57 scripts (100% of validation-heavy scripts)
-- ✓ All base validators (require_mapping, require_str, require_list, etc.) centralized
-- ✓ 55+ scripts extend toolkit with domain-specific validators (no duplication)
-- ✓ Test coverage: `scripts/test_validation_toolkit.py`
-- ✓ Pre-commit enforcement: rejects new scripts defining duplicate validators
-- ✓ Eliminated ~1,500+ lines of copy-pasted validation code
+- Created and adopted `scripts/validation_toolkit.py` as the canonical home for shared `require_*` validators across the repo-managed validation scripts.
+- Removed the remaining exact-main duplicate validator definitions that still shadowed canonical helpers after the initial rollout, including the final `gate_bypass_waivers.py` migration.
+- Hardened `scripts/enforce_validation_toolkit.sh` so a script now fails closed if it imports the shared toolkit and still redefines canonical validator names locally.
+- Added a repository contract test that asserts only `scripts/validation_toolkit.py` defines the canonical validator names and that `scripts/validate_repo.sh` executes the toolkit enforcement step.
+- Re-verified the repo automation path from the latest reachable `origin/main` base with the toolkit unit tests, focused pytest slice, enforcement script, and `./scripts/validate_repo.sh data-models agent-standards`.
+
+This ADR is repo-only automation. The 2026-04-14 completion recorded exact-main validation and live-apply evidence, but it did not mutate any running infrastructure.
 
 ## Context
 

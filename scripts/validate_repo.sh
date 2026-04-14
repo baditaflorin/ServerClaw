@@ -678,34 +678,54 @@ validate_agent_standards() {
 
   _validate_playbook_metadata
   local meta_rc=$?
-  [[ $meta_rc -ne 0 ]] && rc=$meta_rc
+  if [[ $meta_rc -ne 0 ]]; then
+    rc=$meta_rc
+  fi
 
   _validate_workstream_entry
   local ws_rc=$?
-  [[ $ws_rc -ne 0 ]] && rc=$ws_rc
+  if [[ $ws_rc -ne 0 ]]; then
+    rc=$ws_rc
+  fi
 
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_registry.py" --check >/dev/null
   local ws_registry_rc=$?
-  [[ $ws_registry_rc -ne 0 ]] && rc=$ws_registry_rc
+  if [[ $ws_registry_rc -ne 0 ]]; then
+    rc=$ws_registry_rc
+  fi
 
   _validate_adr_index_current
   local idx_rc=$?
-  [[ $idx_rc -ne 0 ]] && rc=$idx_rc
+  if [[ $idx_rc -ne 0 ]]; then
+    rc=$idx_rc
+  fi
 
   # Warnings only — do not fail
   _validate_topology_snapshot_fresh || true
 
   _validate_windmill_raw_app_lockfiles
   local raw_app_lock_rc=$?
-  [[ $raw_app_lock_rc -ne 0 ]] && rc=$raw_app_lock_rc
+  if [[ $raw_app_lock_rc -ne 0 ]]; then
+    rc=$raw_app_lock_rc
+  fi
 
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_discovery_artifacts.py" --check >/dev/null
   local discovery_rc=$?
-  [[ $discovery_rc -ne 0 ]] && rc=$discovery_rc
+  if [[ $discovery_rc -ne 0 ]]; then
+    rc=$discovery_rc
+  fi
 
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_public_entrypoints.py" --check >/dev/null
   local public_repo_rc=$?
-  [[ $public_repo_rc -ne 0 ]] && rc=$public_repo_rc
+  if [[ $public_repo_rc -ne 0 ]]; then
+    rc=$public_repo_rc
+  fi
+
+  "$REPO_ROOT/scripts/enforce_validation_toolkit.sh" --all-files >/dev/null
+  local validation_toolkit_rc=$?
+  if [[ $validation_toolkit_rc -ne 0 ]]; then
+    rc=$validation_toolkit_rc
+  fi
 
   # Warnings only — do not fail
   _validate_config_registry_updated || true

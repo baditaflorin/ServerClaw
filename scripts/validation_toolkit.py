@@ -48,6 +48,29 @@ def require_string_list(value: Any, path: str, *, min_length: int = 0) -> list[s
     return items
 
 
+def require_int_list(
+    value: Any,
+    path: str,
+    minimum: int | None = None,
+    maximum: int | None = None,
+    min_length: int = 0,
+) -> list[int]:
+    """Validate that value is a list of integers, optionally enforcing bounds."""
+    items = require_list(value, path, min_length=min_length)
+    return [require_int(item, f"{path}[{index}]", minimum=minimum, maximum=maximum) for index, item in enumerate(items)]
+
+
+def require_unique_string_list(value: Any, path: str, *, min_length: int = 0) -> list[str]:
+    """Validate that value is a list of unique non-empty strings."""
+    items = require_string_list(value, path, min_length=min_length)
+    seen: set[str] = set()
+    for item in items:
+        if item in seen:
+            raise ValueError(f"{path} must not contain duplicates")
+        seen.add(item)
+    return items
+
+
 def require_bool(value: Any, path: str) -> bool:
     """Validate that value is a boolean. Rejects truthy/falsy non-booleans."""
     if not isinstance(value, bool):

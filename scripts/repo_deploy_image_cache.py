@@ -51,7 +51,7 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def require_identifier(value: Any, path: str) -> str:
+def require_profile_identifier(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not value[0].islower():
         raise ValueError(f"{path} must start with a lowercase letter")
@@ -85,7 +85,7 @@ def validate_profile_catalog(payload: dict[str, Any], *, path: Path = CATALOG_PA
     for profile_index, raw_profile in enumerate(profiles):
         profile_path = f"{path_str}.profiles[{profile_index}]"
         profile = require_mapping(raw_profile, profile_path)
-        profile_id = require_identifier(profile.get("id"), f"{profile_path}.id")
+        profile_id = require_profile_identifier(profile.get("id"), f"{profile_path}.id")
         if profile_id in profile_ids:
             raise ValueError(f"{profile_path}.id duplicates '{profile_id}'")
         profile_ids.add(profile_id)
@@ -116,7 +116,7 @@ def validate_profile_catalog(payload: dict[str, Any], *, path: Path = CATALOG_PA
         for repository_index, raw_repository in enumerate(profile.get("repositories", [])):
             repository_path = f"{profile_path}.repositories[{repository_index}]"
             repository = require_mapping(raw_repository, repository_path)
-            repository_id = require_identifier(repository.get("id"), f"{repository_path}.id")
+            repository_id = require_profile_identifier(repository.get("id"), f"{repository_path}.id")
             if repository_id in repository_ids:
                 raise ValueError(f"{repository_path}.id duplicates '{repository_id}'")
             repository_ids.add(repository_id)
@@ -132,7 +132,7 @@ def validate_profile_catalog(payload: dict[str, Any], *, path: Path = CATALOG_PA
         for bundle_index, raw_bundle in enumerate(bundles):
             bundle_path = f"{profile_path}.bundles[{bundle_index}]"
             bundle = require_mapping(raw_bundle, bundle_path)
-            bundle_id = require_identifier(bundle.get("id"), f"{bundle_path}.id")
+            bundle_id = require_profile_identifier(bundle.get("id"), f"{bundle_path}.id")
             if bundle_id in bundle_ids:
                 raise ValueError(f"{bundle_path}.id duplicates '{bundle_id}'")
             bundle_ids.add(bundle_id)
@@ -150,7 +150,7 @@ def validate_profile_catalog(payload: dict[str, Any], *, path: Path = CATALOG_PA
             for image_index, raw_image in enumerate(images):
                 image_path = f"{bundle_path}.images[{image_index}]"
                 image = require_mapping(raw_image, image_path)
-                image_id = require_identifier(image.get("id"), f"{image_path}.id")
+                image_id = require_profile_identifier(image.get("id"), f"{image_path}.id")
                 if image_id in image_ids:
                     raise ValueError(f"{image_path}.id duplicates '{image_id}'")
                 image_ids.add(image_id)
