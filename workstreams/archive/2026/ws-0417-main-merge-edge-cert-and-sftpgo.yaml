@@ -74,6 +74,9 @@ shared_surfaces:
 - docs/release-notes/index/*
 - versions/stack.yaml
 - scripts/topology-snapshot.json
+- build/platform-manifest.json
+- receipts/gate-bypasses/20260414T032406Z-codex-ws-0417-main-final-8335f92-skip-remote-gate.json
+- receipts/live-applies/evidence/2026-04-14-ws-0417-post-merge-validation.txt
 - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
 - receipts/runtime-pool-scaling/README.md
 ownership_manifest:
@@ -200,6 +203,15 @@ notes: 'Branch-local integration closeout was rebased onto origin/main@8e48b016a
   gate to pass from a clean latest-main worktree. Focused validation after the rebase
   passed for data models, cross-catalog integrity, service completeness, workstream
   surfaces, agent standards, generated docs, and the targeted edge-certificate syntax/lint
-  checks before the 0.178.137 mainline release cut.
+  checks before the 0.178.137 mainline release cut. After the release cut,
+  build/platform-manifest.json was refreshed so the exact schema-validation chain
+  passed locally on release commit 8335f92d2, tests/test_agent_tool_registry.py
+  passed locally, and semgrep passed locally with warnings only. The full
+  primary-branch pre-push gate then reduced to pre-existing untouched ansible-lint
+  findings plus remote-environment failures (tofu runner DNS/image availability,
+  remote-only schema/integration/semgrep noise) and the expected archived-branch
+  ownership mismatch, so the governed skip_remote_gate receipt
+  receipts/gate-bypasses/20260414T032406Z-codex-ws-0417-main-final-8335f92-skip-remote-gate.json
+  was recorded before the final origin/main push.
 
   '

@@ -1,0 +1,29 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-14T03:24:06Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "codex/ws-0417-main-final",
+  "commit": "8335f92d2188d67f0e73bba943ecf56519efad29",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "Primary-branch pre-push gate on 8335f92d2 reduced to pre-existing repo-wide failures in untouched Ansible files plus remote-environment gate issues; release-tree-specific checks passed locally, including snapshot workstream-surfaces, exact schema-validation after refreshing build/platform-manifest.json, tests/test_agent_tool_registry.py, and focused edge-certificate validations.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "CI=true ./scripts/validate_repo.sh agent-standards",
+      "LV3_SNAPSHOT_BRANCH=HEAD ./scripts/validate_repo.sh workstream-surfaces",
+      "./scripts/run_python_with_packages.sh pytest -- -m pytest tests/test_agent_tool_registry.py -q",
+      "exact schema-validation chain passed locally on 8335f92d2 after refreshing build/platform-manifest.json",
+      "uv tool run --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/fix-edge-certificate.yml --syntax-check",
+      "uv tool run --from ansible-lint ansible-lint --offline playbooks/fix-edge-certificate.yml",
+      "uv run pytest tests/test_edge_publication_makefile.py -q",
+      "uv run pytest tests/test_ansible_execution_scopes.py -q"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-15",
+    "remediation_ref": "ws-0417-main-merge-edge-cert-and-sftpgo"
+  }
+}
