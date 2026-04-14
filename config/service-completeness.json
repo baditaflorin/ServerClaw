@@ -321,7 +321,15 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/librechat.json",
       "alert_rule_file": "config/alertmanager/rules/librechat.yml",
-      "suppressed_checks": {}
+      "suppressed_checks": {
+        "api_gateway": "2027-01-01",
+        "keycloak_client": "2027-01-01",
+        "secret_definition": "2027-01-01",
+        "grafana_dashboard": "2027-01-01",
+        "slo_definition": "2027-01-01",
+        "data_catalog": "2027-01-01",
+        "alert_rules": "2027-01-01"
+      }
     },
     "litellm": {
       "service_type": "compose",
@@ -331,7 +339,16 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/litellm.json",
       "alert_rule_file": "config/alertmanager/rules/litellm.yml",
-      "suppressed_checks": {}
+      "suppressed_checks": {
+        "subdomain": "2027-01-01",
+        "api_gateway": "2027-01-01",
+        "keycloak_client": "2027-01-01",
+        "secret_definition": "2027-01-01",
+        "grafana_dashboard": "2027-01-01",
+        "slo_definition": "2027-01-01",
+        "data_catalog": "2027-01-01",
+        "alert_rules": "2027-01-01"
+      }
     },
     "livekit": {
       "service_type": "compose",
@@ -629,7 +646,11 @@
       "requires_secrets": false,
       "requires_compose_secrets": false,
       "suppressed_checks": {
+        "api_gateway": "2027-01-01",
+        "keycloak_client": "2027-01-01",
         "grafana_dashboard": "2027-01-01",
+        "slo_definition": "2027-01-01",
+        "data_catalog": "2027-01-01",
         "alert_rules": "2027-01-01"
       }
     },

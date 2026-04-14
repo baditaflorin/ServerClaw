@@ -12,9 +12,16 @@ depends_on:
 - adr-0368-docker-compose-jinja2-macro-library
 conflicts_with: []
 shared_surfaces:
+- catalog/services/gitea/service.yaml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/templates/compose_macros.j2
+- collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
 - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
 - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/gitea_runner/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/verify.yml
+- collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
 - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/compose_macros.j2
@@ -25,12 +32,16 @@ shared_surfaces:
 - collections/ansible_collections/lv3/platform/roles/librechat_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/litellm_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/minio_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/minio_runtime/meta/argument_specs.yml
+- collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/main.yml
 - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/compose_macros.j2
 - collections/ansible_collections/lv3/platform/roles/netbox_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/paperless_runtime/templates/docker-compose.yml.j2
 - collections/ansible_collections/lv3/platform/roles/plane_runtime/templates/compose_macros.j2
+- collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml
 - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
 - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
 - collections/ansible_collections/lv3/platform/playbooks/_includes/docker_runtime_converge.yml
@@ -76,6 +87,7 @@ shared_surfaces:
 - playbooks/_includes/docker_runtime_converge.yml
 - playbooks/_includes/dns_publication.yml
 - playbooks/_includes/nginx_edge_publication.yml
+- playbooks/_includes/templates/compose_macros.j2
 - playbooks/_includes/postgres_preparation.yml
 - playbooks/fix-edge-certificate.yml
 - playbooks/redpanda.yml
@@ -83,16 +95,23 @@ shared_surfaces:
 - playbooks/tasks/verify-probe.yml
 - playbooks/verify-bootstrap-guests.yml
 - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+- receipts/runtime-pool-scaling/.gitkeep
 - scripts/validate_repo.sh
 - scripts/generate_platform_vars.py
 - scripts/topology-snapshot.json
 - tests/test_ansible_execution_scopes.py
+- tests/test_compose_macro_template_search_paths.py
+- tests/test_dns_publication_include.py
+- tests/test_edge_publication_playbooks.py
 - tests/test_flagsmith_runtime_role.py
 - tests/test_gitea_runtime_role.py
 - tests/test_label_studio_runtime_role.py
 - tests/test_minio_runtime_role.py
+- tests/test_openbao_systemd_credentials_helper.py
+- tests/test_proxmox_security_role.py
 - tests/test_redpanda_playbook.py
 - tests/test_redpanda_runtime_role.py
+- tests/test_service_definition_catalog.py
 - tests/test_validate_repo_cache.py
 - workstreams/active/ws-0368-live-apply.yaml
 - workstreams.yaml
@@ -100,6 +119,7 @@ ownership_manifest:
   owned_surfaces:
   - id: adr_0368_compose_macros
     paths:
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/templates/compose_macros.j2
     - collections/ansible_collections/lv3/platform/roles/common/templates/compose_macros.j2
     - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/templates/docker-compose.yml.j2
@@ -123,10 +143,22 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/compose_macros.j2
     - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/templates/docker-compose.yml.j2
     - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2
+    - playbooks/_includes/templates/compose_macros.j2
+    - tests/test_compose_macro_template_search_paths.py
     mode: exclusive
   - id: adr_0368_exact_main_replay
     paths:
+    - catalog/services/gitea/service.yaml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+    - collections/ansible_collections/lv3/platform/roles/gitea_runner/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/verify.yml
+    - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+    - collections/ansible_collections/lv3/platform/roles/minio_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/minio_runtime/meta/argument_specs.yml
+    - collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/main.yml
     - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/proxmox_security/tasks/main.yml
     - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
     - collections/ansible_collections/lv3/platform/playbooks/_includes/docker_runtime_converge.yml
     - collections/ansible_collections/lv3/platform/playbooks/_includes/nginx_edge_publication.yml
@@ -163,10 +195,16 @@ ownership_manifest:
     - playbooks/tasks/verify-probe.yml
     - playbooks/verify-bootstrap-guests.yml
     - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+    - receipts/runtime-pool-scaling/.gitkeep
     - scripts/validate_repo.sh
     - tests/test_ansible_execution_scopes.py
+    - tests/test_dns_publication_include.py
+    - tests/test_edge_publication_playbooks.py
+    - tests/test_openbao_systemd_credentials_helper.py
+    - tests/test_proxmox_security_role.py
     - tests/test_redpanda_playbook.py
     - tests/test_redpanda_runtime_role.py
+    - tests/test_service_definition_catalog.py
     - tests/test_validate_repo_cache.py
     - scripts/topology-snapshot.json
     mode: exclusive
