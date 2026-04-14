@@ -3,6 +3,174 @@
   "schema_version": "1.0.0",
   "certificates": [
     {
+      "id": "backup-pbs-ui",
+      "service_id": "backup_pbs",
+      "status": "lan_only",
+      "summary": "Proxmox Backup Server HTTPS endpoint on the backup VM. LAN-only \u2014 not reachable from the Tailscale controller; excluded from automated validation.",
+      "expected_issuer": "any",
+      "endpoint": {
+        "host": "10.10.10.60",
+        "port": 8007,
+        "server_name": "10.10.10.60"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "pbs-self-managed",
+        "managed_by_repo": false,
+        "notes": "The PBS appliance manages its own HTTPS certificate lifecycle today."
+      }
+    },
+    {
+      "id": "openbao-proxy",
+      "service_id": "openbao",
+      "status": "active",
+      "summary": "OpenBao HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
+      "expected_issuer": "step-ca",
+      "endpoint": {
+        "host": "100.64.0.1",
+        "port": 8200,
+        "server_name": "100.64.0.1"
+      },
+      "policy": {
+        "warn_hours": 6,
+        "critical_hours": 2
+      },
+      "renewal": {
+        "agent": "systemd-step-issue",
+        "managed_by_repo": true,
+        "host": "docker-runtime",
+        "unit_name": "lv3-openbao-cert-renew",
+        "on_calendar": "*:0/15",
+        "randomized_delay_seconds": 60,
+        "reload_command": "docker compose --file /opt/openbao/docker-compose.yml restart openbao"
+      },
+      "material": {
+        "certificate_file": "/opt/openbao/tls/server.crt",
+        "key_file": "/opt/openbao/tls/server.key",
+        "root_file": "/opt/step-ca/home/certs/root_ca.crt",
+        "subject": "100.64.0.1",
+        "sans": [
+          "10.10.10.20",
+          "100.64.0.1"
+        ],
+        "ca_url": "https://10.10.10.20:9000",
+        "provisioner": "services",
+        "password_file": "/opt/step-ca/secrets/services-password.txt",
+        "not_after": "24h"
+      }
+    },
+    {
+      "id": "portainer-proxy",
+      "service_id": "portainer",
+      "status": "tls_pending",
+      "summary": "Portainer HTTPS endpoint exposed through the Proxmox host Tailscale proxy. TLS handshake fails (Cipher: NONE) \u2014 Portainer serves a self-signed cert incompatible with modern TLS stacks; excluded from validation until cert is replaced with step-ca material.",
+      "expected_issuer": "any",
+      "endpoint": {
+        "host": "100.64.0.1",
+        "port": 9444,
+        "server_name": "100.64.0.1"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "portainer-self-managed",
+        "managed_by_repo": false,
+        "host": "docker-runtime",
+        "notes": "Portainer still serves its container-local certificate. A follow-up ADR can replace it with step-ca-managed material."
+      }
+    },
+    {
+      "id": "proxmox-ui",
+      "service_id": "proxmox_ui",
+      "status": "active",
+      "summary": "Proxmox manager HTTPS certificate on the host listener.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "100.64.0.1",
+        "port": 8006,
+        "server_name": "proxmox.example.com"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "proxmox-acme",
+        "managed_by_repo": false,
+        "host": "proxmox-host",
+        "notes": "Renewed by the Proxmox ACME integration on the host."
+      }
+    },
+    {
+      "id": "step-ca-proxy",
+      "service_id": "step_ca",
+      "status": "active",
+      "summary": "step-ca HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
+      "expected_issuer": "step-ca",
+      "endpoint": {
+        "host": "100.64.0.1",
+        "port": 9443,
+        "server_name": "localhost"
+      },
+      "policy": {
+        "warn_hours": 6,
+        "critical_hours": 2
+      },
+      "renewal": {
+        "agent": "step-ca-self",
+        "managed_by_repo": false,
+        "host": "docker-runtime",
+        "notes": "The CA bootstrap certificate remains a step-ca-managed special case and is only inventoried here."
+      }
+    },
+    {
+      "id": "vaultwarden-private",
+      "service_id": "vaultwarden",
+      "status": "active",
+      "summary": "Vaultwarden HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
+      "expected_issuer": "step-ca",
+      "endpoint": {
+        "host": "100.64.0.1",
+        "port": 443,
+        "server_name": "vault.example.com"
+      },
+      "policy": {
+        "warn_hours": 6,
+        "critical_hours": 2
+      },
+      "renewal": {
+        "agent": "systemd-step-issue",
+        "managed_by_repo": true,
+        "host": "docker-runtime",
+        "unit_name": "lv3-vaultwarden-cert-renew",
+        "on_calendar": "*:0/15",
+        "randomized_delay_seconds": 60,
+        "reload_command": "docker compose --file /opt/vaultwarden/docker-compose.yml restart vaultwarden"
+      },
+      "material": {
+        "certificate_file": "/opt/vaultwarden/tls/server.crt",
+        "key_file": "/opt/vaultwarden/tls/server.key",
+        "root_file": "/opt/step-ca/home/certs/root_ca.crt",
+        "subject": "vault.example.com",
+        "sans": [
+          "vault.example.com",
+          "10.10.10.20",
+          "100.118.189.95",
+          "127.0.0.1",
+          "localhost"
+        ],
+        "ca_url": "https://10.10.10.20:9000",
+        "provisioner": "services",
+        "password_file": "/opt/step-ca/secrets/services-password.txt",
+        "not_after": "24h"
+      }
+    },
+    {
       "id": "agents-edge",
       "service_id": "dify",
       "status": "active",
@@ -36,6 +204,30 @@
         "host": "analytics.example.com",
         "port": 443,
         "server_name": "analytics.example.com"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "annotate-edge",
+      "service_id": "label_studio",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for annotate.example.com.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "annotate.example.com",
+        "port": 443,
+        "server_name": "annotate.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -99,24 +291,28 @@
       }
     },
     {
-      "id": "backup-pbs-ui",
-      "service_id": "backup_pbs",
-      "status": "lan_only",
-      "summary": "Proxmox Backup Server HTTPS endpoint on the backup VM. LAN-only \u2014 not reachable from the Tailscale controller; excluded from automated validation.",
-      "expected_issuer": "any",
+      "id": "bi-edge",
+      "service_id": "superset",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for bi.example.com.",
+      "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "10.10.10.60",
-        "port": 8007,
-        "server_name": "10.10.10.60"
+        "host": "bi.example.com",
+        "port": 443,
+        "server_name": "bi.example.com"
       },
       "policy": {
         "warn_days": 21,
         "critical_days": 14
       },
       "renewal": {
-        "agent": "pbs-self-managed",
+        "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "notes": "The PBS appliance manages its own HTTPS certificate lifecycle today."
+        "host": "nginx",
+        "notes": "Renewed by Certbot on the shared public edge VM."
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
       }
     },
     {
@@ -138,31 +334,6 @@
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
         "host": "nginx"
-      },
-      "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
-      }
-    },
-    {
-      "id": "bi-edge",
-      "service_id": "superset",
-      "status": "active",
-      "summary": "Shared NGINX edge certificate served for bi.example.com.",
-      "expected_issuer": "letsencrypt",
-      "endpoint": {
-        "host": "bi.example.com",
-        "port": 443,
-        "server_name": "bi.example.com"
-      },
-      "policy": {
-        "warn_days": 21,
-        "critical_days": 14
-      },
-      "renewal": {
-        "agent": "certbot-dns-hetzner",
-        "managed_by_repo": false,
-        "host": "nginx",
-        "notes": "Renewed by Certbot on the shared public edge VM."
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
@@ -243,15 +414,15 @@
       }
     },
     {
-      "id": "ci-edge",
-      "service_id": "woodpecker",
+      "id": "chat-edge",
+      "service_id": "librechat",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for ci.example.com.",
+      "summary": "Shared NGINX edge certificate served for chat.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "ci.example.com",
+        "host": "chat.example.com",
         "port": 443,
-        "server_name": "ci.example.com"
+        "server_name": "chat.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -267,15 +438,15 @@
       }
     },
     {
-      "id": "chat-edge",
-      "service_id": "librechat",
+      "id": "ci-edge",
+      "service_id": "woodpecker",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for chat.example.com.",
+      "summary": "Shared NGINX edge certificate served for ci.example.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "chat.example.com",
+        "host": "ci.example.com",
         "port": 443,
-        "server_name": "chat.example.com"
+        "server_name": "ci.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -411,6 +582,30 @@
       }
     },
     {
+      "id": "draw-edge",
+      "service_id": "excalidraw",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for draw.example.com.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "draw.example.com",
+        "port": 443,
+        "server_name": "draw.example.com"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "errors-edge",
       "service_id": "glitchtip",
       "status": "active",
@@ -435,15 +630,15 @@
       }
     },
     {
-      "id": "draw-edge",
-      "service_id": "excalidraw",
+      "id": "lv3-org-apex-edge",
+      "service_id": "nginx_edge",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for draw.example.com.",
+      "summary": "Shared NGINX edge certificate served for the example.com apex crawl-policy endpoint.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "draw.example.com",
+        "host": "example.com",
         "port": 443,
-        "server_name": "draw.example.com"
+        "server_name": "example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -579,30 +774,6 @@
       }
     },
     {
-      "id": "keycloak-edge",
-      "service_id": "keycloak",
-      "status": "active",
-      "summary": "Shared NGINX edge certificate served for sso.example.com.",
-      "expected_issuer": "letsencrypt",
-      "endpoint": {
-        "host": "sso.example.com",
-        "port": 443,
-        "server_name": "sso.example.com"
-      },
-      "policy": {
-        "warn_days": 21,
-        "critical_days": 14
-      },
-      "renewal": {
-        "agent": "certbot-dns-hetzner",
-        "managed_by_repo": false,
-        "host": "nginx"
-      },
-      "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
-      }
-    },
-    {
       "id": "langfuse-edge",
       "service_id": "langfuse",
       "status": "active",
@@ -660,30 +831,6 @@
         "host": "logs.example.com",
         "port": 443,
         "server_name": "logs.example.com"
-      },
-      "policy": {
-        "warn_days": 21,
-        "critical_days": 14
-      },
-      "renewal": {
-        "agent": "certbot-dns-hetzner",
-        "managed_by_repo": false,
-        "host": "nginx"
-      },
-      "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
-      }
-    },
-    {
-      "id": "lv3-org-apex-edge",
-      "service_id": "nginx_edge",
-      "status": "active",
-      "summary": "Shared NGINX edge certificate served for the example.com apex crawl-policy endpoint.",
-      "expected_issuer": "letsencrypt",
-      "endpoint": {
-        "host": "example.com",
-        "port": 443,
-        "server_name": "example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -867,45 +1014,6 @@
       }
     },
     {
-      "id": "openbao-proxy",
-      "service_id": "openbao",
-      "status": "active",
-      "summary": "OpenBao HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
-      "expected_issuer": "step-ca",
-      "endpoint": {
-        "host": "100.64.0.1",
-        "port": 8200,
-        "server_name": "100.64.0.1"
-      },
-      "policy": {
-        "warn_hours": 6,
-        "critical_hours": 2
-      },
-      "renewal": {
-        "agent": "systemd-step-issue",
-        "managed_by_repo": true,
-        "host": "docker-runtime",
-        "unit_name": "lv3-openbao-cert-renew",
-        "on_calendar": "*:0/15",
-        "randomized_delay_seconds": 60,
-        "reload_command": "docker compose --file /opt/openbao/docker-compose.yml restart openbao"
-      },
-      "material": {
-        "certificate_file": "/opt/openbao/tls/server.crt",
-        "key_file": "/opt/openbao/tls/server.key",
-        "root_file": "/opt/step-ca/home/certs/root_ca.crt",
-        "subject": "100.64.0.1",
-        "sans": [
-          "10.10.10.20",
-          "100.64.0.1"
-        ],
-        "ca_url": "https://10.10.10.20:9000",
-        "provisioner": "services",
-        "password_file": "/opt/step-ca/secrets/services-password.txt",
-        "not_after": "24h"
-      }
-    },
-    {
       "id": "ops-edge",
       "service_id": "ops_portal",
       "status": "active",
@@ -930,25 +1038,27 @@
       }
     },
     {
-      "id": "portainer-proxy",
-      "service_id": "portainer",
-      "status": "tls_pending",
-      "summary": "Portainer HTTPS endpoint exposed through the Proxmox host Tailscale proxy. TLS handshake fails (Cipher: NONE) \u2014 Portainer serves a self-signed cert incompatible with modern TLS stacks; excluded from validation until cert is replaced with step-ca material.",
-      "expected_issuer": "any",
+      "id": "paperless-edge",
+      "service_id": "paperless",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for paperless.example.com.",
+      "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "100.64.0.1",
-        "port": 9444,
-        "server_name": "100.64.0.1"
+        "host": "paperless.example.com",
+        "port": 443,
+        "server_name": "paperless.example.com"
       },
       "policy": {
         "warn_days": 21,
         "critical_days": 14
       },
       "renewal": {
-        "agent": "portainer-self-managed",
+        "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
-        "host": "docker-runtime",
-        "notes": "Portainer still serves its container-local certificate. A follow-up ADR can replace it with step-ca-managed material."
+        "host": "nginx"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
       }
     },
     {
@@ -976,28 +1086,6 @@
       }
     },
     {
-      "id": "proxmox-ui",
-      "service_id": "proxmox_ui",
-      "status": "active",
-      "summary": "Proxmox manager HTTPS certificate on the host listener.",
-      "expected_issuer": "letsencrypt",
-      "endpoint": {
-        "host": "100.64.0.1",
-        "port": 8006,
-        "server_name": "proxmox.example.com"
-      },
-      "policy": {
-        "warn_days": 21,
-        "critical_days": 14
-      },
-      "renewal": {
-        "agent": "proxmox-acme",
-        "managed_by_repo": false,
-        "host": "proxmox-host",
-        "notes": "Renewed by the Proxmox ACME integration on the host."
-      }
-    },
-    {
       "id": "registry-edge",
       "service_id": "harbor",
       "status": "active",
@@ -1007,6 +1095,30 @@
         "host": "registry.example.com",
         "port": 443,
         "server_name": "registry.example.com"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
+      "id": "repo-intake-edge",
+      "service_id": "repo_intake",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for repo-intake.example.com.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "repo-intake.example.com",
+        "port": 443,
+        "server_name": "repo-intake.example.com"
       },
       "policy": {
         "warn_days": 21,
@@ -1070,6 +1182,30 @@
       }
     },
     {
+      "id": "keycloak-edge",
+      "service_id": "keycloak",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for sso.example.com.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "sso.example.com",
+        "port": 443,
+        "server_name": "sso.example.com"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "status-edge",
       "service_id": "status_page",
       "status": "active",
@@ -1091,28 +1227,6 @@
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
-      }
-    },
-    {
-      "id": "step-ca-proxy",
-      "service_id": "step_ca",
-      "status": "active",
-      "summary": "step-ca HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
-      "expected_issuer": "step-ca",
-      "endpoint": {
-        "host": "100.64.0.1",
-        "port": 9443,
-        "server_name": "localhost"
-      },
-      "policy": {
-        "warn_hours": 6,
-        "critical_hours": 2
-      },
-      "renewal": {
-        "agent": "step-ca-self",
-        "managed_by_repo": false,
-        "host": "docker-runtime",
-        "notes": "The CA bootstrap certificate remains a step-ca-managed special case and is only inventoried here."
       }
     },
     {
@@ -1164,48 +1278,6 @@
       }
     },
     {
-      "id": "vaultwarden-private",
-      "service_id": "vaultwarden",
-      "status": "active",
-      "summary": "Vaultwarden HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
-      "expected_issuer": "step-ca",
-      "endpoint": {
-        "host": "100.64.0.1",
-        "port": 443,
-        "server_name": "vault.example.com"
-      },
-      "policy": {
-        "warn_hours": 6,
-        "critical_hours": 2
-      },
-      "renewal": {
-        "agent": "systemd-step-issue",
-        "managed_by_repo": true,
-        "host": "docker-runtime",
-        "unit_name": "lv3-vaultwarden-cert-renew",
-        "on_calendar": "*:0/15",
-        "randomized_delay_seconds": 60,
-        "reload_command": "docker compose --file /opt/vaultwarden/docker-compose.yml restart vaultwarden"
-      },
-      "material": {
-        "certificate_file": "/opt/vaultwarden/tls/server.crt",
-        "key_file": "/opt/vaultwarden/tls/server.key",
-        "root_file": "/opt/step-ca/home/certs/root_ca.crt",
-        "subject": "vault.example.com",
-        "sans": [
-          "vault.example.com",
-          "10.10.10.20",
-          "100.118.189.95",
-          "127.0.0.1",
-          "localhost"
-        ],
-        "ca_url": "https://10.10.10.20:9000",
-        "provisioner": "services",
-        "password_file": "/opt/step-ca/secrets/services-password.txt",
-        "not_after": "24h"
-      }
-    },
-    {
       "id": "wiki-edge",
       "service_id": "outline",
       "status": "active",
@@ -1215,54 +1287,6 @@
         "host": "wiki.example.com",
         "port": 443,
         "server_name": "wiki.example.com"
-      },
-      "policy": {
-        "warn_days": 21,
-        "critical_days": 14
-      },
-      "renewal": {
-        "agent": "certbot-dns-hetzner",
-        "managed_by_repo": false,
-        "host": "nginx"
-      },
-      "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
-      }
-    },
-    {
-      "id": "annotate-edge",
-      "service_id": "label_studio",
-      "status": "active",
-      "summary": "Shared NGINX edge certificate served for annotate.example.com.",
-      "expected_issuer": "letsencrypt",
-      "endpoint": {
-        "host": "annotate.example.com",
-        "port": 443,
-        "server_name": "annotate.example.com"
-      },
-      "policy": {
-        "warn_days": 21,
-        "critical_days": 14
-      },
-      "renewal": {
-        "agent": "certbot-dns-hetzner",
-        "managed_by_repo": false,
-        "host": "nginx"
-      },
-      "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
-      }
-    },
-    {
-      "id": "paperless-edge",
-      "service_id": "paperless",
-      "status": "active",
-      "summary": "Shared NGINX edge certificate served for paperless.example.com.",
-      "expected_issuer": "letsencrypt",
-      "endpoint": {
-        "host": "paperless.example.com",
-        "port": 443,
-        "server_name": "paperless.example.com"
       },
       "policy": {
         "warn_days": 21,

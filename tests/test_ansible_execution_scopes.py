@@ -182,6 +182,20 @@ def test_validate_scope_catalog_covers_live_apply_service_wrappers(tmp_path: Pat
     scopes.validate_scope_catalog(repo_root=repo_root, catalog_path=catalog_path, inventory_path=inventory_path)
 
 
+def test_collect_makefile_entrypoints_ignores_descriptor_var_files(tmp_path: Path) -> None:
+    repo_root, _catalog_path, _inventory_path = make_repo(tmp_path)
+    write(
+        repo_root / "Makefile",
+        """
+live-apply-service:
+\tdescriptor_args="-e @$(REPO_ROOT)/playbooks/vars/$(service).yml"
+""".strip()
+        + "\n",
+    )
+
+    assert scopes._collect_makefile_entrypoints(repo_root / "Makefile", repo_root) == ()
+
+
 def test_resolve_identity_override_uses_shared_local_overlay_for_worktrees(tmp_path: Path) -> None:
     repo_root = tmp_path
     worktree_root = repo_root / ".worktrees" / "ws-0346-live-apply"

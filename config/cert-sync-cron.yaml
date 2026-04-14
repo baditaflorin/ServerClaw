@@ -1,0 +1,67 @@
+# Cert Sync Cron Configuration — ADR 0414
+#
+# Defines the scheduled cert auto-sync job deployed on the nginx edge host.
+# Consumed by the cert_renewal_timer Ansible role (extends ADR 0101 pattern).
+#
+# Job: daily scan for cert_mismatch entries; auto-repair via converge-nginx-edge.
+# Safe to run on any platform — exits cleanly if no mismatches found.
+# Writes JSON report to /var/log/cert-sync-YYYYMMDD.json for audit trail.
+
+cert_sync_cron:
+  enabled: true
+  # Run at 03:00 UTC daily — after Let's Encrypt daily renewal window (02:00-03:00)
+  schedule: "0 3 * * *"
+  # Path to the repo on the controller host (used by cron invocation)
+  repo_path: "{{ platform_repo_path | default('/opt/platform') }}"
+  command: >-
+    cd {{ platform_repo_path | default('/opt/platform') }} &&
+    python3 scripts/cert_lifecycle_manager.py
+    sync-missing
+    --apply
+    --json
+    --env production
+    >> /var/log/cert-sync-$(date +%Y%m%d).json 2>&1
+  log_retention_days: 30
+  # Alert if exit code is non-zero (systemd OnFailure= or monitoring hook)
+  alert_on_failure: true
+  # Skip validation entirely (for forks without Hetzner DNS API)
+  # Override via .local/identity.yml: platform_cert_validation_mode: skip
+  skip_cert_validation: false
+  # Keep only the last N log files
+  log_rotate_keep: 30
+
+# Systemd timer unit (alternative to cron — deployed by cert_renewal_timer role)
+cert_sync_systemd_timer:
+  enabled: "{{ cert_sync_cron.enabled }}"
+  unit_name: cert-sync
+  description: "Daily certificate mismatch scan and auto-repair (ADR 0414)"
+  on_calendar: "*-*-* 03:00:00 UTC"
+  persistent: true
+  service:
+    description: "Cert sync: detect and repair certificate mismatches"
+    type: oneshot
+    exec_start: >-
+      /bin/bash -c 'cd {{ platform_repo_path | default("/opt/platform") }} &&
+      python3 scripts/cert_lifecycle_manager.py sync-missing --apply --json
+      --env production >> /var/log/cert-sync-$(date +%%Y%%m%%d).json 2>&1'
+    # Run as root so certbot can read /etc/letsencrypt
+    user: root
+    standard_output: journal
+    standard_error: journal
+    on_failure: "cert-sync-alert.service"
+
+# Alert service (triggered by OnFailure= in the timer service)
+cert_sync_alert_service:
+  enabled: "{{ cert_sync_systemd_timer.enabled }}"
+  unit_name: cert-sync-alert
+  description: "Alert: cert-sync.service failed (ADR 0414)"
+  type: oneshot
+  # Writes a structured failure event to the gate-bypass log for visibility
+  exec_start: >-
+    /bin/bash -c 'cd {{ platform_repo_path | default("/opt/platform") }} &&
+    python3 scripts/log_gate_bypass.py
+    --bypass cert_sync_failure
+    --source cert-sync-timer
+    --reason-code cert-sync-cron-failure
+    --detail "cert-sync.service exited non-zero: check /var/log/cert-sync-$(date +%%Y%%m%%d).json"
+    --impacted-lane cert-validation'

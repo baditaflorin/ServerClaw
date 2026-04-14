@@ -373,7 +373,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream docker.io/gitea/gitea — pinned by digest in defaults
     internal_port: 3003
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/gitea
     container_name: gitea
     needs_openbao: true
@@ -570,7 +570,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: ""            # uses upstream quay.io/keycloak/keycloak — pinned in defaults
     internal_port: 8091
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/keycloak
     container_name: keycloak
     needs_openbao: true
@@ -1004,7 +1004,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: openbao_runtime
     internal_port: 8201
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/openbao
     container_name: lv3-openbao
     needs_openbao: false
@@ -1015,7 +1015,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: openfga_runtime
     internal_port: 8098
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/openfga
     container_name: lv3-openfga
     needs_openbao: true
@@ -1491,7 +1491,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: temporal_server_runtime
     internal_port: 7243
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/temporal
     container_name: temporal-server
     needs_openbao: true
@@ -1576,7 +1576,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: vaultwarden_runtime
     internal_port: 8222
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/vaultwarden
     container_name: vaultwarden
     needs_openbao: false
@@ -1627,7 +1627,7 @@ platform_service_registry:
     service_type: docker_compose
     image_catalog_key: windmill_runtime
     internal_port: 8000
-    host_group: docker-runtime
+    host_group: runtime-control
     site_dir: /opt/windmill
     container_name: windmill-server
     needs_openbao: true

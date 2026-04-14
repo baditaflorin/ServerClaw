@@ -290,11 +290,15 @@ def _normalise_status(value: str, *, default: str) -> str:
 
 
 def _extract_value(text: str, key: str, default: str = "") -> str:
-    pattern = re.compile(rf"^[-*]\s+{re.escape(key)}:\s+(.+)$", re.IGNORECASE | re.MULTILINE)
+    escaped_key = re.escape(key)
+    pattern = re.compile(rf"^[-*]\s+(?:\*\*)?{escaped_key}(?:\*\*)?:\s+(.+)$", re.IGNORECASE | re.MULTILINE)
     match = pattern.search(text)
     if match:
         return match.group(1).strip()
-    header_pattern = re.compile(rf"^#{1, 2}\s+{re.escape(key)}:\s+(.+)$", re.IGNORECASE | re.MULTILINE)
+    header_pattern = re.compile(
+        rf"^#{1, 2}\s+(?:\*\*)?{escaped_key}(?:\*\*)?:\s+(.+)$",
+        re.IGNORECASE | re.MULTILINE,
+    )
     match = header_pattern.search(text)
     if match:
         return match.group(1).strip()

@@ -37,6 +37,7 @@ INDEX_PATH = ADR_DIR / ".index.yaml"
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 COLLECTIONS_DIR = REPO_ROOT / "collections"
 PLAYBOOKS_DIR = REPO_ROOT / "playbooks"
+LIVE_APPLY_RECEIPTS_DIR = REPO_ROOT / "receipts" / "live-applies"
 AUXILIARY_ADR_FILENAME_TOKENS = (
     "implementation-roadmap",
     "gap-analysis",
@@ -381,6 +382,57 @@ def scan_config_files(adr_number: str) -> list[ImplementationMarker]:
     return markers
 
 
+def scan_live_apply_receipts(adr_number: str) -> list[ImplementationMarker]:
+    """Detect committed live-apply receipts that reference an ADR."""
+    markers: list[ImplementationMarker] = []
+
+    if not LIVE_APPLY_RECEIPTS_DIR.exists():
+        return markers
+
+    adr_patterns = [
+        rf"\bADR\s+{adr_number}\b",
+        rf"\badr[_-]?{adr_number}\b",
+    ]
+
+    for receipt_file in LIVE_APPLY_RECEIPTS_DIR.rglob("*"):
+        if not receipt_file.is_file():
+            continue
+        if receipt_file.suffix.lower() not in {".json", ".yaml", ".yml", ".txt"}:
+            continue
+
+        relpath = str(receipt_file.relative_to(REPO_ROOT))
+
+        if any(re.search(pattern, relpath, re.IGNORECASE) for pattern in adr_patterns):
+            markers.append(
+                ImplementationMarker(
+                    marker_type="live-apply-receipt",
+                    adr_number=adr_number,
+                    location=relpath,
+                    evidence="Committed live-apply evidence references the ADR",
+                    confidence=1.0,
+                )
+            )
+            continue
+
+        try:
+            content = receipt_file.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+
+        if any(re.search(pattern, content, re.IGNORECASE) for pattern in adr_patterns):
+            markers.append(
+                ImplementationMarker(
+                    marker_type="live-apply-receipt",
+                    adr_number=adr_number,
+                    location=relpath,
+                    evidence="ADR reference found in committed live-apply evidence",
+                    confidence=0.95,
+                )
+            )
+
+    return markers
+
+
 # ==============================================================================
 # Infer Implementation Status
 # ==============================================================================
@@ -390,6 +442,9 @@ def infer_implementation_status(markers: list[ImplementationMarker]) -> str:
     """Infer implementation status from detected markers."""
     if not markers:
         return "No Evidence"
+
+    if any(marker.marker_type == "live-apply-receipt" for marker in markers):
+        return "Likely Implemented"
 
     # Count marker types and calculate confidence score
     high_confidence_markers = [m for m in markers if m.confidence >= 0.85]
@@ -424,19 +479,21 @@ def generate_report(
 ) -> ADRImplementationReport:
     """Generate a complete implementation report for an ADR."""
     inferred_status = infer_implementation_status(markers)
-    canonical_status = adr_metadata.implementation_status
+    canonical_decision_status = adr_metadata.status
+    canonical_implementation_status = adr_metadata.implementation_status
 
     # Check if inferred status matches canonical
     status_match = (
-        (canonical_status == "Implemented" and inferred_status.startswith("Likely"))
-        or (canonical_status == "Partial" and inferred_status == "Partial Evidence")
-        or (canonical_status == "Not Implemented" and inferred_status == "No Evidence")
+        (canonical_implementation_status == "Implemented" and inferred_status.startswith("Likely"))
+        or (canonical_implementation_status == "Partial" and inferred_status == "Partial Evidence")
+        or (canonical_implementation_status == "Not Implemented" and inferred_status == "No Evidence")
     )
 
     # Generate summary
     summary_lines = [
-        f"Canonical Status: {canonical_status}",
-        f"Inferred Status: {inferred_status}",
+        f"Canonical Decision Status: {canonical_decision_status}",
+        f"Canonical Implementation Status: {canonical_implementation_status}",
+        f"Inferred Implementation Status: {inferred_status}",
         f"Markers Found: {len(markers)}",
     ]
 
@@ -453,8 +510,8 @@ def generate_report(
     return ADRImplementationReport(
         adr_number=adr_metadata.adr_number,
         title=adr_metadata.title,
-        canonical_status=adr_metadata.status,
-        canonical_implementation_status=canonical_status,
+        canonical_status=canonical_decision_status,
+        canonical_implementation_status=canonical_implementation_status,
         detected_markers=markers,
         inferred_implementation_status=inferred_status,
         status_match=status_match,
@@ -476,8 +533,9 @@ def generate_markdown_report(report: ADRImplementationReport) -> str:
         "",
         "| Field | Value |",
         "| --- | --- |",
-        f"| Canonical Status | {report.canonical_implementation_status} |",
-        f"| Inferred Status | {report.inferred_implementation_status} |",
+        f"| Canonical Decision Status | {report.canonical_status} |",
+        f"| Canonical Implementation Status | {report.canonical_implementation_status} |",
+        f"| Inferred Implementation Status | {report.inferred_implementation_status} |",
         f"| Status Match | {'✓' if report.status_match else '✗'} |",
         f"| Markers Found | {len(report.detected_markers)} |",
         "",
@@ -618,6 +676,7 @@ def main():
         markers.extend(scan_playbooks(adr_number))
         markers.extend(scan_compose_files(adr_number))
         markers.extend(scan_config_files(adr_number))
+        markers.extend(scan_live_apply_receipts(adr_number))
 
         # Generate report
         report = generate_report(metadata, markers)
