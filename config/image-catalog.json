@@ -541,7 +541,7 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-30",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-minio-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-04-13-minio-runtime.json",
       "exception": {
         "owner": "Platform operations",
         "justification": "The pinned upstream MinIO image still reports critical Trivy findings in bundled Go binaries; keep it digest-pinned and review on the next image rotation window.",
@@ -549,9 +549,9 @@
           "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
           "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
         ],
-        "approved_on": "2026-03-30",
-        "expires_on": "2026-04-13",
-        "remediation_plan": "Re-scan and refresh minio_runtime with make upgrade-container-image IMAGE_ID=minio_runtime WRITE=true APPLY=true before the exception expires."
+        "approved_on": "2026-04-14",
+        "expires_on": "2026-04-21",
+        "remediation_plan": "Re-scan and refresh minio_runtime with make upgrade-container-image IMAGE_ID=minio_runtime WRITE=true APPLY=true before the refreshed exception expires."
       },
       "consumers": [
         "roles/minio_runtime/templates/docker-compose.yml.j2",

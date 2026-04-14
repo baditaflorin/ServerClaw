@@ -333,6 +333,7 @@ workstreams:
   - config/correction-loops.json
   - config/dependency-graph.json
   - config/health-probe-catalog.json
+  - config/image-catalog.json
   - config/prometheus/file_sd/https_tls_targets.yml
   - config/prometheus/rules/https_tls_alerts.yml
   - config/service-capability-catalog.json
@@ -368,6 +369,9 @@ workstreams:
   - playbooks/tasks/verify-probe.yml
   - playbooks/verify-bootstrap-guests.yml
   - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+  - receipts/image-scans/2026-04-13-minio-runtime.json
+  - receipts/sbom/f6efb212cad3.cdx.json
+  - receipts/cve/f6efb212cad3-20260413T222257Z.grype.json
   - receipts/runtime-pool-scaling/.gitkeep
   - scripts/validate_repo.sh
   - scripts/generate_platform_vars.py
@@ -445,6 +449,7 @@ workstreams:
       - config/correction-loops.json
       - config/dependency-graph.json
       - config/health-probe-catalog.json
+      - config/image-catalog.json
       - config/prometheus/file_sd/https_tls_targets.yml
       - config/prometheus/rules/https_tls_alerts.yml
       - config/service-capability-catalog.json
@@ -468,6 +473,9 @@ workstreams:
       - playbooks/tasks/verify-probe.yml
       - playbooks/verify-bootstrap-guests.yml
       - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+      - receipts/image-scans/2026-04-13-minio-runtime.json
+      - receipts/sbom/f6efb212cad3.cdx.json
+      - receipts/cve/f6efb212cad3-20260413T222257Z.grype.json
       - receipts/runtime-pool-scaling/.gitkeep
       - scripts/validate_repo.sh
       - tests/test_ansible_execution_scopes.py
