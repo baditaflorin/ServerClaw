@@ -1,5 +1,5 @@
 id: adr-0369-python-validation-toolkit
-adr: '0369'
+adr: 0369
 title: Shared Python validation toolkit for catalog and registry scripts
 status: in_progress
 owner: codex
@@ -86,3 +86,4 @@ ownership_manifest:
     mode: exclusive
 ready_to_merge: false
 live_applied: false
+plane_issue_id: f2097c3e-b37d-4c84-a5cc-b1518ceb3378

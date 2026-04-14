@@ -359,6 +359,7 @@ workstreams:
       mode: exclusive
   ready_to_merge: false
   live_applied: false
+  plane_issue_id: f2097c3e-b37d-4c84-a5cc-b1518ceb3378
 - id: ws-0364-service-api-agent-tools
   adr: '0364'
   title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
