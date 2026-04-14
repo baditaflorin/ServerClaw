@@ -15,7 +15,7 @@
     "substitute_evidence": [
       "git show --stat HEAD"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-13",
     "remediation_ref": "ws-0374-live-apply"
   }

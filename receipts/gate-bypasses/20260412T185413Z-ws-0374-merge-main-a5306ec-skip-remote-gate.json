@@ -19,7 +19,7 @@
       "make validate-generated-cross-cutting",
       "./scripts/validate_repo.sh generated-vars"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-13",
     "remediation_ref": "ws-0374-live-apply"
   }

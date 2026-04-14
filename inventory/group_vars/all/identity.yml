@@ -96,6 +96,6 @@ platform_container_registry: "registry.{{ platform_domain }}"
 # ---------------------------------------------------------------------------
 # Repository identity (used by Gitea, CI, server checkouts)
 # ---------------------------------------------------------------------------
-platform_repo_name: platform_server
+platform_repo_name: proxmox_florin_server
 platform_gitea_org: ops
 platform_repo_checkout_path: "/srv/{{ platform_repo_name }}"

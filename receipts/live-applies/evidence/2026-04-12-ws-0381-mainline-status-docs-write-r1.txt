@@ -1,4 +1,4 @@
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_release_notes.py --write-root-summaries
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/generate_release_notes.py --write-root-summaries
 Updated root summary documents: changelog.md, docs/release-notes/README.md, docs/release-notes/index/2026.md, docs/release-notes/index/README.md
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/generate_status_docs.py --write
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/generate_status_docs.py --write
 Updated generated status docs: README.md, docs/status/history/live-apply-evidence.md, docs/status/history/merged-workstreams.md

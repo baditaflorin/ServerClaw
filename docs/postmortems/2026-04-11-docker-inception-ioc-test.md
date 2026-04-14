@@ -162,7 +162,7 @@ The Ansible extra-vars override mechanism works exactly as designed:
 
 | Variable | Committed | Local Override | Result |
 |----------|-----------|---------------|--------|
-| `platform_domain` | `example.com` | `lv3.org` | Override wins |
+| `platform_domain` | `example.com` | `example.com` | Override wins |
 | `platform_operator_email` | `operator@example.com` | real email | Override wins |
 | `platform_operator_name` | `Platform Operator` | real name | Override wins |
 | `management_ipv4` | not in committed | real IP | Injected |

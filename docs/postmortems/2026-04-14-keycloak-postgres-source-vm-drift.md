@@ -23,8 +23,8 @@ database layer on every request, causing all authentication flows to fail with
 | Time (UTC) | Event |
 |------------|-------|
 | 2026-04-13 ~22:00 | Keycloak migrated from docker-runtime to runtime-control; nginx upstream hotfixed and converged |
-| 2026-04-14 (morning) | User attempts SSO login at `chat.lv3.org` |
-| 2026-04-14 | User reports: `sso.lv3.org` returns "An internal server error has occurred" with a Keycloak error page |
+| 2026-04-14 (morning) | User attempts SSO login at `chat.example.com` |
+| 2026-04-14 | User reports: `sso.example.com` returns "An internal server error has occurred" with a Keycloak error page |
 | +5 min | Investigation: Keycloak container status checked — `Up 35 hours (healthy)` — container is running |
 | +8 min | Keycloak logs examined: `FATAL: no pg_hba.conf entry for host "10.10.10.92", user "keycloak", database "keycloak", SSL encryption` |
 | +10 min | Root cause identified: `platform_postgres_clients.keycloak.source_vm` still set to `docker-runtime` |
@@ -76,7 +76,7 @@ but had no way to discover the full set of registries that needed updating.
 2. **Applied:** Ran `make converge-postgres-vm env=production` — pg_hba.conf regenerated
    with `host keycloak keycloak 10.10.10.92/32 scram-sha-256` entry added
 3. **Cleared:** Restarted `keycloak-keycloak-1` container to flush failed connection pool
-4. **Verified:** SSO login working at `chat.lv3.org`
+4. **Verified:** SSO login working at `chat.example.com`
 
 ---
 

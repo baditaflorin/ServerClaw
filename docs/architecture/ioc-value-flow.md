@@ -165,9 +165,9 @@ graph LR
     end
 
     subgraph DEPLOY["Deployed Instance"]
-        D1["identity: lv3.org"]
-        D2["host_vars: 65.108.75.123"]
-        D3["services: *.lv3.org"]
+        D1["identity: example.com"]
+        D2["host_vars: 203.0.113.1"]
+        D3["services: *.example.com"]
     end
 
     PRIVATE -->|"publish_to_serverclaw.py<br/>Tier C: 0 files changed"| PUBLIC

@@ -4,13 +4,13 @@
 **Severity:** CRITICAL (P0)
 **Duration:** ~6 hours (approx. 03:00–09:00 UTC)
 **Status:** Resolved
-**Affected system:** Proxmox host `65.108.75.123` (all 14 VMs, all platform services)
+**Affected system:** Proxmox host `203.0.113.1` (all 14 VMs, all platform services)
 
 ---
 
 ## Summary
 
-The Proxmox host became completely unreachable after `/etc/network/interfaces` was written with the RFC 5737 documentation placeholder IP `203.0.113.1/26` instead of the real IP `65.108.75.123/26`. When the network was reloaded (`ifreload -a`) during an Ansible convergence, `vmbr0` received the wrong IP. All inbound traffic to the real IP timed out at the network level — the server appeared offline. No application-level error was produced; the host was simply unreachable.
+The Proxmox host became completely unreachable after `/etc/network/interfaces` was written with the RFC 5737 documentation placeholder IP `203.0.113.1/26` instead of the real IP `203.0.113.1/26`. When the network was reloaded (`ifreload -a`) during an Ansible convergence, `vmbr0` received the wrong IP. All inbound traffic to the real IP timed out at the network level — the server appeared offline. No application-level error was produced; the host was simply unreachable.
 
 Recovery required Hetzner KVM console access and a rescue system boot. All 14 VMs remained running throughout but were inaccessible from the internet.
 
@@ -44,7 +44,7 @@ Recovery required Hetzner KVM console access and a rescue system boot. All 14 VM
 | ~09:00 | Hetzner support ticket filed (#2026041203004207); KVM console access requested |
 | ~09:30 | KVM credentials obtained; console attached |
 | ~09:30 | Root cause identified: `ip addr show vmbr0` reveals `203.0.113.1/26` |
-| ~09:35 | Immediate fix: `ip addr del 203.0.113.1/26 dev vmbr0 && ip addr add 65.108.75.123/26 dev vmbr0 broadcast 65.108.75.127`; routes restored |
+| ~09:35 | Immediate fix: `ip addr del 203.0.113.1/26 dev vmbr0 && ip addr add 203.0.113.1/26 dev vmbr0 broadcast 65.108.75.127`; routes restored |
 | ~09:40 | `/etc/network/interfaces` corrected with real IP values |
 | ~09:45 | SSH connectivity restored; all VMs reachable |
 | ~10:00 | pve-firewall guard fixed (nftables → iptables); placeholder IP safety guard added |
@@ -98,7 +98,7 @@ Replaced the v0.178.122 nftables-based guard with an iptables-based guard target
 Added `ansible_port: "{{ lookup('env', 'LV3_PROXMOX_HOST_PORT') | default(22, true) }}"` to the `proxmox-host` inventory entry, and `proxmox_guest_ssh_jump_port` to the ProxyJump args. This allows convergence to route through the break-glass SSH port (2222) when Tailscale is unavailable:
 
 ```bash
-LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-gitea env=production
+LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make converge-gitea env=production
 ```
 
 ### Fix 4 — `keycloak_local_artifact_dir` missing from `gitea.yml`
@@ -119,9 +119,9 @@ ip addr show vmbr0
 
 # 3. Immediate connectivity fix (without reboot)
 ip addr del 203.0.113.1/26 dev vmbr0
-ip addr add 65.108.75.123/26 broadcast 65.108.75.127 dev vmbr0
+ip addr add 203.0.113.1/26 broadcast 65.108.75.127 dev vmbr0
 ip route del default
-ip route add default via 65.108.75.65 dev vmbr0
+ip route add default via 203.0.113.65 dev vmbr0
 
 # 4. If SSH is not listening
 systemctl start ssh
@@ -131,7 +131,7 @@ iptables -L PVEFW-HOST-IN -n   # check if ACCEPT rules are loaded
 systemctl stop pve-firewall     # emergency: INPUT falls through to ACCEPT
 
 # 6. Fix /etc/network/interfaces permanently (use real values)
-# Real IP: 65.108.75.123/26, gateway: 65.108.75.65
+# Real IP: 203.0.113.1/26, gateway: 203.0.113.65
 # Edit: /etc/network/interfaces
 
 # 7. Reload nftables (guest internet may be broken after recovery)
@@ -215,7 +215,7 @@ The `proxmox_network` role already does this (the `Wait for SSH after network re
 
 If `100.64.0.1:22` (Tailscale jump host) is unreachable, the break-glass path is:
 ```bash
-LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make <target> env=production
+LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make <target> env=production
 ```
 This uses the public IP and the break-glass SSH port which is always open. Document this in your session notes whenever running playbooks while Tailscale is down.
 

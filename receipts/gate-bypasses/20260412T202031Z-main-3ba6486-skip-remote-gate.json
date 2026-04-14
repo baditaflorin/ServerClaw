@@ -19,7 +19,7 @@
       "receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-certificates-r1.txt",
       "receipts/live-applies/evidence/2026-04-12-ws-0381-main-auth-verification-r1.txt"
     ],
-    "owner": "Florin Badita-Nistor",
+    "owner": "Platform Operator",
     "expires_on": "2026-04-13",
     "remediation_ref": "docs/workstreams/ws-0381-live-apply.md"
   }

@@ -3,23 +3,23 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/build/changelog-portal
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/build/ops-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/build/docs-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/build/changelog-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/build/ops-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/build/docs-portal
 Result: PASS (live-apply-service)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/scripts/interface_contracts.py --check-live-apply "service:postgres-vm"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/scripts/interface_contracts.py --check-live-apply "service:postgres-vm"
 Live apply contract OK: service:postgres-vm -> playbooks/services/postgres-vm.yml
 INFO live-apply-service: skipping service-catalog gates for non-catalog playbook 'postgres-vm'
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/playbooks/services/postgres-vm.yml (env=production)
-Running scoped playbook: playbooks/services/postgres-vm.yml limit=postgres,postgres-apps,postgres-data,postgres-replica shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0359-main-merge-r2/.ansible/shards/a70a267a63d0406fa387f45c151750b3/postgres-vm-production.json
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/playbooks/services/postgres-vm.yml (env=production)
+Running scoped playbook: playbooks/services/postgres-vm.yml limit=postgres,postgres-apps,postgres-data,postgres-replica shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0359-main-merge-r2/.ansible/shards/a70a267a63d0406fa387f45c151750b3/postgres-vm-production.json
 
 PLAY [Converge PostgreSQL VM baseline] *****************************************
 
