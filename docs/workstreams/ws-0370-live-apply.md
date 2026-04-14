@@ -10,7 +10,7 @@
 - Implemented On: 2026-04-14
 - Latest Verified Base: `origin/main@3cb78f677e3ed6b0f3343c86085c405fdecac8d9` (`repo 0.178.140`, `platform 0.178.138`)
 - Branch: `codex/ws-0370-exact-main`
-- Worktree: `.worktrees/ws-0370-exact-main`
+- Worktree: removed after merge-to-main
 - Owner: codex
 - Depends On: `ADR 0021`, `ADR 0063`, `ADR 0165`, `ADR 0370`, `ADR 0371`
 - Conflicts With: none
@@ -60,5 +60,5 @@
   files fell back to committed `example.com` placeholders. Regenerating platform
   vars from the `.local` overlay restored the real domain and IP topology without
   reintroducing deployment-specific values into generic committed source files.
-- The final push will promote this verified workstream branch directly to
-  `origin/main` and then remove `.worktrees/ws-0370-exact-main`.
+- The verified workstream branch was promoted to `origin/main`, after which the
+  temporary `.worktrees/ws-0370-exact-main` integration worktree was removed.

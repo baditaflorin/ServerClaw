@@ -1,7 +1,7 @@
 id: ws-0370-live-apply
 adr: '0370'
 title: Complete ADR 0370 shared lifecycle adoption and live-apply it from latest origin/main
-status: ready
+status: live_applied
 ready_to_merge: true
 live_applied: true
 owner: codex
@@ -24,7 +24,7 @@ shared_surfaces:
 - docs/release-notes/*.md
 - versions/stack.yaml
 - workstreams.yaml
-- workstreams/active/ws-0370-live-apply.yaml
+- workstreams/archive/2026/ws-0370-live-apply.yaml
 - docs/workstreams/ws-0370-live-apply.md
 - docs/adr/0370-service-lifecycle-task-includes.md
 - docs/adr/.index.yaml
@@ -102,7 +102,7 @@ ownership_manifest:
     contract: workstream-registry-v1
   - id: ws_0370_registry_source
     paths:
-    - workstreams/active/ws-0370-live-apply.yaml
+    - workstreams/archive/2026/ws-0370-live-apply.yaml
     mode: exclusive
   - id: ws_0370_workstream_doc
     paths:
