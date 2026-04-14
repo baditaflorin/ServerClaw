@@ -12,6 +12,7 @@ depends_on:
 - adr-0368-docker-compose-jinja2-macro-library
 conflicts_with: []
 shared_surfaces:
+- catalog/services/redpanda/service.yaml
 - catalog/services/gitea/service.yaml
 - collections/ansible_collections/lv3/platform/playbooks/_includes/templates/compose_macros.j2
 - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
@@ -96,11 +97,18 @@ shared_surfaces:
 - playbooks/tasks/verify-probe.yml
 - playbooks/verify-bootstrap-guests.yml
 - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+- receipts/live-applies/
+- receipts/image-scans/2026-04-14-redpanda-runtime.json
+- receipts/sbom/c61d4eb37091.cdx.json
+- receipts/cve/c61d4eb37091-20260414T044015Z.grype.json
 - receipts/image-scans/2026-04-13-minio-runtime.json
 - receipts/sbom/f6efb212cad3.cdx.json
 - receipts/cve/f6efb212cad3-20260413T222257Z.grype.json
 - receipts/runtime-pool-scaling/.gitkeep
+- scripts/managed_image_gate.py
 - scripts/validate_repo.sh
+- scripts/sbom_scanner.py
+- scripts/upgrade_container_image.py
 - scripts/generate_platform_vars.py
 - scripts/topology-snapshot.json
 - tests/test_ansible_execution_scopes.py
@@ -115,7 +123,9 @@ shared_surfaces:
 - tests/test_proxmox_security_role.py
 - tests/test_redpanda_playbook.py
 - tests/test_redpanda_runtime_role.py
+- tests/test_sbom_scanner.py
 - tests/test_service_definition_catalog.py
+- tests/test_upgrade_container_image.py
 - tests/test_validate_repo_cache.py
 - workstreams/active/ws-0368-live-apply.yaml
 - workstreams.yaml
@@ -152,6 +162,7 @@ ownership_manifest:
     mode: exclusive
   - id: adr_0368_exact_main_replay
     paths:
+    - catalog/services/redpanda/service.yaml
     - catalog/services/gitea/service.yaml
     - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
     - collections/ansible_collections/lv3/platform/roles/gitea_runner/tasks/main.yml
@@ -200,10 +211,16 @@ ownership_manifest:
     - playbooks/tasks/verify-probe.yml
     - playbooks/verify-bootstrap-guests.yml
     - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+    - receipts/image-scans/2026-04-14-redpanda-runtime.json
+    - receipts/sbom/c61d4eb37091.cdx.json
+    - receipts/cve/c61d4eb37091-20260414T044015Z.grype.json
     - receipts/image-scans/2026-04-13-minio-runtime.json
     - receipts/sbom/f6efb212cad3.cdx.json
     - receipts/cve/f6efb212cad3-20260413T222257Z.grype.json
     - receipts/runtime-pool-scaling/.gitkeep
+    - scripts/managed_image_gate.py
+    - scripts/sbom_scanner.py
+    - scripts/upgrade_container_image.py
     - scripts/validate_repo.sh
     - tests/test_ansible_execution_scopes.py
     - tests/test_dns_publication_include.py
@@ -212,7 +229,9 @@ ownership_manifest:
     - tests/test_proxmox_security_role.py
     - tests/test_redpanda_playbook.py
     - tests/test_redpanda_runtime_role.py
+    - tests/test_sbom_scanner.py
     - tests/test_service_definition_catalog.py
+    - tests/test_upgrade_container_image.py
     - tests/test_validate_repo_cache.py
     - scripts/topology-snapshot.json
     mode: exclusive
@@ -244,6 +263,11 @@ ownership_manifest:
     - tests/test_minio_runtime_role.py
     mode: shared_contract
     contract: workstream-registry-v1
+  - id: adr_0368_live_apply_evidence
+    paths:
+    - receipts/live-applies/
+    mode: shared_contract
+    contract: live-apply-evidence-v1
   - id: workstream_registry
     paths:
     - workstreams.yaml

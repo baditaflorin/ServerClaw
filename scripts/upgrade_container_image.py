@@ -82,7 +82,7 @@ def update_catalog(
     entry["digest"] = digest
     entry["ref"] = build_ref(entry["registry_ref"], tag, digest)
     entry["pinned_on"] = scanned_on
-    entry["scan_receipt"] = str(receipt_path.relative_to(IMAGE_CATALOG_PATH.parent.parent))
+    entry["scan_receipt"] = relpath(receipt_path)
     if exception is None:
         entry["scan_status"] = "pass_no_critical"
         entry.pop("exception", None)

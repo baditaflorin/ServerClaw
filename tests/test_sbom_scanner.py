@@ -116,6 +116,36 @@ def test_host_path_for_repo_path_uses_workspace_host(monkeypatch) -> None:
     assert scanner.host_path_for_repo_path(candidate) == Path("/host/workspace/receipts/sbom/image.cdx.json")
 
 
+def test_relpath_falls_back_to_shared_repo_root_for_worktree_receipts(monkeypatch, tmp_path: Path) -> None:
+    shared_root = tmp_path
+    worktree_root = shared_root / ".worktrees" / "ws-0368"
+    receipt_path = shared_root / "receipts" / "sbom" / "image.cdx.json"
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(scanner, "REPO_ROOT", worktree_root)
+    monkeypatch.setattr(scanner, "shared_repo_root", lambda _repo_root=None: shared_root)
+
+    assert scanner.relpath(receipt_path) == "receipts/sbom/image.cdx.json"
+
+
+def test_host_path_for_repo_path_uses_shared_repo_root_for_worktree_receipts(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    shared_root = tmp_path
+    worktree_root = shared_root / ".worktrees" / "ws-0368"
+    receipt_path = shared_root / "receipts" / "sbom" / "image.cdx.json"
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setenv("LV3_DOCKER_WORKSPACE_PATH", "/host/workspace")
+    monkeypatch.setattr(scanner, "REPO_ROOT", worktree_root)
+    monkeypatch.setattr(scanner, "shared_repo_root", lambda _repo_root=None: shared_root)
+
+    assert scanner.host_path_for_repo_path(receipt_path) == Path("/host/workspace/receipts/sbom/image.cdx.json")
+
+
 def test_syft_scan_image_uses_native_syft_on_linux(monkeypatch, tmp_path: Path) -> None:
     recorded: dict[str, object] = {}
     expected_payload = {"bomFormat": "CycloneDX"}

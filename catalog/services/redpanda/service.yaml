@@ -148,8 +148,9 @@ health:
         \    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER',\
         \ 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Content-Type': 'application/vnd.kafka.json.v2+json',\n\
         \        'Accept': 'application/vnd.kafka.v2+json',\n    },\n    method='POST',\n\
-        )\nurllib.request.urlopen(produce_request, timeout=30).read()\n\nrecords_request\
-        \ = urllib.request.Request(\n    'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset=0&timeout=3000&max_bytes=1048576',\n\
+        )\nproduce_payload = json.loads(urllib.request.urlopen(produce_request, timeout=30).read().decode('utf-8'))\n\
+        offset = int(produce_payload['offsets'][0]['offset'])\n\nrecords_request\
+        \ = urllib.request.Request(\n    f'http://127.0.0.1:8103/topics/platform.redpanda.smoke/partitions/0/records?offset={offset}&timeout=3000&max_bytes=1048576',\n\
         \    headers={\n        'Authorization': f\"Basic {auth('REDPANDA_PLATFORM_USER',\
         \ 'REDPANDA_PLATFORM_PASSWORD')}\",\n        'Accept': 'application/vnd.kafka.json.v2+json',\n\
         \    },\n)\nrecords = json.loads(urllib.request.urlopen(records_request, timeout=30).read().decode('utf-8'))\n\

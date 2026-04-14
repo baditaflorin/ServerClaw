@@ -1,0 +1,35 @@
+$ curl -sf http://100.64.0.1:3009/api/v1/version
+{"version":"1.25.5"}
+
+$ curl -sf http://100.64.0.1:3009/api/swagger >/dev/null && echo ok
+ok
+
+$ python3 scripts/release_bundle.py validate --public-key-path keys/gitea-release-bundle-cosign.pub
+{
+  "status": "ok",
+  "file_count": 3888,
+  "public_key": "keys/gitea-release-bundle-cosign.pub",
+  "includes": [
+    ".config-locations.yaml",
+    ".gitea/workflows",
+    ".repo-structure.yaml",
+    "AGENTS.md",
+    "Makefile",
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "ansible.cfg",
+    "collections/ansible_collections/lv3/platform",
+    "config",
+    "docs/adr",
+    "docs/runbooks",
+    "docs/schema",
+    "docs/workstreams",
+    "inventory",
+    "keys/gitea-release-bundle-cosign.pub",
+    "playbooks",
+    "pyproject.toml",
+    "scripts",
+    "workstreams.yaml"
+  ]
+}

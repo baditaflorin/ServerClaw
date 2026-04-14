@@ -27,6 +27,16 @@ def test_gitea_readiness_probe_uses_private_repo_hook_path() -> None:
     )
 
 
+def test_redpanda_readiness_probe_reads_back_from_the_produced_offset() -> None:
+    health_catalog = json.loads((REPO_ROOT / "config" / "health-probe-catalog.json").read_text(encoding="utf-8"))
+    readiness_argv = health_catalog["services"]["redpanda"]["readiness"]["argv"]
+
+    assert "produce_payload = json.loads" in readiness_argv[-1]
+    assert "offset = int(produce_payload['offsets'][0]['offset'])" in readiness_argv[-1]
+    assert "records?offset={offset}" in readiness_argv[-1]
+    assert "records?offset=0" not in readiness_argv[-1]
+
+
 def test_bundle_directory_name_must_match_service_id() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         bundle_root = Path(tmp) / "catalog" / "services"

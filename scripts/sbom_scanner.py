@@ -8,16 +8,18 @@ import platform
 import shutil
 import subprocess
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
 
 from artifact_cache_seed import normalize_registry_host, strip_registry_host
-from controller_automation_toolkit import load_json, repo_path, write_json
+from controller_automation_toolkit import load_json, repo_path, shared_repo_root, write_json
 
 
 REPO_ROOT = repo_path()
@@ -60,8 +62,22 @@ def digest_short(value: str) -> str:
     return cleaned[:12] or "unknown"
 
 
+def _repo_relative_path(path: Path) -> Path:
+    candidate = path.resolve()
+    roots = [REPO_ROOT.resolve()]
+    shared_root = shared_repo_root(REPO_ROOT).resolve()
+    if shared_root not in roots:
+        roots.append(shared_root)
+    for root in roots:
+        try:
+            return candidate.relative_to(root)
+        except ValueError:
+            continue
+    raise ValueError(f"{candidate} is not inside the active repository root or its shared worktree root")
+
+
 def relpath(path: Path) -> str:
-    return str(path.relative_to(REPO_ROOT))
+    return str(_repo_relative_path(path))
 
 
 def ensure_dir(path: Path) -> Path:
@@ -79,7 +95,7 @@ def host_path_for_repo_path(path: Path) -> Path:
     if not host_root:
         return path
     try:
-        rel = path.relative_to(REPO_ROOT)
+        rel = _repo_relative_path(path)
     except ValueError:
         return path
     return host_root / rel
