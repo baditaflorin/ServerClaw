@@ -1,12 +1,12 @@
 id: ws-0368-live-apply
 adr: 0368
 title: ADR 0368 Live Apply and Completion
-status: ready
+status: live_applied
 ready_to_merge: true
 live_applied: true
 owner: codex
-branch: codex/ws-0368-main-integration-r3
-worktree_path: .worktrees/ws-0368-main-integration-r3
+branch: codex/ws-0368-main-publish-r4
+worktree_path: .worktrees/ws-0368-main-publish-r4
 doc: docs/workstreams/ws-0368-live-apply.md
 depends_on:
 - adr-0368-docker-compose-jinja2-macro-library
@@ -102,6 +102,7 @@ shared_surfaces:
 - receipts/live-applies/
 - receipts/live-applies/ws-0368-live-apply-apply-receipt.yaml
 - receipts/live-applies/2026-04-14-adr-0368-docker-compose-jinja2-macro-library-live-apply.json
+- receipts/live-applies/2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply.json
 - receipts/live-applies/evidence/2026-04-14-ws-0368-check-build-server-r1-0.178.137.txt
 - receipts/live-applies/evidence/2026-04-14-ws-0368-git-diff-check-r1-0.178.137.txt
 - receipts/live-applies/evidence/2026-04-14-ws-0368-gitea-verify-r1-0.178.137.txt
@@ -110,6 +111,18 @@ shared_surfaces:
 - receipts/live-applies/evidence/2026-04-14-ws-0368-redpanda-verify-r1-0.178.137.txt
 - receipts/live-applies/evidence/2026-04-14-ws-0368-remote-validate-r1-0.178.137.txt
 - receipts/live-applies/evidence/2026-04-14-ws-0368-repo-gates-r1-0.178.137.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-pytest-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-check-build-server-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-minio-live-apply-r3-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-live-apply-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-verify-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-redpanda-live-apply-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-pytest-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-repo-gates-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-live-apply-receipts-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-git-diff-check-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-check-build-server-r1-0.178.138.txt
+- receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-remote-validate-r1-0.178.138.txt
 - receipts/image-scans/2026-04-14-redpanda-runtime.json
 - receipts/sbom/c61d4eb37091.cdx.json
 - receipts/cve/c61d4eb37091-20260414T044015Z.grype.json
@@ -139,7 +152,7 @@ shared_surfaces:
 - tests/test_service_definition_catalog.py
 - tests/test_upgrade_container_image.py
 - tests/test_validate_repo_cache.py
-- workstreams/active/ws-0368-live-apply.yaml
+- workstreams/archive/2026/ws-0368-live-apply.yaml
 - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
@@ -270,7 +283,7 @@ ownership_manifest:
     - docs/adr/index/by-status/implemented.yaml
     - docs/adr/index/by-status/proposed.yaml
     - docs/workstreams/ws-0368-live-apply.md
-    - workstreams/active/ws-0368-live-apply.yaml
+    - workstreams/archive/2026/ws-0368-live-apply.yaml
     - tests/test_flagsmith_runtime_role.py
     - tests/test_gitea_runtime_role.py
     - tests/test_label_studio_runtime_role.py
@@ -280,6 +293,7 @@ ownership_manifest:
   - id: adr_0368_live_apply_evidence
     paths:
     - receipts/live-applies/
+    - receipts/live-applies/2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply.json
     - receipts/live-applies/evidence/2026-04-14-ws-0368-check-build-server-r1-0.178.137.txt
     - receipts/live-applies/evidence/2026-04-14-ws-0368-git-diff-check-r1-0.178.137.txt
     - receipts/live-applies/evidence/2026-04-14-ws-0368-gitea-verify-r1-0.178.137.txt
@@ -288,6 +302,18 @@ ownership_manifest:
     - receipts/live-applies/evidence/2026-04-14-ws-0368-redpanda-verify-r1-0.178.137.txt
     - receipts/live-applies/evidence/2026-04-14-ws-0368-remote-validate-r1-0.178.137.txt
     - receipts/live-applies/evidence/2026-04-14-ws-0368-repo-gates-r1-0.178.137.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-pytest-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-check-build-server-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-minio-live-apply-r3-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-live-apply-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-gitea-verify-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-redpanda-live-apply-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-pytest-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-repo-gates-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-live-apply-receipts-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-git-diff-check-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-check-build-server-r1-0.178.138.txt
+    - receipts/live-applies/evidence/2026-04-14-ws-0368-mainline-final-remote-validate-r1-0.178.138.txt
     mode: shared_contract
     contract: live-apply-evidence-v1
   - id: workstream_registry
@@ -295,28 +321,38 @@ ownership_manifest:
     - workstreams.yaml
     mode: shared_contract
     contract: workstream-registry-v1
-notes: 'Purpose-built closure workstream for ADR 0368. Scope includes completing the
+notes: |
+  Purpose-built closure workstream for ADR 0368. Scope covered the remaining
+  compose-macro rollout, the later fresh-worktree and data-model drift that
+  blocked truthful exact-main replay, the merged-main MinIO, Gitea, and
+  Redpanda replays, and the final release-truth updates required once the
+  live apply was verified from main.
 
-  shared compose macro adoption, reconciling later hairpin automation drift,
+  Latest realistic origin/main remained
+  6aeb26434724680c6da2162cd3544031b5a93f03 during closeout, with repository
+  version 0.178.137 and platform version 0.178.133. The workstream repaired
+  the Redpanda readiness probe to read back from the produced Kafka offset,
+  fixed shared-worktree receipt resolution in the SBOM and managed-image
+  helpers, materialized the missing fresh-worktree generated artifacts needed
+  for the exact-main MinIO replay, and reran MinIO, Gitea, and Redpanda from
+  the merged main candidate.
 
-  replaying the exact-main Redpanda and data-model fixes needed for truthful
-
-  live apply, validating the repo automation path, and recording live-apply
-
-  evidence plus final ADR metadata without touching protected release files
-
-  until the final integration step.
-
-  Latest realistic origin/main replay is complete at 6aeb26434724680c6da2162cd3544031b5a93f03
-  (VERSION 0.178.137). MinIO, Gitea, and Redpanda were replayed successfully on
-  2026-04-14, with Redpanda requiring a readiness-probe repair to read back from
-  the produced Kafka offset instead of hard-coding offset=0. check-build-server
-  passed, and make remote-validate completed through the governed local fallback
-  after the remote builder could not resolve registry.example.com for runner
-  images. Remaining work is integration-only: merge onto the latest main tip,
-  replay from merged main, update protected release truth, push origin/main, and
-  retire this worktree.
-
-  '
+  Final validation passed for focused pytest, the direct validate_repo gate
+  bundle, live-apply receipt schema validation, git diff check,
+  check-build-server, and remote-validate. remote-validate exercised the
+  governed failure-and-recovery path end to end: the build server could not
+  resolve registry.example.com for the validation runner images, and the repo
+  then reran the unresolved checks locally with all blocking lanes passing.
 blockers: []
+canonical_truth:
+  changelog_entry: live-apply ADR 0368 from the latest realistic origin/main base
+    by repairing the Redpanda readiness probe offset handling, refreshing shared-worktree
+    SBOM and image receipt paths, and re-verifying MinIO, Gitea, Redpanda, check-build-server,
+    and remote-validate end to end
+  release_bump: patch
+  included_in_repo_version: 0.178.138
+  latest_receipts:
+    gitea: 2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply
+    minio: 2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply
+    redpanda: 2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply
 plane_issue_id: 5bd08ebb-7b42-4947-b3d1-bcb3d20fcd84

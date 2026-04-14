@@ -167,6 +167,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0368` | ADR 0368 Live Apply and Completion | `live_applied` | [ws-0368-live-apply.md](../../workstreams/ws-0368-live-apply.md) |
 | `0375` | Latest-main integration: edge certificate recovery and validation gate repairs | `merged` | [ws-0417-main-merge-edge-cert-and-sftpgo.md](../../workstreams/ws-0417-main-merge-edge-cert-and-sftpgo.md) |
 | `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](../../workstreams/ws-0372-live-apply.md) |
 | `0364` | ADR 0364 post-merge validation closure on latest origin/main | `merged` | [ws-0364-post-merge-validation.md](../../workstreams/ws-0364-post-merge-validation.md) |

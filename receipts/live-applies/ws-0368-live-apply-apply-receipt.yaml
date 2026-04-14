@@ -2,13 +2,13 @@ workstream_id: ws-0368-live-apply
 state: completed
 schema_version: 1.1.0
 started_at: '2026-04-14T00:02:00Z'
-completed_at: '2026-04-14T05:13:19Z'
+completed_at: '2026-04-14T06:06:02Z'
 applied_by: codex
-repo_version: 90004bc486852ed737a12a3dc204137df798adaf
-adr: 0368
-summary: Live-apply ADR 0368 compose-macro adoption from the latest realistic
-  origin/main base and repair the exact-main replay gaps surfaced by the governed
-  MinIO, Gitea, and Redpanda replays.
+repo_version: 0.178.138
+adr: '0368'
+summary: Live-apply ADR 0368 from the latest realistic origin/main base and carry
+  the verified exact-main MinIO, Gitea, and Redpanda replays into integrated repo
+  and platform version 0.178.138.
 targets:
 - target: docker-runtime
   role: redpanda_runtime
@@ -18,15 +18,19 @@ targets:
   role: gitea_runtime
 errors: []
 notes:
+- The branch-local exact-main repair replay completed first, then the merged main
+  candidate replay completed from origin/main@6aeb26434724680c6da2162cd3544031b5a93f03
+  after materializing the missing fresh-worktree generated artifacts.
 - MinIO replay completed via ALLOW_IN_PLACE_MUTATION=true make live-apply-service
-  service=minio env=production and post-apply health probes passed.
+  service=minio env=production and the mainline evidence captured the public
+  health endpoint plus oauth2-proxy redirect verification.
 - Gitea replay completed via ALLOW_IN_PLACE_MUTATION=true make live-apply-service
-  service=gitea env=production and the private API plus release-bundle validation
-  passed.
-- Redpanda replay initially failed because the readiness probe always read
-  offset=0; the catalog and generated health-probe bundle were repaired to read
-  back from the produced offset, after which the replay and direct smoke
-  verification passed.
-- check-build-server passed from this worktree, and make remote-validate
-  completed through the governed local fallback after the remote builder failed
-  to resolve registry.example.com for runner images.
+  service=gitea env=production and the mainline evidence captured the private API,
+  swagger endpoint, and signed release-bundle validation.
+- Redpanda replay required repairing the readiness probe to read back from the
+  produced Kafka offset instead of hard-coding offset=0, after which the exact-main
+  replay and stream-contract verification passed.
+- Final validation passed for focused pytest, the direct validate_repo gate bundle,
+  live-apply receipt schema validation, git diff check, check-build-server, and the
+  remote-validate fallback path after the build server failed to resolve
+  registry.example.com for runner images.

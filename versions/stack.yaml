@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.137
-platform_version: 0.178.133
+repo_version: 0.178.138
+platform_version: 0.178.138
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -25,7 +25,7 @@ live_apply_evidence:
     docker_runtime: 2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply
     dozzle: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
     falco: 2026-04-03-adr-0300-falco-mainline-live-apply
-    gitea: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    gitea: 2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply
     grist: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     homepage: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
@@ -39,7 +39,7 @@ live_apply_evidence:
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     backup_coverage: 2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply
     restic_config_backup: 2026-03-31-adr-0302-restic-config-backup-mainline-live-apply
-    minio: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
+    minio: 2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply
     guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply
@@ -153,7 +153,7 @@ live_apply_evidence:
     temporal: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     renovate: 2026-03-31-adr-0297-renovate-mainline-live-apply
     piper: 2026-03-31-adr-0284-piper-mainline-live-apply
-    redpanda: 2026-03-31-adr-0290-redpanda-mainline-live-apply
+    redpanda: 2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply
     serverclaw_skills: 2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply
     sbom_cve_scanning: 2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply
     paperless: 2026-04-04-ws-0335-service-recovery-followup-live-apply
@@ -1180,8 +1180,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.137
+    current: 0.178.138
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.133
+    current: 0.178.138
     meaning: intended platform release for the actual server configuration

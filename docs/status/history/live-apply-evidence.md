@@ -8,6 +8,9 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
+| `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
+| `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
@@ -33,7 +36,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `keycloak` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `homepage` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `harbor` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `gitea` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `api_gateway` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
@@ -45,7 +47,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `paperless` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `outline` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `ops_portal` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
-| `minio` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `matrix_synapse` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `jupyterhub` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `grist` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
@@ -83,7 +84,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `sbom_cve_scanning` | `2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply` |
 | `restic_config_backup` | `2026-03-31-adr-0302-restic-config-backup-mainline-live-apply` |
 | `renovate` | `2026-03-31-adr-0297-renovate-mainline-live-apply` |
-| `redpanda` | `2026-03-31-adr-0290-redpanda-mainline-live-apply` |
 | `postgres_audit` | `2026-03-31-adr-0303-pgaudit-mainline-live-apply` |
 | `piper` | `2026-03-31-adr-0284-piper-mainline-live-apply` |
 | `k6_load_testing` | `2026-03-31-adr-0305-k6-mainline-live-apply` |

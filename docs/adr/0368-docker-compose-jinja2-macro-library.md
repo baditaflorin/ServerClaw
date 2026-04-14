@@ -4,7 +4,7 @@
 - Status: Accepted
 - Implementation Status: Live applied
 - Implemented In Repo Version: 0.178.116
-- Implemented In Platform Version: 0.178.137
+- Implemented In Platform Version: 0.178.138
 - Implemented On: 2026-04-14
 - Deciders: platform team
 - Concern: platform, dry

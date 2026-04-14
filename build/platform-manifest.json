@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.137",
-  "platform_version": "0.178.133",
-  "generated_at": "2026-04-14T03:22:40Z",
-  "next_refresh_at": "2026-04-14T04:22:40Z",
+  "repo_version": "0.178.138",
+  "platform_version": "0.178.138",
+  "generated_at": "2026-04-14T06:21:07Z",
+  "next_refresh_at": "2026-04-14T07:21:07Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.136",
+    "last_version": "0.178.137",
     "deployed_at": "2026-04-14",
-    "summary": "repair edge certificate recovery on latest origin/main and refresh the generated release, workstream, and validation surfaces needed to land the merge cleanly",
-    "release_notes_url": "docs/release-notes/0.178.137.md"
+    "summary": "live-apply ADR 0368 from the latest realistic origin/main base by repairing the Redpanda readiness probe offset handling, refreshing shared-worktree SBOM and image receipt paths, and re-verifying MinIO, Gitea, Redpanda, check-build-server, and remote-validate end to end",
+    "release_notes_url": "docs/release-notes/0.178.138.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
