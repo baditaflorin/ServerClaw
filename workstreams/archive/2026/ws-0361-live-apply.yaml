@@ -19,7 +19,7 @@ shared_surfaces:
 - docs/runbooks/configure-semaphore.md
 - docs/runbooks/configure-semaphore-keycloak.md
 - docs/postmortems/2026-04-11-public-release-secret-exposure.md
-- workstreams/done/ws-0361-live-apply.yaml
+- workstreams/archive/2026/ws-0361-live-apply.yaml
 - workstreams.yaml
 - docs/adr/.index.yaml
 - docs/adr/index/**/*.yaml
@@ -114,6 +114,6 @@ canonical_truth:
   release_bump: patch
   included_in_repo_version: 0.178.130
   latest_receipts:
-    semaphore_keycloak_oidc: 2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply
+    semaphore: 2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply
 blockers: []
 plane_issue_id: ef6c2a9c-6b89-4760-b443-95ee881e4511

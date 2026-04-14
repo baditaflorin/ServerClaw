@@ -41,6 +41,7 @@ class WorkstreamCanonicalTruth:
     adr: str
     title: str
     status: str
+    live_applied: bool
     changelog_entry: str | None
     release_bump: str | None
     included_in_repo_version: str | None
@@ -97,6 +98,7 @@ def load_workstream_canonical_truth(path: Path | None = None) -> list[Workstream
         adr = _require_string(workstream_mapping.get("adr"), path=f"{workstream_path}.adr")
         title = _require_string(workstream_mapping.get("title"), path=f"{workstream_path}.title")
         status = _require_string(workstream_mapping.get("status"), path=f"{workstream_path}.status")
+        live_applied = bool(workstream_mapping.get("live_applied", status == LIVE_APPLIED_STATUS))
 
         canonical_truth = workstream_mapping.get("canonical_truth")
         if canonical_truth is None:
@@ -148,6 +150,7 @@ def load_workstream_canonical_truth(path: Path | None = None) -> list[Workstream
                 adr=adr,
                 title=title,
                 status=status,
+                live_applied=live_applied,
                 changelog_entry=changelog_entry,
                 release_bump=release_bump,
                 included_in_repo_version=included_in_repo_version,
@@ -238,7 +241,7 @@ def assemble_latest_receipts(
             candidate.workstream_id,
         ),
     ):
-        if item.status != LIVE_APPLIED_STATUS:
+        if not item.live_applied and item.status != LIVE_APPLIED_STATUS:
             continue
         for capability, receipt_id in item.latest_receipts.items():
             assembled[capability] = receipt_id

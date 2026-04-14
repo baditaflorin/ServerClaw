@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.178.138
+repo_version: 0.178.139
 platform_version: 0.178.138
 
 live_apply_evidence:
@@ -13,12 +13,12 @@ live_apply_evidence:
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+    public_edge_publication: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
     headscale: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
     vikunja: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
-    semaphore: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    semaphore: 2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    identity_core_watchdog: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
+    identity_core_watchdog: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
@@ -68,7 +68,7 @@ live_apply_evidence:
     neko: 2026-04-12-adr-0380-neko-exact-main-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
+    keycloak: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     openfga: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -78,7 +78,7 @@ live_apply_evidence:
     security_posture_reporting: 2026-03-26-adr-0102-security-posture-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     searxng: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
-    ops_portal: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
+    ops_portal: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
     ollama: 2026-04-07-ollama-serverclaw-gemma4-live-apply
     operator_access: 2026-04-02-adr-0315-canonical-page-states-mainline-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
@@ -89,7 +89,7 @@ live_apply_evidence:
     failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
     flagsmith: 2026-03-30-adr-0288-flagsmith-mainline-live-apply
     crawl4ai: 2026-03-31-adr-0288-crawl4ai-mainline-live-apply
-    coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
+    coolify: 2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply
     coolify_apps: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
     outline: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
@@ -183,6 +183,9 @@ live_apply_evidence:
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     service_definition_catalog_assembly: 2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply
+    realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
+    stage_smoke_promotion_gates: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+    education_wemeshup: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -1180,7 +1183,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.138
+    current: 0.178.139
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.178.138

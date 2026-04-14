@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 313
+  total_workstreams: 314
   by_year:
-    '2026': 313
+    '2026': 314
 workstreams:
 - id: ws-0417-attack-surface-hardening
   title: "ADR 0417 \u2014 External Attack Surface Hardening"
