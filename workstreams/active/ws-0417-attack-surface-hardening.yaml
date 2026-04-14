@@ -2,8 +2,18 @@ id: ws-0417-attack-surface-hardening
 title: "ADR 0417 — External Attack Surface Hardening"
 adr: "0417"
 status: in_progress
+ready_to_merge: false
+live_applied: false
 branch: claude/adr-0413-librechat-nginx
 owner: claude
+worktree_path: .claude/worktrees/adr-0413-librechat-nginx
+doc: docs/adr/0417-external-attack-surface-hardening.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0417-attack-surface-hardening.yaml
+  - docs/adr/0417-external-attack-surface-hardening.md
 started: "2026-04-14"
 priority: p0
 surfaces:
@@ -16,3 +26,14 @@ summary: >
   (2) internal IPs removed from system prompt, (3) Keycloak /admin/ ACL-restricted
   to internal CIDRs, (4) API gateway /docs blocked at nginx edge.
   Regression tests enforce these controls in CI.
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0417_tracking
+      paths:
+        - workstreams/active/ws-0417-attack-surface-hardening.yaml
+        - docs/adr/0417-external-attack-surface-hardening.md
+      mode: shared_contract
+      contract: workstream-registry-v1
+notes: |
+  Red-team hardening workstream for the external LibreChat, ServerClaw, Keycloak,
+  and API-gateway exposure surfaces discovered on 2026-04-14.

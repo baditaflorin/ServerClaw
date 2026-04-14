@@ -10,7 +10,7 @@ generated: '2026-04-14'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 33
+total_adrs: 32
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -332,26 +332,6 @@ adrs:
     summary: We will deploy SFTPGo as the managed file transfer service for all SFTP,
     filename: 0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
     path: docs/adr/0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
-  - adr: '0324'
-    title: Service Definition Shards And Generated Service Catalog Assembly
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-04-01'
-    concern: documentation
-    keywords:
-      - services
-      - catalogs
-      - generation
-      - sharding
-      - repo-structure
-      - service
-      - definition
-      - shards
-      - generated
-      - catalog
-    summary: We will move service-shaped repository truth toward per-service source
-    filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
-    path: docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
   - adr: '0347'
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted

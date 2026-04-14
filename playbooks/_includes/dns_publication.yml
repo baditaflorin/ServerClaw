@@ -38,25 +38,25 @@
         file: "{{ subdomain_catalog_path }}"
         name: subdomain_catalog
 
-    - name: "Select the {{ service_dns_fqdn }} subdomain entry"
+    - name: "Select the {{ service_dns_fqdn | default('service.example.com') }} subdomain entry"
       ansible.builtin.set_fact:
         selected_subdomain: >-
           {{
             (
               subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', service_dns_fqdn)
+              | selectattr('fqdn', 'equalto', service_dns_fqdn | default('service.example.com'))
               | list
               | first
             ) | default({})
           }}
 
-    - name: "Assert {{ service_dns_fqdn }} is catalogued"
+    - name: "Assert {{ service_dns_fqdn | default('service.example.com') }} is catalogued"
       ansible.builtin.assert:
         that:
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
           - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
-        fail_msg: "{{ service_dns_fqdn }} must exist in config/subdomain-catalog.json before live apply."
+        fail_msg: "{{ service_dns_fqdn | default('service.example.com') }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:
@@ -78,7 +78,7 @@
             else selected_subdomain.target
           }}
 
-    - name: "Converge the {{ service_dns_fqdn }} Hetzner DNS record"
+    - name: "Converge the {{ service_dns_fqdn | default('service.example.com') }} Hetzner DNS record"
       ansible.builtin.include_role:
         name: lv3.platform.hetzner_dns_record
       vars:

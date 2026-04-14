@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import uuid
@@ -43,6 +44,7 @@ class ScopeCatalogEntry:
     execution_class: str
     shared_surfaces: tuple[str, ...]
     target_lane: str | None = None
+    host_pattern_var: str | None = None
     integration_only: bool = False
 
 
@@ -54,6 +56,7 @@ class ResolvedPlaybookScope:
     execution_class: str
     shared_surfaces: tuple[str, ...]
     target_lane: str | None
+    host_pattern_var: str | None
     integration_only: bool
     source_leaf_playbooks: tuple[str, ...]
 
@@ -132,6 +135,10 @@ def load_scope_catalog(*, catalog_path: Path = CATALOG_PATH, repo_root: Path = R
         if mutation_scope == "lane" and not target_lane:
             raise AnsibleExecutionScopeError(f"{catalog_path}:{raw_path} lane scope requires target_lane")
 
+        host_pattern_var = raw_entry.get("host_pattern_var")
+        if host_pattern_var is not None and (not isinstance(host_pattern_var, str) or not host_pattern_var.strip()):
+            raise AnsibleExecutionScopeError(f"{catalog_path}:{raw_path}.host_pattern_var must be a non-empty string")
+
         integration_only = raw_entry.get("integration_only", False)
         if not isinstance(integration_only, bool):
             raise AnsibleExecutionScopeError(f"{catalog_path}:{raw_path}.integration_only must be boolean")
@@ -143,6 +150,7 @@ def load_scope_catalog(*, catalog_path: Path = CATALOG_PATH, repo_root: Path = R
             execution_class=execution_class,
             shared_surfaces=tuple(shared_surfaces),
             target_lane=target_lane.strip() if isinstance(target_lane, str) else None,
+            host_pattern_var=host_pattern_var.strip() if isinstance(host_pattern_var, str) else None,
             integration_only=integration_only,
         )
 
@@ -192,6 +200,67 @@ def _render_hosts_expression(raw_hosts: str, *, env: str) -> str:
     if "{{" in rendered or "}}" in rendered:
         raise AnsibleExecutionScopeError(f"unsupported hosts expression: {raw_hosts!r}")
     return rendered.strip()
+
+
+def _parse_extra_vars_payload(payload: str, *, repo_root: Path) -> dict[str, Any]:
+    payload = payload.strip()
+    if not payload:
+        raise AnsibleExecutionScopeError("extra-vars payload must not be empty")
+    if payload.startswith("@"):
+        extra_vars_path = Path(payload[1:])
+        if not extra_vars_path.is_absolute():
+            extra_vars_path = (repo_root / extra_vars_path).resolve()
+        loaded_payload = load_yaml(extra_vars_path)
+        if not isinstance(loaded_payload, dict):
+            raise AnsibleExecutionScopeError(f"extra-vars file '{extra_vars_path}' must contain a mapping")
+        return {str(key): value for key, value in loaded_payload.items()}
+    if payload.startswith("{"):
+        loaded_payload = json.loads(payload)
+        if not isinstance(loaded_payload, dict):
+            raise AnsibleExecutionScopeError("JSON extra-vars payload must contain an object")
+        return {str(key): value for key, value in loaded_payload.items()}
+
+    extra_vars: dict[str, Any] = {}
+    for token in shlex.split(payload):
+        if "=" not in token:
+            raise AnsibleExecutionScopeError(f"unsupported extra-vars token: {token!r}")
+        key, value = token.split("=", 1)
+        if not key:
+            raise AnsibleExecutionScopeError(f"extra-vars token must define a key: {token!r}")
+        extra_vars[key] = value
+    return extra_vars
+
+
+def extract_extra_vars_from_passthrough(
+    passthrough_args: list[str] | None,
+    *,
+    repo_root: Path = REPO_ROOT,
+) -> dict[str, Any]:
+    if not passthrough_args:
+        return {}
+
+    extra_vars: dict[str, Any] = {}
+    index = 0
+    while index < len(passthrough_args):
+        token = passthrough_args[index]
+        payload: str | None = None
+        if token in {"-e", "--extra-vars"}:
+            if index + 1 >= len(passthrough_args):
+                raise AnsibleExecutionScopeError(f"{token} requires a payload")
+            payload = passthrough_args[index + 1]
+            index += 2
+        elif token.startswith("--extra-vars="):
+            payload = token.split("=", 1)[1]
+            index += 1
+        elif token.startswith("-e") and token != "-e":
+            payload = token[2:]
+            index += 1
+        else:
+            index += 1
+            continue
+
+        extra_vars.update(_parse_extra_vars_payload(payload, repo_root=repo_root))
+    return extra_vars
 
 
 def _collect_inventory_hosts(payload: Any) -> tuple[str, ...]:
@@ -317,6 +386,7 @@ def _aggregate_imported_scope(playbook_path: str, child_scopes: list[ResolvedPla
             execution_class=child.execution_class,
             shared_surfaces=_unique_preserving_order([playbook_path, *child.shared_surfaces]),
             target_lane=child.target_lane,
+            host_pattern_var=child.host_pattern_var,
             integration_only=child.integration_only,
             source_leaf_playbooks=child.source_leaf_playbooks,
         )
@@ -339,6 +409,7 @@ def _aggregate_imported_scope(playbook_path: str, child_scopes: list[ResolvedPla
             [playbook_path, *(surface for scope in child_scopes for surface in scope.shared_surfaces)]
         ),
         target_lane=target_lane,
+        host_pattern_var=None,
         integration_only=playbook_path == "playbooks/site.yml",
         source_leaf_playbooks=_unique_preserving_order(
             [leaf for scope in child_scopes for leaf in scope.source_leaf_playbooks]
@@ -377,6 +448,7 @@ def resolve_playbook_scope(
                 ]
             ),
             target_lane=entry.target_lane,
+            host_pattern_var=entry.host_pattern_var,
             integration_only=entry.integration_only,
             source_leaf_playbooks=(playbook_path,),
         )
@@ -411,12 +483,40 @@ def discover_target_hosts(
     env: str,
     inventory_path: Path = INVENTORY_PATH,
     repo_root: Path = REPO_ROOT,
+    catalog_path: Path = CATALOG_PATH,
+    extra_vars: dict[str, Any] | None = None,
+    resolved_scope: ResolvedPlaybookScope | None = None,
     ansible_playbook_bin: str = "ansible-playbook",
     ansible_inventory_bin: str = "ansible-inventory",
 ) -> tuple[str, ...]:
     del ansible_playbook_bin
     playbook_path = normalize_repo_path(playbook, repo_root=repo_root)
-    host_patterns = _discover_playbook_host_patterns(playbook_path, env=env, repo_root=repo_root)
+    scope = resolved_scope
+    if scope is None:
+        try:
+            scope = resolve_playbook_scope(playbook_path, repo_root=repo_root, catalog_path=catalog_path)
+        except AnsibleExecutionScopeError as exc:
+            if "does not define imports or a leaf catalog entry" not in str(exc):
+                raise
+            scope = None
+    if scope and scope.host_pattern_var:
+        if extra_vars is None:
+            raise AnsibleExecutionScopeError(
+                f"playbook '{playbook_path}' requires extra-vars to resolve host pattern '{scope.host_pattern_var}'"
+            )
+        raw_host_pattern = extra_vars.get(scope.host_pattern_var)
+        if raw_host_pattern is None:
+            raise AnsibleExecutionScopeError(
+                f"playbook '{playbook_path}' requires extra-var '{scope.host_pattern_var}' to resolve target hosts"
+            )
+        host_pattern = str(raw_host_pattern).strip()
+        if not host_pattern:
+            raise AnsibleExecutionScopeError(
+                f"playbook '{playbook_path}' resolved empty host pattern from extra-var '{scope.host_pattern_var}'"
+            )
+        host_patterns = (host_pattern,)
+    else:
+        host_patterns = _discover_playbook_host_patterns(playbook_path, env=env, repo_root=repo_root)
     if not host_patterns:
         raise AnsibleExecutionScopeError(f"playbook '{playbook_path}' resolved no host patterns for env '{env}'")
     hosts: list[str] = []
@@ -518,6 +618,7 @@ def plan_playbook_execution(
     env: str,
     run_id: str | None = None,
     shard_root: Path | None = None,
+    extra_vars: dict[str, Any] | None = None,
     inventory_path: Path = INVENTORY_PATH,
     repo_root: Path = REPO_ROOT,
     catalog_path: Path = CATALOG_PATH,
@@ -530,6 +631,9 @@ def plan_playbook_execution(
         env=env,
         inventory_path=inventory_path,
         repo_root=repo_root,
+        catalog_path=catalog_path,
+        extra_vars=extra_vars,
+        resolved_scope=resolved_scope,
         ansible_playbook_bin=ansible_playbook_bin,
         ansible_inventory_bin=ansible_inventory_bin,
     )
@@ -595,6 +699,8 @@ def _collect_makefile_entrypoints(makefile_path: Path, repo_root: Path) -> tuple
             if not match:
                 continue
             path = match.group("path")
+            if "$(" in path:
+                break
             if "--syntax-check" in line:
                 break
             if path.startswith("playbooks/tasks/") or path.startswith("playbooks/vars/"):
@@ -655,11 +761,13 @@ def run_scoped_playbook(
     ansible_inventory_bin: str = "ansible-inventory",
     lane_registry: LaneRegistry | None = None,
 ) -> subprocess.CompletedProcess[str]:
+    extra_vars = extract_extra_vars_from_passthrough(passthrough_args, repo_root=repo_root)
     plan = plan_playbook_execution(
         playbook,
         env=env,
         run_id=run_id,
         shard_root=shard_root,
+        extra_vars=extra_vars,
         inventory_path=inventory_path,
         repo_root=repo_root,
         catalog_path=catalog_path,

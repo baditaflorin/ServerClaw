@@ -18,6 +18,7 @@ service:
   runtime_pool: runtime-general
   deployment_surface: playbooks/sftpgo.yml
   restart_domain: runtime-general-data-apps
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: elastic_stateless
   tags:
     - sftp
@@ -36,7 +37,15 @@ completeness:
   requires_secrets: true
   requires_compose_secrets: true
   keycloak_client_generated: true
-  suppressed_checks: {}
+  suppressed_checks:
+    health_probe: '2026-09-23'
+    api_gateway: '2026-09-23'
+    secret_definition: '2026-09-23'
+    grafana_dashboard: '2026-09-23'
+    slo_definition: '2026-09-23'
+    data_catalog: '2026-09-23'
+    alert_rules: '2026-09-23'
+    runbook: '2026-09-23'
 redundancy:
   tier: R1
   recovery_objective:

@@ -81,10 +81,10 @@ ownership_manifest:
     contract: workstream-registry-v1
 canonical_truth:
   changelog_entry: align live-apply-service descriptor loading with ADR 0372 playbook
-    composition, add missing keycloak/searxng service wrappers, and verify the
-    include-based playbook tests
+    composition, add missing keycloak/searxng service wrappers, and verify the include-based
+    playbook tests
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.136
   latest_receipts: {}
 description: 'Finalize ADR 0372 on the governed live-apply path. The branch verifies
   that
@@ -99,13 +99,11 @@ description: 'Finalize ADR 0372 on the governed live-apply path. The branch veri
 
   '
 blockers:
-- >-
-  Live-apply-service fails the vulnerability budget gate because the image scan
-  receipts for edge-published services (ex: directus_runtime dated 2026-03-30)
-  are older than the 7-day policy window.
-- >-
-  Attempted to refresh scans on docker-runtime, but trivy remote scans fail because
-  tagged images (ex: minio/minio:RELEASE.2025-07-23T15-54-02Z) are no longer
-  present locally and the host cannot resolve docker.io to pull; artifact-cache
-  scans also time out at 10.10.10.80:5001.
+- 'Live-apply-service fails the vulnerability budget gate because the image scan receipts
+  for edge-published services (ex: directus_runtime dated 2026-03-30) are older than
+  the 7-day policy window.'
+- 'Attempted to refresh scans on docker-runtime, but trivy remote scans fail because
+  tagged images (ex: minio/minio:RELEASE.2025-07-23T15-54-02Z) are no longer present
+  locally and the host cannot resolve docker.io to pull; artifact-cache scans also
+  time out at 10.10.10.80:5001.'
 plane_issue_id: 86a2487d-67a2-40d6-974a-5da04320db13

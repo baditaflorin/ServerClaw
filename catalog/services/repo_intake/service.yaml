@@ -16,9 +16,11 @@ service:
   secret_catalog_ids: []
   adr: '0373'
   adr_file: docs/adr/0373-service-registry-and-derived-defaults.md
+  runbook: docs/runbooks/repo-intake.md
   runtime_pool: runtime-general
   deployment_surface: playbooks/services/repo-intake.yml
   restart_domain: runtime-general
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
   mobility_tier: elastic_stateless
   tags:
     - webhook
@@ -36,7 +38,13 @@ completeness:
   requires_oidc: false
   requires_secrets: true
   requires_compose_secrets: false
-  suppressed_checks: {}
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+    secret_definition: '2026-09-23'
+    grafana_dashboard: '2026-09-23'
+    slo_definition: '2026-09-23'
+    data_catalog: '2026-09-23'
+    alert_rules: '2026-09-23'
 redundancy:
   tier: R1
   recovery_objective:

@@ -84,6 +84,44 @@ def resolve_status_file(path: Path, workspace: Path) -> Path:
     return workspace / path
 
 
+def _python_meets_min_version(candidate: str) -> bool:
+    completed = subprocess.Popen(
+        [
+            candidate,
+            "-c",
+            "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    completed.communicate()
+    return completed.returncode == 0
+
+
+def resolve_python_binary() -> str:
+    configured = os.environ.get("LV3_VALIDATE_PYTHON_BIN", "").strip()
+    if configured:
+        if _python_meets_min_version(configured):
+            return configured
+        raise RuntimeError(f"LV3_VALIDATE_PYTHON_BIN must resolve to Python 3.10+: {configured}")
+
+    for candidate in (
+        shutil.which("python3.13"),
+        shutil.which("python3.12"),
+        shutil.which("python3.11"),
+        shutil.which("python3.10"),
+        "/opt/homebrew/bin/python3",
+        "/usr/local/bin/python3",
+        shutil.which("python3"),
+        sys.executable,
+    ):
+        if candidate and Path(candidate).exists() and _python_meets_min_version(candidate):
+            return candidate
+
+    return "python3"
+
+
 def load_optional_json(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
         return None
@@ -318,7 +356,7 @@ def run_fallback_gate(argv: list[str] | None = None) -> int:
     elif prior_payload is not None and not use_remote_payload:
         print("run_gate_fallback: ignoring stale non-remote gate status and running the requested local checks.")
 
-    python_binary = os.environ.get("LV3_VALIDATE_PYTHON_BIN") or sys.executable or shutil.which("python3") or "python3"
+    python_binary = resolve_python_binary()
     checks_to_run = rerun_checks or list(args.checks)
 
     with tempfile.NamedTemporaryFile(

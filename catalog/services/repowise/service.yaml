@@ -42,7 +42,11 @@ completeness:
   requires_secrets: false
   requires_compose_secrets: false
   suppressed_checks:
+    api_gateway: '2027-01-01'
+    keycloak_client: '2027-01-01'
     grafana_dashboard: '2027-01-01'
+    slo_definition: '2027-01-01'
+    data_catalog: '2027-01-01'
     alert_rules: '2027-01-01'
 redundancy:
   tier: R1

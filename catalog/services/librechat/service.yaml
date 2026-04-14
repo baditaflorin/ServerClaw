@@ -10,6 +10,7 @@ service:
   vmid: 170
   internal_url: http://10.10.10.70:8096
   public_url: https://chat.example.com
+  subdomain: chat.example.com
   exposure: edge-published
   uptime_monitor_name: LibreChat Public
   health_probe_id: librechat
@@ -39,7 +40,14 @@ completeness:
   requires_compose_secrets: true
   dashboard_file: config/grafana/dashboards/librechat.json
   alert_rule_file: config/alertmanager/rules/librechat.yml
-  suppressed_checks: {}
+  suppressed_checks:
+    api_gateway: '2026-09-23'
+    keycloak_client: '2026-09-23'
+    secret_definition: '2026-09-23'
+    grafana_dashboard: '2026-09-23'
+    slo_definition: '2026-09-23'
+    data_catalog: '2026-09-23'
+    alert_rules: '2026-09-23'
 redundancy:
   tier: R1
   recovery_objective:

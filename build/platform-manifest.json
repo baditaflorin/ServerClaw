@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.135",
+  "repo_version": "0.178.136",
   "platform_version": "0.178.133",
-  "generated_at": "2026-04-14T00:33:37Z",
-  "next_refresh_at": "2026-04-14T01:33:37Z",
+  "generated_at": "2026-04-14T01:58:08Z",
+  "next_refresh_at": "2026-04-14T02:58:08Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.134",
+    "last_version": "0.178.135",
     "deployed_at": "2026-04-14",
-    "summary": "ADR 0417: single-command service VM migration (make migrate-service svc=X to=Y) \u2014 atomic registry update + ordered converge + receipt; orphan detection (make detect-orphans); generic teardown playbook; replaces manual 5-step runbook implements ADR 0324 by moving service-local metadata into catalog/services bundles and generating the aggregate service catalogs from those sources",
-    "release_notes_url": "docs/release-notes/0.178.135.md"
+    "summary": "implements ADR 0324 by moving service-local metadata into catalog/services bundles and generating the aggregate service catalogs from those sources live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end",
+    "release_notes_url": "docs/release-notes/0.178.136.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

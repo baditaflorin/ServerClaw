@@ -10,7 +10,7 @@ generated: '2026-04-14'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 24
+total_adrs: 27
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -372,3 +372,47 @@ adrs:
     summary: The single authoritative source for LibreChat's callback URL is
     filename: 0413-sso-redirect-uri-and-service-topology-variable-drift.md
     path: docs/adr/0413-sso-redirect-uri-and-service-topology-variable-drift.md
+  - adr: '0416'
+    title: Topology Consistency Enforcement
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - topology
+      - consistency
+      - enforcement
+    summary: ''
+    filename: 0416-topology-consistency-enforcement.md
+    path: docs/adr/0416-topology-consistency-enforcement.md
+  - adr: '0417'
+    title: External Attack Surface Hardening
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - external
+      - attack
+      - surface
+      - hardening
+    summary: ALLOWREGISTRATION and ALLOWSOCIALREGISTRATION are variabilized in
+    filename: 0417-external-attack-surface-hardening.md
+    path: docs/adr/0417-external-attack-surface-hardening.md
+  - adr: '0417'
+    title: Service VM Migration IaC — Single Canonical Procedure
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - service
+      - vm
+      - migration
+      - iac
+      - single
+      - canonical
+      - procedure
+    summary: bash
+    filename: 0417-service-vm-migration-iac.md
+    path: docs/adr/0417-service-vm-migration-iac.md

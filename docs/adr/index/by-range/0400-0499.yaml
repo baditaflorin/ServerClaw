@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 16
+total_adrs: 19
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -292,3 +292,47 @@ adrs:
     summary: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
     filename: 0415-postmortem-cert-mismatch-gate-forced-no-verify.md
     path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md
+  - adr: '0416'
+    title: Topology Consistency Enforcement
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - topology
+      - consistency
+      - enforcement
+    summary: ''
+    filename: 0416-topology-consistency-enforcement.md
+    path: docs/adr/0416-topology-consistency-enforcement.md
+  - adr: '0417'
+    title: External Attack Surface Hardening
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - external
+      - attack
+      - surface
+      - hardening
+    summary: ALLOWREGISTRATION and ALLOWSOCIALREGISTRATION are variabilized in
+    filename: 0417-external-attack-surface-hardening.md
+    path: docs/adr/0417-external-attack-surface-hardening.md
+  - adr: '0417'
+    title: Service VM Migration IaC — Single Canonical Procedure
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - service
+      - vm
+      - migration
+      - iac
+      - single
+      - canonical
+      - procedure
+    summary: bash
+    filename: 0417-service-vm-migration-iac.md
+    path: docs/adr/0417-service-vm-migration-iac.md

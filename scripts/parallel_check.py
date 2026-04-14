@@ -32,10 +32,12 @@ RUNNER_UNAVAILABLE_MARKERS = (
     "error during connect",
     "is the docker daemon running",
     "unable to find image 'registry.localhost/check-runner/",
+    "unable to find image 'registry.example.com/check-runner/",
     "unsupported manifest media type",
     "no matching manifest for",
     "pull access denied",
     "received unexpected http status: 502 bad gateway",
+    "dial tcp: lookup registry.example.com: no such host",
     "exec format error",
 )
 
@@ -276,7 +278,7 @@ def cleanup_timed_out_container(
 
 def should_use_local_fallback_command(check: CheckDefinition) -> bool:
     source = os.environ.get("LV3_VALIDATION_SOURCE", "").strip().lower()
-    return bool(check.local_fallback_command and source.startswith("local-"))
+    return bool(source.startswith("local-") and (check.local_fallback_command or check.native_command))
 
 
 def should_use_native_command(check: CheckDefinition) -> bool:
@@ -298,7 +300,7 @@ def execute_check(
     if should_use_native_command(check):
         docker_command = ["sh", "-c", check.native_command or check.command]
     elif should_use_local_fallback_command(check):
-        docker_command = ["sh", "-c", check.local_fallback_command or check.command]
+        docker_command = ["sh", "-c", check.local_fallback_command or check.native_command or check.command]
     else:
         cidfile_dir = workspace / ".local" / "validation-gate" / "docker-cids"
         cidfile_dir.mkdir(parents=True, exist_ok=True)

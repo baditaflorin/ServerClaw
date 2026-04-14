@@ -6,7 +6,7 @@
 #   service_runtime_roles (list) — ordered list of roles to apply after linux_guest_firewall
 # Usage: import_playbook with -e @playbooks/vars/<service>.yml
 
-- name: "Converge {{ service_audit_name }} on the Docker runtime VM"
+- name: "Converge {{ service_audit_name | default('service') }} on the Docker runtime VM"
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
   become: true
   gather_facts: true
@@ -16,8 +16,8 @@
       ansible.builtin.import_tasks: tasks/preflight.yml
       vars:
         playbook_execution_require_debian: true
-        playbook_execution_audit_action: "playbook.start.{{ service_audit_name }}"
-        playbook_execution_audit_target: "{{ service_audit_name }}"
+        playbook_execution_audit_action: "playbook.start.{{ service_audit_name | default('service') }}"
+        playbook_execution_audit_target: "{{ service_audit_name | default('service') }}"
         required_hosts:
           - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
 
@@ -25,6 +25,6 @@
     - name: Apply prerequisite and runtime roles
       ansible.builtin.include_role:
         name: "{{ role_item }}"
-      loop: "{{ [('lv3.platform.linux_guest_firewall')] + service_runtime_roles }}"
+      loop: "{{ [('lv3.platform.linux_guest_firewall')] + (service_runtime_roles | default([])) }}"
       loop_control:
         loop_var: role_item

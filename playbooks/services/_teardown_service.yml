@@ -19,8 +19,8 @@
 #   # ansible-playbook ... _teardown_service.yml -e teardown_host=docker-runtime
 #   #                                             -e teardown_container_name=keycloak
 
-- name: "Teardown service container — {{ teardown_container_name }} on {{ teardown_host }}"
-  hosts: "{{ teardown_host }}"
+- name: "Teardown service container — {{ teardown_container_name | default('container') }} on {{ teardown_host | default('target-host') }}"
+  hosts: "{{ teardown_host | default('localhost') }}"
   gather_facts: false
   become: true
 

@@ -8,10 +8,9 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
-| `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](../../workstreams/ws-0372-live-apply.md) |
+| `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
-| `0359` | Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main | `live_applied` | [ws-0359-live-apply.md](../../workstreams/ws-0359-live-apply.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
@@ -168,6 +167,10 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](../../workstreams/ws-0372-live-apply.md) |
+| `0364` | ADR 0364 post-merge validation closure on latest origin/main | `merged` | [ws-0364-post-merge-validation.md](../../workstreams/ws-0364-post-merge-validation.md) |
+| `0359` | Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main | `live_applied` | [ws-0359-live-apply.md](../../workstreams/ws-0359-live-apply.md) |
+| `0324` | Implement ADR 0324 service bundles and verify the generated-catalog automation end to end | `live_applied` | [ws-0324-live-apply.md](../../workstreams/ws-0324-live-apply.md) |
 | `0381` | ADR 0381 live apply from latest origin/main | `merged` | [ws-0381-live-apply.md](../../workstreams/ws-0381-live-apply.md) |
 | `0380` | Neko remote desktop exact-main live apply and regression hardening | `merged` | [ws-0380-live-apply.md](../../workstreams/ws-0380-live-apply.md) |
 | `0025` | Live apply ADR 0025 compose-managed runtime stacks from latest origin/main | `live_applied` | [ws-0025-live-apply.md](../../workstreams/ws-0025-live-apply.md) |

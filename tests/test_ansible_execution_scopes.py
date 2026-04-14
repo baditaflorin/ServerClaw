@@ -196,6 +196,32 @@ live-apply-service:
     assert scopes._collect_makefile_entrypoints(repo_root / "Makefile", repo_root) == ()
 
 
+def test_validate_scope_catalog_ignores_makefile_descriptor_placeholders(tmp_path: Path) -> None:
+    repo_root, catalog_path, inventory_path = make_repo(tmp_path)
+    write(
+        repo_root / "playbooks" / "services" / "alpha.yml",
+        """
+---
+- import_playbook: ../leaf-alpha.yml
+""".strip()
+        + "\n",
+    )
+    write(repo_root / "playbooks" / "wrapper.yml", "---\n- import_playbook: leaf-alpha.yml\n")
+    makefile_path = repo_root / "Makefile"
+    makefile_path.write_text(
+        makefile_path.read_text(encoding="utf-8")
+        + """
+descriptor:
+\tif [ -f "$(REPO_ROOT)/playbooks/vars/$(service).yml" ]; then \
+\t\tprintf '%s\\n' "descriptor"; \
+\tfi
+""",
+        encoding="utf-8",
+    )
+
+    scopes.validate_scope_catalog(repo_root=repo_root, catalog_path=catalog_path, inventory_path=inventory_path)
+
+
 def test_resolve_identity_override_uses_shared_local_overlay_for_worktrees(tmp_path: Path) -> None:
     repo_root = tmp_path
     worktree_root = repo_root / ".worktrees" / "ws-0346-live-apply"
@@ -328,6 +354,62 @@ all:
     assert staging_hosts == ("beta",)
     assert calls[0][calls[0].index("-l") + 1] == "proxmox_hosts:&production"
     assert calls[1][calls[1].index("-l") + 1] == "proxmox_hosts:&staging"
+
+
+def test_plan_playbook_execution_uses_catalog_host_pattern_var(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_root, catalog_path, inventory_path = make_repo(tmp_path)
+    write(
+        catalog_path,
+        catalog_path.read_text(encoding="utf-8")
+        + """
+  playbooks/services/_teardown_service.yml:
+    playbook_id: teardown-service
+    mutation_scope: host
+    host_pattern_var: teardown_host
+    shared_surfaces:
+      - inventory/host_vars/proxmox-host.yml
+""",
+    )
+    write(
+        repo_root / "playbooks" / "services" / "_teardown_service.yml",
+        """
+---
+- hosts: "{{ teardown_host }}"
+""".strip()
+        + "\n",
+    )
+
+    calls: list[list[str]] = []
+
+    def fake_run(command: list[str], cwd: Path, text: bool, capture_output: bool, check: bool = False):
+        del cwd, text, capture_output, check
+        calls.append(command)
+        if command[0] != "ansible-inventory":
+            raise AssertionError(command)
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=yaml.safe_dump(
+                {"all": {"children": {"selected": {"hosts": {"alpha": {"ansible_host": "10.0.0.10"}}}}}}
+            ),
+            stderr="",
+        )
+
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+
+    plan = scopes.plan_playbook_execution(
+        "playbooks/services/_teardown_service.yml",
+        env="production",
+        extra_vars={"teardown_host": "alpha"},
+        repo_root=repo_root,
+        catalog_path=catalog_path,
+        inventory_path=inventory_path,
+    )
+
+    assert plan.target_hosts == ("alpha",)
+    assert plan.limit_expression == "alpha"
+    assert "host:alpha" in plan.shared_surfaces
+    assert calls[0][calls[0].index("-l") + 1] == "alpha"
 
 
 def test_run_scoped_playbook_uses_primary_inventory_for_group_vars_and_shard_for_scope(
@@ -486,6 +568,11 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
         repo_root=REPO_ROOT,
         catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
     )
+    teardown_scope = scopes.resolve_playbook_scope(
+        "playbooks/services/_teardown_service.yml",
+        repo_root=REPO_ROOT,
+        catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
+    )
 
     assert api_scope.mutation_scope == "lane"
     assert api_scope.target_lane == "lane:runtime-control"
@@ -494,3 +581,5 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
     assert plausible_scope.source_leaf_playbooks == ("playbooks/plausible.yml",)
     assert monitoring_scope.mutation_scope == "platform"
     assert "playbooks/services/grafana.yml" in monitoring_scope.source_leaf_playbooks
+    assert teardown_scope.mutation_scope == "host"
+    assert teardown_scope.host_pattern_var == "teardown_host"

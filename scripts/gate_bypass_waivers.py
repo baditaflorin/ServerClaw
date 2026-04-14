@@ -23,7 +23,27 @@ if repo_root_str not in sys.path:
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from validation_toolkit import require_list, require_mapping, require_str
+try:
+    from validation_toolkit import require_list, require_mapping, require_str
+except ModuleNotFoundError as exc:
+    if exc.name != "validation_toolkit":
+        raise
+
+    def require_mapping(value: Any, path: str) -> dict[str, Any]:
+        if not isinstance(value, dict):
+            raise ValueError(f"{path} must be a mapping")
+        return value
+
+    def require_list(value: Any, path: str) -> list[Any]:
+        if not isinstance(value, list):
+            raise ValueError(f"{path} must be a list")
+        return value
+
+    def require_str(value: Any, path: str) -> str:
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{path} must be a non-empty string")
+        return value
+
 
 from scripts.controller_automation_toolkit import emit_cli_error
 

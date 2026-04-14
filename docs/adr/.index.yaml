@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-14'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 449
+total_adrs: 451
 adr_number_range:
   first: '0001'
   last: '0417'
-  next_available: '0417'
+  next_available: 0418
 implementation_status_summary:
-  Implemented: 352
+  Implemented: 353
   Partial: 3
-  Not Implemented: 33
+  Not Implemented: 32
   Deprecated: 5
   Accepted: 31
-  Proposed: 24
+  Proposed: 27
 decision_status_summary:
   Accepted: 355
-  Proposed: 30
+  Proposed: 33
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 16
+      count: 19
       first_adr: '0400'
-      last_adr: '0415'
+      last_adr: '0417'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -97,7 +97,7 @@ facets:
       count: 6
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 39
+      count: 40
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -106,12 +106,12 @@ facets:
       count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 42
+      count: 44
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 352
+      count: 353
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -119,7 +119,7 @@ facets:
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 33
+      count: 32
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -131,22 +131,27 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 24
+      count: 27
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0418'
+  next_available_adr: 0418
 latest_adrs:
   - adr: '0417'
     title: Service VM Migration IaC — Single Canonical Procedure
-    implementation_status: Implemented
+    implementation_status: Proposed
     concern: vm-topology
     path: docs/adr/0417-service-vm-migration-iac.md
+  - adr: '0417'
+    title: External Attack Surface Hardening
+    implementation_status: Proposed
+    concern: security
+    path: docs/adr/0417-external-attack-surface-hardening.md
   - adr: '0416'
     title: Topology Consistency Enforcement
-    implementation_status: Implemented
+    implementation_status: Proposed
     concern: vm-topology
     path: docs/adr/0416-topology-consistency-enforcement.md
   - adr: '0415'
@@ -184,22 +189,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0409-zero-sanitization-publication.md
-  - adr: 0408
-    title: Generic Inventory Hostnames
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0408-generic-inventory-hostnames.md
-  - adr: '0407'
-    title: Generic-by-Default Codebase with Local Overlay
-    implementation_status: Proposed
-    concern: resilience
-    path: docs/adr/0407-generic-by-default-local-overlay-architecture.md
-  - adr: '0406'
-    title: Automated DNS Propagation From Single IP Source of Truth
-    implementation_status: Implemented
-    concern: bootstrap
-    path: docs/adr/0406-automated-dns-propagation-from-single-ip-source-of-truth.md
-    implemented_on: '2026-04-11'
 discovery_queries:
   how do we bootstrap:
     - '0001'

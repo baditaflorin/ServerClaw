@@ -4,7 +4,7 @@
 # Input: service_audit_name (string) — service name for logging (e.g., "directus")
 # Usage: import_playbook with -e @playbooks/vars/<service>.yml
 
-- name: "Publish {{ service_audit_name }} through the NGINX edge"
+- name: "Publish {{ service_audit_name | default('service') }} through the NGINX edge"
   hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true

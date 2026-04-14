@@ -1,4 +1,31 @@
 ---
+# Playbook: verify-bootstrap-proxmox.yml
+# Purpose: Validate that the Proxmox host reached the expected post-install baseline before guest provisioning proceeds.
+# Use case: Run after the initial Proxmox bootstrap or after host recovery to confirm the managed hypervisor baseline.
+#
+# Inputs (required):
+#   - inventory/hosts.yml (inventory, required): Declares the Proxmox hosts to verify.
+#
+# Inputs (optional):
+#   - playbook_execution_env (string, optional, default=production): Selects the production or staging host-pattern mapping.
+#   - playbook_execution_host_patterns (mapping, optional): Override host-pattern lookups for production or staging validation runs.
+#
+# Outputs:
+#   - Verifies the host OS, Proxmox API, storage pools, SSH service, KVM device, and ops user presence.
+#
+# Idempotency: Fully idempotent
+#              The playbook only reads host state and asserts expected conditions.
+#
+# Dependencies:
+#   - ADR 0165: Playbook metadata standard required by the repository gate.
+#   - ADR 0386: Bootstrap verification flow defines this hypervisor-validation step.
+#
+# Related ADRs: 0165, 0386
+# Related Runbooks: docs/runbooks/playbook-execution-model.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
+
 # Verify Proxmox VE bootstrap succeeded — ADR 0386
 #
 # Checks that the Proxmox host is in the expected post-install state
@@ -9,7 +36,13 @@
 #   ansible-playbook -i inventory/hosts.yml playbooks/verify-bootstrap-proxmox.yml
 
 - name: Verify Proxmox bootstrap
-  hosts: "{{ playbook_execution_host_patterns['proxmox_hosts'][playbook_execution_env] }}"
+  hosts: >-
+    {{
+      (
+        playbook_execution_host_patterns
+        | default({'proxmox_hosts': {'production': 'proxmox_hosts', 'staging': 'proxmox_hosts'}}, true)
+      )['proxmox_hosts'][playbook_execution_env | default('production')]
+    }}
   gather_facts: true
   become: true
   tasks:

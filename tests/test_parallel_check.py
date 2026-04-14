@@ -310,6 +310,40 @@ def test_execute_check_uses_local_fallback_command_for_local_sources(tmp_path: P
     assert result.docker_command == ["sh", "-c", "printf native-ok"]
 
 
+def test_execute_check_uses_native_command_for_local_sources_when_no_local_fallback(
+    tmp_path: Path, monkeypatch
+) -> None:
+    parallel_check = load_parallel_check_module()
+    monkeypatch.setenv("LV3_VALIDATION_SOURCE", "local-validate")
+    check = parallel_check.CheckDefinition(
+        label="schema-validation",
+        image="registry.example.com/check-runner/python:3.12.10",
+        command="exit 88",
+        working_dir="/workspace",
+        timeout_seconds=30,
+        native_command="printf native-schema-ok",
+    )
+
+    result = parallel_check.execute_check(check, tmp_path, str(tmp_path / "missing-docker"))
+
+    assert result.status == "passed"
+    assert result.stdout == "native-schema-ok"
+    assert result.docker_command == ["sh", "-c", "printf native-schema-ok"]
+
+
+def test_classify_runner_unavailable_recognizes_registry_dns_failure() -> None:
+    parallel_check = load_parallel_check_module()
+
+    marker = parallel_check.classify_runner_unavailable(
+        "",
+        "Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally\n"
+        'docker: Error response from daemon: Get "https://registry.example.com/v2/": '
+        "dial tcp: lookup registry.example.com: no such host",
+    )
+
+    assert marker == "unable to find image 'registry.example.com/check-runner/"
+
+
 def test_main_supports_all_checks(tmp_path: Path, capsys) -> None:
     parallel_check = load_parallel_check_module()
     manifest_path = tmp_path / "manifest.json"

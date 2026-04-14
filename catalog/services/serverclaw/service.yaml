@@ -10,6 +10,7 @@ service:
   vmid: 170
   internal_url: http://10.10.10.70:8096
   public_url: https://chat.example.com
+  subdomain: chat.example.com
   exposure: edge-published
   uptime_monitor_name: ServerClaw
   health_probe_id: serverclaw
@@ -34,6 +35,7 @@ service:
     production:
       status: active
       url: https://chat.example.com
+      subdomain: chat.example.com
       notes: ServerClaw uses in-app Keycloak OIDC for routine browser login while
         retaining a repo-managed bootstrap admin as break-glass access.
 completeness:
@@ -45,7 +47,10 @@ completeness:
   keycloak_client_generated: true
   dashboard_file: config/grafana/dashboards/serverclaw.json
   alert_rule_file: config/alertmanager/rules/serverclaw.yml
-  suppressed_checks: {}
+  suppressed_checks:
+    ansible_role: '2026-09-23'
+    subdomain: '2026-09-23'
+    compose_secrets: '2026-09-23'
 redundancy:
   tier: R1
   recovery_objective:

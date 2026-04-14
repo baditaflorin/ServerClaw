@@ -1,4 +1,31 @@
 ---
+# Playbook: verify-bootstrap-guests.yml
+# Purpose: Confirm that the declared guest VMs are reachable over SSH after bootstrap or provisioning.
+# Use case: Run after bootstrap or guest creation to verify that every expected guest responds before deeper convergence.
+#
+# Inputs (required):
+#   - inventory/hosts.yml (inventory, required): Declares the guest hosts that should be reachable.
+#
+# Inputs (optional):
+#   - playbook_execution_env (string, optional, default=production): Selects the production or staging host-pattern mapping.
+#   - playbook_execution_host_patterns (mapping, optional): Override host-pattern lookups for production or staging validation runs.
+#
+# Outputs:
+#   - Reports per-host SSH reachability and basic operating-system facts for reachable guests.
+#
+# Idempotency: Fully idempotent
+#              The playbook only reads connectivity and fact state.
+#
+# Dependencies:
+#   - ADR 0165: Playbook metadata standard required by the repository gate.
+#   - ADR 0386: Bootstrap verification flow defines this guest-validation step.
+#
+# Related ADRs: 0165, 0386
+# Related Runbooks: docs/runbooks/playbook-execution-model.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
+
 # Verify guest VM provisioning succeeded — ADR 0386
 #
 # Checks that all declared VMs exist, are running, and respond to SSH.
@@ -8,7 +35,13 @@
 #   ansible-playbook -i inventory/hosts.yml playbooks/verify-bootstrap-guests.yml
 
 - name: Verify guest VMs are reachable
-  hosts: "{{ playbook_execution_host_patterns['lv3_guests'][playbook_execution_env] }}"
+  hosts: >-
+    {{
+      (
+        playbook_execution_host_patterns
+        | default({'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'}}, true)
+      )['lv3_guests'][playbook_execution_env | default('production')]
+    }}
   gather_facts: false
   tasks:
     - name: Wait for SSH connectivity

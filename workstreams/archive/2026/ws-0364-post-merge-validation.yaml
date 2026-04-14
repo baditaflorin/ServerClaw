@@ -1,0 +1,179 @@
+id: ws-0364-post-merge-validation
+adr: '0364'
+title: ADR 0364 post-merge validation closure on latest origin/main
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/ws-0364-post-merge-validation-r2
+worktree_path: .worktrees/ws-0364-post-merge-validation
+doc: docs/workstreams/ws-0364-post-merge-validation.md
+depends_on:
+- adr-0082-remote-build-execution-gateway
+- adr-0083-docker-based-check-runner
+- adr-0087-repository-validation-gate
+- adr-0264-failure-domain-isolated-validation-lanes
+- adr-0266-validation-runner-capability-contracts
+- adr-0364-native-build-server-gate-execution
+conflicts_with: []
+shared_surfaces:
+- VERSION
+- changelog.md
+- workstreams.yaml
+- workstreams/active/ws-0364-post-merge-validation.yaml
+- workstreams/active/ws-0417-attack-surface-hardening.yaml
+- docs/workstreams/ws-0364-post-merge-validation.md
+- build/platform-manifest.json
+- catalog/services/librechat/service.yaml
+- catalog/services/litellm/service.yaml
+- catalog/services/repo_intake/service.yaml
+- catalog/services/repowise/service.yaml
+- catalog/services/serverclaw/service.yaml
+- catalog/services/sftpgo/service.yaml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/docker_runtime_converge.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/nginx_edge_publication.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/postgres_preparation.yml
+- config/contracts/service-partitions/catalog.json
+- config/ansible-execution-scopes.yaml
+- config/correction-loops.json
+- config/dependency-graph.json
+- config/grafana/dashboards/slo-overview.json
+- config/prometheus/file_sd/https_tls_targets.yml
+- config/prometheus/file_sd/slo_targets.yml
+- config/prometheus/rules/https_tls_alerts.yml
+- config/prometheus/rules/slo_alerts.yml
+- config/prometheus/rules/slo_rules.yml
+- config/service-capability-catalog.json
+- config/service-completeness.json
+- config/slo-catalog.json
+- config/service-redundancy-catalog.json
+- config/validation-gate.json
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/diagrams/service-dependency-graph.excalidraw
+- docs/site-generated/architecture/dependency-graph.md
+- platform/ansible/execution_scopes.py
+- playbooks/_includes/dns_publication.yml
+- playbooks/_includes/docker_runtime_converge.yml
+- playbooks/_includes/nginx_edge_publication.yml
+- playbooks/_includes/postgres_preparation.yml
+- playbooks/fix-edge-certificate.yml
+- playbooks/services/_teardown_service.yml
+- playbooks/verify-bootstrap-guests.yml
+- playbooks/verify-bootstrap-proxmox.yml
+- playbooks/verify-platform.yml
+- receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+- receipts/live-applies/evidence/2026-04-14-ws-0364-post-merge-validation.txt
+- scripts/ansible_scope_runner.py
+- scripts/gate_bypass_waivers.py
+- scripts/parallel_check.py
+- scripts/remote_exec.sh
+- scripts/run_gate.py
+- scripts/run_gate_fallback.py
+- scripts/validate_repo.sh
+- tests/test_ansible_execution_scopes.py
+- tests/test_parallel_check.py
+- tests/test_remote_exec.py
+- tests/test_repo_intake_runtime_role.py
+- tests/test_validation_gate.py
+- versions/stack.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    - workstreams/active/ws-0364-post-merge-validation.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0417_registry_repair
+    paths:
+    - workstreams/active/ws-0417-attack-surface-hardening.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0364_post_merge_validation_doc
+    paths:
+    - docs/workstreams/ws-0364-post-merge-validation.md
+    - receipts/live-applies/evidence/2026-04-14-ws-0364-post-merge-validation.txt
+    mode: exclusive
+  - id: ws_0364_gate_validation_repairs
+    paths:
+    - VERSION
+    - changelog.md
+    - build/platform-manifest.json
+    - catalog/services/librechat/service.yaml
+    - catalog/services/litellm/service.yaml
+    - catalog/services/repo_intake/service.yaml
+    - catalog/services/repowise/service.yaml
+    - catalog/services/serverclaw/service.yaml
+    - catalog/services/sftpgo/service.yaml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/docker_runtime_converge.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/nginx_edge_publication.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/postgres_preparation.yml
+    - config/ansible-execution-scopes.yaml
+    - config/contracts/service-partitions/catalog.json
+    - config/correction-loops.json
+    - config/dependency-graph.json
+    - config/grafana/dashboards/slo-overview.json
+    - config/prometheus/file_sd/https_tls_targets.yml
+    - config/prometheus/file_sd/slo_targets.yml
+    - config/prometheus/rules/https_tls_alerts.yml
+    - config/prometheus/rules/slo_alerts.yml
+    - config/prometheus/rules/slo_rules.yml
+    - config/service-capability-catalog.json
+    - config/service-completeness.json
+    - config/slo-catalog.json
+    - config/service-redundancy-catalog.json
+    - config/validation-gate.json
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/diagrams/service-dependency-graph.excalidraw
+    - docs/site-generated/architecture/dependency-graph.md
+    - platform/ansible/execution_scopes.py
+    - playbooks/_includes/dns_publication.yml
+    - playbooks/_includes/docker_runtime_converge.yml
+    - playbooks/_includes/nginx_edge_publication.yml
+    - playbooks/_includes/postgres_preparation.yml
+    - playbooks/fix-edge-certificate.yml
+    - playbooks/services/_teardown_service.yml
+    - playbooks/verify-bootstrap-guests.yml
+    - playbooks/verify-bootstrap-proxmox.yml
+    - playbooks/verify-platform.yml
+    - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
+    - scripts/ansible_scope_runner.py
+    - scripts/gate_bypass_waivers.py
+    - scripts/parallel_check.py
+    - scripts/remote_exec.sh
+    - scripts/run_gate.py
+    - scripts/run_gate_fallback.py
+    - scripts/validate_repo.sh
+    - tests/test_ansible_execution_scopes.py
+    - tests/test_parallel_check.py
+    - tests/test_remote_exec.py
+    - tests/test_repo_intake_runtime_role.py
+    - tests/test_validation_gate.py
+    - versions/stack.yaml
+    mode: shared_contract
+    contract: validation-gate-runtime-v1
+canonical_truth:
+  changelog_entry: finalize ADR 0364 validation closure, refresh derived catalogs,
+    and reverify build-server gate automation on the latest mainline tree
+  release_bump: patch
+  included_in_repo_version: 0.178.136
+  latest_receipts: {}
+notes: 'Closure workstream for ADR 0364 after the earlier live-apply merge.
+
+  Scope: rerun build-server and validation automation from the latest origin/main,
+
+  repair repo-local gate regressions that block truthful revalidation, and leave
+
+  explicit evidence plus merge-safe metadata for final integration.
+
+  Result: make check-build-server passed on origin/main@0ed784c50, make
+
+  remote-validate completed through the governed local fallback path after the
+
+  remote runner image pull failed on registry.example.com DNS resolution, and
+
+  the focused regression pytest suite passed with 69 tests on the final tree.
+
+  '

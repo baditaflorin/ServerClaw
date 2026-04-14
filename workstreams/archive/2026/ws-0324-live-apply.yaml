@@ -232,7 +232,7 @@ canonical_truth:
   changelog_entry: implements ADR 0324 by moving service-local metadata into catalog/services
     bundles and generating the aggregate service catalogs from those sources
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.136
   latest_receipts:
     service_definition_catalog_assembly: 2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply
 blockers: []

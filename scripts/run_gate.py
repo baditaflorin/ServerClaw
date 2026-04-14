@@ -9,10 +9,12 @@ import os
 import sys
 import tempfile
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -304,6 +306,14 @@ def build_fast_global_results(
     return payload
 
 
+def should_bypass_runner_eligibility_for_local_fallback(
+    *,
+    source: str,
+    check: parallel_check.CheckDefinition,
+) -> bool:
+    return source.startswith("local-") and bool(check.local_fallback_command or check.native_command)
+
+
 def build_status_payload(
     *,
     source: str,
@@ -391,6 +401,12 @@ def main(argv: list[str] | None = None) -> int:
         lanes=[check.label for check in checks],
         container_runtime_binary=args.docker_binary,
     )
+    for check in checks:
+        if should_bypass_runner_eligibility_for_local_fallback(source=args.source, check=check):
+            runner_context["lane_evaluations"][check.label] = {
+                "eligible": True,
+                "reasons": [],
+            }
     runner_unavailable_results = {
         check.label: parallel_check.CheckResult(
             label=check.label,

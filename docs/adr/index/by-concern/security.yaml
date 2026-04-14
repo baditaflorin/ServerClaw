@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-14'
 facet: concern
 concern: security
-total_adrs: 39
+total_adrs: 40
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -732,3 +732,17 @@ adrs:
     summary: 'We implement four changes:'
     filename: 0414-cert-lifecycle-agent-tools-and-cron-sync.md
     path: docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
+  - adr: '0417'
+    title: External Attack Surface Hardening
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - external
+      - attack
+      - surface
+      - hardening
+    summary: ALLOWREGISTRATION and ALLOWSOCIALREGISTRATION are variabilized in
+    filename: 0417-external-attack-surface-hardening.md
+    path: docs/adr/0417-external-attack-surface-hardening.md

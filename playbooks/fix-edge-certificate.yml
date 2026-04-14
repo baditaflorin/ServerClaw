@@ -1,5 +1,32 @@
 ---
-- name: Fix NGINX Edge Certificate Issues (ci.{{ platform_domain }}, bi.{{ platform_domain }}, etc)
+# Playbook: fix-edge-certificate.yml
+# Purpose: Reconcile the shared NGINX edge certificate when edge-published domains are missing from the current SAN set.
+# Use case: Run after certificate-validation or edge publication drift reveals missing public SANs on the live edge certificate.
+#
+# Inputs (required):
+#   - platform_domain (string, required): Base platform domain used to render operator-facing status messages.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Selects the production or staging NGINX target host group.
+#
+# Outputs:
+#   - Reports missing edge-published domains and renews the shared edge certificate when SAN coverage is incomplete.
+#
+# Idempotency: Partially idempotent
+#              Safe to rerun; renewal only executes when missing SANs are detected, but the renewal action itself changes live certificate state.
+#
+# Dependencies:
+#   - ADR 0165: Playbook metadata standard required by the repository gate.
+#   - ADR 0375: Certificate validation and concordance enforcement defines the drift this playbook repairs.
+#   - Requires: inventory/group_vars/platform.yml and config/subdomain-catalog.json to be current before execution.
+#
+# Related ADRs: 0165, 0375
+# Related Runbooks: docs/runbooks/validation-gate.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
+
+- name: Fix NGINX Edge Certificate Issues (ci.{{ platform_domain | default('example.com') }}, bi.{{ platform_domain | default('example.com') }}, etc)
   hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
@@ -13,7 +40,7 @@
   tasks:
     - name: Validate controller connectivity
       ansible.builtin.debug:
-        msg: "Fixing NGINX edge certificate for missing domains (ci.{{ platform_domain }}, bi.{{ platform_domain }}, etc)"
+        msg: "Fixing NGINX edge certificate for missing domains (ci.{{ platform_domain | default('example.com') }}, bi.{{ platform_domain | default('example.com') }}, etc)"
 
     - name: Load subdomain catalog
       ansible.builtin.set_fact:

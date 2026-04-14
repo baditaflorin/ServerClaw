@@ -4,4 +4,4 @@ This generated index collects older release-note links after they roll out of th
 
 ## Archived Years
 
-- [2026 (454 releases)](2026.md)
+- [2026 (455 releases)](2026.md)

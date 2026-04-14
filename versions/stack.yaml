@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.178.134
+repo_version: 0.178.136
 platform_version: 0.178.133
 
 live_apply_evidence:
@@ -33,7 +33,7 @@ live_apply_evidence:
     livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
     litellm: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
-    postgres_vm: 2026-04-14-adr-0416-phase2-derived-pg-hba-ip-live-apply
+    postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
     uptime_kuma: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
@@ -182,6 +182,7 @@ live_apply_evidence:
     open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
+    service_definition_catalog_assembly: 2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -1179,8 +1180,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.133
+    current: 0.178.136
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.132
+    current: 0.178.133
     meaning: intended platform release for the actual server configuration

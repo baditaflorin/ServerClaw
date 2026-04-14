@@ -7,7 +7,7 @@
 - name: "Prepare PostgreSQL for {{ service_postgres_role | regex_replace('lv3\\.platform\\.', '') }}"
   vars:
     # Default for Ansible parser validation; overridden by -e @playbooks/vars/<service>.yml
-    service_postgres_role: "lv3.platform.postgres_default"
+    service_postgres_role: "lv3.platform.directus_postgres"
   hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true

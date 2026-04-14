@@ -367,6 +367,58 @@ def test_run_gate_reports_runner_unavailable_without_crashing(tmp_path: Path, ca
     assert payload["checks"][1]["status"] == "passed"
 
 
+def test_run_gate_executes_native_local_fallback_even_when_runner_contract_marks_docker_unavailable(
+    tmp_path: Path,
+) -> None:
+    run_gate = load_module("run_gate_local_native_fallback", "scripts/run_gate.py")
+    manifest_path = tmp_path / "validation-gate.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "alpha": {
+                    "description": "alpha check",
+                    "severity": "error",
+                    "image": "example/alpha:latest",
+                    "command": "exit 99",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                    "native_command": "printf alpha-native",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    status_path = tmp_path / "last-run.json"
+    runner_contracts = tmp_path / "validation-runner-contracts.json"
+    write_runner_contracts(runner_contracts, lane_ids=["alpha"])
+
+    exit_code = run_gate.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--workspace",
+            str(tmp_path),
+            "--docker-binary",
+            str(tmp_path / "missing-docker"),
+            "--status-file",
+            str(status_path),
+            "--source",
+            "local-fallback",
+            "--runner-id",
+            "test-runner",
+            "--runner-contracts",
+            str(runner_contracts),
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(status_path.read_text(encoding="utf-8"))
+    assert payload["status"] == "passed"
+    assert payload["checks"][0]["status"] == "passed"
+    assert payload["checks"][0]["runner_unavailable_reason"] is None
+    assert payload["runner"]["lane_evaluations"]["alpha"]["eligible"] is True
+
+
 def test_log_gate_bypass_writes_receipt(tmp_path: Path) -> None:
     receipt_dir = tmp_path / "receipts"
     completed = subprocess.run(
