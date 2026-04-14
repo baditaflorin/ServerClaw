@@ -97,3 +97,10 @@
 - Another local worktree owns a dirty `main` branch, so the final integration is
   pushed directly from this verified workstream branch to `origin/main` instead
   of mutating that unrelated checkout.
+- The final `origin/main` promotion uses the governed `skip_remote_gate` waiver
+  recorded in
+  `receipts/gate-bypasses/20260414T071925Z-codex-ws-0368-main-publish-r4-b8a2a0d-skip-remote-gate.json`
+  because clean `origin/main@6aeb26434724680c6da2162cd3544031b5a93f03` still
+  reproduces the untouched whole-repo `ansible-lint` fatal baseline, while the
+  ws-0368 branch-local regressions were revalidated locally from this publish
+  worktree before the push.

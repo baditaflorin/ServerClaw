@@ -343,6 +343,12 @@ notes: |
   governed failure-and-recovery path end to end: the build server could not
   resolve registry.example.com for the validation runner images, and the repo
   then reran the unresolved checks locally with all blocking lanes passing.
+  The final origin/main promotion records the governed skip_remote_gate waiver
+  in receipts/gate-bypasses/20260414T071925Z-codex-ws-0368-main-publish-r4-b8a2a0d-skip-remote-gate.json
+  because clean origin/main still reproduces the untouched whole-repo
+  ansible-lint fatal baseline, while the ws-0368 publish branch reran the
+  affected fresh-worktree checks locally and cleared the branch-local gate
+  regressions before pushing main.
 blockers: []
 canonical_truth:
   changelog_entry: live-apply ADR 0368 from the latest realistic origin/main base
