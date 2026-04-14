@@ -4,17 +4,17 @@
   "bypass": "skip_remote_gate",
   "source": "manual-no-verify-push",
   "branch": "HEAD",
-  "commit": "ad28ea61182c897fd0b6e7ba37738daa87a1c05b",
+  "commit": "ab0b755c85b7ec1b8d1250af1926f3f67583afeb",
   "waiver": {
     "reason_code": "pre_existing_gate_failures",
     "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
-    "detail": "Manual mainline promotion from ad28ea611 after current-tip remote-validate passed. The pre-push cert gate still fails on the pre-existing repo-intake.lv3.org cert_mismatch, and a targeted live repair via playbooks/fix-edge-certificate.yml failed because Let's Encrypt CAA rechecks for matrix.lv3.org blocked issuance. The earlier protected-branch gate on this line also exposed existing ansible-lint debt unrelated to these commits.",
+    "detail": "Manual mainline promotion for the validated code tip ab0b755c8 after rebasing to the latest origin/main. The current-tip remote-validate replay passed on the receipt-only follow-up commit, while the pre-push cert gate still fails on the pre-existing repo-intake.lv3.org cert_mismatch. A targeted live repair via playbooks/fix-edge-certificate.yml failed because Let's Encrypt CAA rechecks for matrix.lv3.org blocked issuance, and the earlier protected-branch gate on this line had already exposed existing ansible-lint debt unrelated to these commits.",
     "impacted_lanes": [
       "remote-pre-push-gate"
     ],
     "substitute_evidence": [
-      "make remote-validate passed on ad28ea611",
-      "uv run python scripts/validate_adr_status_transitions.py passed on ad28ea611",
+      "make remote-validate passed on 594649d3; the only delta from validated code tip ab0b755c8 is this governed bypass receipt",
+      "uv run python scripts/validate_adr_status_transitions.py passed on the ab0b755c8 lineage",
       "git push --dry-run origin HEAD:main reached certificate validation and failed on pre-existing repo-intake.lv3.org cert_mismatch",
       "ansible-playbook playbooks/fix-edge-certificate.yml failed because Let's Encrypt CAA rechecks for matrix.lv3.org blocked certificate issuance"
     ],
