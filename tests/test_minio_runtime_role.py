@@ -38,15 +38,16 @@ def test_tasks_install_mc_and_manage_buckets_policies_and_lifecycle() -> None:
     assert "Generate the MinIO root password when missing" in names
     assert "Generate the MinIO consumer secret keys when missing" in names
     assert "Wait for the MinIO admin API to respond via the local client alias" in names
-    assert "Check whether the managed MinIO users already exist" in names
+    assert "Reconcile the managed MinIO users with their desired secrets" in names
     assert "Render the MinIO bucket policy documents" in names
     assert "Ensure the RAG staging bucket lifecycle rule exists" in names
     assert "Verify the MinIO runtime" in names
     assert "minio_managed_consumers_resolved" in tasks_text
     assert "minio_consumer_secret_generation.stdout" in tasks_text
     assert "admin\n      - info\n      - local" in tasks_text
-    assert 'loop: "{{ minio_user_info.results }}"' in tasks_text
-    assert "when: item.rc != 0" in tasks_text
+    assert 'loop: "{{ minio_managed_consumers_resolved }}"' in tasks_text
+    assert "admin\n      - user\n      - add\n      - local" in tasks_text
+    assert "when: item.rc != 0" not in tasks_text
 
 
 def test_tasks_recover_stale_compose_network_during_startup() -> None:

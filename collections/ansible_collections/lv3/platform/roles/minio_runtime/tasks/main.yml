@@ -452,24 +452,7 @@
   until: minio_admin_info.rc == 0
   changed_when: false
 
-- name: Check whether the managed MinIO users already exist
-  ansible.builtin.command:
-    argv:
-      - "{{ minio_mc_bin }}"
-      - --config-dir
-      - "{{ minio_mc_config_dir }}"
-      - admin
-      - user
-      - info
-      - local
-      - "{{ item.access_key_id }}"
-  loop: "{{ minio_managed_consumers_resolved }}"
-  register: minio_user_info
-  failed_when: false
-  changed_when: false
-  no_log: true
-
-- name: Ensure the MinIO users exist
+- name: Reconcile the managed MinIO users with their desired secrets
   ansible.builtin.command:
     argv:
       - "{{ minio_mc_bin }}"
@@ -481,8 +464,7 @@
       - local
       - "{{ item.access_key_id }}"
       - "{{ minio_consumer_secret_keys[item.access_key_id] }}"
-  loop: "{{ minio_user_info.results }}"
-  when: item.rc != 0
+  loop: "{{ minio_managed_consumers_resolved }}"
   changed_when: false
   no_log: true
 

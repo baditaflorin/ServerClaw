@@ -26,12 +26,10 @@ def test_gitea_defaults_reference_private_service_topology() -> None:
     assert "service_topology_get('minio')" in defaults
     assert "gitea-oauth" in defaults
     assert "playbook_execution_host_patterns.postgres[playbook_execution_env]" in defaults
-    assert ".local/gitea/minio-secret-key.txt" in defaults
+    assert 'gitea_minio_secret_key_local_file: "{{ gitea_local_artifact_dir }}/minio-secret-key.txt"' in defaults
     assert "gitea_minio_bucket_name: gitea-lfs" in defaults
-    assert (
-        'gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"'
-        in defaults
-    )
+    assert "gitea_oidc_internal_discovery_url:" in defaults
+    assert "gitea_keycloak_service_topology.urls.internal" in defaults
 
 
 def test_gitea_compose_mounts_data_volume_and_openbao_env() -> None:
@@ -46,9 +44,10 @@ def test_gitea_compose_mounts_data_volume_and_openbao_env() -> None:
 
 def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     template = BOOTSTRAP_TEMPLATE.read_text()
+    assert 'docker exec --user git "${container}" gitea "$@"' in template
     assert 'oidc_internal_discovery="{{ gitea_oidc_internal_discovery_url }}"' in template
     assert '--auto-discover-url "${oidc_internal_discovery}"' in template
-    assert "gitea admin auth list" in template
+    assert "exec_gitea admin auth list" in template
     assert "generate-access-token" in template
     assert "--raw" in template
     assert "generate-runner-token" in template
@@ -64,12 +63,20 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
 def test_runner_defaults_use_mirrored_registration_token() -> None:
     defaults = RUNNER_DEFAULTS.read_text()
     assert "gitea_runner_compose_bin: docker" in defaults
-    assert ".local/gitea/runner-registration-token.txt" in defaults
-    assert "docker-build" in defaults
+    assert (
+        'gitea_runner_registration_token_local_file: "{{ repo_shared_local_root }}/gitea/runner-registration-token.txt"'
+        in defaults
+    )
+    assert (
+        'gitea_runner_name: "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"' in defaults
+    )
     assert "service_topology_get('openbao')" in defaults
     assert "service_topology_get('gitea')" in defaults
     assert "platform_service_topology.gitea" in defaults
-    assert ".local/gitea/renovate-password.txt" in defaults
+    assert (
+        'gitea_runner_renovate_password_local_file: "{{ repo_shared_local_root }}/gitea/renovate-password.txt"'
+        in defaults
+    )
     assert "services/gitea-runner/renovate-runtime" in defaults
     assert "gitea_runner_renovate_clone_host" in defaults
     assert "gitea_runner_renovate_clone_host_address" in defaults
@@ -123,22 +130,29 @@ def test_runner_tasks_use_docker_compose_plugin() -> None:
 def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:
     tasks = load_tasks()
     names = {task["name"] for task in tasks}
-    assert "Ensure the Gitea database password exists on the control machine" in names
-    assert "Ensure the Gitea OIDC client secret exists on the control machine" in names
-    assert "Ensure the Gitea MinIO secret key exists on the control machine" in names
-    assert "Ensure the release-bundle Cosign private key exists on the control machine" in names
-    assert "Ensure the release-bundle Cosign password exists on the control machine" in names
-    assert "Generate the Gitea Renovate bot password when missing" in names
-    assert "Mirror the Gitea Renovate bot password to the control machine" in names
+    assert "Check Gitea prerequisites on the control machine" in names
+    assert "Manage Gitea runtime secrets" in names
     assert "Mirror the Gitea admin token to the control machine" in names
     assert "Mirror the Gitea runner registration token to the control machine" in names
+
+    prereq_task = next(task for task in tasks if task["name"] == "Check Gitea prerequisites on the control machine")
+    prerequisite_files = prereq_task["vars"]["common_check_local_secrets_files"]
+    prerequisite_paths = {item["path"] for item in prerequisite_files}
+    assert "{{ gitea_database_password_local_file }}" in prerequisite_paths
+    assert "{{ gitea_oidc_client_secret_local_file }}" in prerequisite_paths
+    assert "{{ gitea_minio_secret_key_local_file }}" in prerequisite_paths
+    assert "{{ gitea_release_bundle_cosign_private_key_local_file }}" in prerequisite_paths
+    assert "{{ gitea_release_bundle_cosign_password_local_file }}" in prerequisite_paths
+    assert "{{ gitea_ntfy_token_local_file }}" in prerequisite_paths
 
 
 def test_runner_tasks_render_the_openbao_backed_renovate_bundle() -> None:
     runner_tasks = yaml.safe_load((ROLE_ROOT / "gitea_runner" / "tasks" / "main.yml").read_text())
     names = {task["name"] for task in runner_tasks}
 
-    assert "Ensure the Gitea Renovate bot password exists on the control machine" in names
+    assert "Check Gitea runner prerequisites on the control machine" in names
+    assert "Check Gitea Renovate bot prerequisites when Renovate is enabled" in names
+    assert "Record the Gitea runner registration token" in names
     assert "Prepare the Renovate credential bundle for the Gitea runner" in names
     assert "Confirm the Renovate credential bundle rendered successfully" in names
     prepare_task = next(
@@ -214,6 +228,16 @@ def test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap() -> None:
     assert wait_task["delay"] == 5
 
 
+def test_gitea_verify_health_uses_the_host_published_socket() -> None:
+    verify_tasks = yaml.safe_load((ROLE_ROOT / "gitea_runtime" / "tasks" / "verify.yml").read_text())
+    verify_task = next(task for task in verify_tasks if task["name"] == "Verify the Gitea runtime health")
+    verify_vars = verify_task["vars"]
+
+    assert verify_vars["common_verify_port_host"] == "{{ ansible_host }}"
+    assert verify_vars["common_verify_port"] == "{{ gitea_http_port }}"
+    assert verify_vars["common_verify_health_url"] == "{{ gitea_private_base_url }}/user/login"
+
+
 def test_gitea_runtime_recovers_stale_docker_networking() -> None:
     tasks = load_tasks()
     names = {task["name"] for task in tasks}
@@ -245,12 +269,18 @@ def test_gitea_runtime_recovers_stale_docker_networking() -> None:
 
 def test_gitea_defaults_include_release_bundle_signing_paths() -> None:
     defaults = ROLE_DEFAULTS.read_text()
-    assert ".local/gitea/release-bundle-cosign.key" in defaults
-    assert ".local/gitea/release-bundle-cosign.password.txt" in defaults
+    assert (
+        'gitea_release_bundle_cosign_private_key_local_file: "{{ gitea_local_artifact_dir }}/release-bundle-cosign.key"'
+        in defaults
+    )
+    assert (
+        'gitea_release_bundle_cosign_password_local_file: "{{ gitea_local_artifact_dir }}/release-bundle-cosign.password.txt"'
+        in defaults
+    )
     assert "keys/gitea-release-bundle-cosign.pub" in defaults
     assert "RELEASE_BUNDLE_REPO_TOKEN" in defaults
     assert "gitea_renovate_username: renovate-bot" in defaults
-    assert ".local/gitea/renovate-password.txt" in defaults
+    assert 'gitea_renovate_password_local_file: "{{ gitea_local_artifact_dir }}/renovate-password.txt"' in defaults
 
 
 def test_runtime_env_templates_enable_lfs_on_shared_minio() -> None:

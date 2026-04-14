@@ -321,15 +321,7 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/librechat.json",
       "alert_rule_file": "config/alertmanager/rules/librechat.yml",
-      "suppressed_checks": {
-        "api_gateway": "2027-01-01",
-        "keycloak_client": "2027-01-01",
-        "secret_definition": "2027-01-01",
-        "grafana_dashboard": "2027-01-01",
-        "slo_definition": "2027-01-01",
-        "data_catalog": "2027-01-01",
-        "alert_rules": "2027-01-01"
-      }
+      "suppressed_checks": {}
     },
     "litellm": {
       "service_type": "compose",
@@ -339,16 +331,7 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/litellm.json",
       "alert_rule_file": "config/alertmanager/rules/litellm.yml",
-      "suppressed_checks": {
-        "subdomain": "2027-01-01",
-        "api_gateway": "2027-01-01",
-        "keycloak_client": "2027-01-01",
-        "secret_definition": "2027-01-01",
-        "grafana_dashboard": "2027-01-01",
-        "slo_definition": "2027-01-01",
-        "data_catalog": "2027-01-01",
-        "alert_rules": "2027-01-01"
-      }
+      "suppressed_checks": {}
     },
     "livekit": {
       "service_type": "compose",
@@ -646,28 +629,9 @@
       "requires_secrets": false,
       "requires_compose_secrets": false,
       "suppressed_checks": {
-        "api_gateway": "2027-01-01",
-        "keycloak_client": "2027-01-01",
         "grafana_dashboard": "2027-01-01",
-        "slo_definition": "2027-01-01",
-        "data_catalog": "2027-01-01",
         "alert_rules": "2027-01-01"
       }
-    },
-    "repo_intake": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "suppressed_checks": {
-        "api_gateway": "2027-01-01",
-        "grafana_dashboard": "2027-01-01",
-        "slo_definition": "2027-01-01",
-        "data_catalog": "2027-01-01",
-        "alert_rules": "2027-01-01"
-      },
-      "notes": "The public route is published through the shared edge auth boundary rather than a dedicated API gateway or service-local Keycloak client."
     },
     "searxng": {
       "service_type": "compose",

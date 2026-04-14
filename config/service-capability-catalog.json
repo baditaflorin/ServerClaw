@@ -1212,7 +1212,6 @@
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
       "public_url": "https://chat.example.com",
-      "subdomain": "chat.example.com",
       "exposure": "edge-published",
       "uptime_monitor_name": "LibreChat Public",
       "health_probe_id": "librechat",
@@ -2540,11 +2539,9 @@
       "secret_catalog_ids": [],
       "adr": "0373",
       "adr_file": "docs/adr/0373-service-registry-and-derived-defaults.md",
-      "runbook": "docs/runbooks/repo-intake.md",
       "runtime_pool": "runtime-general",
       "deployment_surface": "playbooks/services/repo-intake.yml",
       "restart_domain": "runtime-general",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
       "mobility_tier": "elastic_stateless",
       "tags": [
         "webhook",
@@ -2691,7 +2688,6 @@
       "vmid": 170,
       "internal_url": "http://10.10.10.70:8096",
       "public_url": "https://chat.example.com",
-      "subdomain": "chat.example.com",
       "exposure": "edge-published",
       "uptime_monitor_name": "ServerClaw",
       "health_probe_id": "serverclaw",
@@ -2718,7 +2714,6 @@
         "production": {
           "status": "active",
           "url": "https://chat.example.com",
-          "subdomain": "chat.example.com",
           "notes": "ServerClaw uses in-app Keycloak OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
         }
       }
@@ -2742,7 +2737,6 @@
       "runtime_pool": "runtime-general",
       "deployment_surface": "playbooks/sftpgo.yml",
       "restart_domain": "runtime-general-data-apps",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-general",
       "mobility_tier": "elastic_stateless",
       "tags": [
         "sftp",

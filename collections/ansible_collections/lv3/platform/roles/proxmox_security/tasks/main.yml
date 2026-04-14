@@ -298,7 +298,14 @@
   changed_when: true
 
 - name: Check existing ACME plugins
-  ansible.builtin.command: pvenode acme plugin list
+  ansible.builtin.command:
+    argv:
+      - pvenode
+      - acme
+      - plugin
+      - list
+      - --output-format
+      - json
   register: proxmox_acme_plugins
   changed_when: false
   when: proxmox_security_manage_acme | bool
@@ -328,7 +335,7 @@
       - "{{ proxmox_acme_validation_delay | string }}"
   when:
     - proxmox_security_manage_acme | bool
-    - proxmox_acme_plugin_id not in proxmox_acme_plugins.stdout
+    - (proxmox_acme_plugins.stdout | from_json | map(attribute='plugin') | list) is not contains(proxmox_acme_plugin_id)
   changed_when: true
   no_log: true
 
@@ -348,7 +355,7 @@
       - "{{ proxmox_acme_validation_delay | string }}"
   when:
     - proxmox_security_manage_acme | bool
-    - proxmox_acme_plugin_id in proxmox_acme_plugins.stdout
+    - (proxmox_acme_plugins.stdout | from_json | map(attribute='plugin') | list) is contains(proxmox_acme_plugin_id)
   changed_when: true
   no_log: true
   ignore_errors: true

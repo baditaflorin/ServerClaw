@@ -66,6 +66,11 @@
         prerequisite: "Converge the Gitea runtime first so the Renovate bot credential is mirrored locally"
   when: gitea_runner_renovate_enabled | bool
 
+- name: Record the Gitea runner registration token
+  ansible.builtin.set_fact:
+    gitea_runner_registration_token: "{{ lookup('ansible.builtin.file', gitea_runner_registration_token_local_file) | trim }}"
+  no_log: true
+
 - name: Record the Gitea Renovate bot password
   ansible.builtin.set_fact:
     gitea_runner_renovate_password: "{{ lookup('ansible.builtin.file', gitea_runner_renovate_password_local_file) | trim }}"

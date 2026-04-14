@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 import tempfile
 
+import json
 import yaml
 
 
@@ -15,6 +16,15 @@ import service_definition_catalog  # noqa: E402
 
 def test_repo_service_definition_catalog_matches_generated_aggregates() -> None:
     assert service_definition_catalog.main(["--check"]) == 0
+
+
+def test_gitea_readiness_probe_uses_private_repo_hook_path() -> None:
+    health_catalog = json.loads((REPO_ROOT / "config" / "health-probe-catalog.json").read_text(encoding="utf-8"))
+    readiness_argv = health_catalog["services"]["gitea"]["readiness"]["argv"]
+
+    assert (
+        readiness_argv[-1] == "/opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive"
+    )
 
 
 def test_bundle_directory_name_must_match_service_id() -> None:

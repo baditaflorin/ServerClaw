@@ -18,6 +18,9 @@
     subdomain_catalog_path: "{{ playbook_dir }}/../../config/subdomain-catalog.json"
     inventory_defaults_path: "{{ playbook_dir }}/../../inventory/group_vars/all/identity.yml"
     local_identity_path: "{{ playbook_dir }}/../../.local/identity.yml"
+    # The committed catalog stays generic-by-default even when the scoped runner
+    # injects the real deployment domain from .local/identity.yml.
+    catalog_placeholder_domain: example.com
     # Sentinel: the placeholder stored in committed catalog files.
     # Any catalog target equal to this value is replaced with management_ipv4 at runtime.
     _dns_public_ip_placeholder: "203.0.113.1"
@@ -38,13 +41,34 @@
         file: "{{ subdomain_catalog_path }}"
         name: subdomain_catalog
 
+    - name: Derive the catalog lookup FQDN from the requested service hostname
+      ansible.builtin.set_fact:
+        catalog_lookup_fqdn: >-
+          {{
+            service_dns_fqdn
+            if (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', service_dns_fqdn)
+              | list
+            )
+            else (
+              catalog_placeholder_domain
+              if service_dns_fqdn == hetzner_dns_zone_name
+              else (
+                service_dns_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+                ~ '.'
+                ~ catalog_placeholder_domain
+              )
+            )
+          }}
+
     - name: "Select the {{ service_dns_fqdn | default('service.example.com') }} subdomain entry"
       ansible.builtin.set_fact:
         selected_subdomain: >-
           {{
             (
               subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', service_dns_fqdn | default('service.example.com'))
+              | selectattr('fqdn', 'equalto', catalog_lookup_fqdn)
               | list
               | first
             ) | default({})
@@ -55,7 +79,7 @@
         that:
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+          - selected_subdomain.fqdn == catalog_lookup_fqdn
         fail_msg: "{{ service_dns_fqdn | default('service.example.com') }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
@@ -63,9 +87,9 @@
         selected_subdomain_record_name: >-
           {{
             '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            if service_dns_fqdn == hetzner_dns_zone_name
             else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+              service_dns_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
             )
           }}
 
