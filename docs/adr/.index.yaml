@@ -8,11 +8,11 @@
 schema_version: 2
 generated: '2026-04-14'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 448
+total_adrs: 449
 adr_number_range:
   first: '0001'
-  last: '0416'
-  next_available: '0416'
+  last: '0417'
+  next_available: '0417'
 implementation_status_summary:
   Implemented: 352
   Partial: 3
@@ -137,8 +137,13 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0417'
+  next_available_adr: '0418'
 latest_adrs:
+  - adr: '0417'
+    title: Service VM Migration IaC — Single Canonical Procedure
+    implementation_status: Implemented
+    concern: vm-topology
+    path: docs/adr/0417-service-vm-migration-iac.md
   - adr: '0416'
     title: Topology Consistency Enforcement
     implementation_status: Implemented

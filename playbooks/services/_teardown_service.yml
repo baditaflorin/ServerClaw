@@ -1,0 +1,61 @@
+---
+# _teardown_service.yml — Generic service container stop + remove
+# ADR 0417 — Service VM Migration IaC
+#
+# Stops and removes a named container on a specific VM.
+# Called by scripts/migrate_service.py (via make teardown-service) during migrations.
+# Also callable standalone for manual cleanup.
+#
+# Required extra-vars:
+#   teardown_host           — inventory hostname of the VM to target (e.g. docker-runtime)
+#   teardown_container_name — container name to stop and remove (e.g. keycloak)
+#
+# Optional extra-vars:
+#   teardown_ignore_missing — if true, don't fail if container doesn't exist (default: true)
+#
+# Example:
+#   make teardown-service svc=keycloak on_vm=docker-runtime env=production
+#   # which runs:
+#   # ansible-playbook ... _teardown_service.yml -e teardown_host=docker-runtime
+#   #                                             -e teardown_container_name=keycloak
+
+- name: "Teardown service container — {{ teardown_container_name }} on {{ teardown_host }}"
+  hosts: "{{ teardown_host }}"
+  gather_facts: false
+  become: true
+
+  vars:
+    teardown_ignore_missing: true
+
+  pre_tasks:
+    - name: Assert required variables are set
+      ansible.builtin.assert:
+        that:
+          - teardown_host is defined and teardown_host != ""
+          - teardown_container_name is defined and teardown_container_name != ""
+        fail_msg: "teardown_host and teardown_container_name must be set via -e"
+
+  tasks:
+    - name: "Check if container {{ teardown_container_name }} exists"
+      community.docker.docker_container_info:
+        name: "{{ teardown_container_name }}"
+      register: _container_info
+      ignore_errors: true
+
+    - name: "Stop container {{ teardown_container_name }} (if running)"
+      community.docker.docker_container:
+        name: "{{ teardown_container_name }}"
+        state: stopped
+      when: _container_info.exists | default(false)
+
+    - name: "Remove container {{ teardown_container_name }}"
+      community.docker.docker_container:
+        name: "{{ teardown_container_name }}"
+        state: absent
+      when: _container_info.exists | default(false)
+
+    - name: "Log teardown result"
+      ansible.builtin.debug:
+        msg: >-
+          {{ teardown_container_name }} on {{ inventory_hostname }}:
+          {{ 'stopped and removed' if (_container_info.exists | default(false)) else 'was not running (nothing to do)' }}

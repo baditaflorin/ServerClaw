@@ -117,7 +117,29 @@ uv run --with pyyaml python scripts/validate_topology_consistency.py --check
 
 ### 4. Operator procedure when moving a service to a different VM
 
-When migrating service `<svc>` from `<old-vm>` to `<new-vm>`:
+**⚠ This manual procedure is superseded by ADR 0417. Use `make migrate-service`.**
+
+```bash
+# Preview what will change (no files touched, no converges run):
+make migrate-service-dry-run svc=<svc> to=<new-vm>
+
+# Execute: updates all three registry files + runs ordered converges + writes receipt:
+make migrate-service svc=<svc> to=<new-vm> env=production
+
+# Then commit the registry changes:
+git diff && git add inventory/ && git commit -m "migrate <svc>: <old-vm> → <new-vm>"
+git push origin main
+```
+
+`make migrate-service` updates `host_group`, `proxy.upstream_host`, and
+`lv3_service_topology.owning_vm` atomically, runs topology validation, then
+converges in the correct order (postgres → stop-old → service → nginx).
+
+The manual 5-step procedure below is kept for reference only. Do not use it
+for new migrations — it is error-prone and bypasses the receipt system.
+
+<details>
+<summary>Legacy manual procedure (reference only — use make migrate-service instead)</summary>
 
 ```yaml
 # Step 1: Update the authoritative registry
@@ -125,26 +147,23 @@ When migrating service `<svc>` from `<old-vm>` to `<new-vm>`:
   <svc>:
     host_group: <new-vm>    # was: <old-vm>
 
-# Step 2: Update the PostgreSQL client registry (if the service uses postgres)
-# inventory/group_vars/platform_postgres.yml
-  - service: <svc>
-    source_vm: <new-vm>     # was: <old-vm>
-
-# Step 3: Update nginx routing topology (if the service has a public endpoint)
+# Step 2: Update nginx routing topology (if the service has a public endpoint)
 # inventory/host_vars/proxmox-host.yml
   lv3_service_topology:
     <svc>:
       owning_vm: <new-vm>   # was: <old-vm>
       upstream: "http://{{ ... <new-vm> ... }}:..."
 
-# Step 4: Verify consistency
+# Step 3: Verify consistency
 python scripts/validate_topology_consistency.py --check
 
-# Step 5: Converge affected services
+# Step 4: Converge affected services (order matters!)
 make converge-postgres-vm env=production        # updates pg_hba.conf
-make converge-keycloak env=production           # or relevant service
+make teardown-service svc=<svc> on_vm=<old-vm> # stop old container
+make converge-<svc> env=production              # start on new VM
 make converge-nginx-edge env=production         # updates nginx upstream
 ```
+</details>
 
 ### 5. Phase 2 COMPLETE: derive source_vm from host_group automatically ✅
 

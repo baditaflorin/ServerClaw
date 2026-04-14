@@ -102,6 +102,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
 .PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
+.PHONY: migrate-service migrate-service-dry-run teardown-service detect-orphans purge-orphans
 .PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat
 .PHONY: syntax-check-flagsmith converge-flagsmith
 .PHONY: syntax-check-lago converge-lago
@@ -1355,6 +1356,48 @@ converge-vaultwarden:
 converge-mattermost:
 	$(MAKE) preflight WORKFLOW=converge-mattermost
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/mattermost.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+# ---------------------------------------------------------------------------
+# ADR 0417 — Service VM Migration IaC
+# Single canonical entrypoint for moving a service between VMs.
+# All three fields (host_group, proxy.upstream_host, owning_vm) are updated
+# atomically, then the correct ordered converge sequence is executed.
+#
+# Usage:
+#   make migrate-service-dry-run svc=keycloak to=runtime-control
+#   make migrate-service         svc=keycloak to=runtime-control env=production
+#   make teardown-service        svc=keycloak on_vm=docker-runtime env=production
+#   make detect-orphans
+#   make purge-orphans
+# ---------------------------------------------------------------------------
+
+migrate-service-dry-run:
+	@test -n "$(svc)" || (echo "Usage: make migrate-service-dry-run svc=<name> to=<vm>"; exit 1)
+	@test -n "$(to)"  || (echo "Usage: make migrate-service-dry-run svc=<name> to=<vm>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --dry-run
+
+migrate-service:
+	@test -n "$(svc)" || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
+	@test -n "$(to)"  || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --execute
+
+teardown-service:
+	@test -n "$(svc)"    || (echo "Usage: make teardown-service svc=<name> on_vm=<vm> [env=production]"; exit 1)
+	@test -n "$(on_vm)"  || (echo "Usage: make teardown-service svc=<name> on_vm=<vm> [env=production]"; exit 1)
+	$(eval _container_name := $(if $(container_name),$(container_name),$(svc)))
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) \
+	  --playbook $(REPO_ROOT)/playbooks/services/_teardown_service.yml \
+	  --env $(env) -- \
+	  --private-key $(BOOTSTRAP_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  -e teardown_host=$(on_vm) \
+	  -e teardown_container_name=$(_container_name)
+
+detect-orphans:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/detect_orphaned_containers.py --list
+
+purge-orphans:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/detect_orphaned_containers.py --purge
 
 rotate-secret:
 	$(MAKE) preflight WORKFLOW=rotate-secret
