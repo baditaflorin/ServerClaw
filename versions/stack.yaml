@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.178.140
-platform_version: 0.178.138
+repo_version: 0.178.141
+platform_version: 0.178.141
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -30,7 +30,7 @@ live_apply_evidence:
     homepage: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     librechat: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
-    livekit: 2026-04-01-adr-0293-livekit-mainline-live-apply
+    livekit: 2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply
     litellm: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
@@ -1183,8 +1183,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.140
+    current: 0.178.141
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.138
+    current: 0.178.141
     meaning: intended platform release for the actual server configuration

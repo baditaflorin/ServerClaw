@@ -31,6 +31,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 livekit_service_topology: "{{ platform_service_topology | service_topology_get('livekit') }}"
+livekit_openbao_service_topology: "{{ platform_service_topology | service_topology_get('openbao') }}"
 livekit_image: "{{ container_image_catalog.images.livekit_runtime.ref }}"
 livekit_container_name: lv3-livekit
 livekit_site_dir: /opt/livekit
@@ -41,6 +42,8 @@ livekit_legacy_env_file: "{{ livekit_site_dir }}/livekit.env"
 livekit_openbao_agent_dir: "{{ livekit_site_dir }}/openbao"
 livekit_openbao_agent_image: "{{ openbao_agent_image }}"
 livekit_openbao_agent_container_name: livekit-openbao-agent
+livekit_runtime_openbao_address: "http://{{ livekit_openbao_service_topology.private_ip }}:{{ hostvars[platform_topology_host].platform_port_assignments.openbao_http_port }}"
+livekit_runtime_openbao_local_address: "http://127.0.0.1:{{ openbao_http_port }}"
 livekit_openbao_secret_path: services/livekit/runtime-env
 livekit_openbao_policy_name: lv3-service-livekit-runtime
 livekit_openbao_approle_name: livekit-runtime

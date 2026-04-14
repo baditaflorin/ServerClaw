@@ -1277,9 +1277,9 @@
       "description": "Real-time audio signalling and media relay surface for voice-enabled operator and agent sessions.",
       "category": "communication",
       "lifecycle_status": "active",
-      "vm": "docker-runtime",
-      "vmid": 120,
-      "internal_url": "http://10.10.10.20:7880",
+      "vm": "runtime-comms",
+      "vmid": 121,
+      "internal_url": "http://10.10.10.21:7880",
       "public_url": "https://livekit.example.com",
       "subdomain": "livekit.example.com",
       "exposure": "edge-published",
@@ -1305,7 +1305,7 @@
         "webrtc",
         "realtime"
       ],
-      "notes": "Signal traffic is published through the shared NGINX edge at livekit.example.com while media TCP and UDP listeners are forwarded directly by the Proxmox host to docker-runtime.",
+      "notes": "Signal traffic is published through the shared NGINX edge at livekit.example.com while media TCP and UDP listeners are forwarded directly by the Proxmox host to runtime-comms.",
       "environments": {
         "production": {
           "status": "active",

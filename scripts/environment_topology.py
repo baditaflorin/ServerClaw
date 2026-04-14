@@ -383,8 +383,8 @@ def main(argv: list[str] | None = None) -> int:
         host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
         validate_environment_topology(catalog, host_vars)
         if args.validate:
-            service_catalog = load_json(SERVICE_CATALOG_PATH)
-            subdomain_catalog = load_json(SUBDOMAIN_CATALOG_PATH)
+            service_catalog = apply_identity_domain_overlay(load_json(SERVICE_CATALOG_PATH))
+            subdomain_catalog = apply_identity_domain_overlay(load_json(SUBDOMAIN_CATALOG_PATH))
             validate_environment_references(catalog, service_catalog, subdomain_catalog, host_vars)
             return 0
         if args.list:

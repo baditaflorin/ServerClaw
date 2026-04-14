@@ -6,9 +6,9 @@ service:
     operator and agent sessions.
   category: communication
   lifecycle_status: active
-  vm: docker-runtime
-  vmid: 120
-  internal_url: http://10.10.10.20:7880
+  vm: runtime-comms
+  vmid: 121
+  internal_url: http://10.10.10.21:7880
   public_url: https://livekit.example.com
   subdomain: livekit.example.com
   exposure: edge-published
@@ -33,7 +33,7 @@ service:
     - realtime
   notes: Signal traffic is published through the shared NGINX edge at livekit.example.com
     while media TCP and UDP listeners are forwarded directly by the Proxmox host to
-    docker-runtime.
+    runtime-comms.
   environments:
     production:
       status: active
@@ -60,28 +60,24 @@ redundancy:
     rpo_minutes: 1440
   backup_sources:
     - git_repository
-    - pbs_vm_120
+    - pbs_vm_121
   standby:
     kind: cold
-    location: docker-runtime
-    failover_trigger: Restore docker-runtime when LiveKit, its public signalling path,
+    location: runtime-comms
+    failover_trigger: Restore runtime-comms when LiveKit, its public signalling path,
       or its media listener contract cannot be recovered in place.
-    failback_method: Restore or rebuild docker-runtime, then rerun the LiveKit converge
+    failback_method: Restore or rebuild runtime-comms, then rerun the LiveKit converge
       from git.
 dependency:
   node:
     id: livekit
     service: livekit
     name: LiveKit
-    vm: docker-runtime
-    tier: 2
+    vm: runtime-comms
+    tier: 1
     category: communication
     adr: 0293
   outbound_edges:
-    - from: livekit
-      to: docker_runtime
-      type: hard
-      description: LiveKit runs as a repo-managed Docker Compose workload on docker-runtime.
     - from: livekit
       to: nginx_edge
       type: soft
@@ -94,13 +90,13 @@ dependency:
         env contract before the service is verified.
 health:
   service_name: livekit
-  owning_vm: docker-runtime
+  owning_vm: runtime-comms
   role: livekit_runtime
   verify_file: roles/livekit_runtime/tasks/verify.yml
   startup:
     kind: tcp
     description: LiveKit startup completes once the local signalling listener is reachable
-      on docker-runtime.
+      on runtime-comms.
     timeout_seconds: 120
     retries: 24
     delay_seconds: 5
@@ -108,7 +104,7 @@ health:
     port: 7880
   liveness:
     kind: tcp
-    description: The LiveKit TCP media listener remains bound on docker-runtime.
+    description: The LiveKit TCP media listener remains bound on runtime-comms.
     timeout_seconds: 120
     retries: 24
     delay_seconds: 5

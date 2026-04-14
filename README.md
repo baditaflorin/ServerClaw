@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.140` |
-| Platform version | `0.178.138` |
+| Repository version | `0.178.141` |
+| Platform version | `0.178.141` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -61,6 +61,7 @@ monitored, and recoverable from a single repository.
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
+| `livekit` | `2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply` |
 | `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
@@ -77,7 +78,6 @@ monitored, and recoverable from a single repository.
 | `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
-| `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
 
 Showing 20 of 181 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -89,8 +89,8 @@ Showing 20 of 181 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.140` |
-| Platform version | `0.178.138` |
+| Repository version | `0.178.141` |
+| Platform version | `0.178.141` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

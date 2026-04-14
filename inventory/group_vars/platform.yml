@@ -49,7 +49,7 @@ platform_host:
         target_host: 10.10.10.92
         target_port: 993
       - listen_port: 7881
-        target_host: 10.10.10.20
+        target_host: 10.10.10.21
         target_port: 7881
       - listen_port: 8080
         target_host: '{{ neko_vm_ipv4 | default(''10.10.10.41'') }}'
@@ -2034,8 +2034,8 @@ platform_service_topology:
       smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
-    owning_vm: docker-runtime
-    private_ip: 10.10.10.20
+    owning_vm: runtime-comms
+    private_ip: 10.10.10.21
     public_hostname: livekit.lv3.org
     exposure_model: edge-published
     observability:
@@ -2055,7 +2055,7 @@ platform_service_topology:
       kind: proxy
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.20:7880
+      upstream: http://10.10.10.21:7880
     service_id: livekit
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/livekit.yml
@@ -2068,7 +2068,7 @@ platform_service_topology:
       media_udp: 7882
     urls:
       public: https://livekit.lv3.org
-      internal: http://10.10.10.20:7880
+      internal: http://10.10.10.21:7880
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime
@@ -4047,187 +4047,187 @@ platform_dns_records:
       value: 100.64.0.1
       ttl: 60
 platform_dns_declarations:
-  agents.example.com:
+  agents.lv3.org:
     service: dify
     target_host: nginx
     ttl: 60
     type: public
-  analytics.example.com:
+  analytics.lv3.org:
     service: plausible
     target_host: nginx
     ttl: 3600
     type: public
-  annotate.example.com:
+  annotate.lv3.org:
     service: label_studio
     target_host: nginx
     ttl: 3600
     type: public
-  api.example.com:
+  api.lv3.org:
     service: api_gateway
     target_host: nginx
     ttl: 60
     type: public
-  bi.example.com:
+  bi.lv3.org:
     service: superset
     target_host: nginx
     ttl: 3600
     type: public
-  billing.example.com:
+  billing.lv3.org:
     service: lago
     target_host: nginx
     ttl: 3600
     type: public
-  chat.example.com:
+  chat.lv3.org:
     service: librechat
     target_host: nginx
     ttl: 3600
     type: public
-  ci.example.com:
+  ci.lv3.org:
     service: woodpecker
     target_host: nginx
     ttl: 3600
     type: public
-  cloud.example.com:
+  cloud.lv3.org:
     service: nextcloud
     target_host: nginx
     ttl: 3600
     type: public
-  data.example.com:
+  data.lv3.org:
     service: directus
     target_host: nginx
     ttl: 60
     type: public
-  draw.example.com:
+  draw.lv3.org:
     service: excalidraw
     target_host: nginx
     ttl: 3600
     type: public
-  errors.example.com:
+  errors.lv3.org:
     service: glitchtip
     target_host: nginx
     ttl: 3600
     type: public
-  files.example.com:
+  files.lv3.org:
     service: sftpgo
     target_host: nginx
     ttl: 3600
     type: public
-  flags.example.com:
+  flags.lv3.org:
     service: flagsmith
     target_host: nginx
     ttl: 3600
     type: public
-  git.example.com:
+  git.lv3.org:
     service: gitea
     target_host: nginx
     ttl: 3600
     type: internal
-  grist.example.com:
+  grist.lv3.org:
     service: grist
     target_host: nginx
     ttl: 3600
     type: public
-  langfuse.example.com:
+  langfuse.lv3.org:
     service: langfuse
     target_host: nginx
     ttl: 3600
     type: public
-  livekit.example.com:
+  livekit.lv3.org:
     service: livekit
     target_host: nginx
     ttl: 60
     type: public
-  logs.example.com:
+  logs.lv3.org:
     service: dozzle
     target_host: nginx
     ttl: 3600
     type: public
-  mail.example.com:
+  mail.lv3.org:
     service: mail_platform
     target_host: docker-runtime
     ttl: 3600
     type: internal
-  matrix.example.com:
+  matrix.lv3.org:
     service: matrix_synapse
     target_host: nginx
     ttl: 3600
     type: public
-  minio-console.example.com:
+  minio-console.lv3.org:
     service: minio
     target_host: nginx
     ttl: 3600
     type: public
-  minio.example.com:
+  minio.lv3.org:
     service: minio
     target_host: nginx
     ttl: 3600
     type: public
-  n8n.example.com:
+  n8n.lv3.org:
     service: n8n
     target_host: nginx
     ttl: 3600
     type: public
-  ntfy.example.com:
+  ntfy.lv3.org:
     service: ntfy
     target_host: nginx
     ttl: 3600
     type: public
-  ops.example.com:
+  ops.lv3.org:
     service: ops_portal
     target_host: nginx
     ttl: 3600
     type: public
-  paperless.example.com:
+  paperless.lv3.org:
     service: paperless
     target_host: nginx
     ttl: 3600
     type: public
-  registry.example.com:
+  registry.lv3.org:
     service: harbor
     target_host: nginx
     ttl: 3600
     type: public
-  repo-intake.example.com:
+  repo-intake.lv3.org:
     service: repo_intake
     target_host: nginx
     ttl: 3600
     type: public
-  repowise.example.com:
+  repowise.lv3.org:
     service: repowise
     target_host: nginx
     ttl: 3600
     type: public
-  s3.example.com:
+  s3.lv3.org:
     service: minio
     target_host: nginx
     ttl: 3600
     type: public
-  search.example.com:
+  search.lv3.org:
     service: searxng
     target_host: nginx
     ttl: 3600
     type: internal
-  sso.example.com:
+  sso.lv3.org:
     service: keycloak
     target_host: nginx
     ttl: 60
     type: public
-  tasks.example.com:
+  tasks.lv3.org:
     service: plane
     target_host: nginx
     ttl: 3600
     type: public
-  uptime.example.com:
+  uptime.lv3.org:
     service: uptime_kuma
     target_host: nginx
     ttl: 3600
     type: public
-  vault.example.com:
+  vault.lv3.org:
     service: vaultwarden
     target_host: nginx
     ttl: 3600
     type: internal
-  wiki.example.com:
+  wiki.lv3.org:
     service: outline
     target_host: nginx
     ttl: 3600
@@ -4235,7 +4235,7 @@ platform_dns_declarations:
 platform_nginx_upstreams:
   - name: api_gateway_upstream
     service_name: api_gateway
-    fqdn: api.example.com
+    fqdn: api.lv3.org
     extra_fqdns: []
     port: 8080
     host: runtime-control
@@ -4246,7 +4246,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: coolify_upstream
     service_name: coolify
-    fqdn: coolify.example.com
+    fqdn: coolify.lv3.org
     extra_fqdns: []
     port: 8000
     host: coolify
@@ -4257,7 +4257,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: dify_upstream
     service_name: dify
-    fqdn: agents.example.com
+    fqdn: agents.lv3.org
     extra_fqdns: []
     port: 8094
     host: docker-runtime
@@ -4268,7 +4268,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: directus_upstream
     service_name: directus
-    fqdn: data.example.com
+    fqdn: data.lv3.org
     extra_fqdns: []
     port: 8055
     host: docker-runtime
@@ -4279,7 +4279,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: dozzle_upstream
     service_name: dozzle
-    fqdn: logs.example.com
+    fqdn: logs.lv3.org
     extra_fqdns: []
     port: 8089
     host: docker-runtime
@@ -4290,7 +4290,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: excalidraw_upstream
     service_name: excalidraw
-    fqdn: draw.example.com
+    fqdn: draw.lv3.org
     extra_fqdns: []
     port: 3095
     host: docker-runtime
@@ -4301,7 +4301,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: flagsmith_upstream
     service_name: flagsmith
-    fqdn: flags.example.com
+    fqdn: flags.lv3.org
     extra_fqdns: []
     port: 8017
     host: docker-runtime
@@ -4312,7 +4312,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: glitchtip_upstream
     service_name: glitchtip
-    fqdn: errors.example.com
+    fqdn: errors.lv3.org
     extra_fqdns: []
     port: 3005
     host: docker-runtime
@@ -4323,7 +4323,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: grist_upstream
     service_name: grist
-    fqdn: grist.example.com
+    fqdn: grist.lv3.org
     extra_fqdns: []
     port: 8484
     host: docker-runtime
@@ -4334,7 +4334,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: harbor_upstream
     service_name: harbor
-    fqdn: registry.example.com
+    fqdn: registry.lv3.org
     extra_fqdns: []
     port: 8095
     host: runtime-control
@@ -4345,7 +4345,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: homepage_upstream
     service_name: homepage
-    fqdn: home.example.com
+    fqdn: home.lv3.org
     extra_fqdns: []
     port: 3090
     host: runtime-general
@@ -4356,9 +4356,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: keycloak_upstream
     service_name: keycloak
-    fqdn: sso.example.com
+    fqdn: sso.lv3.org
     extra_fqdns:
-      - sso.staging.example.com
+      - sso.staging.lv3.org
     port: 8091
     host: docker-runtime
     ip: 10.10.10.20
@@ -4368,7 +4368,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: label_studio_upstream
     service_name: label_studio
-    fqdn: annotate.example.com
+    fqdn: annotate.lv3.org
     extra_fqdns: []
     port: 8110
     host: docker-runtime
@@ -4379,7 +4379,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: lago_upstream
     service_name: lago
-    fqdn: billing.example.com
+    fqdn: billing.lv3.org
     extra_fqdns: []
     port: 8099
     host: docker-runtime
@@ -4390,7 +4390,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: langfuse_upstream
     service_name: langfuse
-    fqdn: langfuse.example.com
+    fqdn: langfuse.lv3.org
     extra_fqdns: []
     port: 3002
     host: docker-runtime
@@ -4401,7 +4401,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: librechat_upstream
     service_name: librechat
-    fqdn: chat.example.com
+    fqdn: chat.lv3.org
     extra_fqdns: []
     port: 8096
     host: coolify
@@ -4412,18 +4412,18 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: livekit_upstream
     service_name: livekit
-    fqdn: livekit.example.com
+    fqdn: livekit.lv3.org
     extra_fqdns: []
     port: 7880
-    host: docker-runtime
-    ip: 10.10.10.20
+    host: runtime-comms
+    ip: 10.10.10.21
     auth_proxy: false
     websocket: true
     max_body_size: 10m
     path_prefix: /
   - name: matrix_synapse_upstream
     service_name: matrix_synapse
-    fqdn: matrix.example.com
+    fqdn: matrix.lv3.org
     extra_fqdns: []
     port: 8008
     host: docker-runtime
@@ -4434,7 +4434,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: minio_upstream
     service_name: minio
-    fqdn: minio.example.com
+    fqdn: minio.lv3.org
     extra_fqdns: []
     port: 9010
     host: docker-runtime
@@ -4445,7 +4445,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: n8n_upstream
     service_name: n8n
-    fqdn: n8n.example.com
+    fqdn: n8n.lv3.org
     extra_fqdns: []
     port: 5678
     host: docker-runtime
@@ -4456,7 +4456,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: nextcloud_upstream
     service_name: nextcloud
-    fqdn: cloud.example.com
+    fqdn: cloud.lv3.org
     extra_fqdns: []
     port: 8084
     host: docker-runtime
@@ -4467,7 +4467,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: ntfy_upstream
     service_name: ntfy
-    fqdn: ntfy.example.com
+    fqdn: ntfy.lv3.org
     extra_fqdns: []
     port: 2586
     host: docker-runtime
@@ -4478,9 +4478,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: ops_portal_upstream
     service_name: ops_portal
-    fqdn: ops.example.com
+    fqdn: ops.lv3.org
     extra_fqdns:
-      - ops.staging.example.com
+      - ops.staging.lv3.org
     port: 8092
     host: docker-runtime
     ip: 10.10.10.20
@@ -4490,7 +4490,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: outline_upstream
     service_name: outline
-    fqdn: wiki.example.com
+    fqdn: wiki.lv3.org
     extra_fqdns: []
     port: 3006
     host: docker-runtime
@@ -4501,7 +4501,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: paperless_upstream
     service_name: paperless
-    fqdn: paperless.example.com
+    fqdn: paperless.lv3.org
     extra_fqdns: []
     port: 8018
     host: docker-runtime
@@ -4512,7 +4512,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: plane_upstream
     service_name: plane
-    fqdn: tasks.example.com
+    fqdn: tasks.lv3.org
     extra_fqdns: []
     port: 8093
     host: docker-runtime
@@ -4523,7 +4523,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: plausible_upstream
     service_name: plausible
-    fqdn: analytics.example.com
+    fqdn: analytics.lv3.org
     extra_fqdns: []
     port: 8016
     host: docker-runtime
@@ -4534,9 +4534,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: repo_intake_upstream
     service_name: repo_intake
-    fqdn: repo-intake.example.com
+    fqdn: repo-intake.lv3.org
     extra_fqdns:
-      - repo-intake.staging.example.com
+      - repo-intake.staging.lv3.org
     port: 8101
     host: docker-runtime
     ip: 10.10.10.20
@@ -4546,7 +4546,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: repowise_upstream
     service_name: repowise
-    fqdn: repowise.example.com
+    fqdn: repowise.lv3.org
     extra_fqdns: []
     port: 7070
     host: docker-runtime
@@ -4557,7 +4557,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: superset_upstream
     service_name: superset
-    fqdn: bi.example.com
+    fqdn: bi.lv3.org
     extra_fqdns: []
     port: 8105
     host: docker-runtime
@@ -4568,9 +4568,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: uptime_kuma_upstream
     service_name: uptime_kuma
-    fqdn: uptime.example.com
+    fqdn: uptime.lv3.org
     extra_fqdns:
-      - uptime.staging.example.com
+      - uptime.staging.lv3.org
     port: 3001
     host: docker-runtime
     ip: 10.10.10.20
@@ -4580,7 +4580,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: woodpecker_upstream
     service_name: woodpecker
-    fqdn: ci.example.com
+    fqdn: ci.lv3.org
     extra_fqdns: []
     port: 8102
     host: docker-runtime
@@ -4601,7 +4601,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://agents.example.com/console/api/oauth/login/oidc/callback
+      - https://agents.lv3.org/console/api/oauth/login/oidc/callback
     scopes:
       - openid
       - profile
@@ -4611,7 +4611,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://data.example.com/auth/login/keycloak/callback
+      - https://data.lv3.org/auth/login/keycloak/callback
     scopes:
       - openid
       - profile
@@ -4621,7 +4621,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://git.example.com/user/oauth2/Keycloak/callback
+      - https://git.lv3.org/user/oauth2/Keycloak/callback
     scopes:
       - openid
       - profile
@@ -4631,7 +4631,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://errors.example.com/accounts/oidc/keycloak/login/callback/
+      - https://errors.lv3.org/accounts/oidc/keycloak/login/callback/
     scopes:
       - openid
       - profile
@@ -4641,7 +4641,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://grist.example.com/oauth2/callback
+      - https://grist.lv3.org/oauth2/callback
     scopes:
       - openid
       - profile
@@ -4651,7 +4651,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://registry.example.com/c/oidc/callback
+      - https://registry.lv3.org/c/oidc/callback
     scopes:
       - openid
       - profile
@@ -4662,7 +4662,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://langfuse.example.com/api/auth/callback/keycloak
+      - https://langfuse.lv3.org/api/auth/callback/keycloak
     scopes:
       - openid
       - profile
@@ -4672,7 +4672,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://ops.example.com/oauth2/callback
+      - https://ops.lv3.org/oauth2/callback
     scopes:
       - openid
       - profile
@@ -4682,7 +4682,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://wiki.example.com/auth/oidc.callback
+      - https://wiki.lv3.org/auth/oidc.callback
     scopes:
       - openid
       - profile
@@ -4692,7 +4692,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://paperless.example.com/accounts/oidc/keycloak/login/callback/
+      - https://paperless.lv3.org/accounts/oidc/keycloak/login/callback/
     scopes:
       - openid
       - profile
@@ -4702,7 +4702,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://repo-intake.example.com/oauth2/callback
+      - https://repo-intake.lv3.org/oauth2/callback
     scopes:
       - openid
       - profile
@@ -4712,7 +4712,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://chat.example.com/oauth/openid/callback
+      - https://chat.lv3.org/oauth/openid/callback
     scopes:
       - openid
       - profile
@@ -4722,7 +4722,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://files.example.com/web/oidc/redirect
+      - https://files.lv3.org/web/oidc/redirect
     scopes:
       - openid
       - profile
@@ -4732,7 +4732,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://bi.example.com/oauth-authorized/keycloak
+      - https://bi.lv3.org/oauth-authorized/keycloak
     scopes:
       - openid
       - profile
@@ -4742,207 +4742,207 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://tasks.example.com/auth/openid/lv3
+      - https://tasks.lv3.org/auth/openid/lv3
     scopes:
       - openid
       - profile
       - email
     service: vikunja
 platform_hairpin_nat_hosts:
-  - hostname: agents.example.com
+  - hostname: agents.lv3.org
     address: 10.10.10.10
-  - hostname: bi.example.com
+  - hostname: bi.lv3.org
     address: 10.10.10.10
-  - hostname: chat.example.com
+  - hostname: chat.lv3.org
     address: 10.10.10.10
-  - hostname: data.example.com
+  - hostname: data.lv3.org
     address: 10.10.10.10
-  - hostname: dify.example.com
+  - hostname: dify.lv3.org
     address: 10.10.10.10
-  - hostname: files.example.com
+  - hostname: files.lv3.org
     address: 10.10.10.10
-  - hostname: grist.example.com
+  - hostname: grist.lv3.org
     address: 10.10.10.10
-  - hostname: langfuse.example.com
+  - hostname: langfuse.lv3.org
     address: 10.10.10.10
-  - hostname: paperless.example.com
+  - hostname: paperless.lv3.org
     address: 10.10.10.10
-  - hostname: sso.example.com
+  - hostname: sso.lv3.org
     address: 10.10.10.10
-  - hostname: wiki.example.com
+  - hostname: wiki.lv3.org
     address: 10.10.10.10
 platform_tls_certs:
-  agents.example.com:
+  agents.lv3.org:
     cert_validity_days: 90
     service: dify
     source: letsencrypt
     wildcard: false
-  analytics.example.com:
+  analytics.lv3.org:
     cert_validity_days: 90
     service: plausible
     source: letsencrypt
     wildcard: false
-  annotate.example.com:
+  annotate.lv3.org:
     cert_validity_days: 90
     service: label_studio
     source: letsencrypt
     wildcard: false
-  api.example.com:
+  api.lv3.org:
     cert_validity_days: 90
     service: api_gateway
     source: letsencrypt
     wildcard: false
-  bi.example.com:
+  bi.lv3.org:
     cert_validity_days: 90
     service: superset
     source: letsencrypt
     wildcard: false
-  billing.example.com:
+  billing.lv3.org:
     cert_validity_days: 90
     service: lago
     source: letsencrypt
     wildcard: false
-  chat.example.com:
+  chat.lv3.org:
     cert_validity_days: 90
     service: librechat
     source: letsencrypt
     wildcard: false
-  ci.example.com:
+  ci.lv3.org:
     cert_validity_days: 90
     service: woodpecker
     source: letsencrypt
     wildcard: false
-  cloud.example.com:
+  cloud.lv3.org:
     cert_validity_days: 90
     service: nextcloud
     source: letsencrypt
     wildcard: false
-  data.example.com:
+  data.lv3.org:
     cert_validity_days: 90
     service: directus
     source: letsencrypt
     wildcard: false
-  draw.example.com:
+  draw.lv3.org:
     cert_validity_days: 90
     service: excalidraw
     source: letsencrypt
     wildcard: false
-  errors.example.com:
+  errors.lv3.org:
     cert_validity_days: 90
     service: glitchtip
     source: letsencrypt
     wildcard: false
-  files.example.com:
+  files.lv3.org:
     cert_validity_days: 90
     service: sftpgo
     source: letsencrypt
     wildcard: false
-  flags.example.com:
+  flags.lv3.org:
     cert_validity_days: 90
     service: flagsmith
     source: letsencrypt
     wildcard: false
-  grist.example.com:
+  grist.lv3.org:
     cert_validity_days: 90
     service: grist
     source: letsencrypt
     wildcard: false
-  langfuse.example.com:
+  langfuse.lv3.org:
     cert_validity_days: 90
     service: langfuse
     source: letsencrypt
     wildcard: false
-  livekit.example.com:
+  livekit.lv3.org:
     cert_validity_days: 90
     service: livekit
     source: letsencrypt
     wildcard: false
-  logs.example.com:
+  logs.lv3.org:
     cert_validity_days: 90
     service: dozzle
     source: letsencrypt
     wildcard: false
-  mail.example.com:
+  mail.lv3.org:
     cert_validity_days: 90
     service: mail_platform
     source: letsencrypt
     wildcard: false
-  matrix.example.com:
+  matrix.lv3.org:
     cert_validity_days: 90
     service: matrix_synapse
     source: letsencrypt
     wildcard: false
-  minio-console.example.com:
+  minio-console.lv3.org:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  minio.example.com:
+  minio.lv3.org:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  n8n.example.com:
+  n8n.lv3.org:
     cert_validity_days: 90
     service: n8n
     source: letsencrypt
     wildcard: false
-  ntfy.example.com:
+  ntfy.lv3.org:
     cert_validity_days: 90
     service: ntfy
     source: letsencrypt
     wildcard: false
-  ops.example.com:
+  ops.lv3.org:
     cert_validity_days: 90
     service: ops_portal
     source: letsencrypt
     wildcard: false
-  paperless.example.com:
+  paperless.lv3.org:
     cert_validity_days: 90
     service: paperless
     source: letsencrypt
     wildcard: false
-  registry.example.com:
+  registry.lv3.org:
     cert_validity_days: 90
     service: harbor
     source: letsencrypt
     wildcard: false
-  repo-intake.example.com:
+  repo-intake.lv3.org:
     cert_validity_days: 90
     service: repo_intake
     source: letsencrypt
     wildcard: false
-  repowise.example.com:
+  repowise.lv3.org:
     cert_validity_days: 90
     service: repowise
     source: letsencrypt
     wildcard: false
-  s3.example.com:
+  s3.lv3.org:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  sso.example.com:
+  sso.lv3.org:
     cert_validity_days: 90
     service: keycloak
     source: letsencrypt
     wildcard: false
-  tasks.example.com:
+  tasks.lv3.org:
     cert_validity_days: 90
     service: plane
     source: letsencrypt
     wildcard: false
-  uptime.example.com:
+  uptime.lv3.org:
     cert_validity_days: 90
     service: uptime_kuma
     source: letsencrypt
     wildcard: false
-  vault.example.com:
+  vault.lv3.org:
     cert_validity_days: 90
     service: vaultwarden
     source: step-ca
     wildcard: false
-  wiki.example.com:
+  wiki.lv3.org:
     cert_validity_days: 90
     service: outline
     source: letsencrypt
@@ -5331,8 +5331,8 @@ public_edge_service_topology:
       smtp: smtp://10.10.10.91:1025
   livekit:
     service_name: livekit
-    owning_vm: docker-runtime
-    private_ip: 10.10.10.20
+    owning_vm: runtime-comms
+    private_ip: 10.10.10.21
     public_hostname: livekit.lv3.org
     exposure_model: edge-published
     observability:
@@ -5352,7 +5352,7 @@ public_edge_service_topology:
       kind: proxy
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.20:7880
+      upstream: http://10.10.10.21:7880
     service_id: livekit
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/livekit.yml
@@ -5365,7 +5365,7 @@ public_edge_service_topology:
       media_udp: 7882
     urls:
       public: https://livekit.lv3.org
-      internal: http://10.10.10.20:7880
+      internal: http://10.10.10.21:7880
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime

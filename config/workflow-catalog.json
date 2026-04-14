@@ -1819,7 +1819,7 @@
       }
     },
     "converge-livekit": {
-      "description": "Converge LiveKit on docker-runtime, program Proxmox public TCP and UDP media forwarding, and publish livekit.example.com through the shared NGINX edge.",
+      "description": "Converge LiveKit on runtime-comms, program Proxmox public TCP and UDP media forwarding, and publish livekit.example.com through the shared NGINX edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1860,12 +1860,12 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed LiveKit runtime on docker-runtime with controller-local mirrored API credentials, public signalling at livekit.example.com, and public TCP plus UDP media forwarding through the Proxmox host."
+        "A repo-managed LiveKit runtime on runtime-comms with controller-local mirrored API credentials, public signalling at livekit.example.com, and public TCP plus UDP media forwarding through the Proxmox host."
       ],
       "verification_commands": [
         "make syntax-check-livekit",
         "python3 $(git rev-parse --show-toplevel)/scripts/livekit_tool.py verify-room-lifecycle --url https://livekit.example.com --api-key-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-key.txt --api-secret-file $(scripts/resolve_local_overlay_root.sh)/livekit/api-secret.txt --room-prefix livekit-workflow-verify --identity livekit-workflow-probe --timeout-seconds 120",
-        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml docker-runtime -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i $(git rev-parse --show-toplevel)/inventory/hosts.yml runtime-comms -m shell -a \"ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '\" --private-key $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
       ],
       "execution_class": "mutation",
       "budget": {

@@ -156,7 +156,7 @@ proxmox_public_ingress_tcp_forwards:
     target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | list | first).ipv4 }}"
     target_port: 993
   - listen_port: 7881
-    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms') | list | first).ipv4 }}"
     target_port: 7881
   # TODO: Add neko_vm to proxmox_guests when provisioned (planned VMID 141 → 10.10.10.41)
   - listen_port: 8080
@@ -165,7 +165,7 @@ proxmox_public_ingress_tcp_forwards:
     description: Neko remote desktop signalling (proxied via NGINX edge as browser.{{ platform_domain }})
 proxmox_public_ingress_udp_forwards:
   - listen_port: 7882
-    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}"
+    target_host: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms') | list | first).ipv4 }}"
     target_port: 7882
   # TODO: Add neko_vm to proxmox_guests when provisioned (planned VMID 141 → 10.10.10.41)
   - listen_port_range: 50000-60000
@@ -1326,6 +1326,11 @@ network_policy:
             - 8098
             - 8201
           description: Gitea Actions runner access plus OpenBao automation access from docker-build
+        - source: runtime-comms
+          protocol: tcp
+          ports:
+            - 8201
+          description: Private OpenBao automation access from runtime-comms for LiveKit secret injection
         - source: nginx
           protocol: tcp
           ports:
@@ -2287,8 +2292,8 @@ lv3_service_topology:
       service_telemetry: false
   livekit:
     service_name: livekit
-    owning_vm: docker-runtime
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}"
+    owning_vm: runtime-comms
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms') | map(attribute='ipv4') | first) }}"
     public_hostname: livekit.{{ platform_domain }}
     exposure_model: edge-published
     observability:
@@ -2308,7 +2313,7 @@ lv3_service_topology:
       kind: proxy
       proxy_read_timeout_seconds: 3600
       proxy_send_timeout_seconds: 3600
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}"
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime

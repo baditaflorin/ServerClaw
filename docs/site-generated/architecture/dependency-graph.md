@@ -17,8 +17,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, LiveKit, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Repo Intake, SFTPGo, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, LiveKit, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Repo Intake, SFTPGo, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -35,6 +35,7 @@ graph TD
     grist["Grist\nTier 1"]
     harbor["Harbor\nTier 1"]
     headscale["Headscale\nTier 1"]
+    livekit["LiveKit\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     mailpit["Mailpit\nTier 1"]
     minio["MinIO\nTier 1"]
@@ -76,7 +77,6 @@ graph TD
     langfuse["Langfuse\nTier 2"]
     librechat["LibreChat\nTier 2"]
     litellm["LiteLLM Proxy\nTier 2"]
-    livekit["LiveKit\nTier 2"]
     matrix_synapse["Matrix Synapse\nTier 2"]
     mattermost["Mattermost\nTier 2"]
     n8n["n8n\nTier 2"]
@@ -198,7 +198,6 @@ graph TD
     litellm -->|hard| ollama
     litellm -->|startup_only| openbao
     litellm -->|hard| postgres
-    livekit -->|hard| docker_runtime
     livekit -->|soft| nginx_edge
     livekit -->|startup_only| openbao
     mail_platform -->|soft| nginx_edge

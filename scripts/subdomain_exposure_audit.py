@@ -31,6 +31,7 @@ from publication_contract import (
     registry_entries,
 )
 import subdomain_catalog
+from validation_toolkit import apply_identity_domain_overlay
 
 
 REGISTRY_PATH = repo_path("config", "subdomain-exposure-registry.json")
@@ -62,7 +63,7 @@ def iso_timestamp(value: datetime) -> str:
 
 
 def load_certificate_catalog() -> dict[str, Any]:
-    return json.loads(CERTIFICATE_CATALOG_PATH.read_text(encoding="utf-8"))
+    return apply_identity_domain_overlay(json.loads(CERTIFICATE_CATALOG_PATH.read_text(encoding="utf-8")))
 
 
 def hostname_record_type(target: str) -> str:

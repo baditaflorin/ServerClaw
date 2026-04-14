@@ -1,12 +1,12 @@
 id: ws-0370-live-apply
 adr: '0370'
 title: Complete ADR 0370 shared lifecycle adoption and live-apply it from latest origin/main
-status: in_progress
-ready_to_merge: false
-live_applied: false
+status: ready
+ready_to_merge: true
+live_applied: true
 owner: codex
-branch: codex/ws-0370-live-apply
-worktree_path: .worktrees/ws-0370-live-apply
+branch: codex/ws-0370-exact-main
+worktree_path: .worktrees/ws-0370-exact-main
 doc: docs/workstreams/ws-0370-live-apply.md
 depends_on:
 - adr-0021-docker-runtime
@@ -16,20 +16,80 @@ depends_on:
 - adr-0371-parameterized-verify-tasks
 conflicts_with: []
 shared_surfaces:
+- README.md
+- VERSION
+- RELEASE.md
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/*.md
+- versions/stack.yaml
 - workstreams.yaml
 - workstreams/active/ws-0370-live-apply.yaml
 - docs/workstreams/ws-0370-live-apply.md
 - docs/adr/0370-service-lifecycle-task-includes.md
+- docs/adr/.index.yaml
+- docs/adr/index/*/*.yaml
 - docs/adr/implementation-status/adr-0370.yaml
 - docs/runbooks/validate-repository-automation.md
+- docs/runbooks/configure-livekit.md
+- docs/runbooks/configure-openbao.md
+- docs/diagrams/agent-coordination-map.excalidraw
+- docs/site-generated/architecture/dependency-graph.md
+- docs/status/history/live-apply-evidence.md
+- build/platform-manifest.json
+- catalog/services/livekit/service.yaml
+- config/dependency-graph.json
+- config/health-probe-catalog.json
+- config/service-capability-catalog.json
+- config/service-redundancy-catalog.json
+- config/subdomain-exposure-registry.json
+- config/workflow-catalog.json
+- inventory/group_vars/all/main.yml
+- inventory/group_vars/all/platform_services.yml
+- inventory/group_vars/all/proxmox-guests.yml
+- inventory/group_vars/platform.yml
+- inventory/group_vars/platform_tls_certs.yml
+- inventory/host_vars/proxmox-host.yml
+- playbooks/_includes/dns_publication.yml
+- playbooks/livekit.yml
+- playbooks/provision-subdomain.yml
+- collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+- collections/ansible_collections/lv3/platform/playbooks/livekit.yml
+- collections/ansible_collections/lv3/platform/playbooks/provision-subdomain.yml
 - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/check_local_secrets.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/manage_service_secrets.yml
 - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_compose_converge.yml
+- collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
+- collections/ansible_collections/lv3/platform/roles/*_runtime/defaults/main.yml
 - collections/ansible_collections/lv3/platform/roles/*_runtime/tasks/main.yml
+- scripts/environment_catalog.py
+- scripts/environment_topology.py
+- scripts/generate_homepage_config.py
+- scripts/identity_yaml.py
+- scripts/sbom_scanner.py
+- scripts/service_catalog.py
+- scripts/subdomain_catalog.py
+- scripts/subdomain_exposure_audit.py
+- scripts/upgrade_container_image.py
+- scripts/validation_toolkit.py
+- scripts/validate_repository_data_models.py
 - scripts/validate_repo.sh
-- receipts/live-applies/2026-04-11-adr-0370-*.json
-- receipts/live-applies/evidence/2026-04-11-ws-0370-*
+- scripts/topology-snapshot.json
+- tests/test_compose_runtime_secret_injection.py
+- tests/test_homepage_config.py
+- tests/test_live_apply_worktree_bootstrap.py
+- tests/test_livekit_runtime_role.py
+- tests/test_openbao_compose_env_helper.py
+- tests/test_plausible_runtime_role.py
+- tests/test_runtime_general_service_playbooks.py
+- tests/test_sbom_scanner.py
+- tests/test_upgrade_container_image.py
+- tests/test_uptime_kuma_runtime_role.py
+- receipts/live-applies/ws-0370-live-apply-apply-receipt.yaml
+- receipts/live-applies/2026-04-14-adr-0370-*.json
+- receipts/live-applies/evidence/2026-04-14-ws-0370-*
 ownership_manifest:
   owned_surfaces:
   - id: workstream_registry
@@ -48,35 +108,133 @@ ownership_manifest:
   - id: ws_0370_adr_metadata
     paths:
     - docs/adr/0370-service-lifecycle-task-includes.md
+    - docs/adr/.index.yaml
+    - docs/adr/index/*/*.yaml
     - docs/adr/implementation-status/adr-0370.yaml
     mode: exclusive
   - id: ws_0370_common_lifecycle_tasks
     paths:
     - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
     - collections/ansible_collections/lv3/platform/roles/common/tasks/check_local_secrets.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
     - collections/ansible_collections/lv3/platform/roles/common/tasks/manage_service_secrets.yml
     - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_compose_converge.yml
+    - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent.hcl.j2
+    mode: exclusive
+  - id: ws_0370_runtime_role_defaults
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/*_runtime/defaults/main.yml
     mode: exclusive
   - id: ws_0370_runtime_role_migrations
     paths:
     - collections/ansible_collections/lv3/platform/roles/*_runtime/tasks/main.yml
     mode: exclusive
+  - id: ws_0370_dns_publication_helpers
+    paths:
+    - playbooks/_includes/dns_publication.yml
+    - playbooks/livekit.yml
+    - playbooks/provision-subdomain.yml
+    - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
+    - collections/ansible_collections/lv3/platform/playbooks/livekit.yml
+    - collections/ansible_collections/lv3/platform/playbooks/provision-subdomain.yml
+    mode: exclusive
+  - id: ws_0370_inventory_runtime_vars
+    paths:
+    - inventory/group_vars/all/main.yml
+    - inventory/group_vars/all/platform_services.yml
+    - inventory/group_vars/all/proxmox-guests.yml
+    - inventory/group_vars/platform.yml
+    - inventory/group_vars/platform_tls_certs.yml
+    - inventory/host_vars/proxmox-host.yml
+    mode: exclusive
+  - id: ws_0370_workflow_bootstrap_catalog
+    paths:
+    - build/platform-manifest.json
+    - catalog/services/livekit/service.yaml
+    - config/dependency-graph.json
+    - config/health-probe-catalog.json
+    - config/service-capability-catalog.json
+    - config/service-redundancy-catalog.json
+    - config/subdomain-exposure-registry.json
+    - config/workflow-catalog.json
+    mode: exclusive
+  - id: ws_0370_identity_and_catalog_scripts
+    paths:
+    - scripts/environment_catalog.py
+    - scripts/environment_topology.py
+    - scripts/generate_homepage_config.py
+    - scripts/identity_yaml.py
+    - scripts/sbom_scanner.py
+    - scripts/service_catalog.py
+    - scripts/subdomain_catalog.py
+    - scripts/subdomain_exposure_audit.py
+    - scripts/upgrade_container_image.py
+    - scripts/validate_repository_data_models.py
+    - scripts/validation_toolkit.py
+    - scripts/topology-snapshot.json
+    mode: exclusive
+  - id: ws_0370_validation_tests
+    paths:
+    - tests/test_compose_runtime_secret_injection.py
+    - tests/test_homepage_config.py
+    - tests/test_live_apply_worktree_bootstrap.py
+    - tests/test_livekit_runtime_role.py
+    - tests/test_openbao_compose_env_helper.py
+    - tests/test_plausible_runtime_role.py
+    - tests/test_runtime_general_service_playbooks.py
+    - tests/test_sbom_scanner.py
+    - tests/test_upgrade_container_image.py
+    - tests/test_uptime_kuma_runtime_role.py
+    mode: exclusive
+  - id: ws_0370_generated_status_and_architecture_docs
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/site-generated/architecture/dependency-graph.md
+    - docs/status/history/live-apply-evidence.md
+    mode: exclusive
   - id: ws_0370_validation_surface
     paths:
+    - docs/runbooks/configure-livekit.md
+    - docs/runbooks/configure-openbao.md
     - docs/runbooks/validate-repository-automation.md
     - scripts/validate_repo.sh
     mode: shared_contract
     contract: validation-pipeline-v1
+  - id: ws_0370_mainline_release_surfaces
+    paths:
+    - README.md
+    - VERSION
+    - RELEASE.md
+    - changelog.md
+    - docs/release-notes/README.md
+    - docs/release-notes/*.md
+    - versions/stack.yaml
+    mode: exclusive
   - id: ws_0370_live_apply_receipts
     paths:
-    - receipts/live-applies/2026-04-11-adr-0370-*.json
-    - receipts/live-applies/evidence/2026-04-11-ws-0370-*
+    - receipts/live-applies/ws-0370-live-apply-apply-receipt.yaml
+    - receipts/live-applies/2026-04-14-adr-0370-*.json
+    - receipts/live-applies/evidence/2026-04-14-ws-0370-*
     mode: exclusive
 notes: 'Complete the remaining ADR 0370 runtime-role migration work, validate the
 
-  shared lifecycle helper behavior against the repo automation gates, and then
+  shared lifecycle helper behavior against the repo automation gates, repair the
 
-  perform the exact-main live apply plus canonical metadata closeout.
+  fresh-worktree local-overlay materialization bug that replayed example.com
+
+  placeholders, and complete the exact-main LiveKit runtime-comms live apply
+
+  plus canonical metadata closeout.
 
   '
+blockers: []
+canonical_truth:
+  changelog_entry: complete ADR 0370 exact-main live apply by finishing the remaining
+    shared lifecycle helper adoption, preserving fresh-worktree .local identity
+    overlays during governed replays, and re-verifying LiveKit on runtime-comms
+    from latest origin/main
+  release_bump: patch
+  included_in_repo_version: 0.178.141
+  latest_receipts:
+    livekit: 2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply
 plane_issue_id: e934a859-18fc-44f0-a67b-6e9d87d20209

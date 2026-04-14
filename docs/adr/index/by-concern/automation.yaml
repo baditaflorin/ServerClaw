@@ -490,7 +490,7 @@ adrs:
   - adr: '0370'
     title: Service Lifecycle Task Includes
     status: Accepted
-    implementation_status: Accepted
+    implementation_status: Implemented
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -506,6 +506,9 @@ adrs:
       Runtime roles include them with includerole / in
     filename: 0370-service-lifecycle-task-includes.md
     path: docs/adr/0370-service-lifecycle-task-includes.md
+    implemented_in_repo_version: 0.178.141
+    implemented_in_platform_version: 0.178.141
+    implemented_on: '2026-04-14'
   - adr: '0371'
     title: Parameterized Service Verification Tasks
     status: Accepted

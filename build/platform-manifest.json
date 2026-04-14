@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.140",
-  "platform_version": "0.178.138",
-  "generated_at": "2026-04-14T08:09:19Z",
-  "next_refresh_at": "2026-04-14T09:09:19Z",
+  "repo_version": "0.178.141",
+  "platform_version": "0.178.141",
+  "generated_at": "2026-04-14T11:04:04Z",
+  "next_refresh_at": "2026-04-14T12:04:04Z",
   "environment": "production",
   "identity": {
-    "platform_name": "example.com",
-    "operator": "Platform Operator",
+    "platform_name": "lv3.org",
+    "operator": "Florin Badita-Nistor",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -2059,7 +2059,7 @@
       },
       {
         "id": "converge-livekit",
-        "description": "Converge LiveKit on docker-runtime, program Proxmox public TCP and UDP media forwarding, and publish livekit.example.com through the shared NGINX edge.",
+        "description": "Converge LiveKit on runtime-comms, program Proxmox public TCP and UDP media forwarding, and publish livekit.example.com through the shared NGINX edge.",
         "tags": [
           "converge-livekit",
           "host-and-guest-live",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.138",
+    "last_version": "0.178.140",
     "deployed_at": "2026-04-14",
-    "summary": "centralize shared Python validation helpers across catalog and registry scripts per ADR 0369",
-    "release_notes_url": "docs/release-notes/0.178.140.md"
+    "summary": "complete ADR 0370 shared lifecycle helper adoption across the remaining runtime-service wrappers and compose converge paths repair fresh-worktree live-apply bootstrap so shared `.local` identity overlays, generated artifacts, and validation tooling stay aligned during governed replays",
+    "release_notes_url": "docs/release-notes/0.178.141.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6310,17 +6310,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.example.com",
+        "endpoint": "https://ops.lv3.org",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.example.com",
+        "endpoint": "https://windmill.lv3.org",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.example.com",
+        "endpoint": "https://api.lv3.org",
         "adr": "0092"
       }
     ],

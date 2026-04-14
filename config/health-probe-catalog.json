@@ -1593,12 +1593,12 @@
     },
     "livekit": {
       "service_name": "livekit",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "runtime-comms",
       "role": "livekit_runtime",
       "verify_file": "roles/livekit_runtime/tasks/verify.yml",
       "startup": {
         "kind": "tcp",
-        "description": "LiveKit startup completes once the local signalling listener is reachable on docker-runtime.",
+        "description": "LiveKit startup completes once the local signalling listener is reachable on runtime-comms.",
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
@@ -1607,7 +1607,7 @@
       },
       "liveness": {
         "kind": "tcp",
-        "description": "The LiveKit TCP media listener remains bound on docker-runtime.",
+        "description": "The LiveKit TCP media listener remains bound on runtime-comms.",
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,

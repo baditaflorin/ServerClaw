@@ -10,7 +10,7 @@ generated: '2026-04-14'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 353
+total_adrs: 354
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6239,6 +6239,28 @@ adrs:
     path: docs/adr/0368-docker-compose-jinja2-macro-library.md
     implemented_in_repo_version: 0.178.116
     implemented_in_platform_version: 0.178.138
+    implemented_on: '2026-04-14'
+  - adr: '0370'
+    title: Service Lifecycle Task Includes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: automation
+    keywords:
+      - ansible
+      - roles
+      - dry
+      - lifecycle
+      - tasks
+      - service
+      - task
+      - includes
+    summary: Create four new shared task files in the common role. Each handles one discrete phase of the service lifecycle.
+      Runtime roles include them with includerole / in
+    filename: 0370-service-lifecycle-task-includes.md
+    path: docs/adr/0370-service-lifecycle-task-includes.md
+    implemented_in_repo_version: 0.178.141
+    implemented_in_platform_version: 0.178.141
     implemented_on: '2026-04-14'
   - adr: '0373'
     title: Service Registry and Derived Defaults
