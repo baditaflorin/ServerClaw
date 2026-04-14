@@ -129,6 +129,13 @@ def run_command(
     env: dict[str, str] | None = None,
     timeout: float | None = None,
 ) -> CommandResult:
+    def _coerce_output(value: str | bytes | None) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, bytes):
+            return value.decode("utf-8", errors="replace")
+        return value
+
     try:
         completed = subprocess.run(
             command,
@@ -140,10 +147,10 @@ def run_command(
             timeout=timeout,
         )
     except subprocess.TimeoutExpired as exc:
-        stdout = (exc.stdout or "").strip()
-        stderr_lines = []
+        stdout = _coerce_output(exc.stdout).strip()
+        stderr_lines: list[str] = []
         if exc.stderr:
-            stderr_lines.append(exc.stderr.strip())
+            stderr_lines.append(_coerce_output(exc.stderr).strip())
         if timeout is not None:
             stderr_lines.append(f"command timed out after {int(timeout)} seconds")
         return CommandResult(

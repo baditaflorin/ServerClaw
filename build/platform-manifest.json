@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.141",
-  "platform_version": "0.178.141",
-  "generated_at": "2026-04-14T15:22:39Z",
-  "next_refresh_at": "2026-04-14T16:22:39Z",
+  "repo_version": "0.178.143",
+  "platform_version": "0.178.143",
+  "generated_at": "2026-04-14T17:17:21Z",
+  "next_refresh_at": "2026-04-14T18:17:21Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-04-12T00:00:00Z"
+        "last_live_apply": "2026-04-14T00:00:00Z"
       },
       "browser_runner": {
         "service_name": "Browser Runner",
@@ -302,7 +302,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://home.example.com",
-        "last_live_apply": "2026-04-12T00:00:00Z",
+        "last_live_apply": "2026-04-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "keycloak": {
@@ -405,7 +405,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.91:8025",
-        "last_live_apply": "2026-04-13T00:00:00Z",
+        "last_live_apply": "2026-04-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "matrix_synapse": {
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.140",
+    "last_version": "0.178.141",
     "deployed_at": "2026-04-14",
-    "summary": "complete ADR 0370 shared lifecycle helper adoption across the remaining runtime-service wrappers and compose converge paths repair fresh-worktree live-apply bootstrap so shared `.local` identity overlays, generated artifacts, and validation tooling stay aligned during governed replays",
-    "release_notes_url": "docs/release-notes/0.178.141.md"
+    "summary": "close ADR 0371 on the latest realistic `origin/main` by migrating the remaining LibreChat, LiteLLM, and Repowise verifier wrappers to the shared parameterized health-check helper and promoting the verified exact-main live replays into this release completes ADR 0324 exact-main closeout by recording the generated service-catalog assembly receipt on main and refreshing the canonical truth surfaces",
+    "release_notes_url": "docs/release-notes/0.178.143.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

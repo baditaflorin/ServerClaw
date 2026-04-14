@@ -1617,7 +1617,9 @@ adrs:
       parameters.
     filename: 0371-parameterized-verify-tasks.md
     path: docs/adr/0371-parameterized-verify-tasks.md
-    implemented_on: '2026-04-12'
+    implemented_in_repo_version: 0.178.143
+    implemented_in_platform_version: 0.178.143
+    implemented_on: '2026-04-14'
   - adr: '0372'
     title: Data-Driven Playbook Composition
     status: Accepted

@@ -2,20 +2,21 @@
 
 - ADR: [ADR 0371](../adr/0371-parameterized-verify-tasks.md)
 - Title: re-verify parameterized service verification tasks from latest origin/main
-- Status: ready
-- Included In Repo Version: pending merge to `main`
-- Branch-Local Receipt: exact-main replays on `2026-04-13` for `repowise`, `litellm`, and `librechat`, plus the earlier scoped recovery evidence for `rag-context`
-- Mainline Receipt: pending
-- Implemented On: 2026-04-12
-- Live Applied On: 2026-04-13
-- Live Applied In Platform Version: pending
-- Latest Verified Base: `origin/main@07ddfe99a` (`repo 0.178.127`, `platform 0.178.126`)
+- Status: merged
+- Included In Repo Version: `0.178.143`
+- Included In Platform Version: `0.178.143`
+- Branch-Local Receipt: `receipts/live-applies/2026-04-14-adr-0371-parameterized-service-verification-tasks-live-apply.json`
+- Mainline Receipt: `receipts/live-applies/2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply.json`
+- Implemented On: 2026-04-14
+- Live Applied On: 2026-04-14
+- Live Applied In Platform Version: `0.178.143`
+- Latest Verified Base: `origin/main@7b72694975ef8aae83e59d96c08dd27181595b2e` (`repo 0.178.142`, `platform 0.178.141`)
 - Branch: `codex/ws-0371-live-apply`
-- Worktree: `.worktrees/ws-0371-final`
+- Worktree: removed after merge-to-main
 - Owner: codex
 - Depends On: `ADR 0165`, `ADR 0289`, `ADR 0371`
 - Conflicts With: none
-- Shared Surfaces: `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml`, `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml`, `collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml`, `config/health-probe-catalog.json`, `config/service-capability-catalog.json`, `docs/adr/0371-parameterized-verify-tasks.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `playbooks/services/librechat.yml`, `playbooks/services/litellm.yml`, `playbooks/services/repowise.yml`, `platform/ansible/execution_scopes.py`, `receipts/live-applies/*adr-0371*`, `receipts/live-applies/evidence/*ws-0371*`, `scripts/generate_diagrams.py`, `scripts/generate_ops_portal.py`, `scripts/generate_status_docs.py`, `scripts/platform_manifest.py`, `tests/test_ansible_execution_scopes.py`, `tests/test_service_live_apply_wrappers.py`, `workstreams/active/ws-0371-live-apply.yaml`, `workstreams.yaml`
+- Shared Surfaces: `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml`, `collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml`, `collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml`, `config/health-probe-catalog.json`, `config/service-capability-catalog.json`, `docs/adr/0371-parameterized-verify-tasks.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `playbooks/services/librechat.yml`, `playbooks/services/litellm.yml`, `playbooks/services/repowise.yml`, `platform/ansible/execution_scopes.py`, `receipts/live-applies/*adr-0371*`, `receipts/live-applies/evidence/*ws-0371*`, `scripts/generate_diagrams.py`, `scripts/generate_ops_portal.py`, `scripts/generate_status_docs.py`, `scripts/platform_manifest.py`, `tests/test_ansible_execution_scopes.py`, `tests/test_service_live_apply_wrappers.py`, `workstreams/archive/2026/ws-0371-live-apply.yaml`, `workstreams.yaml`
 
 ## Scope
 
@@ -26,8 +27,8 @@
 - validate the repo automation and verification gates from a fresh isolated
   worktree, then replay the governed service live-apply path for the affected
   services with explicit evidence captured in-branch
-- update ADR 0371 and this workstream with the verified implementation/live
-  status while leaving protected mainline release files for the merge step
+- update ADR 0371, this workstream, and the integrated mainline release/state
+  surfaces once the latest realistic `origin/main` replay is fully verified
 
 ## Planned Verification
 
@@ -39,13 +40,16 @@
 - final handoff notes describing what is complete on-branch and what still waits
   for merge-to-`main`
 
-## Merge Notes
+## Integrated Closeout Notes
 
-- Do not bump `VERSION`, `changelog.md`, `README.md`, or `versions/stack.yaml`
-  on this branch.
-- If the branch proves ADR 0371 live-applied successfully, update only the
-  ADR-local/workstream-local state here and leave shared integration truth for
-  the final mainline step.
+- The final closeout now includes the protected mainline integration surfaces:
+  `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`.
+- The shard-backed workstream registry moved this workstream to
+  `workstreams/archive/2026/ws-0371-live-apply.yaml`; `workstreams.yaml`
+  should be regenerated from that archived shard before merge.
+- The exact-main live-apply evidence remains the authoritative proof of the
+  platform change, while the integrated receipts and generated status pages
+  describe the merged `0.178.143` repo and platform state.
 
 ## 2026-04-11 Progress
 
@@ -188,11 +192,49 @@
   - authenticated LiteLLM `GET http://127.0.0.1:4000/v1/models` returned the
     expected model list after the governed replay
 
-## Remaining Mainline Integration Work
+## 2026-04-14 Exact-Main Closeout
 
-- Merge this branch onto local `main` at `origin/main@07ddfe99a`.
-- Cut the protected integration surfaces on `main`: receipt, `VERSION`,
-  `changelog.md`, and `versions/stack.yaml`.
-- Refresh the generated status/workstream surfaces, validate the merged tree,
-  and push `origin/main` so ADR 0371 records its first canonical repo/platform
-  versions.
+- Re-fetched `origin/main` to the latest realistic base
+  `7b72694975ef8aae83e59d96c08dd27181595b2e` and replayed all remaining
+  ADR 0371 services from that exact-main candidate.
+- `repowise` converged successfully on `docker-runtime`; the container reported
+  healthy locally, `http://127.0.0.1:7070/health` returned the Repowise JSON
+  payload, and the public edge stabilized to `HTTP 200` on
+  `https://repowise.lv3.org/health`.
+- `litellm` completed the full governed replay across `proxmox-host`,
+  `postgres`, and `docker-runtime`, including the Proxmox guest-firewall
+  refresh for `docker-runtime`; direct verification returned `HTTP 200` with
+  `"I'm alive!"` from `http://10.10.10.20:4000/health/liveliness`.
+- `librechat` completed the full governed replay across `proxmox-host`,
+  `coolify`, and `nginx`, and the public surface now returns `HTTP 200` on
+  `https://chat.lv3.org/`.
+
+## Final Verification
+
+- The large focused pytest slice passed on the latest merged exact-main tree:
+  `250 passed in 39.66s`.
+- The direct repo gate bundle
+  `./scripts/validate_repo.sh agent-standards data-models health-probes`
+  passed on the integrated candidate.
+- `repowise`, `litellm`, and `librechat` exact-main replay evidence is recorded
+  under `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-*.txt`,
+  with controller-side direct verification collected separately in
+  `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-direct-verification-r1-0.178.142.txt`.
+- The final integration gates also record live-apply receipt schema validation,
+  whitespace diff checks, build-server reachability, and remote validation
+  evidence under the matching `2026-04-14-ws-0371-mainline-final-*.txt`
+  transcripts.
+
+## Integration Notes
+
+- The first April 11 scoped `litellm` replay preserved the historical
+  `ifreload`/SSH failure on `proxmox-host`; the 2026-04-14 exact-main replay
+  no longer reproduced it because the host network render was already converged
+  and the reload path was skipped cleanly.
+- The `repowise` public edge briefly returned `502` during startup while the
+  backend was still stabilizing. The direct post-replay checks captured the
+  steady-state `HTTP 200` health response once the service finished starting.
+- The final exact-main shell wrappers completed their governed replays, but the
+  optional controller-side footer probes stalled after the play recap. Direct
+  verification was rerun immediately and recorded separately so the branch
+  keeps a clean audit trail for the verified production state.

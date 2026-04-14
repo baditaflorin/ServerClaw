@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.141` |
-| Platform version | `0.178.141` |
+| Repository version | `0.178.143` |
+| Platform version | `0.178.143` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -58,10 +58,15 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
+| `repowise` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
+| `platform` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `livekit` | `2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply` |
+| `litellm` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
+| `librechat` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
@@ -70,16 +75,11 @@ monitored, and recoverable from a single repository.
 | `ops_portal` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `litellm` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
-| `librechat` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
 | `keycloak` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `identity_core_watchdog` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
-| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
-| `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
 
-Showing 20 of 181 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 183 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 ## Version Summary
@@ -89,8 +89,8 @@ Showing 20 of 181 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.141` |
-| Platform version | `0.178.141` |
+| Repository version | `0.178.143` |
+| Platform version | `0.178.143` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 312 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 315 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |

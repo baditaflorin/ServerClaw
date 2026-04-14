@@ -170,6 +170,8 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0371` | Re-verify parameterized service verification tasks from the latest origin/main | `merged` | [ws-0371-live-apply.md](../../workstreams/ws-0371-live-apply.md) |
+| `0369` | ADR 0369 live apply — Python validation toolkit completion | `merged` | [ws-0369-live-apply.md](../../workstreams/ws-0369-live-apply.md) |
 | `0370` | Complete ADR 0370 shared lifecycle adoption and live-apply it from latest origin/main | `live_applied` | [ws-0370-live-apply.md](../../workstreams/ws-0370-live-apply.md) |
 | `0368` | ADR 0368 Live Apply and Completion | `live_applied` | [ws-0368-live-apply.md](../../workstreams/ws-0368-live-apply.md) |
 | `0375` | Latest-main integration: edge certificate recovery and validation gate repairs | `merged` | [ws-0417-main-merge-edge-cert-and-sftpgo.md](../../workstreams/ws-0417-main-merge-edge-cert-and-sftpgo.md) |

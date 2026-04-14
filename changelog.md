@@ -12,17 +12,16 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- [adr-0369] Finalize the shared Python validation toolkit on the latest `origin/main`, harden the duplicate-validator enforcement path, and record exact-main validation evidence for the merged repo state.
-
 - completes ADR 0324 exact-main closeout by recording the generated service-catalog assembly receipt on main and refreshing the canonical truth surfaces
 - fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge
 
 ## Latest Release
 
-- [0.178.141 release notes](docs/release-notes/0.178.141.md)
+- [0.178.143 release notes](docs/release-notes/0.178.143.md)
 
 ## Previous Releases
 
+- [0.178.141 release notes](docs/release-notes/0.178.141.md)
 - [0.178.140 release notes](docs/release-notes/0.178.140.md)
 - [0.178.138 release notes](docs/release-notes/0.178.138.md)
 - [0.178.137 release notes](docs/release-notes/0.178.137.md)
@@ -34,9 +33,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.129 release notes](docs/release-notes/0.178.129.md)
 - [0.178.126 release notes](docs/release-notes/0.178.126.md)
 - [0.178.123 release notes](docs/release-notes/0.178.123.md)
-- [0.178.122 release notes](docs/release-notes/0.178.122.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (467 releases)](docs/release-notes/index/2026.md)
+- [2026 (468 releases)](docs/release-notes/index/2026.md)

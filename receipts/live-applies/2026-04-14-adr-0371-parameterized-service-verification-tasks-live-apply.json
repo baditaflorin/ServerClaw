@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0371-parameterized-service-verification-tasks-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-14T16:45:00Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0371-parameterized-service-verification-tasks-live-apply",
+  "adr": "0371",
+  "workstream": "ws-0371-live-apply",
+  "source_branch": "codex/ws-0371-live-apply",
+  "source_commit": "570adb6f13daf32663bcf5633b9ea50aa87592bc",
+  "repo_version_context": "0.178.142",
+  "platform_version_context": "0.178.141",
+  "summary": "Replay the remaining ADR 0371 service verification wrappers from the latest realistic origin/main base, finish the fresh-worktree generator repairs, and re-verify repowise, litellm, and librechat directly on the live platform.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Repowise public health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "LiteLLM private liveliness"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "LibreChat public entrypoint"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0371 regression slice on the latest realistic exact-main tree",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema --with jinja2 python -m pytest -q tests/test_ansible_execution_scopes.py tests/test_canonical_truth.py tests/test_common_docker_bridge_chains_helper.py tests/test_docker_runtime_role.py tests/test_environment_topology.py tests/test_generate_cross_cutting_artifacts.py tests/test_generate_platform_vars.py tests/test_generate_release_notes.py tests/test_live_apply_worktree_bootstrap.py tests/test_litellm_runtime_role.py tests/test_livekit_runtime_role.py tests/test_ollama_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_ops_portal.py tests/test_packaged_repo_paths.py tests/test_plausible_runtime_role.py tests/test_repowise_playbook.py tests/test_restic_config_backup.py tests/test_runtime_general_service_playbooks.py tests/test_service_compose_macro_resolution.py tests/test_service_live_apply_wrappers.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_uptime_kuma_runtime_role.py tests/test_validate_portal_auth.py tests/test_validation_toolkit.py` passed with `250 passed in 39.66s`."
+    },
+    {
+      "check": "Repowise exact-main replay and public health verification",
+      "result": "pass",
+      "observed": "The governed `service=repowise` replay completed on docker-runtime, the container reported healthy locally, and `https://repowise.lv3.org/health` returned `HTTP 200` with the Repowise JSON health payload after startup stabilized."
+    },
+    {
+      "check": "LiteLLM exact-main replay and private liveliness verification",
+      "result": "pass",
+      "observed": "The governed `service=litellm` replay completed successfully across proxmox-host, postgres, and docker-runtime, including the Docker bridge-chain and guest-firewall checks. Direct verification returned `HTTP 200` and `\"I'm alive!\"` from `http://10.10.10.20:4000/health/liveliness`."
+    },
+    {
+      "check": "LibreChat exact-main replay and public edge verification",
+      "result": "pass",
+      "observed": "The governed `service=librechat` replay completed successfully across proxmox-host, coolify, and nginx, and `https://chat.lv3.org/` returned `HTTP 200` with the LibreChat HTML shell."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0371-parameterized-verify-tasks.md",
+    "docs/workstreams/ws-0371-live-apply.md",
+    "workstreams/archive/2026/ws-0371-live-apply.yaml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml",
+    "collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml",
+    "playbooks/services/librechat.yml",
+    "playbooks/services/litellm.yml",
+    "playbooks/services/repowise.yml",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-repowise-live-apply-r2-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-litellm-live-apply-r1-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-librechat-live-apply-r1-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-direct-verification-r1-0.178.142.txt"
+  ],
+  "notes": [
+    "The latest realistic base for the exact-main replay was origin/main@7b72694975ef8aae83e59d96c08dd27181595b2e with repo version 0.178.142 and platform version 0.178.141.",
+    "The first 2026-04-11 scoped litellm replay preserved the historical proxmox_network ifreload/SSH failure, but the 2026-04-14 exact-main replay did not reproduce it because the host network render was already converged and the reload path stayed skipped.",
+    "The governed replay transcripts reached clean play recaps for litellm and librechat before their optional controller-side shell footers stalled; direct verification was rerun immediately and recorded separately so the live state remains fully evidenced."
+  ]
+}

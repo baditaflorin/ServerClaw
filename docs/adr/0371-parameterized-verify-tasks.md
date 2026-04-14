@@ -1,14 +1,32 @@
 # ADR 0371: Parameterized Service Verification Tasks
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: pending
-- Implemented In Platform Version: pending
-- Implemented On: 2026-04-12
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.178.143
+- Implemented In Platform Version: 0.178.143
+- Implemented On: 2026-04-14
 - Date: 2026-04-06
 - Deciders: platform team
 - Concern: platform, dry
 - Tags: ansible, verification, healthcheck, dry
+
+## Implementation Summary (2026-04-14)
+
+- Migrated the remaining hand-written verifier wrappers for `librechat`,
+  `litellm`, and `repowise` to the shared
+  `lv3.platform.common` `verify_service_health` include.
+- Added canonical service-scoped live-apply wrappers under
+  `playbooks/services/` so the governed `make live-apply-service` lane can
+  replay all remaining ADR 0371 services directly from fresh worktrees.
+- Repaired the remaining fresh-worktree generator entrypoints so exact-main
+  replays no longer fail when Python resolves the stdlib `platform` module
+  instead of the repo's `platform/` package.
+- Re-verified the latest realistic `origin/main@7b72694975ef8aae83e59d96c08dd27181595b2e`
+  base (`repo 0.178.142`, `platform 0.178.141`) with exact-main replays for
+  `repowise`, `litellm`, and `librechat`, plus direct controller-side health
+  verification of `https://repowise.lv3.org/health`,
+  `http://10.10.10.20:4000/health/liveliness`, and
+  `https://chat.lv3.org/`.
 
 ## Context
 

@@ -1,0 +1,27 @@
+workstream_id: ws-0371-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-14T16:22:21Z'
+completed_at: '2026-04-14T16:41:34Z'
+applied_by: codex
+repo_version: 0.178.143
+adr: '0371'
+summary: Replay the remaining ADR 0371 service verification migrations from the latest realistic origin/main base, re-verify repowise, litellm, and librechat directly on the live platform, and carry the verified result into integrated repo and platform version 0.178.143.
+targets:
+- target: proxmox-host
+  role: proxmox_network
+- target: docker-runtime
+  role: repowise_runtime
+- target: postgres
+  role: litellm_postgres
+- target: docker-runtime
+  role: litellm_runtime
+- target: coolify
+  role: librechat_runtime
+- target: nginx
+  role: nginx_edge_publication
+errors: []
+notes:
+- The latest realistic exact-main base was origin/main@7b72694975ef8aae83e59d96c08dd27181595b2e with repo version 0.178.142 and platform version 0.178.141.
+- Repowise, LiteLLM, and LibreChat all completed governed replays on 2026-04-14, with direct endpoint verification recorded separately after the wrapper shell footers stalled post-recap.
+- The final integrated validation evidence is preserved under the matching 2026-04-14-ws-0371-mainline-final-*.txt transcripts for direct repo gates, live-apply receipt validation, git diff checks, build-server reachability, and remote validation.

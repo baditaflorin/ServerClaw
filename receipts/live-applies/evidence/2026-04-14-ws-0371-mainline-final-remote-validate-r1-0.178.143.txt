@@ -1,0 +1,124 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-main-ship/scripts/remote_exec.sh remote-validate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS             DURATION(s)
+agent-standards       runner_unavailable 0.08
+alert-rule-validation runner_unavailable 0.11
+ansible-syntax        runner_unavailable 0.12
+atlas-lint            runner_unavailable 0.11
+dependency-graph      runner_unavailable 0.11
+iac-policy-scan       runner_unavailable 0.10
+policy-validation     runner_unavailable 0.08
+schema-validation     runner_unavailable 0.10
+type-check            runner_unavailable 0.10
+workstream-surfaces   runner_unavailable 0.08
+
+[agent-standards] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/agent-standards-j_lkykty.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh agent-standards
+[agent-standards] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[alert-rule-validation] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/alert-rule-validation-89fjtiu6.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/generate_slo_rules.py --check >/dev/null && python scripts/generate_https_tls_assurance.py --check >/dev/null && python scripts/validate_alert_rules.py
+[alert-rule-validation] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[ansible-syntax] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/ansible-syntax-z01x_1pt.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -v /opt/builds/.ansible/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha -w /workspace registry.example.com/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
+[ansible-syntax] stderr
+Unable to find image 'registry.example.com/check-runner/ansible:2.17.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[atlas-lint] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/atlas-lint-ts0gxrqh.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -v /run/docker.sock:/run/docker.sock -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -e DOCKER_HOST=unix:///run/docker.sock -e LV3_HOST_WORKSPACE=/home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py lint --repo-root ${LV3_HOST_WORKSPACE:-/workspace} >/dev/null
+[atlas-lint] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[dependency-graph] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/dependency-graph-qu0cu58u.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+[dependency-graph] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[iac-policy-scan] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/iac-policy-scan-dvkx05j6.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/security:2026.03.23 sh -c python3 scripts/iac_policy_scan.py
+[iac-policy-scan] stderr
+Unable to find image 'registry.example.com/check-runner/security:2026.03.23' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[policy-validation] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/policy-validation-zf5l0wkc.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -v /opt/builds/.policy-toolchain:/opt/lv3/policy-toolchain -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -e LV3_POLICY_TOOLCHAIN_ROOT=/opt/lv3/policy-toolchain -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/policy_checks.py --validate
+[policy-validation] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[schema-validation] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/schema-validation-2cegzeds.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null && ./scripts/run_python_with_packages.sh pyyaml -- scripts/atlas_schema.py validate >/dev/null
+[schema-validation] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[type-check] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/type-check-ujrev96a.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/run_python_with_packages.sh mypy pyyaml types-PyYAML httpx pytest -- -m mypy --cache-dir /tmp/mypy-cache scripts/atlas_schema.py scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/atlas-drift-check.py config/windmill/scripts/post-merge-gate.py tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py
+[type-check] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo/.local/validation-gate/docker-cids/workstream-surfaces-md_pmkne.cid -v /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo/.lv3-runs/20260414T172506Z-remote-validate-e3eaa4f355a6-75838/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=e3eaa4f355a6874216c742fd9e5be05b0d3eff4bd286e405070e9a378b86d9d1 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-14T17:24:57.033241+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ec3434832c4dd4445f38c92620f86e1c661c182c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stderr
+Unable to find image 'registry.example.com/check-runner/python:3.12.10' locally
+docker: Error response from daemon: Get "https://registry.example.com/v2/": dial tcp: lookup registry.example.com: no such host
+
+Run 'docker run --help' for more information
+remote_exec: remote command failed, falling back locally for remote-validate
+remote_exec: running local fallback for remote-validate
+run_gate_fallback: rerunning unresolved remote checks locally: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+  changed files: README.md, RELEASE.md, VERSION, build/platform-manifest.json, catalog/services/litellm/service.yaml, catalog/services/neko/service.yaml, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 5.08
+alert-rule-validation passed 1.26
+ansible-syntax        passed 254.51
+atlas-lint            passed 0.48
+dependency-graph      passed 1.73
+iac-policy-scan       passed 21.36
+policy-validation     passed 6.09
+schema-validation     passed 41.86
+type-check            passed 1.08
+workstream-surfaces   passed 0.71
+run_gate_fallback: merged local rerun with synced remote gate status at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-main-ship/.local/validation-gate/remote-validate-last-run.json

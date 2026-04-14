@@ -1,0 +1,15 @@
+Checking SSH connectivity to ops@10.10.10.30
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+build-server-ok
+Checking remote workspace root /home/ops/builds/serverclaw-platform
+Checking remote session workspace /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+/home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0371-main-ship-d552de6c9b/repo
+Checking immutable snapshot dry-run upload from HEAD@ec3434832c4dd4445f38c92620f86e1c661c182c
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Transfer starting: 1 files
+repository-snapshot-83087abcfa4cd3e0fa311d9c43d4b232eb54e4a46a2865b82149c1fb773238b2.tar.gz
+
+sent 186 bytes  received 26 bytes  1451 bytes/sec
+total size is 39450443  speedup is 186086.12

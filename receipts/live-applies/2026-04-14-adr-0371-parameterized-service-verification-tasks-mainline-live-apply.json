@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-14T16:46:00Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0371-parameterized-service-verification-tasks-mainline-live-apply",
+  "adr": "0371",
+  "workstream": "ws-0371-live-apply",
+  "source_branch": "codex/ws-0371-live-apply",
+  "source_commit": "570adb6f13daf32663bcf5633b9ea50aa87592bc",
+  "repo_version_context": "0.178.142",
+  "platform_version_context": "0.178.141",
+  "integrated_repo_version": "0.178.143",
+  "integrated_platform_version": "0.178.143",
+  "summary": "Close ADR 0371 on the latest realistic 0.178.142 origin/main base, carry the remaining shared verifier migrations and fresh-worktree generator repairs into main, and promote the verified repowise, litellm, and librechat replays into integrated repo and platform version 0.178.143.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Repowise public health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "LiteLLM private liveliness"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "LibreChat public entrypoint"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0371 regression slice on the integrated candidate",
+      "result": "pass",
+      "observed": "The latest merged exact-main pytest slice passed with `250 passed in 39.66s`; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-pytest-r1-0.178.142.txt`."
+    },
+    {
+      "check": "Direct repository gate bundle on the integrated candidate",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards data-models health-probes` passed; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-repo-gates-r1-0.178.143.txt`."
+    },
+    {
+      "check": "Exact-main service replays and direct endpoint verification",
+      "result": "pass",
+      "observed": "`repowise`, `litellm`, and `librechat` all completed their governed exact-main replays, and direct verification returned `HTTP 200` for `https://repowise.lv3.org/health`, `http://10.10.10.20:4000/health/liveliness`, and `https://chat.lv3.org/`; evidence: the matching `2026-04-14-ws-0371-mainline-*-live-apply-*.txt` transcripts plus `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-direct-verification-r1-0.178.142.txt`."
+    },
+    {
+      "check": "Live-apply receipt validation and whitespace diff check",
+      "result": "pass",
+      "observed": "`python3 scripts/live_apply_receipts.py --validate` and `git diff --check` passed; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-live-apply-receipts-r1-0.178.143.txt` and `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-git-diff-check-r1-0.178.143.txt`."
+    },
+    {
+      "check": "Build-server reachability and remote validation path",
+      "result": "pass",
+      "observed": "`./scripts/remote_exec.sh check-build-server` and `make remote-validate` passed from the integrated candidate; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-check-build-server-r1-0.178.143.txt` and `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-remote-validate-r1-0.178.143.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0371-parameterized-verify-tasks.md",
+    "docs/workstreams/ws-0371-live-apply.md",
+    "workstreams/archive/2026/ws-0371-live-apply.yaml",
+    "receipts/live-applies/ws-0371-live-apply-apply-receipt.yaml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml",
+    "collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/repowise_runtime/tasks/verify.yml",
+    "playbooks/services/librechat.yml",
+    "playbooks/services/litellm.yml",
+    "playbooks/services/repowise.yml",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-pytest-r1-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-repowise-live-apply-r2-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-litellm-live-apply-r1-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-librechat-live-apply-r1-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-direct-verification-r1-0.178.142.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-repo-gates-r1-0.178.143.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-live-apply-receipts-r1-0.178.143.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-git-diff-check-r1-0.178.143.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-check-build-server-r1-0.178.143.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-final-remote-validate-r1-0.178.143.txt"
+  ],
+  "notes": [
+    "The exact-main replay started from origin/main@7b72694975ef8aae83e59d96c08dd27181595b2e, the latest realistic reachable mainline revision with repo version 0.178.142 and platform version 0.178.141 at apply time.",
+    "The integrated closeout updates VERSION, changelog.md, README.md, versions/stack.yaml, the archived ws-0371 workstream metadata, the ADR metadata, and these receipts so repo version 0.178.143 and platform version 0.178.143 describe the same verified state.",
+    "The direct verification evidence captures the final steady-state surfaces because the optional controller-side footer probes in the repowise, litellm, and librechat wrapper shells stalled after clean play recaps."
+  ]
+}

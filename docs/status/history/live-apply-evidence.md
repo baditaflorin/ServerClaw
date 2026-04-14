@@ -8,10 +8,15 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
+| `repowise` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
+| `platform` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `livekit` | `2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply` |
+| `litellm` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
+| `librechat` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
@@ -20,14 +25,11 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `ops_portal` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `litellm` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
-| `librechat` | `2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply` |
 | `keycloak` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `identity_core_watchdog` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
-| `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
 | `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
 | `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |

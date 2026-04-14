@@ -1,11 +1,11 @@
 schema_version: 1.0.0
-repo_version: 0.178.141
-platform_version: 0.178.141
+repo_version: 0.178.143
+platform_version: 0.178.143
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    platform: 2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply
+    platform: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
@@ -29,9 +29,9 @@ live_apply_evidence:
     grist: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     homepage: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
-    librechat: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
+    librechat: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
     livekit: 2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply
-    litellm: 2026-04-12-adr-0374-cross-cutting-service-manifest-live-apply
+    litellm: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
     lago: 2026-04-01-adr-0292-lago-mainline-live-apply
     postgres_vm: 2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply
     uptime_kuma: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -186,6 +186,8 @@ live_apply_evidence:
     realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     stage_smoke_promotion_gates: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     education_wemeshup: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
+    validation_toolkit: 2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply
+    repowise: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -1183,8 +1185,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.141
+    current: 0.178.143
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.141
+    current: 0.178.143
     meaning: intended platform release for the actual server configuration
