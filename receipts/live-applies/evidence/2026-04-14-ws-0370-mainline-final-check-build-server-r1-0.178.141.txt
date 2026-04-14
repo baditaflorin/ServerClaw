@@ -1,0 +1,11 @@
+Checking SSH connectivity to ops@10.10.10.30
+build-server-ok
+Checking remote workspace root /home/ops/builds/serverclaw-platform
+Checking remote session workspace /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0370-exact-main-bc94c864e3/repo
+/home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0370-exact-main-bc94c864e3/repo
+Checking immutable snapshot dry-run upload from codex/ws-0370-exact-main@e6d74fd8419684f68eeb090b8c39847748491c82
+Transfer starting: 1 files
+repository-snapshot-ca6a614c0629d28ae115a086493a276badabff7fc36bd0225c73d68e60c1f400.tar.gz
+
+sent 186 bytes  received 26 bytes  1451 bytes/sec
+total size is 56691937  speedup is 267413.54

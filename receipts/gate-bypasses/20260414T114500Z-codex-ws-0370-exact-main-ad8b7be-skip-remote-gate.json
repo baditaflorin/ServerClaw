@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-14T11:45:00Z",
+  "bypass": "skip_remote_gate",
+  "source": "manual",
+  "branch": "codex/ws-0370-exact-main",
+  "commit": "ad8b7befbbff6593374d3892ff857260589c3c2e",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "ADR 0370 exact-main closeout fixes the direct ws-0370 gate regressions (missing live-apply receipts and generated Prometheus file_sd artifacts), but primary-branch pre-push validation still fails on pre-existing mainline issues outside this workstream, including baseline ansible-lint debt and the integration-test runner missing httpx in the local fallback environment.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-repo-gates-r1-0.178.141.txt",
+      "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-remote-validate-r1-0.178.141.txt",
+      "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-check-build-server-r1-0.178.141.txt"
+    ],
+    "owner": "codex",
+    "expires_on": "2026-04-15",
+    "remediation_ref": "docs/workstreams/ws-0370-live-apply.md"
+  }
+}

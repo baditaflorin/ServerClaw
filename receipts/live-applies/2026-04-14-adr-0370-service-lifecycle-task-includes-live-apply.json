@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0370-service-lifecycle-task-includes-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-14T10:28:37Z",
+  "recorded_by": "codex",
+  "workflow_id": "live-apply-service",
+  "adr": "0370",
+  "workstream": "ws-0370-live-apply",
+  "source_branch": "codex/ws-0370-exact-main",
+  "source_commit": "e6d74fd8419684f68eeb090b8c39847748491c82",
+  "repo_version_context": "0.178.141",
+  "platform_version_context": "0.178.138",
+  "summary": "Replay ADR 0370 from the latest realistic 0.178.140 origin/main base, finish the remaining shared lifecycle helper adoption for LiveKit and the remote OpenBao helper path, repair fresh-worktree local-overlay materialization, and verify the exact-main LiveKit runtime-comms replay before the final mainline promotion.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-comms"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "LiveKit public room lifecycle"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused latest-main regression slice",
+      "result": "pass",
+      "observed": "`pytest -q tests/test_openbao_compose_env_helper.py tests/test_compose_runtime_secret_injection.py tests/test_livekit_runtime_role.py` passed with `20 passed in 0.22s`; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-pytest-r1-0.178.141.txt`."
+    },
+    {
+      "check": "LiveKit playbook syntax validation",
+      "result": "pass",
+      "observed": "`make syntax-check-livekit` passed; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-syntax-livekit-r1-0.178.141.txt`."
+    },
+    {
+      "check": "Fresh-worktree generated platform vars and local overlay materialization",
+      "result": "pass",
+      "observed": "`make generate-platform-vars` regenerated `inventory/group_vars/platform.yml` with the real `.local` identity overlay applied, restoring livekit.lv3.org and the runtime-comms topology in the fresh worktree; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-generate-platform-vars-r2-0.178.141.txt`."
+    },
+    {
+      "check": "Exact-main LiveKit replay and public verification",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=livekit env=production` completed with `localhost ok=25 changed=0 failed=0 skipped=7`, `nginx ok=46 changed=2 failed=0 skipped=11`, `proxmox-host ok=36 changed=0 failed=0 skipped=12`, and `runtime-comms ok=220 changed=5 failed=0 skipped=76 rescued=1`; the controller-side public room lifecycle verification passed in the same run. Evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-livekit-live-apply-r2-0.178.141.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0370-service-lifecycle-task-includes.md",
+    "docs/workstreams/ws-0370-live-apply.md",
+    "workstreams/archive/2026/ws-0370-live-apply.yaml",
+    "collections/ansible_collections/lv3/platform/playbooks/livekit.yml",
+    "playbooks/livekit.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml",
+    "collections/ansible_collections/lv3/platform/roles/livekit_runtime/tasks/main.yml",
+    "inventory/group_vars/all/platform_services.yml",
+    "inventory/host_vars/proxmox-host.yml",
+    "inventory/group_vars/platform.yml",
+    "tests/test_openbao_compose_env_helper.py",
+    "tests/test_compose_runtime_secret_injection.py",
+    "tests/test_livekit_runtime_role.py",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-pytest-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-syntax-livekit-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-generate-platform-vars-r2-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-livekit-live-apply-r2-0.178.141.txt"
+  ],
+  "notes": [
+    "The replay started from origin/main@3cb78f677e3ed6b0f3343c86085c405fdecac8d9, the latest realistic 0.178.140 mainline base visible from this controller at apply time.",
+    "Fresh-worktree generated surfaces initially replayed committed example.com placeholders. Regenerating platform vars from the ignored .local identity overlay restored the private deployment domain and unblocked truthful mainline replay.",
+    "This receipt records the truthful exact-main platform application of ADR 0370 before the final integrated mainline closeout updates the protected release surfaces."
+  ]
+}

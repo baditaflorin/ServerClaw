@@ -312,6 +312,8 @@ workstreams:
   - docs/status/history/live-apply-evidence.md
   - build/platform-manifest.json
   - catalog/services/livekit/service.yaml
+  - config/prometheus/file_sd/https_tls_targets.yml
+  - config/prometheus/file_sd/slo_targets.yml
   - config/dependency-graph.json
   - config/health-probe-catalog.json
   - config/service-capability-catalog.json
@@ -364,6 +366,7 @@ workstreams:
   - receipts/live-applies/ws-0370-live-apply-apply-receipt.yaml
   - receipts/live-applies/2026-04-14-adr-0370-*.json
   - receipts/live-applies/evidence/2026-04-14-ws-0370-*
+  - receipts/gate-bypasses/*ws-0370*.json
   ownership_manifest:
     owned_surfaces:
     - id: workstream_registry
@@ -425,6 +428,8 @@ workstreams:
       paths:
       - build/platform-manifest.json
       - catalog/services/livekit/service.yaml
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/file_sd/slo_targets.yml
       - config/dependency-graph.json
       - config/health-probe-catalog.json
       - config/service-capability-catalog.json
@@ -489,6 +494,7 @@ workstreams:
       - receipts/live-applies/ws-0370-live-apply-apply-receipt.yaml
       - receipts/live-applies/2026-04-14-adr-0370-*.json
       - receipts/live-applies/evidence/2026-04-14-ws-0370-*
+      - receipts/gate-bypasses/*ws-0370*.json
       mode: exclusive
   notes: 'Complete the remaining ADR 0370 runtime-role migration work, validate the
 
