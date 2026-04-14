@@ -490,6 +490,56 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 When creating or modifying Nomad jobs, place the job spec in `config/nomad/jobs/`
 and register it through the Nomad playbook or the `lv3-nomad job run` wrapper.
 
+## Service VM Migration (ADR 0416 + ADR 0417) — CRITICAL
+
+Moving a service to a different VM touches **three independent registries** that
+must stay in sync. Editing any of them manually without the others causes
+topology drift and production failures (pg_hba.conf blocks DB connections,
+nginx routes to the wrong IP, etc.).
+
+**The single canonical command — no manual registry edits:**
+
+```bash
+# Preview: show exactly what will change and which converges will run
+make migrate-service-dry-run svc=keycloak to=runtime-control
+
+# Execute: update all registries + ordered converge + write receipt
+make migrate-service svc=keycloak to=runtime-control env=production
+```
+
+The script updates all three registry fields atomically:
+
+| Registry | Field | Authority |
+|----------|-------|-----------|
+| `inventory/group_vars/all/platform_services.yml` | `host_group` | **AUTHORITATIVE** |
+| `inventory/group_vars/all/platform_services.yml` | `proxy.upstream_host` | derived — kept in sync |
+| `inventory/host_vars/proxmox-host.yml` | `lv3_service_topology[svc].owning_vm` | derived — kept in sync |
+
+Then runs converges in the correct dependency order:
+`postgres-vm` → `teardown-service (stop old)` → `converge-<svc>` → `nginx-edge`
+
+**Why order matters:**
+- postgres BEFORE service: pg_hba.conf must allow the new VM before the service starts
+- stop-old BEFORE start-new: prevents split-brain (two containers writing to same DB)
+- nginx AFTER service: traffic only routes to new VM once it's healthy
+
+**Orphaned container cleanup** (containers left behind by old migrations):
+
+```bash
+make detect-orphans   # list containers running on the wrong VM
+make purge-orphans    # stop and remove them (SSH-based, requires prod access)
+```
+
+**Pre-push gate enforces consistency** — manually editing one registry file without
+the others will fail `validate_topology_consistency.py --check` at push time.
+The gate is the backstop; `make migrate-service` is the preventive tool.
+
+**Teardown only** (stop a container without full migration):
+
+```bash
+make teardown-service svc=keycloak on_vm=docker-runtime env=production
+```
+
 ## Cross-Service Wiring Rules
 
 Some services derive their configuration dynamically from the inventory host list.
@@ -516,3 +566,5 @@ For targeted VM-only runs (`make provision-guests`), apply each service in the t
 - Agents in worktrees do NOT have `.local/` — this is intentional. If credentials are needed, read from the main worktree path directly. Do not create symlinks, copies, or placeholder credentials.
 - Never hand-maintain a security boundary list (like sanitization patterns) without an automated audit. The initial publication sanitization config missed 7 of 25 VMs (28% miss rate) and an IPv6 address in a template file. The drift detector (`make audit-sanitization`) catches these gaps automatically.
 - Regex patterns for VM names with staging variants need `(-staging)?` optionality — `monitoring` does NOT match `monitoring-staging` because `-staging-` is in the middle.
+- NEVER manually edit `platform_service_registry.host_group`, `proxy.upstream_host`, or `lv3_service_topology[svc].owning_vm` in isolation when migrating a service. All three must change together. Use `make migrate-service svc=X to=Y` — it updates all registries atomically and runs converges in the correct dependency order. Manual multi-step edits caused three drift incidents in 72 hours (ADR 0416 postmortem).
+- If a service fails to connect to PostgreSQL after a VM migration, the cause is almost always a stale pg_hba.conf entry. Run `make converge-postgres-vm env=production` — since ADR 0416 Phase 2, pg_hba.conf derives client IPs from `platform_service_registry.host_group` automatically. You only need to ensure `host_group` is correct.
