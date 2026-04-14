@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.135",
   "platform_version": "0.178.133",
-  "generated_at": "2026-04-13T23:56:25Z",
-  "next_refresh_at": "2026-04-14T00:56:25Z",
+  "generated_at": "2026-04-14T00:33:37Z",
+  "next_refresh_at": "2026-04-14T01:33:37Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6296,8 +6296,8 @@
   },
   "recent_changes": {
     "last_version": "0.178.134",
-    "deployed_at": "2026-04-13",
-    "summary": "ADR 0417: external attack surface hardening \u2014 LibreChat registration off by default, RFC 1918 IPs removed from system prompt, Keycloak /admin/ IP-ACL restricted to internal CIDRs, API gateway /docs blocked at nginx edge; regression tests in CI ADR 0416 Phase 2: eliminate source_vm from platform_postgres_clients; derive pg_hba client IP from platform_service_registry.host_group at template render time \u2014 topology drift now impossible by construction; SSH-verified 6 pending registry corrections (uptime_kuma, mail_platform, redpanda, gotenberg, ollama, piper)",
+    "deployed_at": "2026-04-14",
+    "summary": "ADR 0417: single-command service VM migration (make migrate-service svc=X to=Y) \u2014 atomic registry update + ordered converge + receipt; orphan detection (make detect-orphans); generic teardown playbook; replaces manual 5-step runbook implements ADR 0324 by moving service-local metadata into catalog/services bundles and generating the aggregate service catalogs from those sources",
     "release_notes_url": "docs/release-notes/0.178.135.md"
   },
   "agentic_architecture": {

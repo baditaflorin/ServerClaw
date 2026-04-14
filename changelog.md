@@ -12,8 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- ADR 0417: external attack surface hardening — LibreChat registration off by default, RFC 1918 IPs removed from system prompt, Keycloak /admin/ IP-ACL restricted to internal CIDRs, API gateway /docs blocked at nginx edge; regression tests in CI
-- ADR 0416 Phase 2: eliminate source_vm from platform_postgres_clients; derive pg_hba client IP from platform_service_registry.host_group at template render time — topology drift now impossible by construction; SSH-verified 6 pending registry corrections (uptime_kuma, mail_platform, redpanda, gotenberg, ollama, piper)
+- ADR 0417: single-command service VM migration (make migrate-service svc=X to=Y) — atomic registry update + ordered converge + receipt; orphan detection (make detect-orphans); generic teardown playbook; replaces manual 5-step runbook
+- implements ADR 0324 by moving service-local metadata into catalog/services bundles and generating the aggregate service catalogs from those sources
 - live-apply ADR 0359 from the latest origin/main by replaying postgres-vm onto the rebased mainline tree, removing the guest-wide 10.10.10.0/24 HBA bypass, and verifying least-privilege client logins end to end
 - align live-apply-service descriptor loading with ADR 0372 playbook composition, add missing keycloak/searxng service wrappers, and verify the include-based playbook tests
 
