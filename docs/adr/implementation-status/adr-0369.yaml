@@ -1,116 +1,330 @@
 adr_number: 0369
 title: Python Validation Toolkit
-canonical_status: Proposed
-canonical_implementation_status: Proposed
+canonical_status: Accepted
+canonical_implementation_status: Implemented
 detected_markers:
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:de4ec430e
+  evidence: "de4ec430e [release] Bump to 0.178.139 \u2014 ADR 0369 shared Python validation\
+    \ toolkit"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.651137'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:68f3323a0
+  evidence: '68f3323a0 On codex/ws-0369-live-apply: ws-0369-pre-final-rebase-20260414T1102+0300'
+  confidence: 0.6
+  detected_on: '2026-04-14T11:06:56.651685'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:e357c7c59
+  evidence: 'e357c7c59 index on codex/ws-0369-live-apply: c6f9564ac [ws-0368] Record
+    main push gate waiver'
+  confidence: 0.6
+  detected_on: '2026-04-14T11:06:56.651699'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:b4615bd2b
+  evidence: 'b4615bd2b untracked files on codex/ws-0369-live-apply: c6f9564ac [ws-0368]
+    Record main push gate waiver'
+  confidence: 0.6
+  detected_on: '2026-04-14T11:06:56.651706'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:a53778ce4
+  evidence: a53778ce4 [workstreams] Record ADR 0369 Plane issue linkage
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.651960'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:344564bd0
+  evidence: "344564bd0 refactor(validate_repository_data_models.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.651989'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:f4daab136
+  evidence: "f4daab136 refactor(gate_bypass_waivers.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.651994'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:b35c571a8
+  evidence: "b35c571a8 refactor(service_catalog.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.651998'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:27098b2c7
+  evidence: "27098b2c7 refactor(service_redundancy.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652002'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:6a215033f
+  evidence: "6a215033f refactor(immutable_guest_replacement.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652005'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:a917f6d08
+  evidence: "a917f6d08 refactor(validate_nats_topics.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652009'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:87bb54be6
+  evidence: "87bb54be6 refactor(typesense_catalog_sync.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652013'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:8761612b7
+  evidence: "8761612b7 refactor(token_lifecycle.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652016'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:7f64f9765
+  evidence: "7f64f9765 refactor(service_completeness.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652019'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:247164dcb
+  evidence: "247164dcb refactor(runtime_assurance.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652023'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:e1b76f506
+  evidence: "e1b76f506 refactor(provider_boundary_catalog.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652027'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:0c682cb67
+  evidence: "0c682cb67 refactor(ntfy_publish.py): use shared validation_toolkit \u2014\
+    \ ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652030'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:bfade4a36
+  evidence: "bfade4a36 refactor(maintenance_window_tool.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652033'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:99f57db1a
+  evidence: "99f57db1a refactor(generate_platform_vars.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652036'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:10733f0d7
+  evidence: "10733f0d7 refactor(vulnerability_budget.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652039'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:d7d782515
+  evidence: "d7d782515 refactor(validation_runner_contracts.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652043'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:de31f808c
+  evidence: "de31f808c refactor(stage_smoke_suites.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652047'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:abae1167b
+  evidence: "abae1167b refactor(shared_policy_packs.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652050'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:453f84681
+  evidence: "453f84681 refactor(failure_domain_policy.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652053'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:3b2a4cafb
+  evidence: "3b2a4cafb refactor(environment_topology.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652056'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:d2b3eff78
+  evidence: "d2b3eff78 refactor(container_image_policy.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652059'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:4f13e0bcc
+  evidence: "4f13e0bcc refactor(capability_contracts.py): use shared validation_toolkit\
+    \ \u2014 ADR 0369"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652062'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:8374ab78f
+  evidence: 8374ab78f [workstreams] Register ADR 0369 validation toolkit on mainline
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.652066'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:9f81a23ce
+  evidence: 9f81a23ce [postmortem] ADR 0369 Validation Toolkit Implementation (2026-04-10)
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.655210'
+- marker_type: git-commit
+  adr_number: 0369
+  location: git:d3aae5bb0
+  evidence: "d3aae5bb0 [release] Bump to 0.178.80 \u2014 ADR 0369 validation_toolkit\
+    \ complete"
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:56.655238'
 - marker_type: git-commit
   adr_number: 0369
   location: git:095055c9a
   evidence: "095055c9a refactor(scripts): migrate batch 6 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439215'
+  detected_on: '2026-04-14T11:06:56.658698'
 - marker_type: git-commit
   adr_number: 0369
   location: git:b7d3263de
   evidence: "b7d3263de refactor(scripts): migrate batch 5 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439253'
+  detected_on: '2026-04-14T11:06:56.658710'
 - marker_type: git-commit
   adr_number: 0369
   location: git:c44373ce6
   evidence: "c44373ce6 refactor(scripts): migrate batch 4 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439258'
+  detected_on: '2026-04-14T11:06:56.658714'
 - marker_type: git-commit
   adr_number: 0369
   location: git:f6581595b
   evidence: "f6581595b refactor(scripts): migrate batch 3 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439262'
+  detected_on: '2026-04-14T11:06:56.658718'
 - marker_type: git-commit
   adr_number: 0369
   location: git:b33fd80c0
   evidence: "b33fd80c0 refactor(scripts): migrate batch 2 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439266'
+  detected_on: '2026-04-14T11:06:56.658721'
 - marker_type: git-commit
   adr_number: 0369
   location: git:1da6a0e69
   evidence: "1da6a0e69 refactor(scripts): migrate batch 1 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439270'
+  detected_on: '2026-04-14T11:06:56.658725'
 - marker_type: git-commit
   adr_number: 0369
   location: git:067feaad6
   evidence: "067feaad6 feat(scripts): add shared validation_toolkit \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439273'
+  detected_on: '2026-04-14T11:06:56.658728'
 - marker_type: git-commit
   adr_number: 0369
   location: git:cd6dc1749
   evidence: "cd6dc1749 refactor(scripts): migrate batch 6 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439874'
+  detected_on: '2026-04-14T11:06:56.659075'
 - marker_type: git-commit
   adr_number: 0369
   location: git:714c83a40
   evidence: "714c83a40 refactor(scripts): migrate batch 5 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439890'
+  detected_on: '2026-04-14T11:06:56.659084'
 - marker_type: git-commit
   adr_number: 0369
   location: git:71f0e61f1
   evidence: "71f0e61f1 refactor(scripts): migrate batch 4 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439907'
+  detected_on: '2026-04-14T11:06:56.659098'
 - marker_type: git-commit
   adr_number: 0369
   location: git:73a08ca28
   evidence: "73a08ca28 refactor(scripts): migrate batch 3 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439911'
+  detected_on: '2026-04-14T11:06:56.659102'
 - marker_type: git-commit
   adr_number: 0369
   location: git:78c0b8cac
   evidence: "78c0b8cac refactor(scripts): migrate batch 2 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439928'
+  detected_on: '2026-04-14T11:06:56.659115'
 - marker_type: git-commit
   adr_number: 0369
   location: git:f0f2f6e51
   evidence: "f0f2f6e51 refactor(scripts): migrate batch 1 to shared validation_toolkit\
     \ \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.439943'
+  detected_on: '2026-04-14T11:06:56.659119'
 - marker_type: git-commit
   adr_number: 0369
   location: git:2d0518010
   evidence: "2d0518010 feat(scripts): add shared validation_toolkit \u2014 ADR 0369"
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.440190'
+  detected_on: '2026-04-14T11:06:56.659132'
 - marker_type: git-commit
   adr_number: 0369
   location: git:b46904d68
   evidence: b46904d68 [workstreams] Register ADR 0369 validation toolkit
   confidence: 1.0
-  detected_on: '2026-04-07T07:55:42.440263'
+  detected_on: '2026-04-14T11:06:56.659188'
+- marker_type: live-apply-receipt
+  adr_number: 0369
+  location: receipts/live-applies/2026-04-12-adr-0369-python-validation-toolkit-live-apply.json
+  evidence: Committed live-apply evidence references the ADR
+  confidence: 1.0
+  detected_on: '2026-04-14T11:06:57.140822'
 inferred_implementation_status: Likely Implemented
 status_match: false
-summary: 'Canonical Status: Proposed
+summary: 'Canonical Decision Status: Accepted
 
-  Inferred Status: Likely Implemented
+  Canonical Implementation Status: Implemented
 
-  Markers Found: 15
+  Inferred Implementation Status: Likely Implemented
 
-  Breakdown: git-commit=15'
+  Markers Found: 46
+
+  Breakdown: git-commit=45, live-apply-receipt=1'

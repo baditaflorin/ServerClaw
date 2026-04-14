@@ -1,0 +1,73 @@
+id: ws-0369-live-apply
+adr: 0369
+title: ADR 0369 live apply — Python validation toolkit completion
+status: merged
+owner: codex
+branch: codex/ws-0369-live-apply
+worktree_path: .worktrees/ws-0369-live-apply
+doc: docs/workstreams/ws-0369-live-apply.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- scripts/validation_toolkit.py
+- scripts/test_validation_toolkit.py
+- scripts/enforce_validation_toolkit.sh
+- scripts/validate_repo.sh
+- .pre-commit-config.yaml
+- docs/adr/0369-python-validation-toolkit.md
+- docs/runbooks/validate-repository-automation.md
+- docs/runbooks/validation-gate.md
+- docs/adr/.index.yaml
+- docs/adr/index/**/*.yaml
+- docs/adr/implementation-status/adr-0369.md
+- docs/adr/implementation-status/adr-0369.yaml
+- docs/adr/implementation-status/INDEX.yaml
+- docs/workstreams/ws-0369-live-apply.md
+- workstreams/archive/2026/ws-0369-live-apply.yaml
+- receipts/live-applies/2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply.json
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0369_validation_toolkit
+    paths:
+    - scripts/validation_toolkit.py
+    - scripts/test_validation_toolkit.py
+    - scripts/enforce_validation_toolkit.sh
+    - scripts/validate_repo.sh
+    - .pre-commit-config.yaml
+    - docs/adr/0369-python-validation-toolkit.md
+    - docs/runbooks/validate-repository-automation.md
+    - docs/runbooks/validation-gate.md
+    - docs/adr/.index.yaml
+    - docs/adr/index/**/*.yaml
+    - docs/adr/implementation-status/adr-0369.md
+    - docs/adr/implementation-status/adr-0369.yaml
+    - docs/adr/implementation-status/INDEX.yaml
+    - docs/workstreams/ws-0369-live-apply.md
+    - workstreams/archive/2026/ws-0369-live-apply.yaml
+    - receipts/live-applies/2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply.json
+    mode: exclusive
+ready_to_merge: true
+live_applied: true
+notes: 'Exact-main live apply for ADR 0369. This workstream finishes the migration
+  by
+
+  removing remaining base-validator redefinitions, tightening the enforcement
+
+  hook so duplicate require_* helpers fail closed, and capturing end-to-end
+
+  validation evidence plus ADR metadata updates from the latest origin/main base.
+
+  '
+canonical_truth:
+  changelog_entry: finalize ADR 0369 on the latest origin/main base, enforce the shared validation toolkit contract end to end, and record exact-main validation evidence for the merged repo state
+  release_bump: patch
+  included_in_repo_version: 0.178.142
+  latest_receipts:
+    validation_toolkit: 2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply
+plane_issue_id: 521e015b-cfe0-4592-95e7-fd1aba0b14c0

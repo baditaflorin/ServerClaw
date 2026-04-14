@@ -144,6 +144,10 @@ git push origin main
 | Task | Command |
 |------|---------|
 | Run a playbook | `make converge-<service> env=production` (from repo root) |
+| **Move a service to a different VM** | `make migrate-service svc=<name> to=<vm> env=production` — updates all 3 registries + ordered converge. Preview first: `make migrate-service-dry-run svc=<name> to=<vm>` |
+| Find orphaned containers | `make detect-orphans` — containers running on wrong VM |
+| Remove orphaned containers | `make purge-orphans` |
+| Stop a container on a specific VM | `make teardown-service svc=<name> on_vm=<vm> env=production` |
 | Before running any playbook | Rename `.local/open-webui/provider.env` and `.local/serverclaw/provider.env` to `.bak`; restore after. These files trip the preflight `.env` scanner. |
 | Sync Dify tools | `python scripts/sync_tools_to_dify.py --base-url http://10.10.10.20:8094 ...` (internal URL — bypasses oauth2-proxy) |
 | Bump platform manifest | `uvx --python 3.12 --with pyyaml --with jsonschema --with requests --with jinja2 python scripts/platform_manifest.py --write` |
@@ -265,3 +269,7 @@ always reflect actual deployment reality.
 **`.local/` is sacred** — NEVER symlink, copy, or `git add` the `.local` directory. Worktrees intentionally lack `.local/`; read credentials from the main worktree path if needed. Never generate placeholder secrets that could overwrite real ones. Never use `git add -A` or `git add .` in a directory containing `.local`. A pre-commit hook blocks `.local` from the index but defense in depth matters. See ADR 0376 for the full incident analysis.
 
 **`platform.yml` fake IPs = broken deployment** — If `inventory/group_vars/platform.yml` contains `203.0.113.1` or `example.com`, every downstream artifact (DNS records, monitoring targets, Tailscale config) will be misconfigured. Always run `make generate-platform-vars` after changing `.local/identity.yml` or `inventory/host_vars/proxmox-host.yml`. The generator now loads `.local/identity.yml` as a high-priority overlay; without it, fake IPs propagate silently into production DNS.
+
+**Service VM migration must use `make migrate-service`** — Do NOT manually edit `platform_service_registry.host_group`, `proxy.upstream_host`, or `lv3_service_topology[svc].owning_vm` in isolation. All three must change together or topology drift occurs. The pre-push gate will catch it, but the right approach is to use `make migrate-service svc=X to=Y` which updates all registries atomically and runs converges in the correct order (postgres → stop-old → service → nginx). Manual multi-step migrations caused three drift incidents in 72 hours.
+
+**Service won't connect to PostgreSQL after moving it** — The pg_hba.conf is now derived from `platform_service_registry.host_group` automatically (ADR 0416 Phase 2). Run `make converge-postgres-vm env=production` to rebuild it. No manual `source_vm` edits — that field no longer exists.

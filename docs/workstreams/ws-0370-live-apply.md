@@ -60,5 +60,5 @@
   files fell back to committed `example.com` placeholders. Regenerating platform
   vars from the `.local` overlay restored the real domain and IP topology without
   reintroducing deployment-specific values into generic committed source files.
-- The final push will promote this verified workstream branch directly to
-  `origin/main` and then remove `.worktrees/ws-0370-exact-main`.
+- The verified workstream branch was promoted to `origin/main`, after which the
+  temporary `.worktrees/ws-0370-exact-main` integration worktree was removed.

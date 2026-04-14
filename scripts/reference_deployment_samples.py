@@ -70,7 +70,7 @@ REQUIRED_PROFILE_VALUE_KEYS = {
 }
 
 
-def require_identifier(value: Any, path: str) -> str:
+def require_sample_identifier(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not IDENTIFIER_PATTERN.fullmatch(value):
         raise ValueError(f"{path} must use lowercase letters, numbers, and hyphens")
@@ -165,7 +165,7 @@ def validate_provider_profile_catalog(
     for profile_index, raw_profile in enumerate(profiles):
         profile_path = f"{path}.profiles[{profile_index}]"
         profile = require_mapping(raw_profile, profile_path)
-        profile_id = require_identifier(profile.get("id"), f"{profile_path}.id")
+        profile_id = require_sample_identifier(profile.get("id"), f"{profile_path}.id")
         if profile_id in index:
             raise ValueError(f"{profile_path}.id duplicates '{profile_id}'")
         require_str(profile.get("title"), f"{profile_path}.title")
@@ -216,7 +216,7 @@ def validate_sample_catalog(
     for sample_index, raw_sample in enumerate(samples):
         sample_path = f"{path}.samples[{sample_index}]"
         sample = require_mapping(raw_sample, sample_path)
-        sample_id = require_identifier(sample.get("id"), f"{sample_path}.id")
+        sample_id = require_sample_identifier(sample.get("id"), f"{sample_path}.id")
         if sample_id in seen_ids:
             raise ValueError(f"{sample_path}.id duplicates '{sample_id}'")
         seen_ids.add(sample_id)
@@ -242,7 +242,7 @@ def validate_sample_catalog(
         for provider_index, raw_provider_id in enumerate(
             require_list(sample.get("supported_provider_profiles"), f"{sample_path}.supported_provider_profiles")
         ):
-            provider_id = require_identifier(
+            provider_id = require_sample_identifier(
                 raw_provider_id,
                 f"{sample_path}.supported_provider_profiles[{provider_index}]",
             )
@@ -442,7 +442,7 @@ def _validate_rendered_api_publication(path: Path) -> None:
     for surface_index, raw_surface in enumerate(surfaces):
         surface_path = f"{path}.surfaces[{surface_index}]"
         surface = require_mapping(raw_surface, surface_path)
-        require_identifier(surface.get("id"), f"{surface_path}.id")
+        require_sample_identifier(surface.get("id"), f"{surface_path}.id")
         require_str(surface.get("title"), f"{surface_path}.title")
         tier = require_str(surface.get("publication_tier"), f"{surface_path}.publication_tier")
         if tier not in required_tiers:
