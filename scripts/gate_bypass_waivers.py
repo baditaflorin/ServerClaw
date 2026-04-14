@@ -23,27 +23,7 @@ if repo_root_str not in sys.path:
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-try:
-    from validation_toolkit import require_list, require_mapping, require_str
-except ModuleNotFoundError as exc:
-    if exc.name != "validation_toolkit":
-        raise
-
-    def require_mapping(value: Any, path: str) -> dict[str, Any]:
-        if not isinstance(value, dict):
-            raise ValueError(f"{path} must be a mapping")
-        return value
-
-    def require_list(value: Any, path: str) -> list[Any]:
-        if not isinstance(value, list):
-            raise ValueError(f"{path} must be a list")
-        return value
-
-    def require_str(value: Any, path: str) -> str:
-        if not isinstance(value, str) or not value.strip():
-            raise ValueError(f"{path} must be a non-empty string")
-        return value
-
+from validation_toolkit import require_identifier, require_int, require_list, require_mapping, require_str
 
 from scripts.controller_automation_toolkit import emit_cli_error
 
@@ -53,7 +33,6 @@ CATALOG_SCHEMA_PATH = REPO_ROOT / "docs" / "schema" / "gate-bypass-waiver-catalo
 RECEIPT_SCHEMA_PATH = REPO_ROOT / "docs" / "schema" / "gate-bypass-waiver-receipt.schema.json"
 SUPPORTED_CATALOG_SCHEMA_VERSION = "1.0.0"
 SUPPORTED_RECEIPT_SCHEMA_VERSION = "2.0.0"
-IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 LIST_SPLIT_PATTERN = re.compile(r"[,\n;]+")
 
 
@@ -93,19 +72,6 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def require_identifier(value: Any, path: str) -> str:
-    value = require_str(value, path)
-    if not IDENTIFIER_PATTERN.match(value):
-        raise ValueError(f"{path} must use lowercase letters, numbers, hyphens, or underscores")
-    return value
-
-
-def require_int(value: Any, path: str, minimum: int = 1) -> int:
-    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
-        raise ValueError(f"{path} must be an integer >= {minimum}")
-    return value
-
-
 def parse_datetime(raw: str, path: str) -> datetime:
     try:
         parsed = datetime.fromisoformat(require_str(raw, path).replace("Z", "+00:00"))
@@ -133,7 +99,7 @@ def split_list_values(values: list[str]) -> list[str]:
     return result
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def nonempty_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     result: list[str] = []
     for index, item in enumerate(items):
@@ -143,7 +109,7 @@ def require_string_list(value: Any, path: str) -> list[str]:
     return result
 
 
-def require_identifier_list(value: Any, path: str) -> list[str]:
+def validate_identifier_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     result: list[str] = []
     for index, item in enumerate(items):
@@ -173,15 +139,17 @@ def validate_catalog(catalog: dict[str, Any], *, path: Path | None = None) -> No
     if catalog.get("schema_version") != SUPPORTED_CATALOG_SCHEMA_VERSION:
         raise ValueError(f"{prefix}.schema_version must be {SUPPORTED_CATALOG_SCHEMA_VERSION}")
 
-    expiring_soon_days = require_int(catalog.get("expiring_soon_days"), f"{prefix}.expiring_soon_days")
+    expiring_soon_days = require_int(catalog.get("expiring_soon_days"), f"{prefix}.expiring_soon_days", minimum=1)
     repeat_after_expiry = require_mapping(catalog.get("repeat_after_expiry"), f"{prefix}.repeat_after_expiry")
     warning_after = require_int(
         repeat_after_expiry.get("warning_after_occurrences"),
         f"{prefix}.repeat_after_expiry.warning_after_occurrences",
+        minimum=1,
     )
     blocker_after = require_int(
         repeat_after_expiry.get("blocker_after_occurrences"),
         f"{prefix}.repeat_after_expiry.blocker_after_occurrences",
+        minimum=1,
     )
     if blocker_after < warning_after:
         raise ValueError(f"{prefix}.repeat_after_expiry.blocker_after_occurrences must be >= warning_after_occurrences")
@@ -196,8 +164,8 @@ def validate_catalog(catalog: dict[str, Any], *, path: Path | None = None) -> No
         require_identifier(reason_code, item_path)
         item = require_mapping(value, item_path)
         require_str(item.get("summary"), f"{item_path}.summary")
-        require_int(item.get("max_expiry_days"), f"{item_path}.max_expiry_days")
-        require_identifier_list(item.get("allowed_bypasses"), f"{item_path}.allowed_bypasses")
+        require_int(item.get("max_expiry_days"), f"{item_path}.max_expiry_days", minimum=1)
+        validate_identifier_list(item.get("allowed_bypasses"), f"{item_path}.allowed_bypasses")
 
 
 def validate_jsonschema(instance: Any, schema_path: Path) -> None:
@@ -218,6 +186,7 @@ def max_expiry_days_for_reason(catalog: dict[str, Any], reason_code: str) -> int
     return require_int(
         reason.get("max_expiry_days"),
         f"config/gate-bypass-waiver-catalog.json.reason_codes.{reason_code}.max_expiry_days",
+        minimum=1,
     )
 
 
@@ -300,14 +269,14 @@ def validate_receipt(
     if reason_code not in reasons:
         raise ValueError(f"{path}.waiver.reason_code references unknown reason code '{reason_code}'")
     reason = require_mapping(reasons[reason_code], f"config/gate-bypass-waiver-catalog.json.reason_codes.{reason_code}")
-    allowed_bypasses = require_identifier_list(reason.get("allowed_bypasses"), f"{path}.waiver.allowed_bypasses")
+    allowed_bypasses = validate_identifier_list(reason.get("allowed_bypasses"), f"{path}.waiver.allowed_bypasses")
     if bypass not in allowed_bypasses:
         raise ValueError(f"{path}.bypass is not allowed for reason code '{reason_code}'")
 
     expires_on = parse_date(str(waiver.get("expires_on") or ""), f"{path}.waiver.expires_on")
     if expires_on < created_at.date():
         raise ValueError(f"{path}.waiver.expires_on must not be earlier than {path}.created_at")
-    max_expiry_days = require_int(reason.get("max_expiry_days"), f"{path}.waiver.max_expiry_days")
+    max_expiry_days = require_int(reason.get("max_expiry_days"), f"{path}.waiver.max_expiry_days", minimum=1)
     if (expires_on - created_at.date()).days > max_expiry_days:
         raise ValueError(
             f"{path}.waiver.expires_on exceeds the {max_expiry_days}-day policy window for '{reason_code}'"
@@ -323,9 +292,9 @@ def validate_receipt(
         reason_code=reason_code,
         reason_summary=require_str(waiver.get("reason_summary"), f"{path}.waiver.reason_summary"),
         detail=require_str(waiver.get("detail"), f"{path}.waiver.detail"),
-        impacted_lanes=tuple(require_identifier_list(waiver.get("impacted_lanes"), f"{path}.waiver.impacted_lanes")),
+        impacted_lanes=tuple(validate_identifier_list(waiver.get("impacted_lanes"), f"{path}.waiver.impacted_lanes")),
         substitute_evidence=tuple(
-            require_string_list(waiver.get("substitute_evidence"), f"{path}.waiver.substitute_evidence")
+            nonempty_string_list(waiver.get("substitute_evidence"), f"{path}.waiver.substitute_evidence")
         ),
         owner=require_str(waiver.get("owner"), f"{path}.waiver.owner"),
         expires_on=expires_on,
@@ -384,7 +353,7 @@ def summarize_receipts(
     open_waivers = [item for item in compliant_receipts if item.status_on(reference_date) == "open"]
     expired_waivers = [item for item in compliant_receipts if item.status_on(reference_date) == "expired"]
     expiring_soon_days = require_int(
-        catalog.get("expiring_soon_days"), "config/gate-bypass-waiver-catalog.json.expiring_soon_days"
+        catalog.get("expiring_soon_days"), "config/gate-bypass-waiver-catalog.json.expiring_soon_days", minimum=1
     )
     expiring_soon = [
         item
@@ -404,10 +373,12 @@ def summarize_receipts(
     warning_after = require_int(
         repeat_policy.get("warning_after_occurrences"),
         "config/gate-bypass-waiver-catalog.json.repeat_after_expiry.warning_after_occurrences",
+        minimum=1,
     )
     blocker_after = require_int(
         repeat_policy.get("blocker_after_occurrences"),
         "config/gate-bypass-waiver-catalog.json.repeat_after_expiry.blocker_after_occurrences",
+        minimum=1,
     )
     reason_summaries: list[dict[str, Any]] = []
     warnings: list[dict[str, Any]] = []

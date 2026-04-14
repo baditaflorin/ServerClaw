@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.138",
+  "repo_version": "0.178.140",
   "platform_version": "0.178.138",
-  "generated_at": "2026-04-14T06:21:07Z",
-  "next_refresh_at": "2026-04-14T07:21:07Z",
+  "generated_at": "2026-04-14T08:09:19Z",
+  "next_refresh_at": "2026-04-14T09:09:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.137",
+    "last_version": "0.178.138",
     "deployed_at": "2026-04-14",
-    "summary": "live-apply ADR 0368 from the latest realistic origin/main base by repairing the Redpanda readiness probe offset handling, refreshing shared-worktree SBOM and image receipt paths, and re-verifying MinIO, Gitea, Redpanda, check-build-server, and remote-validate end to end",
-    "release_notes_url": "docs/release-notes/0.178.138.md"
+    "summary": "centralize shared Python validation helpers across catalog and registry scripts per ADR 0369",
+    "release_notes_url": "docs/release-notes/0.178.140.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

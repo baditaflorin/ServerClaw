@@ -173,6 +173,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0364` | ADR 0364 post-merge validation closure on latest origin/main | `merged` | [ws-0364-post-merge-validation.md](../../workstreams/ws-0364-post-merge-validation.md) |
 | `0359` | Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main | `live_applied` | [ws-0359-live-apply.md](../../workstreams/ws-0359-live-apply.md) |
 | `0324` | Implement ADR 0324 service bundles and verify the generated-catalog automation end to end | `live_applied` | [ws-0324-live-apply.md](../../workstreams/ws-0324-live-apply.md) |
+| `0361` | Semaphore Keycloak OIDC integration live apply | `merged` | [ws-0361-live-apply.md](../../workstreams/ws-0361-live-apply.md) |
 | `0381` | ADR 0381 live apply from latest origin/main | `merged` | [ws-0381-live-apply.md](../../workstreams/ws-0381-live-apply.md) |
 | `0380` | Neko remote desktop exact-main live apply and regression hardening | `merged` | [ws-0380-live-apply.md](../../workstreams/ws-0380-live-apply.md) |
 | `0025` | Live apply ADR 0025 compose-managed runtime stacks from latest origin/main | `live_applied` | [ws-0025-live-apply.md](../../workstreams/ws-0025-live-apply.md) |

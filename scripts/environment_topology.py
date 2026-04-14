@@ -42,7 +42,7 @@ ALLOWED_RESERVED_CAPACITY_EXCLUSIONS = SHARED_POLICIES.reserved_capacity_exclusi
 ENVIRONMENT_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_-]*$")
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     normalized: list[str] = []
     seen: set[str] = set()
@@ -165,7 +165,7 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
                     exception.get("rationale"),
                     f"environments[{index}].placement.co_location_exceptions[{exception_index}].rationale",
                 )
-            exclusions = require_string_list(
+            exclusions = unique_string_list(
                 placement.get("reserved_capacity_exclusions"),
                 f"environments[{index}].placement.reserved_capacity_exclusions",
             )

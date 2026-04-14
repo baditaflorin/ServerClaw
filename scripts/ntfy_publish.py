@@ -33,21 +33,13 @@ if str(REPO_ROOT / "scripts") not in sys.path:
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, resolve_repo_local_path
 
-from validation_toolkit import require_mapping
+from validation_toolkit import require_mapping, require_str as require_string
 
 
 NTFY_SEQUENCE_ID_REGEX = re.compile(r"^[-_A-Za-z0-9]{1,64}$")
 NTFY_SEQUENCE_ID_INVALID_CHARS = re.compile(r"[^-_A-Za-z0-9]+")
 NTFY_SEQUENCE_ID_HASH_LEN = 12
 NTFY_SEQUENCE_ID_FALLBACK_PREFIX = "seq"
-
-
-def require_string(value: Any, path: str, *, allow_empty: bool = False) -> str:
-    if not isinstance(value, str):
-        raise ValueError(f"{path} must be a string")
-    if not allow_empty and not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
 
 
 def load_topic_registry(path: Path) -> dict[str, Any]:
@@ -93,7 +85,7 @@ def lookup_registry_user(registry: dict[str, Any], publisher: str | None) -> dic
     return require_mapping(users[publisher], f"config/ntfy/topics.yaml.users.{publisher}")
 
 
-def require_registered_topic(registry: dict[str, Any], topic: str) -> dict[str, Any]:
+def validate_registered_topic(registry: dict[str, Any], topic: str) -> dict[str, Any]:
     topics = require_mapping(registry.get("topics"), "config/ntfy/topics.yaml.topics")
     if topic not in topics:
         raise ValueError(f"Topic '{topic}' is not registered in config/ntfy/topics.yaml")
@@ -284,7 +276,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         registry = load_topic_registry(args.registry)
         secret_manifest = load_secret_manifest(args.secret_manifest) if args.secret_manifest.exists() else {}
-        topic_config = require_registered_topic(registry, args.topic)
+        topic_config = validate_registered_topic(registry, args.topic)
         user = lookup_registry_user(registry, args.publisher)
         assert_publisher_topic_access(user, args.publisher, args.topic)
         base_url = resolve_base_url(registry, args.base_url)

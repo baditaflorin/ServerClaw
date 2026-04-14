@@ -197,6 +197,7 @@ def test_assemble_latest_receipts_prefers_newer_repo_version_over_higher_adr(can
             adr="0273",
             title="Older integrated edge receipt",
             status="live_applied",
+            live_applied=True,
             changelog_entry=None,
             release_bump=None,
             included_in_repo_version="0.177.77",
@@ -207,6 +208,7 @@ def test_assemble_latest_receipts_prefers_newer_repo_version_over_higher_adr(can
             adr="0268",
             title="Newer integrated edge receipt",
             status="live_applied",
+            live_applied=True,
             changelog_entry=None,
             release_bump=None,
             included_in_repo_version="0.177.81",
@@ -231,6 +233,7 @@ def test_assemble_latest_receipts_prefers_unreleased_live_apply_over_older_versi
             adr="0331",
             title="Older versioned receipt",
             status="live_applied",
+            live_applied=True,
             changelog_entry=None,
             release_bump=None,
             included_in_repo_version="0.178.120",
@@ -241,10 +244,11 @@ def test_assemble_latest_receipts_prefers_unreleased_live_apply_over_older_versi
             adr="0373",
             title="Newer unreleased live apply",
             status="live_applied",
+            live_applied=True,
             changelog_entry=None,
             release_bump=None,
             included_in_repo_version=None,
-            latest_receipts={"keycloak": "2026-04-13-keycloak-topology-fix-runtime-control-live-apply"},
+            latest_receipts={"keycloak": "2026-04-12-adr-0381-login-service-contracts-mainline-live-apply"},
         ),
     ]
 
@@ -253,7 +257,30 @@ def test_assemble_latest_receipts_prefers_unreleased_live_apply_over_older_versi
         stack_path=canonical_repo / "versions" / "stack.yaml",
     )
 
-    assert latest["keycloak"] == "2026-04-13-keycloak-topology-fix-runtime-control-live-apply"
+    assert latest["keycloak"] == "2026-04-12-adr-0381-login-service-contracts-mainline-live-apply"
+
+
+def test_assemble_latest_receipts_keeps_merged_live_applied_workstreams(canonical_repo: Path) -> None:
+    items = [
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0361-live-apply",
+            adr="0361",
+            title="Semaphore Keycloak OIDC integration live apply",
+            status="merged",
+            live_applied=True,
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.178.130",
+            latest_receipts={"semaphore": "2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply"},
+        ),
+    ]
+
+    latest = canonical_truth.assemble_latest_receipts(
+        items,
+        stack_path=canonical_repo / "versions" / "stack.yaml",
+    )
+
+    assert latest["semaphore"] == "2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply"
 
 
 def test_mark_pending_workstreams_released_sets_repo_version(canonical_repo: Path) -> None:

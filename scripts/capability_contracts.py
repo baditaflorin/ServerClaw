@@ -37,7 +37,7 @@ def emit_cli_error(label: str, exc: Exception) -> int:
     return 1
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     values = [require_str(item, f"{path}[{index}]") for index, item in enumerate(items)]
     if len(values) != len(set(values)):
@@ -96,16 +96,16 @@ def validate_capability_contract_catalog(
             raise ValueError(f"{path}.id duplicates capability '{capability_id}'")
         seen_ids.add(capability_id)
 
-        require_string_list(capability.get("required_outcomes"), f"{path}.required_outcomes")
-        require_string_list(capability.get("service_guarantees"), f"{path}.service_guarantees")
-        require_string_list(capability.get("security_expectations"), f"{path}.security_expectations")
-        require_string_list(capability.get("audit_expectations"), f"{path}.audit_expectations")
-        require_string_list(capability.get("observability_requirements"), f"{path}.observability_requirements")
-        require_string_list(capability.get("portability_constraints"), f"{path}.portability_constraints")
+        unique_string_list(capability.get("required_outcomes"), f"{path}.required_outcomes")
+        unique_string_list(capability.get("service_guarantees"), f"{path}.service_guarantees")
+        unique_string_list(capability.get("security_expectations"), f"{path}.security_expectations")
+        unique_string_list(capability.get("audit_expectations"), f"{path}.audit_expectations")
+        unique_string_list(capability.get("observability_requirements"), f"{path}.observability_requirements")
+        unique_string_list(capability.get("portability_constraints"), f"{path}.portability_constraints")
 
         migration = require_mapping(capability.get("migration_expectations"), f"{path}.migration_expectations")
-        require_string_list(migration.get("export_formats"), f"{path}.migration_expectations.export_formats")
-        require_string_list(
+        unique_string_list(migration.get("export_formats"), f"{path}.migration_expectations.export_formats")
+        unique_string_list(
             migration.get("import_requirements"),
             f"{path}.migration_expectations.import_requirements",
         )

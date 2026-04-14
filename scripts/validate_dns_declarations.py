@@ -27,7 +27,8 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml
-from validation_toolkit import load_yaml_with_identity, require_int, require_mapping, require_str
+from identity_yaml import load_yaml_with_identity
+from validation_toolkit import require_int, require_mapping, require_str
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"

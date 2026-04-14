@@ -14,7 +14,7 @@ from typing import Any
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from validation_toolkit import require_list, require_mapping
+from validation_toolkit import require_list, require_mapping, require_str as require_string
 
 
 DEFAULT_COLLECTION = "platform-services"
@@ -43,12 +43,6 @@ PLATFORM_SERVICE_SCHEMA = {
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def require_string(value: Any, label: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{label} must be a non-empty string")
-    return value.strip()
 
 
 def optional_string(value: Any) -> str:

@@ -32,7 +32,7 @@ ALLOWED_SCAN_STATUSES = {"pass_no_critical", "exception_open"}
 ALLOWED_SCANNERS = {"grype", "trivy"}
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def validate_nonempty_string_list(value: Any, path: str) -> list[str]:
     items = require_list(value, path)
     if not items:
         raise ValueError(f"{path} must not be empty")
@@ -42,7 +42,7 @@ def require_string_list(value: Any, path: str) -> list[str]:
     return output
 
 
-def require_date(value: Any, path: str) -> str:
+def validate_date(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not DATE_PATTERN.match(value):
         raise ValueError(f"{path} must use YYYY-MM-DD format")
@@ -55,7 +55,7 @@ def optional_mapping(value: Any, path: str) -> dict | None:
     return require_mapping(value, path)
 
 
-def require_digest(value: Any, path: str) -> str:
+def validate_digest(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not DIGEST_PATTERN.match(value):
         raise ValueError(f"{path} must be a sha256 digest")
@@ -75,10 +75,10 @@ def validate_exception_metadata(exception: dict, path: str) -> None:
     else:
         raise ValueError(f"{path}.justification must be a non-empty string")
     if exception.get("compensating_controls") is not None:
-        require_string_list(exception.get("compensating_controls"), f"{path}.compensating_controls")
-    approved_on = require_date(exception.get("approved_on"), f"{path}.approved_on")
+        validate_nonempty_string_list(exception.get("compensating_controls"), f"{path}.compensating_controls")
+    approved_on = validate_date(exception.get("approved_on"), f"{path}.approved_on")
     expires_on_key = "expires_on" if exception.get("expires_on") is not None else "review_by"
-    expires_on = require_date(exception.get(expires_on_key), f"{path}.{expires_on_key}")
+    expires_on = validate_date(exception.get(expires_on_key), f"{path}.{expires_on_key}")
     if exception.get("remediation_plan") is not None:
         require_str(exception.get("remediation_plan"), f"{path}.remediation_plan")
     if expires_on < approved_on:
@@ -111,7 +111,7 @@ def validate_image_catalog(catalog: dict) -> None:
         if tag == "latest":
             raise ValueError(f"images.{image_id}.tag must not use 'latest'")
 
-        digest = require_digest(entry.get("digest"), f"images.{image_id}.digest")
+        digest = validate_digest(entry.get("digest"), f"images.{image_id}.digest")
         expected_ref = f"{registry_ref}:{tag}@{digest}"
         ref = require_str(entry.get("ref"), f"images.{image_id}.ref")
         if ref != expected_ref:
@@ -124,7 +124,7 @@ def validate_image_catalog(catalog: dict) -> None:
         if platform != "linux/amd64":
             raise ValueError(f"images.{image_id}.platform must be linux/amd64 for this platform")
 
-        require_date(entry.get("pinned_on"), f"images.{image_id}.pinned_on")
+        validate_date(entry.get("pinned_on"), f"images.{image_id}.pinned_on")
         scan_status = require_str(entry.get("scan_status"), f"images.{image_id}.scan_status")
         if scan_status not in ALLOWED_SCAN_STATUSES:
             raise ValueError(f"images.{image_id}.scan_status must be one of {sorted(ALLOWED_SCAN_STATUSES)}")
@@ -178,7 +178,7 @@ def validate_scan_receipt(receipt: dict, path: Path, image_id: str, ref: str) ->
     if scanner not in ALLOWED_SCANNERS:
         raise ValueError(f"{path}.scanner must be one of {sorted(ALLOWED_SCANNERS)}")
 
-    require_date(receipt.get("scanned_on"), f"{path}.scanned_on")
+    validate_date(receipt.get("scanned_on"), f"{path}.scanned_on")
     summary = require_mapping(receipt.get("summary"), f"{path}.summary")
     critical = summary.get("critical", None)
     high = summary.get("high", None)
@@ -270,13 +270,13 @@ def resolve_remote_digest(registry_ref: str, tag: str, platform: str = "linux/am
 
     manifests = manifest.get("manifests")
     if not manifests:
-        return require_digest(manifest_digest, "remote digest")
+        return validate_digest(manifest_digest, "remote digest")
 
     arch = platform.split("/", 1)[1]
     for item in manifests:
         item_platform = item.get("platform", {})
         if item_platform.get("os") == "linux" and item_platform.get("architecture") == arch:
-            return require_digest(item.get("digest"), "remote digest")
+            return validate_digest(item.get("digest"), "remote digest")
     raise ValueError(f"no manifest for platform '{platform}' under '{registry_ref}:{tag}'")
 
 

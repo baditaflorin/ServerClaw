@@ -21,7 +21,7 @@ _SCRIPTS_DIR = str(Path(__file__).resolve().parent)
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
-from validation_toolkit import require_int, require_list, require_str, require_string_list
+from validation_toolkit import require_int, require_list, require_mapping, require_str, require_string_list
 
 from controller_automation_toolkit import load_yaml
 from platform.ledger import LedgerWriter
@@ -65,12 +65,6 @@ def parse_timestamp(value: Any) -> dt.datetime | None:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=UTC)
     return parsed.astimezone(UTC)
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be a mapping")
-    return value
 
 
 def slugify(value: str) -> str:

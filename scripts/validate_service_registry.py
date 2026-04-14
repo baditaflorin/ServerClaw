@@ -19,13 +19,12 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from identity_yaml import load_yaml_with_identity, resolve_jinja2_vars
 from validation_toolkit import (
-    load_yaml_with_identity,
     require_enum,
     require_int,
     require_mapping,
     require_str,
-    resolve_jinja2_vars,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

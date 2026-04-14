@@ -53,7 +53,7 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def require_string_list(value: Any, path: str) -> list[str]:
+def unique_string_list(value: Any, path: str) -> list[str]:
     values = [require_str(item, f"{path}[{index}]") for index, item in enumerate(require_list(value, path))]
     if len(values) != len(set(values)):
         raise ValueError(f"{path} must not contain duplicates")
@@ -162,7 +162,7 @@ def validate_contract_catalog(
         if validation_lanes == "all-validation-gate-checks":
             validation_lane_ids = sorted(gate_checks)
         elif validation_lanes:
-            validation_lane_ids = require_string_list(
+            validation_lane_ids = unique_string_list(
                 validation_lanes,
                 f"config/build-server.json.commands.{command_label}.validation_lanes",
             )
@@ -289,7 +289,7 @@ def attest_runner(
     if runner_id not in runners:
         raise ValueError(f"unknown validation runner contract: {runner_id}")
     runner = require_mapping(runners[runner_id], f"config/validation-runner-contracts.json.runners.{runner_id}")
-    tool_names = sorted(set(require_string_list(runner.get("required_tools"), f"runner {runner_id} required_tools")))
+    tool_names = sorted(set(unique_string_list(runner.get("required_tools"), f"runner {runner_id} required_tools")))
     runtime_engine = require_mapping(
         runner.get("container_runtime"),
         f"runner {runner_id} container_runtime",
@@ -313,7 +313,7 @@ def attest_runner(
         "hostname": socket.gethostname(),
         "platform": sys.platform,
         "cpu_architecture": normalize_cpu_architecture(pyplatform.machine()),
-        "emulation_support": require_string_list(
+        "emulation_support": unique_string_list(
             runner.get("emulation_support"),
             f"config/validation-runner-contracts.json.runners.{runner_id}.emulation_support",
         ),
@@ -354,7 +354,7 @@ def evaluate_lane_eligibility(
     reasons: list[str] = []
 
     supported_lanes = set(
-        require_string_list(
+        unique_string_list(
             runner.get("supported_validation_lanes"),
             f"config/validation-runner-contracts.json.runners.{runner_id}.supported_validation_lanes",
         )
@@ -363,7 +363,7 @@ def evaluate_lane_eligibility(
         reasons.append(f"runner contract '{runner_id}' does not declare support for lane '{lane_id}'")
 
     allowed_architectures = set(
-        require_string_list(
+        unique_string_list(
             lane.get("allowed_cpu_architectures"),
             f"config/validation-runner-contracts.json.lanes.{lane_id}.allowed_cpu_architectures",
         )
@@ -376,7 +376,7 @@ def evaluate_lane_eligibility(
             f"lane '{lane_id}' requires CPU architecture in {sorted(allowed_architectures)}, not '{attested_architecture}'"
         )
     declared_architectures = set(
-        require_string_list(
+        unique_string_list(
             runner.get("cpu_architectures"),
             f"config/validation-runner-contracts.json.runners.{runner_id}.cpu_architectures",
         )
@@ -407,7 +407,7 @@ def evaluate_lane_eligibility(
             )
 
     tooling = require_mapping(attestation.get("tooling"), f"{runner_id} attestation tooling")
-    required_tools = require_string_list(
+    required_tools = unique_string_list(
         lane.get("required_tools"), f"config/validation-runner-contracts.json.lanes.{lane_id}.required_tools"
     )
     missing_tools = [
@@ -424,7 +424,7 @@ def evaluate_lane_eligibility(
         reasons.append(f"required tooling missing for lane '{lane_id}': {', '.join(sorted(missing_tools))}")
 
     allowed_reachability = set(
-        require_string_list(
+        unique_string_list(
             lane.get("allowed_network_reachability_classes"),
             f"config/validation-runner-contracts.json.lanes.{lane_id}.allowed_network_reachability_classes",
         )

@@ -25,7 +25,13 @@ from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, repo_path
 
-from validation_toolkit import require_int, require_list
+from validation_toolkit import (
+    require_int,
+    require_list,
+    require_mapping,
+    require_str as require_string,
+    require_string_list,
+)
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -191,22 +197,6 @@ def yaml_dump(payload: Any) -> str:
             return super().increase_indent(flow, False)
 
     return yaml.dump(payload, Dumper=IndentedSafeDumper, sort_keys=False)
-
-
-def require_mapping(value: Any, path: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must be a mapping")
-    return value
-
-
-def require_string(value: Any, path: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{path} must be a non-empty string")
-    return value
-
-
-def require_string_list(value: Any, path: str) -> list[str]:
-    return [require_string(item, f"{path}[{index}]") for index, item in enumerate(require_list(value, path))]
 
 
 def load_service_classification_map() -> dict[str, dict[str, Any]]:
