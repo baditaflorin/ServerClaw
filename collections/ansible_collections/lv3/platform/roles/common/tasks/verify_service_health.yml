@@ -1,12 +1,12 @@
 ---
-- name: "Wait for {{ common_verify_service_name }} to listen on port {{ common_verify_port }}"
+- name: Wait for service port
   ansible.builtin.wait_for:
     host: "{{ common_verify_port_host | default('127.0.0.1') }}"
     port: "{{ common_verify_port }}"
     delay: 0
     timeout: "{{ common_verify_port_timeout | default(300) }}"
 
-- name: "Verify {{ common_verify_service_name }} health endpoint"
+- name: Verify service health endpoint
   ansible.builtin.uri:
     url: "{{ common_verify_health_url }}"
     method: GET
@@ -19,7 +19,7 @@
   changed_when: false
   when: (common_verify_health_url | default('')) | length > 0
 
-- name: "Assert {{ common_verify_service_name }} health response"
+- name: Assert service health response
   ansible.builtin.assert:
     that: "{{ common_verify_health_assertions }}"
     fail_msg: >-
@@ -30,7 +30,7 @@
     - (common_verify_health_url | default('')) | length > 0
     - (common_verify_health_assertions | default([])) | length > 0
 
-- name: "Verify {{ common_verify_service_name }} extra endpoints"
+- name: Verify extra service endpoints
   ansible.builtin.include_tasks: verify_service_health_extra.yml
   loop: "{{ common_verify_extra_endpoints | default([]) }}"
   loop_control:

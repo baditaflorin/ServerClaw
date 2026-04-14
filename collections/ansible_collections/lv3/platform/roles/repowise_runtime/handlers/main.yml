@@ -1,5 +1,5 @@
 ---
-- name: restart repowise
+- name: Restart repowise
   community.docker.docker_compose_v2:
     project_src: "{{ repowise_base_dir }}"
     state: restarted

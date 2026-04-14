@@ -1,5 +1,5 @@
 ---
-- name: "Verify {{ common_verify_service_name }} endpoint {{ common_verify_extra_endpoint.url }}"
+- name: Verify extra service endpoint
   ansible.builtin.uri:
     url: "{{ common_verify_extra_endpoint.url }}"
     method: GET
@@ -11,7 +11,7 @@
   until: common_verify_extra_response.status == (common_verify_extra_endpoint.status_code | default(200) | int)
   changed_when: false
 
-- name: "Assert {{ common_verify_service_name }} endpoint {{ common_verify_extra_endpoint.url }}"
+- name: Assert extra service endpoint
   ansible.builtin.assert:
     that: "{{ common_verify_extra_endpoint.assertions }}"
     fail_msg: >-
