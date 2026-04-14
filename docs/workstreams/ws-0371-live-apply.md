@@ -7,6 +7,7 @@
 - Included In Platform Version: `0.178.143`
 - Branch-Local Receipt: `receipts/live-applies/2026-04-14-adr-0371-parameterized-service-verification-tasks-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply.json`
+- Promotion Gate Waiver: `receipts/gate-bypasses/20260414T180616Z-codex-ws-0371-live-apply-dbe0269-skip-remote-gate.json`
 - Implemented On: 2026-04-14
 - Live Applied On: 2026-04-14
 - Live Applied In Platform Version: `0.178.143`
@@ -224,6 +225,31 @@
   whitespace diff checks, build-server reachability, and remote validation
   evidence under the matching `2026-04-14-ws-0371-mainline-final-*.txt`
   transcripts.
+
+## Promotion Gate Outcome
+
+- The first `git push origin HEAD:refs/heads/main` attempt from the detached
+  ship worktree hit the remote build-server fallback path and then failed in
+  local fallback for three reasons that were not release-tree regressions:
+  - the detached ship worktree did not have the ignored generated
+    `config/generated/*` and `inventory/group_vars/platform_hairpin.yml`
+    surfaces present, so `data-models` and `alert-rules` observed stale local
+    generation state that did not reproduce in the feature worktree
+  - the local `integration-tests` fallback was pointing at raw `pytest tests/`
+    instead of the governed `scripts/integration_suite.py` wrapper
+  - the remaining full-repo `ansible-lint` failures were all in untouched
+    baseline files outside the ADR 0371 change set
+- The final branch now includes the local fallback fix for
+  `config/validation-gate.json` plus the shared verify-task lint cleanup, and
+  the focused substitute validations all pass from the feature worktree:
+  - `./scripts/validate_repo.sh data-models`
+  - `./scripts/validate_repo.sh alert-rules`
+  - `./scripts/run_python_with_packages.sh pytest -- scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json`
+  - `uv run --with pytest --with pyyaml --with jsonschema --with jinja2 python -m pytest -q tests/test_service_live_apply_wrappers.py tests/test_validation_gate.py`
+- Because the remaining full primary-branch gate failure reduced to the
+  untouched whole-repo `ansible-lint` baseline, the final `origin/main`
+  promotion uses the governed `skip_remote_gate` waiver recorded in the
+  receipt above instead of `--no-verify`.
 
 ## Integration Notes
 

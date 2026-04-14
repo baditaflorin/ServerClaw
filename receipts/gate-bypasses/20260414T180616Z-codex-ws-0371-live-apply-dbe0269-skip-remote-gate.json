@@ -1,0 +1,26 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-14T18:06:16Z",
+  "bypass": "skip_remote_gate",
+  "source": "ws-0371-final-promotion",
+  "branch": "codex/ws-0371-live-apply",
+  "commit": "dbe026920a275367bcbcd5de75c59ed16e3104c8",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "ADR 0371 focused reruns passed after fixing the shared verify-task lint findings and the local integration-suite fallback; the remaining full primary-branch gate failure is the untouched whole-repo ansible-lint baseline, while the detached ship worktree's schema and alert drift did not reproduce in the feature worktree with the generated surfaces present.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "./scripts/validate_repo.sh data-models",
+      "./scripts/validate_repo.sh alert-rules",
+      "./scripts/run_python_with_packages.sh pytest -- scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json",
+      "uv run --with pytest --with pyyaml --with jsonschema --with jinja2 python -m pytest -q tests/test_service_live_apply_wrappers.py tests/test_validation_gate.py",
+      "receipts/live-applies/2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply.json"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-15",
+    "remediation_ref": "ws-0371-live-apply"
+  }
+}
