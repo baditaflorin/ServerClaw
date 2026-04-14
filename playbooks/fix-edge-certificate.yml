@@ -30,6 +30,12 @@
   hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
+  vars:
+    fix_edge_cert_name: lv3-edge
+    fix_edge_dns_hetzner_plugin_version: 3.0.0
+    fix_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
+    fix_edge_dns_hetzner_propagation_seconds: 120
+    fix_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
   vars_files:
     - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
@@ -56,6 +62,7 @@
             subdomain_catalog.subdomains
             | selectattr('exposure', 'in', ['edge-published', 'edge-static'])
             | map(attribute='fqdn')
+            | map('replace', 'example.com', platform_domain)
             | unique
             | sort
           }}
@@ -67,7 +74,7 @@
           - openssl
           - x509
           - -in
-          - /etc/letsencrypt/live/lv3-edge/cert.pem
+          - "/etc/letsencrypt/live/{{ fix_edge_cert_name }}/cert.pem"
           - -text
           - -noout
       register: current_cert_info
@@ -75,12 +82,15 @@
 
     - name: Extract SANs from current certificate
       ansible.builtin.set_fact:
-        current_cert_domains: |
+        current_cert_domains: >-
           {{
             (
-              current_cert_info.stdout
-              | regex_search('Subject Alternative Name: (.*)', '\1')
-              | default('')
+              (
+                current_cert_info.stdout
+                | regex_search('Subject Alternative Name: (.*)', '\1')
+                | first
+                | default('')
+              )
               | split(', ')
               | map('trim')
               | map('regex_replace', '^DNS:', '')
@@ -115,30 +125,65 @@
           - certbot
           - certificates
           - --cert-name
-          - lv3-edge
+          - "{{ fix_edge_cert_name }}"
       register: certbot_status
       ignore_errors: true
+
+    - name: Ensure certbot DNS-01 prerequisites are present
+      ansible.builtin.apt:
+        name:
+          - certbot
+          - python3-venv
+        state: present
+        force_apt_get: true
+      when: missing_domains | length > 0
+
+    - name: Derive the Certbot Hetzner plugin path
+      ansible.builtin.set_fact:
+        fix_edge_certbot_plugin_path: >-
+          {{ fix_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
+      when: missing_domains | length > 0
+
+    - name: Install the pinned Certbot Hetzner DNS plugin
+      ansible.builtin.pip:
+        name: "certbot-dns-hetzner=={{ fix_edge_dns_hetzner_plugin_version }}"
+        virtualenv: "{{ fix_edge_dns_hetzner_virtualenv }}"
+        virtualenv_command: /usr/bin/python3 -m venv
+      when: missing_domains | length > 0
+
+    - name: Write the Hetzner DNS credential file when a controller token is present
+      ansible.builtin.copy:
+        dest: "{{ fix_edge_dns_hetzner_credentials_file }}"
+        mode: "0600"
+        content: "dns_hetzner_api_token = {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}\n"
+      when:
+        - missing_domains | length > 0
+        - (lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim | length) > 0
+      no_log: true
+
+    - name: Check the Hetzner DNS credential file
+      ansible.builtin.stat:
+        path: "{{ fix_edge_dns_hetzner_credentials_file }}"
+      register: fix_edge_dns_hetzner_credentials_after
+      when: missing_domains | length > 0
+
+    - name: Assert the Hetzner DNS credential file is available
+      ansible.builtin.assert:
+        that:
+          - fix_edge_dns_hetzner_credentials_after.stat.exists
+        fail_msg: >-
+          Fixing the shared edge certificate requires either HETZNER_DNS_API_TOKEN on the controller
+          or an existing {{ fix_edge_dns_hetzner_credentials_file }} on the edge host.
+      when: missing_domains | length > 0
 
     - name: Force certificate renewal with all domains
       block:
         - name: Backup current renewal config
           ansible.builtin.copy:
-            src: /etc/letsencrypt/renewal/lv3-edge.conf
-            dest: /etc/letsencrypt/renewal/lv3-edge.conf.backup
+            src: "/etc/letsencrypt/renewal/{{ fix_edge_cert_name }}.conf"
+            dest: "/etc/letsencrypt/renewal/{{ fix_edge_cert_name }}.conf.backup"
             remote_src: true
             backup: true
-          when: missing_domains | length > 0
-
-        - name: Stop nginx during renewal
-          ansible.builtin.systemd:
-            name: nginx
-            state: stopped
-          when: missing_domains | length > 0
-
-        - name: Remove staging certificate to force renewal
-          ansible.builtin.file:
-            path: /etc/letsencrypt/live/lv3-edge
-            state: absent
           when: missing_domains | length > 0
 
         - name: Run certbot to request certificate with all domains
@@ -146,20 +191,51 @@
             argv:
               - certbot
               - certonly
-              - --dns-hetzner
+              - --authenticator
+              - dns-hetzner
               - --dns-hetzner-credentials
-              - /etc/letsencrypt/hetzner.ini
+              - "{{ fix_edge_dns_hetzner_credentials_file }}"
+              - --dns-hetzner-propagation-seconds
+              - "{{ fix_edge_dns_hetzner_propagation_seconds | string }}"
               - --cert-name
-              - lv3-edge
+              - "{{ fix_edge_cert_name }}"
               - --force-renewal
               - --non-interactive
               - --agree-tos
               - --email
-              - "{{ public_edge_certbot_email | default('admin@{{ platform_domain }}') }}"
-              - "{% for domain in edge_published_domains | sort %}-d {{ domain }}{{ ' ' if not loop.last else '' }}{% endfor %}"
+              - "{{ public_edge_certbot_email | default('admin@' + platform_domain) }}"
+              - -d
+              - "{{ edge_published_domains | sort | join(',') }}"
+          environment:
+            CERTBOT_PLUGIN_PATH: "{{ fix_edge_certbot_plugin_path }}"
           when: missing_domains | length > 0
           async: 300
           poll: 5
+
+        - name: Discover the latest public edge certificate lineage
+          ansible.builtin.shell:
+            cmd: "ls -dt /etc/letsencrypt/live/{{ fix_edge_cert_name }}* 2>/dev/null | head -n 1"
+          register: fix_edge_latest_cert_lineage
+          changed_when: false
+          when: missing_domains | length > 0
+
+        - name: Assert the renewed public edge certificate lineage exists
+          ansible.builtin.assert:
+            that:
+              - (fix_edge_latest_cert_lineage.stdout | trim | length) > 0
+            fail_msg: >-
+              Certbot completed without leaving a visible lineage under /etc/letsencrypt/live/{{ fix_edge_cert_name }}*.
+          when: missing_domains | length > 0
+
+        - name: Refresh the canonical public edge lineage alias
+          ansible.builtin.file:
+            src: "{{ fix_edge_latest_cert_lineage.stdout | trim }}"
+            dest: "/etc/letsencrypt/live/{{ fix_edge_cert_name }}"
+            state: link
+            force: true
+          when:
+            - missing_domains | length > 0
+            - (fix_edge_latest_cert_lineage.stdout | trim) != "/etc/letsencrypt/live/{{ fix_edge_cert_name }}"
 
         - name: Start nginx after renewal
           ansible.builtin.systemd:
@@ -174,7 +250,7 @@
               - openssl
               - x509
               - -in
-              - /etc/letsencrypt/live/lv3-edge/cert.pem
+              - "/etc/letsencrypt/live/{{ fix_edge_cert_name }}/cert.pem"
               - -text
               - -noout
           register: new_cert_info
@@ -184,7 +260,7 @@
           ansible.builtin.debug:
             msg: |
               Certificate renewal completed!
-              Check: openssl x509 -in /etc/letsencrypt/live/lv3-edge/cert.pem -text -noout | grep -A5 "Subject Alternative Name"
+              Check: openssl x509 -in /etc/letsencrypt/live/{{ fix_edge_cert_name }}/cert.pem -text -noout | grep -A5 "Subject Alternative Name"
           when: missing_domains | length > 0
 
       when: missing_domains | length > 0
@@ -201,7 +277,7 @@
       ansible.builtin.command:
         argv:
           - python3
-          - /tmp/certificate_validator.py
+          - "{{ playbook_dir }}/../scripts/certificate_validator.py"
           - --check-all
       delegate_to: localhost
       become: false
