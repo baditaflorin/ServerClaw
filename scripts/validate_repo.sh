@@ -322,7 +322,7 @@ validate_ansible_syntax() {
   install_collections
   load_lines_into_array playbooks < <(
     tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
-      awk -F/ '(( $1 == "playbooks" && NF == 2 ) || ( $1 == "playbooks" && $2 == "groups" && NF == 3 ) || ( $1 == "playbooks" && $2 == "services" && NF == 3 )) && $NF !~ /^\./ { print }'
+      awk -F/ '(( $1 == "playbooks" && NF == 2 ) || ( $1 == "playbooks" && $2 == "groups" && NF == 3 ) || ( $1 == "playbooks" && $2 == "services" && NF == 3 && $3 !~ /^_/ )) && $NF !~ /^\./ { print }'
   )
   if [[ ${#playbooks[@]} -eq 0 ]]; then
     return 0

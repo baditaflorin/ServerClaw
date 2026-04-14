@@ -26,7 +26,7 @@
 # Author: LV3 Platform
 # Last Updated: 2026-04-14
 
-- name: Fix NGINX Edge Certificate Issues (ci.{{ platform_domain | default('example.com') }}, bi.{{ platform_domain | default('example.com') }}, etc)
+- name: Fix NGINX Edge Certificate Issues
   hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
@@ -78,6 +78,7 @@
           - -text
           - -noout
       register: current_cert_info
+      changed_when: false
       ignore_errors: true
 
     - name: Extract SANs from current certificate
@@ -127,6 +128,7 @@
           - --cert-name
           - "{{ fix_edge_cert_name }}"
       register: certbot_status
+      changed_when: false
       ignore_errors: true
 
     - name: Ensure certbot DNS-01 prerequisites are present
@@ -177,6 +179,7 @@
       when: missing_domains | length > 0
 
     - name: Force certificate renewal with all domains
+      when: missing_domains | length > 0
       block:
         - name: Backup current renewal config
           ansible.builtin.copy:
@@ -184,7 +187,7 @@
             dest: "/etc/letsencrypt/renewal/{{ fix_edge_cert_name }}.conf.backup"
             remote_src: true
             backup: true
-          when: missing_domains | length > 0
+            mode: preserve
 
         - name: Run certbot to request certificate with all domains
           ansible.builtin.command:
@@ -208,41 +211,53 @@
               - "{{ edge_published_domains | sort | join(',') }}"
           environment:
             CERTBOT_PLUGIN_PATH: "{{ fix_edge_certbot_plugin_path }}"
-          when: missing_domains | length > 0
+          changed_when: true
           async: 300
           poll: 5
 
         - name: Discover the latest public edge certificate lineage
-          ansible.builtin.shell:
-            cmd: "ls -dt /etc/letsencrypt/live/{{ fix_edge_cert_name }}* 2>/dev/null | head -n 1"
-          register: fix_edge_latest_cert_lineage
+          ansible.builtin.find:
+            paths: /etc/letsencrypt/live
+            file_type: directory
+            patterns: "{{ fix_edge_cert_name }}*"
+            recurse: false
+          register: fix_edge_cert_lineages
           changed_when: false
-          when: missing_domains | length > 0
+
+        - name: Select the latest public edge certificate lineage
+          ansible.builtin.set_fact:
+            fix_edge_latest_cert_lineage: >-
+              {{
+                (
+                  fix_edge_cert_lineages.files
+                  | sort(attribute='mtime', reverse=true)
+                  | map(attribute='path')
+                  | list
+                  | first
+                ) | default('')
+              }}
 
         - name: Assert the renewed public edge certificate lineage exists
           ansible.builtin.assert:
             that:
-              - (fix_edge_latest_cert_lineage.stdout | trim | length) > 0
+              - fix_edge_latest_cert_lineage | length > 0
             fail_msg: >-
               Certbot completed without leaving a visible lineage under /etc/letsencrypt/live/{{ fix_edge_cert_name }}*.
-          when: missing_domains | length > 0
 
         - name: Refresh the canonical public edge lineage alias
           ansible.builtin.file:
-            src: "{{ fix_edge_latest_cert_lineage.stdout | trim }}"
+            src: "{{ fix_edge_latest_cert_lineage }}"
             dest: "/etc/letsencrypt/live/{{ fix_edge_cert_name }}"
             state: link
             force: true
           when:
-            - missing_domains | length > 0
-            - (fix_edge_latest_cert_lineage.stdout | trim) != "/etc/letsencrypt/live/{{ fix_edge_cert_name }}"
+            - fix_edge_latest_cert_lineage != ('/etc/letsencrypt/live/' ~ fix_edge_cert_name)
 
         - name: Start nginx after renewal
           ansible.builtin.systemd:
             name: nginx
             state: started
             enabled: true
-          when: missing_domains | length > 0
 
         - name: Verify certificate after renewal
           ansible.builtin.command:
@@ -254,24 +269,20 @@
               - -text
               - -noout
           register: new_cert_info
-          when: missing_domains | length > 0
+          changed_when: false
 
         - name: Report renewal results
           ansible.builtin.debug:
             msg: |
               Certificate renewal completed!
               Check: openssl x509 -in /etc/letsencrypt/live/{{ fix_edge_cert_name }}/cert.pem -text -noout | grep -A5 "Subject Alternative Name"
-          when: missing_domains | length > 0
-
-      when: missing_domains | length > 0
 
     - name: If no missing domains, run standard nginx converge
+      when: missing_domains | length == 0
       block:
         - name: Display nginx is up to date
           ansible.builtin.debug:
             msg: "Certificate is up to date with all required domains"
-
-      when: missing_domains | length == 0
 
     - name: Validate certificate domains
       ansible.builtin.command:
@@ -282,6 +293,7 @@
       delegate_to: localhost
       become: false
       register: validation_result
+      changed_when: false
       ignore_errors: true
 
     - name: Show validation results

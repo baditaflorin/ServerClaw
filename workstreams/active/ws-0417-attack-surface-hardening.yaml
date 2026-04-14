@@ -5,6 +5,7 @@ status: in_progress
 ready_to_merge: false
 live_applied: false
 branch: claude/adr-0413-librechat-nginx
+worktree_path: .worktrees/adr-0413-auth
 owner: claude
 worktree_path: .claude/worktrees/adr-0413-librechat-nginx
 doc: docs/adr/0417-external-attack-surface-hardening.md

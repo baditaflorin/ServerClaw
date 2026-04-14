@@ -48,9 +48,9 @@ completeness:
   dashboard_file: config/grafana/dashboards/serverclaw.json
   alert_rule_file: config/alertmanager/rules/serverclaw.yml
   suppressed_checks:
-    ansible_role: '2026-09-23'
-    subdomain: '2026-09-23'
-    compose_secrets: '2026-09-23'
+    ansible_role: '2027-01-01'
+    subdomain: '2027-01-01'
+    compose_secrets: '2027-01-01'
 redundancy:
   tier: R1
   recovery_objective:

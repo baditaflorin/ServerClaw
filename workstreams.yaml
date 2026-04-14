@@ -28,6 +28,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   branch: claude/adr-0413-librechat-nginx
+  worktree_path: .worktrees/adr-0413-auth
   owner: claude
   worktree_path: .claude/worktrees/adr-0413-librechat-nginx
   doc: docs/adr/0417-external-attack-surface-hardening.md
@@ -123,8 +124,7 @@ workstreams:
     '
 - id: ws-0417-main-merge-edge-cert-and-sftpgo
   adr: '0375'
-  title: 'Latest-main integration: edge certificate recovery and SFTPGo dependency
-    graph'
+  title: 'Latest-main integration: edge certificate recovery and validation gate repairs'
   status: in_progress
   owner: codex
   branch: codex/dependency-graph-sftpgo-fix
@@ -140,7 +140,14 @@ workstreams:
   - workstreams/active/ws-0417-main-merge-edge-cert-and-sftpgo.yaml
   - workstreams/active/ws-0375-certificate-validation.yaml
   - docs/workstreams/ws-0417-main-merge-edge-cert-and-sftpgo.md
+  - catalog/services/repo_intake/service.yaml
+  - catalog/services/sftpgo/service.yaml
+  - catalog/services/librechat/service.yaml
+  - catalog/services/serverclaw/service.yaml
+  - catalog/services/repowise/service.yaml
+  - catalog/services/litellm/service.yaml
   - .ansible-lint
+  - platform/ansible/execution_scopes.py
   - scripts/validate_repo.sh
   - playbooks/fix-edge-certificate.yml
   - playbooks/verify-bootstrap-guests.yml
@@ -189,6 +196,7 @@ workstreams:
   - docs/release-notes/*
   - docs/release-notes/index/*
   - versions/stack.yaml
+  - scripts/topology-snapshot.json
   - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
   - receipts/runtime-pool-scaling/README.md
   ownership_manifest:
@@ -208,6 +216,15 @@ workstreams:
       - workstreams/active/ws-0375-certificate-validation.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: ws_0417_service_definition_bundles
+      paths:
+      - catalog/services/repo_intake/service.yaml
+      - catalog/services/sftpgo/service.yaml
+      - catalog/services/librechat/service.yaml
+      - catalog/services/serverclaw/service.yaml
+      - catalog/services/repowise/service.yaml
+      - catalog/services/litellm/service.yaml
+      mode: exclusive
     - id: certificate_validator_recovery_playbook
       paths:
       - playbooks/fix-edge-certificate.yml
@@ -216,6 +233,7 @@ workstreams:
     - id: ws_0417_validation_script
       paths:
       - .ansible-lint
+      - platform/ansible/execution_scopes.py
       - scripts/validate_repo.sh
       mode: exclusive
     - id: ws_0417_edge_tests
@@ -275,6 +293,7 @@ workstreams:
       - docs/release-notes/*
       - docs/release-notes/index/*
       - versions/stack.yaml
+      - scripts/topology-snapshot.json
       mode: shared_contract
       contract: mainline-release-integration-v1
     - id: ws_0417_receipt_repair

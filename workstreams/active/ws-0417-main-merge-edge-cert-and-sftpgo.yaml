@@ -1,10 +1,10 @@
 id: ws-0417-main-merge-edge-cert-and-sftpgo
 adr: '0375'
-title: "Latest-main integration: edge certificate recovery and SFTPGo dependency graph"
+title: "Latest-main integration: edge certificate recovery and validation gate repairs"
 status: in_progress
 owner: codex
-branch: codex/dependency-graph-sftpgo-fix
-worktree_path: .worktrees/dependency-graph-sftpgo-fix
+branch: codex/ws-0417-main-final
+worktree_path: .worktrees/ws-0417-main-final
 doc: docs/workstreams/ws-0417-main-merge-edge-cert-and-sftpgo.md
 depends_on:
   - ws-0375-certificate-validation
@@ -14,9 +14,17 @@ conflicts_with: []
 shared_surfaces:
   - workstreams.yaml
   - workstreams/active/ws-0417-main-merge-edge-cert-and-sftpgo.yaml
+  - workstreams/active/ws-0417-attack-surface-hardening.yaml
   - workstreams/active/ws-0375-certificate-validation.yaml
   - docs/workstreams/ws-0417-main-merge-edge-cert-and-sftpgo.md
+  - catalog/services/repo_intake/service.yaml
+  - catalog/services/sftpgo/service.yaml
+  - catalog/services/librechat/service.yaml
+  - catalog/services/serverclaw/service.yaml
+  - catalog/services/repowise/service.yaml
+  - catalog/services/litellm/service.yaml
   - .ansible-lint
+  - platform/ansible/execution_scopes.py
   - scripts/validate_repo.sh
   - playbooks/fix-edge-certificate.yml
   - playbooks/verify-bootstrap-guests.yml
@@ -65,6 +73,7 @@ shared_surfaces:
   - docs/release-notes/*
   - docs/release-notes/index/*
   - versions/stack.yaml
+  - scripts/topology-snapshot.json
   - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
   - receipts/runtime-pool-scaling/README.md
 ownership_manifest:
@@ -79,11 +88,25 @@ ownership_manifest:
         - workstreams/active/ws-0417-main-merge-edge-cert-and-sftpgo.yaml
         - docs/workstreams/ws-0417-main-merge-edge-cert-and-sftpgo.md
       mode: exclusive
+    - id: ws_0417_registry_repairs
+      paths:
+        - workstreams/active/ws-0417-attack-surface-hardening.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
     - id: ws_0417_related_workstream_source
       paths:
         - workstreams/active/ws-0375-certificate-validation.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: ws_0417_service_definition_bundles
+      paths:
+        - catalog/services/repo_intake/service.yaml
+        - catalog/services/sftpgo/service.yaml
+        - catalog/services/librechat/service.yaml
+        - catalog/services/serverclaw/service.yaml
+        - catalog/services/repowise/service.yaml
+        - catalog/services/litellm/service.yaml
+      mode: exclusive
     - id: certificate_validator_recovery_playbook
       paths:
         - playbooks/fix-edge-certificate.yml
@@ -92,6 +115,7 @@ ownership_manifest:
     - id: ws_0417_validation_script
       paths:
         - .ansible-lint
+        - platform/ansible/execution_scopes.py
         - scripts/validate_repo.sh
       mode: exclusive
     - id: ws_0417_edge_tests
@@ -151,6 +175,7 @@ ownership_manifest:
         - docs/release-notes/*
         - docs/release-notes/index/*
         - versions/stack.yaml
+        - scripts/topology-snapshot.json
       mode: shared_contract
       contract: mainline-release-integration-v1
     - id: ws_0417_receipt_repair
@@ -159,18 +184,23 @@ ownership_manifest:
         - receipts/runtime-pool-scaling/README.md
       mode: exclusive
 canonical_truth:
-  changelog_entry: repair edge certificate recovery on latest origin/main, register
-    SFTPGo in the dependency graph, and refresh the generated release and validation
-    surfaces needed to land the merge cleanly
+  changelog_entry: repair edge certificate recovery on latest origin/main and
+    refresh the generated release, workstream, and validation surfaces needed
+    to land the merge cleanly
   release_bump: patch
   included_in_repo_version: null
   latest_receipts: {}
 blockers: []
-ready_to_merge: false
+ready_to_merge: true
 live_applied: false
 notes: >
-  Branch-local integration closeout that started from origin/main@bf8be0939 with
-  VERSION=0.178.133. Scope includes the live-relevant fix to
-  playbooks/fix-edge-certificate.yml, the missing SFTPGo dependency-graph node,
-  and the repo metadata plus generated-artifact repairs required for the current
-  validation gate to pass from a clean latest-main worktree.
+  Branch-local integration closeout restarted from origin/main@0ed784c50 with
+  VERSION=0.178.135. Latest main already contains the SFTPGo dependency-graph
+  registration, so this branch replays the live-relevant fix to
+  playbooks/fix-edge-certificate.yml and carries the repo metadata plus
+  generated-artifact repairs required for the current validation gate to pass
+  from a clean latest-main worktree. Final validation on the merged-main replay
+  passed for semgrep, workstream surfaces, policy, alert rules, agent
+  standards, generated docs, OpenTofu validation, and the staging integration
+  gate skip path; remaining failures observed during the session were
+  pre-existing mainline baseline issues outside this workstream's owned files.

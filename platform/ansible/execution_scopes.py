@@ -686,6 +686,7 @@ def _collect_makefile_entrypoints(makefile_path: Path, repo_root: Path) -> tuple
             entrypoints.extend(
                 normalize_repo_path(path, repo_root=repo_root)
                 for path in sorted((repo_root / "playbooks" / "services").glob("*.yml"))
+                if not path.name.startswith("_")
             )
             continue
         if "--playbook $(REPO_ROOT)/playbooks/groups/$(group).yml" in line:
@@ -704,6 +705,8 @@ def _collect_makefile_entrypoints(makefile_path: Path, repo_root: Path) -> tuple
             if "--syntax-check" in line:
                 break
             if path.startswith("playbooks/tasks/") or path.startswith("playbooks/vars/"):
+                break
+            if path.startswith("playbooks/services/_"):
                 break
             entrypoints.append(normalize_repo_path(path, repo_root=repo_root))
             break
