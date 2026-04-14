@@ -2,6 +2,12 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+portainer_image: "{{ container_image_catalog.images.portainer_runtime.ref }}"
+portainer_container_name: portainer
+portainer_site_dir: /opt/portainer
+portainer_data_dir: "{{ portainer_site_dir }}/data"
+portainer_compose_file: "{{ portainer_site_dir }}/docker-compose.yml"
+portainer_local_artifact_dir: "{{ repo_shared_local_root }}/portainer"
 portainer_https_port: "{{ platform_service_topology | platform_service_port('portainer', 'internal') }}"
 portainer_host_proxy_port: "{{ platform_service_topology | platform_service_port('portainer', 'controller') }}"
 portainer_endpoint_name: local

@@ -17,8 +17,8 @@ def test_defaults_define_the_private_uptime_kuma_runtime_contract() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
     assert defaults["uptime_kuma_site_dir"] == "/opt/uptime-kuma"
-    assert defaults["uptime_kuma_compose_file"] == "/opt/uptime-kuma/docker-compose.yml"
-    assert defaults["uptime_kuma_data_dir"] == "/opt/uptime-kuma/data"
+    assert defaults["uptime_kuma_compose_file"] == "{{ uptime_kuma_site_dir }}/docker-compose.yml"
+    assert defaults["uptime_kuma_data_dir"] == "{{ uptime_kuma_site_dir }}/data"
     assert defaults["uptime_kuma_container_name"] == "uptime-kuma"
     assert defaults["uptime_kuma_image"] == "{{ container_image_catalog.images.uptime_kuma_runtime.ref }}"
     assert defaults["uptime_kuma_port"] == "{{ uptime_kuma_service_topology.ports.internal }}"
@@ -54,9 +54,9 @@ def test_main_tasks_render_pull_start_and_verify_uptime_kuma() -> None:
     assert package_task["ansible.builtin.apt"]["name"] == ["docker-compose-plugin"]
 
     assert "Render the Uptime Kuma compose file" in names
-    assert "Pull the Uptime Kuma image" in names
-    assert "Start the Uptime Kuma stack" in names
+    assert "Converge the Uptime Kuma compose stack" in names
     assert "Wait for Uptime Kuma to listen locally" in names
+    assert "Verify the Uptime Kuma container is running" in names
     assert "Verify Uptime Kuma health probes" in names
 
     assert_vars_task = next(task for task in tasks if task["name"] == "Validate Uptime Kuma runtime inputs")
@@ -69,18 +69,26 @@ def test_main_tasks_render_pull_start_and_verify_uptime_kuma() -> None:
         "uptime_kuma_port",
     ]
 
-    pull_task = next(task for task in tasks if task["name"] == "Pull the Uptime Kuma image")
-    assert pull_task["ansible.builtin.command"]["argv"][:3] == ["docker", "compose", "--file"]
-
-    start_task = next(task for task in tasks if task["name"] == "Start the Uptime Kuma stack")
-    assert start_task["ansible.builtin.command"]["argv"][:3] == ["docker", "compose", "--file"]
+    converge_task = next(task for task in tasks if task["name"] == "Converge the Uptime Kuma compose stack")
+    assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert converge_task["ansible.builtin.include_role"]["tasks_from"] == "docker_compose_converge"
+    assert converge_task["vars"]["common_docker_compose_converge_compose_file"] == "{{ uptime_kuma_compose_file }}"
+    assert converge_task["vars"]["common_docker_compose_converge_site_dir"] == "{{ uptime_kuma_site_dir }}"
+    assert converge_task["vars"]["common_docker_compose_converge_service_name"] == "uptime-kuma"
+    assert converge_task["vars"]["common_docker_compose_converge_health_port"] == "{{ uptime_kuma_port }}"
 
 
 def test_verify_tasks_probe_the_local_http_surface() -> None:
     tasks = yaml.safe_load(ROLE_VERIFY.read_text())
-    probe_task = next(task for task in tasks if task["name"] == "Verify the Uptime Kuma web UI responds locally")
+    running_task = next(task for task in tasks if task["name"] == "Verify the Uptime Kuma container is running")
+    probe_task = next(task for task in tasks if task["name"] == "Verify the Uptime Kuma runtime")
 
-    assert probe_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ uptime_kuma_port }}"
+    assert running_task["ansible.builtin.command"]["argv"][:3] == ["docker", "ps", "--filter"]
+    assert probe_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert probe_task["ansible.builtin.include_role"]["tasks_from"] == "verify_service_health"
+    assert probe_task["vars"]["common_verify_service_name"] == "uptime-kuma"
+    assert probe_task["vars"]["common_verify_port"] == "{{ uptime_kuma_port }}"
+    assert probe_task["vars"]["common_verify_health_url"] == "http://127.0.0.1:{{ uptime_kuma_port }}"
 
 
 def test_compose_template_publishes_the_expected_listener_and_data_mount() -> None:

@@ -2,6 +2,20 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+mattermost_site_dir: /opt/mattermost
+mattermost_secret_dir: /etc/lv3/mattermost
+mattermost_compose_file: "{{ mattermost_site_dir }}/docker-compose.yml"
+mattermost_env_file: "{{ compose_runtime_secret_root }}/mattermost/runtime.env"
+mattermost_legacy_env_file: "{{ mattermost_site_dir }}/mattermost.env"
+mattermost_openbao_agent_dir: "{{ mattermost_site_dir }}/openbao"
+mattermost_openbao_agent_image: "{{ openbao_agent_image }}"
+mattermost_openbao_agent_container_name: mattermost-openbao-agent
+mattermost_openbao_secret_path: services/mattermost/runtime-env
+mattermost_openbao_policy_name: lv3-service-mattermost-runtime
+mattermost_openbao_approle_name: mattermost-runtime
+mattermost_image: mattermost/mattermost-team-edition:release-10.11
+mattermost_local_artifact_dir: "{{ repo_shared_local_root }}/mattermost"
+mattermost_container_name: lv3-mattermost
 mattermost_team_name: lv3
 mattermost_team_display_name: LV3
 mattermost_bootstrap_file: "{{ mattermost_site_dir }}/bootstrap-mattermost.py"

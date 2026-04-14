@@ -84,7 +84,12 @@ def test_main_tasks_generate_keys_render_openbao_stack_and_verify_runtime() -> N
     env_wait_task = next(task for task in tasks if task["name"] == "Wait for the LiveKit runtime env file")
     assert "grep -Eq '^LIVEKIT_KEYS=.+:.+$'" in env_wait_task["ansible.builtin.shell"]
     up_task = next(task for task in tasks if task["name"] == "Converge the LiveKit runtime stack")
-    assert up_task["ansible.builtin.command"]["argv"][-3:] == ["-d", "--remove-orphans", "livekit"]
+    assert up_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert up_task["ansible.builtin.include_role"]["tasks_from"] == "docker_compose_converge"
+    assert up_task["vars"]["common_docker_compose_converge_compose_file"] == "{{ livekit_compose_file }}"
+    assert up_task["vars"]["common_docker_compose_converge_site_dir"] == "{{ livekit_site_dir }}"
+    assert up_task["vars"]["common_docker_compose_converge_service_name"] == "livekit"
+    assert up_task["vars"]["common_docker_compose_converge_force_recreate_entire_stack"] is True
     udp_wait_task = next(task for task in tasks if task["name"] == "Wait for the LiveKit UDP media listener")
     assert (
         "ss -lunH | awk '{print $4}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'"
@@ -98,10 +103,15 @@ def test_verify_tasks_probe_signal_media_and_room_lifecycle() -> None:
     tasks = yaml.safe_load(ROLE_VERIFY.read_text())
     names = [task["name"] for task in tasks]
 
-    assert "Verify the LiveKit signal listener is reachable locally" in names
+    assert "Verify the LiveKit runtime signal port" in names
     assert "Verify the LiveKit TCP media listener is reachable locally" in names
     assert "Verify the LiveKit UDP media listener is present locally" in names
     assert "Verify the LiveKit room lifecycle locally" in names
+    signal_task = next(task for task in tasks if task["name"] == "Verify the LiveKit runtime signal port")
+    assert signal_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert signal_task["ansible.builtin.include_role"]["tasks_from"] == "verify_service_health"
+    assert signal_task["vars"]["common_verify_service_name"] == "livekit"
+    assert signal_task["vars"]["common_verify_port"] == "{{ livekit_signal_port }}"
     udp_listener_task = next(
         task for task in tasks if task["name"] == "Verify the LiveKit UDP media listener is present locally"
     )
