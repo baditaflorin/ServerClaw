@@ -20,15 +20,15 @@ It covers:
 
 Before running the workflow, confirm:
 
-1. the controller has the SSH key at `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519`
-2. `postgres`, `runtime-control`, `monitoring`, and `nginx-edge` are reachable through the Proxmox jump path
+1. the controller has the bootstrap SSH key at `.local/ssh/bootstrap.id_ed25519`
+2. `postgres`, `runtime-control`, `monitoring`, and `nginx` are reachable through the Proxmox jump path
 3. `HETZNER_DNS_API_TOKEN` is available in the shell that runs the converge
 
 ## Entrypoints
 
 - syntax check: `make syntax-check-keycloak`
 - preflight: `make preflight WORKFLOW=converge-keycloak`
-- converge: `HETZNER_DNS_API_TOKEN=... make converge-keycloak`
+- converge: `HETZNER_DNS_API_TOKEN=... make converge-keycloak env=production`
 
 ## Delivered Surfaces
 
@@ -52,13 +52,13 @@ The workflow manages these live surfaces:
 
 After a successful converge, these controller-local files should exist:
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/database-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/bootstrap-admin-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/florin.badita-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/grafana-client-secret.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/open-webui-client-secret.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/lv3-agent-hub-client-secret.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/serverclaw-runtime-client-secret.txt`
+- `.local/keycloak/database-password.txt`
+- `.local/keycloak/bootstrap-admin-password.txt`
+- `.local/keycloak/florin.badita-password.txt`
+- `.local/keycloak/grafana-client-secret.txt`
+- `.local/keycloak/open-webui-client-secret.txt`
+- `.local/keycloak/lv3-agent-hub-client-secret.txt`
+- `.local/keycloak/serverclaw-runtime-client-secret.txt`
 
 Treat the entire `.local/keycloak/` subtree as recovery material and keep it out of git.
 
@@ -67,13 +67,14 @@ Treat the entire `.local/keycloak/` subtree as recovery material and keep it out
 Run these checks after converge:
 
 1. `make syntax-check-keycloak`
-2. `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml runtime-control -m shell -a 'docker compose --file /opt/keycloak/docker-compose.yml ps && sudo ls -l /opt/keycloak/openbao /run/lv3-secrets/keycloak && sudo test ! -e /opt/keycloak/keycloak.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+2. `ansible -i inventory/hosts.yml runtime-control -m shell -a 'docker compose --file /opt/keycloak/docker-compose.yml ps && sudo ls -l /opt/keycloak/openbao /run/lv3-secrets/keycloak && sudo test ! -e /opt/keycloak/keycloak.env' --private-key .local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 3. `curl -s https://sso.example.com/realms/lv3/.well-known/openid-configuration`
-4. `curl -I https://grafana.example.com/login/generic_oauth`
-5. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.example.com/realms/lv3/protocol/openid-connect/token`
-6. `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml runtime-control -m shell -a "docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc 'timeout 15 bash -lc \"exec 3<>/dev/tcp/lv3-mail-stalwart/1587\"'" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
-7. `uv run --with playwright python /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/outline.automation-password.txt`
-8. `curl -s --data "grant_type=client_credentials&client_id=serverclaw-runtime&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/serverclaw-runtime-client-secret.txt)" https://sso.example.com/realms/lv3/protocol/openid-connect/token`
+4. `curl -I -L https://home.example.com/`
+5. `curl -I https://grafana.example.com/login/generic_oauth`
+6. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat .local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.example.com/realms/lv3/protocol/openid-connect/token`
+7. `ansible -i inventory/hosts.yml runtime-control -m shell -a "docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc 'timeout 15 bash -lc \"exec 3<>/dev/tcp/lv3-mail-stalwart/1587\"'" --private-key .local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+8. `uv run --with playwright python scripts/session_logout_verify.py --password-file .local/keycloak/outline.automation-password.txt`
+9. `curl -s --data "grant_type=client_credentials&client_id=serverclaw-runtime&client_secret=$(cat .local/keycloak/serverclaw-runtime-client-secret.txt)" https://sso.example.com/realms/lv3/protocol/openid-connect/token`
 
 ## TOTP Recovery
 
@@ -82,7 +83,7 @@ If an operator can enter the correct password but Keycloak rejects the one-time 
 If the failure persists, remove the stored Keycloak OTP credential and require fresh enrollment on next login:
 
 ```bash
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/operator_manager.py \
+uvx --from pyyaml python scripts/operator_manager.py \
   recover-totp \
   --id florin-badita
 ```
@@ -100,7 +101,7 @@ After the command succeeds, sign in again with the existing password and complet
 If the locally mirrored bootstrap password no longer matches the live account, set a new known password and optionally force rotation at next login:
 
 ```bash
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/operator_manager.py \
+uvx --from pyyaml python scripts/operator_manager.py \
   reset-password \
   --id florin-badita \
   --password 'REPLACE_WITH_NEW_PASSWORD' \
@@ -125,13 +126,14 @@ The validated recovery sequence from the 2026-04-03 Open WebUI rollout was:
 2. use that temporary client only long enough to restore or verify the repo-managed `lv3-bootstrap-admin` password held on the runtime at `/etc/lv3/keycloak/bootstrap-admin-password`
 3. verify the restored bootstrap admin directly against the runtime-local listener at `http://127.0.0.1:18080/realms/master/protocol/openid-connect/token`
 4. delete the temporary emergency client immediately after the bootstrap admin works again
-5. resync `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/bootstrap-admin-password.txt` from `/etc/lv3/keycloak/bootstrap-admin-password` before replaying workflows that reconcile downstream Keycloak clients, including `make converge-open-webui`
+5. resync `.local/keycloak/bootstrap-admin-password.txt` from `/etc/lv3/keycloak/bootstrap-admin-password` before replaying workflows that reconcile downstream Keycloak clients, including `make converge-open-webui`
 
 ## Notes
 
 - Keycloak is the shared SSO broker. It does not replace OpenBao for secrets or `step-ca` for SSH and internal TLS.
 - Grafana is the first repo-managed consumer of the shared OIDC flow in this rollout. Future app integrations should reuse the same realm and identity taxonomy instead of creating app-local password stores.
 - The shared browser-session logout contract depends on the edge publication and app-local consumers being current as well as Keycloak. After changing post-logout redirect URIs here, replay `make configure-edge-publication` and any affected service playbooks before relying on end-to-end logout verification.
+- Latest-main verification for ADR 0382 proved that the shared edge may keep the active SAN certificate under a suffixed Let’s Encrypt lineage such as `lv3-edge-0001`. If `home.example.com` or `sso.example.com` falls back to the wrong certificate after a converge, replay the governed Keycloak apply and inspect the rendered `ssl_certificate` path on `nginx` before changing any Keycloak realm settings.
 - The shared edge and Grafana flows now complete Keycloak logout without an interactive confirmation page because the shared proxy logout path can provide `id_token_hint`. Outline is the current declared gap: its app-local logout reaches the Keycloak confirmation page and then returns through `https://ops.example.com/.well-known/lv3/session/proxy-logout`. Treat that confirmation page as expected current behavior until Outline can provide an `id_token_hint`.
 - The Keycloak master bootstrap admin remains a break-glass recovery identity and should not become a routine human login.
 - After the runtime-control live apply completes, the repo-managed Keycloak runtime and its controller-local mirrors are expected on `runtime-control`. If downstream client reconciliation fails after a Keycloak recovery, check the controller-local bootstrap password mirror first instead of hand-creating replacement client secrets.

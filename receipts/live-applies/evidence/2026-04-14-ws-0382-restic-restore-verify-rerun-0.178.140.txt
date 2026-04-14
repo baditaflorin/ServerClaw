@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "target": "docker-runtime",
+  "command": "sudo /bin/bash -lc 'set -euo pipefail\nscript_path=/srv/platform_server/scripts/restic_config_backup.py\nfallback_script_path=/opt/api-gateway/service/scripts/restic_config_backup.py\ncatalog_path=/srv/platform_server/config/restic-file-backup-catalog.json\nfallback_catalog_path=/etc/lv3/restic-config-backup/restic-file-backup-catalog.json\n\nif [ ! -f \"$script_path\" ] && [ -f \"$fallback_script_path\" ]; then\n  script_path=\"$fallback_script_path\"\nfi\nif [ ! -f \"$script_path\" ]; then\n  echo \"restic_config_backup.py is missing from both $script_path and $fallback_script_path\" >&2\n  exit 2\nfi\nif [ ! -f \"$catalog_path\" ] && [ -f \"$fallback_catalog_path\" ]; then\n  catalog_path=\"$fallback_catalog_path\"\nfi\nif [ ! -f \"$catalog_path\" ]; then\n  echo \"restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path\" >&2\n  exit 2\nfi\nexport PYTHONPATH=\"/srv/platform_server:${PYTHONPATH:-}\"\nexec python3 \"$script_path\" --repo-root /srv/platform_server --catalog \"$catalog_path\" --backup-receipts-dir /srv/platform_server/receipts/restic-backups --latest-snapshot-receipt /srv/platform_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/platform_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode restore-verify --triggered-by ws-0382-post-verify-restore-rerun --print-report-json'",
+  "returncode": 0,
+  "stdout": "{\n  \"status\": \"ok\",\n  \"mode\": \"restore-verify\",\n  \"result\": \"pass\",\n  \"receipt_path\": \"receipts/restic-restore-verifications/20260414T085430Z.json\",\n  \"report\": {\n    \"schema_version\": \"1.0.0\",\n    \"receipt_id\": \"restic-restore-verify-20260414T085430Z\",\n    \"recorded_at\": \"2026-04-14T08:54:30Z\",\n    \"recorded_on\": \"2026-04-14\",\n    \"recorded_by\": \"codex\",\n    \"restored_at\": \"2026-04-14T08:54:30Z\",\n    \"result\": \"pass\",\n    \"source_id\": \"receipts\",\n    \"snapshot_id\": \"99e58d2809f40c11c73bf065adb0cabdc553eaea2788859564555f5b2e0f29c7\",\n    \"snapshot_recorded_at\": \"2026-04-14T08:47:41Z\",\n    \"restore_path\": \"/var/lib/lv3/restic-config-backup/restore-verification/20260414T085430Z/restore/srv/proxmox_florin_server/receipts\",\n    \"restored_file_count\": 4642,\n    \"expected_minimum_files\": 1\n  }\n}\nREPORT_JSON={\"status\":\"ok\",\"mode\":\"restore-verify\",\"result\":\"pass\",\"receipt_path\":\"receipts/restic-restore-verifications/20260414T085430Z.json\",\"report\":{\"schema_version\":\"1.0.0\",\"receipt_id\":\"restic-restore-verify-20260414T085430Z\",\"recorded_at\":\"2026-04-14T08:54:30Z\",\"recorded_on\":\"2026-04-14\",\"recorded_by\":\"codex\",\"restored_at\":\"2026-04-14T08:54:30Z\",\"result\":\"pass\",\"source_id\":\"receipts\",\"snapshot_id\":\"99e58d2809f40c11c73bf065adb0cabdc553eaea2788859564555f5b2e0f29c7\",\"snapshot_recorded_at\":\"2026-04-14T08:47:41Z\",\"restore_path\":\"/var/lib/lv3/restic-config-backup/restore-verification/20260414T085430Z/restore/srv/proxmox_florin_server/receipts\",\"restored_file_count\":4642,\"expected_minimum_files\":1}}",
+  "stderr": "",
+  "synced_local_paths": [
+    "receipts/restic-restore-verifications/20260414T085430Z.json"
+  ],
+  "report": {
+    "status": "ok",
+    "mode": "restore-verify",
+    "result": "pass",
+    "receipt_path": "receipts/restic-restore-verifications/20260414T085430Z.json",
+    "report": {
+      "schema_version": "1.0.0",
+      "receipt_id": "restic-restore-verify-20260414T085430Z",
+      "recorded_at": "2026-04-14T08:54:30Z",
+      "recorded_on": "2026-04-14",
+      "recorded_by": "codex",
+      "restored_at": "2026-04-14T08:54:30Z",
+      "result": "pass",
+      "source_id": "receipts",
+      "snapshot_id": "99e58d2809f40c11c73bf065adb0cabdc553eaea2788859564555f5b2e0f29c7",
+      "snapshot_recorded_at": "2026-04-14T08:47:41Z",
+      "restore_path": "/var/lib/lv3/restic-config-backup/restore-verification/20260414T085430Z/restore/srv/proxmox_florin_server/receipts",
+      "restored_file_count": 4642,
+      "expected_minimum_files": 1
+    }
+  },
+  "summary": null
+}

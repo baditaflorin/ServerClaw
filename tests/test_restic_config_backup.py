@@ -229,6 +229,59 @@ def test_summarize_latest_snapshots_clamps_negative_interval_age(tmp_path: Path)
     assert receipt["sources"][0]["reasons"][0].startswith("Latest snapshot is 0 minutes old")
 
 
+def test_run_restore_verification_resolves_snapshot_paths_from_legacy_repo_root(tmp_path: Path) -> None:
+    receipts_source = restic_backup.Source(
+        "receipts",
+        "receipts",
+        (Path("/srv/platform_server/receipts"),),
+        360,
+        "interval",
+        "every_6_hours",
+        {"keep_daily": 90},
+        False,
+        False,
+        {"path": "receipts", "expected_minimum_files": 1},
+    )
+    snapshot = {
+        "id": "snap-receipts",
+        "time": "2026-04-14T08:47:41Z",
+        "hostname": "docker-runtime",
+        "paths": ["/srv/proxmox_florin_server/receipts"],
+        "tags": ["source:receipts", "source-label:receipts"],
+        "summary": {"total_files_processed": 1},
+        "_parsed_time": datetime(2026, 4, 14, 8, 47, 41, tzinfo=UTC),
+    }
+
+    restic_backup.load_restic_snapshots = lambda **kwargs: [snapshot]
+    restic_backup.snapshot_for_source = lambda source, snapshots: snapshot
+
+    def fake_restic_call(argv, **kwargs):
+        assert argv[0] == "restore"
+        target = Path(argv[argv.index("--target") + 1])
+        restored_dir = target / "srv" / "proxmox_florin_server" / "receipts"
+        restored_dir.mkdir(parents=True, exist_ok=True)
+        (restored_dir / "proof.json").write_text("{}\n", encoding="utf-8")
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    restic_backup.restic_call = fake_restic_call
+
+    receipt, receipt_path = restic_backup.run_restore_verification(
+        sources=[receipts_source],
+        credentials={"restic_password": "pw", "minio_secret_key": "secret", "nats_password": "x"},
+        endpoint="http://10.10.10.20:9000",
+        cache_dir=tmp_path / "cache",
+        repo_root=Path("/srv/platform_server"),
+        restore_dir=tmp_path / "restore-receipts",
+        runtime_state_dir=tmp_path / "runtime-state",
+        catalog={"controller_host": {"minio": {"bucket": "restic-config-backup"}}},
+    )
+
+    assert receipt["result"] == "pass"
+    assert receipt["restored_file_count"] == 1
+    assert receipt["restore_path"].endswith("/restore/srv/proxmox_florin_server/receipts")
+    assert receipt_path.exists()
+
+
 def test_refresh_latest_snapshot_receipt_for_live_apply_updates_cached_entries(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     (repo_root / "config").mkdir(parents=True)

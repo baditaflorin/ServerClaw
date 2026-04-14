@@ -1,0 +1,37 @@
+workstream_id: ws-0382-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-13T21:59:25Z'
+completed_at: '2026-04-14T08:54:30Z'
+applied_by: codex
+repo_version: 0.178.140
+adr: 0382
+summary: Replay the latest origin/main Keycloak live apply, verify the shared
+  logout flow end to end, and prove the governed restic backup plus restore
+  verification path from the isolated worktree.
+targets:
+- target: runtime-control
+  role: keycloak
+- target: nginx
+  role: nginx_edge_publication
+- target: docker-runtime
+  role: restic-config-backup
+errors: []
+notes:
+- >-
+  Latest verified base: origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4 with
+  repo VERSION 0.178.140 and integrated platform VERSION 0.178.138.
+- >-
+  Governed keycloak production replay completed successfully and restored the
+  shared-edge OIDC path after the TLS lineage fallback fix.
+- >-
+  Session logout verification passed for both the shared edge and Outline;
+  evidence: receipts/live-applies/evidence/2026-04-14-ws-0382-session-logout-verify-0.178.140.txt.
+- >-
+  Restic backup trigger passed and refreshed
+  receipts/restic-backups/20260414T084809Z.json plus
+  receipts/restic-snapshots-latest.json.
+- >-
+  Restore verification first exposed a false-negative path-resolution bug for
+  historical /srv/proxmox_florin_server snapshots, then passed after the fix and
+  synced receipts/restic-restore-verifications/20260414T085430Z.json.

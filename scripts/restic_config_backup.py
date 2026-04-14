@@ -649,6 +649,57 @@ def snapshot_for_source(source: Source, snapshots: list[dict[str, Any]]) -> dict
     return max(candidates, key=lambda item: item["_parsed_time"])
 
 
+def restored_path_candidates(
+    *,
+    restore_target: Path,
+    repo_root: Path,
+    restore_relative_path: str,
+    snapshot: dict[str, Any],
+) -> list[Path]:
+    configured_path = Path(str(restore_relative_path))
+    candidates: list[Path] = []
+
+    def add_candidate(path: Path) -> None:
+        if path not in candidates:
+            candidates.append(path)
+
+    if configured_path.is_absolute():
+        add_candidate(restore_target / configured_path.relative_to(configured_path.anchor))
+    else:
+        add_candidate(restore_target / repo_root.relative_to(repo_root.anchor) / configured_path)
+        add_candidate(restore_target / configured_path)
+
+    for raw_path in snapshot.get("paths") or []:
+        snapshot_path = Path(str(raw_path))
+        if snapshot_path.is_absolute():
+            add_candidate(restore_target / snapshot_path.relative_to(snapshot_path.anchor))
+        else:
+            add_candidate(restore_target / snapshot_path)
+
+    return candidates
+
+
+def resolve_restored_path(
+    *,
+    restore_target: Path,
+    repo_root: Path,
+    restore_relative_path: str,
+    snapshot: dict[str, Any],
+) -> tuple[Path, int]:
+    candidates = restored_path_candidates(
+        restore_target=restore_target,
+        repo_root=repo_root,
+        restore_relative_path=restore_relative_path,
+        snapshot=snapshot,
+    )
+    existing = [(count_files(candidate), candidate) for candidate in candidates if candidate.exists()]
+    if existing:
+        restored_file_count, resolved_path = max(existing, key=lambda item: item[0])
+        return resolved_path, restored_file_count
+    fallback = candidates[0] if candidates else restore_target / restore_relative_path
+    return fallback, 0
+
+
 def summarize_latest_snapshots(
     *,
     catalog: dict[str, Any],
@@ -1174,14 +1225,13 @@ def run_restore_verification(
         cache_dir=cache_dir,
     )
 
-    expected_path = (
-        restore_target
-        / repo_root.relative_to(repo_root.anchor)
-        / str(receipts_source.restore_verification.get("path", "receipts"))
+    restore_relative_path = str(receipts_source.restore_verification.get("path", "receipts"))
+    expected_path, restored_file_count = resolve_restored_path(
+        restore_target=restore_target,
+        repo_root=repo_root,
+        restore_relative_path=restore_relative_path,
+        snapshot=snapshot,
     )
-    if not expected_path.exists():
-        expected_path = restore_target / str(receipts_source.restore_verification.get("path", "receipts"))
-    restored_file_count = count_files(expected_path)
     expected_minimum_files = int(receipts_source.restore_verification.get("expected_minimum_files") or 1)
     result = "pass" if restored_file_count >= expected_minimum_files else "fail"
 
