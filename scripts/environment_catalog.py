@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import load_json, repo_path
+from validation_toolkit import apply_identity_domain_overlay
 
 
 ENVIRONMENT_TOPOLOGY_PATH = repo_path("config", "environment-topology.json")
@@ -22,7 +23,7 @@ def _ordered_environment_ids(environment_ids: set[str]) -> tuple[str, ...]:
 
 
 def load_environment_topology(path: Path | None = None) -> dict[str, Any]:
-    return load_json(path or ENVIRONMENT_TOPOLOGY_PATH)
+    return apply_identity_domain_overlay(load_json(path or ENVIRONMENT_TOPOLOGY_PATH))
 
 
 def configured_environment_ids(

@@ -23,7 +23,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
 
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 
-from validation_toolkit import require_list, require_mapping, require_str
+from validation_toolkit import apply_identity_domain_overlay, require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from shared_policy_packs import load_shared_policy_packs
@@ -56,7 +56,7 @@ def unique_string_list(value: Any, path: str) -> list[str]:
 
 
 def load_environment_topology() -> dict[str, Any]:
-    return load_json(ENVIRONMENT_TOPOLOGY_PATH)
+    return apply_identity_domain_overlay(load_json(ENVIRONMENT_TOPOLOGY_PATH))
 
 
 def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, Any]) -> dict[str, dict[str, Any]]:

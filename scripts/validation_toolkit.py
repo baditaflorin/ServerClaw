@@ -11,6 +11,7 @@ Usage:
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 
@@ -117,3 +118,55 @@ def optional(value: Any, path: str, validator, **kwargs):
     if value is None:
         return None
     return validator(value, path, **kwargs)
+
+# ---------------------------------------------------------------------------
+# Identity variable resolution (ADR 0385 + ws-0370 shared-local overlay fix)
+# ---------------------------------------------------------------------------
+
+
+def _find_identity_path() -> Path:
+    """Locate the highest-precedence identity.yml for this checkout."""
+    repo_root = Path(__file__).resolve().parents[1]
+    shared_root = repo_root.parent.parent if repo_root.parent.name == ".worktrees" else repo_root
+
+    local_identity = shared_root / ".local" / "identity.yml"
+    if local_identity.exists():
+        return local_identity
+
+    worktree_identity = repo_root / ".local" / "identity.yml"
+    if worktree_identity.exists():
+        return worktree_identity
+
+    return repo_root / "inventory" / "group_vars" / "all" / "identity.yml"
+
+
+def load_identity_vars() -> dict[str, str]:
+    """Load simple scalar identity variables from the active identity overlay."""
+    import yaml
+
+    path = _find_identity_path()
+    if not path.exists():
+        return {}
+    with path.open() as handle:
+        data = yaml.safe_load(handle) or {}
+    return {key: value for key, value in data.items() if isinstance(value, str) and "{{" not in value}
+
+
+def replace_example_domain(value: Any, platform_domain: str) -> Any:
+    """Recursively replace example.com with the real platform domain."""
+    if isinstance(value, str):
+        return value.replace("example.com", platform_domain)
+    if isinstance(value, list):
+        return [replace_example_domain(item, platform_domain) for item in value]
+    if isinstance(value, dict):
+        return {key: replace_example_domain(val, platform_domain) for key, val in value.items()}
+    return value
+
+
+def apply_identity_domain_overlay(payload: Any, *, platform_domain: str | None = None) -> Any:
+    """Apply example.com -> platform_domain replacement when a real identity overlay is present."""
+    if platform_domain is None:
+        platform_domain = load_identity_vars().get("platform_domain")
+    if not platform_domain or platform_domain == "example.com":
+        return payload
+    return replace_example_domain(payload, platform_domain)

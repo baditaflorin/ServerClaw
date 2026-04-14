@@ -7,7 +7,9 @@
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../../../../config/subdomain-catalog.json"
     inventory_defaults_path: "{{ playbook_dir }}/../../../../../inventory/group_vars/all/identity.yml"
+    repo_root_path: "{{ playbook_dir }}/../../../../../"
     subdomain_fqdn: "{{ subdomain_fqdn | default(lookup('ansible.builtin.env', 'FQDN'), true) }}"
+    _dns_public_ip_placeholder: "203.0.113.1"
 
   tasks:
     - name: Assert a target FQDN was provided
@@ -20,10 +22,44 @@
       ansible.builtin.include_vars:
         file: "{{ inventory_defaults_path }}"
 
+    - name: Resolve the shared repository root for controller-local overlays
+      ansible.builtin.set_fact:
+        controller_repo_shared_root: >-
+          {{
+            (
+              lookup(
+                'ansible.builtin.pipe',
+                'git -C ' ~ (repo_root_path | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+              )
+              | dirname
+            )
+          }}
+
+    - name: Resolve the local identity overlay path
+      ansible.builtin.set_fact:
+        controller_local_identity_path: "{{ controller_repo_shared_root }}/.local/identity.yml"
+
+    - name: Load local identity overlay
+      ansible.builtin.include_vars:
+        file: "{{ controller_local_identity_path }}"
+      when: controller_local_identity_path is file
+      no_log: true
+
     - name: Load the subdomain catalog
       ansible.builtin.include_vars:
         file: "{{ subdomain_catalog_path }}"
         name: subdomain_catalog
+
+    - name: Resolve the generic catalog FQDN for the requested hostname
+      ansible.builtin.set_fact:
+        requested_subdomain_catalog_fqdn: >-
+          {{
+            (
+              subdomain_fqdn.rsplit('.' ~ platform_domain, 1)[0] ~ '.example.com'
+            )
+            if subdomain_fqdn.endswith('.' ~ platform_domain)
+            else subdomain_fqdn
+          }}
 
     - name: Select the requested subdomain entry
       ansible.builtin.set_fact:
@@ -31,18 +67,31 @@
           {{
             (
               subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | selectattr('fqdn', 'equalto', requested_subdomain_catalog_fqdn)
               | list
               | first
             ) | default({})
           }}
+
+    - name: Derive the runtime subdomain FQDN from the generic catalog entry
+      ansible.builtin.set_fact:
+        selected_subdomain_runtime_fqdn: >-
+          {{
+            (
+              selected_subdomain.fqdn.rsplit('.example.com', 1)[0] ~ '.' ~ platform_domain
+            )
+            if selected_subdomain.fqdn.endswith('.example.com')
+            else selected_subdomain.fqdn
+          }}
+      when: selected_subdomain != {}
 
     - name: Assert the subdomain exists and is provisionable
       ansible.builtin.assert:
         that:
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+          - selected_subdomain_runtime_fqdn == subdomain_fqdn
+          - selected_subdomain_runtime_fqdn.endswith(hetzner_dns_zone_name)
         fail_msg: >-
           The requested FQDN must exist in config/subdomain-catalog.json with status active or planned
           and stay inside the managed Hetzner DNS zone.
@@ -52,10 +101,19 @@
         selected_subdomain_record_name: >-
           {{
             '@'
-            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            if selected_subdomain_runtime_fqdn == hetzner_dns_zone_name
             else (
-              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+              selected_subdomain_runtime_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
             )
+          }}
+
+    - name: Resolve DNS target
+      ansible.builtin.set_fact:
+        resolved_dns_target: >-
+          {{
+            management_ipv4
+            if selected_subdomain.target == _dns_public_ip_placeholder
+            else selected_subdomain.target
           }}
 
     - name: Converge the Hetzner DNS record for the selected subdomain
@@ -65,5 +123,5 @@
         hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
         hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
         hetzner_dns_record_type: A
-        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_value: "{{ resolved_dns_target }}"
         hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"

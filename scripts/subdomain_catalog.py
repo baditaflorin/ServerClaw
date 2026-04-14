@@ -25,6 +25,7 @@ from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
 from identity_yaml import load_yaml_with_identity
 from validation_toolkit import (
+    apply_identity_domain_overlay,
     require_bool,
     require_list,
     require_mapping,
@@ -150,7 +151,8 @@ def expected_dns_records_for_entry(entry: dict[str, Any], path: str) -> list[dic
 
 
 def load_subdomain_catalog() -> dict[str, Any]:
-    return load_json(SUBDOMAIN_CATALOG_PATH)
+    catalog = load_json(SUBDOMAIN_CATALOG_PATH)
+    return apply_identity_domain_overlay(catalog)
 
 
 def load_host_vars() -> dict[str, Any]:

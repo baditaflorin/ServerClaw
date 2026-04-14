@@ -203,7 +203,7 @@
       - --force-recreate
       - --remove-orphans
       - --no-deps
-      - "{{ common_docker_compose_converge_force_recreate_service | default(common_docker_compose_converge_service_name) }}"
+      - "{{ common_docker_compose_converge_force_recreate_service | default(common_docker_compose_converge_service_name, true) }}"
   args:
     chdir: "{{ common_docker_compose_converge_site_dir }}"
   register: common_dcc_force_up

@@ -5,8 +5,19 @@ from typing import Any
 
 
 def _find_identity_path() -> Path:
-    """Locate inventory/group_vars/all/identity.yml relative to this script."""
-    return Path(__file__).resolve().parents[1] / "inventory" / "group_vars" / "all" / "identity.yml"
+    """Locate the highest-precedence identity.yml for this checkout."""
+    repo_root = Path(__file__).resolve().parents[1]
+    shared_root = repo_root.parent.parent if repo_root.parent.name == ".worktrees" else repo_root
+
+    local_identity = shared_root / ".local" / "identity.yml"
+    if local_identity.exists():
+        return local_identity
+
+    worktree_identity = repo_root / ".local" / "identity.yml"
+    if worktree_identity.exists():
+        return worktree_identity
+
+    return repo_root / "inventory" / "group_vars" / "all" / "identity.yml"
 
 
 def load_identity_vars() -> dict[str, str]:

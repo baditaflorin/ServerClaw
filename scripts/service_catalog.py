@@ -22,7 +22,14 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
 
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
 
-from validation_toolkit import require_bool, require_int, require_list, require_mapping, require_str
+from validation_toolkit import (
+    apply_identity_domain_overlay,
+    require_bool,
+    require_int,
+    require_list,
+    require_mapping,
+    require_str,
+)
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_catalog import configured_environment_ids
@@ -236,7 +243,7 @@ def validate_degradation_modes(value: Any, path: str) -> list[dict[str, Any]]:
 
 
 def load_service_catalog() -> dict[str, Any]:
-    return load_json(SERVICE_CATALOG_PATH)
+    return apply_identity_domain_overlay(load_json(SERVICE_CATALOG_PATH))
 
 
 def health_probe_service_ids() -> set[str]:

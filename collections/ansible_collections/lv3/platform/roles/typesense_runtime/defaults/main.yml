@@ -5,9 +5,22 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0077, ADR 0165, and ADR 0277.
 ---
-# NOTE: Conventional variables (site_dir, image, compose_file, env_file,
-# openbao_*, container_name, internal_port, local_artifact_dir) are derived
-# from platform_service_registry — ADR 0373.
+# NOTE: Ansible validates role argument specs before tasks run, so the
+# conventional defaults that ADR 0373 normally derives at task time must also
+# exist here for service-wrapper entrypoints like `live-apply-service`.
+typesense_site_dir: /opt/typesense
+typesense_compose_file: "{{ typesense_site_dir }}/docker-compose.yml"
+typesense_env_file: "{{ compose_runtime_secret_root }}/typesense/runtime.env"
+typesense_legacy_env_file: "{{ typesense_site_dir }}/typesense.env"
+typesense_openbao_agent_dir: "{{ typesense_site_dir }}/openbao"
+typesense_openbao_agent_image: "{{ openbao_agent_image }}"
+typesense_openbao_agent_container_name: typesense-openbao-agent
+typesense_openbao_secret_path: services/typesense/runtime-env
+typesense_openbao_policy_name: lv3-service-typesense-runtime
+typesense_openbao_approle_name: typesense-runtime
+typesense_image: "{{ container_image_catalog.images.typesense_runtime.ref }}"
+typesense_container_name: typesense
+typesense_local_artifact_dir: "{{ repo_shared_local_root }}/typesense"
 typesense_port: "{{ platform_service_topology | platform_service_port('typesense', 'internal') }}"
 typesense_host_proxy_port: "{{ platform_service_topology | platform_service_port('typesense', 'controller') }}"
 typesense_internal_base_url: "{{ platform_service_topology | platform_service_url('typesense', 'internal') }}"
