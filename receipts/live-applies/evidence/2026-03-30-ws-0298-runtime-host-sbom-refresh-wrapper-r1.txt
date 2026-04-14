@@ -1,7 +1,7 @@
 docker-runtime-lv3 | CHANGED | rc=0 >>
 {
   "status": "error",
-  "command": "uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json",
+  "command": "uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json",
   "returncode": 2,
   "stdout": "",
   "stderr": "SBOM refresh error: time=\"2026-03-30T17:36:56Z\" level=error msg=\"error waiting for container: unexpected EOF\""

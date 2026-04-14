@@ -13,13 +13,13 @@
   "integrated_platform_version": "0.130.77",
   "workflow_id": "adr-0306-checkov-iac-policy-scan-mainline-live-apply",
   "adr": "0306",
-  "summary": "Integrated ADR 0306 onto latest `origin/main` baseline `2411a7cd428e0eba17168aa5eed66f04c4ed48dd` as repository version `0.177.119` while preserving the already-current platform baseline `0.130.77`. The earlier exact-main private Gitea proof derived from source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` remains the first hosted verification boundary on platform version `0.130.75`; this final integration cut adds release-manager evidence, rebased build-server validation, detached exact-head `remote-validate` success, and a bounded `pre-push-gate` caveat tied to transient `registry.lv3.org/check-runner/infra:2026.03.23` `502 Bad Gateway` responses rather than an ADR 0306 regression.",
+  "summary": "Integrated ADR 0306 onto latest `origin/main` baseline `2411a7cd428e0eba17168aa5eed66f04c4ed48dd` as repository version `0.177.119` while preserving the already-current platform baseline `0.130.77`. The earlier exact-main private Gitea proof derived from source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` remains the first hosted verification boundary on platform version `0.130.75`; this final integration cut adds release-manager evidence, rebased build-server validation, detached exact-head `remote-validate` success, and a bounded `pre-push-gate` caveat tied to transient `registry.example.com/check-runner/infra:2026.03.23` `502 Bad Gateway` responses rather than an ADR 0306 regression.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -36,12 +36,12 @@
     {
       "kind": "service_endpoint",
       "name": "Private Gitea main validate run 179",
-      "address": "http://100.64.0.1:3009/ops/proxmox_florin_server/actions/runs/175"
+      "address": "http://100.64.0.1:3009/ops/platform_server/actions/runs/175"
     },
     {
       "kind": "service_endpoint",
       "name": "Private Gitea main release-bundle run 178",
-      "address": "http://100.64.0.1:3009/ops/proxmox_florin_server/actions/runs/174"
+      "address": "http://100.64.0.1:3009/ops/platform_server/actions/runs/174"
     }
   ],
   "verification": [
@@ -68,7 +68,7 @@
     {
       "check": "Detached exact-head pre-push gate coverage",
       "result": "partial",
-      "observed": "The detached `make pre-push-gate` wrapper was exercised twice. Both replays passed every remote blocking check except `packer-validate` and `tofu-validate`, which hit transient `502 Bad Gateway` pulls for `registry.lv3.org/check-runner/infra:2026.03.23`. The fallback then proved `packer-validate` and `tofu-validate`, but the wrapper stayed non-green because controller-local fallback reran already-green heavy checks under fixed timeouts."
+      "observed": "The detached `make pre-push-gate` wrapper was exercised twice. Both replays passed every remote blocking check except `packer-validate` and `tofu-validate`, which hit transient `502 Bad Gateway` pulls for `registry.example.com/check-runner/infra:2026.03.23`. The fallback then proved `packer-validate` and `tofu-validate`, but the wrapper stayed non-green because controller-local fallback reran already-green heavy checks under fixed timeouts."
     },
     {
       "check": "Detached exact-head direct timeout-victim replays",
@@ -132,7 +132,7 @@
   "notes": [
     "ADR 0306 is now integrated in repository version `0.177.119`, while ADR metadata preserves `Implemented In Platform Version: 0.130.75` as the first live platform version where the control became true.",
     "The detached exact-head `remote-validate` replay passed cleanly after the release cut and re-verified the released `0.177.119` automation surfaces without the branch-only `workstream-surfaces` guard.",
-    "The detached exact-head `pre-push-gate` wrapper remained partial only because `registry.lv3.org/check-runner/infra:2026.03.23` returned transient `502 Bad Gateway` responses and the controller fallback reran already-green heavy checks under fixed timeouts; no ADR 0306 functional regression was found in the direct `ansible-lint` and Trivy `security-scan` replays.",
+    "The detached exact-head `pre-push-gate` wrapper remained partial only because `registry.example.com/check-runner/infra:2026.03.23` returned transient `502 Bad Gateway` responses and the controller fallback reran already-green heavy checks under fixed timeouts; no ADR 0306 functional regression was found in the direct `ansible-lint` and Trivy `security-scan` replays.",
     "A bounded manual cleanup of inactive ADR 0306 build-server session roots was required to recover enough remote scratch capacity for the final replays, and the remote-build-gateway runbook now records the same safety rule."
   ]
 }

@@ -11,12 +11,12 @@
   "platform_version_context": "current production Windmill runtime after the ADR 0269 exact-main replay",
   "workflow_id": "adr-0269-windmill-isolated-checkout-live-apply",
   "adr": "0269",
-  "summary": "Replayed the Windmill production live apply from a branch-scoped controller worktree and alternate guest checkout path so concurrent agents could verify ADR 0269 without clobbering the shared /srv/proxmox_florin_server checkout, then recorded the checkout-hardening changes that made the isolated replay succeed end to end.",
+  "summary": "Replayed the Windmill production live apply from a branch-scoped controller worktree and alternate guest checkout path so concurrent agents could verify ADR 0269 without clobbering the shared /srv/platform_server checkout, then recorded the checkout-hardening changes that made the isolated replay succeed end to end.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,7 +39,7 @@
     {
       "check": "Isolated-checkout governed Windmill live apply",
       "result": "pass",
-      "observed": "make live-apply-service service=windmill env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply -e windmill_worker_repo_checkout_host_path=/srv/proxmox_florin_server-adr-0269-live-apply -e windmill_worker_repo_checkout_container_path=/srv/proxmox_florin_server -e windmill_worker_repo_checkout_compat_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0269-live-apply' passed with docker-runtime-lv3 ok=253 changed=59 failed=0, postgres-lv3 ok=65 changed=1 failed=0, and proxmox_florin ok=37 changed=4 failed=0."
+      "observed": "make live-apply-service service=windmill env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply -e windmill_worker_repo_checkout_host_path=/srv/platform_server-adr-0269-live-apply -e windmill_worker_repo_checkout_container_path=/srv/platform_server -e windmill_worker_repo_checkout_compat_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server-adr-0269-live-apply' passed with docker-runtime-lv3 ok=253 changed=59 failed=0, postgres-lv3 ok=65 changed=1 failed=0, and proxmox-host ok=37 changed=4 failed=0."
     },
     {
       "check": "Seeded Windmill healthcheck and gate-status scripts after isolated replay",
@@ -54,7 +54,7 @@
     {
       "check": "Steady-state mount-source inspection",
       "result": "partial",
-      "observed": "docker inspect windmill-windmill_worker-1 still showed /srv/proxmox_florin_server -> /srv/proxmox_florin_server after the successful replay, so the branch-scoped converge path is verified but the long-lived worker bind mount may still be reclaimed by later concurrent compose renders."
+      "observed": "docker inspect windmill-windmill_worker-1 still showed /srv/platform_server -> /srv/platform_server after the successful replay, so the branch-scoped converge path is verified but the long-lived worker bind mount may still be reclaimed by later concurrent compose renders."
     }
   ],
   "evidence_refs": [
@@ -76,6 +76,6 @@
   "notes": [
     "The first isolated-checkout attempts failed for two branch-specific reasons: the worker checkout archive and prune steps recursed into symlinked sync roots as if they were normal directories, and fresh alternate guest checkout paths did not contain the mutable files that the worker runtime expects to stay writable.",
     "The final hardening changed the worker checkout checksum marker to key off the alternate guest checkout basename, treated sync-root symlinks as symlink entries instead of directory trees, and bootstrapped missing mutable files from the controller worktree or placeholder files before the worker jobs ran.",
-    "Use this receipt together with the exact-main receipt when another agent needs to replay ADR 0269 from a separate worktree without mutating the canonical /srv/proxmox_florin_server checkout."
+    "Use this receipt together with the exact-main receipt when another agent needs to replay ADR 0269 from a separate worktree without mutating the canonical /srv/platform_server checkout."
   ]
 }

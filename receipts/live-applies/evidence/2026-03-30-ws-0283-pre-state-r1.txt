@@ -18,4 +18,4 @@ ops@100.64.0.1: Permission denied (publickey).
 Connection closed by UNKNOWN port 65535
 
 == public analytics ==
-curl: (6) Could not resolve host: analytics.lv3.org
+curl: (6) Could not resolve host: analytics.example.com

@@ -20,18 +20,18 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "nginx.lv3.org",
-      "address": "https://nginx.lv3.org"
+      "name": "nginx.example.com",
+      "address": "https://nginx.example.com"
     },
     {
       "kind": "service_endpoint",
-      "name": "docs.lv3.org",
-      "address": "https://docs.lv3.org"
+      "name": "docs.example.com",
+      "address": "https://docs.example.com"
     },
     {
       "kind": "service_endpoint",
-      "name": "changelog.lv3.org",
-      "address": "https://changelog.lv3.org"
+      "name": "changelog.example.com",
+      "address": "https://changelog.example.com"
     }
   ],
   "verification": [
@@ -58,7 +58,7 @@
     {
       "check": "Public edge verification after replay",
       "result": "pass",
-      "observed": "`curl -I --max-time 20 https://grafana.lv3.org` returned `HTTP/2 302` to `/login`, `curl -I --max-time 20 https://nginx.lv3.org` returned `HTTP/2 200`, and both `https://docs.lv3.org` and `https://changelog.lv3.org` returned `HTTP/2 302` to the expected `/oauth2/sign_in` entrypoint with the shared `x-robots-tag: noindex, nofollow` headers intact."
+      "observed": "`curl -I --max-time 20 https://grafana.example.com` returned `HTTP/2 302` to `/login`, `curl -I --max-time 20 https://nginx.example.com` returned `HTTP/2 200`, and both `https://docs.example.com` and `https://changelog.example.com` returned `HTTP/2 302` to the expected `/oauth2/sign_in` entrypoint with the shared `x-robots-tag: noindex, nofollow` headers intact."
     }
   ],
   "evidence_refs": [

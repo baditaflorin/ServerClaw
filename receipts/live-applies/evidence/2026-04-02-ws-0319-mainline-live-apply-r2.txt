@@ -3,18 +3,18 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/.local/packer-plugin-cache
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/build/docs-portal
 Result: PASS (live-apply-service)
 /Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/scripts/interface_contracts.py --check-live-apply "service:runtime-ai-pool"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/scripts/interface_contracts.py --check-live-apply "service:runtime-ai-pool"
 Live apply contract OK: service:runtime-ai-pool -> playbooks/services/runtime-ai-pool.yml
 {
   "ts": "2026-04-02T08:06:19Z",
@@ -30,36 +30,36 @@ Live apply contract OK: service:runtime-ai-pool -> playbooks/services/runtime-ai
   "evidence_ref": "docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md"
 }
 INFO live-apply-service: skipping service-catalog gates for non-catalog playbook 'runtime-ai-pool'
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=79d6d08eb9054b04b1b5e3254d00d6c8 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/inventory/hosts.yml --run-id 8d70177edf814b98b5ce70d3d09bd7fb --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/playbooks/services/runtime-ai-pool.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=3753c18f5e5548fd8cb11d27a45d1fb0  -e bypass_promotion=true
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=79d6d08eb9054b04b1b5e3254d00d6c8 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/inventory/hosts.yml --run-id 8d70177edf814b98b5ce70d3d09bd7fb --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/playbooks/services/runtime-ai-pool.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=3753c18f5e5548fd8cb11d27a45d1fb0  -e bypass_promotion=true
 
 PLAY [Ensure the runtime-ai VM is provisioned on the Proxmox host] *************
 
 TASK [Gathering Facts] *********************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:24.242Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:27.664Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:27.664Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:27.671Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:27.693Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:27.693Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:27.701Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:27.733Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:27.733Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Ensure snippets directory exists] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:27.744Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:28.259Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:28.259Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Validate each guest references a declared template] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:28.266Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=runtime-ai-lv3) => {
+ok: [proxmox-host] => (item=runtime-ai-lv3) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -75,7 +75,7 @@ ok: [proxmox_florin] => (item=runtime-ai-lv3) => {
         "placement": {
             "anti_affinity_group": "runtime-ai",
             "co_location_exceptions": [],
-            "failure_domain": "host:proxmox_florin",
+            "failure_domain": "host:proxmox-host",
             "placement_class": "primary"
         },
         "role": "runtime-ai",
@@ -90,314 +90,314 @@ ok: [proxmox_florin] => (item=runtime-ai-lv3) => {
     },
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:28.298Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:28.298Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Build failure-domain live label map] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:28.307Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:28.333Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:28.333Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:28.346Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:29.597Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:29.597Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Check which guest VMs already exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:29.607Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:30.726Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:30.726Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Read current guest configurations] *********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:30.734Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:32.775Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:32.775Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Clone guest VMs from template] *************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:32.783Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=runtime-ai-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:32.812Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=runtime-ai-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:32.812Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Resize guest disks on first clone] *********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:32.819Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=runtime-ai-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:32.845Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=runtime-ai-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:32.845Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:32.855Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:35.308Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:35.308Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Attach additional guest disks when declared] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:35.321Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:35.413Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:35.413Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:35.434Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:36.613Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:36.613Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Start guest VMs] ***************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:36.623Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.685Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.685Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:38.701Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.741Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.741Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validate Proxmox network inputs] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:38.754Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.788Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.788Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validate optional staging bridge inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:38.797Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.833Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:38.833Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure nftables is installed] *************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:38.844Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:42.658Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:42.658Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Persist IPv4 forwarding configuration] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:42.666Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:43.812Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:43.812Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Read the active IPv4 forwarding value] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:43.824Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:44.222Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:44.222Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Apply IPv4 forwarding configuration] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:44.231Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:44.259Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:44.259Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render Proxmox host network interfaces] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:44.273Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:45.414Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:45.414Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render nftables rules for VM egress] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:45.421Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:46.587Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:46.587Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable and start nftables] ****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:46.597Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:47.325Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:47.325Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:47.332Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:48.482Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:48.482Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install Proxmox firewall conntrack service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:48.492Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:49.671Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:49.671Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Reload systemd after conntrack service updates] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:49.683Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:49.747Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:49.747Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:49.758Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:50.325Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:50.325Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Reload nftables rules] ********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:50.376Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.402Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.402Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Apply network changes with ifreload] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:50.412Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.440Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.440Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Wait for SSH after network reload] ********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:50.448Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.470Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.470Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Refresh facts after network changes] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:50.481Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.505Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-04-02T08:06:50.505Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:50.518Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:50.912Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:06:50.912Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Read current guest configurations for firewall enablement] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:06:50.919Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=postgres-replica-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:02.086Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=postgres-replica-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:02.086Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:02.096Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:02.127Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:02.127Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:02.134Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:13.972Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:13.972Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:13.980Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:17.927Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:17.927Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:17.935Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=postgres-replica-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-changed: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:19.392Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=postgres-replica-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+changed: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:19.392Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:19.399Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:20.069Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:20.069Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Compile Proxmox firewall configuration] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:20.079Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:21.368Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:21.368Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:21.375Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:23.004Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:23.004Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:23.012Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:23.438Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:23.438Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:23.446Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:27.315Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:27.315Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Record guests that need restart after firewall activation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:27.323Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:27.400Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:27.400Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Stop guests that need firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:27.412Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-changed: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:28.864Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+changed: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:28.864Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Start guests after firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:28.872Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-changed: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:31.238Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+changed: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:31.238Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:31.251Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-ok: [proxmox_florin] => (item=runtime-ai-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:40.803Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+ok: [proxmox-host] => (item=runtime-ai-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:40.803Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Stop the runtime-ai VM from Proxmox after qm set changes] ****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Stop the runtime-ai VM from Proxmox after qm set changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:40.819Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Stop the runtime-ai VM from Proxmox after qm set changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:42.245Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Stop the runtime-ai VM from Proxmox after qm set changes","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:42.245Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Start the runtime-ai VM from Proxmox after the forced stop] **************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Start the runtime-ai VM from Proxmox after the forced stop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:07:42.262Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Start the runtime-ai VM from Proxmox after the forced stop","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:44.515Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Start the runtime-ai VM from Proxmox after the forced stop","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:07:44.515Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY [Converge the dedicated runtime-ai guest substrate] ***********************
 
@@ -867,44 +867,44 @@ ok: [runtime-ai-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:08:37.962Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [runtime-ai-lv3] => (item=agents.lv3.org)
-changed: [runtime-ai-lv3] => (item=analytics.lv3.org)
-changed: [runtime-ai-lv3] => (item=api.lv3.org)
-changed: [runtime-ai-lv3] => (item=apps.lv3.org)
-changed: [runtime-ai-lv3] => (item=bi.lv3.org)
-changed: [runtime-ai-lv3] => (item=billing.lv3.org)
-changed: [runtime-ai-lv3] => (item=build.lv3.org)
-changed: [runtime-ai-lv3] => (item=chat.lv3.org)
-changed: [runtime-ai-lv3] => (item=ci.lv3.org)
-changed: [runtime-ai-lv3] => (item=cloud.lv3.org)
-changed: [runtime-ai-lv3] => (item=coolify.lv3.org)
-changed: [runtime-ai-lv3] => (item=data.lv3.org)
-changed: [runtime-ai-lv3] => (item=docker.lv3.org)
-changed: [runtime-ai-lv3] => (item=draw.lv3.org)
-changed: [runtime-ai-lv3] => (item=flags.lv3.org)
-changed: [runtime-ai-lv3] => (item=grafana.lv3.org)
-changed: [runtime-ai-lv3] => (item=grist.lv3.org)
-changed: [runtime-ai-lv3] => (item=headscale.lv3.org)
-changed: [runtime-ai-lv3] => (item=home.lv3.org)
-changed: [runtime-ai-lv3] => (item=langfuse.lv3.org)
-changed: [runtime-ai-lv3] => (item=livekit.lv3.org)
-changed: [runtime-ai-lv3] => (item=logs.lv3.org)
-changed: [runtime-ai-lv3] => (item=mail.lv3.org)
-changed: [runtime-ai-lv3] => (item=matrix.lv3.org)
-changed: [runtime-ai-lv3] => (item=minio.lv3.org)
-changed: [runtime-ai-lv3] => (item=n8n.lv3.org)
-changed: [runtime-ai-lv3] => (item=nginx.lv3.org)
-changed: [runtime-ai-lv3] => (item=notebooks.lv3.org)
-changed: [runtime-ai-lv3] => (item=ops.lv3.org)
-changed: [runtime-ai-lv3] => (item=paperless.lv3.org)
-changed: [runtime-ai-lv3] => (item=proxmox.lv3.org)
-changed: [runtime-ai-lv3] => (item=realtime.lv3.org)
-changed: [runtime-ai-lv3] => (item=registry.lv3.org)
-changed: [runtime-ai-lv3] => (item=sso.lv3.org)
-changed: [runtime-ai-lv3] => (item=status.lv3.org)
-changed: [runtime-ai-lv3] => (item=tasks.lv3.org)
-changed: [runtime-ai-lv3] => (item=uptime.lv3.org)
-changed: [runtime-ai-lv3] => (item=wiki.lv3.org)
+changed: [runtime-ai-lv3] => (item=agents.example.com)
+changed: [runtime-ai-lv3] => (item=analytics.example.com)
+changed: [runtime-ai-lv3] => (item=api.example.com)
+changed: [runtime-ai-lv3] => (item=apps.example.com)
+changed: [runtime-ai-lv3] => (item=bi.example.com)
+changed: [runtime-ai-lv3] => (item=billing.example.com)
+changed: [runtime-ai-lv3] => (item=build.example.com)
+changed: [runtime-ai-lv3] => (item=chat.example.com)
+changed: [runtime-ai-lv3] => (item=ci.example.com)
+changed: [runtime-ai-lv3] => (item=cloud.example.com)
+changed: [runtime-ai-lv3] => (item=coolify.example.com)
+changed: [runtime-ai-lv3] => (item=data.example.com)
+changed: [runtime-ai-lv3] => (item=docker.example.com)
+changed: [runtime-ai-lv3] => (item=draw.example.com)
+changed: [runtime-ai-lv3] => (item=flags.example.com)
+changed: [runtime-ai-lv3] => (item=grafana.example.com)
+changed: [runtime-ai-lv3] => (item=grist.example.com)
+changed: [runtime-ai-lv3] => (item=headscale.example.com)
+changed: [runtime-ai-lv3] => (item=home.example.com)
+changed: [runtime-ai-lv3] => (item=langfuse.example.com)
+changed: [runtime-ai-lv3] => (item=livekit.example.com)
+changed: [runtime-ai-lv3] => (item=logs.example.com)
+changed: [runtime-ai-lv3] => (item=mail.example.com)
+changed: [runtime-ai-lv3] => (item=matrix.example.com)
+changed: [runtime-ai-lv3] => (item=minio.example.com)
+changed: [runtime-ai-lv3] => (item=n8n.example.com)
+changed: [runtime-ai-lv3] => (item=nginx.example.com)
+changed: [runtime-ai-lv3] => (item=notebooks.example.com)
+changed: [runtime-ai-lv3] => (item=ops.example.com)
+changed: [runtime-ai-lv3] => (item=paperless.example.com)
+changed: [runtime-ai-lv3] => (item=proxmox.example.com)
+changed: [runtime-ai-lv3] => (item=realtime.example.com)
+changed: [runtime-ai-lv3] => (item=registry.example.com)
+changed: [runtime-ai-lv3] => (item=sso.example.com)
+changed: [runtime-ai-lv3] => (item=status.example.com)
+changed: [runtime-ai-lv3] => (item=tasks.example.com)
+changed: [runtime-ai-lv3] => (item=uptime.example.com)
+changed: [runtime-ai-lv3] => (item=wiki.example.com)
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"runtime-ai-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:08:58.406Z","vm":"runtime-ai-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Check whether the current Docker daemon config exists] ***
@@ -2140,44 +2140,44 @@ ok: [runtime-ai-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:10:55.898Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [runtime-ai-lv3] => (item=agents.lv3.org)
-ok: [runtime-ai-lv3] => (item=analytics.lv3.org)
-ok: [runtime-ai-lv3] => (item=api.lv3.org)
-ok: [runtime-ai-lv3] => (item=apps.lv3.org)
-ok: [runtime-ai-lv3] => (item=bi.lv3.org)
-ok: [runtime-ai-lv3] => (item=billing.lv3.org)
-ok: [runtime-ai-lv3] => (item=build.lv3.org)
-ok: [runtime-ai-lv3] => (item=chat.lv3.org)
-ok: [runtime-ai-lv3] => (item=ci.lv3.org)
-ok: [runtime-ai-lv3] => (item=cloud.lv3.org)
-ok: [runtime-ai-lv3] => (item=coolify.lv3.org)
-ok: [runtime-ai-lv3] => (item=data.lv3.org)
-ok: [runtime-ai-lv3] => (item=docker.lv3.org)
-ok: [runtime-ai-lv3] => (item=draw.lv3.org)
-ok: [runtime-ai-lv3] => (item=flags.lv3.org)
-ok: [runtime-ai-lv3] => (item=grafana.lv3.org)
-ok: [runtime-ai-lv3] => (item=grist.lv3.org)
-ok: [runtime-ai-lv3] => (item=headscale.lv3.org)
-ok: [runtime-ai-lv3] => (item=home.lv3.org)
-ok: [runtime-ai-lv3] => (item=langfuse.lv3.org)
-ok: [runtime-ai-lv3] => (item=livekit.lv3.org)
-ok: [runtime-ai-lv3] => (item=logs.lv3.org)
-ok: [runtime-ai-lv3] => (item=mail.lv3.org)
-ok: [runtime-ai-lv3] => (item=matrix.lv3.org)
-ok: [runtime-ai-lv3] => (item=minio.lv3.org)
-ok: [runtime-ai-lv3] => (item=n8n.lv3.org)
-ok: [runtime-ai-lv3] => (item=nginx.lv3.org)
-ok: [runtime-ai-lv3] => (item=notebooks.lv3.org)
-ok: [runtime-ai-lv3] => (item=ops.lv3.org)
-ok: [runtime-ai-lv3] => (item=paperless.lv3.org)
-ok: [runtime-ai-lv3] => (item=proxmox.lv3.org)
-ok: [runtime-ai-lv3] => (item=realtime.lv3.org)
-ok: [runtime-ai-lv3] => (item=registry.lv3.org)
-ok: [runtime-ai-lv3] => (item=sso.lv3.org)
-ok: [runtime-ai-lv3] => (item=status.lv3.org)
-ok: [runtime-ai-lv3] => (item=tasks.lv3.org)
-ok: [runtime-ai-lv3] => (item=uptime.lv3.org)
-ok: [runtime-ai-lv3] => (item=wiki.lv3.org)
+ok: [runtime-ai-lv3] => (item=agents.example.com)
+ok: [runtime-ai-lv3] => (item=analytics.example.com)
+ok: [runtime-ai-lv3] => (item=api.example.com)
+ok: [runtime-ai-lv3] => (item=apps.example.com)
+ok: [runtime-ai-lv3] => (item=bi.example.com)
+ok: [runtime-ai-lv3] => (item=billing.example.com)
+ok: [runtime-ai-lv3] => (item=build.example.com)
+ok: [runtime-ai-lv3] => (item=chat.example.com)
+ok: [runtime-ai-lv3] => (item=ci.example.com)
+ok: [runtime-ai-lv3] => (item=cloud.example.com)
+ok: [runtime-ai-lv3] => (item=coolify.example.com)
+ok: [runtime-ai-lv3] => (item=data.example.com)
+ok: [runtime-ai-lv3] => (item=docker.example.com)
+ok: [runtime-ai-lv3] => (item=draw.example.com)
+ok: [runtime-ai-lv3] => (item=flags.example.com)
+ok: [runtime-ai-lv3] => (item=grafana.example.com)
+ok: [runtime-ai-lv3] => (item=grist.example.com)
+ok: [runtime-ai-lv3] => (item=headscale.example.com)
+ok: [runtime-ai-lv3] => (item=home.example.com)
+ok: [runtime-ai-lv3] => (item=langfuse.example.com)
+ok: [runtime-ai-lv3] => (item=livekit.example.com)
+ok: [runtime-ai-lv3] => (item=logs.example.com)
+ok: [runtime-ai-lv3] => (item=mail.example.com)
+ok: [runtime-ai-lv3] => (item=matrix.example.com)
+ok: [runtime-ai-lv3] => (item=minio.example.com)
+ok: [runtime-ai-lv3] => (item=n8n.example.com)
+ok: [runtime-ai-lv3] => (item=nginx.example.com)
+ok: [runtime-ai-lv3] => (item=notebooks.example.com)
+ok: [runtime-ai-lv3] => (item=ops.example.com)
+ok: [runtime-ai-lv3] => (item=paperless.example.com)
+ok: [runtime-ai-lv3] => (item=proxmox.example.com)
+ok: [runtime-ai-lv3] => (item=realtime.example.com)
+ok: [runtime-ai-lv3] => (item=registry.example.com)
+ok: [runtime-ai-lv3] => (item=sso.example.com)
+ok: [runtime-ai-lv3] => (item=status.example.com)
+ok: [runtime-ai-lv3] => (item=tasks.example.com)
+ok: [runtime-ai-lv3] => (item=uptime.example.com)
+ok: [runtime-ai-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"runtime-ai-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:11:16.285Z","vm":"runtime-ai-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Check whether the current Docker daemon config exists] ***
@@ -2977,7 +2977,7 @@ ok: [docker-runtime-lv3] => (item=runtime_assurance.py)
 ok: [docker-runtime-lv3] => (item=api_gateway/__init__.py)
 changed: [docker-runtime-lv3] => (item=api_gateway/main.py)
 ok: [docker-runtime-lv3] => (item=requirements.txt)
-changed: [docker-runtime-lv3] => (item=inventory/host_vars/proxmox_florin.yml)
+changed: [docker-runtime-lv3] => (item=inventory/host_vars/proxmox-host.yml)
 changed: [docker-runtime-lv3] => (item=versions/stack.yaml)
 changed: [docker-runtime-lv3] => (item=workstreams.yaml)
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.api_gateway_runtime : Sync the API gateway application sources","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:13:32.690Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
@@ -2985,29 +2985,29 @@ changed: [docker-runtime-lv3] => (item=workstreams.yaml)
 TASK [lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:13:32.710Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-02T08:13:32.769Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=gitea workflow tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ansible collection tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=inventory tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=migrations tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=molecule tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=packer tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=platform package for gateway graph support)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=playbooks tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared search fabric package for gateway search routes)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared scripts tree required by packaged platform modules)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared repo config tree required by packaged platform modules)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo documentation tree required by the local search fabric)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo receipts tree required by the local search fabric)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=requirements tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=roles tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tests tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tofu tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=windmill tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=Gitea workflow tree required by governed registry implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw config tree required by governed skill-pack resolution)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw skill-pack resolver script required by governed registry implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw use-case module required by governed registry implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw runbook required by governed registry implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=gitea workflow tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ansible collection tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=inventory tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=migrations tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=molecule tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=packer tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=platform package for gateway graph support)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=playbooks tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared search fabric package for gateway search routes)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared scripts tree required by packaged platform modules)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared repo config tree required by packaged platform modules)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo documentation tree required by the local search fabric)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo receipts tree required by the local search fabric)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=requirements tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=roles tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tests tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tofu tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=windmill tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=Gitea workflow tree required by governed registry implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw config tree required by governed skill-pack resolution)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw skill-pack resolver script required by governed registry implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw use-case module required by governed registry implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ServerClaw runbook required by governed registry implementation refs)
 
 TASK [lv3.platform.api_gateway_runtime : Create a local staging archive path for the gitea workflow tree required by packaged workflow implementation refs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.api_gateway_runtime : Create a local staging archive path for the gitea workflow tree required by packaged workflow implementation refs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T08:13:33.137Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -4382,16 +4382,16 @@ ok: [docker-runtime-lv3] => {
 PLAY RECAP *********************************************************************
 docker-runtime-lv3         : ok=269  changed=144  unreachable=0    failed=0    skipped=31   rescued=0    ignored=0
 monitoring-lv3             : ok=38   changed=0    unreachable=0    failed=0    skipped=8    rescued=0    ignored=0
-proxmox_florin             : ok=41   changed=8    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+proxmox-host             : ok=41   changed=8    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
 runtime-ai-lv3             : ok=305  changed=4    unreachable=0    failed=0    skipped=64   rescued=0    ignored=0
 
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by live-apply-service --live-apply-trigger
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0319-main-integration/scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by live-apply-service --live-apply-trigger
 {
   "status": "ok",
   "target": "docker-runtime-lv3",
-  "command": "sudo /bin/bash -lc 'set -euo pipefail\nscript_path=/srv/proxmox_florin_server/scripts/restic_config_backup.py\nfallback_script_path=/opt/api-gateway/service/scripts/restic_config_backup.py\ncatalog_path=/srv/proxmox_florin_server/config/restic-file-backup-catalog.json\nfallback_catalog_path=/etc/lv3/restic-config-backup/restic-file-backup-catalog.json\nif [ ! -f \"$script_path\" ] && [ -f \"$fallback_script_path\" ]; then\n  script_path=\"$fallback_script_path\"\nfi\nif [ ! -f \"$script_path\" ]; then\n  echo \"restic_config_backup.py is missing from both $script_path and $fallback_script_path\" >&2\n  exit 2\nfi\nif [ ! -f \"$catalog_path\" ] && [ -f \"$fallback_catalog_path\" ]; then\n  catalog_path=\"$fallback_catalog_path\"\nfi\nif [ ! -f \"$catalog_path\" ]; then\n  echo \"restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path\" >&2\n  exit 2\nfi\nexec python3 \"$script_path\" --repo-root /srv/proxmox_florin_server --catalog \"$catalog_path\" --backup-receipts-dir /srv/proxmox_florin_server/receipts/restic-backups --latest-snapshot-receipt /srv/proxmox_florin_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/proxmox_florin_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-service --print-report-json --live-apply-trigger'",
+  "command": "sudo /bin/bash -lc 'set -euo pipefail\nscript_path=/srv/platform_server/scripts/restic_config_backup.py\nfallback_script_path=/opt/api-gateway/service/scripts/restic_config_backup.py\ncatalog_path=/srv/platform_server/config/restic-file-backup-catalog.json\nfallback_catalog_path=/etc/lv3/restic-config-backup/restic-file-backup-catalog.json\nif [ ! -f \"$script_path\" ] && [ -f \"$fallback_script_path\" ]; then\n  script_path=\"$fallback_script_path\"\nfi\nif [ ! -f \"$script_path\" ]; then\n  echo \"restic_config_backup.py is missing from both $script_path and $fallback_script_path\" >&2\n  exit 2\nfi\nif [ ! -f \"$catalog_path\" ] && [ -f \"$fallback_catalog_path\" ]; then\n  catalog_path=\"$fallback_catalog_path\"\nfi\nif [ ! -f \"$catalog_path\" ]; then\n  echo \"restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path\" >&2\n  exit 2\nfi\nexec python3 \"$script_path\" --repo-root /srv/platform_server --catalog \"$catalog_path\" --backup-receipts-dir /srv/platform_server/receipts/restic-backups --latest-snapshot-receipt /srv/platform_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/platform_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-service --print-report-json --live-apply-trigger'",
   "returncode": 0,
-  "stdout": "{\n  \"status\": \"ok\",\n  \"mode\": \"backup\",\n  \"summary\": {\n    \"governed_sources\": 5,\n    \"protected\": 4,\n    \"uncovered\": 0,\n    \"inactive\": 1,\n    \"uncovered_sources\": [],\n    \"inactive_sources\": [\n      \"falco_overrides\"\n    ]\n  },\n  \"receipt_path\": \"receipts/restic-backups/20260402T081812Z.json\",\n  \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n  \"report\": {\n    \"schema_version\": \"1.0.0\",\n    \"receipt_id\": \"restic-config-backup-20260402T081812Z\",\n    \"recorded_at\": \"2026-04-02T08:18:12Z\",\n    \"recorded_on\": \"2026-04-02\",\n    \"recorded_by\": \"codex\",\n    \"triggered_by\": \"live-apply-service\",\n    \"source_commit\": \"unknown\",\n    \"repository\": {\n      \"bucket\": \"restic-config-backup\",\n      \"endpoint\": \"http://10.200.25.3:9000\",\n      \"repository_url\": \"s3:http://10.200.25.3:9000/restic-config-backup\"\n    },\n    \"summary\": {\n      \"governed_sources\": 5,\n      \"protected\": 4,\n      \"uncovered\": 0,\n      \"inactive\": 1,\n      \"uncovered_sources\": [],\n      \"inactive_sources\": [\n        \"falco_overrides\"\n      ]\n    },\n    \"source_results\": [\n      {\n        \"source_id\": \"config\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 5666,\n        \"paths\": [\n          \"/srv/proxmox_florin_server/config\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30,\n          \"keep_monthly\": 6\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.26897726230478686,\\\"total_files\\\":1284,\\\"files_done\\\":147,\\\"total_bytes\\\":7195980,\\\"bytes_done\\\":1935555}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.08483898426884895,\\\"total_files\\\":3595,\\\"files_done\\\":388,\\\"total_bytes\\\":38518224,\\\"bytes_done\\\":3267847}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.047623358104458585,\\\"total_files\\\":5661,\\\"files_done\\\":642,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":3883726}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.061579690927615435,\\\"total_files\\\":5661,\\\"files_done\\\":905,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":5021877}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.08505724721690257,\\\"total_files\\\":5661,\\\"files_done\\\":1193,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":6936492}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.12010370607477562,\\\"total_files\\\":5661,\\\"files_done\\\":1578,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":9794561}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.13624158537425182,\\\"total_files\\\":5661,\\\"files_done\\\":1891,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":11110619,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extension-list/dist/kit/index.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.15065309424557416,\\\"total_files\\\":5661,\\\"files_done\\\":2192,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":12285890,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extensions/src/trailing-node/index.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.1622724438578603,\\\"total_files\\\":5661,\\\"files_done\\\":2389,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":13233458}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.24771917805800317,\\\"total_files\\\":5661,\\\"files_done\\\":2546,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":20201713,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/ag-grid-community.noStyle.js\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.cjs.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.33795861439309827,\\\"total_files\\\":5661,\\\"files_done\\\":2640,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":27560817,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.esm.mjs\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/agStack/widgets/agInputDateField.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.37463410565460104,\\\"total_files\\\":5661,\\\"files_done\\\":2858,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":30551735}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.38177601649934695,\\\"total_files\\\":5661,\\\"files_done\\\":3136,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":31134164,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/interfaces/iSelectionService.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.42098294629962474,\\\"total_files\\\":5661,\\\"files_done\\\":3307,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":34331523,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-react/dist/types/src/shared/customComp/menuItemComponentWrapper.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.4526425618249734,\\\"total_files\\\":5661,\\\"files_done\\\":3471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":36913392}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.48307307939741756,\\\"total_files\\\":5661,\\\"files_done\\\":3739,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":39395027}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.5840294959965109,\\\"total_files\\\":5661,\\\"files_done\\\":3952,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":47628110,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/react-dom/cjs/react-dom-client.development.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6063655438402222,\\\"total_files\\\":5661,\\\"files_done\\\":4219,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49449634}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6125499540998118,\\\"total_files\\\":5661,\\\"files_done\\\":4471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49953978}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.684111464472038,\\\"total_files\\\":5661,\\\"files_done\\\":4592,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":55789881,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/_tsc.js\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/lib.dom.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.828107609013192,\\\"total_files\\\":5661,\\\"files_done\\\":4752,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":67532891,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/typescript.js\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/use-callback-ref/dist/es2019/useMergeRef.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.93896725606733,\\\"total_files\\\":5661,\\\"files_done\\\":4896,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":76573591}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.9703692164438625,\\\"total_files\\\":5661,\\\"files_done\\\":5228,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":79134448}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":491,\\\"files_changed\\\":5169,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":100,\\\"dirs_changed\\\":770,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":329,\\\"tree_blobs\\\":871,\\\"data_added\\\":3332987,\\\"data_added_packed\\\":960204,\\\"total_files_processed\\\":5661,\\\"total_bytes_processed\\\":81550864,\\\"total_duration\\\":1.230102265,\\\"backup_start\\\":\\\"2026-04-02T08:18:12.39824861Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:13.628350885Z\\\",\\\"snapshot_id\\\":\\\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\\\"}\",\n        \"snapshot_id\": \"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\"\n      },\n      {\n        \"source_id\": \"versions_stack\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 1,\n        \"paths\": [\n          \"/srv/proxmox_florin_server/versions/stack.yaml\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":1,\\\"files_done\\\":1,\\\"total_bytes\\\":48704,\\\"bytes_done\\\":48704}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":0,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":50098,\\\"data_added_packed\\\":13460,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":48704,\\\"total_duration\\\":0.774954489,\\\"backup_start\\\":\\\"2026-04-02T08:18:14.730254317Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:15.505208806Z\\\",\\\"snapshot_id\\\":\\\"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\\\"}\",\n        \"snapshot_id\": \"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\"\n      },\n      {\n        \"source_id\": \"falco_overrides\",\n        \"result\": \"skipped_optional_missing\",\n        \"paths\": [\n          \"/srv/proxmox_florin_server/config/falco\"\n        ],\n        \"reason\": \"optional source path is not present on the runtime host\"\n      }\n    ],\n    \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n    \"notifications\": []\n  }\n}\nREPORT_JSON={\"status\":\"ok\",\"mode\":\"backup\",\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"receipt_path\":\"receipts/restic-backups/20260402T081812Z.json\",\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"report\":{\"schema_version\":\"1.0.0\",\"receipt_id\":\"restic-config-backup-20260402T081812Z\",\"recorded_at\":\"2026-04-02T08:18:12Z\",\"recorded_on\":\"2026-04-02\",\"recorded_by\":\"codex\",\"triggered_by\":\"live-apply-service\",\"source_commit\":\"unknown\",\"repository\":{\"bucket\":\"restic-config-backup\",\"endpoint\":\"http://10.200.25.3:9000\",\"repository_url\":\"s3:http://10.200.25.3:9000/restic-config-backup\"},\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"source_results\":[{\"source_id\":\"config\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":5666,\"paths\":[\"/srv/proxmox_florin_server/config\"],\"retention\":{\"keep_daily\":30,\"keep_monthly\":6},\"restic_stdout\":\"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.26897726230478686,\\\"total_files\\\":1284,\\\"files_done\\\":147,\\\"total_bytes\\\":7195980,\\\"bytes_done\\\":1935555}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.08483898426884895,\\\"total_files\\\":3595,\\\"files_done\\\":388,\\\"total_bytes\\\":38518224,\\\"bytes_done\\\":3267847}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.047623358104458585,\\\"total_files\\\":5661,\\\"files_done\\\":642,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":3883726}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.061579690927615435,\\\"total_files\\\":5661,\\\"files_done\\\":905,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":5021877}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.08505724721690257,\\\"total_files\\\":5661,\\\"files_done\\\":1193,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":6936492}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.12010370607477562,\\\"total_files\\\":5661,\\\"files_done\\\":1578,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":9794561}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.13624158537425182,\\\"total_files\\\":5661,\\\"files_done\\\":1891,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":11110619,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extension-list/dist/kit/index.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.15065309424557416,\\\"total_files\\\":5661,\\\"files_done\\\":2192,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":12285890,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extensions/src/trailing-node/index.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.1622724438578603,\\\"total_files\\\":5661,\\\"files_done\\\":2389,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":13233458}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.24771917805800317,\\\"total_files\\\":5661,\\\"files_done\\\":2546,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":20201713,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/ag-grid-community.noStyle.js\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.cjs.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.33795861439309827,\\\"total_files\\\":5661,\\\"files_done\\\":2640,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":27560817,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.esm.mjs\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/agStack/widgets/agInputDateField.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.37463410565460104,\\\"total_files\\\":5661,\\\"files_done\\\":2858,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":30551735}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.38177601649934695,\\\"total_files\\\":5661,\\\"files_done\\\":3136,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":31134164,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/interfaces/iSelectionService.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.42098294629962474,\\\"total_files\\\":5661,\\\"files_done\\\":3307,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":34331523,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-react/dist/types/src/shared/customComp/menuItemComponentWrapper.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.4526425618249734,\\\"total_files\\\":5661,\\\"files_done\\\":3471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":36913392}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.48307307939741756,\\\"total_files\\\":5661,\\\"files_done\\\":3739,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":39395027}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.5840294959965109,\\\"total_files\\\":5661,\\\"files_done\\\":3952,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":47628110,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/react-dom/cjs/react-dom-client.development.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6063655438402222,\\\"total_files\\\":5661,\\\"files_done\\\":4219,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49449634}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6125499540998118,\\\"total_files\\\":5661,\\\"files_done\\\":4471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49953978}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.684111464472038,\\\"total_files\\\":5661,\\\"files_done\\\":4592,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":55789881,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/_tsc.js\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/lib.dom.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.828107609013192,\\\"total_files\\\":5661,\\\"files_done\\\":4752,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":67532891,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/typescript.js\\\",\\\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/use-callback-ref/dist/es2019/useMergeRef.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.93896725606733,\\\"total_files\\\":5661,\\\"files_done\\\":4896,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":76573591}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.9703692164438625,\\\"total_files\\\":5661,\\\"files_done\\\":5228,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":79134448}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":491,\\\"files_changed\\\":5169,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":100,\\\"dirs_changed\\\":770,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":329,\\\"tree_blobs\\\":871,\\\"data_added\\\":3332987,\\\"data_added_packed\\\":960204,\\\"total_files_processed\\\":5661,\\\"total_bytes_processed\\\":81550864,\\\"total_duration\\\":1.230102265,\\\"backup_start\\\":\\\"2026-04-02T08:18:12.39824861Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:13.628350885Z\\\",\\\"snapshot_id\\\":\\\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\\\"}\",\"snapshot_id\":\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\"},{\"source_id\":\"versions_stack\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":1,\"paths\":[\"/srv/proxmox_florin_server/versions/stack.yaml\"],\"retention\":{\"keep_daily\":30},\"restic_stdout\":\"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":1,\\\"files_done\\\":1,\\\"total_bytes\\\":48704,\\\"bytes_done\\\":48704}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":0,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":50098,\\\"data_added_packed\\\":13460,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":48704,\\\"total_duration\\\":0.774954489,\\\"backup_start\\\":\\\"2026-04-02T08:18:14.730254317Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:15.505208806Z\\\",\\\"snapshot_id\\\":\\\"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\\\"}\",\"snapshot_id\":\"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\"},{\"source_id\":\"falco_overrides\",\"result\":\"skipped_optional_missing\",\"paths\":[\"/srv/proxmox_florin_server/config/falco\"],\"reason\":\"optional source path is not present on the runtime host\"}],\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"notifications\":[]}}",
+  "stdout": "{\n  \"status\": \"ok\",\n  \"mode\": \"backup\",\n  \"summary\": {\n    \"governed_sources\": 5,\n    \"protected\": 4,\n    \"uncovered\": 0,\n    \"inactive\": 1,\n    \"uncovered_sources\": [],\n    \"inactive_sources\": [\n      \"falco_overrides\"\n    ]\n  },\n  \"receipt_path\": \"receipts/restic-backups/20260402T081812Z.json\",\n  \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n  \"report\": {\n    \"schema_version\": \"1.0.0\",\n    \"receipt_id\": \"restic-config-backup-20260402T081812Z\",\n    \"recorded_at\": \"2026-04-02T08:18:12Z\",\n    \"recorded_on\": \"2026-04-02\",\n    \"recorded_by\": \"codex\",\n    \"triggered_by\": \"live-apply-service\",\n    \"source_commit\": \"unknown\",\n    \"repository\": {\n      \"bucket\": \"restic-config-backup\",\n      \"endpoint\": \"http://10.200.25.3:9000\",\n      \"repository_url\": \"s3:http://10.200.25.3:9000/restic-config-backup\"\n    },\n    \"summary\": {\n      \"governed_sources\": 5,\n      \"protected\": 4,\n      \"uncovered\": 0,\n      \"inactive\": 1,\n      \"uncovered_sources\": [],\n      \"inactive_sources\": [\n        \"falco_overrides\"\n      ]\n    },\n    \"source_results\": [\n      {\n        \"source_id\": \"config\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 5666,\n        \"paths\": [\n          \"/srv/platform_server/config\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30,\n          \"keep_monthly\": 6\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.26897726230478686,\\\"total_files\\\":1284,\\\"files_done\\\":147,\\\"total_bytes\\\":7195980,\\\"bytes_done\\\":1935555}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.08483898426884895,\\\"total_files\\\":3595,\\\"files_done\\\":388,\\\"total_bytes\\\":38518224,\\\"bytes_done\\\":3267847}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.047623358104458585,\\\"total_files\\\":5661,\\\"files_done\\\":642,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":3883726}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.061579690927615435,\\\"total_files\\\":5661,\\\"files_done\\\":905,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":5021877}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.08505724721690257,\\\"total_files\\\":5661,\\\"files_done\\\":1193,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":6936492}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.12010370607477562,\\\"total_files\\\":5661,\\\"files_done\\\":1578,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":9794561}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.13624158537425182,\\\"total_files\\\":5661,\\\"files_done\\\":1891,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":11110619,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extension-list/dist/kit/index.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.15065309424557416,\\\"total_files\\\":5661,\\\"files_done\\\":2192,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":12285890,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extensions/src/trailing-node/index.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.1622724438578603,\\\"total_files\\\":5661,\\\"files_done\\\":2389,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":13233458}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.24771917805800317,\\\"total_files\\\":5661,\\\"files_done\\\":2546,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":20201713,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/ag-grid-community.noStyle.js\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.cjs.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.33795861439309827,\\\"total_files\\\":5661,\\\"files_done\\\":2640,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":27560817,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.esm.mjs\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/agStack/widgets/agInputDateField.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.37463410565460104,\\\"total_files\\\":5661,\\\"files_done\\\":2858,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":30551735}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.38177601649934695,\\\"total_files\\\":5661,\\\"files_done\\\":3136,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":31134164,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/interfaces/iSelectionService.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.42098294629962474,\\\"total_files\\\":5661,\\\"files_done\\\":3307,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":34331523,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-react/dist/types/src/shared/customComp/menuItemComponentWrapper.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.4526425618249734,\\\"total_files\\\":5661,\\\"files_done\\\":3471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":36913392}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.48307307939741756,\\\"total_files\\\":5661,\\\"files_done\\\":3739,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":39395027}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.5840294959965109,\\\"total_files\\\":5661,\\\"files_done\\\":3952,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":47628110,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/react-dom/cjs/react-dom-client.development.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6063655438402222,\\\"total_files\\\":5661,\\\"files_done\\\":4219,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49449634}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6125499540998118,\\\"total_files\\\":5661,\\\"files_done\\\":4471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49953978}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.684111464472038,\\\"total_files\\\":5661,\\\"files_done\\\":4592,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":55789881,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/_tsc.js\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/lib.dom.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.828107609013192,\\\"total_files\\\":5661,\\\"files_done\\\":4752,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":67532891,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/typescript.js\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/use-callback-ref/dist/es2019/useMergeRef.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.93896725606733,\\\"total_files\\\":5661,\\\"files_done\\\":4896,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":76573591}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.9703692164438625,\\\"total_files\\\":5661,\\\"files_done\\\":5228,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":79134448}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":491,\\\"files_changed\\\":5169,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":100,\\\"dirs_changed\\\":770,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":329,\\\"tree_blobs\\\":871,\\\"data_added\\\":3332987,\\\"data_added_packed\\\":960204,\\\"total_files_processed\\\":5661,\\\"total_bytes_processed\\\":81550864,\\\"total_duration\\\":1.230102265,\\\"backup_start\\\":\\\"2026-04-02T08:18:12.39824861Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:13.628350885Z\\\",\\\"snapshot_id\\\":\\\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\\\"}\",\n        \"snapshot_id\": \"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\"\n      },\n      {\n        \"source_id\": \"versions_stack\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 1,\n        \"paths\": [\n          \"/srv/platform_server/versions/stack.yaml\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":1,\\\"files_done\\\":1,\\\"total_bytes\\\":48704,\\\"bytes_done\\\":48704}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":0,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":50098,\\\"data_added_packed\\\":13460,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":48704,\\\"total_duration\\\":0.774954489,\\\"backup_start\\\":\\\"2026-04-02T08:18:14.730254317Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:15.505208806Z\\\",\\\"snapshot_id\\\":\\\"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\\\"}\",\n        \"snapshot_id\": \"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\"\n      },\n      {\n        \"source_id\": \"falco_overrides\",\n        \"result\": \"skipped_optional_missing\",\n        \"paths\": [\n          \"/srv/platform_server/config/falco\"\n        ],\n        \"reason\": \"optional source path is not present on the runtime host\"\n      }\n    ],\n    \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n    \"notifications\": []\n  }\n}\nREPORT_JSON={\"status\":\"ok\",\"mode\":\"backup\",\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"receipt_path\":\"receipts/restic-backups/20260402T081812Z.json\",\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"report\":{\"schema_version\":\"1.0.0\",\"receipt_id\":\"restic-config-backup-20260402T081812Z\",\"recorded_at\":\"2026-04-02T08:18:12Z\",\"recorded_on\":\"2026-04-02\",\"recorded_by\":\"codex\",\"triggered_by\":\"live-apply-service\",\"source_commit\":\"unknown\",\"repository\":{\"bucket\":\"restic-config-backup\",\"endpoint\":\"http://10.200.25.3:9000\",\"repository_url\":\"s3:http://10.200.25.3:9000/restic-config-backup\"},\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"source_results\":[{\"source_id\":\"config\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":5666,\"paths\":[\"/srv/platform_server/config\"],\"retention\":{\"keep_daily\":30,\"keep_monthly\":6},\"restic_stdout\":\"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.26897726230478686,\\\"total_files\\\":1284,\\\"files_done\\\":147,\\\"total_bytes\\\":7195980,\\\"bytes_done\\\":1935555}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.08483898426884895,\\\"total_files\\\":3595,\\\"files_done\\\":388,\\\"total_bytes\\\":38518224,\\\"bytes_done\\\":3267847}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.047623358104458585,\\\"total_files\\\":5661,\\\"files_done\\\":642,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":3883726}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":2,\\\"percent_done\\\":0.061579690927615435,\\\"total_files\\\":5661,\\\"files_done\\\":905,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":5021877}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.08505724721690257,\\\"total_files\\\":5661,\\\"files_done\\\":1193,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":6936492}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.12010370607477562,\\\"total_files\\\":5661,\\\"files_done\\\":1578,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":9794561}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.13624158537425182,\\\"total_files\\\":5661,\\\"files_done\\\":1891,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":11110619,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extension-list/dist/kit/index.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.15065309424557416,\\\"total_files\\\":5661,\\\"files_done\\\":2192,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":12285890,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extensions/src/trailing-node/index.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":1,\\\"percent_done\\\":0.1622724438578603,\\\"total_files\\\":5661,\\\"files_done\\\":2389,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":13233458}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.24771917805800317,\\\"total_files\\\":5661,\\\"files_done\\\":2546,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":20201713,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/ag-grid-community.noStyle.js\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.cjs.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.33795861439309827,\\\"total_files\\\":5661,\\\"files_done\\\":2640,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":27560817,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.esm.mjs\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/agStack/widgets/agInputDateField.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.37463410565460104,\\\"total_files\\\":5661,\\\"files_done\\\":2858,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":30551735}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.38177601649934695,\\\"total_files\\\":5661,\\\"files_done\\\":3136,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":31134164,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/interfaces/iSelectionService.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.42098294629962474,\\\"total_files\\\":5661,\\\"files_done\\\":3307,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":34331523,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-react/dist/types/src/shared/customComp/menuItemComponentWrapper.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.4526425618249734,\\\"total_files\\\":5661,\\\"files_done\\\":3471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":36913392}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.48307307939741756,\\\"total_files\\\":5661,\\\"files_done\\\":3739,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":39395027}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.5840294959965109,\\\"total_files\\\":5661,\\\"files_done\\\":3952,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":47628110,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/react-dom/cjs/react-dom-client.development.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6063655438402222,\\\"total_files\\\":5661,\\\"files_done\\\":4219,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49449634}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6125499540998118,\\\"total_files\\\":5661,\\\"files_done\\\":4471,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":49953978}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.684111464472038,\\\"total_files\\\":5661,\\\"files_done\\\":4592,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":55789881,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/_tsc.js\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/lib.dom.d.ts\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.828107609013192,\\\"total_files\\\":5661,\\\"files_done\\\":4752,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":67532891,\\\"current_files\\\":[\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/typescript.js\\\",\\\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/use-callback-ref/dist/es2019/useMergeRef.js\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.93896725606733,\\\"total_files\\\":5661,\\\"files_done\\\":4896,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":76573591}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.9703692164438625,\\\"total_files\\\":5661,\\\"files_done\\\":5228,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":79134448}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":5661,\\\"files_done\\\":5661,\\\"total_bytes\\\":81550864,\\\"bytes_done\\\":81550864}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":491,\\\"files_changed\\\":5169,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":100,\\\"dirs_changed\\\":770,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":329,\\\"tree_blobs\\\":871,\\\"data_added\\\":3332987,\\\"data_added_packed\\\":960204,\\\"total_files_processed\\\":5661,\\\"total_bytes_processed\\\":81550864,\\\"total_duration\\\":1.230102265,\\\"backup_start\\\":\\\"2026-04-02T08:18:12.39824861Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:13.628350885Z\\\",\\\"snapshot_id\\\":\\\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\\\"}\",\"snapshot_id\":\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\"},{\"source_id\":\"versions_stack\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":1,\"paths\":[\"/srv/platform_server/versions/stack.yaml\"],\"retention\":{\"keep_daily\":30},\"restic_stdout\":\"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":1,\\\"files_done\\\":1,\\\"total_bytes\\\":48704,\\\"bytes_done\\\":48704}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":0,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":50098,\\\"data_added_packed\\\":13460,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":48704,\\\"total_duration\\\":0.774954489,\\\"backup_start\\\":\\\"2026-04-02T08:18:14.730254317Z\\\",\\\"backup_end\\\":\\\"2026-04-02T08:18:15.505208806Z\\\",\\\"snapshot_id\\\":\\\"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\\\"}\",\"snapshot_id\":\"2c915dc0bfb4052712721ba316db3c2b310fc510dbb1de7692dec5dd7b1284a4\"},{\"source_id\":\"falco_overrides\",\"result\":\"skipped_optional_missing\",\"paths\":[\"/srv/platform_server/config/falco\"],\"reason\":\"optional source path is not present on the runtime host\"}],\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"notifications\":[]}}",
   "stderr": "",
   "synced_local_paths": [
     "receipts/restic-backups/20260402T081812Z.json",
@@ -4442,13 +4442,13 @@ uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
           "host": "docker-runtime-lv3",
           "files": 5666,
           "paths": [
-            "/srv/proxmox_florin_server/config"
+            "/srv/platform_server/config"
           ],
           "retention": {
             "keep_daily": 30,
             "keep_monthly": 6
           },
-          "restic_stdout": "{\"message_type\":\"status\",\"percent_done\":0.26897726230478686,\"total_files\":1284,\"files_done\":147,\"total_bytes\":7195980,\"bytes_done\":1935555}\n{\"message_type\":\"status\",\"percent_done\":0.08483898426884895,\"total_files\":3595,\"files_done\":388,\"total_bytes\":38518224,\"bytes_done\":3267847}\n{\"message_type\":\"status\",\"seconds_remaining\":2,\"percent_done\":0.047623358104458585,\"total_files\":5661,\"files_done\":642,\"total_bytes\":81550864,\"bytes_done\":3883726}\n{\"message_type\":\"status\",\"seconds_remaining\":2,\"percent_done\":0.061579690927615435,\"total_files\":5661,\"files_done\":905,\"total_bytes\":81550864,\"bytes_done\":5021877}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.08505724721690257,\"total_files\":5661,\"files_done\":1193,\"total_bytes\":81550864,\"bytes_done\":6936492}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.12010370607477562,\"total_files\":5661,\"files_done\":1578,\"total_bytes\":81550864,\"bytes_done\":9794561}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.13624158537425182,\"total_files\":5661,\"files_done\":1891,\"total_bytes\":81550864,\"bytes_done\":11110619,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extension-list/dist/kit/index.js\"]}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.15065309424557416,\"total_files\":5661,\"files_done\":2192,\"total_bytes\":81550864,\"bytes_done\":12285890,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extensions/src/trailing-node/index.ts\"]}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.1622724438578603,\"total_files\":5661,\"files_done\":2389,\"total_bytes\":81550864,\"bytes_done\":13233458}\n{\"message_type\":\"status\",\"percent_done\":0.24771917805800317,\"total_files\":5661,\"files_done\":2546,\"total_bytes\":81550864,\"bytes_done\":20201713,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/ag-grid-community.noStyle.js\",\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.cjs.js\"]}\n{\"message_type\":\"status\",\"percent_done\":0.33795861439309827,\"total_files\":5661,\"files_done\":2640,\"total_bytes\":81550864,\"bytes_done\":27560817,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.esm.mjs\",\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/agStack/widgets/agInputDateField.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.37463410565460104,\"total_files\":5661,\"files_done\":2858,\"total_bytes\":81550864,\"bytes_done\":30551735}\n{\"message_type\":\"status\",\"percent_done\":0.38177601649934695,\"total_files\":5661,\"files_done\":3136,\"total_bytes\":81550864,\"bytes_done\":31134164,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/interfaces/iSelectionService.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.42098294629962474,\"total_files\":5661,\"files_done\":3307,\"total_bytes\":81550864,\"bytes_done\":34331523,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-react/dist/types/src/shared/customComp/menuItemComponentWrapper.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.4526425618249734,\"total_files\":5661,\"files_done\":3471,\"total_bytes\":81550864,\"bytes_done\":36913392}\n{\"message_type\":\"status\",\"percent_done\":0.48307307939741756,\"total_files\":5661,\"files_done\":3739,\"total_bytes\":81550864,\"bytes_done\":39395027}\n{\"message_type\":\"status\",\"percent_done\":0.5840294959965109,\"total_files\":5661,\"files_done\":3952,\"total_bytes\":81550864,\"bytes_done\":47628110,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/react-dom/cjs/react-dom-client.development.js\"]}\n{\"message_type\":\"status\",\"percent_done\":0.6063655438402222,\"total_files\":5661,\"files_done\":4219,\"total_bytes\":81550864,\"bytes_done\":49449634}\n{\"message_type\":\"status\",\"percent_done\":0.6125499540998118,\"total_files\":5661,\"files_done\":4471,\"total_bytes\":81550864,\"bytes_done\":49953978}\n{\"message_type\":\"status\",\"percent_done\":0.684111464472038,\"total_files\":5661,\"files_done\":4592,\"total_bytes\":81550864,\"bytes_done\":55789881,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/_tsc.js\",\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/lib.dom.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.828107609013192,\"total_files\":5661,\"files_done\":4752,\"total_bytes\":81550864,\"bytes_done\":67532891,\"current_files\":[\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/typescript.js\",\"/srv/proxmox_florin_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/use-callback-ref/dist/es2019/useMergeRef.js\"]}\n{\"message_type\":\"status\",\"percent_done\":0.93896725606733,\"total_files\":5661,\"files_done\":4896,\"total_bytes\":81550864,\"bytes_done\":76573591}\n{\"message_type\":\"status\",\"percent_done\":0.9703692164438625,\"total_files\":5661,\"files_done\":5228,\"total_bytes\":81550864,\"bytes_done\":79134448}\n{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":5661,\"files_done\":5661,\"total_bytes\":81550864,\"bytes_done\":81550864}\n{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":5661,\"files_done\":5661,\"total_bytes\":81550864,\"bytes_done\":81550864}\n{\"message_type\":\"summary\",\"files_new\":491,\"files_changed\":5169,\"files_unmodified\":1,\"dirs_new\":100,\"dirs_changed\":770,\"dirs_unmodified\":0,\"data_blobs\":329,\"tree_blobs\":871,\"data_added\":3332987,\"data_added_packed\":960204,\"total_files_processed\":5661,\"total_bytes_processed\":81550864,\"total_duration\":1.230102265,\"backup_start\":\"2026-04-02T08:18:12.39824861Z\",\"backup_end\":\"2026-04-02T08:18:13.628350885Z\",\"snapshot_id\":\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\"}",
+          "restic_stdout": "{\"message_type\":\"status\",\"percent_done\":0.26897726230478686,\"total_files\":1284,\"files_done\":147,\"total_bytes\":7195980,\"bytes_done\":1935555}\n{\"message_type\":\"status\",\"percent_done\":0.08483898426884895,\"total_files\":3595,\"files_done\":388,\"total_bytes\":38518224,\"bytes_done\":3267847}\n{\"message_type\":\"status\",\"seconds_remaining\":2,\"percent_done\":0.047623358104458585,\"total_files\":5661,\"files_done\":642,\"total_bytes\":81550864,\"bytes_done\":3883726}\n{\"message_type\":\"status\",\"seconds_remaining\":2,\"percent_done\":0.061579690927615435,\"total_files\":5661,\"files_done\":905,\"total_bytes\":81550864,\"bytes_done\":5021877}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.08505724721690257,\"total_files\":5661,\"files_done\":1193,\"total_bytes\":81550864,\"bytes_done\":6936492}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.12010370607477562,\"total_files\":5661,\"files_done\":1578,\"total_bytes\":81550864,\"bytes_done\":9794561}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.13624158537425182,\"total_files\":5661,\"files_done\":1891,\"total_bytes\":81550864,\"bytes_done\":11110619,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extension-list/dist/kit/index.js\"]}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.15065309424557416,\"total_files\":5661,\"files_done\":2192,\"total_bytes\":81550864,\"bytes_done\":12285890,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/@tiptap/extensions/src/trailing-node/index.ts\"]}\n{\"message_type\":\"status\",\"seconds_remaining\":1,\"percent_done\":0.1622724438578603,\"total_files\":5661,\"files_done\":2389,\"total_bytes\":81550864,\"bytes_done\":13233458}\n{\"message_type\":\"status\",\"percent_done\":0.24771917805800317,\"total_files\":5661,\"files_done\":2546,\"total_bytes\":81550864,\"bytes_done\":20201713,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/ag-grid-community.noStyle.js\",\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.cjs.js\"]}\n{\"message_type\":\"status\",\"percent_done\":0.33795861439309827,\"total_files\":5661,\"files_done\":2640,\"total_bytes\":81550864,\"bytes_done\":27560817,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/package/main.esm.mjs\",\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/agStack/widgets/agInputDateField.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.37463410565460104,\"total_files\":5661,\"files_done\":2858,\"total_bytes\":81550864,\"bytes_done\":30551735}\n{\"message_type\":\"status\",\"percent_done\":0.38177601649934695,\"total_files\":5661,\"files_done\":3136,\"total_bytes\":81550864,\"bytes_done\":31134164,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-community/dist/types/src/interfaces/iSelectionService.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.42098294629962474,\"total_files\":5661,\"files_done\":3307,\"total_bytes\":81550864,\"bytes_done\":34331523,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/ag-grid-react/dist/types/src/shared/customComp/menuItemComponentWrapper.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.4526425618249734,\"total_files\":5661,\"files_done\":3471,\"total_bytes\":81550864,\"bytes_done\":36913392}\n{\"message_type\":\"status\",\"percent_done\":0.48307307939741756,\"total_files\":5661,\"files_done\":3739,\"total_bytes\":81550864,\"bytes_done\":39395027}\n{\"message_type\":\"status\",\"percent_done\":0.5840294959965109,\"total_files\":5661,\"files_done\":3952,\"total_bytes\":81550864,\"bytes_done\":47628110,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/react-dom/cjs/react-dom-client.development.js\"]}\n{\"message_type\":\"status\",\"percent_done\":0.6063655438402222,\"total_files\":5661,\"files_done\":4219,\"total_bytes\":81550864,\"bytes_done\":49449634}\n{\"message_type\":\"status\",\"percent_done\":0.6125499540998118,\"total_files\":5661,\"files_done\":4471,\"total_bytes\":81550864,\"bytes_done\":49953978}\n{\"message_type\":\"status\",\"percent_done\":0.684111464472038,\"total_files\":5661,\"files_done\":4592,\"total_bytes\":81550864,\"bytes_done\":55789881,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/_tsc.js\",\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/lib.dom.d.ts\"]}\n{\"message_type\":\"status\",\"percent_done\":0.828107609013192,\"total_files\":5661,\"files_done\":4752,\"total_bytes\":81550864,\"bytes_done\":67532891,\"current_files\":[\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/typescript/lib/typescript.js\",\"/srv/platform_server/config/windmill/apps/f/lv3/operator_access_admin.raw_app/node_modules/use-callback-ref/dist/es2019/useMergeRef.js\"]}\n{\"message_type\":\"status\",\"percent_done\":0.93896725606733,\"total_files\":5661,\"files_done\":4896,\"total_bytes\":81550864,\"bytes_done\":76573591}\n{\"message_type\":\"status\",\"percent_done\":0.9703692164438625,\"total_files\":5661,\"files_done\":5228,\"total_bytes\":81550864,\"bytes_done\":79134448}\n{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":5661,\"files_done\":5661,\"total_bytes\":81550864,\"bytes_done\":81550864}\n{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":5661,\"files_done\":5661,\"total_bytes\":81550864,\"bytes_done\":81550864}\n{\"message_type\":\"summary\",\"files_new\":491,\"files_changed\":5169,\"files_unmodified\":1,\"dirs_new\":100,\"dirs_changed\":770,\"dirs_unmodified\":0,\"data_blobs\":329,\"tree_blobs\":871,\"data_added\":3332987,\"data_added_packed\":960204,\"total_files_processed\":5661,\"total_bytes_processed\":81550864,\"total_duration\":1.230102265,\"backup_start\":\"2026-04-02T08:18:12.39824861Z\",\"backup_end\":\"2026-04-02T08:18:13.628350885Z\",\"snapshot_id\":\"1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1\"}",
           "snapshot_id": "1a4c50ce135d1bcd08301781c34f08fa6b828500a8c290ae5f55c9d8da5354e1"
         },
         {
@@ -4457,7 +4457,7 @@ uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
           "host": "docker-runtime-lv3",
           "files": 1,
           "paths": [
-            "/srv/proxmox_florin_server/versions/stack.yaml"
+            "/srv/platform_server/versions/stack.yaml"
           ],
           "retention": {
             "keep_daily": 30
@@ -4469,7 +4469,7 @@ uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
           "source_id": "falco_overrides",
           "result": "skipped_optional_missing",
           "paths": [
-            "/srv/proxmox_florin_server/config/falco"
+            "/srv/platform_server/config/falco"
           ],
           "reason": "optional source path is not present on the runtime host"
         }

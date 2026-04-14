@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.89",
   "workflow_id": "adr-0316-journey-analytics-mainline-live-apply",
   "adr": "0316",
-  "summary": "Promoted ADR 0316 into canonical mainline truth as repository version `0.177.141` and platform version `0.130.89` after replaying the journey analytics and onboarding success scorecard contracts from the latest realistic `origin/main` baseline at repository version `0.177.140` and platform version `0.130.88`, verifying live Windmill helper execution, durable worker-ledger scorecard output, and Plausible route aggregation end to end, and preserving the remaining shared ADR 0281 blocker where `errors.lv3.org` still does not serve a valid Glitchtip publication/runtime path for bounded failure-signal delivery.",
+  "summary": "Promoted ADR 0316 into canonical mainline truth as repository version `0.177.141` and platform version `0.130.89` after replaying the journey analytics and onboarding success scorecard contracts from the latest realistic `origin/main` baseline at repository version `0.177.140` and platform version `0.130.88`, verifying live Windmill helper execution, durable worker-ledger scorecard output, and Plausible route aggregation end to end, and preserving the remaining shared ADR 0281 blocker where `errors.example.com` still does not serve a valid Glitchtip publication/runtime path for bounded failure-signal delivery.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,12 +39,12 @@
     {
       "kind": "service_endpoint",
       "name": "Plausible route ingest",
-      "address": "https://analytics.lv3.org/api/event"
+      "address": "https://analytics.example.com/api/event"
     },
     {
       "kind": "service_endpoint",
       "name": "Glitchtip findings edge",
-      "address": "https://errors.lv3.org/api/3/store/"
+      "address": "https://errors.example.com/api/3/store/"
     }
   ],
   "verification": [
@@ -56,12 +56,12 @@
     {
       "check": "Exact-main Windmill and Plausible replay",
       "result": "pass",
-      "observed": "The exact-main replays converged the shared journey surfaces successfully: `make converge-plausible` passed in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-plausible-r3.txt`, and the final `make converge-windmill` finished with recap `docker-runtime-lv3 : ok=329 changed=48 failed=0`, `postgres-lv3 : ok=93 changed=2 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-windmill-r4.txt`."
+      "observed": "The exact-main replays converged the shared journey surfaces successfully: `make converge-plausible` passed in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-plausible-r3.txt`, and the final `make converge-windmill` finished with recap `docker-runtime-lv3 : ok=329 changed=48 failed=0`, `postgres-lv3 : ok=93 changed=2 failed=0`, and `proxmox-host : ok=41 changed=4 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-windmill-r4.txt`."
     },
     {
       "check": "Live operator-admin journey scorecards and worker ledger state",
       "result": "pass",
-      "observed": "The final exact-main helper run kept the daily `f/lv3/operator_journey_scorecards` schedule enabled for `08:15` `Europe/Bucharest`, produced a live report with `52` events, `3` sessions, `3` visitors, and all six scorecards `ok`, and persisted the worker snapshot at `/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-schedule-r2.json`, `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-event-smoke-r4.json`, `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-scorecards-r5.json`, and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-worker-state-r2.json`."
+      "observed": "The final exact-main helper run kept the daily `f/lv3/operator_journey_scorecards` schedule enabled for `08:15` `Europe/Bucharest`, produced a live report with `52` events, `3` sessions, `3` visitors, and all six scorecards `ok`, and persisted the worker snapshot at `/srv/platform_server/.local/state/journey-analytics/operator-access-admin-latest.json`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-schedule-r2.json`, `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-event-smoke-r4.json`, `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-journey-scorecards-r5.json`, and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-worker-state-r2.json`."
     },
     {
       "check": "Plausible route aggregation across the governed onboarding flow",
@@ -71,7 +71,7 @@
     {
       "check": "Glitchtip failure-signal delivery on the shared public edge",
       "result": "partial",
-      "observed": "The code path now accepts DSN-style secrets and normalizes them to `/api/<project>/store/`, but exact-main verification still found `errors.lv3.org` failing TLS hostname validation, resolving to the shared public edge at `65.108.75.123`, and leaving the live runtime host with an empty `glitchtip_default` container map, so `glitchtip_events` remains `0`; the blocker is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-publication-r2.json` and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-runtime-state-r3.json`."
+      "observed": "The code path now accepts DSN-style secrets and normalizes them to `/api/<project>/store/`, but exact-main verification still found `errors.example.com` failing TLS hostname validation, resolving to the shared public edge at `203.0.113.1`, and leaving the live runtime host with an empty `glitchtip_default` container map, so `glitchtip_events` remains `0`; the blocker is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-publication-r2.json` and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-runtime-state-r3.json`."
     },
     {
       "check": "Exact-main repository automation and validation bundle",
@@ -128,7 +128,7 @@
   "notes": [
     "This exact-main receipt is the canonical proof for ADR 0316 on repository version `0.177.141` and platform version `0.130.89`.",
     "The evidence set intentionally preserves the first blocked helper runs because they exposed real integration drift: the worker mirror initially lacked `scripts/journey_scorecards.py`, and the first Glitchtip attempt assumed the mirrored secret was already a direct store URL rather than a DSN.",
-    "The remaining partial verification is outside ADR 0316's owned browser, worker, and Plausible scope. The missing piece is the shared ADR 0281 publication/runtime repair so `errors.lv3.org` resolves to a live Glitchtip service with the correct TLS identity."
+    "The remaining partial verification is outside ADR 0316's owned browser, worker, and Plausible scope. The missing piece is the shared ADR 0281 publication/runtime repair so `errors.example.com` resolves to a live Glitchtip service with the correct TLS identity."
   ],
   "correction_loop": {
     "loop_id": "2026-04-02-ws-0316-mainline-sync-and-publication-truth",

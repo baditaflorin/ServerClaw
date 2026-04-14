@@ -13,8 +13,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -25,12 +25,12 @@
     {
       "kind": "service_endpoint",
       "name": "api-gateway",
-      "address": "https://api.lv3.org/v1/search"
+      "address": "https://api.example.com/v1/search"
     },
     {
       "kind": "service_endpoint",
       "name": "windmill-worker-checkout",
-      "address": "/srv/proxmox_florin_server"
+      "address": "/srv/platform_server"
     }
   ],
   "verification": [
@@ -52,7 +52,7 @@
     {
       "check": "Windmill worker checkout rebuild helper",
       "result": "pass",
-      "observed": "After syncing the corrected checkout content and repairing ownership on `/srv/proxmox_florin_server/build`, `python3 /srv/proxmox_florin_server/config/windmill/scripts/rebuild-search-index.py --repo-path /srv/proxmox_florin_server` completed successfully and wrote `/srv/proxmox_florin_server/build/search-index/documents.json` with collection counts including `adrs: 178`, `runbooks: 158`, `configs: 57`, `receipts: 167`, and `command_catalog: 156`."
+      "observed": "After syncing the corrected checkout content and repairing ownership on `/srv/platform_server/build`, `python3 /srv/platform_server/config/windmill/scripts/rebuild-search-index.py --repo-path /srv/platform_server` completed successfully and wrote `/srv/platform_server/build/search-index/documents.json` with collection counts including `adrs: 178`, `runbooks: 158`, `configs: 57`, `receipts: 167`, and `command_catalog: 156`."
     }
   ],
   "evidence_refs": [
@@ -68,6 +68,6 @@
   "notes": [
     "The repository implementation for ADR 0121 already existed on `main`, but the live runtime was incomplete: the API gateway image did not include `docs/` or `receipts/`, the worker checkout source path was stale, and malformed/non-UTF8 corpus files could crash indexing.",
     "Automated production converges were partially successful but noisy for reasons outside ADR 0121. The API gateway converge failed at its final Keycloak bearer-token verification step and a later retry hit a transient SSH reconnect. The limited Windmill converge failed before the worker checkout stage on the unrelated `Ensure the pinned uv binaries are executable` privilege-escalation task.",
-    "To finish the live apply in the same turn, the corrected `scripts/search_fabric/` tree was manually synchronized into `/opt/api-gateway/service` and `/srv/proxmox_florin_server`, the API gateway container was rebuilt with `docker compose build api-gateway && docker compose up -d api-gateway`, checkout ownership under `/srv/proxmox_florin_server/build` was repaired for `ops`, and AppleDouble `._*` sidecar files introduced by the manual tar sync were removed before the final worker rebuild verification."
+    "To finish the live apply in the same turn, the corrected `scripts/search_fabric/` tree was manually synchronized into `/opt/api-gateway/service` and `/srv/platform_server`, the API gateway container was rebuilt with `docker compose build api-gateway && docker compose up -d api-gateway`, checkout ownership under `/srv/platform_server/build` was repaired for `ops`, and AppleDouble `._*` sidecar files introduced by the manual tar sync were removed before the final worker rebuild verification."
   ]
 }

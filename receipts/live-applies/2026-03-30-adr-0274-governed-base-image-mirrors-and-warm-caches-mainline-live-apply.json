@@ -21,9 +21,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,7 +34,7 @@
     {
       "kind": "service_endpoint",
       "name": "Coolify public UI",
-      "address": "https://coolify.lv3.org"
+      "address": "https://coolify.example.com"
     }
   ],
   "play_recap": {
@@ -56,7 +56,7 @@
       "rescued": 0,
       "ignored": 0
     },
-    "proxmox_florin": {
+    "proxmox-host": {
       "ok": 273,
       "changed": 5,
       "unreachable": 0,
@@ -90,7 +90,7 @@
     {
       "check": "Exact-main Coolify replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=coolify env=production EXTRA_ARGS='-e bypass_promotion=true'` completed with zero failed or unreachable hosts, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-live-apply.txt`; the final recap reported `coolify-lv3 : ok=161 changed=10 unreachable=0 failed=0 skipped=14`, `nginx-lv3 : ok=81 changed=4 unreachable=0 failed=0 skipped=16`, and `proxmox_florin : ok=273 changed=5 unreachable=0 failed=0 skipped=134`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=coolify env=production EXTRA_ARGS='-e bypass_promotion=true'` completed with zero failed or unreachable hosts, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-live-apply.txt`; the final recap reported `coolify-lv3 : ok=161 changed=10 unreachable=0 failed=0 skipped=14`, `nginx-lv3 : ok=81 changed=4 unreachable=0 failed=0 skipped=16`, and `proxmox-host : ok=273 changed=5 unreachable=0 failed=0 skipped=134`."
     },
     {
       "check": "Docker publication contract",
@@ -110,17 +110,17 @@
     {
       "check": "Public edge redirect contract",
       "result": "pass",
-      "observed": "`https://coolify.lv3.org/` and `/login` both returned the expected TLS-backed `302` redirect to `/oauth2/sign_in` with `x-robots-tag: noindex, nofollow`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-coolify-public-head.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-coolify-login-head.txt`."
+      "observed": "`https://coolify.example.com/` and `/login` both returned the expected TLS-backed `302` redirect to `/oauth2/sign_in` with `x-robots-tag: noindex, nofollow`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-coolify-public-head.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-coolify-login-head.txt`."
     },
     {
       "check": "Crawl policy preservation",
       "result": "pass",
-      "observed": "`docs.lv3.org` and `changelog.lv3.org` still served `robots.txt` with `Disallow: /` after the exact-main replay, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-robots.txt`."
+      "observed": "`docs.example.com` and `changelog.example.com` still served `robots.txt` with `Disallow: /` after the exact-main replay, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-robots.txt`."
     },
     {
       "check": "Host snapshot",
       "result": "pass",
-      "observed": "The Proxmox host remained `Debian-trixie-latest-amd64-base` on kernel `6.17.13-2-pve` with `pve-manager/9.1.6` and VM `170` running after the replay, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-host-state-post.txt`."
+      "observed": "The Proxmox host remained `debian-base-template` on kernel `6.17.13-2-pve` with `pve-manager/9.1.6` and VM `170` running after the replay, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r6-host-state-post.txt`."
     }
   ],
   "evidence_refs": [

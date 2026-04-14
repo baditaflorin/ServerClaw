@@ -11,7 +11,7 @@
   "platform_version_context": "0.130.80",
   "workflow_id": "adr-0292-lago-mainline-live-apply",
   "adr": "0292",
-  "summary": "Re-verified ADR 0292 from the latest realistic `origin/main` lineage by refreshing the worktree onto commit `741241bf8739a093bc396900cd6f0ce6056a192b`, repairing the explicit Lago ADR catalog mapping plus regenerated subdomain exposure registry state required by current automation, and replaying `make converge-lago env=production` from the refreshed tree rooted at source commit `001d039cb2f61dac36e4de9a287f6098c27ca8fd`. The replay re-converged PostgreSQL, the shared Docker runtime, the API gateway, and the shared NGINX edge, restored the protected `billing.lv3.org` browser surface, submitted a fresh public smoke event through the API-gateway billing adapter, and verified current-usage aggregation end to end on repository version context `0.177.126` and platform version context `0.130.80` before the final protected release promotion. Later the same day, `origin/main` advanced to `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1` for the repo-only ws-0315 Gitea follow-up; that newer mainline was merged into this promotion branch, canonical truth plus generated status artifacts were regenerated, and the final protected release surfaces passed `make pre-push-gate` on repository version `0.177.128` while preserving the live-applied platform version `0.130.81` without requiring a second Lago replay.",
+  "summary": "Re-verified ADR 0292 from the latest realistic `origin/main` lineage by refreshing the worktree onto commit `741241bf8739a093bc396900cd6f0ce6056a192b`, repairing the explicit Lago ADR catalog mapping plus regenerated subdomain exposure registry state required by current automation, and replaying `make converge-lago env=production` from the refreshed tree rooted at source commit `001d039cb2f61dac36e4de9a287f6098c27ca8fd`. The replay re-converged PostgreSQL, the shared Docker runtime, the API gateway, and the shared NGINX edge, restored the protected `billing.example.com` browser surface, submitted a fresh public smoke event through the API-gateway billing adapter, and verified current-usage aggregation end to end on repository version context `0.177.126` and platform version context `0.130.80` before the final protected release promotion. Later the same day, `origin/main` advanced to `ef62d910cd1c873e09200ce48b20c5ad4bf0f1c1` for the repo-only ws-0315 Gitea follow-up; that newer mainline was merged into this promotion branch, canonical truth plus generated status artifacts were regenerated, and the final protected release surfaces passed `make pre-push-gate` on repository version `0.177.128` while preserving the live-applied platform version `0.130.81` without requiring a second Lago replay.",
   "targets": [
     {
       "kind": "guest",
@@ -31,12 +31,12 @@
     {
       "kind": "service",
       "name": "lago",
-      "address": "https://billing.lv3.org"
+      "address": "https://billing.example.com"
     },
     {
       "kind": "service",
       "name": "api-gateway-billing-adapter",
-      "address": "https://billing.lv3.org/api/v1/events"
+      "address": "https://billing.example.com/api/v1/events"
     }
   ],
   "verification": [
@@ -68,7 +68,7 @@
     {
       "check": "Public billing edge verification before and after replay",
       "result": "pass",
-      "observed": "The pre-apply public baseline showed both `/` and `/api/health` misrouted as `HTTP/2 308` redirects to `https://nginx.lv3.org/...`. After the replay, `https://billing.lv3.org/` returned the expected shared oauth2 sign-in redirect and `https://billing.lv3.org/api/health` returned the expected canonical `401` gateway rejection for anonymous callers."
+      "observed": "The pre-apply public baseline showed both `/` and `/api/health` misrouted as `HTTP/2 308` redirects to `https://nginx.example.com/...`. After the replay, `https://billing.example.com/` returned the expected shared oauth2 sign-in redirect and `https://billing.example.com/api/health` returned the expected canonical `401` gateway rejection for anonymous callers."
     },
     {
       "check": "Public billing smoke ingest and current-usage verification",

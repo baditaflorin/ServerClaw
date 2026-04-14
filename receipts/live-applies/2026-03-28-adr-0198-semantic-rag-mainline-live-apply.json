@@ -19,8 +19,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service",
@@ -42,7 +42,7 @@
     {
       "check": "Syntax and governed live-apply replay",
       "result": "pass",
-      "observed": "`make syntax-check-rag-context` passed, and `make live-apply-service service=rag-context env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from committed mainline release commit `4e492732` with `docker-runtime-lv3 : ok=94 changed=4 unreachable=0 failed=0 skipped=19` and `proxmox_florin : ok=36 changed=4 unreachable=0 failed=0 skipped=14`."
+      "observed": "`make syntax-check-rag-context` passed, and `make live-apply-service service=rag-context env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from committed mainline release commit `4e492732` with `docker-runtime-lv3 : ok=94 changed=4 unreachable=0 failed=0 skipped=19` and `proxmox-host : ok=36 changed=4 unreachable=0 failed=0 skipped=14`."
     },
     {
       "check": "Managed degraded-index recovery path",

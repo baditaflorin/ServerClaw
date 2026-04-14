@@ -32,5 +32,5 @@
 == push ==
 remote: . Processing 1 references
 remote: Processed 1 references in total
-To http://100.64.0.1:3009/ops/proxmox_florin_server.git
+To http://100.64.0.1:3009/ops/platform_server.git
    e24e0cf3..5b121f70  main -> main

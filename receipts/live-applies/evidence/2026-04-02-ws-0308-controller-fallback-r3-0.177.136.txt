@@ -13,7 +13,7 @@
     "ts": "2026-03-24T19:21:45Z"
   },
   "keycloak": {
-    "email": "baditaflorin@gmail.com",
+    "email": "operator@example.com",
     "status": "active",
     "username": "florin.badita"
   },
@@ -30,7 +30,7 @@
       "onboarded_at": "2026-03-23T00:00:00Z",
       "onboarded_by": "adr-0108-bootstrap"
     },
-    "email": "baditaflorin@gmail.com",
+    "email": "operator@example.com",
     "id": "florin-badita",
     "keycloak": {
       "enabled": true,
@@ -43,7 +43,7 @@
       ],
       "username": "florin.badita"
     },
-    "name": "Florin Badita",
+    "name": "Platform Operator",
     "notes": "Existing platform owner documented when ADR 0108 was implemented.",
     "openbao": {
       "entity_name": "florin.badita",
@@ -59,13 +59,13 @@
         {
           "fingerprint": "SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ",
           "name": "bootstrap-ssh",
-          "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server"
+          "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@platform_server"
         }
       ]
     },
     "status": "active",
     "tailscale": {
-      "login_email": "baditaflorin@gmail.com",
+      "login_email": "operator@example.com",
       "tags": [
         "tag:platform-operator"
       ]

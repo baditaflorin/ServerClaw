@@ -22,12 +22,12 @@
     {
       "kind": "service_endpoint",
       "name": "API gateway declared-to-live attestation",
-      "address": "https://api.lv3.org/v1/platform/attestation"
+      "address": "https://api.example.com/v1/platform/attestation"
     },
     {
       "kind": "service_endpoint",
       "name": "Ops portal public edge",
-      "address": "https://ops.lv3.org"
+      "address": "https://ops.example.com"
     }
   ],
   "verification": [
@@ -54,12 +54,12 @@
     {
       "check": "Declared-to-live gateway contract verification",
       "result": "pass",
-      "observed": "HEAD https://api.lv3.org/v1/platform/attestation returned HTTP/2 401 without a bearer token, GET https://api.lv3.org/healthz returned HTTP/2 200 with {\"status\":\"ok\"}, authenticated GET https://api.lv3.org/v1/platform/attestation returned HTTP/2 200 with a 45-service production summary and api_gateway attested, and authenticated GET https://api.lv3.org/v1/platform/attestation/api_gateway returned HTTP/2 200 with service_id=api_gateway and status=attested."
+      "observed": "HEAD https://api.example.com/v1/platform/attestation returned HTTP/2 401 without a bearer token, GET https://api.example.com/healthz returned HTTP/2 200 with {\"status\":\"ok\"}, authenticated GET https://api.example.com/v1/platform/attestation returned HTTP/2 200 with a 45-service production summary and api_gateway attested, and authenticated GET https://api.example.com/v1/platform/attestation/api_gateway returned HTTP/2 200 with service_id=api_gateway and status=attested."
     },
     {
       "check": "Ops portal internal and public verification",
       "result": "pass",
-      "observed": "From docker-runtime-lv3 reached through the current Proxmox jump path, GET http://127.0.0.1:8092/health returned HTTP 200 with {\"status\":\"ok\"}, GET http://127.0.0.1:8092/ returned HTTP 200 with root_len=487865 and still contained Runtime Assurance, GET http://127.0.0.1:8092/partials/overview returned HTTP 200 with overview_len=403506 and still contained Runtime Assurance, GET http://127.0.0.1:8092/partials/launcher returned HTTP 200 with launcher_len=65756 and still contained Application Launcher, GET https://ops.lv3.org/health returned HTTP/2 200 with {\"status\":\"ok\"}, and HEAD https://ops.lv3.org/ returned HTTP/2 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
+      "observed": "From docker-runtime-lv3 reached through the current Proxmox jump path, GET http://127.0.0.1:8092/health returned HTTP 200 with {\"status\":\"ok\"}, GET http://127.0.0.1:8092/ returned HTTP 200 with root_len=487865 and still contained Runtime Assurance, GET http://127.0.0.1:8092/partials/overview returned HTTP 200 with overview_len=403506 and still contained Runtime Assurance, GET http://127.0.0.1:8092/partials/launcher returned HTTP 200 with launcher_len=65756 and still contained Application Launcher, GET https://ops.example.com/health returned HTTP/2 200 with {\"status\":\"ok\"}, and HEAD https://ops.example.com/ returned HTTP/2 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
     },
     {
       "check": "Full repository validate wrapper",

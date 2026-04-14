@@ -23,7 +23,7 @@ def test_gitea_readiness_probe_uses_private_repo_hook_path() -> None:
     readiness_argv = health_catalog["services"]["gitea"]["readiness"]["argv"]
 
     assert (
-        readiness_argv[-1] == "/opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive"
+        readiness_argv[-1] == "/opt/gitea/data/git/repositories/ops/platform_server.git/custom_hooks/pre-receive"
     )
 
 

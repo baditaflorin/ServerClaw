@@ -10,7 +10,7 @@
   "platform_version_context": "0.130.36",
   "workflow_id": "adr-0212-replaceability-scorecards-live-apply",
   "adr": "0212",
-  "summary": "Implemented ADR 0212 from an isolated worktree on top of the latest `origin/main`, published the governed replaceability scorecards and vendor exit plans to `docs.lv3.org` through the shared edge publication flow, recovered the shared lane by regenerating the missing changelog portal artifact, and verified the deployed ADR 0212 and ADR 0042 pages end to end.",
+  "summary": "Implemented ADR 0212 from an isolated worktree on top of the latest `origin/main`, published the governed replaceability scorecards and vendor exit plans to `docs.example.com` through the shared edge publication flow, recovered the shared lane by regenerating the missing changelog portal artifact, and verified the deployed ADR 0212 and ADR 0042 pages end to end.",
   "targets": [
     {
       "kind": "guest",
@@ -20,21 +20,21 @@
     },
     {
       "kind": "public_hostname",
-      "name": "docs.lv3.org"
+      "name": "docs.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "changelog.lv3.org"
+      "name": "changelog.example.com"
     },
     {
       "kind": "controller_artifact",
       "name": "build/docs-portal",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0212-live-apply/build/docs-portal"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0212-live-apply/build/docs-portal"
     },
     {
       "kind": "controller_artifact",
       "name": "build/changelog-portal",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0212-live-apply/build/changelog-portal"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0212-live-apply/build/changelog-portal"
     }
   ],
   "verification": [
@@ -46,12 +46,12 @@
     {
       "check": "Shared edge publication replay",
       "result": "pass",
-      "observed": "The first `make deploy-docs-portal BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519` run from commit `9d1e75f2` built and copied `docs-portal` but failed because the shared `nginx_edge_publication` role also expected `build/changelog-portal/`; following the repo-documented recovery with `make generate-ops-portal`, `make generate-changelog-portal`, `make docs`, and `make configure-edge-publication env=production` completed successfully with `nginx-lv3 ok=61 changed=3 failed=0 skipped=14`."
+      "observed": "The first `make deploy-docs-portal BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519` run from commit `9d1e75f2` built and copied `docs-portal` but failed because the shared `nginx_edge_publication` role also expected `build/changelog-portal/`; following the repo-documented recovery with `make generate-ops-portal`, `make generate-changelog-portal`, `make docs`, and `make configure-edge-publication env=production` completed successfully with `nginx-lv3 ok=61 changed=3 failed=0 skipped=14`."
     },
     {
       "check": "Authenticated public docs edge behavior",
       "result": "pass",
-      "observed": "On 2026-03-28, `curl -Ik https://docs.lv3.org/` and `curl -Ik https://docs.lv3.org/architecture/decisions/0212-replaceability-scorecards-and-vendor-exit-plans/` both returned `HTTP/2 302` to `https://docs.lv3.org/oauth2/sign_in?...` with `X-Robots-Tag: noindex, nofollow` and the expected HSTS, CORP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, and CSP headers."
+      "observed": "On 2026-03-28, `curl -Ik https://docs.example.com/` and `curl -Ik https://docs.example.com/architecture/decisions/0212-replaceability-scorecards-and-vendor-exit-plans/` both returned `HTTP/2 302` to `https://docs.example.com/oauth2/sign_in?...` with `X-Robots-Tag: noindex, nofollow` and the expected HSTS, CORP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, and CSP headers."
     },
     {
       "check": "Deployed governed ADR artifact parity",

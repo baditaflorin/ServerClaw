@@ -19,8 +19,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -37,7 +37,7 @@
     {
       "check": "Bootstrap admin sign-in",
       "result": "pass",
-      "observed": "POST to `http://100.118.189.95:8008/api/v1/auths/signin` returned the repo-managed `ops@lv3.org` admin identity after the connector-enabled re-converge."
+      "observed": "POST to `http://100.118.189.95:8008/api/v1/auths/signin` returned the repo-managed `ops@example.com` admin identity after the connector-enabled re-converge."
     },
     {
       "check": "In-container Ollama connector reachability",

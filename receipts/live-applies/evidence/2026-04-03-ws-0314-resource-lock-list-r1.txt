@@ -72,5 +72,5 @@
       "resource_path": "vm:150"
     }
   ],
-  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/lv3-concurrency/lock-registry.json"
+  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.git/lv3-concurrency/lock-registry.json"
 }

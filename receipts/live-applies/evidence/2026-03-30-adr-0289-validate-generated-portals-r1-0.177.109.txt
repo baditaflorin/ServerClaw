@@ -1,11 +1,11 @@
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/scripts/generate_ops_portal.py --check
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/scripts/generate_changelog_portal.py --check
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/scripts/generate_slo_rules.py --check
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-release/scripts/generate_ops_portal.py --check
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-release/scripts/generate_changelog_portal.py --check
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-release/scripts/generate_slo_rules.py --check
 /Applications/Xcode.app/Contents/Developer/usr/bin/make docs
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/scripts/build_docs_portal.py
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-release/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-release/scripts/build_docs_portal.py
 
 Running Pagefind v1.4.0 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-release"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -29,4 +29,4 @@ Total:
 
 Finished in 1.762 seconds
 Published artifact secret scan passed: 1543 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release/build/docs-portal
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-release/build/docs-portal

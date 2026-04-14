@@ -203,7 +203,7 @@ skipping: [docker-build-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: Run liveness verification","service_id":"ansible","target":"docker-build-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:40:35.062Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
 skipping: [monitoring-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: Run liveness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:40:35.078Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:40:35.195Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -241,7 +241,7 @@ skipping: [docker-build-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: Run readiness verification","service_id":"ansible","target":"docker-build-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:40:37.124Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
 skipping: [monitoring-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: Run readiness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:40:37.125Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:40:37.213Z","vm":"controller","workflow_id":"ansible-playbook"}

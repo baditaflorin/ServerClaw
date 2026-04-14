@@ -21,7 +21,7 @@
         "/journeys/operator-access-admin/search-result": 2,
         "/journeys/operator-access-admin/start": 2
       },
-      "site_domain": "ops.lv3.org",
+      "site_domain": "ops.example.com",
       "status": "ok",
       "window_days": 30
     },
@@ -69,9 +69,9 @@
       }
     },
     "sources": {
-      "latest_report_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json",
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
-      "plausible_site_domain": "ops.lv3.org"
+      "latest_report_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-latest.json",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "plausible_site_domain": "ops.example.com"
     },
     "status": "ok",
     "surface": "windmill.operator_access_admin",
@@ -99,7 +99,7 @@
         "/journeys/operator-access-admin/search-result": 1,
         "/journeys/operator-access-admin/start": 1
       },
-      "site_domain": "ops.lv3.org",
+      "site_domain": "ops.example.com",
       "status": "ok",
       "window_days": 30
     },
@@ -147,9 +147,9 @@
       }
     },
     "sources": {
-      "latest_report_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json",
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
-      "plausible_site_domain": "ops.lv3.org"
+      "latest_report_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-latest.json",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "plausible_site_domain": "ops.example.com"
     },
     "status": "ok",
     "surface": "windmill.operator_access_admin",

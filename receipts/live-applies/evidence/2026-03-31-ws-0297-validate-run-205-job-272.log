@@ -2,19 +2,19 @@
 2026-03-31T22:51:10.5084108Z workflow prepared
 2026-03-31T22:51:10.5084814Z evaluating expression 'success()'
 2026-03-31T22:51:10.5085410Z expression 'success()' evaluated to 'true'
-2026-03-31T22:51:10.5085562Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-31T22:51:10.5150437Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-31T22:51:10.5150634Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T22:51:10.5085562Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T22:51:10.5150437Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
+2026-03-31T22:51:10.5150634Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
 2026-03-31T22:51:10.5164818Z Image exists? true
-2026-03-31T22:51:10.5204206Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T22:51:10.5204206Z   🐳  docker create image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T22:51:10.5276672Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-31T22:51:10.5277120Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
+2026-03-31T22:51:10.5277120Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/platform_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
 2026-03-31T22:51:10.5277647Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc0004143c8 OomKillDisable:0xc0004142c3 PidsLimit:0xc000414428 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
 2026-03-31T22:51:10.5278022Z --network and --net in the options will be ignored.
-2026-03-31T22:51:10.5278319Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc0004143c8 OomKillDisable:0xc0004142c3 PidsLimit:0xc000414428 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:GITEA-ACTIONS-TASK-257_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-257_WORKFLOW-validate_JOB-validate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-31T22:51:10.7242235Z Created container name=GITEA-ACTIONS-TASK-257_WORKFLOW-validate_JOB-validate id=b5ec9951b5b866f6e6ececd72506f4f12497fe013df0814d7f90d54381739dc5 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
+2026-03-31T22:51:10.5278319Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc0004143c8 OomKillDisable:0xc0004142c3 PidsLimit:0xc000414428 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:GITEA-ACTIONS-TASK-257_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-257_WORKFLOW-validate_JOB-validate Target:/workspace/ops/platform_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
+2026-03-31T22:51:10.7242235Z Created container name=GITEA-ACTIONS-TASK-257_WORKFLOW-validate_JOB-validate id=b5ec9951b5b866f6e6ececd72506f4f12497fe013df0814d7f90d54381739dc5 from image registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
 2026-03-31T22:51:10.7242648Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-31T22:51:10.7242758Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T22:51:10.7242758Z   🐳  docker run image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T22:51:10.7242889Z Starting container: b5ec9951b5b866f6e6ececd72506f4f12497fe013df0814d7f90d54381739dc5
 2026-03-31T22:51:10.8420097Z Started container: b5ec9951b5b866f6e6ececd72506f4f12497fe013df0814d7f90d54381739dc5
 2026-03-31T22:51:10.9239427Z Writing entry to tarball workflow/event.json len:2927
@@ -25,7 +25,7 @@
 2026-03-31T22:51:10.9370533Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=ebc6f737ea3218eb8e6b987a3a240dfd3eed52fc)'
 2026-03-31T22:51:10.9370686Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-31T22:51:10.9370755Z evaluating expression 'format('{0}', github.repository)'
-2026-03-31T22:51:10.9370896Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-31T22:51:10.9370896Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
 2026-03-31T22:51:10.9370997Z expression '${{ github.ref }}' rewritten to 'format('{0}', github.ref)'
 2026-03-31T22:51:10.9371061Z evaluating expression 'format('{0}', github.ref)'
 2026-03-31T22:51:10.9371203Z expression 'format('{0}', github.ref)' evaluated to '%!t(string=refs/heads/codex/ws-0297-live-apply-r2)'
@@ -49,7 +49,7 @@
 2026-03-31T22:51:10.9660246Z Extracting content to '/var/run/act'
 2026-03-31T22:51:10.9675186Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
 2026-03-31T22:51:10.9675374Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-31T22:51:10.9675663Z Working directory '/workspace/ops/proxmox_florin_server'
+2026-03-31T22:51:10.9675663Z Working directory '/workspace/ops/platform_server'
 2026-03-31T22:51:11.0407273Z hint: Using 'master' as the name for the initial branch. This default branch name
 2026-03-31T22:51:11.0408051Z hint: is subject to change. To configure the initial branch name to use in all
 2026-03-31T22:51:11.0408187Z hint: of your new repositories, which will suppress this warning, call:
@@ -60,11 +60,11 @@
 2026-03-31T22:51:11.0408870Z hint: 'development'. The just-created branch can be renamed via this command:
 2026-03-31T22:51:11.0409002Z hint:
 2026-03-31T22:51:11.0409118Z hint: 	git branch -m <name>
-2026-03-31T22:51:11.0409254Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-31T22:51:15.6051619Z From http://10.10.10.20:3003/ops/proxmox_florin_server
+2026-03-31T22:51:11.0409254Z Initialized empty Git repository in /workspace/ops/platform_server/.git/
+2026-03-31T22:51:15.6051619Z From http://10.10.10.20:3003/ops/platform_server
 2026-03-31T22:51:15.6052155Z  * branch              codex/ws-0297-live-apply-r2 -> FETCH_HEAD
 2026-03-31T22:51:15.6055317Z  * [new branch]        codex/ws-0297-live-apply-r2 -> origin/codex/ws-0297-live-apply-r2
-2026-03-31T22:51:19.8351656Z From http://10.10.10.20:3003/ops/proxmox_florin_server
+2026-03-31T22:51:19.8351656Z From http://10.10.10.20:3003/ops/platform_server
 2026-03-31T22:51:19.8352051Z  * branch              main       -> FETCH_HEAD
 2026-03-31T22:51:19.8354176Z  * [new branch]        main       -> origin/main
 2026-03-31T22:51:20.5569603Z Note: switching to 'ebc6f737ea3218eb8e6b987a3a240dfd3eed52fc'.
@@ -108,7 +108,28 @@
 2026-03-31T22:51:22.9708144Z Get:1 http://deb.debian.org/debian trixie/main amd64 docker-cli amd64 26.1.5+dfsg1-9+b12 [7338 kB]
 2026-03-31T22:51:23.7260584Z Fetched 7338 kB in 0s (55.6 MB/s)
 2026-03-31T22:51:23.7383433Z Selecting previously unselected package docker-cli.
-2026-03-31T22:51:23.7420573Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
+2026-03-31T22:51:23.7420573Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9191 files and directories currently installed.)
 2026-03-31T22:51:23.7424226Z Preparing to unpack .../docker-cli_26.1.5+dfsg1-9+b12_amd64.deb ...
 2026-03-31T22:51:23.7440267Z Unpacking docker-cli (26.1.5+dfsg1-9+b12) ...
 2026-03-31T22:51:23.9842256Z Setting up docker-cli (26.1.5+dfsg1-9+b12) ...
@@ -130,7 +151,28 @@
 2026-03-31T22:51:25.6928769Z Get:1 http://deb.debian.org/debian trixie/main amd64 make amd64 4.4.1-2 [463 kB]
 2026-03-31T22:51:26.3746582Z Fetched 463 kB in 0s (10.4 MB/s)
 2026-03-31T22:51:26.3850059Z Selecting previously unselected package make.
-2026-03-31T22:51:26.3887233Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9201 files and directories currently installed.)
+2026-03-31T22:51:26.3887233Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9201 files and directories currently installed.)
 2026-03-31T22:51:26.3894994Z Preparing to unpack .../make_4.4.1-2_amd64.deb ...
 2026-03-31T22:51:26.3907504Z Unpacking make (4.4.1-2) ...
 2026-03-31T22:51:26.4211153Z Setting up make (4.4.1-2) ...
@@ -168,7 +210,28 @@
 2026-03-31T22:51:28.2186484Z Get:12 http://deb.debian.org/debian trixie/main amd64 python3-venv amd64 3.13.5-1 [1180 B]
 2026-03-31T22:51:28.8953828Z Fetched 8676 kB in 0s (54.5 MB/s)
 2026-03-31T22:51:28.9100711Z Selecting previously unselected package libpython3.13-minimal:amd64.
-2026-03-31T22:51:28.9137490Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9250 files and directories currently installed.)
+2026-03-31T22:51:28.9137490Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9250 files and directories currently installed.)
 2026-03-31T22:51:28.9141530Z Preparing to unpack .../libpython3.13-minimal_3.13.5-2_amd64.deb ...
 2026-03-31T22:51:28.9155935Z Unpacking libpython3.13-minimal:amd64 (3.13.5-2) ...
 2026-03-31T22:51:28.9736801Z Selecting previously unselected package python3.13-minimal.
@@ -177,7 +240,28 @@
 2026-03-31T22:51:29.0765661Z Setting up libpython3.13-minimal:amd64 (3.13.5-2) ...
 2026-03-31T22:51:29.0829175Z Setting up python3.13-minimal (3.13.5-2) ...
 2026-03-31T22:51:29.6992956Z Selecting previously unselected package python3-minimal.
-2026-03-31T22:51:29.7040459Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9575 files and directories currently installed.)
+2026-03-31T22:51:29.7040459Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9575 files and directories currently installed.)
 2026-03-31T22:51:29.7048394Z Preparing to unpack .../python3-minimal_3.13.5-1_amd64.deb ...
 2026-03-31T22:51:29.7067589Z Unpacking python3-minimal (3.13.5-1) ...
 2026-03-31T22:51:29.7248341Z Selecting previously unselected package media-types.
@@ -194,7 +278,28 @@
 2026-03-31T22:51:29.8558513Z Unpacking libpython3-stdlib:amd64 (3.13.5-1) ...
 2026-03-31T22:51:29.8704594Z Setting up python3-minimal (3.13.5-1) ...
 2026-03-31T22:51:29.9707604Z Selecting previously unselected package python3.
-2026-03-31T22:51:29.9748337Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 10029 files and directories currently installed.)
+2026-03-31T22:51:29.9748337Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 10029 files and directories currently installed.)
 2026-03-31T22:51:29.9752532Z Preparing to unpack .../python3_3.13.5-1_amd64.deb ...
 2026-03-31T22:51:29.9802192Z Unpacking python3 (3.13.5-1) ...
 2026-03-31T22:51:29.9978209Z Selecting previously unselected package python3-pip-whl.
@@ -324,11 +429,11 @@
 2026-03-31T22:56:10.4353816Z workstream-surfaces   passed 4.04
 2026-03-31T22:56:10.4353889Z yaml-lint             passed 17.39
 2026-03-31T22:56:10.5546860Z /bin/sh: 1: ruby: not found
-2026-03-31T22:56:10.6045824Z uv run --with pyyaml --with nats-py python /workspace/ops/proxmox_florin_server/scripts/k6_load_testing.py --repo-root /workspace/ops/proxmox_florin_server --scenario smoke --runner-context gitea-actions --environment production --service keycloak --service openfga
+2026-03-31T22:56:10.6045824Z uv run --with pyyaml --with nats-py python /workspace/ops/platform_server/scripts/k6_load_testing.py --repo-root /workspace/ops/platform_server --scenario smoke --runner-context gitea-actions --environment production --service keycloak --service openfga
 2026-03-31T22:56:10.6757782Z Using CPython 3.12.13 interpreter at: /usr/local/bin/python3
 2026-03-31T22:56:10.6758237Z Creating virtual environment at: .venv
-2026-03-31T22:56:10.7989698Z    Building lv3-platform-cli @ file:///workspace/ops/proxmox_florin_server
-2026-03-31T22:56:11.5973199Z       Built lv3-platform-cli @ file:///workspace/ops/proxmox_florin_server
+2026-03-31T22:56:10.7989698Z    Building lv3-platform-cli @ file:///workspace/ops/platform_server
+2026-03-31T22:56:11.5973199Z       Built lv3-platform-cli @ file:///workspace/ops/platform_server
 2026-03-31T22:56:11.5991696Z warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
 2026-03-31T22:56:11.5991867Z          If the cache and target directories are on different filesystems, hardlinking may not be supported.
 2026-03-31T22:56:11.5991980Z          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.

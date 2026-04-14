@@ -13,8 +13,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -36,7 +36,7 @@
     {
       "kind": "service_endpoint",
       "name": "api-gateway",
-      "address": "https://api.lv3.org"
+      "address": "https://api.example.com"
     }
   ],
   "verification": [
@@ -48,7 +48,7 @@
     {
       "check": "Governed Windmill converge replay",
       "result": "pass",
-      "observed": "The final `make converge-windmill` replay completed successfully with `docker-runtime-lv3 : ok=183 changed=27 unreachable=0 failed=0 skipped=23`, `postgres-lv3 : ok=57 changed=1 unreachable=0 failed=0 skipped=8`, and `proxmox_florin : ok=36 changed=4 unreachable=0 failed=0 skipped=14`."
+      "observed": "The final `make converge-windmill` replay completed successfully with `docker-runtime-lv3 : ok=183 changed=27 unreachable=0 failed=0 skipped=23`, `postgres-lv3 : ok=57 changed=1 unreachable=0 failed=0 skipped=8`, and `proxmox-host : ok=36 changed=4 unreachable=0 failed=0 skipped=14`."
     },
     {
       "check": "Runtime graph state and world-state prerequisite",
@@ -63,7 +63,7 @@
     {
       "check": "Live checkout graph rebuild",
       "result": "pass",
-      "observed": "A repo-managed rebuild executed successfully from `/srv/proxmox_florin_server` on `docker-runtime-lv3`, returning `{'status': 'ok', 'node_count': 46, 'edge_count': 130}` and the expected postgres descendant list from the live checkout."
+      "observed": "A repo-managed rebuild executed successfully from `/srv/platform_server` on `docker-runtime-lv3`, returning `{'status': 'ok', 'node_count': 46, 'edge_count': 130}` and the expected postgres descendant list from the live checkout."
     }
   ],
   "evidence_refs": [

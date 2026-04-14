@@ -21,7 +21,7 @@
     {
       "kind": "service_endpoint",
       "name": "GitHub Actions Validate workflow",
-      "address": "https://github.com/baditaflorin/proxmox_florin_server/actions/workflows/validate.yml"
+      "address": "https://github.com/baditaflorin/platform_server/actions/workflows/validate.yml"
     },
     {
       "kind": "service_endpoint",
@@ -38,7 +38,7 @@
     {
       "check": "Exact-main Semgrep wrapper and no-git snapshot replay",
       "result": "pass",
-      "observed": "Both `./scripts/validate_repo.sh semgrep` and the containerized no-git replay in `registry.lv3.org/check-runner/python:3.12.10` passed on the exact-main `0.177.108` tree, with the snapshot path explicitly recording `baseline comparison: skipped (checkout has no git metadata)`; transcripts are preserved in `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-validate-semgrep-r1-0.177.108.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-no-git-semgrep-r1-0.177.108.txt`."
+      "observed": "Both `./scripts/validate_repo.sh semgrep` and the containerized no-git replay in `registry.example.com/check-runner/python:3.12.10` passed on the exact-main `0.177.108` tree, with the snapshot path explicitly recording `baseline comparison: skipped (checkout has no git metadata)`; transcripts are preserved in `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-validate-semgrep-r1-0.177.108.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-no-git-semgrep-r1-0.177.108.txt`."
     },
     {
       "check": "Exact-main repo-side validation wrappers",

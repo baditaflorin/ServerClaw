@@ -9,11 +9,11 @@
   "repo_version_context": "0.174.0",
   "workflow_id": "converge-searxng",
   "adr": "0148",
-  "summary": "Recorded the successful 2026-03-26 production live apply of the repo-managed SearXNG runtime on docker-runtime-lv3, the Proxmox-host Tailscale operator proxy, the Open WebUI web-search integration, and the final tailnet DNS publication for search.lv3.org after a brownout-delayed localhost DNS retry completed successfully.",
+  "summary": "Recorded the successful 2026-03-26 production live apply of the repo-managed SearXNG runtime on docker-runtime-lv3, the Proxmox-host Tailscale operator proxy, the Open WebUI web-search integration, and the final tailnet DNS publication for search.example.com after a brownout-delayed localhost DNS retry completed successfully.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -25,7 +25,7 @@
     {
       "kind": "service_endpoint",
       "name": "searxng-tailnet-hostname",
-      "address": "http://search.lv3.org/search?q=proxmox%20ve&format=json"
+      "address": "http://search.example.com/search?q=proxmox%20ve&format=json"
     }
   ],
   "verification": [
@@ -47,7 +47,7 @@
     {
       "check": "Tailnet DNS resolution and hostname-backed JSON endpoint",
       "result": "pass",
-      "observed": "`dig +short @1.1.1.1 search.lv3.org` returned `100.64.0.1`, and `curl -fsS 'http://search.lv3.org/search?q=proxmox%20ve&format=json'` returned a structured JSON payload with search results."
+      "observed": "`dig +short @1.1.1.1 search.example.com` returned `100.64.0.1`, and `curl -fsS 'http://search.example.com/search?q=proxmox%20ve&format=json'` returned a structured JSON payload with search results."
     }
   ],
   "evidence_refs": [

@@ -2,10 +2,10 @@
   "jobs": [
     {
       "id": 121,
-      "url": "http://git.lv3.org:3009/api/v1/repos/ops/proxmox_florin_server/actions/jobs/121",
-      "html_url": "http://git.lv3.org:3009/ops/proxmox_florin_server/actions/runs/90/jobs/0",
+      "url": "http://git.example.com:3009/api/v1/repos/ops/platform_server/actions/jobs/121",
+      "html_url": "http://git.example.com:3009/ops/platform_server/actions/runs/90/jobs/0",
       "run_id": 94,
-      "run_url": "http://git.lv3.org:3009/api/v1/repos/ops/proxmox_florin_server/actions/runs/94",
+      "run_url": "http://git.example.com:3009/api/v1/repos/ops/platform_server/actions/runs/94",
       "name": "renovate",
       "labels": [
         "self-hosted"

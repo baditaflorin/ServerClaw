@@ -12,12 +12,12 @@
   "targets": [
     {
       "kind": "controller",
-      "name": "proxmox_florin_server-main",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server"
+      "name": "platform_server-main",
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server"
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     }
   ],

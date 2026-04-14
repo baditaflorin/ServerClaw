@@ -27,7 +27,7 @@
     {
       "kind": "service_endpoint",
       "name": "ops portal public edge",
-      "address": "https://ops.lv3.org"
+      "address": "https://ops.example.com"
     }
   ],
   "verification": [
@@ -44,7 +44,7 @@
     {
       "check": "Targeted live apply from the latest origin/main worktree",
       "result": "pass",
-      "observed": "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i inventory/hosts.yml playbooks/ops-portal.yml -e env=production --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply --start-at-task Reset the synced ops portal application tree before refresh completed with docker-runtime-lv3 : ok=41 changed=11 unreachable=0 failed=0 skipped=8 rescued=0 ignored=0."
+      "observed": "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i inventory/hosts.yml playbooks/ops-portal.yml -e env=production --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0253-live-apply --start-at-task Reset the synced ops portal application tree before refresh completed with docker-runtime-lv3 : ok=41 changed=11 unreachable=0 failed=0 skipped=8 rescued=0 ignored=0."
     },
     {
       "check": "Internal runtime assurance scoreboard render",
@@ -54,7 +54,7 @@
     {
       "check": "Public authenticated edge verification",
       "result": "pass",
-      "observed": "GET https://ops.lv3.org/health returned HTTP 200 with {\"status\":\"ok\"}, and HEAD https://ops.lv3.org/ returned HTTP 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
+      "observed": "GET https://ops.example.com/health returned HTTP 200 with {\"status\":\"ok\"}, and HEAD https://ops.example.com/ returned HTTP 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
     },
     {
       "check": "Full converge wrapper from this Codex execution environment",

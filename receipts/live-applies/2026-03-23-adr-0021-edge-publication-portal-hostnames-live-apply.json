@@ -8,7 +8,7 @@
   "repo_version_context": "0.93.0",
   "workflow_id": "configure-edge-publication",
   "adr": "0021",
-  "summary": "Published ops.lv3.org and changelog.lv3.org live through the shared NGINX edge, moved the edge certificate flow to Hetzner-backed DNS-01 validation, and verified both generated portal surfaces locally on nginx-lv3.",
+  "summary": "Published ops.example.com and changelog.example.com live through the shared NGINX edge, moved the edge certificate flow to Hetzner-backed DNS-01 validation, and verified both generated portal surfaces locally on nginx-lv3.",
   "targets": [
     {
       "kind": "guest",
@@ -18,28 +18,28 @@
     },
     {
       "kind": "public_hostname",
-      "name": "ops.lv3.org"
+      "name": "ops.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "changelog.lv3.org"
+      "name": "changelog.example.com"
     }
   ],
   "verification": [
     {
       "check": "Authoritative DNS publication",
       "result": "pass",
-      "observed": "The Hetzner authoritative zone and a direct `dig @1.1.1.1` lookup both resolved `ops.lv3.org` and `changelog.lv3.org` to `65.108.75.123`."
+      "observed": "The Hetzner authoritative zone and a direct `dig @1.1.1.1` lookup both resolved `ops.example.com` and `changelog.example.com` to `203.0.113.1`."
     },
     {
       "check": "Shared edge certificate SAN expansion",
       "result": "pass",
-      "observed": "The live `lv3-edge` certificate on nginx-lv3 now includes `DNS:ops.lv3.org` and `DNS:changelog.lv3.org` alongside the existing edge hostnames."
+      "observed": "The live `lv3-edge` certificate on nginx-lv3 now includes `DNS:ops.example.com` and `DNS:changelog.example.com` alongside the existing edge hostnames."
     },
     {
       "check": "Portal HTTPS responses on the edge VM",
       "result": "pass",
-      "observed": "Host-header HTTPS probes against `127.0.0.1` on nginx-lv3 returned `HTTP/2 200` for both `ops.lv3.org` and `changelog.lv3.org` after the edge converge."
+      "observed": "Host-header HTTPS probes against `127.0.0.1` on nginx-lv3 returned `HTTP/2 200` for both `ops.example.com` and `changelog.example.com` after the edge converge."
     }
   ],
   "evidence_refs": [

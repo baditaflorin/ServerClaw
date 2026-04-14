@@ -3,18 +3,18 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/.local/packer-plugin-cache
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/build/docs-portal
 Result: PASS (live-apply-service)
 /Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/scripts/interface_contracts.py --check-live-apply "service:api-gateway"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/scripts/interface_contracts.py --check-live-apply "service:api-gateway"
 Live apply contract OK: service:api-gateway -> playbooks/services/api-gateway.yml
 {
   "ts": "2026-04-03T06:46:11Z",
@@ -30,9 +30,9 @@ Live apply contract OK: service:api-gateway -> playbooks/services/api-gateway.ym
   "evidence_ref": "docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md"
 }
 INFO live-apply-service: skipping service-catalog gates for non-catalog playbook 'api-gateway'
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=c2f4304432674783be752bdbb1722adb ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/inventory/hosts.yml --run-id 338f8555e21548fbb5fae16f149bab9b --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/playbooks/services/api-gateway.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump  -e platform_trace_id=5e4b6748d3e44f96b05c297432f737bf  -e bypass_promotion=true
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/playbooks/services/api-gateway.yml (env=production)
-Running scoped playbook: playbooks/services/api-gateway.yml limit=runtime-control-lv3 shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/.ansible/shards/338f8555e21548fbb5fae16f149bab9b/api-gateway-production.json
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=c2f4304432674783be752bdbb1722adb ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/inventory/hosts.yml --run-id 338f8555e21548fbb5fae16f149bab9b --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/playbooks/services/api-gateway.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump  -e platform_trace_id=5e4b6748d3e44f96b05c297432f737bf  -e bypass_promotion=true
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/playbooks/services/api-gateway.yml (env=production)
+Running scoped playbook: playbooks/services/api-gateway.yml limit=runtime-control-lv3 shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/.ansible/shards/338f8555e21548fbb5fae16f149bab9b/api-gateway-production.json
 
 PLAY [Converge the unified platform API gateway on the runtime-control VM] *****
 

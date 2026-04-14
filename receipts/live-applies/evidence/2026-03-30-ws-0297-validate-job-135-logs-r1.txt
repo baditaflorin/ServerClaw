@@ -2,19 +2,19 @@
 2026-03-30T21:41:09.2294208Z workflow prepared
 2026-03-30T21:41:09.2294969Z evaluating expression 'success()'
 2026-03-30T21:41:09.2295901Z expression 'success()' evaluated to 'true'
-2026-03-30T21:41:09.2296083Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-30T21:41:09.2359193Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-30T21:41:09.2359486Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-30T21:41:09.2296083Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-30T21:41:09.2359193Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
+2026-03-30T21:41:09.2359486Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
 2026-03-30T21:41:09.2371553Z Image exists? true
-2026-03-30T21:41:09.2398770Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-30T21:41:09.2398770Z   🐳  docker create image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-30T21:41:09.2458552Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-30T21:41:09.2458927Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
+2026-03-30T21:41:09.2458927Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/platform_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
 2026-03-30T21:41:09.2459394Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038cec8 OomKillDisable:0xc00038cdc3 PidsLimit:0xc00038cf28 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
 2026-03-30T21:41:09.2459759Z --network and --net in the options will be ignored.
-2026-03-30T21:41:09.2460055Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038cec8 OomKillDisable:0xc00038cdc3 PidsLimit:0xc00038cf28 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-30T21:41:09.2644795Z Created container name=GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate id=ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
+2026-03-30T21:41:09.2460055Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038cec8 OomKillDisable:0xc00038cdc3 PidsLimit:0xc00038cf28 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate Target:/workspace/ops/platform_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
+2026-03-30T21:41:09.2644795Z Created container name=GITEA-ACTIONS-TASK-121_WORKFLOW-validate_JOB-validate id=ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229 from image registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
 2026-03-30T21:41:09.2645202Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-30T21:41:09.2645350Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-30T21:41:09.2645350Z   🐳  docker run image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-30T21:41:09.2645634Z Starting container: ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229
 2026-03-30T21:41:09.3694774Z Started container: ccf53dda18e8b49f4c1b4b0516cdfedf697123eeae5fadc4b6a33bf6de815229
 2026-03-30T21:41:09.4429249Z Writing entry to tarball workflow/event.json len:5950
@@ -28,7 +28,7 @@
 2026-03-30T21:41:09.4599741Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
 2026-03-30T21:41:09.4599873Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-30T21:41:09.4599942Z evaluating expression 'format('{0}', github.repository)'
-2026-03-30T21:41:09.4600069Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-30T21:41:09.4600069Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
 2026-03-30T21:41:09.4600169Z expression '${{ github.server_url }}' rewritten to 'format('{0}', github.server_url)'
 2026-03-30T21:41:09.4600239Z evaluating expression 'format('{0}', github.server_url)'
 2026-03-30T21:41:09.4600401Z expression 'format('{0}', github.server_url)' evaluated to '%!t(string=http://10.10.10.20:3003)'
@@ -49,7 +49,7 @@
 2026-03-30T21:41:09.4968268Z Extracting content to '/var/run/act'
 2026-03-30T21:41:09.4982699Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
 2026-03-30T21:41:09.4983089Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-30T21:41:09.4983492Z Working directory '/workspace/ops/proxmox_florin_server'
+2026-03-30T21:41:09.4983492Z Working directory '/workspace/ops/platform_server'
 2026-03-30T21:41:09.5722863Z hint: Using 'master' as the name for the initial branch. This default branch name
 2026-03-30T21:41:09.5723515Z hint: is subject to change. To configure the initial branch name to use in all
 2026-03-30T21:41:09.5723683Z hint: of your new repositories, which will suppress this warning, call:
@@ -60,8 +60,8 @@
 2026-03-30T21:41:09.5724177Z hint: 'development'. The just-created branch can be renamed via this command:
 2026-03-30T21:41:09.5724283Z hint:
 2026-03-30T21:41:09.5724361Z hint: 	git branch -m <name>
-2026-03-30T21:41:09.5724576Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-30T21:41:13.6404205Z From http://10.10.10.20:3003/ops/proxmox_florin_server
+2026-03-30T21:41:09.5724576Z Initialized empty Git repository in /workspace/ops/platform_server/.git/
+2026-03-30T21:41:13.6404205Z From http://10.10.10.20:3003/ops/platform_server
 2026-03-30T21:41:13.6404997Z  * branch            codex/ws-0297-live-apply -> FETCH_HEAD
 2026-03-30T21:41:13.6406135Z  * [new branch]      codex/ws-0297-live-apply -> origin/codex/ws-0297-live-apply
 2026-03-30T21:41:14.0785649Z Note: switching to 'b378e61a9976fa0c9217ad7c4ea7d06e077917fe'.
@@ -122,7 +122,28 @@
 2026-03-30T21:41:17.0738193Z Get:12 http://deb.debian.org/debian trixie/main amd64 docker.io amd64 26.1.5+dfsg1-9+b12 [23.0 MB]
 2026-03-30T21:41:17.9904185Z Fetched 59.9 MB in 1s (79.5 MB/s)
 2026-03-30T21:41:18.0066207Z Selecting previously unselected package runc.
-2026-03-30T21:41:18.0111436Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
+2026-03-30T21:41:18.0111436Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9191 files and directories currently installed.)
 2026-03-30T21:41:18.0118541Z Preparing to unpack .../00-runc_1.1.15+ds1-2+b4_amd64.deb ...
 2026-03-30T21:41:18.0137485Z Unpacking runc (1.1.15+ds1-2+b4) ...
 2026-03-30T21:41:18.1465478Z Selecting previously unselected package containerd.

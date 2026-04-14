@@ -14,8 +14,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -49,7 +49,7 @@
     {
       "check": "Live Windmill converge",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully after the worker checkout refresh and follow-up triage hardening replay, with the final recap reporting `docker-runtime-lv3 ok=211 changed=33 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`."
+      "observed": "`make converge-windmill` completed successfully after the worker checkout refresh and follow-up triage hardening replay, with the final recap reporting `docker-runtime-lv3 ok=211 changed=33 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`."
     },
     {
       "check": "Windmill authenticated health",
@@ -64,7 +64,7 @@
     {
       "check": "Durable closure-loop state persistence",
       "result": "pass",
-      "observed": "The worker's `/srv/proxmox_florin_server/.local/state/closure-loop/runs.json` record for run `71ec1385-9d52-471d-8fbf-e1fbcec6c6ca` persisted the ADR 0204 correction-loop snapshot with `workflow_id: platform-observation-loop`, `retry_budget_cycles: 3`, and escalation state `ESCALATED_FOR_APPROVAL`."
+      "observed": "The worker's `/srv/platform_server/.local/state/closure-loop/runs.json` record for run `71ec1385-9d52-471d-8fbf-e1fbcec6c6ca` persisted the ADR 0204 correction-loop snapshot with `workflow_id: platform-observation-loop`, `retry_budget_cycles: 3`, and escalation state `ESCALATED_FOR_APPROVAL`."
     },
     {
       "check": "Merge-to-main boundary note",

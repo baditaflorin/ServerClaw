@@ -35,6 +35,6 @@ fatal: [docker-runtime-lv3]: FAILED! => {"msg": "Unexpected failure during modul
 PLAY RECAP *********************************************************************
 docker-runtime-lv3         : ok=242  changed=47   unreachable=0    failed=1    skipped=25   rescued=0    ignored=0
 postgres-lv3               : ok=65   changed=1    unreachable=0    failed=0    skipped=8    rescued=0    ignored=0
-proxmox_florin             : ok=37   changed=4    unreachable=0    failed=0    skipped=15   rescued=0    ignored=0
+proxmox-host             : ok=37   changed=4    unreachable=0    failed=0    skipped=15   rescued=0    ignored=0
 
 make: *** [converge-windmill] Error 2

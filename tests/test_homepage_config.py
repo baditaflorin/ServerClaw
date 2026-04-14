@@ -49,7 +49,7 @@ def test_render_outputs_apply_identity_domain_overlay(monkeypatch) -> None:
     monkeypatch.setattr(
         generate_homepage_config,
         "apply_identity_domain_overlay",
-        lambda payload: _replace_example_domain(payload, "lv3.org"),
+        lambda payload: _replace_example_domain(payload, "example.com"),
     )
 
     outputs = generate_homepage_config.render_outputs()
@@ -61,8 +61,8 @@ def test_render_outputs_apply_identity_domain_overlay(monkeypatch) -> None:
     quick_actions = next(group["Quick Actions"] for group in bookmarks if "Quick Actions" in group)
     ops_portal = next(item["Ops Portal"][0] for item in quick_actions if "Ops Portal" in item)
 
-    assert homepage_tile["href"] == "https://home.lv3.org"
-    assert ops_portal["href"] == "https://ops.lv3.org"
+    assert homepage_tile["href"] == "https://home.example.com"
+    assert ops_portal["href"] == "https://ops.example.com"
 
 
 def test_render_outputs_serialize_expected_files(monkeypatch) -> None:

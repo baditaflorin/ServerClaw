@@ -8,5 +8,5 @@ Health probe contract validation
 
 [stage] alert-rules
 Alert rule validation
-generate https tls assurance error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/config/prometheus/file_sd/https_tls_targets.yml is out of date; run generate_https_tls_assurance.py --write
+generate https tls assurance error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1/config/prometheus/file_sd/https_tls_targets.yml is out of date; run generate_https_tls_assurance.py --write
 [fail:2] alert-rules

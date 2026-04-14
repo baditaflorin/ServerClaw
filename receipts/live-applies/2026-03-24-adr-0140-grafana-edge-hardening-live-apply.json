@@ -19,24 +19,24 @@
     },
     {
       "kind": "public_hostname",
-      "name": "grafana.lv3.org"
+      "name": "grafana.example.com"
     }
   ],
   "verification": [
     {
       "check": "Public Grafana dashboard redirect",
       "result": "pass",
-      "observed": "`curl -I https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` with `location: /login?redirectTo=%2Fd%2Flv3-platform-overview%2Flv3-platform-overview`."
+      "observed": "`curl -I https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` with `location: /login?redirectTo=%2Fd%2Flv3-platform-overview%2Flv3-platform-overview`."
     },
     {
       "check": "Public Grafana health endpoint block",
       "result": "pass",
-      "observed": "`curl -I https://grafana.lv3.org/api/health` returned `HTTP/2 404` with `x-robots-tag: noindex`."
+      "observed": "`curl -I https://grafana.example.com/api/health` returned `HTTP/2 404` with `x-robots-tag: noindex`."
     },
     {
       "check": "Public Grafana login headers",
       "result": "pass",
-      "observed": "`curl -I https://grafana.lv3.org/login` returned `HTTP/2 200` with `x-robots-tag: noindex` and without `X-Grafana-Version` or `Via` headers."
+      "observed": "`curl -I https://grafana.example.com/login` returned `HTTP/2 200` with `x-robots-tag: noindex` and without `X-Grafana-Version` or `Via` headers."
     }
   ],
   "evidence_refs": [

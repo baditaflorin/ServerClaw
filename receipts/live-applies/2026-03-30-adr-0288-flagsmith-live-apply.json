@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.71",
   "workflow_id": "adr-0288-flagsmith-live-apply",
   "adr": "0288",
-  "summary": "Live-applied ADR 0288 from the latest available `0.177.108` mainline lineage by converging the repo-managed Flagsmith runtime on `docker-runtime-lv3`, keeping the public `flags.lv3.org` edge route behind the shared oauth2-proxy and Keycloak boundary, repairing sparse feature-state verification and Docker bridge-chain recovery during the correction loop, and confirming the seeded runtime plus public health surface are now stable on the live `0.130.71` platform.",
+  "summary": "Live-applied ADR 0288 from the latest available `0.177.108` mainline lineage by converging the repo-managed Flagsmith runtime on `docker-runtime-lv3`, keeping the public `flags.example.com` edge route behind the shared oauth2-proxy and Keycloak boundary, repairing sparse feature-state verification and Docker bridge-chain recovery during the correction loop, and confirming the seeded runtime plus public health surface are now stable on the live `0.130.71` platform.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Flagsmith public edge",
-      "address": "https://flags.lv3.org/"
+      "address": "https://flags.example.com/"
     },
     {
       "kind": "service_endpoint",
@@ -82,7 +82,7 @@
     {
       "check": "Public and guest-local probes",
       "result": "pass",
-      "observed": "`curl -fsS https://flags.lv3.org/health` returned the Flagsmith system status page, `curl -I https://flags.lv3.org/` and `curl -I https://flags.lv3.org/api/v1/projects/` both returned `HTTP/2 302` redirects into the shared oauth2-proxy sign-in flow, and a guest-local `curl -fsS http://127.0.0.1:8017/health` on `docker-runtime-lv3` returned the same status page."
+      "observed": "`curl -fsS https://flags.example.com/health` returned the Flagsmith system status page, `curl -I https://flags.example.com/` and `curl -I https://flags.example.com/api/v1/projects/` both returned `HTTP/2 302` redirects into the shared oauth2-proxy sign-in flow, and a guest-local `curl -fsS http://127.0.0.1:8017/health` on `docker-runtime-lv3` returned the same status page."
     }
   ],
   "evidence_refs": [
@@ -122,7 +122,7 @@
     "The correction loop exposed two real contract gaps: Flagsmith feature-state PATCH responses were sparse and needed a refetch-before-verify path, and live feature-state values arrived as typed nested payloads that had to be normalized before drift checks could pass.",
     "The branch validation bundle also exposed one repo-contract gap in the workstream manifest: `tests/test_flagsmith_seed.py` had to be added to the declared owned surfaces before the ownership gate could pass.",
     "The runtime replay also exposed transient Docker bridge-chain and stale compose-network failures on docker-runtime-lv3; the runtime role now recovers by restarting Docker, rerunning bridge programming, and retrying compose with force-recreate when those signatures appear.",
-    "A manual Hetzner DNS API POST created the `flags.lv3.org` A record during early debugging, but the settled repository converge now treats that record as managed and drift-free with no further DNS mutation required.",
+    "A manual Hetzner DNS API POST created the `flags.example.com` A record during early debugging, but the settled repository converge now treats that record as managed and drift-free with no further DNS mutation required.",
     "Protected exact-main surfaces still remain for merge-to-main: refresh `README.md`, `VERSION`, the release section in `changelog.md`, `versions/stack.yaml`, and the final ADR 0288 repo-version metadata from the synchronized latest-main replay."
   ],
   "correction_loop": {

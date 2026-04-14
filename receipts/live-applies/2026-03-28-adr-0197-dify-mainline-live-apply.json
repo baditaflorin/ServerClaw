@@ -11,12 +11,12 @@
   "platform_version_context": "0.130.42",
   "workflow_id": "adr-0197-dify-mainline-live-apply",
   "adr": "0197",
-  "summary": "Integrated ADR 0197 into current main by replaying the repo-managed Dify runtime and public edge, re-verifying the governed Dify tool bridge through api.lv3.org, and preserving packaged API gateway runbook compatibility plus linked-worktree smoke tracing on production.",
+  "summary": "Integrated ADR 0197 into current main by replaying the repo-managed Dify runtime and public edge, re-verifying the governed Dify tool bridge through api.example.com, and preserving packaged API gateway runbook compatibility plus linked-worktree smoke tracing on production.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,12 +39,12 @@
     {
       "kind": "service_endpoint",
       "name": "public Dify health",
-      "address": "https://agents.lv3.org/healthz"
+      "address": "https://agents.example.com/healthz"
     },
     {
       "kind": "service_endpoint",
       "name": "governed Dify tools bridge",
-      "address": "https://api.lv3.org/v1/dify-tools/get-platform-status"
+      "address": "https://api.example.com/v1/dify-tools/get-platform-status"
     },
     {
       "kind": "service_endpoint",
@@ -71,22 +71,22 @@
     {
       "check": "Public Dify edge publication",
       "result": "pass",
-      "observed": "`dig +short agents.lv3.org` returned `65.108.75.123`, and `curl -fsS -D - https://agents.lv3.org/healthz` returned `HTTP/2 200` with `{\"step\":\"finished\",\"setup_at\":\"2026-03-28T00:11:21\"}`."
+      "observed": "`dig +short agents.example.com` returned `203.0.113.1`, and `curl -fsS -D - https://agents.example.com/healthz` returned `HTTP/2 200` with `{\"step\":\"finished\",\"setup_at\":\"2026-03-28T00:11:21\"}`."
     },
     {
       "check": "Public API gateway auth boundary",
       "result": "pass",
-      "observed": "`curl -fsS -D - https://api.lv3.org/v1/health` returned the expected canonical `HTTP/2 401` auth envelope instead of the earlier broken public edge behavior."
+      "observed": "`curl -fsS -D - https://api.example.com/v1/health` returned the expected canonical `HTTP/2 401` auth envelope instead of the earlier broken public edge behavior."
     },
     {
       "check": "Governed Dify tool bridge",
       "result": "pass",
-      "observed": "`curl -fsS -D - -X POST https://api.lv3.org/v1/dify-tools/get-platform-status -H \"Content-Type: application/json\" -H \"X-LV3-Dify-Api-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt)\" -d '{}'` returned `HTTP/2 200` after the replay."
+      "observed": "`curl -fsS -D - -X POST https://api.example.com/v1/dify-tools/get-platform-status -H \"Content-Type: application/json\" -H \"X-LV3-Dify-Api-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/tools-api-key.txt)\" -d '{}'` returned `HTTP/2 200` after the replay."
     },
     {
       "check": "Linked-worktree smoke verification",
       "result": "pass",
-      "observed": "The private tunnel `curl -fsS -D - http://127.0.0.1:18094/healthz` returned `HTTP/1.1 200`, and `uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url http://127.0.0.1:18094 --admin-email baditaflorin@gmail.com --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/admin-password.txt --init-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/init-password.txt --tools-api-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt --export-path platform/dify-workflows/lv3-dify-smoke.yml` completed with `tool_count: 11`, `trace_configured: true`, and exported `platform/dify-workflows/lv3-dify-smoke.yml`."
+      "observed": "The private tunnel `curl -fsS -D - http://127.0.0.1:18094/healthz` returned `HTTP/1.1 200`, and `uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url http://127.0.0.1:18094 --admin-email operator@example.com --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/admin-password.txt --init-password-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/init-password.txt --tools-api-key-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/tools-api-key.txt --export-path platform/dify-workflows/lv3-dify-smoke.yml` completed with `tool_count: 11`, `trace_configured: true`, and exported `platform/dify-workflows/lv3-dify-smoke.yml`."
     }
   ],
   "evidence_refs": [
@@ -109,7 +109,7 @@
   ],
   "notes": [
     "This mainline receipt supersedes the earlier branch-local receipt `2026-03-28-adr-0197-dify-live-apply`, which correctly captured the original Hetzner DNS write brownout but no longer reflects current platform truth.",
-    "The latest-main replay was performed from the isolated worktree `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0197-main-finish` on branch `codex/ws-0197-main-finish` after rebasing ADR 0197 onto current `origin/main`.",
+    "The latest-main replay was performed from the isolated worktree `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0197-main-finish` on branch `codex/ws-0197-main-finish` after rebasing ADR 0197 onto current `origin/main`.",
     "The replay preserved the Dify internal port move from `8093` to `8094` so the existing Plane proxy on `docker-runtime-lv3` remains untouched while Dify stays healthy.",
     "The packaged API gateway runtime already contained newer ADR 0209 use-case service structure on current main, so the compatibility repair intentionally preserved that richer implementation while adding legacy `delivery_surface` handling, the `portal` alias mapping, and the optional `repo_root` argument on `WindmillWorkflowRunner`."
   ]

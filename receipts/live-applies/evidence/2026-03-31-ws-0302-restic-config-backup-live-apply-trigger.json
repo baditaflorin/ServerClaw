@@ -1,8 +1,8 @@
 {
   "status": "error",
   "target": "docker-runtime-lv3",
-  "command": "sudo python3 /srv/proxmox_florin_server/scripts/restic_config_backup.py --repo-root /srv/proxmox_florin_server --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-ws-0302 --print-report-json --live-apply-trigger",
+  "command": "sudo python3 /srv/platform_server/scripts/restic_config_backup.py --repo-root /srv/platform_server --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-ws-0302 --print-report-json --live-apply-trigger",
   "returncode": 2,
   "stdout": "",
-  "stderr": "python3: can't open file '/srv/proxmox_florin_server/scripts/restic_config_backup.py': [Errno 2] No such file or directory"
+  "stderr": "python3: can't open file '/srv/platform_server/scripts/restic_config_backup.py': [Errno 2] No such file or directory"
 }

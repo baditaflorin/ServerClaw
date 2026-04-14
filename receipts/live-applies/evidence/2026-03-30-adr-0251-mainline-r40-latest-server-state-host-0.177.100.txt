@@ -1,4 +1,4 @@
-Debian-trixie-latest-amd64-base
+debian-base-template
 2026-03-30T13:02:11+02:00
 6.17.13-2-pve
 pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)

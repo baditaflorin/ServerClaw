@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -50,17 +50,17 @@
     {
       "check": "Latest-origin/main Windmill live replay",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0230-live-apply-r2` with final recap `docker-runtime-lv3 ok=229 changed=38 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`."
+      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0230-live-apply-r2` with final recap `docker-runtime-lv3 ok=229 changed=38 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`."
     },
     {
       "check": "Worker-local ADR 0230 policy validation",
       "result": "pass",
-      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'cd /srv/proxmox_florin_server && python3 scripts/policy_checks.py --validate' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` returned `ADR 0230 policy checks OK: /srv/proxmox_florin_server/policy`, and a follow-up `find /srv/proxmox_florin_server/policy -type f \\( -name \"._*\" -o -name \".DS_Store\" \\) -print` returned no paths."
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'cd /srv/platform_server && python3 scripts/policy_checks.py --validate' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` returned `ADR 0230 policy checks OK: /srv/platform_server/policy`, and a follow-up `find /srv/platform_server/policy -type f \\( -name \"._*\" -o -name \".DS_Store\" \\) -print` returned no paths."
     },
     {
       "check": "Worker-side approval and validation-gate status path",
       "result": "pass",
-      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'cd /srv/proxmox_florin_server && python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned && python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` returned `Command approval OK: converge-windmill` and listed `policy-validation` in the enabled gate checks."
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'cd /srv/platform_server && python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned && python3 config/windmill/scripts/gate-status.py --repo-path /srv/platform_server' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` returned `Command approval OK: converge-windmill` and listed `policy-validation` in the enabled gate checks."
     },
     {
       "check": "Promotion gate shared-policy rejection path",

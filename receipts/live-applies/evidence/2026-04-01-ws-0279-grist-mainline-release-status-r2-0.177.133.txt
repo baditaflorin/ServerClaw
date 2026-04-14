@@ -11,7 +11,7 @@ Platform 1.0.0 readiness
 - Release blockers: 0 workstreams in progress
 - Gate bypass waivers: 1 open, 0 warnings, 0 blockers
 - Criteria met: 1/7 (14.29%)
-- OPEN WAIVER controller_dependency_gap until 2026-04-02 (baditaflorin@gmail.com; ws-0286-live-apply)
+- OPEN WAIVER controller_dependency_gap until 2026-04-02 (operator@example.com; ws-0286-live-apply)
 - PENDING ADR window 0001-0111: 99/111 implemented; first pending: 0014, 0020, 0024, 0025, 0028
 - PENDING SLO error budgets: pending (missing receipts/slo-reports/latest.json)
 - PENDING Backup restore verification: 0/2 consecutive passes from 4 receipt(s)

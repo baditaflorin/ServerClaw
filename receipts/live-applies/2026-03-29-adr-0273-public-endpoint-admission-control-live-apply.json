@@ -13,8 +13,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -24,18 +24,18 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "lv3.org",
-      "address": "https://lv3.org/"
+      "name": "example.com",
+      "address": "https://example.com/"
     },
     {
       "kind": "service_endpoint",
-      "name": "docs.lv3.org",
-      "address": "https://docs.lv3.org/"
+      "name": "docs.example.com",
+      "address": "https://docs.example.com/"
     },
     {
       "kind": "service_endpoint",
-      "name": "ops.lv3.org",
-      "address": "https://ops.lv3.org/"
+      "name": "ops.example.com",
+      "address": "https://ops.example.com/"
     }
   ],
   "verification": [
@@ -62,12 +62,12 @@
     {
       "check": "Direct HTTPS and SAN verification",
       "result": "pass",
-      "observed": "`curl -I https://lv3.org` returned `HTTP/2 308` redirecting to `https://nginx.lv3.org/`; `curl -I https://docs.lv3.org` and `curl -I https://ops.lv3.org` both returned `HTTP/2 302` to their `oauth2/sign_in` paths with `x-robots-tag: noindex, nofollow`; `echo | openssl s_client -servername docs.lv3.org -connect docs.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName` showed a Let's Encrypt issuer (`CN=E7`) and SAN coverage for `docs.lv3.org`, `ops.lv3.org`, `agents.lv3.org`, `api.lv3.org`, `apps.lv3.org`, `changelog.lv3.org`, `coolify.lv3.org`, `draw.lv3.org`, `headscale.lv3.org`, `home.lv3.org`, `langfuse.lv3.org`, `logs.lv3.org`, `lv3.org`, `n8n.lv3.org`, `nginx.lv3.org`, `realtime.lv3.org`, `registry.lv3.org`, `status.lv3.org`, `tasks.lv3.org`, and `wiki.lv3.org`."
+      "observed": "`curl -I https://example.com` returned `HTTP/2 308` redirecting to `https://nginx.example.com/`; `curl -I https://docs.example.com` and `curl -I https://ops.example.com` both returned `HTTP/2 302` to their `oauth2/sign_in` paths with `x-robots-tag: noindex, nofollow`; `echo | openssl s_client -servername docs.example.com -connect docs.example.com:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName` showed a Let's Encrypt issuer (`CN=E7`) and SAN coverage for `docs.example.com`, `ops.example.com`, `agents.example.com`, `api.example.com`, `apps.example.com`, `changelog.example.com`, `coolify.example.com`, `draw.example.com`, `headscale.example.com`, `home.example.com`, `langfuse.example.com`, `logs.example.com`, `example.com`, `n8n.example.com`, `nginx.example.com`, `realtime.example.com`, `registry.example.com`, `status.example.com`, `tasks.example.com`, and `wiki.example.com`."
     },
     {
       "check": "Final public exposure audit",
       "result": "partial",
-      "observed": "`make subdomain-exposure-audit` wrote audit run `2f66b12b-e342-464e-a6a4-c69516bc92f9` at `2026-03-29T11:15:55.744650Z`; the ADR 0273 concordance checks passed, while the audit still reported the pre-existing `git.lv3.org` warnings `active_subdomain_missing_expected_public_resolution` and `active_catalog_subdomain_missing_from_zone`."
+      "observed": "`make subdomain-exposure-audit` wrote audit run `2f66b12b-e342-464e-a6a4-c69516bc92f9` at `2026-03-29T11:15:55.744650Z`; the ADR 0273 concordance checks passed, while the audit still reported the pre-existing `git.example.com` warnings `active_subdomain_missing_expected_public_resolution` and `active_catalog_subdomain_missing_from_zone`."
     }
   ],
   "evidence_refs": [
@@ -88,7 +88,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "The live apply started from the isolated worktree `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0273-public-endpoint-admission-control` on branch `codex/ws-0273-public-endpoint-admission-control`, created from the latest fetched `origin/main`.",
+    "The live apply started from the isolated worktree `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0273-public-endpoint-admission-control` on branch `codex/ws-0273-public-endpoint-admission-control`, created from the latest fetched `origin/main`.",
     "The route-ledger replay remained fully idempotent, while the shared-edge replay performed four safe changes on `nginx-lv3` during its validation and reload path.",
     "The docs build performed by `make configure-edge-publication` regenerated `docs/site-generated/architecture/dependency-graph.md` with Pagefind front matter, so this branch records that generated-docs update alongside the ADR 0273 receipt.",
     "Protected integration files (`VERSION`, `changelog.md`, `versions/stack.yaml`, and any generated release surfaces) intentionally remained pending until the final mainline integration step."

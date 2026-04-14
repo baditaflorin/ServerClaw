@@ -1,2 +1,2 @@
 docker-runtime-lv3 | CHANGED | rc=0 >>
-3678900cd0300f93f1cbd59c8777ba7bf6a280e2d923389c1a9cd9895c4bb443  /srv/proxmox_florin_server/scripts/sbom_scanner.py
+3678900cd0300f93f1cbd59c8777ba7bf6a280e2d923389c1a9cd9895c4bb443  /srv/platform_server/scripts/sbom_scanner.py

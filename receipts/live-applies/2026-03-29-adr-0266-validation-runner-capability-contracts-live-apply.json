@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -35,7 +35,7 @@
     {
       "check": "Build-server workspace and immutable snapshot handoff",
       "result": "pass",
-      "observed": "`make check-build-server` passed from commit `d9a17397`, verified SSH reachability to `ops@10.10.10.30`, created the session workspace `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0266-validation-runner-capability-contracts-8be65b3b1f/repo`, and confirmed immutable snapshot upload for the rebased branch."
+      "observed": "`make check-build-server` passed from commit `d9a17397`, verified SSH reachability to `ops@10.10.10.30`, created the session workspace `/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0266-validation-runner-capability-contracts-8be65b3b1f/repo`, and confirmed immutable snapshot upload for the rebased branch."
     },
     {
       "check": "Remote validation runner attestation",

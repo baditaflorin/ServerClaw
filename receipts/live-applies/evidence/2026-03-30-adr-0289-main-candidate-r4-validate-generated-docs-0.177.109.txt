@@ -1,4 +1,4 @@
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-detached-r4/scripts/generate_status_docs.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-detached-r4/scripts/generate_status_docs.py --check
 Generated status docs OK
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-detached-r4/scripts/generate_diagrams.py --check
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-main-detached-r4/scripts/generate_diagrams.py --check
 Architecture diagrams OK

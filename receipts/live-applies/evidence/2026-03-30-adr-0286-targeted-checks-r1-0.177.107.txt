@@ -1,8 +1,8 @@
 $ uv run --with pytest --with pyyaml python -m pytest -q tests/test_tika_runtime_role.py tests/test_tesseract_ocr_runtime_role.py tests/test_document_extraction.py tests/test_generate_platform_vars.py tests/test_service_id_resolver.py tests/test_docker_runtime_role.py tests/test_post_verify_tasks.py tests/test_docker_publication_assurance_playbook.py
 Using CPython 3.13.7 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
 Creating virtual environment at: .venv
-   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply-r3
-      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply-r3
+   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0286-live-apply-r3
+      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0286-live-apply-r3
 Installed 2 packages in 4ms
 .......................................................................  [100%]
 71 passed in 3.02s

@@ -11,11 +11,11 @@
   "platform_version_context": "0.130.40",
   "workflow_id": "adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply",
   "adr": "0225",
-  "summary": "Applied ADR 0225 on proxmox_florin by bootstrapping a durable server-resident ansible-pull reconcile loop, minting a least-privilege Gitea read token for the host, correcting repeated host-local replays with a dedicated local ansible-pull inventory, publishing the exact rebased 0.177.43 integration candidate into the private Gitea source, and proving the timer-backed systemd path end to end through a successful latest-main host-local receipt.",
+  "summary": "Applied ADR 0225 on proxmox-host by bootstrapping a durable server-resident ansible-pull reconcile loop, minting a least-privilege Gitea read token for the host, correcting repeated host-local replays with a dedicated local ansible-pull inventory, publishing the exact rebased 0.177.43 integration candidate into the private Gitea source, and proving the timer-backed systemd path end to end through a successful latest-main host-local receipt.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -26,7 +26,7 @@
     {
       "kind": "managed_path",
       "name": "Server-resident checkout",
-      "address": "/srv/proxmox_florin_server"
+      "address": "/srv/platform_server"
     },
     {
       "kind": "managed_path",
@@ -38,22 +38,22 @@
     {
       "check": "Focused role regression slice",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_server_resident_reconciliation.py` passed with `7 passed in 0.06s`, `ansible-playbook -i inventory/hosts.yml playbooks/server-resident-reconciliation.yml --syntax-check` passed, and `./scripts/validate_repo.sh data-models architecture-fitness generated-docs agent-standards` passed from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply` once the ADR index and generated truth surfaces were refreshed."
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_server_resident_reconciliation.py` passed with `7 passed in 0.06s`, `ansible-playbook -i inventory/hosts.yml playbooks/server-resident-reconciliation.yml --syntax-check` passed, and `./scripts/validate_repo.sh data-models architecture-fitness generated-docs agent-standards` passed from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0225-live-apply` once the ADR index and generated truth surfaces were refreshed."
     },
     {
       "check": "Controller-driven bootstrap and runtime-inventory repair",
       "result": "pass",
-      "observed": "The isolated worktree replay installed `ansible-core`, the managed askpass helper, wrapper, and `lv3-server-resident-reconciliation.timer` on `proxmox_florin`, mirrored the low-privilege Gitea token to `/etc/lv3/server-resident-reconciliation/gitea-read-token`, and later re-rendered `/var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml` plus the wrapper after the latest-main replay exposed an `ansible-pull` checkout mismatch on repeated runs."
+      "observed": "The isolated worktree replay installed `ansible-core`, the managed askpass helper, wrapper, and `lv3-server-resident-reconciliation.timer` on `proxmox-host`, mirrored the low-privilege Gitea token to `/etc/lv3/server-resident-reconciliation/gitea-read-token`, and later re-rendered `/var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml` plus the wrapper after the latest-main replay exposed an `ansible-pull` checkout mismatch on repeated runs."
     },
     {
       "check": "Private Gitea source publication",
       "result": "pass",
-      "observed": "After rebasing onto the latest `origin/main`, the private repo `ops/proxmox_florin_server` published exact snapshot commit `5b121f700d0f1cd372ef85f24288691fb8a88e0c` for source commit `aacd8443b064aa2a14f9929f11a3ae45ae530095`, which made the final 0.177.43 integration candidate available to the trusted host-local `ansible-pull` runner without changing the source URL."
+      "observed": "After rebasing onto the latest `origin/main`, the private repo `ops/platform_server` published exact snapshot commit `5b121f700d0f1cd372ef85f24288691fb8a88e0c` for source commit `aacd8443b064aa2a14f9929f11a3ae45ae530095`, which made the final 0.177.43 integration candidate available to the trusted host-local `ansible-pull` runner without changing the source URL."
     },
     {
       "check": "Host-local ansible-pull replay",
       "result": "pass",
-      "observed": "On `2026-03-28T17:53:04Z`, `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox_florin`, `/srv/proxmox_florin_server` checked out `5b121f700d0f1cd372ef85f24288691fb8a88e0c`, the working tree stayed clean, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`, `exit_code: 0`, `duration_seconds: 9`, and `inventory_path: /var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml`."
+      "observed": "On `2026-03-28T17:53:04Z`, `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox-host`, `/srv/platform_server` checked out `5b121f700d0f1cd372ef85f24288691fb8a88e0c`, the working tree stayed clean, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`, `exit_code: 0`, `duration_seconds: 9`, and `inventory_path: /var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml`."
     }
   ],
   "evidence_refs": [

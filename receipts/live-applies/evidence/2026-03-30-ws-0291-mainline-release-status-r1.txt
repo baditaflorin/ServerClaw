@@ -25,7 +25,7 @@
         "bypass": "skip_remote_gate",
         "reason_code": "controller_dependency_gap",
         "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
-        "owner": "baditaflorin@gmail.com",
+        "owner": "operator@example.com",
         "expires_on": "2026-04-02",
         "remediation_ref": "ws-0286-live-apply"
       }

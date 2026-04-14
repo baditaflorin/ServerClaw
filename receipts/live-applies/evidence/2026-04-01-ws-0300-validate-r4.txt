@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/validate_repo.sh
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/validate_repo.sh
 Generated platform vars validation
 Syntax check: playbooks/api-gateway.yml
 Syntax check: playbooks/artifact-cache-vm.yml
@@ -180,13 +180,13 @@ collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.y
 
 Ansible role idempotency policy
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/ansible_role_idempotency.py", line 318, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/ansible_role_idempotency.py", line 318, in <module>
     raise SystemExit(main())
                      ~~~~^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/ansible_role_idempotency.py", line 280, in main
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/ansible_role_idempotency.py", line 280, in main
     enforced, tracked, exempt = validate_config(config, path=args.config)
                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/ansible_role_idempotency.py", line 66, in validate_config
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/ansible_role_idempotency.py", line 66, in validate_config
     raise ValueError(f"{path} does not match the role tree: {'; '.join(details)}")
-ValueError: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/config/ansible-role-idempotency.yml does not match the role tree: missing roles: grist_runtime, livekit_runtime
+ValueError: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/config/ansible-role-idempotency.yml does not match the role tree: missing roles: grist_runtime, livekit_runtime
 make: *** [validate] Error 1

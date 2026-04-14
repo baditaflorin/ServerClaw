@@ -72,7 +72,7 @@
     "nextcloud-app",
     "langfuse-web"
   ],
-  "errors_lv3_org_resolves_to": "65.108.75.123",
+  "errors_lv3_org_resolves_to": "203.0.113.1",
   "glitchtip_network_inspect": [
     {
       "Attachable": false,
@@ -119,10 +119,10 @@
       }
     }
   ],
-  "nginx_lv3_org_resolves_to": "65.108.75.123",
+  "nginx_lv3_org_resolves_to": "203.0.113.1",
   "secret_read": {
     "returncode": 0,
     "stderr": ""
   },
-  "secret_value": "https://7b523db6e7a14aa2bd822cff46bb0943@errors.lv3.org/3"
+  "secret_value": "https://7b523db6e7a14aa2bd822cff46bb0943@errors.example.com/3"
 }

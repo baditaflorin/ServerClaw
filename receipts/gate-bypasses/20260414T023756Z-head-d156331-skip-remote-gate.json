@@ -18,7 +18,7 @@
       "./scripts/run_python_with_packages.sh pytest -- -m pytest tests/test_agent_tool_registry.py -q",
       "exact schema-validation chain passed locally on HEAD@d15633136"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-15",
     "remediation_ref": "ws-0364-post-merge-validation"
   }

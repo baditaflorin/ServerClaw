@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.60",
   "workflow_id": "adr-0254-serverclaw-distinct-product-surface-mainline-live-apply",
   "adr": "0254",
-  "summary": "Live-applied ADR 0254 from merged main commit 72ee92ef77cae2cf73e3c42168b2e193984c05c1 after release 0.177.91 reached origin/main, replayed make converge-serverclaw on the exact mainline tree, preserved the governed 8096 Proxmox and guest firewall lane to coolify-lv3, and re-verified internal edge reachability, bootstrap admin sign-in, and public chat.lv3.org over HTTPS end to end.",
+  "summary": "Live-applied ADR 0254 from merged main commit 72ee92ef77cae2cf73e3c42168b2e193984c05c1 after release 0.177.91 reached origin/main, replayed make converge-serverclaw on the exact mainline tree, preserved the governed 8096 Proxmox and guest firewall lane to coolify-lv3, and re-verified internal edge reachability, bootstrap admin sign-in, and public chat.example.com over HTTPS end to end.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "serverclaw",
-      "address": "https://chat.lv3.org/"
+      "address": "https://chat.example.com/"
     }
   ],
   "verification": [
@@ -52,27 +52,27 @@
     {
       "check": "Exact-main ServerClaw converge replay",
       "result": "pass",
-      "observed": "`make converge-serverclaw` completed successfully from merged `main` source commit `72ee92ef77cae2cf73e3c42168b2e193984c05c1` with recap `coolify-lv3 ok=60 changed=4 failed=0 skipped=14`, `docker-runtime-lv3 ok=63 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`, and `proxmox_florin ok=241 changed=6 failed=0 skipped=108`."
+      "observed": "`make converge-serverclaw` completed successfully from merged `main` source commit `72ee92ef77cae2cf73e3c42168b2e193984c05c1` with recap `coolify-lv3 ok=60 changed=4 failed=0 skipped=14`, `docker-runtime-lv3 ok=63 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`, and `proxmox-host ok=241 changed=6 failed=0 skipped=108`."
     },
     {
       "check": "Host firewall lane",
       "result": "pass",
-      "observed": "A fresh host probe on `proxmox_florin` confirmed `/etc/pve/firewall/170.fw` still contains `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096` after the merged-main replay."
+      "observed": "A fresh host probe on `proxmox-host` confirmed `/etc/pve/firewall/170.fw` still contains `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096` after the merged-main replay."
     },
     {
       "check": "Internal nginx-to-coolify edge lane",
       "result": "pass",
-      "observed": "Fresh `nginx-lv3` probes succeeded on both checks: `nc -vz -w 5 10.10.10.70 8096` returned `Connection to 10.10.10.70 8096 port [tcp/*] succeeded!`, and `curl -sk -D - https://127.0.0.1/ -H 'Host: chat.lv3.org' -o /dev/null` returned `HTTP/2 200` with `server: nginx` and `content-type: text/html; charset=utf-8`."
+      "observed": "Fresh `nginx-lv3` probes succeeded on both checks: `nc -vz -w 5 10.10.10.70 8096` returned `Connection to 10.10.10.70 8096 port [tcp/*] succeeded!`, and `curl -sk -D - https://127.0.0.1/ -H 'Host: chat.example.com' -o /dev/null` returned `HTTP/2 200` with `server: nginx` and `content-type: text/html; charset=utf-8`."
     },
     {
       "check": "Coolify runtime health and bootstrap admin sign-in",
       "result": "pass",
-      "observed": "Fresh `coolify-lv3` checks returned `200` from `http://127.0.0.1:8096/`, and guest-local bootstrap admin sign-in returned `{\"email\":\"ops@lv3.org\",\"role\":\"admin\",\"token_type\":\"Bearer\",\"has_token\":true}`."
+      "observed": "Fresh `coolify-lv3` checks returned `200` from `http://127.0.0.1:8096/`, and guest-local bootstrap admin sign-in returned `{\"email\":\"ops@example.com\",\"role\":\"admin\",\"token_type\":\"Bearer\",\"has_token\":true}`."
     },
     {
       "check": "Public ServerClaw edge verification",
       "result": "pass",
-      "observed": "Fresh public probes returned `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.lv3.org/` on `http://chat.lv3.org/`, and `HTTP/2 200` with the repo-managed security headers on `https://chat.lv3.org/`."
+      "observed": "Fresh public probes returned `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.example.com/` on `http://chat.example.com/`, and `HTTP/2 200` with the repo-managed security headers on `https://chat.example.com/`."
     },
     {
       "check": "Post-closeout validation sweep",

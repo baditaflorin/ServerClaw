@@ -8,7 +8,7 @@ docker-runtime-lv3 | CHANGED => {
     "group": "root",
     "mode": "0755",
     "owner": "root",
-    "path": "/srv/proxmox_florin_server/receipts/sbom",
+    "path": "/srv/platform_server/receipts/sbom",
     "size": 4096,
     "state": "directory",
     "uid": 0
@@ -22,7 +22,7 @@ docker-runtime-lv3 | CHANGED => {
     "group": "root",
     "mode": "0755",
     "owner": "root",
-    "path": "/srv/proxmox_florin_server/receipts/cve",
+    "path": "/srv/platform_server/receipts/cve",
     "size": 4096,
     "state": "directory",
     "uid": 0
@@ -32,13 +32,13 @@ docker-runtime-lv3 | CHANGED => {
         "discovered_interpreter_python": "/usr/bin/python3.13"
     },
     "changed": true,
-    "dest": "/srv/proxmox_florin_server",
+    "dest": "/srv/platform_server",
     "extract_results": {
         "cmd": [
             "/usr/bin/tar",
             "--extract",
             "-C",
-            "/srv/proxmox_florin_server",
+            "/srv/platform_server",
             "-z",
             "-f",
             "/tmp/ansible-tmp-1774935824.156495-11315-238157005295578/source"
@@ -58,9 +58,9 @@ docker-runtime-lv3 | CHANGED => {
     "uid": 0
 }
 docker-runtime-lv3 | CHANGED | rc=0 >>
-EXISTS /srv/proxmox_florin_server/config/sbom-scanner.json
-EXISTS /srv/proxmox_florin_server/scripts/sbom_scanner.py
-EXISTS /srv/proxmox_florin_server/scripts/sbom_refresh.py
-EXISTS /srv/proxmox_florin_server/config/windmill/scripts/sbom-refresh.py
-EXISTS /srv/proxmox_florin_server/receipts/sbom
-EXISTS /srv/proxmox_florin_server/receipts/cve
+EXISTS /srv/platform_server/config/sbom-scanner.json
+EXISTS /srv/platform_server/scripts/sbom_scanner.py
+EXISTS /srv/platform_server/scripts/sbom_refresh.py
+EXISTS /srv/platform_server/config/windmill/scripts/sbom-refresh.py
+EXISTS /srv/platform_server/receipts/sbom
+EXISTS /srv/platform_server/receipts/cve

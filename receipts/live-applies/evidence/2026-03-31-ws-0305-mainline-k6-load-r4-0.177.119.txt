@@ -1,4 +1,4 @@
-uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/k6_load_testing.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final --scenario load --publish-nats --notify-ntfy --service keycloak --service openfga
+uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/scripts/k6_load_testing.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final --scenario load --publish-nats --notify-ntfy --service keycloak --service openfga
 k6 receipt warning for keycloak: failed to deliver ntfy warning: HTTP Error 404: Not Found
 k6 receipt warning for openfga: failed to deliver ntfy warning: HTTP Error 404: Not Found
 WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested

@@ -8,7 +8,7 @@ after_toggle_code 200
 after_toggle_favorites_section 1
 after_toggle_remove_keycloak 2
 redirect_code 303
-redirect_location https://sso.lv3.org
+redirect_location https://sso.example.com
 after_code 200
 after_favorites_section 1
 after_remove_keycloak 3

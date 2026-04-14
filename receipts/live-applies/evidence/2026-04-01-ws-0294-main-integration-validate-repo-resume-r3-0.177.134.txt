@@ -15,12 +15,12 @@ collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.y
 
 Ansible role idempotency policy
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/scripts/ansible_role_idempotency.py", line 318, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration/scripts/ansible_role_idempotency.py", line 318, in <module>
     raise SystemExit(main())
                      ~~~~^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/scripts/ansible_role_idempotency.py", line 280, in main
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration/scripts/ansible_role_idempotency.py", line 280, in main
     enforced, tracked, exempt = validate_config(config, path=args.config)
                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/scripts/ansible_role_idempotency.py", line 66, in validate_config
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration/scripts/ansible_role_idempotency.py", line 66, in validate_config
     raise ValueError(f"{path} does not match the role tree: {'; '.join(details)}")
-ValueError: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/config/ansible-role-idempotency.yml does not match the role tree: missing roles: livekit_runtime, one_api_postgres, one_api_runtime
+ValueError: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration/config/ansible-role-idempotency.yml does not match the role tree: missing roles: livekit_runtime, one_api_postgres, one_api_runtime

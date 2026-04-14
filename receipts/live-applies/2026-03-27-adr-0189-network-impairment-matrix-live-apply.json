@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -47,7 +47,7 @@
     {
       "check": "Governed ADR 0189 live render",
       "result": "pass",
-      "observed": "`POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix` with `{\"target_class\":\"staging\"}` returned `status: planned`, `entry_count: 4`, and `report_file: /srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json`; a guest-local read of that JSON file on `docker-runtime-lv3` returned the same `planned` staging slice."
+      "observed": "`POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix` with `{\"target_class\":\"staging\"}` returned `status: planned`, `entry_count: 4`, and `report_file: /srv/platform_server/.local/network-impairment-matrix/latest.json`; a guest-local read of that JSON file on `docker-runtime-lv3` returned the same `planned` staging slice."
     }
   ],
   "evidence_refs": [
@@ -59,7 +59,7 @@
   ],
   "notes": [
     "This workstream branch intentionally leaves `VERSION`, numbered release sections in `changelog.md`, `versions/stack.yaml`, and the top-level integrated `README.md` status summary for the final merge-to-main integration step.",
-    "The live repair added a shared Windmill runtime safeguard that removes stale `/srv/proxmox_florin_server/pyproject.toml` and `lv3_platform_cli.egg-info` from the mirrored worker checkout so repo-managed Python jobs no longer trigger `uv` editable-build startup failures before their wrappers run.",
+    "The live repair added a shared Windmill runtime safeguard that removes stale `/srv/platform_server/pyproject.toml` and `lv3_platform_cli.egg-info` from the mirrored worker checkout so repo-managed Python jobs no longer trigger `uv` editable-build startup failures before their wrappers run.",
     "The ADR 0189 rollout remains on the safe diagnostic path only: it renders governed staging, preview, fixture, standby, and recovery matrix slices but does not authorize ad hoc production impairments; actual higher-fidelity execution lanes remain follow-up work under ADR 0088 and ADR 0185."
   ]
 }

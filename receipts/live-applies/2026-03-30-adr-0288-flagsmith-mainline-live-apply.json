@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.72",
   "workflow_id": "adr-0288-flagsmith-mainline-live-apply",
   "adr": "0288",
-  "summary": "Replayed ADR 0288 from committed source `0b32e585bbf2f0445f9eddd153923f93c221dba2`, published the repo-managed Flagsmith runtime at `flags.lv3.org` behind the shared oauth2-proxy and Keycloak boundary, verified public and guest-local health from the exact-main `0.177.109` tree, and attached the canonical Flagsmith receipt to the already-merged `0.177.109 / 0.130.72` mainline baseline without advancing the tracked platform version again.",
+  "summary": "Replayed ADR 0288 from committed source `0b32e585bbf2f0445f9eddd153923f93c221dba2`, published the repo-managed Flagsmith runtime at `flags.example.com` behind the shared oauth2-proxy and Keycloak boundary, verified public and guest-local health from the exact-main `0.177.109` tree, and attached the canonical Flagsmith receipt to the already-merged `0.177.109 / 0.130.72` mainline baseline without advancing the tracked platform version again.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Flagsmith public edge",
-      "address": "https://flags.lv3.org/"
+      "address": "https://flags.example.com/"
     },
     {
       "kind": "service_endpoint",
@@ -72,7 +72,7 @@
     {
       "check": "Public and guest-local runtime proofs",
       "result": "pass",
-      "observed": "`curl -fsS https://flags.lv3.org/health` returned the Flagsmith system status page, `curl -I https://flags.lv3.org/` and `curl -I https://flags.lv3.org/api/v1/projects/` both returned `HTTP/2 302` redirects into the shared oauth2-proxy sign-in flow, `docker-runtime-lv3` reported healthy `flagsmith` and `flagsmith-task-processor` containers, and a guest-local `curl -fsS http://127.0.0.1:8017/health` returned the same status page."
+      "observed": "`curl -fsS https://flags.example.com/health` returned the Flagsmith system status page, `curl -I https://flags.example.com/` and `curl -I https://flags.example.com/api/v1/projects/` both returned `HTTP/2 302` redirects into the shared oauth2-proxy sign-in flow, `docker-runtime-lv3` reported healthy `flagsmith` and `flagsmith-task-processor` containers, and a guest-local `curl -fsS http://127.0.0.1:8017/health` returned the same status page."
     },
     {
       "check": "Clean exact-main generated-surface refresh",

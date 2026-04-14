@@ -2,9 +2,9 @@
 2026-03-30T20:17:07.8322269Z workflow prepared
 2026-03-30T20:17:07.8323078Z evaluating expression 'success()'
 2026-03-30T20:17:07.8323717Z expression 'success()' evaluated to 'true'
-2026-03-30T20:17:07.8323908Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
-2026-03-30T20:17:07.8389157Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb platform= username= forcePull=false
-2026-03-30T20:17:07.8389565Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
+2026-03-30T20:17:07.8323908Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
+2026-03-30T20:17:07.8389157Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb platform= username= forcePull=false
+2026-03-30T20:17:07.8389565Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
 2026-03-30T20:17:07.8397469Z Image exists? false
-2026-03-30T20:17:07.8398033Z pulling image 'registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb' ()
+2026-03-30T20:17:07.8398033Z pulling image 'registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb' ()
 2026-03-30T20:17:07.9158645Z Error response from daemon: unknown: artifact check-runner/python@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb not found

@@ -18,8 +18,8 @@ windmill-windmill_worker_native-1   ghcr.io/windmill-labs/windmill:1.662.0@sha25
 --- api version ---
 CE v1.662.0
 
-=== proxmox_florin ===
-Debian-trixie-latest-amd64-base
+=== proxmox-host ===
+debian-base-template
 2026-03-30T16:31:17Z
 Linux 6.17.13-2-pve x86_64 GNU/Linux
 

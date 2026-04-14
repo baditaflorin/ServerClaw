@@ -19,7 +19,7 @@ Passed
 
 Notes
 - The `0.177.123` replay needed a generated refresh of `docs/diagrams/agent-coordination-map.excalidraw` after `scripts/generate_diagrams.py --check` reported stale generated output; the refreshed map now records `304` parallel branches instead of `303`.
-- The validation commands used controller-local `TMPDIR=/tmp`, `ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local`, and `ANSIBLE_REMOTE_TEMP=/tmp` to avoid the earlier default `~/.ansible/tmp` disk-pressure failure mode seen on prior replays.
+- The validation commands used controller-local `TMPDIR=/tmp`, `ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local`, and `ANSIBLE_REMOTE_TEMP=/tmp` to avoid the earlier default `~/.ansible/tmp` disk-pressure failure mode seen on prior replays.
 - Supporting receipts:
   - `receipts/live-applies/evidence/2026-03-31-adr-0281-targeted-latest-main-tests-r5-0.177.123.txt`
   - `receipts/live-applies/evidence/2026-03-31-adr-0281-repo-contract-refresh-r3-0.177.123.txt`
@@ -35,4 +35,4 @@ Known remaining generated-doc blockers
 Live-state blockers
 - quiet-window probe `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r5-0.177.123.txt` still shows 5 conflicting controller-local live applies on the shared hosts
 - long waiter `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-waiter-r4-0.177.122.txt` timed out after 15 minutes without finding a quiet controller window
-- public-surface probe `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r5-0.177.123.txt` still shows `errors.lv3.org` serving `CN=nginx.lv3.org` and redirecting to `https://nginx.lv3.org/...`
+- public-surface probe `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r5-0.177.123.txt` still shows `errors.example.com` serving `CN=nginx.example.com` and redirecting to `https://nginx.example.com/...`

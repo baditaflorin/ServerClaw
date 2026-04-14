@@ -1,7 +1,7 @@
-proxmox_florin | CHANGED | rc=0 >>
-vmid=110 tags: aag-edge-publication;fd-host-proxmox-florin;ingress;lv3;nginx;pc-primary
-vmid=120 tags: aag-runtime-shared;docker;fd-host-proxmox-florin;lv3;pc-primary;runtime
-vmid=130 tags: aag-build-jobs;build;docker;fd-host-proxmox-florin;lv3;pc-primary
-vmid=140 tags: aag-observability-core;fd-host-proxmox-florin;grafana;lv3;monitoring;pc-primary
-vmid=150 tags: aag-postgres-ha;database;fd-host-proxmox-florin;lv3;pc-primary;postgres
-vmid=160 tags: aag-control-plane-recovery;backup;exc-same-domain;fd-host-proxmox-florin;lv3;pbs;pc-recovery
+proxmox-host | CHANGED | rc=0 >>
+vmid=110 tags: aag-edge-publication;fd-host-proxmox-host;ingress;lv3;nginx;pc-primary
+vmid=120 tags: aag-runtime-shared;docker;fd-host-proxmox-host;lv3;pc-primary;runtime
+vmid=130 tags: aag-build-jobs;build;docker;fd-host-proxmox-host;lv3;pc-primary
+vmid=140 tags: aag-observability-core;fd-host-proxmox-host;grafana;lv3;monitoring;pc-primary
+vmid=150 tags: aag-postgres-ha;database;fd-host-proxmox-host;lv3;pc-primary;postgres
+vmid=160 tags: aag-control-plane-recovery;backup;exc-same-domain;fd-host-proxmox-host;lv3;pbs;pc-recovery

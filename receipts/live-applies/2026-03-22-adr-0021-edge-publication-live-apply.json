@@ -18,18 +18,18 @@
     },
     {
       "kind": "public_hostname",
-      "name": "grafana.lv3.org"
+      "name": "grafana.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "nginx.lv3.org"
+      "name": "nginx.example.com"
     }
   ],
   "verification": [
     {
       "check": "Published hostnames reachable",
       "result": "pass",
-      "observed": "grafana.lv3.org and nginx.lv3.org served the repo-managed edge responses."
+      "observed": "grafana.example.com and nginx.example.com served the repo-managed edge responses."
     },
     {
       "check": "Shared edge certificate expanded",

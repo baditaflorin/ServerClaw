@@ -377,7 +377,7 @@ deleted: sha256:bd59e7e428c9e76bc724f38578c163243152a507a5da6e0f63c0d61da952ba5b
 deleted: sha256:34165fb0807042c1f8ed197fd1ea5a031ca3e27e6e3fba9fbcf49a20052d19b7
 deleted: sha256:3bd325ec8c2d0894ea95758a6b235d7e2da1cb28f1cc2b76aeede98d5f8f425a
 deleted: sha256:a33ba213ad26a605d904a741f67154f3904c74a43182c872c35f36b10fa005e0
-untagged: registry.lv3.org/check-runner/security:2026.03.30
+untagged: registry.example.com/check-runner/security:2026.03.30
 deleted: sha256:3a149cf57e8a24b3ca8939226274e40d48f63667dc06e7d4ad3f321f1810af8e
 untagged: adr-0083-clean/check-runner/python:3.12.10
 deleted: sha256:1ce1dd1643ab1f6913b1a060f7c4e33c6dc9a543ed6220eab696aa56f4619632
@@ -646,7 +646,7 @@ deleted: sha256:09be70d4cecb4dbe9da2fa9b5b6758b69afbbbf31fb3c4933d590f385df62215
 deleted: sha256:16a3b2de3805a3809ac7193b758424ac54cbf3cfffd3d59d89de311fe1d8659a
 deleted: sha256:779531fd95e9636af9d977f53d5bf0d4c0830ca4704af1237bbbeb21727ce779
 deleted: sha256:0d46c9587c4d461e4abdd94cab81a6238629019f271fcdff144bcb01c1b841c6
-untagged: registry.lv3.org/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+untagged: registry.example.com/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
 deleted: sha256:8475aec5270d74cb5c21ce0888d03720660a821cf65635a34e1bef53a0aca887
 deleted: sha256:4674cb1bebb291d87e5c4b6b6d859f501a3535daff594c57679f8207ed3586b0
 deleted: sha256:ed31b7be3e6cbbb29435ecfba01e490c545b18a528d996703e5ec4f9b7c0bde9
@@ -703,7 +703,7 @@ deleted: sha256:0feb77b4d767274f6422f4c270615121333dc3592ff2829fe7bcbf4eb2cac82c
 deleted: sha256:a483da8ab3e941547542718cacd3258c6c705a63e94183c837c9bc44eb608999
 untagged: adr-0083-clean/check-runner/infra:2026.03.23
 untagged: adr-0083-final/check-runner/infra:2026.03.23
-untagged: registry.lv3.org/check-runner/infra:2026.03.23
+untagged: registry.example.com/check-runner/infra:2026.03.23
 deleted: sha256:336aea3bd6ae88ba3350274e75a0c786708672bd10b8bdf753ccb2375e1fc4f4
 untagged: 10.10.10.30:5001/portainer/portainer-ce@sha256:3d8e3d85d0653baf49ebe7875200f0e5c4da79c8ebea380acddf40896e4d59eb
 deleted: sha256:2622931a6f420d9c80c84f6b17cce4b0fb5a0d67b23eb2baf44eae774ff5a9ac

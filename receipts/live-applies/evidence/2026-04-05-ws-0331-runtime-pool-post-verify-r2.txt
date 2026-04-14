@@ -105,7 +105,7 @@ name: runtime-control-lv3
 Mem:           125Gi        96Gi        14Gi       106Mi        15Gi        29Gi
 
 ## capacity report
-Capacity Report for florin (proxmox_florin)
+Capacity Report for florin (proxmox-host)
 Metrics source: disabled
 
 Host summary:

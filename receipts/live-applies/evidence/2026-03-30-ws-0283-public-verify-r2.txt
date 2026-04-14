@@ -1,15 +1,15 @@
 2026-03-30T09:05:01Z
 READY
 {"sessions":"ok","postgres":"ok","clickhouse":"ok","sites_cache":"ok"}TRACKER_INJECTION
-  <script defer data-domain="nginx.lv3.org" data-api="https://analytics.lv3.org/api/event" src="https://analytics.lv3.org/js/script.js"></script>
+  <script defer data-domain="nginx.example.com" data-api="https://analytics.example.com/api/event" src="https://analytics.example.com/js/script.js"></script>
 DASHBOARD_HEADERS
 HTTP/2 302
 server: nginx
 date: Mon, 30 Mar 2026 09:05:02 GMT
 content-type: text/html
 content-length: 138
-location: https://analytics.lv3.org/oauth2/sign_in?rd=https://analytics.lv3.org/
+location: https://analytics.example.com/oauth2/sign_in?rd=https://analytics.example.com/
 x-robots-tag: noindex, nofollow
 
 DNS
-{"analytics.lv3.org": ["65.108.75.123"]}
+{"analytics.example.com": ["203.0.113.1"]}

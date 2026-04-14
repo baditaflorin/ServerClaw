@@ -1,4 +1,4 @@
-The push refers to repository [registry.lv3.org/check-runner/security]
+The push refers to repository [registry.example.com/check-runner/security]
 3ec68d92c98f: Waiting
 ccd2228a733b: Waiting
 4197917b98c4: Waiting
@@ -31,4 +31,4 @@ fc453660bbd3: Waiting
 3ec68d92c98f: Waiting
 ccd2228a733b: Waiting
 4197917b98c4: Waiting
-unknown: unexpected status from HEAD request to https://registry.lv3.org/v2/check-runner/security/blobs/sha256:9987d4e17be35a9db295366410f8fa8f59fd08d56b2ee1532f7ad92efd591197: 502 Bad Gateway
+unknown: unexpected status from HEAD request to https://registry.example.com/v2/check-runner/security/blobs/sha256:9987d4e17be35a9db295366410f8fa8f59fd08d56b2ee1532f7ad92efd591197: 502 Bad Gateway

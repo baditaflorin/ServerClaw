@@ -1,1 +1,1 @@
-[0] Generated password → /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-live-apply/.local/keycloak/matei.busui-tmp-password.txt
+[0] Generated password → /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0317-live-apply/.local/keycloak/matei.busui-tmp-password.txt

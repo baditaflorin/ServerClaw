@@ -11,18 +11,18 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/.local/packer-plugin-cache
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/build/docs-portal
 Result: PASS (live-apply-service)
 /Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/scripts/interface_contracts.py --check-live-apply "service:grist"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/scripts/interface_contracts.py --check-live-apply "service:grist"
 Live apply contract OK: service:grist -> playbooks/services/grist.yml
 Vulnerability budget gate for grist: approved
 Service: grist
@@ -32,7 +32,7 @@ Decision: approved
 grist: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime-lv3
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 override: grist remains governed by immutable guest replacement on docker-runtime-lv3 (preview_guest, rollback 180m); ALLOW_IN_PLACE_MUTATION=true was supplied for this run.
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=833943ef561b4908b6ad9e9d52894109 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/inventory/hosts.yml --run-id 5b000865d71f441e835acde54e47d2bd --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=892056c42bf64fafaba5f3a5e1317f75
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=833943ef561b4908b6ad9e9d52894109 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/inventory/hosts.yml --run-id 5b000865d71f441e835acde54e47d2bd --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=892056c42bf64fafaba5f3a5e1317f75
 
 PLAY [Ensure Hetzner DNS publication for Grist] ********************************
 
@@ -596,44 +596,44 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:00:10.162Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=bi.lv3.org)
-ok: [docker-runtime-lv3] => (item=billing.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=ci.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=data.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=flags.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=grist.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=livekit.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=minio.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=notebooks.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=paperless.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=bi.example.com)
+ok: [docker-runtime-lv3] => (item=billing.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=ci.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=data.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=flags.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=grist.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=livekit.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=minio.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=notebooks.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=paperless.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:00:29.171Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Check whether the current Docker daemon config exists] ***
@@ -1099,7 +1099,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:00:59.808Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:00:59.819Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:00:59.876Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1232,7 +1232,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:01:05.680Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:01:05.693Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Read OpenBao seal status before runtime secret injection for keycloak] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before runtime secret injection for keycloak","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:01:05.744Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1247,9 +1247,9 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:01:07.038Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:01:07.050Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key runtime secret injection for keycloak #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key runtime secret injection for keycloak #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:01:07.093Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1797,7 +1797,7 @@ ok: [docker-runtime-lv3 -> localhost]
 TASK [lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:22.773Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:02:22.783Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
 
 TASK [lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:22.829Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2040,7 +2040,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:48.357Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:02:48.368Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:48.422Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2173,7 +2173,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:54.207Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:02:54.220Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Read OpenBao seal status before runtime secret injection for grist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before runtime secret injection for grist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:54.274Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2188,9 +2188,9 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for grist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for grist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:55.531Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for grist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-01T17:02:55.543Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key runtime secret injection for grist #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key runtime secret injection for grist #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-01T17:02:55.584Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2419,7 +2419,7 @@ FAILED - RETRYING: [docker-runtime-lv3]: Wait for the Keycloak issuer discovery 
 FAILED - RETRYING: [docker-runtime-lv3]: Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup (3 retries left).
 FAILED - RETRYING: [docker-runtime-lv3]: Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup (2 retries left).
 FAILED - RETRYING: [docker-runtime-lv3]: Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup (1 retries left).
-fatal: [docker-runtime-lv3]: FAILED! => {"attempts": 18, "changed": false, "cmd": "set -euo pipefail\ndiscovery_json=\"$(curl --fail --silent --show-error \\\n  --resolve 'sso.lv3.org:443:10.10.10.10' \\\n  'https://sso.lv3.org/realms/lv3/.well-known/openid-configuration')\"\npython3 -c '\nimport json\nimport sys\n\npayload = json.loads(sys.stdin.read())\nif payload.get(\"issuer\") != sys.argv[1]:\n    raise SystemExit(f\"unexpected issuer: {payload.get(\\\"issuer\\\")!r}\")\n' \"https://sso.lv3.org/realms/lv3\" <<<\"$discovery_json\"\n", "delta": "0:00:00.047421", "end": "2026-04-01 17:04:54.098242", "msg": "non-zero return code", "rc": 1, "start": "2026-04-01 17:04:54.050821", "stderr": "  File \"<string>\", line 7\n    raise SystemExit(f\"unexpected issuer: {payload.get(\\\"issuer\\\")!r}\")\n                                                        ^\nSyntaxError: unexpected character after line continuation character", "stderr_lines": ["  File \"<string>\", line 7", "    raise SystemExit(f\"unexpected issuer: {payload.get(\\\"issuer\\\")!r}\")", "                                                        ^", "SyntaxError: unexpected character after line continuation character"], "stdout": "", "stdout_lines": []}
+fatal: [docker-runtime-lv3]: FAILED! => {"attempts": 18, "changed": false, "cmd": "set -euo pipefail\ndiscovery_json=\"$(curl --fail --silent --show-error \\\n  --resolve 'sso.example.com:443:10.10.10.10' \\\n  'https://sso.example.com/realms/lv3/.well-known/openid-configuration')\"\npython3 -c '\nimport json\nimport sys\n\npayload = json.loads(sys.stdin.read())\nif payload.get(\"issuer\") != sys.argv[1]:\n    raise SystemExit(f\"unexpected issuer: {payload.get(\\\"issuer\\\")!r}\")\n' \"https://sso.example.com/realms/lv3\" <<<\"$discovery_json\"\n", "delta": "0:00:00.047421", "end": "2026-04-01 17:04:54.098242", "msg": "non-zero return code", "rc": 1, "start": "2026-04-01 17:04:54.050821", "stderr": "  File \"<string>\", line 7\n    raise SystemExit(f\"unexpected issuer: {payload.get(\\\"issuer\\\")!r}\")\n                                                        ^\nSyntaxError: unexpected character after line continuation character", "stderr_lines": ["  File \"<string>\", line 7", "    raise SystemExit(f\"unexpected issuer: {payload.get(\\\"issuer\\\")!r}\")", "                                                        ^", "SyntaxError: unexpected character after line continuation character"], "stdout": "", "stdout_lines": []}
 {"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.grist_runtime : Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-04-01T17:04:54.191Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 PLAY RECAP *********************************************************************

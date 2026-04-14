@@ -9,7 +9,7 @@
   "repo_version_context": "0.162.0",
   "workflow_id": "adr-0146-langfuse-live-apply",
   "adr": "0146",
-  "summary": "Published self-hosted Langfuse at https://langfuse.lv3.org, verified the seeded lv3-agent-observability project through the public API, and ingested a public smoke trace that resolved in the Langfuse UI after fixing topology generation, edge publication recovery defaults, and Redis persistence ownership.",
+  "summary": "Published self-hosted Langfuse at https://langfuse.example.com, verified the seeded lv3-agent-observability project through the public API, and ingested a public smoke trace that resolved in the Langfuse UI after fixing topology generation, edge publication recovery defaults, and Redis persistence ownership.",
   "targets": [
     {
       "kind": "guest",
@@ -26,7 +26,7 @@
     {
       "kind": "service_endpoint",
       "name": "langfuse",
-      "address": "https://langfuse.lv3.org"
+      "address": "https://langfuse.example.com"
     }
   ],
   "verification": [
@@ -38,17 +38,17 @@
     {
       "check": "Public Langfuse health endpoint",
       "result": "pass",
-      "observed": "From the controller on 2026-03-26, `curl -fsS -D - https://langfuse.lv3.org/api/public/health` returned `HTTP/2 200` with body `{\"status\":\"OK\",\"version\":\"3.162.0\"}`."
+      "observed": "From the controller on 2026-03-26, `curl -fsS -D - https://langfuse.example.com/api/public/health` returned `HTTP/2 200` with body `{\"status\":\"OK\",\"version\":\"3.162.0\"}`."
     },
     {
       "check": "Seeded public project contract",
       "result": "pass",
-      "observed": "Using the controller-local public and secret project keys, `curl -fsS -u \"$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY\" https://langfuse.lv3.org/api/public/projects` returned project `lv3-agent-observability` in organization `lv3`."
+      "observed": "Using the controller-local public and secret project keys, `curl -fsS -u \"$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY\" https://langfuse.example.com/api/public/projects` returned project `lv3-agent-observability` in organization `lv3`."
     },
     {
       "check": "Public smoke trace and UI resolution",
       "result": "pass",
-      "observed": "Running `uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py --base-url https://langfuse.lv3.org --project-id lv3-agent-observability --bootstrap-email baditaflorin@gmail.com --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt` returned `api_verified=true`, `ui_verified=true`, trace id `4080b556f5c041e3a6afc28f37b99d41`, and trace URL `https://langfuse.lv3.org/project/lv3-agent-observability/traces/4080b556f5c041e3a6afc28f37b99d41`."
+      "observed": "Running `uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py --base-url https://langfuse.example.com --project-id lv3-agent-observability --bootstrap-email operator@example.com --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt` returned `api_verified=true`, `ui_verified=true`, trace id `4080b556f5c041e3a6afc28f37b99d41`, and trace URL `https://langfuse.example.com/project/lv3-agent-observability/traces/4080b556f5c041e3a6afc28f37b99d41`."
     }
   ],
   "evidence_refs": [

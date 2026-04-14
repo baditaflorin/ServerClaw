@@ -7,7 +7,7 @@ content-type: application/json; charset=utf-8
 content-length: 76
 docker-distribution-api-version: registry/2.0
 set-cookie: sid=954e63ccb9ab2db412d32736f7c5f7eb; Path=/; HttpOnly
-www-authenticate: Bearer realm="https://registry.lv3.org/service/token",service="harbor-registry"
+www-authenticate: Bearer realm="https://registry.example.com/service/token",service="harbor-registry"
 x-request-id: 59be2847-2e3b-4f6a-a4ef-81d20a078b2e
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,7 +34,7 @@
     {
       "kind": "service_endpoint",
       "name": "Keycloak public realm",
-      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+      "address": "https://sso.example.com/realms/lv3/.well-known/openid-configuration"
     },
     {
       "kind": "service_endpoint",
@@ -44,7 +44,7 @@
     {
       "kind": "service_endpoint",
       "name": "Headscale API",
-      "address": "https://headscale.lv3.org/api/v1/user"
+      "address": "https://headscale.example.com/api/v1/user"
     },
     {
       "kind": "identity",
@@ -66,12 +66,12 @@
     {
       "check": "Dedicated-worktree full onboarding replay",
       "result": "pass",
-      "observed": "The final replay used `LV3_KEYCLOAK_URL=http://127.0.0.1:28080` plus ephemeral `LV3_KEYCLOAK_BOOTSTRAP_PASSWORD` and `LV3_PLATFORM_SMTP_PASSWORD` overrides sourced from `docker-runtime-lv3`, reused the previously generated Keycloak password and Headscale authkey files, reverified Keycloak user `d1c1c5b5-f4c8-47de-8865-c529789ada77` with realm role `platform-admin` and groups `lv3-platform-admins` / `grafana-admins`, and successfully sent the requester-CC onboarding email to `baditaflorin+tmp002@gmail.com` and `baditaflorin@gmail.com`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt`."
+      "observed": "The final replay used `LV3_KEYCLOAK_URL=http://127.0.0.1:28080` plus ephemeral `LV3_KEYCLOAK_BOOTSTRAP_PASSWORD` and `LV3_PLATFORM_SMTP_PASSWORD` overrides sourced from `docker-runtime-lv3`, reused the previously generated Keycloak password and Headscale authkey files, reverified Keycloak user `d1c1c5b5-f4c8-47de-8865-c529789ada77` with realm role `platform-admin` and groups `lv3-platform-admins` / `grafana-admins`, and successfully sent the requester-CC onboarding email to `operator@example.com` and `operator@example.com`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt`."
     },
     {
       "check": "Fallback lane discovery and drift diagnosis",
       "result": "pass",
-      "observed": "The workstream preserved the real control-plane drift that made the fallback necessary: the public `sso.lv3.org` edge returned `502`, `runtime-control-lv3` OpenBao still reported `initialized:false`, and the healthy Keycloak plus mail secret path remained on `docker-runtime-lv3`; the prechecks and converge probes are preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-precheck-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-converge-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-precheck-r1.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-converge-r1.txt`."
+      "observed": "The workstream preserved the real control-plane drift that made the fallback necessary: the public `sso.example.com` edge returned `502`, `runtime-control-lv3` OpenBao still reported `initialized:false`, and the healthy Keycloak plus mail secret path remained on `docker-runtime-lv3`; the prechecks and converge probes are preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-precheck-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-converge-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-precheck-r1.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-converge-r1.txt`."
     },
     {
       "check": "Broader operator-onboard automation preflight",

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -56,7 +56,7 @@
     {
       "check": "Governed Windmill replay",
       "result": "pass",
-      "observed": "The first two branch-local replays truthfully failed because the worktree still carried stale copies of `config/windmill/scripts/gate-status.py` and `scripts/gate_status.py` from the older baseline. After syncing those wrappers to the current mainline contract, `make converge-windmill` completed successfully with final recap `docker-runtime-lv3 : ok=314 changed=48 unreachable=0 failed=0 skipped=99`, `postgres-lv3 : ok=95 changed=6 unreachable=0 failed=0 skipped=28`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
+      "observed": "The first two branch-local replays truthfully failed because the worktree still carried stale copies of `config/windmill/scripts/gate-status.py` and `scripts/gate_status.py` from the older baseline. After syncing those wrappers to the current mainline contract, `make converge-windmill` completed successfully with final recap `docker-runtime-lv3 : ok=314 changed=48 unreachable=0 failed=0 skipped=99`, `postgres-lv3 : ok=95 changed=6 unreachable=0 failed=0 skipped=28`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
     },
     {
       "check": "Live operator-admin raw-app parity",

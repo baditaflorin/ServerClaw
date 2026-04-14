@@ -36,27 +36,27 @@
     {
       "kind": "service_endpoint",
       "name": "shared logout entrypoint",
-      "address": "https://home.lv3.org/.well-known/lv3/session/logout"
+      "address": "https://home.example.com/.well-known/lv3/session/logout"
     },
     {
       "kind": "service_endpoint",
       "name": "shared proxy cleanup",
-      "address": "https://ops.lv3.org/.well-known/lv3/session/proxy-logout"
+      "address": "https://ops.example.com/.well-known/lv3/session/proxy-logout"
     },
     {
       "kind": "service_endpoint",
       "name": "logged-out landing page",
-      "address": "https://ops.lv3.org/.well-known/lv3/session/logged-out"
+      "address": "https://ops.example.com/.well-known/lv3/session/logged-out"
     },
     {
       "kind": "service_endpoint",
       "name": "Outline OIDC surface",
-      "address": "https://wiki.lv3.org/auth/oidc"
+      "address": "https://wiki.example.com/auth/oidc"
     },
     {
       "kind": "service_endpoint",
       "name": "Keycloak realm broker",
-      "address": "https://sso.lv3.org/realms/lv3"
+      "address": "https://sso.example.com/realms/lv3"
     }
   ],
   "verification": [
@@ -78,7 +78,7 @@
     {
       "check": "Latest-origin/main Keycloak replay",
       "result": "pass",
-      "observed": "The first make converge-keycloak env=production run failed transiently while reading the Outline automation user groups from the Keycloak admin API; a direct admin-token API check immediately after returned HTTP 200 for outline.automation with groups grafana-admins and lv3-platform-admins, and the second converge replay completed successfully with docker-runtime-lv3 : ok=153 changed=3 failed=0, monitoring-lv3 : ok=17 changed=0 failed=0, nginx-lv3 : ok=38 changed=4 failed=0, postgres-lv3 : ok=47 changed=0 failed=0, and proxmox_florin : ok=169 changed=0 failed=0."
+      "observed": "The first make converge-keycloak env=production run failed transiently while reading the Outline automation user groups from the Keycloak admin API; a direct admin-token API check immediately after returned HTTP 200 for outline.automation with groups grafana-admins and lv3-platform-admins, and the second converge replay completed successfully with docker-runtime-lv3 : ok=153 changed=3 failed=0, monitoring-lv3 : ok=17 changed=0 failed=0, nginx-lv3 : ok=38 changed=4 failed=0, postgres-lv3 : ok=47 changed=0 failed=0, and proxmox-host : ok=169 changed=0 failed=0."
     },
     {
       "check": "Scoped Outline replay from the isolated worktree",
@@ -88,12 +88,12 @@
     {
       "check": "Public edge replay and shared logout publication",
       "result": "pass",
-      "observed": "make configure-edge-publication env=production completed successfully with nginx-lv3 : ok=63 changed=5 failed=0, reloading both oauth2-proxy and NGINX after the shared logout endpoints, Authorization-header extraction, and the wiki.lv3.org CSP override were rendered."
+      "observed": "make configure-edge-publication env=production completed successfully with nginx-lv3 : ok=63 changed=5 failed=0, reloading both oauth2-proxy and NGINX after the shared logout endpoints, Authorization-header extraction, and the wiki.example.com CSP override were rendered."
     },
     {
       "check": "HTTP and browser logout verification",
       "result": "pass",
-      "observed": "curl -I https://wiki.lv3.org/ returned HTTP 200 with the expected Outline-compatible CSP override; curl -i https://home.lv3.org/.well-known/lv3/session/logout returned HTTP 302 to the shared oauth2-proxy sign-out path; curl -i https://ops.lv3.org/.well-known/lv3/session/proxy-logout returned HTTP 302 to the logged-out landing page; curl -i https://ops.lv3.org/.well-known/lv3/session/logged-out returned HTTP 200 with Cache-Control: no-store; and uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt passed, verifying both the shared edge logout path and the real Outline UI logout path."
+      "observed": "curl -I https://wiki.example.com/ returned HTTP 200 with the expected Outline-compatible CSP override; curl -i https://home.example.com/.well-known/lv3/session/logout returned HTTP 302 to the shared oauth2-proxy sign-out path; curl -i https://ops.example.com/.well-known/lv3/session/proxy-logout returned HTTP 302 to the logged-out landing page; curl -i https://ops.example.com/.well-known/lv3/session/logged-out returned HTTP 200 with Cache-Control: no-store; and uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/outline.automation-password.txt passed, verifying both the shared edge logout path and the real Outline UI logout path."
     }
   ],
   "evidence_refs": [

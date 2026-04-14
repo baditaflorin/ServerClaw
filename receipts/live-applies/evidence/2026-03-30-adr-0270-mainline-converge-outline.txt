@@ -720,32 +720,32 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:52:32.118Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T23:52:44.673Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -1419,7 +1419,7 @@ ok: [docker-runtime-lv3 -> localhost]
 TASK [lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:55:51.075Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T23:55:51.089Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/adr-0270-main-integration/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
 
 TASK [lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:55:51.132Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2014,11 +2014,11 @@ skipping: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:57:30.970Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
-ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T23:57:38.742Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -2028,8 +2028,8 @@ ok: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:57:40.154Z","vm":"controller","workflow_id":"ansible-playbook"}
-failed: [nginx-lv3 -> localhost] (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'}) => {"ansible_loop_var": "item", "changed": false, "cmd": ["rsync", "--archive", "--delete", "--compress", "--out-format=<<CHANGED>>%i %n%L", "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r", "--rsh=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=30 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\"", "--rsync-path=sudo rsync", "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration/build/changelog-portal/", "ops@10.10.10.10:/var/www/lv3-generated/changelog-portal/"], "delta": "0:00:02.079990", "end": "2026-03-30 02:57:42.457090", "item": {"hostname": "changelog.lv3.org", "kind": "static_dir", "source_dir": "changelog-portal"}, "msg": "non-zero return code", "rc": 23, "start": "2026-03-30 02:57:40.377100", "stderr": "Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.\r\nrsync(89320): error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration/build/changelog-portal/: (l)stat: No such file or directory", "stderr_lines": ["Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.", "rsync(89320): error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration/build/changelog-portal/: (l)stat: No such file or directory"], "stdout": "", "stdout_lines": []}
-failed: [nginx-lv3 -> localhost] (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'}) => {"ansible_loop_var": "item", "changed": false, "cmd": ["rsync", "--archive", "--delete", "--compress", "--out-format=<<CHANGED>>%i %n%L", "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r", "--rsh=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=30 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\"", "--rsync-path=sudo rsync", "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration/build/docs-portal/", "ops@10.10.10.10:/var/www/lv3-generated/docs-portal/"], "delta": "0:00:02.056294", "end": "2026-03-30 02:57:44.733948", "item": {"hostname": "docs.lv3.org", "kind": "static_dir", "source_dir": "docs-portal"}, "msg": "non-zero return code", "rc": 23, "start": "2026-03-30 02:57:42.677654", "stderr": "Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.\r\nrsync(89698): error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration/build/docs-portal/: (l)stat: No such file or directory", "stderr_lines": ["Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.", "rsync(89698): error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration/build/docs-portal/: (l)stat: No such file or directory"], "stdout": "", "stdout_lines": []}
+failed: [nginx-lv3 -> localhost] (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'}) => {"ansible_loop_var": "item", "changed": false, "cmd": ["rsync", "--archive", "--delete", "--compress", "--out-format=<<CHANGED>>%i %n%L", "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r", "--rsh=ssh -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=30 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\"", "--rsync-path=sudo rsync", "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/adr-0270-main-integration/build/changelog-portal/", "ops@10.10.10.10:/var/www/lv3-generated/changelog-portal/"], "delta": "0:00:02.079990", "end": "2026-03-30 02:57:42.457090", "item": {"hostname": "changelog.example.com", "kind": "static_dir", "source_dir": "changelog-portal"}, "msg": "non-zero return code", "rc": 23, "start": "2026-03-30 02:57:40.377100", "stderr": "Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.\r\nrsync(89320): error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/adr-0270-main-integration/build/changelog-portal/: (l)stat: No such file or directory", "stderr_lines": ["Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.", "rsync(89320): error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/adr-0270-main-integration/build/changelog-portal/: (l)stat: No such file or directory"], "stdout": "", "stdout_lines": []}
+failed: [nginx-lv3 -> localhost] (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'}) => {"ansible_loop_var": "item", "changed": false, "cmd": ["rsync", "--archive", "--delete", "--compress", "--out-format=<<CHANGED>>%i %n%L", "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r", "--rsh=ssh -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=30 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p\"", "--rsync-path=sudo rsync", "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/adr-0270-main-integration/build/docs-portal/", "ops@10.10.10.10:/var/www/lv3-generated/docs-portal/"], "delta": "0:00:02.056294", "end": "2026-03-30 02:57:44.733948", "item": {"hostname": "docs.example.com", "kind": "static_dir", "source_dir": "docs-portal"}, "msg": "non-zero return code", "rc": 23, "start": "2026-03-30 02:57:42.677654", "stderr": "Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.\r\nrsync(89698): error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/adr-0270-main-integration/build/docs-portal/: (l)stat: No such file or directory", "stderr_lines": ["Warning: Permanently added '10.10.10.10' (ED25519) to the list of known hosts.", "rsync(89698): error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/adr-0270-main-integration/build/docs-portal/: (l)stat: No such file or directory"], "stdout": "", "stdout_lines": []}
 {"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"One or more items failed","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-29T23:57:44.766Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 PLAY RECAP *********************************************************************

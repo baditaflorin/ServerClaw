@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -38,7 +38,7 @@
     {
       "check": "Latest-main Windmill converge replay",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from the isolated integration worktree with `docker-runtime-lv3 : ok=203 changed=37 unreachable=0 failed=0`, `postgres-lv3 : ok=63 changed=1 unreachable=0 failed=0`, and `proxmox_florin : ok=36 changed=4 unreachable=0 failed=0`."
+      "observed": "`make converge-windmill` completed successfully from the isolated integration worktree with `docker-runtime-lv3 : ok=203 changed=37 unreachable=0 failed=0`, `postgres-lv3 : ok=63 changed=1 unreachable=0 failed=0`, and `proxmox-host : ok=36 changed=4 unreachable=0 failed=0`."
     },
     {
       "check": "Windmill worker runtime contract",

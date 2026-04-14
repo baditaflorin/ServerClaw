@@ -21,7 +21,7 @@
       },
       "recorded_at": "2026-04-02T07:55:29Z",
       "result": null,
-      "route": "https://ops.lv3.org/journeys/operator-access-admin/alert",
+      "route": "https://ops.example.com/journeys/operator-access-admin/alert",
       "schema_version": 1,
       "session_id": "session-2a604b6e7e",
       "stage": "alert",
@@ -46,7 +46,7 @@
       },
       "recorded_at": "2026-04-02T07:55:31Z",
       "result": null,
-      "route": "https://ops.lv3.org/journeys/operator-access-admin/alert",
+      "route": "https://ops.example.com/journeys/operator-access-admin/alert",
       "schema_version": 1,
       "session_id": "session-2a604b6e7e",
       "stage": "alert",
@@ -71,7 +71,7 @@
       },
       "recorded_at": "2026-04-02T07:55:33Z",
       "result": null,
-      "route": "https://ops.lv3.org/journeys/operator-access-admin/alert",
+      "route": "https://ops.example.com/journeys/operator-access-admin/alert",
       "schema_version": 1,
       "session_id": "session-2a604b6e7e",
       "stage": "alert",
@@ -101,7 +101,7 @@
         "/journeys/operator-access-admin/search-result": 2,
         "/journeys/operator-access-admin/start": 2
       },
-      "site_domain": "ops.lv3.org",
+      "site_domain": "ops.example.com",
       "status": "ok",
       "window_days": 30
     },
@@ -149,16 +149,16 @@
       }
     },
     "sources": {
-      "latest_report_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json",
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
-      "plausible_site_domain": "ops.lv3.org"
+      "latest_report_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-latest.json",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "plausible_site_domain": "ops.example.com"
     },
     "status": "ok",
     "surface": "windmill.operator_access_admin",
     "window_days": 30
   },
   "latest_report_exists": true,
-  "latest_report_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json",
+  "latest_report_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-latest.json",
   "ledger_exists": true,
   "ledger_line_count": 52
 }

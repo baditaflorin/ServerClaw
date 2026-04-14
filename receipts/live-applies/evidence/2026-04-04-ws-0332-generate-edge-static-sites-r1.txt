@@ -1,10 +1,10 @@
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/scripts/generate_changelog_portal.py --write
-uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply --path build/changelog-portal
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/scripts/generate_changelog_portal.py --write
+uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply --path build/changelog-portal
 Published artifact secret scan passed: 1163 file(s) checked with builtin.
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/scripts/build_docs_portal.py
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/scripts/build_docs_portal.py
 
 Running Pagefind v1.4.0 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -28,4 +28,4 @@ Total:
 
 Finished in 24.317 seconds
 Published artifact secret scan passed: 2293 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/build/docs-portal
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/build/docs-portal

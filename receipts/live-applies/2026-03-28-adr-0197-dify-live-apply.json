@@ -10,11 +10,11 @@
   "repo_version_context": "0.177.12",
   "workflow_id": "converge-dify",
   "adr": "0197",
-  "summary": "Applied the ADR 0197 Dify visual workflow canvas from the isolated workstream, verified the internal Dify bootstrap and smoke workflow export on docker-runtime-lv3, repaired the governed Dify tool bridge through api.lv3.org, and recorded the remaining public-edge blocker caused by the external Hetzner DNS write brownout.",
+  "summary": "Applied the ADR 0197 Dify visual workflow canvas from the isolated workstream, verified the internal Dify bootstrap and smoke workflow export on docker-runtime-lv3, repaired the governed Dify tool bridge through api.example.com, and recorded the remaining public-edge blocker caused by the external Hetzner DNS write brownout.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -25,8 +25,8 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "api.lv3.org Dify tools bridge",
-      "address": "https://api.lv3.org/v1/dify-tools/get-platform-status"
+      "name": "api.example.com Dify tools bridge",
+      "address": "https://api.example.com/v1/dify-tools/get-platform-status"
     },
     {
       "kind": "service_endpoint",
@@ -48,17 +48,17 @@
     {
       "check": "Bootstrap smoke workflow export and governed tool sync",
       "result": "pass",
-      "observed": "`uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url http://127.0.0.1:18094 --admin-email baditaflorin@gmail.com --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/admin-password.txt --init-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/init-password.txt --tools-api-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt` completed with `setup_step: finished`, `login_result: success`, `tool_count: 11`, and exported `platform/dify-workflows/lv3-dify-smoke.yml`."
+      "observed": "`uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url http://127.0.0.1:18094 --admin-email operator@example.com --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/admin-password.txt --init-password-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/init-password.txt --tools-api-key-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/tools-api-key.txt` completed with `setup_step: finished`, `login_result: success`, `tool_count: 11`, and exported `platform/dify-workflows/lv3-dify-smoke.yml`."
     },
     {
       "check": "Public governed Dify tool bridge",
       "result": "pass",
-      "observed": "`curl -sS -X POST https://api.lv3.org/v1/dify-tools/get-platform-status -H \"Content-Type: application/json\" -H \"X-LV3-Dify-Api-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt)\" -d '{}'` returned `HTTP/2 200` with the governed platform-status payload after the gateway runtime was extended to package the workflow-contract repo surfaces and emit the correct `service_identity` audit class."
+      "observed": "`curl -sS -X POST https://api.example.com/v1/dify-tools/get-platform-status -H \"Content-Type: application/json\" -H \"X-LV3-Dify-Api-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/dify/tools-api-key.txt)\" -d '{}'` returned `HTTP/2 200` with the governed platform-status payload after the gateway runtime was extended to package the workflow-contract repo surfaces and emit the correct `service_identity` audit class."
     },
     {
       "check": "Public Dify hostname publication",
       "result": "partial",
-      "observed": "`curl https://agents.lv3.org/` still fails with `Could not resolve host: agents.lv3.org`; the repo-side runtime and governed tool bridge are live, but the public Dify edge hostname remains blocked by the external Hetzner DNS write brownout and must be replayed from `main` once that provider-side outage is resolved."
+      "observed": "`curl https://agents.example.com/` still fails with `Could not resolve host: agents.example.com`; the repo-side runtime and governed tool bridge are live, but the public Dify edge hostname remains blocked by the external Hetzner DNS write brownout and must be replayed from `main` once that provider-side outage is resolved."
     }
   ],
   "evidence_refs": [
@@ -80,7 +80,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "The live apply was performed from the isolated worktree `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0197-live-apply` on branch `codex/ws-0197-live-apply` after rebasing to the latest `origin/main`.",
+    "The live apply was performed from the isolated worktree `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0197-live-apply` on branch `codex/ws-0197-live-apply` after rebasing to the latest `origin/main`.",
     "A one-time manual OpenBao policy upsert for `lv3-service-dify-runtime` was required before the repo replay could fully converge; that manual step is intentionally recorded here so the later `main` replay is not treated as hidden context.",
     "The Dify runtime was moved from the intended internal port `8093` to `8094` because `8093` was already occupied by the unrelated Plane proxy on `docker-runtime-lv3`; the live apply preserved Plane and updated the Dify runtime to avoid that conflict.",
     "Protected integration files remain intentionally unchanged on this workstream branch: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level README integrated status summary."

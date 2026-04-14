@@ -10,7 +10,7 @@
   "platform_version_context": "0.130.34",
   "workflow_id": "adr-0021-shared-edge-certificate-repair-mainline-live-apply",
   "adr": "0021",
-  "summary": "Replayed the shared NGINX edge publication from merged `main`, forcing service-specific edge converges to load the canonical platform topology before rebuilding the shared certificate SAN set, then re-verified `wiki.lv3.org` and `draw.lv3.org` publication end to end.",
+  "summary": "Replayed the shared NGINX edge publication from merged `main`, forcing service-specific edge converges to load the canonical platform topology before rebuilding the shared certificate SAN set, then re-verified `wiki.example.com` and `draw.example.com` publication end to end.",
   "targets": [
     {
       "kind": "guest",
@@ -20,16 +20,16 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "public_hostname",
-      "name": "wiki.lv3.org"
+      "name": "wiki.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "draw.lv3.org"
+      "name": "draw.example.com"
     }
   ],
   "verification": [
@@ -46,7 +46,7 @@
     {
       "check": "Wiki health and certificate",
       "result": "pass",
-      "observed": "`curl -I https://wiki.lv3.org` and `curl -I https://wiki.lv3.org/_health` both returned `HTTP/2 200`, and the live certificate SANs include `DNS:draw.lv3.org` and `DNS:wiki.lv3.org`."
+      "observed": "`curl -I https://wiki.example.com` and `curl -I https://wiki.example.com/_health` both returned `HTTP/2 200`, and the live certificate SANs include `DNS:draw.example.com` and `DNS:wiki.example.com`."
     },
     {
       "check": "Rendered shared edge configuration",
@@ -56,7 +56,7 @@
     {
       "check": "Managed Outline publication",
       "result": "pass",
-      "observed": "`python3 scripts/sync_docs_to_outline.py verify --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server --base-url https://wiki.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/api-token.txt` returned `outline living collections verified`."
+      "observed": "`python3 scripts/sync_docs_to_outline.py verify --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server --base-url https://wiki.example.com --api-token-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/outline/api-token.txt` returned `outline living collections verified`."
     }
   ],
   "evidence_refs": [
@@ -72,7 +72,7 @@
   ],
   "notes": [
     "This mainline receipt supersedes the branch-local `2026-03-28-adr-0021-shared-edge-certificate-repair-live-apply` receipt as the canonical public-edge evidence for this repair.",
-    "The live replay also preserved the newly published `tasks.lv3.org` hostname in the shared SAN set, confirming the repair coexists with the newer public-edge topology present on `main`.",
+    "The live replay also preserved the newly published `tasks.example.com` hostname in the shared SAN set, confirming the repair coexists with the newer public-edge topology present on `main`.",
     "The `main` worktree already had `build/changelog-portal/` and `build/docs-portal/` present before replay, so the shared edge could republish both generated static portals during the repair."
   ]
 }

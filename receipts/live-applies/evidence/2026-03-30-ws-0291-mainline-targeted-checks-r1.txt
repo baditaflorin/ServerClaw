@@ -3,14 +3,14 @@ $ uv run --with pytest --with pyyaml python -m pytest -q tests/test_generate_pla
 72 passed in 4.09s
 
 $ make syntax-check-jupyterhub
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml --syntax-check
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml --syntax-check
 
-playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml
+playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml
 
 $ make syntax-check-ollama
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml --syntax-check
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml --syntax-check
 
-playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml
+playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml
 
 $ python3 scripts/validate_service_completeness.py --service jupyterhub
 Service completeness: jupyterhub

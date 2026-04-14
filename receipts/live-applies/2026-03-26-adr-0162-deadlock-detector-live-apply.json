@@ -25,8 +25,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -66,7 +66,7 @@
   ],
   "notes": [
     "The controller could not reach `docker-runtime-lv3` or `postgres-lv3` directly during live apply, so production converges used a temporary jump-based inventory through `ops@100.64.0.1`.",
-    "The corrected Windmill wrapper now resolves repo imports from the mounted checkout default `/srv/proxmox_florin_server`, which was required for the detector job to execute successfully inside the worker sandbox.",
+    "The corrected Windmill wrapper now resolves repo imports from the mounted checkout default `/srv/platform_server`, which was required for the detector job to execute successfully inside the worker sandbox.",
     "The broader Windmill converge remained noisy and partially manual during recovery, but the ADR 0162 script, enabled schedule, and live manual detector execution were all verified before this receipt was recorded."
   ]
 }

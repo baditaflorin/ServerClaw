@@ -25,7 +25,7 @@
     },
     {
       "kind": "public_hostname",
-      "name": "grafana.lv3.org"
+      "name": "grafana.example.com"
     }
   ],
   "verification": [
@@ -42,7 +42,7 @@
     {
       "check": "Public Grafana verification gate",
       "result": "pass",
-      "observed": "`https://grafana.lv3.org/api/health` now returns `404`, while `https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview` returns `302` to `/login?redirectTo=...`, matching the repo-managed ADR 0140 verification contract used by the ADR 0096 monitoring apply."
+      "observed": "`https://grafana.example.com/api/health` now returns `404`, while `https://grafana.example.com/d/lv3-slo-overview/lv3-slo-overview` returns `302` to `/login?redirectTo=...`, matching the repo-managed ADR 0140 verification contract used by the ADR 0096 monitoring apply."
     }
   ],
   "evidence_refs": [

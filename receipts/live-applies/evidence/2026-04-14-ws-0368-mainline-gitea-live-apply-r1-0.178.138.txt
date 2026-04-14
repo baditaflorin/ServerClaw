@@ -3,19 +3,19 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/build/docs-portal
 Result: PASS (live-apply-service)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/scripts/interface_contracts.py --check-live-apply "service:gitea"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/scripts/interface_contracts.py --check-live-apply "service:gitea"
 Live apply contract OK: service:gitea -> playbooks/services/gitea.yml
 Vulnerability budget gate for gitea: approved
 Service: gitea
@@ -25,8 +25,8 @@ Decision: approved
 gitea: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@runtime-control
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 No ADR 0191 immutable guest replacement policy blocks the requested live apply for gitea.
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/gitea.yml (env=production)
-Running scoped playbook: playbooks/services/gitea.yml limit=proxmox-host,postgres,runtime-control,docker-build shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/.ansible/shards/0b05b1bbcc9649c986e1e80ab7221b97/gitea-production.json
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/gitea.yml (env=production)
+Running scoped playbook: playbooks/services/gitea.yml limit=proxmox-host,postgres,runtime-control,docker-build shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/.ansible/shards/0b05b1bbcc9649c986e1e80ab7221b97/gitea-production.json
 
 PLAY [Converge private Gitea access on the Proxmox host] ***********************
 
@@ -2055,7 +2055,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:48:06.836Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:48:06.847Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for runtime-control
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:48:06.877Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2190,7 +2190,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:48:11.023Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:48:11.037Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-control
 
 TASK [lv3.platform.common : Read OpenBao seal status before runtime secret injection for keycloak] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before runtime secret injection for keycloak","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:48:11.074Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2205,9 +2205,9 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:48:12.231Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:48:12.247Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key runtime secret injection for keycloak #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key runtime secret injection for keycloak #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:48:12.269Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2771,7 +2771,7 @@ ok: [runtime-control]
 TASK [lv3.platform.keycloak_runtime : Run the Plane OIDC client reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the Plane OIDC client reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:49:31.051Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the Plane OIDC client reconciliation tasks","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:49:31.067Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/plane_client.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/plane_client.yml for runtime-control
 
 TASK [lv3.platform.keycloak_runtime : Set Plane OIDC client configuration facts] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Set Plane OIDC client configuration facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:49:31.096Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2830,10 +2830,10 @@ ok: [runtime-control] => {
         "Plane OIDC Client Configuration:",
         "Client ID: lv3-plane-oidc",
         "Client Secret: ****************************************************************",
-        "Public URL: https://tasks.lv3.org",
+        "Public URL: https://tasks.example.com",
         "Keycloak URL: http://127.0.0.1:18080",
         "Realm: lv3",
-        "Secret artifact: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/plane-oidc-client-secret.txt"
+        "Secret artifact: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/plane-oidc-client-secret.txt"
     ]
 }
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Display Plane OIDC client configuration","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:49:34.906Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
@@ -2931,7 +2931,7 @@ ok: [runtime-control -> localhost]
 TASK [lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:49:42.051Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:49:42.064Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for runtime-control
 
 TASK [lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:49:42.112Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3313,7 +3313,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:50:19.590Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:50:19.602Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for runtime-control
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:50:19.632Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3448,7 +3448,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:50:23.720Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:50:23.735Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-control
 
 TASK [lv3.platform.common : Read OpenBao seal status before runtime secret injection for gitea] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before runtime secret injection for gitea","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:50:23.769Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3463,9 +3463,9 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for gitea] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for gitea","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:50:24.927Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for gitea","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:50:24.943Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key runtime secret injection for gitea #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key runtime secret injection for gitea #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:50:24.966Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3823,7 +3823,7 @@ skipping: [runtime-control]
 TASK [lv3.platform.common : Verify gitea extra endpoints] **********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify gitea extra endpoints","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:06.639Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Verify gitea extra endpoints","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:51:06.658Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml for runtime-control => (item=http://10.10.10.92:3003/api/swagger)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health_extra.yml for runtime-control => (item=http://10.10.10.92:3003/api/swagger)
 
 TASK [lv3.platform.common : Verify gitea endpoint http://10.10.10.92:3003/api/swagger] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify gitea endpoint http://10.10.10.92:3003/api/swagger","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:06.678Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3879,7 +3879,7 @@ skipping: [runtime-control]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:08.565Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:51:08.578Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/../tasks/verify-probe.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/../tasks/verify-probe.yml for runtime-control
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:08.600Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3904,7 +3904,7 @@ skipping: [runtime-control]
 TASK [Repair Docker publication before readiness verification] *****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Repair Docker publication before readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:09.777Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Repair Docker publication before readiness verification","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:51:09.799Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/../tasks/docker-publication-assert.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/../tasks/docker-publication-assert.yml for runtime-control
 
 TASK [Assert the Docker publication contract is defined] ***********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Assert the Docker publication contract is defined","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:09.824Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3947,7 +3947,7 @@ ok: [runtime-control]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:14.261Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:51:14.276Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/../tasks/verify-probe.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/playbooks/services/../tasks/verify-probe.yml for runtime-control
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:51:14.302Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -4988,7 +4988,7 @@ ok: [docker-build]
 TASK [lv3.platform.common : Ensure managed directory tree entries exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:52:22.624Z","vm":"controller","workflow_id":"ansible-playbook"}
 ok: [docker-build] => (item={'path': '/opt/builds', 'owner': 'ops', 'group': 'ops', 'mode': '0755'})
-ok: [docker-build] => (item={'path': '/opt/builds/proxmox_florin_server', 'owner': 'ops', 'group': 'ops', 'mode': '0755'})
+ok: [docker-build] => (item={'path': '/opt/builds/platform_server', 'owner': 'ops', 'group': 'ops', 'mode': '0755'})
 ok: [docker-build] => (item={'path': '/opt/builds/.packer.d', 'owner': 'ops', 'group': 'ops', 'mode': '0755'})
 ok: [docker-build] => (item={'path': '/opt/builds/.ansible/collections', 'owner': 'ops', 'group': 'ops', 'mode': '0755'})
 ok: [docker-build] => (item={'path': '/opt/builds/.ansible', 'owner': 'ops', 'group': 'ops', 'mode': '0755'})
@@ -5221,7 +5221,7 @@ ok: [docker-build]
 TASK [lv3.platform.common : Ensure the configured OpenBao API is unsealed before host-native secret delivery] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the configured OpenBao API is unsealed before host-native secret delivery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:52:42.509Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the configured OpenBao API is unsealed before host-native secret delivery","service_id":"ansible","target":"docker-build","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:52:42.524Z","vm":"docker-build","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-build
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-build
 
 TASK [lv3.platform.common : Read OpenBao seal status before host-native secret delivery for gitea-runner-renovate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before host-native secret delivery for gitea-runner-renovate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:52:42.547Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -5236,9 +5236,9 @@ ok: [docker-build]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during host-native secret delivery for gitea-runner-renovate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during host-native secret delivery for gitea-runner-renovate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:52:43.699Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during host-native secret delivery for gitea-runner-renovate","service_id":"ansible","target":"docker-build","task_status":"ok","trace_id":"background","ts":"2026-04-14T05:52:43.714Z","vm":"docker-build","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-build => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-build => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-build => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-build => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-build => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-publish-r4/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-build => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key host-native secret delivery for gitea-runner-renovate #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key host-native secret delivery for gitea-runner-renovate #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T05:52:43.731Z","vm":"controller","workflow_id":"ansible-playbook"}

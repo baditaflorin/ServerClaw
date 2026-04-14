@@ -10,27 +10,27 @@
   "platform_version_context": "0.130.35",
   "workflow_id": "adr-0224-coolify-wildcard-dns-live-apply",
   "adr": "0224",
-  "summary": "Extended the Coolify lane to publish wildcard app DNS from repo-managed edge aliases, created the missing `*.apps.lv3.org` Hetzner record, and verified public resolution plus HTTPS reachability for `education-wemeshup.apps.lv3.org`.",
+  "summary": "Extended the Coolify lane to publish wildcard app DNS from repo-managed edge aliases, created the missing `*.apps.example.com` Hetzner record, and verified public resolution plus HTTPS reachability for `education-wemeshup.apps.example.com`.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service",
       "name": "coolify_apps",
-      "address": "https://apps.lv3.org"
+      "address": "https://apps.example.com"
     },
     {
       "kind": "dns_record",
-      "name": "*.apps.lv3.org",
-      "address": "65.108.75.123"
+      "name": "*.apps.example.com",
+      "address": "203.0.113.1"
     },
     {
       "kind": "application",
-      "name": "education-wemeshup.apps.lv3.org",
-      "address": "https://education-wemeshup.apps.lv3.org"
+      "name": "education-wemeshup.apps.example.com",
+      "address": "https://education-wemeshup.apps.example.com"
     }
   ],
   "verification": [
@@ -42,17 +42,17 @@
     {
       "check": "Scoped Coolify DNS publication replay",
       "result": "pass",
-      "observed": "`ansible-playbook -i inventory/hosts.yml playbooks/coolify.yml --limit proxmox_hosts --start-at-task 'Ensure Hetzner DNS records are present' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed with `proxmox_florin ok=163 changed=0 failed=0`, confirming the Coolify DNS stage now converges cleanly through repo automation."
+      "observed": "`ansible-playbook -i inventory/hosts.yml playbooks/coolify.yml --limit proxmox_hosts --start-at-task 'Ensure Hetzner DNS records are present' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed with `proxmox-host ok=163 changed=0 failed=0`, confirming the Coolify DNS stage now converges cleanly through repo automation."
     },
     {
       "check": "Hetzner authoritative and public recursive DNS resolution",
       "result": "pass",
-      "observed": "`dig +noall +answer @ns1.your-server.de education-wemeshup.apps.lv3.org A`, `dig +short @8.8.8.8 education-wemeshup.apps.lv3.org A`, and `dig +short @9.9.9.9 education-wemeshup.apps.lv3.org A` all returned `65.108.75.123` after wildcard publication."
+      "observed": "`dig +noall +answer @ns1.your-server.de education-wemeshup.apps.example.com A`, `dig +short @8.8.8.8 education-wemeshup.apps.example.com A`, and `dig +short @9.9.9.9 education-wemeshup.apps.example.com A` all returned `203.0.113.1` after wildcard publication."
     },
     {
       "check": "End-to-end HTTPS reachability through the wildcard lane",
       "result": "pass",
-      "observed": "`curl -ksSI --resolve education-wemeshup.apps.lv3.org:443:65.108.75.123 https://education-wemeshup.apps.lv3.org/` returned `HTTP/2 200`, and `curl -ks --resolve education-wemeshup.apps.lv3.org:443:65.108.75.123 https://education-wemeshup.apps.lv3.org/api/v1/catalog/taxonomy` returned the production taxonomy payload with API version `v1`, `2` categories, and `6` activities."
+      "observed": "`curl -ksSI --resolve education-wemeshup.apps.example.com:443:203.0.113.1 https://education-wemeshup.apps.example.com/` returned `HTTP/2 200`, and `curl -ks --resolve education-wemeshup.apps.example.com:443:203.0.113.1 https://education-wemeshup.apps.example.com/api/v1/catalog/taxonomy` returned the production taxonomy payload with API version `v1`, `2` categories, and `6` activities."
     }
   ],
   "evidence_refs": [
@@ -69,6 +69,6 @@
   "notes": [
     "The initial scoped create attempt hit an opaque Hetzner API failure while the Ansible DNS role still had `no_log: true` on record creation. Replaying the exact `*.apps` POST directly against the Hetzner DNS API succeeded immediately, and the repo-managed playbook then reran cleanly with no changes.",
     "Public recursive resolvers updated during the same turn, but the controller's default resolver briefly kept the earlier NXDOMAIN cached. A browser may still need a short wait or a local DNS cache refresh after seeing the previous negative answer.",
-    "Because the Coolify app lane now owns `*.apps.lv3.org`, individual app create and delete events no longer need one-off DNS record lifecycle work while the wildcard ingress lane remains active."
+    "Because the Coolify app lane now owns `*.apps.example.com`, individual app create and delete events no longer need one-off DNS record lifecycle work while the wildcard ingress lane remains active."
   ]
 }

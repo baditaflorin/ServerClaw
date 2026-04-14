@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -45,7 +45,7 @@
     {
       "check": "Latest-origin/main Windmill converge with raw-app dependency staging and OpenBao retries",
       "result": "pass",
-      "observed": "`BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-live-apply` with final recap `docker-runtime-lv3 ok=226 changed=30 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`."
+      "observed": "`BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0236-live-apply` with final recap `docker-runtime-lv3 ok=226 changed=30 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`."
     },
     {
       "check": "Live Windmill app publication",

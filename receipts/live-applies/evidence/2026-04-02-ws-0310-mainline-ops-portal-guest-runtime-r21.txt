@@ -8,8 +8,8 @@ PASS overview_partial_locked
 PASS locked_deploy_action
 PASS complete_required_items
 PASS activation_partial_unlocked
-PASS unlocked_launcher_redirect https://sso.lv3.org
+PASS unlocked_launcher_redirect https://sso.example.com
 PASS activation_override
 PASS launcher_partial_override
-PASS override_launcher_redirect https://sso.lv3.org
+PASS override_launcher_redirect https://sso.example.com
 RESULT PASS

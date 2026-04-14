@@ -159,10 +159,10 @@ docker-runtime-lv3 | CHANGED | rc=0 >>
         "title": "Live-apply and promotion lane"
       }
     ],
-    "lane_catalog_path": "/srv/proxmox_florin_server/config/validation-lanes.yaml",
+    "lane_catalog_path": "/srv/platform_server/config/validation-lanes.yaml",
     "last_run": null,
     "latest_bypass": {
-      "path": "/srv/proxmox_florin_server/receipts/gate-bypasses/20260328T220410Z-codex-ws-0264-receipt-driven-resilience-adrs-r3-6b19422-skip-remote-gate.json",
+      "path": "/srv/platform_server/receipts/gate-bypasses/20260328T220410Z-codex-ws-0264-receipt-driven-resilience-adrs-r3-6b19422-skip-remote-gate.json",
       "payload": {
         "branch": "codex/ws-0264-receipt-driven-resilience-adrs-r3",
         "bypass": "skip_remote_gate",
@@ -172,7 +172,7 @@ docker-runtime-lv3 | CHANGED | rc=0 >>
         "source": "manual-main-push"
       }
     },
-    "manifest_path": "/srv/proxmox_florin_server/config/validation-gate.json",
+    "manifest_path": "/srv/platform_server/config/validation-gate.json",
     "post_merge_run": {
       "checks": [
         {
@@ -196,13 +196,13 @@ docker-runtime-lv3 | CHANGED | rc=0 >>
         }
       ],
       "executed_at": "2026-03-29T22:24:37.498783+00:00",
-      "manifest": "/srv/proxmox_florin_server/config/validation-gate.json",
+      "manifest": "/srv/platform_server/config/validation-gate.json",
       "requested_checks": [
         "local-fallback"
       ],
       "source": "windmill-post-merge-local-fallback",
       "status": "passed",
-      "workspace": "/srv/proxmox_florin_server"
+      "workspace": "/srv/platform_server"
     },
     "waiver_summary": {
       "expiring_soon": [],

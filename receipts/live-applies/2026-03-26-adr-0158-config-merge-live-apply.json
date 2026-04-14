@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -43,7 +43,7 @@
     {
       "check": "Windmill converge and seeded worker availability",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from the current-mainline branch with `docker-runtime-lv3 : ok=152 changed=11 unreachable=0 failed=0`, `postgres-lv3 : ok=57 changed=1 unreachable=0 failed=0`, and `proxmox_florin : ok=35 changed=4 unreachable=0 failed=0`; afterwards `GET /api/w/lv3/scripts/get/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes` returned HTTP 200 and the managed schedule remained enabled with the production DSN in `args.dsn`."
+      "observed": "`make converge-windmill` completed successfully from the current-mainline branch with `docker-runtime-lv3 : ok=152 changed=11 unreachable=0 failed=0`, `postgres-lv3 : ok=57 changed=1 unreachable=0 failed=0`, and `proxmox-host : ok=35 changed=4 unreachable=0 failed=0`; afterwards `GET /api/w/lv3/scripts/get/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes` returned HTTP 200 and the managed schedule remained enabled with the production DSN in `args.dsn`."
     },
     {
       "check": "Production merge-worker execution",

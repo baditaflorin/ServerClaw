@@ -51,7 +51,7 @@
     {
       "kind": "service_endpoint",
       "name": "Falco ntfy topic",
-      "address": "https://ntfy.lv3.org/platform-security-critical"
+      "address": "https://ntfy.example.com/platform-security-critical"
     }
   ],
   "verification": [

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,27 +39,27 @@
     {
       "kind": "service_endpoint",
       "name": "shared logout entrypoint",
-      "address": "https://home.lv3.org/.well-known/lv3/session/logout"
+      "address": "https://home.example.com/.well-known/lv3/session/logout"
     },
     {
       "kind": "service_endpoint",
       "name": "shared proxy cleanup",
-      "address": "https://ops.lv3.org/.well-known/lv3/session/proxy-logout"
+      "address": "https://ops.example.com/.well-known/lv3/session/proxy-logout"
     },
     {
       "kind": "service_endpoint",
       "name": "logged-out landing page",
-      "address": "https://ops.lv3.org/.well-known/lv3/session/logged-out"
+      "address": "https://ops.example.com/.well-known/lv3/session/logged-out"
     },
     {
       "kind": "service_endpoint",
       "name": "Outline OIDC surface",
-      "address": "https://wiki.lv3.org/auth/oidc"
+      "address": "https://wiki.example.com/auth/oidc"
     },
     {
       "kind": "service_endpoint",
       "name": "Keycloak realm broker",
-      "address": "https://sso.lv3.org/realms/lv3"
+      "address": "https://sso.example.com/realms/lv3"
     }
   ],
   "verification": [
@@ -76,12 +76,12 @@
     {
       "check": "Exact-main Keycloak recovery replay",
       "result": "pass",
-      "observed": "The first exact-main guarded Outline replay exposed a transient Keycloak admin-token timeout after Docker activity. `curl -fsS http://10.10.10.20:8091/realms/master` returned HTTP 200 immediately afterward, and `make converge-keycloak env=production` then completed successfully with `docker-runtime-lv3 : ok=150 changed=0 failed=0`, `monitoring-lv3 : ok=17 changed=0 failed=0`, `nginx-lv3 : ok=39 changed=4 failed=0`, `postgres-lv3 : ok=47 changed=0 failed=0`, and `proxmox_florin : ok=201 changed=0 failed=0`."
+      "observed": "The first exact-main guarded Outline replay exposed a transient Keycloak admin-token timeout after Docker activity. `curl -fsS http://10.10.10.20:8091/realms/master` returned HTTP 200 immediately afterward, and `make converge-keycloak env=production` then completed successfully with `docker-runtime-lv3 : ok=150 changed=0 failed=0`, `monitoring-lv3 : ok=17 changed=0 failed=0`, `nginx-lv3 : ok=39 changed=4 failed=0`, `postgres-lv3 : ok=47 changed=0 failed=0`, and `proxmox-host : ok=201 changed=0 failed=0`."
     },
     {
       "check": "Guarded exact-main Outline wrapper replay",
       "result": "pass",
-      "observed": "`make live-apply-service service=outline env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0248-main-merge` after the Keycloak recovery replay, with final recap `docker-runtime-lv3 : ok=209 changed=5 failed=0`, `localhost : ok=25 changed=1 failed=0`, `nginx-lv3 : ok=38 changed=2 failed=0`, and `postgres-lv3 : ok=47 changed=0 failed=0`. The run passed the `Canonical truth OK` and `Live apply contract OK` gates, exercising the `ready_for_merge` interface-contract support added for this integration."
+      "observed": "`make live-apply-service service=outline env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0248-main-merge` after the Keycloak recovery replay, with final recap `docker-runtime-lv3 : ok=209 changed=5 failed=0`, `localhost : ok=25 changed=1 failed=0`, `nginx-lv3 : ok=38 changed=2 failed=0`, and `postgres-lv3 : ok=47 changed=0 failed=0`. The run passed the `Canonical truth OK` and `Live apply contract OK` gates, exercising the `ready_for_merge` interface-contract support added for this integration."
     },
     {
       "check": "Exact-main public edge publication",
@@ -91,12 +91,12 @@
     {
       "check": "HTTP logout contract verification",
       "result": "pass",
-      "observed": "`curl -I -sS https://wiki.lv3.org/` returned HTTP 200 with the expected Outline-compatible CSP override; `curl -i -sS https://home.lv3.org/.well-known/lv3/session/logout` returned HTTP 302 to `https://ops.lv3.org/oauth2/sign_out?rd=https%3A//ops.lv3.org/.well-known/lv3/session/proxy-logout`; `curl -i -sS https://ops.lv3.org/.well-known/lv3/session/proxy-logout` returned HTTP 302 to `https://ops.lv3.org/oauth2/sign_out?rd=https%3A//ops.lv3.org/.well-known/lv3/session/logged-out`; and `curl -i -sS https://ops.lv3.org/.well-known/lv3/session/logged-out` returned HTTP 200 with `Cache-Control: no-store` and `Clear-Site-Data: \"cache\", \"cookies\", \"storage\"`."
+      "observed": "`curl -I -sS https://wiki.example.com/` returned HTTP 200 with the expected Outline-compatible CSP override; `curl -i -sS https://home.example.com/.well-known/lv3/session/logout` returned HTTP 302 to `https://ops.example.com/oauth2/sign_out?rd=https%3A//ops.example.com/.well-known/lv3/session/proxy-logout`; `curl -i -sS https://ops.example.com/.well-known/lv3/session/proxy-logout` returned HTTP 302 to `https://ops.example.com/oauth2/sign_out?rd=https%3A//ops.example.com/.well-known/lv3/session/logged-out`; and `curl -i -sS https://ops.example.com/.well-known/lv3/session/logged-out` returned HTTP 200 with `Cache-Control: no-store` and `Clear-Site-Data: \"cache\", \"cookies\", \"storage\"`."
     },
     {
       "check": "Browser logout verification",
       "result": "pass",
-      "observed": "`uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt` passed and reported `verified shared edge logout via https://home.lv3.org/` plus `verified Outline logout via https://wiki.lv3.org/auth/oidc`."
+      "observed": "`uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/outline.automation-password.txt` passed and reported `verified shared edge logout via https://home.example.com/` plus `verified Outline logout via https://wiki.example.com/auth/oidc`."
     }
   ],
   "evidence_refs": [

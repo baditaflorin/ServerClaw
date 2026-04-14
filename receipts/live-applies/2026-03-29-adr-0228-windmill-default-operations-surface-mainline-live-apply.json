@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -46,12 +46,12 @@
     {
       "check": "Exact-main Windmill replay",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from branch head `afb96649` with replay log `.local/ws-0228-main/converge-windmill-mainline-r25.log`, including `Verify the Windmill default operations scripts are seeded`, `Assert the Windmill default operations scripts exist`, and final recap `docker-runtime-lv3 ok=248 changed=50`, `postgres-lv3 ok=64 changed=1`, and `proxmox_florin ok=37 changed=4`."
+      "observed": "`make converge-windmill` completed successfully from branch head `afb96649` with replay log `.local/ws-0228-main/converge-windmill-mainline-r25.log`, including `Verify the Windmill default operations scripts are seeded`, `Assert the Windmill default operations scripts exist`, and final recap `docker-runtime-lv3 ok=248 changed=50`, `postgres-lv3 ok=64 changed=1`, and `proxmox-host ok=37 changed=4`."
     },
     {
       "check": "Worker-local validation fallback",
       "result": "pass",
-      "observed": "The direct worker checkout command `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` passed from `/srv/proxmox_florin_server` with exit code `0`, proving the Python `3.11` compatibility fix in `scripts/generate_ops_portal.py` and the new empty-state coverage in `tests/test_ops_portal.py` keep the worker-local `generated-portals` fallback green."
+      "observed": "The direct worker checkout command `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` passed from `/srv/platform_server` with exit code `0`, proving the Python `3.11` compatibility fix in `scripts/generate_ops_portal.py` and the new empty-state coverage in `tests/test_ops_portal.py` keep the worker-local `generated-portals` fallback green."
     },
     {
       "check": "Integrated repo automation and validation slice",
@@ -66,7 +66,7 @@
     {
       "check": "Post-merge gate fallback nuance",
       "result": "partial",
-      "observed": "The raw `post_merge_gate` payload still shows the primary Docker-runner validation path failing because the worker receives `502 Bad Gateway` while pulling `registry.lv3.org/check-runner/*` images. The documented worker-local fallback passed, so the seeded `f/lv3/post_merge_gate` workflow still returned top-level `status: ok` on the live control plane."
+      "observed": "The raw `post_merge_gate` payload still shows the primary Docker-runner validation path failing because the worker receives `502 Bad Gateway` while pulling `registry.example.com/check-runner/*` images. The documented worker-local fallback passed, so the seeded `f/lv3/post_merge_gate` workflow still returned top-level `status: ok` on the live control plane."
     },
     {
       "check": "Post-replay server state",
@@ -106,7 +106,7 @@
     "The isolated-worktree receipt `2026-03-28-adr-0228-windmill-default-operations-surface-live-apply` remains the first-live proof for ADR 0228. This mainline receipt becomes the canonical evidence for integrated release `0.177.71` and platform version `0.130.49`.",
     "The final exact-main replay repairs one worker-only validation gap that was not visible in the earlier isolated branch proof: `scripts/generate_ops_portal.py` needed Python `3.11`-compatible empty-state rendering so `generated-portals` could parse on the worker-local fallback.",
     "The only remaining live warning in the representative workflow set is token hygiene for `local-platform-cli`, which `audit_token_inventory` reports as `rotation_due_soon` because the token expires on `2026-03-31T00:00:00Z`.",
-    "The primary Docker-runner validation lane is still blocked on `registry.lv3.org/check-runner/*` pulls returning `502 Bad Gateway` from the worker. ADR 0228 is still considered live-applied here because the intended local fallback completed successfully and the top-level `post_merge_gate` workflow status is `ok`.",
+    "The primary Docker-runner validation lane is still blocked on `registry.example.com/check-runner/*` pulls returning `502 Bad Gateway` from the worker. ADR 0228 is still considered live-applied here because the intended local fallback completed successfully and the top-level `post_merge_gate` workflow status is `ok`.",
     "The only validation-path result that remained non-pass on this branch was the expected `workstream-surfaces` terminal-branch guard, which should disappear once this exact commit is published on `origin/main`."
   ]
 }

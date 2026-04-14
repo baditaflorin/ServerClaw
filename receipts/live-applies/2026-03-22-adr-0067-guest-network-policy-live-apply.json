@@ -12,7 +12,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -25,7 +25,7 @@
     {
       "check": "Workflow convergence and idempotence",
       "result": "pass",
-      "observed": "`make converge-guest-network-policy` completed successfully after live apply, and a follow-up rerun on the rebased `main` integration branch finished with `changed=0` on `proxmox_florin` plus every guest except `docker-runtime-lv3`, which reapplied the same verified nftables policy without changing the observed allow/deny behavior."
+      "observed": "`make converge-guest-network-policy` completed successfully after live apply, and a follow-up rerun on the rebased `main` integration branch finished with `changed=0` on `proxmox-host` plus every guest except `docker-runtime-lv3`, which reapplied the same verified nftables policy without changing the observed allow/deny behavior."
     },
     {
       "check": "Management and NAT continuity",

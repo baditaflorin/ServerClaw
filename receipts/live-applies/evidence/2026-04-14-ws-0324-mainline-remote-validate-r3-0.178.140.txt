@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-main-integration-r5/scripts/remote_exec.sh remote-validate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-main-integration-r5/scripts/remote_exec.sh remote-validate --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
@@ -121,4 +121,4 @@ policy-validation     passed 1.05
 schema-validation     passed 34.49
 type-check            passed 0.69
 workstream-surfaces   passed 2.56
-run_gate_fallback: merged local rerun with synced remote gate status at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-main-integration-r5/.local/validation-gate/remote-validate-last-run.json
+run_gate_fallback: merged local rerun with synced remote gate status at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-main-integration-r5/.local/validation-gate/remote-validate-last-run.json

@@ -1,5 +1,5 @@
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0267-main-refresh-v5/scripts/gate_status.py
-Validation gate manifest: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0267-main-refresh-v5/config/validation-gate.json
+python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0267-main-refresh-v5/scripts/gate_status.py
+Validation gate manifest: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0267-main-refresh-v5/config/validation-gate.json
 Validation lanes:
   - documentation-and-adr: Documentation and ADR lane [documentation-index]
   - repository-structure-and-schema: Repository structure and schema lane [yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction]
@@ -31,5 +31,5 @@ Enabled checks:
 Last gate run: none recorded
 Last remote validate run: none recorded
 Last post-merge gate run: none recorded
-Latest bypass receipt: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0267-main-refresh-v5/receipts/gate-bypasses/20260329T221109Z-codex-ws-0296-education-refresh-3df431e-skip-remote-gate.json (skip_remote_gate at 2026-03-29T22:11:09.552642+00:00)
+Latest bypass receipt: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0267-main-refresh-v5/receipts/gate-bypasses/20260329T221109Z-codex-ws-0296-education-refresh-3df431e-skip-remote-gate.json (skip_remote_gate at 2026-03-29T22:11:09.552642+00:00)
 Waiver summary: 0 open, 63 legacy, 0 warnings, 0 release blockers

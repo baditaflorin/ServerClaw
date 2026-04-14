@@ -20,13 +20,13 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "application",
-      "name": "education-wemeshup.apps.lv3.org",
-      "address": "https://education-wemeshup.apps.lv3.org"
+      "name": "education-wemeshup.apps.example.com",
+      "address": "https://education-wemeshup.apps.example.com"
     }
   ],
   "verification": [
@@ -53,7 +53,7 @@
     {
       "check": "Public production verification",
       "result": "pass",
-      "observed": "`curl -ksSI https://education-wemeshup.apps.lv3.org/ | head -n 1` returned `HTTP/2 200`, and `/api/v1/catalog/taxonomy` returned `catalogVersion: 2.0.0`, `activityCount: 1056`, and `categoryCount: 95` after the redeploy."
+      "observed": "`curl -ksSI https://education-wemeshup.apps.example.com/ | head -n 1` returned `HTTP/2 200`, and `/api/v1/catalog/taxonomy` returned `catalogVersion: 2.0.0`, `activityCount: 1056`, and `categoryCount: 95` after the redeploy."
     }
   ],
   "evidence_refs": [

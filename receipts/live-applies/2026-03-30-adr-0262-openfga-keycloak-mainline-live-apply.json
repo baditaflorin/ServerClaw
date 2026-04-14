@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -56,7 +56,7 @@
     {
       "kind": "service_endpoint",
       "name": "Platform API gateway",
-      "address": "https://api.lv3.org"
+      "address": "https://api.example.com"
     }
   ],
   "verification": [
@@ -68,22 +68,22 @@
     {
       "check": "Synchronized exact-main mail-platform prerequisite replay",
       "result": "pass",
-      "observed": "`make converge-mail-platform env=production` succeeded from committed source `a6d327e73c210137b0f6ede8e202b560d3335ebc` with final recap `docker-runtime-lv3 : ok=190 changed=8 unreachable=0 failed=0 skipped=36`, `monitoring-lv3 : ok=154 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox_florin : ok=73 changed=0 unreachable=0 failed=0 skipped=33`."
+      "observed": "`make converge-mail-platform env=production` succeeded from committed source `a6d327e73c210137b0f6ede8e202b560d3335ebc` with final recap `docker-runtime-lv3 : ok=190 changed=8 unreachable=0 failed=0 skipped=36`, `monitoring-lv3 : ok=154 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox-host : ok=73 changed=0 unreachable=0 failed=0 skipped=33`."
     },
     {
       "check": "Synchronized exact-main Keycloak replay",
       "result": "pass",
-      "observed": "`make converge-keycloak env=production` succeeded with final recap `docker-runtime-lv3 : ok=175 changed=0 unreachable=0 failed=0 skipped=38`, `monitoring-lv3 : ok=17 changed=0 unreachable=0 failed=0 skipped=1`, `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=7`, `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=14`, and `proxmox_florin : ok=219 changed=0 unreachable=0 failed=0 skipped=105`."
+      "observed": "`make converge-keycloak env=production` succeeded with final recap `docker-runtime-lv3 : ok=175 changed=0 unreachable=0 failed=0 skipped=38`, `monitoring-lv3 : ok=17 changed=0 unreachable=0 failed=0 skipped=1`, `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=7`, `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=14`, and `proxmox-host : ok=219 changed=0 unreachable=0 failed=0 skipped=105`."
     },
     {
       "check": "Synchronized exact-main OpenFGA replay",
       "result": "pass",
-      "observed": "`make converge-openfga env=production` succeeded with final recap `docker-runtime-lv3 : ok=256 changed=5 unreachable=0 failed=0 skipped=69`, `localhost : ok=2 changed=1 unreachable=0 failed=0 skipped=0`, `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=14`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`; that replay also passed the repo-managed delegated authorization bootstrap assertion."
+      "observed": "`make converge-openfga env=production` succeeded with final recap `docker-runtime-lv3 : ok=256 changed=5 unreachable=0 failed=0 skipped=69`, `localhost : ok=2 changed=1 unreachable=0 failed=0 skipped=0`, `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=14`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`; that replay also passed the repo-managed delegated authorization bootstrap assertion."
     },
     {
       "check": "Delegated authorization bootstrap and verification",
       "result": "pass",
-      "observed": "`curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores` returned the `serverclaw-authz` store, and `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091` returned `verification_passed: true` with `tuple_count: 12`, the declared operator and runtime principals, and all six expected checks passed."
+      "observed": "`curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores` returned the `serverclaw-authz` store, and `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091` returned `verification_passed: true` with `tuple_count: 12`, the declared operator and runtime principals, and all six expected checks passed."
     },
     {
       "check": "Synchronized exact-main API gateway replay",
@@ -93,7 +93,7 @@
     {
       "check": "Public and authenticated gateway verification",
       "result": "pass",
-      "observed": "`curl -fsS https://api.lv3.org/healthz` returned `{\"status\":\"ok\"}`; the authenticated `https://api.lv3.org/v1/platform/services` response listed the `openfga` service with `gateway_prefix: /v1/openfga` and internal URL `http://100.64.0.1:8014`; and `https://api.lv3.org/v1/openfga/healthz` returned the canonical `AUTH_INSUFFICIENT_ROLE` envelope for `service-account-lv3-agent-hub` with `HTTP_STATUS=403`, proving the route is live and correctly role-gated instead of missing."
+      "observed": "`curl -fsS https://api.example.com/healthz` returned `{\"status\":\"ok\"}`; the authenticated `https://api.example.com/v1/platform/services` response listed the `openfga` service with `gateway_prefix: /v1/openfga` and internal URL `http://100.64.0.1:8014`; and `https://api.example.com/v1/openfga/healthz` returned the canonical `AUTH_INSUFFICIENT_ROLE` envelope for `service-account-lv3-agent-hub` with `HTTP_STATUS=403`, proving the route is live and correctly role-gated instead of missing."
     },
     {
       "check": "Repository validation and gate automation",

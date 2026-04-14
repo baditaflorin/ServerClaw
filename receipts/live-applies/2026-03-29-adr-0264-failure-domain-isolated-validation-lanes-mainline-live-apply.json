@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -56,7 +56,7 @@
     {
       "check": "Worker mirror integrity recovery and direct status checks",
       "result": "pass",
-      "observed": "When the worker mirror at `/srv/proxmox_florin_server` still lacked exact-worktree ADR 0264 files after replay, a bounded refresh of the rebased validation surfaces plus removal of `/opt/windmill/worker-checkout.sha256` restored alignment; after removing macOS `._*` artifacts from the manual tar transfer and restoring `ops:ops` ownership on the worker checkout, `/usr/local/bin/uv run --with pyyaml python3 scripts/canonical_truth.py --write` refreshed worker canonical truth, `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` returned `status: ok`, and the final `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server` returned `status: ok` while running `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` plus `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate` with both commands returning `0`."
+      "observed": "When the worker mirror at `/srv/platform_server` still lacked exact-worktree ADR 0264 files after replay, a bounded refresh of the rebased validation surfaces plus removal of `/opt/windmill/worker-checkout.sha256` restored alignment; after removing macOS `._*` artifacts from the manual tar transfer and restoring `ops:ops` ownership on the worker checkout, `/usr/local/bin/uv run --with pyyaml python3 scripts/canonical_truth.py --write` refreshed worker canonical truth, `python3 config/windmill/scripts/gate-status.py --repo-path /srv/platform_server` returned `status: ok`, and the final `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/platform_server` returned `status: ok` while running `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` plus `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate` with both commands returning `0`."
     },
     {
       "check": "Controller-local follow-up and worker-fallback hardening",

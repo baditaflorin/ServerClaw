@@ -19,5 +19,5 @@ Representative workflow results
   incident_id: token-exposure-20260329T060928Z-local-platform-cli
   impact summary: Exposed token could reach: gateway_api, operator_read_write. Exposure source: validation-dry-run. Notes: ADR 0228 mainline verification after r25.
 - post_merge_gate: ok
-  note: the primary Docker-runner validation path still fails on the worker because `registry.lv3.org/check-runner/*` image pulls return `502 Bad Gateway`
+  note: the primary Docker-runner validation path still fails on the worker because `registry.example.com/check-runner/*` image pulls return `502 Bad Gateway`
   note: the documented worker-local fallback passed, so the overall seeded gate result is green

@@ -3,134 +3,134 @@ PLAY [Bootstrap and maintain server-resident reconciliation on the Proxmox host]
 
 TASK [Gathering Facts] *********************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:25:58.213Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.211Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.211Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Ensure the target host is Debian] ****************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the target host is Debian","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:01.217Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the target host is Debian","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.239Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the target host is Debian","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.239Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Validating arguments against arg spec 'main' - Bootstrap and maintain a server-resident ansible-pull reconcile loop.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Validating arguments against arg spec 'main' - Bootstrap and maintain a server-resident ansible-pull reconcile loop.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:01.247Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Validating arguments against arg spec 'main' - Bootstrap and maintain a server-resident ansible-pull reconcile loop.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.272Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Validating arguments against arg spec 'main' - Bootstrap and maintain a server-resident ansible-pull reconcile loop.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.272Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Validate server-resident reconciliation inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Validate server-resident reconciliation inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:01.278Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Validate server-resident reconciliation inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.312Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Validate server-resident reconciliation inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.312Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Bootstrap low-privilege Gitea pull access from the controller] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Bootstrap low-privilege Gitea pull access from the controller","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:01.318Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Bootstrap low-privilege Gitea pull access from the controller","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:01.338Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Bootstrap low-privilege Gitea pull access from the controller","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:01.338Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Check whether the host-local Gitea read token exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Check whether the host-local Gitea read token exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:01.344Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Check whether the host-local Gitea read token exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.785Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Check whether the host-local Gitea read token exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:01.785Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Fail when the recurring reconcile path lacks its host-local Gitea read token] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Fail when the recurring reconcile path lacks its host-local Gitea read token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:01.795Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Fail when the recurring reconcile path lacks its host-local Gitea read token","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:01.924Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Fail when the recurring reconcile path lacks its host-local Gitea read token","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:01.924Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Ensure server-resident reconciliation packages are present] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Ensure server-resident reconciliation packages are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:01.944Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Ensure server-resident reconciliation packages are present","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.524Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Ensure server-resident reconciliation packages are present","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.524Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Ensure server-resident reconciliation directories exist] *****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Ensure server-resident reconciliation directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:03.530Z","vm":"controller","workflow_id":"ansible-playbook"}
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure server-resident reconciliation directories exist","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.547Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
-included: lv3.platform.common for proxmox_florin
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure server-resident reconciliation directories exist","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.547Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for proxmox-host
 
 TASK [lv3.platform.common : Validating arguments against arg spec 'directory_tree' - Ensure one or more managed directories exist with shared defaults.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'directory_tree' - Ensure one or more managed directories exist with shared defaults.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:03.568Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'directory_tree' - Ensure one or more managed directories exist with shared defaults.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.591Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'directory_tree' - Ensure one or more managed directories exist with shared defaults.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.591Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.common : Validate common directory_tree entrypoint inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common directory_tree entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:03.597Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common directory_tree entrypoint inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.618Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common directory_tree entrypoint inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:03.618Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.common : Ensure managed directory tree entries exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:03.624Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item={'path': '/srv', 'mode': '0755'})
-ok: [proxmox_florin] => (item={'path': '/srv/proxmox_florin_server', 'mode': '0755'})
-ok: [proxmox_florin] => (item={'path': '/var/lib/lv3/server-resident-reconciliation', 'mode': '0755'})
-ok: [proxmox_florin] => (item={'path': '/var/lib/lv3/server-resident-reconciliation/receipts', 'mode': '0755'})
-ok: [proxmox_florin] => (item={'path': '/etc/lv3/server-resident-reconciliation', 'mode': '0700'})
-ok: [proxmox_florin] => (item={'path': '/usr/local/libexec', 'mode': '0755'})
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:05.940Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item={'path': '/srv', 'mode': '0755'})
+ok: [proxmox-host] => (item={'path': '/srv/platform_server', 'mode': '0755'})
+ok: [proxmox-host] => (item={'path': '/var/lib/lv3/server-resident-reconciliation', 'mode': '0755'})
+ok: [proxmox-host] => (item={'path': '/var/lib/lv3/server-resident-reconciliation/receipts', 'mode': '0755'})
+ok: [proxmox-host] => (item={'path': '/etc/lv3/server-resident-reconciliation', 'mode': '0700'})
+ok: [proxmox-host] => (item={'path': '/usr/local/libexec', 'mode': '0755'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:05.940Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Copy the bootstrapped Gitea read token to the host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Copy the bootstrapped Gitea read token to the host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:05.952Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Copy the bootstrapped Gitea read token to the host","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:05.971Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Copy the bootstrapped Gitea read token to the host","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:05.971Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Enforce host-local Gitea read token permissions] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Enforce host-local Gitea read token permissions","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:05.977Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Enforce host-local Gitea read token permissions","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:06.359Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Enforce host-local Gitea read token permissions","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:06.359Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation Git askpass helper] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation Git askpass helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:06.366Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation Git askpass helper","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:07.457Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation Git askpass helper","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:07.457Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation ansible-pull inventory] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation ansible-pull inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:07.464Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation ansible-pull inventory","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:09.499Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation ansible-pull inventory","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:09.499Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation wrapper] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation wrapper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:09.506Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation wrapper","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:11.507Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation wrapper","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:11.507Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:11.514Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:12.609Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:12.609Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd timer] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd timer","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:12.615Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd timer","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.709Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Render the server-resident reconciliation systemd timer","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.709Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Enable the server-resident reconciliation timer] *************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Enable the server-resident reconciliation timer","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:13.715Z","vm":"controller","workflow_id":"ansible-playbook"}
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Enable the server-resident reconciliation timer","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.735Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
-included: lv3.platform.common for proxmox_florin
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Enable the server-resident reconciliation timer","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.735Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for proxmox-host
 
 TASK [lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:13.756Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.780Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.780Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.common : Validate common systemd_unit entrypoint inputs] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common systemd_unit entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:13.786Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common systemd_unit entrypoint inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.808Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common systemd_unit entrypoint inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:13.808Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.common : Ensure the managed systemd unit matches the requested state] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:13.814Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:14.785Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-28T17:26:14.785Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.common : Verify the managed systemd unit active state] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T17:26:14.793Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:14.819Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-28T17:26:14.819Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY RECAP *********************************************************************
-proxmox_florin             : ok=20   changed=2    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+proxmox-host             : ok=20   changed=2    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0

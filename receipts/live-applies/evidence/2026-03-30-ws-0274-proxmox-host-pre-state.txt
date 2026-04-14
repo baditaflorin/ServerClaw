@@ -1,5 +1,5 @@
-proxmox_florin | UNREACHABLE! => {
+proxmox-host | UNREACHABLE! => {
     "changed": false,
-    "msg": "Failed to connect to the host via ssh: ssh: connect to host 65.108.75.123 port 22: Operation timed out",
+    "msg": "Failed to connect to the host via ssh: ssh: connect to host 203.0.113.1 port 22: Operation timed out",
     "unreachable": true
 }

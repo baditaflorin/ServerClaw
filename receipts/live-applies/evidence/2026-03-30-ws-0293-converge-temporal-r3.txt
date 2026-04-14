@@ -2,10 +2,10 @@
 Preflight workflow: converge-temporal
 Description: Converge Temporal on docker-runtime-lv3, provision its PostgreSQL history and visibility stores on postgres-lv3, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
-INFO generated temporal_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal/database-password.txt
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
+INFO generated temporal_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/temporal/database-password.txt
 Result: PASS (converge-temporal)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=644f3160aad34d72ad0f5c7b5dfcd74e ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main/inventory/hosts.yml --run-id 2c45be65fe9d44189c02362863b62375 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main/playbooks/temporal.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=644f3160aad34d72ad0f5c7b5dfcd74e ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-temporal-main/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-temporal-main/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-temporal-main/inventory/hosts.yml --run-id 2c45be65fe9d44189c02362863b62375 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-temporal-main/playbooks/temporal.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 PLAY [Prepare PostgreSQL for Temporal] *****************************************
 
@@ -839,34 +839,34 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T17:41:50.383Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T17:42:06.144Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -1169,7 +1169,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T17:42:27.609Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T17:42:27.631Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-temporal-main/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T17:42:27.704Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1527,7 +1527,7 @@ ok: [docker-runtime-lv3]
 
 TASK [lv3.platform.temporal_runtime : Create the repo-managed Temporal namespace when missing] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.temporal_runtime : Create the repo-managed Temporal namespace when missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T17:44:13.391Z","vm":"controller","workflow_id":"ansible-playbook"}
-fatal: [docker-runtime-lv3]: FAILED! => {"changed": false, "cmd": ["docker", "compose", "--profile", "tools", "--file", "/opt/temporal/docker-compose.yml", "run", "--rm", "temporal-admin-tools", "temporal", "operator", "namespace", "create", "--namespace", "lv3", "--retention", "168h", "--email", "ops@lv3.org"], "delta": "0:00:03.811538", "end": "2026-03-30 17:44:17.688583", "msg": "non-zero return code", "rc": 1, "start": "2026-03-30 17:44:13.877045", "stderr": " Container temporal-openbao-agent Running \n Container temporal-matching Running \n Container temporal-openbao-agent Waiting \n Container temporal-openbao-agent Waiting \n Container temporal-openbao-agent Healthy \n Container temporal-history Starting \n Container temporal-openbao-agent Healthy \n Container temporal-history Started \n Container temporal-openbao-agent Waiting \n Container temporal-openbao-agent Healthy \n Container temporal-frontend Starting \n Container temporal-frontend Started \n Container temporal-temporal-admin-tools-run-218f3435863c Creating \n Container temporal-temporal-admin-tools-run-218f3435863c Created \ntime=2026-03-30T17:44:17.092 level=ERROR msg=\"failed reaching server: no children to pick from\"", "stderr_lines": [" Container temporal-openbao-agent Running ", " Container temporal-matching Running ", " Container temporal-openbao-agent Waiting ", " Container temporal-openbao-agent Waiting ", " Container temporal-openbao-agent Healthy ", " Container temporal-history Starting ", " Container temporal-openbao-agent Healthy ", " Container temporal-history Started ", " Container temporal-openbao-agent Waiting ", " Container temporal-openbao-agent Healthy ", " Container temporal-frontend Starting ", " Container temporal-frontend Started ", " Container temporal-temporal-admin-tools-run-218f3435863c Creating ", " Container temporal-temporal-admin-tools-run-218f3435863c Created ", "time=2026-03-30T17:44:17.092 level=ERROR msg=\"failed reaching server: no children to pick from\""], "stdout": "", "stdout_lines": []}
+fatal: [docker-runtime-lv3]: FAILED! => {"changed": false, "cmd": ["docker", "compose", "--profile", "tools", "--file", "/opt/temporal/docker-compose.yml", "run", "--rm", "temporal-admin-tools", "temporal", "operator", "namespace", "create", "--namespace", "lv3", "--retention", "168h", "--email", "ops@example.com"], "delta": "0:00:03.811538", "end": "2026-03-30 17:44:17.688583", "msg": "non-zero return code", "rc": 1, "start": "2026-03-30 17:44:13.877045", "stderr": " Container temporal-openbao-agent Running \n Container temporal-matching Running \n Container temporal-openbao-agent Waiting \n Container temporal-openbao-agent Waiting \n Container temporal-openbao-agent Healthy \n Container temporal-history Starting \n Container temporal-openbao-agent Healthy \n Container temporal-history Started \n Container temporal-openbao-agent Waiting \n Container temporal-openbao-agent Healthy \n Container temporal-frontend Starting \n Container temporal-frontend Started \n Container temporal-temporal-admin-tools-run-218f3435863c Creating \n Container temporal-temporal-admin-tools-run-218f3435863c Created \ntime=2026-03-30T17:44:17.092 level=ERROR msg=\"failed reaching server: no children to pick from\"", "stderr_lines": [" Container temporal-openbao-agent Running ", " Container temporal-matching Running ", " Container temporal-openbao-agent Waiting ", " Container temporal-openbao-agent Waiting ", " Container temporal-openbao-agent Healthy ", " Container temporal-history Starting ", " Container temporal-openbao-agent Healthy ", " Container temporal-history Started ", " Container temporal-openbao-agent Waiting ", " Container temporal-openbao-agent Healthy ", " Container temporal-frontend Starting ", " Container temporal-frontend Started ", " Container temporal-temporal-admin-tools-run-218f3435863c Creating ", " Container temporal-temporal-admin-tools-run-218f3435863c Created ", "time=2026-03-30T17:44:17.092 level=ERROR msg=\"failed reaching server: no children to pick from\""], "stdout": "", "stdout_lines": []}
 {"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.temporal_runtime : Create the repo-managed Temporal namespace when missing","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-30T17:44:17.784Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 PLAY RECAP *********************************************************************

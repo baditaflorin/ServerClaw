@@ -18,14 +18,14 @@
     },
     {
       "kind": "public_hostname",
-      "name": "ops.lv3.org"
+      "name": "ops.example.com"
     }
   ],
   "verification": [
     {
       "check": "Public sign-in redirect scope",
       "result": "pass",
-      "observed": "A live request to https://ops.lv3.org/oauth2/sign_in redirected to the Keycloak authorization endpoint with scope=openid+profile+email and no invalid groups scope."
+      "observed": "A live request to https://ops.example.com/oauth2/sign_in redirected to the Keycloak authorization endpoint with scope=openid+profile+email and no invalid groups scope."
     },
     {
       "check": "Rendered oauth2-proxy scope on nginx-lv3",

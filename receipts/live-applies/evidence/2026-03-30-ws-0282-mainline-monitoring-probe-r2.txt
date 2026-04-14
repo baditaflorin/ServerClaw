@@ -8,7 +8,7 @@ monitoring-lv3 | CHANGED | rc=0 >>
       "To": [
         {
           "Name": "",
-          "Address": "mailpit-mainline@lv3.org"
+          "Address": "mailpit-mainline@example.com"
         }
       ]
     }

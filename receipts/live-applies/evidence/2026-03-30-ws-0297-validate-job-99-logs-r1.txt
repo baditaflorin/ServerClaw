@@ -15,8 +15,8 @@
 2026-03-30T16:44:10.3544837Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
 2026-03-30T16:44:10.3545074Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-30T16:44:10.3545174Z evaluating expression 'format('{0}', github.repository)'
-2026-03-30T16:44:10.3545318Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
-2026-03-30T16:44:10.3545683Z type=remote-action actionDir=/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab actionPath= workdir=/workspace/ops/proxmox_florin_server actionCacheDir=/root/.cache/act actionName=c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab containerActionDir=/root/.cache/act/2bd6f2030a12813f/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
+2026-03-30T16:44:10.3545318Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
+2026-03-30T16:44:10.3545683Z type=remote-action actionDir=/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab actionPath= workdir=/workspace/ops/platform_server actionCacheDir=/root/.cache/act actionName=c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab containerActionDir=/root/.cache/act/2bd6f2030a12813f/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
 2026-03-30T16:44:10.3545843Z /root/.cache/act/2bd6f2030a12813f/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
 2026-03-30T16:44:10.3546006Z Removing /root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/.gitignore before docker cp
 2026-03-30T16:44:10.3546317Z Stripping prefix:/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/ src:/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/

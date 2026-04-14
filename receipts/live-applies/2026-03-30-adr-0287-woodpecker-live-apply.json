@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.72",
   "workflow_id": "converge-woodpecker",
   "adr": "0287",
-  "summary": "Replayed ADR 0287 from the latest realistic origin/main baseline and verified the Woodpecker production rollout end to end on the workstream branch. The successful `r14` live apply converged the Proxmox Tailscale proxy lane, Woodpecker PostgreSQL access, the Docker runtime stack, `ci.lv3.org` publication through the shared edge, a dedicated site-local `ci.lv3.org` Let's Encrypt certificate, and the controller-local bootstrap artifacts plus seed repository secret. The managed trigger wrapper was then hardened against Woodpecker's live `204 No Content` manual-trigger response so the final exact-main pipeline verification can wait for a newly visible run once `.woodpecker.yml` is present on the forge branch being triggered.",
+  "summary": "Replayed ADR 0287 from the latest realistic origin/main baseline and verified the Woodpecker production rollout end to end on the workstream branch. The successful `r14` live apply converged the Proxmox Tailscale proxy lane, Woodpecker PostgreSQL access, the Docker runtime stack, `ci.example.com` publication through the shared edge, a dedicated site-local `ci.example.com` Let's Encrypt certificate, and the controller-local bootstrap artifacts plus seed repository secret. The managed trigger wrapper was then hardened against Woodpecker's live `204 No Content` manual-trigger response so the final exact-main pipeline verification can wait for a newly visible run once `.woodpecker.yml` is present on the forge branch being triggered.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Woodpecker public hostname",
-      "address": "https://ci.lv3.org/healthz"
+      "address": "https://ci.example.com/healthz"
     },
     {
       "kind": "service_endpoint",
@@ -57,12 +57,12 @@
     {
       "check": "Authoritative Woodpecker production replay",
       "result": "pass",
-      "observed": "`HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` completed successfully and is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r14.txt`; the final recap reports `docker-runtime-lv3 : ok=156 changed=4 failed=0`, `nginx-lv3 : ok=46 changed=4 failed=0`, `postgres-lv3 : ok=51 changed=0 failed=0`, `proxmox_florin : ok=265 changed=1 failed=0`, and `localhost : ok=4 changed=0 failed=0`."
+      "observed": "`HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` completed successfully and is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r14.txt`; the final recap reports `docker-runtime-lv3 : ok=156 changed=4 failed=0`, `nginx-lv3 : ok=46 changed=4 failed=0`, `postgres-lv3 : ok=51 changed=0 failed=0`, `proxmox-host : ok=265 changed=1 failed=0`, and `localhost : ok=4 changed=0 failed=0`."
     },
     {
       "check": "Public TLS, private health, and controller API verification",
       "result": "pass",
-      "observed": "Strict validation against `https://ci.lv3.org/healthz` returned `HTTP/2 200` with `x-woodpecker-version: 3.13.0`; `curl -fsS http://100.64.0.1:8017/healthz` succeeded on the private controller path; `openssl s_client -connect ci.lv3.org:443 -servername ci.lv3.org` showed `subject=CN=ci.lv3.org`, Let's Encrypt issuer `CN=E7`, and SAN `DNS:ci.lv3.org`; `make woodpecker-manage ACTION=whoami` resolved to admin user `ops-gitea`; and `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'` confirmed `LV3_WOODPECKER_SECRET_SMOKE` on repo `id=1`."
+      "observed": "Strict validation against `https://ci.example.com/healthz` returned `HTTP/2 200` with `x-woodpecker-version: 3.13.0`; `curl -fsS http://100.64.0.1:8017/healthz` succeeded on the private controller path; `openssl s_client -connect ci.example.com:443 -servername ci.example.com` showed `subject=CN=ci.example.com`, Let's Encrypt issuer `CN=E7`, and SAN `DNS:ci.example.com`; `make woodpecker-manage ACTION=whoami` resolved to admin user `ops-gitea`; and `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/platform_server'` confirmed `LV3_WOODPECKER_SECRET_SMOKE` on repo `id=1`."
     },
     {
       "check": "Manual pipeline trigger readiness on the current upstream mainline",
@@ -102,6 +102,6 @@
   "notes": [
     "The latest realistic upstream checked during this workstream is `origin/main` commit `32696e7e523f0f1cd0fd3168d9701790b54f66e` with `VERSION` `0.177.109` and live platform baseline `0.130.72`.",
     "The branch intentionally still leaves protected integration files unchanged: `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level `README.md` mainline summary.",
-    "The remaining exact-main verification step is to land `.woodpecker.yml` on the forge branch being triggered, then rerun `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'` from the integrated mainline tree."
+    "The remaining exact-main verification step is to land `.woodpecker.yml` on the forge branch being triggered, then rerun `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/platform_server --branch main --wait'` from the integrated mainline tree."
   ]
 }

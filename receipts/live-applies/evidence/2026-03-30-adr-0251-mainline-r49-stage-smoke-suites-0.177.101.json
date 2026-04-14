@@ -1,5 +1,5 @@
 {
-  "command": "python3 /srv/proxmox_florin_server/scripts/stage_smoke_suites.py --service windmill --environment production --report-file /tmp/stage-smoke-windmill-production-sxjx68g0.json",
+  "command": "python3 /srv/platform_server/scripts/stage_smoke_suites.py --service windmill --environment production --report-file /tmp/stage-smoke-windmill-production-sxjx68g0.json",
   "environment": "production",
   "report_file": "/tmp/stage-smoke-windmill-production-sxjx68g0.json",
   "result": {
@@ -16,7 +16,7 @@
         "summary": "1 passed, 0 failed, 0 skipped"
       }
     ],
-    "repo_root": "/srv/proxmox_florin_server",
+    "repo_root": "/srv/platform_server",
     "service": "windmill",
     "status": "passed",
     "suite_ids": [
@@ -33,7 +33,7 @@
           "executed_at": "2026-03-30T11:40:33.862296+00:00",
           "marker_expression": "integration and not mutation and not destructive",
           "mode": "gate",
-          "repo_root": "/srv/proxmox_florin_server",
+          "repo_root": "/srv/platform_server",
           "required_service_ids": [
             "windmill"
           ],
@@ -48,12 +48,12 @@
             "total": 1
           },
           "targets": {
-            "gateway_url": "https://api.lv3.org",
-            "grafana_url": "https://grafana.lv3.org",
-            "keycloak_url": "https://sso.lv3.org",
+            "gateway_url": "https://api.example.com",
+            "grafana_url": "https://grafana.example.com",
+            "keycloak_url": "https://sso.example.com",
             "netbox_url": "http://100.64.0.1:8004",
             "openbao_url": "https://100.64.0.1:8200",
-            "postgres_dsn": "postgres://database.lv3.org:5432",
+            "postgres_dsn": "postgres://database.example.com:5432",
             "windmill_url": "http://127.0.0.1:8000"
           },
           "tests": [
@@ -97,5 +97,5 @@
   "service": "windmill",
   "status": "ok",
   "stderr": "",
-  "stdout": "{\n  \"environment\": \"production\",\n  \"executed_at\": \"2026-03-30T11:40:33.898803+00:00\",\n  \"receipt_smoke_suites\": [\n    {\n      \"environment\": \"production\",\n      \"executed_at\": \"2026-03-30T11:40:33.862296+00:00\",\n      \"report_ref\": \"/tmp/stage-smoke-windmill-production-sxjx68g0-production-windmill-primary-path.json\",\n      \"service_id\": \"windmill\",\n      \"status\": \"passed\",\n      \"suite_id\": \"production-windmill-primary-path\",\n      \"summary\": \"1 passed, 0 failed, 0 skipped\"\n    }\n  ],\n  \"repo_root\": \"/srv/proxmox_florin_server\",\n  \"service\": \"windmill\",\n  \"status\": \"passed\",\n  \"suite_ids\": [\n    \"production-windmill-primary-path\"\n  ],\n  \"suites\": [\n    {\n      \"description\": \"Verify the live Windmill operator path by resolving the production endpoint from the service catalog and reading /api/version.\",\n      \"environment\": \"production\",\n      \"executed_at\": \"2026-03-30T11:40:33.862296+00:00\",\n      \"integration_suite\": {\n        \"duration_seconds\": 0.233,\n        \"environment\": \"production\",\n        \"executed_at\": \"2026-03-30T11:40:33.862296+00:00\",\n        \"marker_expression\": \"integration and not mutation and not destructive\",\n        \"mode\": \"gate\",\n        \"repo_root\": \"/srv/proxmox_florin_server\",\n        \"required_service_ids\": [\n          \"windmill\"\n        ],\n        \"selection\": [\n          \"tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version\"\n        ],\n        \"status\": \"passed\",\n        \"summary\": {\n          \"failed\": 0,\n          \"passed\": 1,\n          \"skipped\": 0,\n          \"total\": 1\n        },\n        \"targets\": {\n          \"gateway_url\": \"https://api.lv3.org\",\n          \"grafana_url\": \"https://grafana.lv3.org\",\n          \"keycloak_url\": \"https://sso.lv3.org\",\n          \"netbox_url\": \"http://100.64.0.1:8004\",\n          \"openbao_url\": \"https://100.64.0.1:8200\",\n          \"postgres_dsn\": \"postgres://database.lv3.org:5432\",\n          \"windmill_url\": \"http://127.0.0.1:8000\"\n        },\n        \"tests\": [\n          {\n            \"duration_seconds\": 0.046,\n            \"longrepr\": \"\",\n            \"nodeid\": \"tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version\",\n            \"outcome\": \"passed\"\n          }\n        ]\n      },\n      \"mode\": \"gate\",\n      \"report_file\": \"/tmp/stage-smoke-windmill-production-sxjx68g0-production-windmill-primary-path.json\",\n      \"required_service_ids\": [\n        \"windmill\"\n      ],\n      \"runner\": \"integration_suite\",\n      \"service_id\": \"windmill\",\n      \"status\": \"passed\",\n      \"suite_id\": \"production-windmill-primary-path\",\n      \"summary\": {\n        \"failed\": 0,\n        \"passed\": 1,\n        \"skipped\": 0,\n        \"total\": 1\n      },\n      \"summary_text\": \"1 passed, 0 failed, 0 skipped\",\n      \"targets\": [\n        \"tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version\"\n      ]\n    }\n  ],\n  \"summary\": {\n    \"failed\": 0,\n    \"passed\": 1,\n    \"skipped\": 0,\n    \"total\": 1\n  }\n}"
+  "stdout": "{\n  \"environment\": \"production\",\n  \"executed_at\": \"2026-03-30T11:40:33.898803+00:00\",\n  \"receipt_smoke_suites\": [\n    {\n      \"environment\": \"production\",\n      \"executed_at\": \"2026-03-30T11:40:33.862296+00:00\",\n      \"report_ref\": \"/tmp/stage-smoke-windmill-production-sxjx68g0-production-windmill-primary-path.json\",\n      \"service_id\": \"windmill\",\n      \"status\": \"passed\",\n      \"suite_id\": \"production-windmill-primary-path\",\n      \"summary\": \"1 passed, 0 failed, 0 skipped\"\n    }\n  ],\n  \"repo_root\": \"/srv/platform_server\",\n  \"service\": \"windmill\",\n  \"status\": \"passed\",\n  \"suite_ids\": [\n    \"production-windmill-primary-path\"\n  ],\n  \"suites\": [\n    {\n      \"description\": \"Verify the live Windmill operator path by resolving the production endpoint from the service catalog and reading /api/version.\",\n      \"environment\": \"production\",\n      \"executed_at\": \"2026-03-30T11:40:33.862296+00:00\",\n      \"integration_suite\": {\n        \"duration_seconds\": 0.233,\n        \"environment\": \"production\",\n        \"executed_at\": \"2026-03-30T11:40:33.862296+00:00\",\n        \"marker_expression\": \"integration and not mutation and not destructive\",\n        \"mode\": \"gate\",\n        \"repo_root\": \"/srv/platform_server\",\n        \"required_service_ids\": [\n          \"windmill\"\n        ],\n        \"selection\": [\n          \"tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version\"\n        ],\n        \"status\": \"passed\",\n        \"summary\": {\n          \"failed\": 0,\n          \"passed\": 1,\n          \"skipped\": 0,\n          \"total\": 1\n        },\n        \"targets\": {\n          \"gateway_url\": \"https://api.example.com\",\n          \"grafana_url\": \"https://grafana.example.com\",\n          \"keycloak_url\": \"https://sso.example.com\",\n          \"netbox_url\": \"http://100.64.0.1:8004\",\n          \"openbao_url\": \"https://100.64.0.1:8200\",\n          \"postgres_dsn\": \"postgres://database.example.com:5432\",\n          \"windmill_url\": \"http://127.0.0.1:8000\"\n        },\n        \"tests\": [\n          {\n            \"duration_seconds\": 0.046,\n            \"longrepr\": \"\",\n            \"nodeid\": \"tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version\",\n            \"outcome\": \"passed\"\n          }\n        ]\n      },\n      \"mode\": \"gate\",\n      \"report_file\": \"/tmp/stage-smoke-windmill-production-sxjx68g0-production-windmill-primary-path.json\",\n      \"required_service_ids\": [\n        \"windmill\"\n      ],\n      \"runner\": \"integration_suite\",\n      \"service_id\": \"windmill\",\n      \"status\": \"passed\",\n      \"suite_id\": \"production-windmill-primary-path\",\n      \"summary\": {\n        \"failed\": 0,\n        \"passed\": 1,\n        \"skipped\": 0,\n        \"total\": 1\n      },\n      \"summary_text\": \"1 passed, 0 failed, 0 skipped\",\n      \"targets\": [\n        \"tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version\"\n      ]\n    }\n  ],\n  \"summary\": {\n    \"failed\": 0,\n    \"passed\": 1,\n    \"skipped\": 0,\n    \"total\": 1\n  }\n}"
 }

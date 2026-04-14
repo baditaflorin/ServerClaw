@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://data.lv3.org",
+      "url": "https://data.example.com",
       "description": "Your current Directus instance."
     }
   ],

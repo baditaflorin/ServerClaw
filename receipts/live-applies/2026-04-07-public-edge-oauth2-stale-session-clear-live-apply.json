@@ -12,7 +12,7 @@
     {
       "kind": "vm",
       "name": "nginx-lv3",
-      "address": "65.108.75.123"
+      "address": "203.0.113.1"
     }
   ],
   "verification": [

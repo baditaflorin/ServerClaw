@@ -18,9 +18,9 @@
   ],
   "verification": [
     {
-      "check": "Stale tiles removed from home.lv3.org",
+      "check": "Stale tiles removed from home.example.com",
       "result": "pass",
-      "observed": "One-API and Open WebUI tiles no longer appear on home.lv3.org; LibreChat tile present."
+      "observed": "One-API and Open WebUI tiles no longer appear on home.example.com; LibreChat tile present."
     },
     {
       "check": "Text selectability working",

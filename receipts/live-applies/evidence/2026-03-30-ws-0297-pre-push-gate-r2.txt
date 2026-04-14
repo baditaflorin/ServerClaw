@@ -1,10 +1,10 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0297-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
-mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
-mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-rsync: [Receiver] change_dir#3 "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643/repo/.lv3-snapshots" failed: No such file or directory (2)
+rsync: [Receiver] change_dir#3 "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643/repo/.lv3-snapshots" failed: No such file or directory (2)
 rsync error: errors selecting input/output files, dirs (code 3) at main.c(829) [Receiver=3.4.1]
 rsync(62782): error: unexpected end of file
 remote_exec: snapshot upload failed, falling back locally for pre-push-gate

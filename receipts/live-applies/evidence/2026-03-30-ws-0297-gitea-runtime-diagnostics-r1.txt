@@ -108,18 +108,18 @@ gitea-openbao-agent                              Up About an hour (healthy)
 2026/03/30 17:49:29 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:60650, 200 OK in 0.6ms @ healthcheck/check.go:67(healthcheck.Check)
 2026/03/30 17:49:34 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
 2026/03/30 17:49:34 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:34592, 200 OK in 0.4ms @ healthcheck/check.go:67(healthcheck.Check)
-2026/03/30 17:49:50 HTTPRequest [W] router: slow      GET /ops/proxmox_florin_server.git/info/refs?service=git-receive-pack for 172.16.240.1:47592, elapsed 3543.4ms @ web/web.go:118(web.Routes.webAuth)
-2026/03/30 17:50:01 HTTPRequest [W] router: slow      GET /ops/proxmox_florin_server.git/info/refs?service=git-receive-pack for 172.16.240.1:38022, elapsed 3224.5ms @ web/web.go:118(web.Routes.webAuth)
+2026/03/30 17:49:50 HTTPRequest [W] router: slow      GET /ops/platform_server.git/info/refs?service=git-receive-pack for 172.16.240.1:47592, elapsed 3543.4ms @ web/web.go:118(web.Routes.webAuth)
+2026/03/30 17:50:01 HTTPRequest [W] router: slow      GET /ops/platform_server.git/info/refs?service=git-receive-pack for 172.16.240.1:38022, elapsed 3224.5ms @ web/web.go:118(web.Routes.webAuth)
 2026/03/30 17:50:14 models/user/user.go:1277:GetUser() [W] [Slow SQL Query] SELECT "id", "lower_name", "name", "full_name", "email", "keep_email_private", "email_notifications_preference", "passwd", "passwd_hash_algo", "must_change_password", "login_type", "login_source", "login_name", "type", "location", "website", "rands", "salt", "language", "description", "created_unix", "updated_unix", "last_login_unix", "last_repo_visibility", "max_repo_creation", "is_active", "is_admin", "is_restricted", "allow_git_hook", "allow_import_local", "allow_create_organization", "prohibit_login", "avatar", "avatar_email", "use_custom_avatar", "num_followers", "num_following", "num_stars", "num_repos", "num_teams", "num_members", "visibility", "repo_admin_change_team_access", "diff_view_style", "theme", "keep_activity_private" FROM "user" WHERE "lower_name"=$1 LIMIT 1 [ops-gitea] - 26.807153984s
 2026/03/30 17:50:14 services/auth/basic.go:136:(*Basic).Verify() [E] UserSignIn: context canceled
 2026/03/30 17:50:14 routers/web/web.go:121:Routes.webAuth.10() [E] Failed to verify user: context canceled
-2026/03/30 17:50:14 HTTPRequest [I] router: completed GET /ops/proxmox_florin_server.git/info/refs?service=git-receive-pack for 172.16.240.1:47592, 401 Unauthorized in 26807.6ms @ web/web.go:118(web.Routes.webAuth)
+2026/03/30 17:50:14 HTTPRequest [I] router: completed GET /ops/platform_server.git/info/refs?service=git-receive-pack for 172.16.240.1:47592, 401 Unauthorized in 26807.6ms @ web/web.go:118(web.Routes.webAuth)
 2026/03/30 17:50:14 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres
 2026/03/30 17:50:14 HTTPRequest [I] router: completed GET /api/healthz for 10.10.10.40:39000, 200 OK in 3.8ms @ healthcheck/check.go:67(healthcheck.Check)
 2026/03/30 17:50:37 HTTPRequest [I] router: completed GET /api/v1/version for 172.16.240.1:49936, 200 OK in 0.1ms @ misc/version.go:15(misc.Version)
 2026/03/30 17:50:40 HTTPRequest [W] router: slow      GET /user/login for 172.16.240.1:49950, elapsed 3237.2ms @ auth/auth.go:184(auth.SignIn)
-2026/03/30 17:50:40 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/proxmox_florin_server/branches/codex%2Fws-0297-live-apply for 172.16.240.1:49954, elapsed 3219.0ms @ v1/api.go:792(v1.Routes.apiAuth)
-2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/proxmox_florin_server/branches/codex%2Fws-0297-live-apply for 172.16.240.1:59680, elapsed 3373.9ms @ v1/api.go:792(v1.Routes.apiAuth)
+2026/03/30 17:50:40 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/platform_server/branches/codex%2Fws-0297-live-apply for 172.16.240.1:49954, elapsed 3219.0ms @ v1/api.go:792(v1.Routes.apiAuth)
+2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/platform_server/branches/codex%2Fws-0297-live-apply for 172.16.240.1:59680, elapsed 3373.9ms @ v1/api.go:792(v1.Routes.apiAuth)
 2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /user/login for 172.16.240.1:59694, elapsed 3350.8ms @ auth/auth.go:184(auth.SignIn)
-2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/proxmox_florin_server/actions/runs?limit=5 for 172.16.240.1:59696, elapsed 3350.0ms @ v1/api.go:792(v1.Routes.apiAuth)
+2026/03/30 17:51:13 HTTPRequest [W] router: slow      GET /api/v1/repos/ops/platform_server/actions/runs?limit=5 for 172.16.240.1:59696, elapsed 3350.0ms @ v1/api.go:792(v1.Routes.apiAuth)
 2026/03/30 17:51:45 .../src/net/http/server.go:2322:HandlerFunc.ServeHTTP() [I] PING DATABASE postgres

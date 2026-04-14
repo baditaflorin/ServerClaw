@@ -1,2 +1,2 @@
 Updated canonical truth:
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0336-live-apply/README.md

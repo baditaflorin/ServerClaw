@@ -23,6 +23,6 @@ Grist server(home,docs,static) is alive.
 1001:1001 644 /opt/grist/persist/home.sqlite3
 
 [grist_env_contract]
-/opt/grist/grist.env:GRIST_OIDC_SP_HOST=https://grist.lv3.org
-/opt/grist/grist.env:GRIST_OIDC_IDP_ISSUER=https://sso.lv3.org/realms/lv3
+/opt/grist/grist.env:GRIST_OIDC_SP_HOST=https://grist.example.com
+/opt/grist/grist.env:GRIST_OIDC_IDP_ISSUER=https://sso.example.com/realms/lv3
 /run/lv3-secrets/grist/runtime.env:GRIST_SESSION_SECRET=<redacted>

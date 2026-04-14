@@ -12,7 +12,7 @@ server: nginx
 date: Mon, 30 Mar 2026 15:12:16 GMT
 content-type: text/html
 content-length: 164
-location: https://nginx.lv3.org/o/docs/
+location: https://nginx.example.com/o/docs/
 x-robots-tag: noindex, nofollow
 
 
@@ -21,7 +21,7 @@ server: nginx
 date: Mon, 30 Mar 2026 15:12:16 GMT
 content-type: text/html
 content-length: 138
-location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/
+location: https://docs.example.com/oauth2/sign_in?rd=https://docs.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -38,7 +38,7 @@ server: nginx
 date: Mon, 30 Mar 2026 15:12:17 GMT
 content-type: text/html
 content-length: 138
-location: https://changelog.lv3.org/oauth2/sign_in?rd=https://changelog.lv3.org/
+location: https://changelog.example.com/oauth2/sign_in?rd=https://changelog.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -52,4 +52,4 @@ x-robots-tag: noindex, nofollow
 
 SAN count: 33
 Has grist: True
-Selected SANs: changelog.lv3.org, docs.lv3.org, grist.lv3.org, ops.lv3.org
+Selected SANs: changelog.example.com, docs.example.com, grist.example.com, ops.example.com

@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -45,12 +45,12 @@
     {
       "check": "Windmill syntax check",
       "result": "pass",
-      "observed": "`make syntax-check-windmill` passed from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0237-live-apply` after the raw-app dependency-install task and committed lockfile were added."
+      "observed": "`make syntax-check-windmill` passed from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0237-live-apply` after the raw-app dependency-install task and committed lockfile were added."
     },
     {
       "check": "Latest-origin/main Windmill live replay",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from the rebased latest-`origin/main` worktree with final recap `docker-runtime-lv3 ok=229 changed=39 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`."
+      "observed": "`make converge-windmill` completed successfully from the rebased latest-`origin/main` worktree with final recap `docker-runtime-lv3 ok=229 changed=39 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`."
     },
     {
       "check": "Windmill bootstrap admin identity",

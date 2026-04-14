@@ -9,11 +9,11 @@ tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/p
 
 >       assert completed.returncode == 0, completed.stderr
 E       AssertionError: remote_exec: built immutable snapshot 805e1d96f8174f52b0ef9a64dd891f63aac5277d5179da2d62f1f606f515d157 from codex/ws-0306-mainline-v2@ec83a428aaf283c16ed53898cb649211fe59e64d
-E         remote_exec: remote run namespace /opt/builds/proxmox_florin_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072630Z-805e1d96f817/repo
-E         /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
+E         remote_exec: remote run namespace /opt/builds/platform_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072630Z-805e1d96f817/repo
+E         /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
 E
 E       assert 127 == 0
-E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scr...S/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
+E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scr...S/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
 
 tests/test_remote_exec.py:249: AssertionError
 ________ test_remote_exec_falls_back_locally_when_remote_command_fails _________
@@ -30,7 +30,7 @@ tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/p
 
 >       assert completed.returncode == 0
 E       AssertionError: assert 127 == 0
-E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scr...S/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
+E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scr...S/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
 
 tests/test_remote_exec.py:315: AssertionError
 _____________ test_remote_exec_mounts_pip_cache_for_python_runners _____________
@@ -42,11 +42,11 @@ tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/p
 
 >       assert completed.returncode == 0, completed.stderr
 E       AssertionError: remote_exec: built immutable snapshot 1ea1b6c3a1269fe24dfb8ec369a0d0ce9dc1a4330077bdf7f486b2e39579000a from codex/ws-0306-mainline-v2@ec83a428aaf283c16ed53898cb649211fe59e64d
-E         remote_exec: remote run namespace /opt/builds/proxmox_florin_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072751Z-1ea1b6c3a126/repo
-E         /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
+E         remote_exec: remote run namespace /opt/builds/platform_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072751Z-1ea1b6c3a126/repo
+E         /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
 E
 E       assert 127 == 0
-E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scr...S/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
+E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scr...S/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
 
 tests/test_remote_exec.py:384: AssertionError
 ____________ test_remote_exec_mounts_packer_cache_for_infra_runners ____________
@@ -58,11 +58,11 @@ tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/p
 
 >       assert completed.returncode == 0, completed.stderr
 E       AssertionError: remote_exec: built immutable snapshot 166ce712f157b92620f0e7fdf7a16795dc241e1e954f92b914276a8ad74d341f from codex/ws-0306-mainline-v2@ec83a428aaf283c16ed53898cb649211fe59e64d
-E         remote_exec: remote run namespace /opt/builds/proxmox_florin_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072803Z-166ce712f157/repo
-E         /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
+E         remote_exec: remote run namespace /opt/builds/platform_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072803Z-166ce712f157/repo
+E         /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
 E
 E       assert 127 == 0
-E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scr...S/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
+E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scr...S/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
 
 tests/test_remote_exec.py:392: AssertionError
 ___ test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace ___
@@ -73,10 +73,10 @@ tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/p
         completed = run_remote_exec(tmp_path, "remote-lint")
 
 >       assert completed.returncode == 0, completed.stderr
-E       AssertionError: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
+E       AssertionError: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
 E
 E       assert 127 == 0
-E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scr...S/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
+E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scr...S/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
 
 tests/test_remote_exec.py:424: AssertionError
 ________ test_remote_exec_forwards_packer_related_environment_variables ________
@@ -97,11 +97,11 @@ tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/p
 
 >       assert completed.returncode == 0, completed.stderr
 E       AssertionError: remote_exec: built immutable snapshot 7402fabf73ce0c0f6db60740d1ac2ea59dba717004b14deac4ab0a96a4d13aa0 from codex/ws-0306-mainline-v2@ec83a428aaf283c16ed53898cb649211fe59e64d
-E         remote_exec: remote run namespace /opt/builds/proxmox_florin_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072857Z-7402fabf73ce/repo
-E         /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
+E         remote_exec: remote run namespace /opt/builds/platform_server/.lv3-session-workspaces/test-session/repo/.lv3-runs/20260331T072857Z-7402fabf73ce/repo
+E         /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found
 E
 E       assert 127 == 0
-E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scr...S/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
+E        +  where 127 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/scr...S/platform_server/.worktrees/ws-0306-mainline-v2/scripts/remote_exec.sh: line 672: mapfile: command not found\n').returncode
 
 tests/test_remote_exec.py:463: AssertionError
 =========================== short test summary info ============================

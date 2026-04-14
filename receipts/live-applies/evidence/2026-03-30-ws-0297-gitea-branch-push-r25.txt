@@ -1,8 +1,8 @@
 remote:
 remote: Create a new pull request for 'codex/ws-0297-live-apply':
-remote:   http://git.lv3.org:3009/ops/proxmox_florin_server/pulls/new/codex/ws-0297-live-apply
+remote:   http://git.example.com:3009/ops/platform_server/pulls/new/codex/ws-0297-live-apply
 remote:
 remote: . Processing 1 references
 remote: Processed 1 references in total
-To http://100.64.0.1:3009/ops/proxmox_florin_server.git
+To http://100.64.0.1:3009/ops/platform_server.git
    9e34213d7..aab714b02  HEAD -> codex/ws-0297-live-apply

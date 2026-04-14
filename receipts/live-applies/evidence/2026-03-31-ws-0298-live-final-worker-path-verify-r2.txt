@@ -1,10 +1,10 @@
 docker-runtime-lv3 | CHANGED | rc=0 >>
--rw-r--r--  1 root root  984 Mar 31 07:49 /srv/proxmox_florin_server/config/sbom-scanner.json
-drwxr-xr-x 23 root root 4096 Mar 31 09:14 /srv/proxmox_florin_server/receipts
-drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/proxmox_florin_server/receipts/cve
-drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/proxmox_florin_server/receipts/sbom
+-rw-r--r--  1 root root  984 Mar 31 07:49 /srv/platform_server/config/sbom-scanner.json
+drwxr-xr-x 23 root root 4096 Mar 31 09:14 /srv/platform_server/receipts
+drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/platform_server/receipts/cve
+drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/platform_server/receipts/sbom
 ---
--rw-r--r--  1 root root  984 Mar 31 07:49 /srv/proxmox_florin_server/config/sbom-scanner.json
-drwxr-xr-x 23 root root 4096 Mar 31 09:14 /srv/proxmox_florin_server/receipts
-drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/proxmox_florin_server/receipts/cve
-drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/proxmox_florin_server/receipts/sbom
+-rw-r--r--  1 root root  984 Mar 31 07:49 /srv/platform_server/config/sbom-scanner.json
+drwxr-xr-x 23 root root 4096 Mar 31 09:14 /srv/platform_server/receipts
+drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/platform_server/receipts/cve
+drwxrwxrwt  2 root root 4096 Mar 31 09:14 /srv/platform_server/receipts/sbom

@@ -16,6 +16,6 @@ targets:
   role: livekit_runtime
 errors: []
 notes:
-- The exact-main replay completed from origin/main@3cb78f677e3ed6b0f3343c86085c405fdecac8d9 after regenerating inventory/group_vars/platform.yml from the real .local identity overlay so livekit.lv3.org, TLS, and runtime-comms topology resolved truthfully in the fresh worktree.
+- The exact-main replay completed from origin/main@3cb78f677e3ed6b0f3343c86085c405fdecac8d9 after regenerating inventory/group_vars/platform.yml from the real .local identity overlay so livekit.example.com, TLS, and runtime-comms topology resolved truthfully in the fresh worktree.
 - LiveKit now converges on runtime-comms instead of docker-runtime, uses the runtime-control OpenBao endpoint through the shared helper path, and the Proxmox 7881 TCP plus 7882 UDP forwarding contract was re-verified end to end.
 - Final validation is recorded under the matching 2026-04-14-ws-0370-mainline-final-*.txt evidence files for the direct repo gates, live-apply receipt validation, git diff check, check-build-server, and remote-validate.

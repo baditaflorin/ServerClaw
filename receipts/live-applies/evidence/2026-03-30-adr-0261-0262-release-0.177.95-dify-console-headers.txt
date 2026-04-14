@@ -3,7 +3,7 @@ server: nginx
 date: Mon, 30 Mar 2026 02:40:18 GMT
 content-type: text/html
 content-length: 138
-location: https://agents.lv3.org/oauth2/sign_in?rd=https://agents.lv3.org/console/api/login
+location: https://agents.example.com/oauth2/sign_in?rd=https://agents.example.com/console/api/login
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -11,5 +11,5 @@ x-content-type-options: nosniff
 x-frame-options: DENY
 referrer-policy: strict-origin-when-cross-origin
 permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://agents.lv3.org wss://agents.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://agents.example.com wss://agents.example.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
 x-robots-tag: noindex, nofollow

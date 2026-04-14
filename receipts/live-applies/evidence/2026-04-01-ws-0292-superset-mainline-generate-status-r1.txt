@@ -1,17 +1,17 @@
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/generate_slo_rules.py --write
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/generate_status_docs.py --write
-Updated generated status docs: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/README.md
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/platform_manifest.py --write
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/generate_ops_portal.py --write
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/generate_changelog_portal.py --write
-uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply --path build/changelog-portal
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/generate_slo_rules.py --write
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/generate_status_docs.py --write
+Updated generated status docs: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/README.md
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/platform_manifest.py --write
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/generate_ops_portal.py --write
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/generate_changelog_portal.py --write
+uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply --path build/changelog-portal
 Published artifact secret scan passed: 1004 file(s) checked with builtin.
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/generate_diagrams.py --write
-Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/docs/diagrams
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/scripts/build_docs_portal.py
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/generate_diagrams.py --write
+Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/docs/diagrams
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/scripts/build_docs_portal.py
 
 Running Pagefind v1.4.0 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -35,4 +35,4 @@ Total:
 
 Finished in 2.052 seconds
 Published artifact secret scan passed: 2049 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply/build/docs-portal
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply/build/docs-portal

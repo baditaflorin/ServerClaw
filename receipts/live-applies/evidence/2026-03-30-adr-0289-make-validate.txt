@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/validate_repo.sh
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/validate_repo.sh
 Generated platform vars validation
 Syntax check: playbooks/api-gateway.yml
 Syntax check: playbooks/artifact-cache-vm.yml
@@ -127,7 +127,7 @@ Syntax check: playbooks/windmill.yml
 YAML lint
 Role argument specs
 Ansible lint
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/validate_repo.sh: line 356: 50801 Killed: 9                  ( cd "$REPO_ROOT"; "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}" )
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/validate_repo.sh: line 356: 50801 Killed: 9                  ( cd "$REPO_ROOT"; "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}" )
 make: *** [validate] Error 137
 /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:324: UserWarning: resource_tracker: There appear to be 3 leaked semaphore objects to clean up at shutdown: {'/mp-pb4yejud', '/mp-8q0v695b', '/mp-8nry1p_g'}
   warnings.warn(

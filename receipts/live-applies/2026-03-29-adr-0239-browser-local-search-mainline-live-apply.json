@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -27,7 +27,7 @@
     {
       "kind": "service_endpoint",
       "name": "Developer portal",
-      "address": "https://docs.lv3.org/"
+      "address": "https://docs.example.com/"
     }
   ],
   "verification": [
@@ -49,7 +49,7 @@
     {
       "check": "External and guest verification of the published search surface",
       "result": "pass",
-      "observed": "`curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and `x-robots-tag: noindex, nofollow`. Direct guest checks on `nginx-lv3` confirmed `/var/www/lv3-generated/docs-portal/pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css`; the published home page contains `id=\"pagefind-search\"` plus `pagefind/pagefind-ui.js`; `releases/0.177.62/index.html` contains `0.130.45`; and `architecture/dependency-graph/index.html` contains `data-pagefind-filter=\"section\"` without the earlier raw frontmatter leak."
+      "observed": "`curl -ksSI https://docs.example.com/` returned `HTTP/2 302` with `location: https://docs.example.com/oauth2/sign_in?rd=https://docs.example.com/` and `x-robots-tag: noindex, nofollow`. Direct guest checks on `nginx-lv3` confirmed `/var/www/lv3-generated/docs-portal/pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css`; the published home page contains `id=\"pagefind-search\"` plus `pagefind/pagefind-ui.js`; `releases/0.177.62/index.html` contains `0.130.45`; and `architecture/dependency-graph/index.html` contains `data-pagefind-filter=\"section\"` without the earlier raw frontmatter leak."
     }
   ],
   "evidence_refs": [

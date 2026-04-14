@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -55,7 +55,7 @@
     {
       "check": "Worker-side approval and gate validation",
       "result": "pass",
-      "observed": "On docker-runtime-lv3, python3 scripts/policy_checks.py --validate, python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned, and python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server all passed after the worker mirror began syncing .gitea/workflows."
+      "observed": "On docker-runtime-lv3, python3 scripts/policy_checks.py --validate, python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned, and python3 config/windmill/scripts/gate-status.py --repo-path /srv/platform_server all passed after the worker mirror began syncing .gitea/workflows."
     },
     {
       "check": "Windmill runtime health after replay",
@@ -101,7 +101,7 @@
   "notes": [
     "This branch-local receipt captures the successful latest-origin/main replay that preceded the protected-file integration on main.",
     "The worker-local validation path initially failed because .gitea/workflows was absent from the mirrored checkout; syncing that hidden path fixed command approval validation without requiring manual server edits.",
-    "Worker-side command approval emitted a non-fatal mutation-audit permission warning for /srv/proxmox_florin_server/.local/state/mutation-audit/mutation-audit.jsonl, but the governed approval and gate-status checks still returned success.",
+    "Worker-side command approval emitted a non-fatal mutation-audit permission warning for /srv/platform_server/.local/state/mutation-audit/mutation-audit.jsonl, but the governed approval and gate-status checks still returned success.",
     "The later mainline integration updates VERSION, changelog.md, README.md, versions/stack.yaml, release notes, and the generated platform manifest without changing the already-verified live workload payload."
   ]
 }

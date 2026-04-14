@@ -5,7 +5,7 @@ docker-build-lv3 | CHANGED | rc=0 >>
 000
 100.64.0.1:3009
 000
-git.lv3.org:3009
+git.example.com:3009
 000curl: (28) Connection timed out after 5002 milliseconds
 curl: (7) Failed to connect to 100.64.0.1 port 3009 after 0 ms: Could not connect to server
-curl: (6) Could not resolve host: git.lv3.org
+curl: (6) Could not resolve host: git.example.com

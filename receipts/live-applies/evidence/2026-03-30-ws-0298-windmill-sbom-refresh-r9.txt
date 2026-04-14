@@ -1,7 +1,7 @@
 docker-runtime-lv3 | CHANGED | rc=0 >>
 {
   "status": "error",
-  "command": "uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json",
+  "command": "uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json",
   "returncode": 2,
   "stdout": "",
   "stderr": "SBOM refresh error: [0061] ERROR could not determine source: an error occurred attempting to resolve '10.10.10.30:5001/ollama/ollama:0.18.2@sha256:1550310a86dbfd206a0319b3e1580e4a8edb0000963ca7550af1b7ed57e4c87f': oci-registry: failed to get image descriptor from registry: Get \"https://10.10.10.30:5001/v2/\": dial tcp 10.10.10.30:5001: i/o timeout; Get \"http://10.10.10.30:5001/v2/\": dial tcp 10.10.10.30:5001: i/o timeout"

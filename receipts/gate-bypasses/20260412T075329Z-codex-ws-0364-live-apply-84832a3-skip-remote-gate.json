@@ -16,7 +16,7 @@
       "receipts/live-applies/evidence/2026-04-12-ws-0364-remote-validate.txt",
       "receipts/live-applies/evidence/2026-04-12-ws-0364-check-build-server.txt"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-14",
     "remediation_ref": "ws-0364-live-apply"
   }

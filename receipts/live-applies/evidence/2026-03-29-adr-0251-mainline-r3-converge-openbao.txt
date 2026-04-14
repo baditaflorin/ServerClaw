@@ -2,19 +2,19 @@
 Preflight workflow: converge-openbao
 Description: Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
-PASS file mail_platform_brevo_api_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/brevo-api-key.txt
-PASS file proxmox_api_token_payload: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
-PASS file monitoring_proxmox_writer_token: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
-PASS file monitoring_guest_writer_token: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
-INFO generated openbao_init_payload: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
-INFO generated openbao_ops_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt
-INFO generated openbao_breakglass_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/breakglass-password.txt
-INFO generated openbao_postgres_rotator_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
-INFO generated openbao_controller_approle: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
-INFO generated openbao_mail_platform_approle: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS file mail_platform_brevo_api_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/mail-platform/brevo-api-key.txt
+PASS file proxmox_api_token_payload: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/proxmox-api/lv3-automation-primary.json
+PASS file monitoring_proxmox_writer_token: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/monitoring/proxmox-writer.token
+PASS file monitoring_guest_writer_token: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/monitoring/guest-writer.token
+INFO generated openbao_init_payload: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openbao/init.json
+INFO generated openbao_ops_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openbao/ops-password.txt
+INFO generated openbao_breakglass_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openbao/breakglass-password.txt
+INFO generated openbao_postgres_rotator_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openbao/postgres-rotator-password.txt
+INFO generated openbao_controller_approle: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openbao/controller-automation-approle.json
+INFO generated openbao_mail_platform_approle: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openbao/mail-platform-approle.json
 Result: PASS (converge-openbao)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=76ee2238cfbd4312b721e7938776c9a5 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/inventory/hosts.yml --run-id f1abfa65688643f3a322afe42bd7c276 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/playbooks/openbao.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=76ee2238cfbd4312b721e7938776c9a5 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/inventory/hosts.yml --run-id f1abfa65688643f3a322afe42bd7c276 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/playbooks/openbao.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 PLAY [Prepare PostgreSQL for OpenBao dynamic credentials] **********************
 
@@ -929,7 +929,7 @@ changed: [docker-runtime-lv3 -> localhost]
 TASK [lv3.platform.openbao_runtime : Ensure OpenBao remains unsealed before authentication verification] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Ensure OpenBao remains unsealed before authentication verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:20.230Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.openbao_runtime : Ensure OpenBao remains unsealed before authentication verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T23:26:20.241Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml for docker-runtime-lv3
 
 TASK [lv3.platform.openbao_runtime : Read OpenBao seal status before authentication verification] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Read OpenBao seal status before authentication verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:20.272Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1111,7 +1111,7 @@ ok: [docker-runtime-lv3]
 TASK [Run startup verification] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:39.232Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run startup verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T23:26:39.247Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe startup] **************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe startup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:39.270Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1136,7 +1136,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:40.438Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T23:26:40.450Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:40.474Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1161,7 +1161,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:41.713Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T23:26:41.727Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0251-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T23:26:41.764Z","vm":"controller","workflow_id":"ansible-playbook"}

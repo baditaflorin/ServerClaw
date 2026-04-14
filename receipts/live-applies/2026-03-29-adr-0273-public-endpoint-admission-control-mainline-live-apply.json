@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -27,18 +27,18 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "lv3.org",
-      "address": "https://lv3.org/"
+      "name": "example.com",
+      "address": "https://example.com/"
     },
     {
       "kind": "service_endpoint",
-      "name": "docs.lv3.org",
-      "address": "https://docs.lv3.org/"
+      "name": "docs.example.com",
+      "address": "https://docs.example.com/"
     },
     {
       "kind": "service_endpoint",
-      "name": "ops.lv3.org",
-      "address": "https://ops.lv3.org/"
+      "name": "ops.example.com",
+      "address": "https://ops.example.com/"
     }
   ],
   "verification": [
@@ -65,12 +65,12 @@
     {
       "check": "Direct HTTPS and SAN verification",
       "result": "pass",
-      "observed": "`curl -I https://lv3.org` returned `HTTP/2 308` redirecting to `https://nginx.lv3.org/`; `curl -I https://docs.lv3.org` and `curl -I https://ops.lv3.org` both returned `HTTP/2 302` to their `oauth2/sign_in` paths with `x-robots-tag: noindex, nofollow`; and `echo | openssl s_client -servername docs.lv3.org -connect docs.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -text` showed a Let's Encrypt issuer (`CN=E7`), subject `CN=nginx.lv3.org`, and SAN coverage for `agents.lv3.org`, `api.lv3.org`, `apps.lv3.org`, `changelog.lv3.org`, `coolify.lv3.org`, `docs.lv3.org`, `draw.lv3.org`, `headscale.lv3.org`, `home.lv3.org`, `langfuse.lv3.org`, `logs.lv3.org`, `lv3.org`, `n8n.lv3.org`, `nginx.lv3.org`, `ops.lv3.org`, `realtime.lv3.org`, `registry.lv3.org`, `status.lv3.org`, `tasks.lv3.org`, and `wiki.lv3.org`."
+      "observed": "`curl -I https://example.com` returned `HTTP/2 308` redirecting to `https://nginx.example.com/`; `curl -I https://docs.example.com` and `curl -I https://ops.example.com` both returned `HTTP/2 302` to their `oauth2/sign_in` paths with `x-robots-tag: noindex, nofollow`; and `echo | openssl s_client -servername docs.example.com -connect docs.example.com:443 2>/dev/null | openssl x509 -noout -issuer -subject -text` showed a Let's Encrypt issuer (`CN=E7`), subject `CN=nginx.example.com`, and SAN coverage for `agents.example.com`, `api.example.com`, `apps.example.com`, `changelog.example.com`, `coolify.example.com`, `docs.example.com`, `draw.example.com`, `headscale.example.com`, `home.example.com`, `langfuse.example.com`, `logs.example.com`, `example.com`, `n8n.example.com`, `nginx.example.com`, `ops.example.com`, `realtime.example.com`, `registry.example.com`, `status.example.com`, `tasks.example.com`, and `wiki.example.com`."
     },
     {
       "check": "Final public exposure audit",
       "result": "partial",
-      "observed": "`make subdomain-exposure-audit` wrote audit run `b24e6187-104c-4c0a-a65b-d723019b9d24` at `2026-03-29T12:49:00.258027Z` into `receipts/subdomain-exposure-audit/20260329T124900Z.json`; the ADR 0273 concordance checks passed on release `0.177.77`, while the audit still reported only the pre-existing `git.lv3.org` warnings `active_subdomain_missing_expected_public_resolution` and `active_catalog_subdomain_missing_from_zone`."
+      "observed": "`make subdomain-exposure-audit` wrote audit run `b24e6187-104c-4c0a-a65b-d723019b9d24` at `2026-03-29T12:49:00.258027Z` into `receipts/subdomain-exposure-audit/20260329T124900Z.json`; the ADR 0273 concordance checks passed on release `0.177.77`, while the audit still reported only the pre-existing `git.example.com` warnings `active_subdomain_missing_expected_public_resolution` and `active_catalog_subdomain_missing_from_zone`."
     }
   ],
   "evidence_refs": [

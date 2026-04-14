@@ -2,19 +2,19 @@
 2026-03-31T03:41:47.2372113Z workflow prepared
 2026-03-31T03:41:47.2372865Z evaluating expression 'success()'
 2026-03-31T03:41:47.2373562Z expression 'success()' evaluated to 'true'
-2026-03-31T03:41:47.2373745Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-31T03:41:47.2438038Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-31T03:41:47.2438307Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T03:41:47.2373745Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T03:41:47.2438038Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
+2026-03-31T03:41:47.2438307Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
 2026-03-31T03:41:47.2449392Z Image exists? true
-2026-03-31T03:41:47.2480090Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T03:41:47.2480090Z   🐳  docker create image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T03:41:47.2546824Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-31T03:41:47.2547238Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
+2026-03-31T03:41:47.2547238Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/platform_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
 2026-03-31T03:41:47.2548001Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000180948 OomKillDisable:0xc000180843 PidsLimit:0xc0001809a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
 2026-03-31T03:41:47.2548491Z --network and --net in the options will be ignored.
-2026-03-31T03:41:47.2548814Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000180948 OomKillDisable:0xc000180843 PidsLimit:0xc0001809a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-194_WORKFLOW-renovate_JOB-renovate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-194_WORKFLOW-renovate_JOB-renovate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-31T03:41:47.2731587Z Created container name=GITEA-ACTIONS-TASK-194_WORKFLOW-renovate_JOB-renovate id=2952f7dacd58c4b4dae3f81aaea5a547f6f738911442e12d6e3fb928c93ea3c0 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
+2026-03-31T03:41:47.2548814Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000180948 OomKillDisable:0xc000180843 PidsLimit:0xc0001809a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-194_WORKFLOW-renovate_JOB-renovate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-194_WORKFLOW-renovate_JOB-renovate Target:/workspace/ops/platform_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
+2026-03-31T03:41:47.2731587Z Created container name=GITEA-ACTIONS-TASK-194_WORKFLOW-renovate_JOB-renovate id=2952f7dacd58c4b4dae3f81aaea5a547f6f738911442e12d6e3fb928c93ea3c0 from image registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
 2026-03-31T03:41:47.2732512Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-31T03:41:47.2732655Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T03:41:47.2732655Z   🐳  docker run image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T03:41:47.2732816Z Starting container: 2952f7dacd58c4b4dae3f81aaea5a547f6f738911442e12d6e3fb928c93ea3c0
 2026-03-31T03:41:47.3693748Z Started container: 2952f7dacd58c4b4dae3f81aaea5a547f6f738911442e12d6e3fb928c93ea3c0
 2026-03-31T03:41:47.4683912Z Writing entry to tarball workflow/event.json len:2924
@@ -31,7 +31,7 @@
 2026-03-31T03:41:47.4840494Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=d299a6a7f6bf855d9ded524d5ccec0a0d37e868d)'
 2026-03-31T03:41:47.4840594Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-31T03:41:47.4840662Z evaluating expression 'format('{0}', github.repository)'
-2026-03-31T03:41:47.4840835Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-31T03:41:47.4840835Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
 2026-03-31T03:41:47.4840938Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
 2026-03-31T03:41:47.4841000Z evaluating expression 'format('{0}', github.token)'
 2026-03-31T03:41:47.4841131Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
@@ -49,7 +49,7 @@
 2026-03-31T03:41:47.5229872Z Extracting content to '/var/run/act'
 2026-03-31T03:41:47.5248090Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
 2026-03-31T03:41:47.5248265Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-31T03:41:47.5248634Z Working directory '/workspace/ops/proxmox_florin_server'
+2026-03-31T03:41:47.5248634Z Working directory '/workspace/ops/platform_server'
 2026-03-31T03:41:47.5886062Z hint: Using 'master' as the name for the initial branch. This default branch name
 2026-03-31T03:41:47.5886542Z hint: is subject to change. To configure the initial branch name to use in all
 2026-03-31T03:41:47.5886676Z hint: of your new repositories, which will suppress this warning, call:
@@ -60,8 +60,8 @@
 2026-03-31T03:41:47.5887174Z hint: 'development'. The just-created branch can be renamed via this command:
 2026-03-31T03:41:47.5887255Z hint:
 2026-03-31T03:41:47.5887342Z hint: 	git branch -m <name>
-2026-03-31T03:41:47.5887621Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-31T03:41:56.3519099Z From http://10.10.10.20:3003/ops/proxmox_florin_server
+2026-03-31T03:41:47.5887621Z Initialized empty Git repository in /workspace/ops/platform_server/.git/
+2026-03-31T03:41:56.3519099Z From http://10.10.10.20:3003/ops/platform_server
 2026-03-31T03:41:56.3519759Z  * branch            codex/ws-0297-live-apply -> FETCH_HEAD
 2026-03-31T03:41:56.3523343Z  * [new branch]      codex/ws-0297-live-apply -> origin/codex/ws-0297-live-apply
 2026-03-31T03:41:56.8057652Z Note: switching to 'd299a6a7f6bf855d9ded524d5ccec0a0d37e868d'.
@@ -105,19 +105,40 @@
 2026-03-31T03:41:59.5407667Z Get:1 http://deb.debian.org/debian trixie/main amd64 docker-cli amd64 26.1.5+dfsg1-9+b12 [7338 kB]
 2026-03-31T03:42:00.2930568Z Fetched 7338 kB in 0s (48.4 MB/s)
 2026-03-31T03:42:00.3100751Z Selecting previously unselected package docker-cli.
-2026-03-31T03:42:00.3153411Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
+2026-03-31T03:42:00.3153411Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9191 files and directories currently installed.)
 2026-03-31T03:42:00.3159627Z Preparing to unpack .../docker-cli_26.1.5+dfsg1-9+b12_amd64.deb ...
 2026-03-31T03:42:00.3297184Z Unpacking docker-cli (26.1.5+dfsg1-9+b12) ...
 2026-03-31T03:42:00.5796628Z Setting up docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-03-31T03:42:01.5804414Z registry.lv3.org/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d: Pulling from check-runner/renovate
+2026-03-31T03:42:01.5804414Z registry.example.com/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d: Pulling from check-runner/renovate
 2026-03-31T03:42:01.5813773Z Digest: sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
-2026-03-31T03:42:01.5813954Z Status: Image is up to date for registry.lv3.org/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
-2026-03-31T03:42:01.5823541Z registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+2026-03-31T03:42:01.5813954Z Status: Image is up to date for registry.example.com/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+2026-03-31T03:42:01.5823541Z registry.example.com/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
 2026-03-31T03:42:03.6457427Z (node:9) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
 2026-03-31T03:42:03.6458041Z (Use `node --trace-deprecation ...` to show where the warning was created)
-2026-03-31T03:42:03.6696415Z  INFO: Repository started (repository=ops/proxmox_florin_server)
+2026-03-31T03:42:03.6696415Z  INFO: Repository started (repository=ops/platform_server)
 2026-03-31T03:42:03.6696823Z        "renovateVersion": "42.76.4"
-2026-03-31T03:42:12.4363405Z ERROR: Repository has unknown error (repository=ops/proxmox_florin_server)
+2026-03-31T03:42:12.4363405Z ERROR: Repository has unknown error (repository=ops/platform_server)
 2026-03-31T03:42:12.4364247Z        "err": {
 2026-03-31T03:42:12.4364339Z          "task": {
 2026-03-31T03:42:12.4364434Z            "commands": [
@@ -131,15 +152,15 @@
 2026-03-31T03:42:12.4365212Z            "format": "utf-8",
 2026-03-31T03:42:12.4365413Z            "parser": "[function]"
 2026-03-31T03:42:12.4365523Z          },
-2026-03-31T03:42:12.4365660Z          "message": "Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@lv3.org>) not allowed\n",
-2026-03-31T03:42:12.4366015Z          "stack": "Error: Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@lv3.org>) not allowed\n\n    at Object.action (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/error-detection.plugin.ts:42:29)\n    at PluginStore.exec (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/plugin-store.ts:54:29)\n    at /usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:124:42\n    at new Promise (<anonymous>)\n    at GitExecutorChain.handleTaskData (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:121:14)\n    at GitExecutorChain.attemptRemoteTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:97:40)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at GitExecutorChain.attemptTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:61:18)"
+2026-03-31T03:42:12.4365660Z          "message": "Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@example.com>) not allowed\n",
+2026-03-31T03:42:12.4366015Z          "stack": "Error: Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@example.com>) not allowed\n\n    at Object.action (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/error-detection.plugin.ts:42:29)\n    at PluginStore.exec (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/plugin-store.ts:54:29)\n    at /usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:124:42\n    at new Promise (<anonymous>)\n    at GitExecutorChain.handleTaskData (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:121:14)\n    at GitExecutorChain.attemptRemoteTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:97:40)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at GitExecutorChain.attemptTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:61:18)"
 2026-03-31T03:42:12.4366411Z        }
-2026-03-31T03:42:12.4396210Z ERROR: Repository has unknown error (repository=ops/proxmox_florin_server)
+2026-03-31T03:42:12.4396210Z ERROR: Repository has unknown error (repository=ops/platform_server)
 2026-03-31T03:42:12.4396511Z        "err": {
 2026-03-31T03:42:12.4396599Z          "message": "unknown-error",
 2026-03-31T03:42:12.4396682Z          "stack": "Error: unknown-error\n    at Object.renovateRepository (/usr/local/renovate/lib/workers/repository/index.ts:110:13)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at attributes (/usr/local/renovate/lib/workers/global/index.ts:198:11)\n    at start (/usr/local/renovate/lib/workers/global/index.ts:183:7)\n    at /usr/local/renovate/lib/renovate.ts:19:22"
 2026-03-31T03:42:12.4396833Z        }
-2026-03-31T03:42:12.5170724Z  INFO: Repository finished (repository=ops/proxmox_florin_server)
+2026-03-31T03:42:12.5170724Z  INFO: Repository finished (repository=ops/platform_server)
 2026-03-31T03:42:12.5171237Z        "cloned": true,
 2026-03-31T03:42:12.5171348Z        "durationMs": 8851,
 2026-03-31T03:42:12.5171450Z        "result": "unknown-error",
@@ -153,7 +174,7 @@
 2026-03-31T03:42:12.5210259Z            "name": "renovate",
 2026-03-31T03:42:12.5210378Z            "level": 50,
 2026-03-31T03:42:12.5210510Z            "logContext": "sCLfKipcmGms_-qdrJwL2",
-2026-03-31T03:42:12.5210638Z            "repository": "ops/proxmox_florin_server",
+2026-03-31T03:42:12.5210638Z            "repository": "ops/platform_server",
 2026-03-31T03:42:12.5210760Z            "err": {
 2026-03-31T03:42:12.5210881Z              "task": {
 2026-03-31T03:42:12.5210987Z                "commands": [
@@ -167,8 +188,8 @@
 2026-03-31T03:42:12.5211984Z                "format": "utf-8",
 2026-03-31T03:42:12.5212110Z                "parser": "[function]"
 2026-03-31T03:42:12.5212258Z              },
-2026-03-31T03:42:12.5212400Z              "message": "Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@lv3.org>) not allowed\n",
-2026-03-31T03:42:12.5212640Z              "stack": "Error: Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@lv3.org>) not allowed\n\n    at Object.action (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/error-detection.plugin.ts:42:29)\n    at PluginStore.exec (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/plugin-store.ts:54:29)\n    at /usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:124:42\n    at new Promise (<anonymous>)\n    at GitExecutorChain.handleTaskData (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:121:14)\n    at GitExecutorChain.attemptRemoteTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:97:40)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at GitExecutorChain.attemptTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:61:18)"
+2026-03-31T03:42:12.5212400Z              "message": "Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@example.com>) not allowed\n",
+2026-03-31T03:42:12.5212640Z              "stack": "Error: Author identity unknown\n\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email \"you@example.com\"\n  git config --global user.name \"Your Name\"\n\nto set your account's default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <renovate-bot@example.com>) not allowed\n\n    at Object.action (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/error-detection.plugin.ts:42:29)\n    at PluginStore.exec (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/plugin-store.ts:54:29)\n    at /usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:124:42\n    at new Promise (<anonymous>)\n    at GitExecutorChain.handleTaskData (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:121:14)\n    at GitExecutorChain.attemptRemoteTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:97:40)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at GitExecutorChain.attemptTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:61:18)"
 2026-03-31T03:42:12.5213085Z            },
 2026-03-31T03:42:12.5213227Z            "msg": "Repository has unknown error"
 2026-03-31T03:42:12.5213395Z          },
@@ -176,7 +197,7 @@
 2026-03-31T03:42:12.5213633Z            "name": "renovate",
 2026-03-31T03:42:12.5213764Z            "level": 50,
 2026-03-31T03:42:12.5213900Z            "logContext": "sCLfKipcmGms_-qdrJwL2",
-2026-03-31T03:42:12.5214033Z            "repository": "ops/proxmox_florin_server",
+2026-03-31T03:42:12.5214033Z            "repository": "ops/platform_server",
 2026-03-31T03:42:12.5214158Z            "err": {
 2026-03-31T03:42:12.5214278Z              "message": "unknown-error",
 2026-03-31T03:42:12.5214394Z              "stack": "Error: unknown-error\n    at Object.renovateRepository (/usr/local/renovate/lib/workers/repository/index.ts:110:13)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at attributes (/usr/local/renovate/lib/workers/global/index.ts:198:11)\n    at start (/usr/local/renovate/lib/workers/global/index.ts:183:7)\n    at /usr/local/renovate/lib/renovate.ts:19:22"

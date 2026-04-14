@@ -1,5 +1,5 @@
 {
-  "catalog_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0299-live-apply/config/atlas/catalog.json",
+  "catalog_path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0299-live-apply/config/atlas/catalog.json",
   "changed_files": [],
   "results": [
     {

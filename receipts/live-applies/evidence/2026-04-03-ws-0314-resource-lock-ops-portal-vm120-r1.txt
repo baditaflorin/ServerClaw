@@ -1,1 +1,1 @@
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/scripts/resource_lock_tool.py acquire --resource "vm:120/service:ops_portal" --holder "agent:ws-0314-live-apply" --lock-type "exclusive" --ttl-seconds 7200  --context-id "ws-0314-mainline-r2"
+python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/scripts/resource_lock_tool.py acquire --resource "vm:120/service:ops_portal" --holder "agent:ws-0314-live-apply" --lock-type "exclusive" --ttl-seconds 7200  --context-id "ws-0314-mainline-r2"

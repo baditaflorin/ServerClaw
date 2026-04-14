@@ -1,5 +1,5 @@
 docker-runtime-lv3 | CHANGED | rc=0 >>
-/srv/proxmox_florin_server/config:
+/srv/platform_server/config:
 total 1796
 drwxr-xr-x 18 root root  12288 Mar 31 08:40 .
 drwxr-xr-x 28 root root   4096 Mar 31 08:40 ..
@@ -103,14 +103,14 @@ drwxr-xr-x  4 root root   4096 Mar 31 05:23 windmill
 -rw-r--r--  1 root root    309 Mar 31 05:23 workflow-defaults.yaml
 -rw-r--r--  1 root root   1817 Mar 31 05:23 worktree-bootstrap-manifests.json
 
-/srv/proxmox_florin_server/config/windmill:
+/srv/platform_server/config/windmill:
 total 24
 drwxr-xr-x  4 root root  4096 Mar 31 05:23 .
 drwxr-xr-x 18 root root 12288 Mar 31 08:40 ..
 drwxr-xr-x  3 root root  4096 Mar 31 05:23 apps
 drwxr-xr-x  5 root root  4096 Mar 31 08:40 scripts
 
-/srv/proxmox_florin_server/config/windmill/scripts:
+/srv/platform_server/config/windmill/scripts:
 total 288
 drwxr-xr-x 5 root root 4096 Mar 31 08:40 .
 drwxr-xr-x 4 root root 4096 Mar 31 05:23 ..

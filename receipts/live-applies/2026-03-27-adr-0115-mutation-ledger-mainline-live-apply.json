@@ -25,8 +25,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -63,7 +63,7 @@
     {
       "check": "Guest-side ledger dual-write",
       "result": "pass",
-      "observed": "A guest-local `scripts/mutation_audit.py --emit` on `docker-runtime-lv3` with explicit exported `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` wrote `2|execution.completed|operator:ops|host|proxmox_florin|ws0115-main-ledger-emit-20260327T044831Z` into `ledger.events`, and the compatibility `audit_log` view exposed `2|2026-03-27 04:48:32+00:00|operator|ops|windmill|execution.completed|proxmox_florin|success|ws0115-main-ledger-emit-20260327T044831Z|receipts/live-applies/2026-03-27-adr-0115-mutation-ledger-mainline-live-apply.json`."
+      "observed": "A guest-local `scripts/mutation_audit.py --emit` on `docker-runtime-lv3` with explicit exported `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` wrote `2|execution.completed|operator:ops|host|proxmox-host|ws0115-main-ledger-emit-20260327T044831Z` into `ledger.events`, and the compatibility `audit_log` view exposed `2|2026-03-27 04:48:32+00:00|operator|ops|windmill|execution.completed|proxmox-host|success|ws0115-main-ledger-emit-20260327T044831Z|receipts/live-applies/2026-03-27-adr-0115-mutation-ledger-mainline-live-apply.json`."
     },
     {
       "check": "Append-only enforcement",

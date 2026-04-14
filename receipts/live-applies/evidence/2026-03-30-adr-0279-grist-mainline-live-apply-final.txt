@@ -474,34 +474,34 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T08:04:27.177Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=grist.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=grist.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T08:04:40.456Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -1345,7 +1345,7 @@ ok: [docker-runtime-lv3 -> localhost]
 TASK [lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T08:06:13.880Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T08:06:13.895Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-live-apply/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-live-apply/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
 
 TASK [lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T08:06:13.940Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1980,11 +1980,11 @@ skipping: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T08:07:34.354Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
-ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T08:07:41.358Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -1994,8 +1994,8 @@ ok: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T08:07:42.770Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-ok: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+ok: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+ok: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T08:07:47.751Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***

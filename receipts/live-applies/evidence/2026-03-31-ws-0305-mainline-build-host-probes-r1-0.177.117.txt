@@ -1,4 +1,4 @@
-LV3_RUN_ID=e46d621ab1a04077a350fbd20b804ceb COMMAND="curl -sS -m 10 http://10.10.10.20:8098/healthz && printf '\n---\n' && curl -sS -m 10 https://sso.lv3.org/realms/lv3/.well-known/openid-configuration | head -c 200" /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/remote_exec.sh remote-exec --local-fallback
+LV3_RUN_ID=e46d621ab1a04077a350fbd20b804ceb COMMAND="curl -sS -m 10 http://10.10.10.20:8098/healthz && printf '\n---\n' && curl -sS -m 10 https://sso.example.com/realms/lv3/.well-known/openid-configuration | head -c 200" /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/scripts/remote_exec.sh remote-exec --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
@@ -6,4 +6,4 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 {"status":"SERVING"}
 
 ---
-{"issuer":"https://sso.lv3.org/realms/lv3","authorization_endpoint":"https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth","token_endpoint":"https://sso.lv3.org/realms/lv3/protocol/openid-conne
+{"issuer":"https://sso.example.com/realms/lv3","authorization_endpoint":"https://sso.example.com/realms/lv3/protocol/openid-connect/auth","token_endpoint":"https://sso.example.com/realms/lv3/protocol/openid-conne

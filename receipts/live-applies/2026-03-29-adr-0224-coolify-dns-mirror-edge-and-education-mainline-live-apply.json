@@ -26,13 +26,13 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "application",
-      "name": "education-wemeshup.apps.lv3.org",
-      "address": "https://education-wemeshup.apps.lv3.org"
+      "name": "education-wemeshup.apps.example.com",
+      "address": "https://education-wemeshup.apps.example.com"
     }
   ],
   "verification": [
@@ -59,12 +59,12 @@
     {
       "check": "Governed education_wemeshup redeploy",
       "result": "pass",
-      "observed": "`python3 scripts/coolify_tool.py deploy-repo --repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --project 'LV3 Apps' --environment production --build-pack dockercompose --docker-compose-location /compose.yaml --compose-domain catalog-web=education-wemeshup.apps.lv3.org --ports 80 --wait --timeout 5400 --force --max-deploy-attempts 5 --retry-delay 5` finished on attempt `1` with deployment `it09nv91sn40tvugmqj3u043` against upstream commit `dd577f374051d24710b461e9cfb796e21ad49da2`."
+      "observed": "`python3 scripts/coolify_tool.py deploy-repo --repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --project 'LV3 Apps' --environment production --build-pack dockercompose --docker-compose-location /compose.yaml --compose-domain catalog-web=education-wemeshup.apps.example.com --ports 80 --wait --timeout 5400 --force --max-deploy-attempts 5 --retry-delay 5` finished on attempt `1` with deployment `it09nv91sn40tvugmqj3u043` against upstream commit `dd577f374051d24710b461e9cfb796e21ad49da2`."
     },
     {
       "check": "Public production verification",
       "result": "pass",
-      "observed": "`https://education-wemeshup.apps.lv3.org/` returned `HTTP/2 200`, `/api/v1/catalog/taxonomy` returned catalog version `2.0.0`, `activityCount: 1056`, and `categoryCount: 95`, and `/api/v1/catalog/activities?limit=1` returned `returned: 1` with `hasNextPage: true`."
+      "observed": "`https://education-wemeshup.apps.example.com/` returned `HTTP/2 200`, `/api/v1/catalog/taxonomy` returned catalog version `2.0.0`, `activityCount: 1056`, and `categoryCount: 95`, and `/api/v1/catalog/activities?limit=1` returned `returned: 1` with `hasNextPage: true`."
     }
   ],
   "evidence_refs": [
@@ -74,7 +74,7 @@
     "docs/runbooks/configure-coolify.md",
     "docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md",
     "inventory/group_vars/platform.yml",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "playbooks/coolify.yml",
     "playbooks/public-edge.yml",
     "scripts/coolify_tool.py",

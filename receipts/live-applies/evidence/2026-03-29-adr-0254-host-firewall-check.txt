@@ -1,5 +1,5 @@
 Command:
-ansible -i inventory/hosts.yml proxmox_florin -m shell -a 'set -e; . /etc/os-release; printf "PRETTY_NAME=%s\n" "$PRETTY_NAME"; uname -r; pveversion; grep -n "10.10.10.10/32 -p tcp -dport 8096" /etc/pve/firewall/170.fw' --private-key .local/ssh/hetzner_llm_agents_ed25519
+ansible -i inventory/hosts.yml proxmox-host -m shell -a 'set -e; . /etc/os-release; printf "PRETTY_NAME=%s\n" "$PRETTY_NAME"; uname -r; pveversion; grep -n "10.10.10.10/32 -p tcp -dport 8096" /etc/pve/firewall/170.fw' --private-key .local/ssh/hetzner_llm_agents_ed25519
 
 Observed on 2026-03-29:
 

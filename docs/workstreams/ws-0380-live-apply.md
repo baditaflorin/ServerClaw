@@ -116,9 +116,9 @@
 ### 2026-04-12: Verified Live Apply
 
 - clean-cache replay succeeded with `rm -rf build/collection-install build/collection-install.requirements.sha && make converge-neko env=production`
-- replay covered the intended live surfaces end to end: Hetzner DNS publication for `browser.lv3.org`, Proxmox host forwarding policy, multi-instance Neko on `runtime-comms`, and shared edge publication on `nginx`
-- controller-side verification passed with `python3 scripts/neko_tool.py validate` (`All 9 instance(s) are valid.`) and `uv run --with websockets --with pyyaml python3 scripts/verify_neko_webrtc_session.py --public-url https://browser.lv3.org --timeout 30`
-- the public verifier observed the expected oauth2 redirect on `https://browser.lv3.org/`, selected backend `10.10.10.21:8080`, completed websocket plus SDP negotiation, and reported `VERIFICATION PASSED: Neko WebRTC is operational`
+- replay covered the intended live surfaces end to end: Hetzner DNS publication for `browser.example.com`, Proxmox host forwarding policy, multi-instance Neko on `runtime-comms`, and shared edge publication on `nginx`
+- controller-side verification passed with `python3 scripts/neko_tool.py validate` (`All 9 instance(s) are valid.`) and `uv run --with websockets --with pyyaml python3 scripts/verify_neko_webrtc_session.py --public-url https://browser.example.com --timeout 30`
+- the public verifier observed the expected oauth2 redirect on `https://browser.example.com/`, selected backend `10.10.10.21:8080`, completed websocket plus SDP negotiation, and reported `VERIFICATION PASSED: Neko WebRTC is operational`
 - ad-hoc host checks confirmed `runtime-comms` is listening on the expected Neko signalling ports (`8080-8088`) and the Proxmox host nftables rules forward UDP `50000-60000` to `10.10.10.21` without a matching public TCP `8080` DNAT rule
 
 ### 2026-04-12: Validation Notes

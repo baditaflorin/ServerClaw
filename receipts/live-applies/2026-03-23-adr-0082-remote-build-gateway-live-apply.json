@@ -12,7 +12,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -31,18 +31,18 @@
     {
       "check": "Build guest rsync prerequisite",
       "result": "pass",
-      "observed": "Installed `rsync` on `docker-build-lv3` and added it to `inventory/host_vars/proxmox_florin.yml` so future guest convergence preserves the build-gateway sync dependency."
+      "observed": "Installed `rsync` on `docker-build-lv3` and added it to `inventory/host_vars/proxmox-host.yml` so future guest convergence preserves the build-gateway sync dependency."
     },
     {
       "check": "Live build-server health check",
       "result": "pass",
-      "observed": "`make check-build-server` completed successfully against `/home/ops/builds/proxmox_florin_server`, including SSH connectivity, remote workspace verification, and rsync dry-run sync."
+      "observed": "`make check-build-server` completed successfully against `/home/ops/builds/platform_server`, including SSH connectivity, remote workspace verification, and rsync dry-run sync."
     }
   ],
   "evidence_refs": [
     "config/build-server.json",
     "inventory/build_server.yml",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "docs/runbooks/remote-build-gateway.md",
     "docs/adr/0082-remote-build-execution-gateway.md",
     "docs/workstreams/adr-0082-remote-build-gateway.md",

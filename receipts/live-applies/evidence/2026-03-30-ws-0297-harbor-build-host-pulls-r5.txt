@@ -1,4 +1,4 @@
 3.12.10: Pulling from check-runner/python
 Digest: sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-Status: Image is up to date for registry.lv3.org/check-runner/python:3.12.10
-registry.lv3.org/check-runner/python:3.12.10
+Status: Image is up to date for registry.example.com/check-runner/python:3.12.10
+registry.example.com/check-runner/python:3.12.10

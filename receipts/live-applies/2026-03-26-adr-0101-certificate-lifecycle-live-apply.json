@@ -13,13 +13,13 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
       "kind": "host",
-      "name": "proxmox_florin_public",
-      "address": "65.108.75.123:2222"
+      "name": "proxmox-host_public",
+      "address": "203.0.113.1:2222"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "vaultwarden_private",
-      "address": "https://vault.lv3.org"
+      "address": "https://vault.example.com"
     }
   ],
   "verification": [
@@ -72,7 +72,7 @@
     {
       "check": "Host Tailscale proxy sockets active",
       "result": "pass",
-      "observed": "`lv3-tailscale-proxy-openbao.socket` and `lv3-tailscale-proxy-step-ca.socket` are active on `proxmox_florin`, and their paired proxy services are running against `10.10.10.20:8200` and `10.10.10.20:9000`."
+      "observed": "`lv3-tailscale-proxy-openbao.socket` and `lv3-tailscale-proxy-step-ca.socket` are active on `proxmox-host`, and their paired proxy services are running against `10.10.10.20:8200` and `10.10.10.20:9000`."
     },
     {
       "check": "OpenBao certificate probe and mTLS listener behavior",
@@ -82,12 +82,12 @@
     {
       "check": "Vaultwarden private HTTPS path",
       "result": "pass",
-      "observed": "`curl -vk --resolve vault.lv3.org:443:100.64.0.1 https://vault.lv3.org/` returned HTTP `200` with a 24-hour `CN=vault.lv3.org` certificate from the LV3 internal CA, confirming the service is healthy through the host Tailscale proxy."
+      "observed": "`curl -vk --resolve vault.example.com:443:100.64.0.1 https://vault.example.com/` returned HTTP `200` with a 24-hour `CN=vault.example.com` certificate from the LV3 internal CA, confirming the service is healthy through the host Tailscale proxy."
     },
     {
       "check": "step-ca proxy health and live certificate verification",
       "result": "pass",
-      "observed": "`curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health` returned `{\"status\":\"ok\"}`, and `python3 scripts/tls_cert_probe.py --certificate-id step-ca-proxy --fail-on never` no longer reports a SAN mismatch against `100.64.0.1`."
+      "observed": "`curl --cacert /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health` returned `{\"status\":\"ok\"}`, and `python3 scripts/tls_cert_probe.py --certificate-id step-ca-proxy --fail-on never` no longer reports a SAN mismatch against `100.64.0.1`."
     }
   ],
   "evidence_refs": [
@@ -100,7 +100,7 @@
   ],
   "notes": [
     "The branch intentionally does not modify protected integration files: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, or `versions/stack.yaml`.",
-    "The shared certificate probe contract now uses the host Tailscale IP for `vaultwarden-private` while keeping `vault.lv3.org` as SNI, which removes a controller-local private-DNS dependency from the validation path.",
+    "The shared certificate probe contract now uses the host Tailscale IP for `vaultwarden-private` while keeping `vault.example.com` as SNI, which removes a controller-local private-DNS dependency from the validation path.",
     "The remaining merge-to-main work is limited to protected integration files and release bookkeeping on `main`; the live issues originally surfaced by this workstream (`postgres-replica-lv3` production targeting and the legacy `step-ca` proxy SAN) are resolved on this branch."
   ]
 }

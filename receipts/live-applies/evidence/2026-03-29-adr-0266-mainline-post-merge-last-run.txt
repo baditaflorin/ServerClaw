@@ -2,8 +2,8 @@ docker-runtime-lv3 | CHANGED | rc=0 >>
 {
   "status": "passed",
   "source": "windmill-post-merge-local-fallback",
-  "workspace": "/srv/proxmox_florin_server",
-  "manifest": "/srv/proxmox_florin_server/config/validation-gate.json",
+  "workspace": "/srv/platform_server",
+  "manifest": "/srv/platform_server/config/validation-gate.json",
   "executed_at": "2026-03-29T22:24:37.498783+00:00",
   "checks": [
     {

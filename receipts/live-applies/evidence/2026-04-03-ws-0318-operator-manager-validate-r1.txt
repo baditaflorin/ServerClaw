@@ -6,7 +6,7 @@
         "onboarded_at": "2026-03-23T00:00:00Z",
         "onboarded_by": "adr-0108-bootstrap"
       },
-      "email": "baditaflorin@gmail.com",
+      "email": "operator@example.com",
       "id": "florin-badita",
       "keycloak": {
         "enabled": true,
@@ -19,7 +19,7 @@
         ],
         "username": "florin.badita"
       },
-      "name": "Florin Badita",
+      "name": "Platform Operator",
       "notes": "Existing platform owner documented when ADR 0108 was implemented.",
       "openbao": {
         "entity_name": "florin.badita",
@@ -35,13 +35,13 @@
           {
             "fingerprint": "SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ",
             "name": "bootstrap-ssh",
-            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server"
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@platform_server"
           }
         ]
       },
       "status": "active",
       "tailscale": {
-        "login_email": "baditaflorin@gmail.com",
+        "login_email": "operator@example.com",
         "tags": [
           "tag:platform-operator"
         ]
@@ -52,7 +52,7 @@
         "onboarded_at": "2026-03-31T00:00:00Z",
         "onboarded_by": "adr-0307-tmp-user"
       },
-      "email": "florin@badita.org",
+      "email": "operator@example.com",
       "id": "florin-tmp-001",
       "keycloak": {
         "enabled": true,
@@ -65,7 +65,7 @@
         ],
         "username": "florin.badita-tmp"
       },
-      "name": "Florin Badita (Temporary)",
+      "name": "Platform Operator (Temporary)",
       "notes": "Temporary 72-hour admin account. Expires 2026-04-03T00:00:00Z.\nCreated per ADR 0307. Full service login access (Keycloak SSO, Grafana, OpenBao, Tailscale, SSH).\nMUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.\n",
       "openbao": {
         "entity_name": "florin.badita-tmp",
@@ -87,7 +87,7 @@
       },
       "status": "active",
       "tailscale": {
-        "login_email": "florin@badita.org",
+        "login_email": "operator@example.com",
         "tags": [
           "tag:platform-operator"
         ]
@@ -98,7 +98,7 @@
         "onboarded_at": "2026-04-03T15:52:45Z",
         "onboarded_by": "codex/ws-0318-live-apply"
       },
-      "email": "baditaflorin+tmp002@gmail.com",
+      "email": "operator@example.com",
       "id": "florin-tmp-002",
       "keycloak": {
         "enabled": true,
@@ -111,7 +111,7 @@
         ],
         "username": "florin.badita-tmp-002"
       },
-      "name": "Florin Badita Temporary",
+      "name": "Platform Operator Temporary",
       "notes": "Temporary 1-week admin account for ADR 0318 live-apply verification. Expires 2026-04-10T00:00:00Z.\nCreated through the documented Keycloak direct-API fallback, Headscale bootstrap, and requester-CC onboarding mail replay.\nMUST be offboarded at expiry: set status=inactive and run operator-offboard workflow.\n",
       "openbao": {
         "entity_name": "florin.badita-tmp-002",
@@ -127,13 +127,13 @@
           {
             "fingerprint": "SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ",
             "name": "bootstrap-placeholder",
-            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server"
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@platform_server"
           }
         ]
       },
       "status": "active",
       "tailscale": {
-        "login_email": "baditaflorin+tmp002@gmail.com",
+        "login_email": "operator@example.com",
         "tags": [
           "tag:platform-operator"
         ]
@@ -144,7 +144,7 @@
         "onboarded_at": "2026-04-01T00:00:00Z",
         "onboarded_by": "claude-agent"
       },
-      "email": "busui.matei1994@gmail.com",
+      "email": "operator@example.com",
       "id": "matei-busui-tmp-001",
       "keycloak": {
         "enabled": true,
@@ -173,13 +173,13 @@
           {
             "fingerprint": "SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ",
             "name": "bootstrap-placeholder",
-            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server"
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@platform_server"
           }
         ]
       },
       "status": "active",
       "tailscale": {
-        "login_email": "busui.matei1994@gmail.com",
+        "login_email": "operator@example.com",
         "tags": [
           "tag:platform-operator"
         ]

@@ -1,7 +1,7 @@
 $ make generate-ops-portal
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/scripts/generate_ops_portal.py --write
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/scripts/generate_ops_portal.py --write
 
 $ make generate-changelog-portal
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/scripts/generate_changelog_portal.py --write
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge --path build/changelog-portal
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/scripts/generate_changelog_portal.py --write
+python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge --path build/changelog-portal
 Published artifact secret scan passed: 572 file(s) checked with builtin.

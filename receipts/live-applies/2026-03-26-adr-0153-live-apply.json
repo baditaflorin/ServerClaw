@@ -25,8 +25,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -53,7 +53,7 @@
     {
       "check": "Windmill live replay",
       "result": "pass",
-      "observed": "The production replay finished on 2026-03-26 with `docker-runtime-lv3 : ok=151 changed=11 unreachable=0 failed=0`, `postgres-lv3 : ok=57 changed=1 unreachable=0 failed=0`, and `proxmox_florin : ok=35 changed=4 unreachable=0 failed=0` before the final Vaultwarden-only runtime replay."
+      "observed": "The production replay finished on 2026-03-26 with `docker-runtime-lv3 : ok=151 changed=11 unreachable=0 failed=0`, `postgres-lv3 : ok=57 changed=1 unreachable=0 failed=0`, and `proxmox-host : ok=35 changed=4 unreachable=0 failed=0` before the final Vaultwarden-only runtime replay."
     },
     {
       "check": "Windmill API version",
@@ -68,7 +68,7 @@
     {
       "check": "Vaultwarden controller path",
       "result": "pass",
-      "observed": "A controller-side probe bound to the local Tailscale address and sent through the Proxmox host proxy returned `200` for `https://vault.lv3.org/alive`, confirming the private Vaultwarden entrypoint was reachable after the runtime replay."
+      "observed": "A controller-side probe bound to the local Tailscale address and sent through the Proxmox host proxy returned `200` for `https://vault.example.com/alive`, confirming the private Vaultwarden entrypoint was reachable after the runtime replay."
     },
     {
       "check": "Vaultwarden runtime state",

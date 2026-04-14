@@ -1,6 +1,6 @@
 ============================= test session starts ==============================
 platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
-rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge
 configfile: pytest.ini
 collected 80 items
 
@@ -13,12 +13,12 @@ tests/test_generate_platform_vars.py .............................       [ 82%]
 tests/test_nginx_edge_publication_role.py ..............                 [100%]
 
 ============================== 80 passed in 4.11s ==============================
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml --syntax-check
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml --syntax-check
 
-playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml --syntax-check
+playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml --syntax-check
 
-playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml
+playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml
 Service completeness: jupyterhub
 Status: PASS
 - ADR: ok (docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)

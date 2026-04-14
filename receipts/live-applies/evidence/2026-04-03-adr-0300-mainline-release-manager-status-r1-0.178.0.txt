@@ -5,9 +5,9 @@ Platform 1.0.0 readiness
 - Release blockers: 1 blocking workstreams: ws-0330-public-github-readiness; waiver blockers: controller_dependency_gap x3
 - Gate bypass waivers: 3 open, 0 warnings, 1 blockers
 - Criteria met: 2/7 (28.57%)
-- OPEN WAIVER controller_dependency_gap until 2026-04-06 (baditaflorin@gmail.com; local-controller-missing-uv)
-- OPEN WAIVER controller_dependency_gap until 2026-04-06 (baditaflorin@gmail.com; local-controller-missing-uv)
-- OPEN WAIVER controller_dependency_gap until 2026-04-06 (baditaflorin@gmail.com; local-controller-missing-uv)
+- OPEN WAIVER controller_dependency_gap until 2026-04-06 (operator@example.com; local-controller-missing-uv)
+- OPEN WAIVER controller_dependency_gap until 2026-04-06 (operator@example.com; local-controller-missing-uv)
+- OPEN WAIVER controller_dependency_gap until 2026-04-06 (operator@example.com; local-controller-missing-uv)
 - WAIVER RELEASE_BLOCKER controller_dependency_gap: 3 repeat(s) past expiry
 - PENDING ADR window 0001-0111: 99/111 implemented; first pending: 0014, 0020, 0024, 0025, 0028
 - PENDING SLO error budgets: pending (missing receipts/slo-reports/latest.json)

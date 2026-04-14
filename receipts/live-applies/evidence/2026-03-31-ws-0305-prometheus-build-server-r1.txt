@@ -1,4 +1,4 @@
-LV3_RUN_ID=caeea5269df146bfa2f8222f91934391 COMMAND="curl -fsS http://10.10.10.40:9090/-/ready && curl -fsS http://10.10.10.40:9090/api/v1/status/buildinfo" /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply/scripts/remote_exec.sh remote-exec --local-fallback
+LV3_RUN_ID=caeea5269df146bfa2f8222f91934391 COMMAND="curl -fsS http://10.10.10.40:9090/-/ready && curl -fsS http://10.10.10.40:9090/api/v1/status/buildinfo" /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-live-apply/scripts/remote_exec.sh remote-exec --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.

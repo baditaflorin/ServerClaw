@@ -49,7 +49,7 @@
     {
       "check": "Exact-main Windmill converge",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from the exact-main worktree with `docker-runtime-lv3 ok=248 changed=45 failed=0`, `postgres-lv3 ok=65 changed=1 failed=0`, and `proxmox_florin ok=38 changed=7 failed=0`."
+      "observed": "`make converge-windmill` completed successfully from the exact-main worktree with `docker-runtime-lv3 ok=248 changed=45 failed=0`, `postgres-lv3 ok=65 changed=1 failed=0`, and `proxmox-host ok=38 changed=7 failed=0`."
     },
     {
       "check": "Live operator admin app publish",
@@ -69,7 +69,7 @@
     {
       "check": "Concurrent worker drift and startup race recovery",
       "result": "pass",
-      "observed": "The exact-main replay corrected a shared-worker mismatch where `/srv/proxmox_florin_server/scripts/gate_status.py` had advanced to a branch-local import of `gate_bypass_waivers` without the companion module in the checkout. The Windmill wrapper now prepends the repo `scripts/` directory to `sys.path` and injects a safe empty waiver-summary fallback only when that helper is absent. The replay also added retries for transient Postgres SQL readiness and default operations script seeding so concurrent live applies no longer fail on short-lived startup windows."
+      "observed": "The exact-main replay corrected a shared-worker mismatch where `/srv/platform_server/scripts/gate_status.py` had advanced to a branch-local import of `gate_bypass_waivers` without the companion module in the checkout. The Windmill wrapper now prepends the repo `scripts/` directory to `sys.path` and injects a safe empty waiver-summary fallback only when that helper is absent. The replay also added retries for transient Postgres SQL readiness and default operations script seeding so concurrent live applies no longer fail on short-lived startup windows."
     }
   ],
   "evidence_refs": [

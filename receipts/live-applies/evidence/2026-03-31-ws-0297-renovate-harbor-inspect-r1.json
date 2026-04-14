@@ -1,5 +1,5 @@
 {
-    "Name": "registry.lv3.org/check-runner/renovate",
+    "Name": "registry.example.com/check-runner/renovate",
     "Digest": "sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d",
     "RepoTags": [
         "42.76.4"

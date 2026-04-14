@@ -18,7 +18,7 @@
     },
     {
       "kind": "private_hostname",
-      "name": "database.lv3.org"
+      "name": "database.example.com"
     }
   ],
   "verification": [
@@ -30,7 +30,7 @@
     {
       "check": "Tailnet-only publication",
       "result": "pass",
-      "observed": "database.lv3.org resolved to the Proxmox host Tailscale IP and public IPv4 port 5432 remained closed."
+      "observed": "database.example.com resolved to the Proxmox host Tailscale IP and public IPv4 port 5432 remained closed."
     },
     {
       "check": "Host-side proxy path",

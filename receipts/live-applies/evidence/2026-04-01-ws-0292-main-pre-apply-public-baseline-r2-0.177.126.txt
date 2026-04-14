@@ -5,7 +5,7 @@ server: nginx
 date: Wed, 01 Apr 2026 06:22:17 GMT
 content-type: text/html
 content-length: 164
-location: https://nginx.lv3.org/
+location: https://nginx.example.com/
 x-robots-tag: noindex, nofollow
 
 
@@ -15,5 +15,5 @@ server: nginx
 date: Wed, 01 Apr 2026 06:22:18 GMT
 content-type: text/html
 content-length: 164
-location: https://nginx.lv3.org/api/health
+location: https://nginx.example.com/api/health
 x-robots-tag: noindex, nofollow

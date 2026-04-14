@@ -1,1 +1,1 @@
-Written /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-live-apply/docs/adr/.index.yaml (324 ADRs indexed)
+Written /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0285-live-apply/docs/adr/.index.yaml (324 ADRs indexed)

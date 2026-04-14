@@ -8,7 +8,7 @@
   "repo_version_context": "0.114.2",
   "workflow_id": "converge-api-gateway",
   "adr": "0092",
-  "summary": "Applied the unified platform API gateway live by reconciling the docker-runtime gateway stack, fixing the edge-publication idempotence bug that blocked `api.lv3.org`, expanding the shared edge certificate, and verifying both anonymous and authenticated public API paths.",
+  "summary": "Applied the unified platform API gateway live by reconciling the docker-runtime gateway stack, fixing the edge-publication idempotence bug that blocked `api.example.com`, expanding the shared edge certificate, and verifying both anonymous and authenticated public API paths.",
   "targets": [
     {
       "kind": "guest",
@@ -24,7 +24,7 @@
     },
     {
       "kind": "public_hostname",
-      "name": "api.lv3.org"
+      "name": "api.example.com"
     }
   ],
   "verification": [
@@ -34,19 +34,19 @@
       "observed": "`ansible-playbook -e proxmox_guest_ssh_connection_mode=proxmox_host_jump playbooks/api-gateway.yml` completed successfully and verified an authenticated `/v1/platform/services` call during role verification."
     },
     {
-      "check": "Shared edge certificate includes api.lv3.org",
+      "check": "Shared edge certificate includes api.example.com",
       "result": "pass",
-      "observed": "The live `lv3-edge` certificate SAN list now includes `DNS:api.lv3.org` after the targeted edge-publication rerun."
+      "observed": "The live `lv3-edge` certificate SAN list now includes `DNS:api.example.com` after the targeted edge-publication rerun."
     },
     {
       "check": "Public anonymous gateway health endpoint",
       "result": "pass",
-      "observed": "`curl https://api.lv3.org/healthz` returned `HTTP/2 200` with `{\"status\":\"ok\"}`."
+      "observed": "`curl https://api.example.com/healthz` returned `HTTP/2 200` with `{\"status\":\"ok\"}`."
     },
     {
       "check": "Public authenticated service catalog",
       "result": "pass",
-      "observed": "A valid `lv3-agent-hub` bearer token issued from the live Keycloak realm was accepted by `https://api.lv3.org/v1/platform/services`, which returned `HTTP 200` with `24` services."
+      "observed": "A valid `lv3-agent-hub` bearer token issued from the live Keycloak realm was accepted by `https://api.example.com/v1/platform/services`, which returned `HTTP 200` with `24` services."
     }
   ],
   "evidence_refs": [
@@ -58,6 +58,6 @@
   "notes": [
     "The `nginx_edge_publication` role had an idempotence bug: `/etc/nginx/sites-enabled/lv3-edge.conf` already existed as a plain file, so the role failed before certificate expansion. The repo now forces the managed symlink replacement and the targeted rerun succeeded.",
     "The gateway runtime now uses the shared `keycloak_default` Docker network for JWKS access, verifies a real bearer token during converge, and self-heals a missing published host port by forcing a compose recreate.",
-    "Controller-side client-credentials requests to `https://sso.lv3.org/realms/lv3/protocol/openid-connect/token` for `lv3-agent-hub` still returned `unauthorized_client` during this rollout, but the live realm itself issued a valid token on the runtime host and that token was accepted by the public gateway surface."
+    "Controller-side client-credentials requests to `https://sso.example.com/realms/lv3/protocol/openid-connect/token` for `lv3-agent-hub` still returned `unauthorized_client` during this rollout, but the live realm itself issued a valid token on the runtime host and that token was accepted by the public gateway surface."
   ]
 }

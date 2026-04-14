@@ -1,6 +1,6 @@
 {
   "login": "renovate-bot",
-  "email": "renovate-bot@lv3.org",
+  "email": "renovate-bot@example.com",
   "active": true,
   "restricted": false,
   "visibility": "public"

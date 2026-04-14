@@ -7,8 +7,8 @@
   "next_refresh_at": "2026-04-14T12:04:04Z",
   "environment": "production",
   "identity": {
-    "platform_name": "lv3.org",
-    "operator": "Florin Badita-Nistor",
+    "platform_name": "example.com",
+    "operator": "Platform Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6310,17 +6310,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.lv3.org",
+        "endpoint": "https://ops.example.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.lv3.org",
+        "endpoint": "https://windmill.example.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.lv3.org",
+        "endpoint": "https://api.example.com",
         "adr": "0092"
       }
     ],

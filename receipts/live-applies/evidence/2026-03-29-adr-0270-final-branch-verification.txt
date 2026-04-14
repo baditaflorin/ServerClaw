@@ -6,7 +6,7 @@ server: nginx
 date: Sun, 29 Mar 2026 22:59:39 GMT
 content-type: text/html
 content-length: 164
-location: https://nginx.lv3.org/api/v2.0/ping
+location: https://nginx.example.com/api/v2.0/ping
 x-robots-tag: noindex, nofollow
 
 <html>

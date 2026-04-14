@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/scripts/validate_repo.sh
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0281-mainline-v2/scripts/validate_repo.sh
 Generated platform vars validation
 Syntax check: playbooks/api-gateway.yml
 Syntax check: playbooks/artifact-cache-vm.yml
@@ -203,9 +203,9 @@ Shell lint
 JSON validation
 Semgrep SAST and secret-pattern validation
 Semgrep gate summary
-  repo: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2
+  repo: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0281-mainline-v2
   source sha: 1fc3a4a0352ccc9c341895c544723ef449b3522d
-  sarif: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/receipts/sast/1fc3a4a0352ccc9c341895c544723ef449b3522d.sarif.json
+  sarif: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0281-mainline-v2/receipts/sast/1fc3a4a0352ccc9c341895c544723ef449b3522d.sarif.json
   findings: error=0 warning=2 note=0 total=2
 Compose runtime env guard
 Retry guard
@@ -219,5 +219,5 @@ Architecture fitness validation
 Workstream surface ownership validation
 Generated status document validation
 Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0281-mainline-v2/README.md
 make: *** [validate] Error 2

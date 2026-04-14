@@ -1,4 +1,4 @@
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-validation-runner-capability-contracts/scripts/gate_status.py
+python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0266-validation-runner-capability-contracts/scripts/gate_status.py
 Validation gate manifest: config/validation-gate.json
 Enabled checks:
   - alert-rule-validation [error]: Regenerate SLO burn-rate rules and enforce severity plus runbook annotations on committed alert rules.

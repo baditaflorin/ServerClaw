@@ -9,12 +9,12 @@
   "repo_version_context": "0.177.12",
   "workflow_id": "converge-harbor",
   "adr": "0201",
-  "summary": "Applied ADR 0201 from the dedicated latest-main worktree by converging Harbor on docker-runtime-lv3, publishing registry.lv3.org through nginx-lv3 with the Harbor upload proxy settings, migrating the four check-runner images into Harbor, and verifying Trivy scan visibility plus build-worker pull compatibility.",
+  "summary": "Applied ADR 0201 from the dedicated latest-main worktree by converging Harbor on docker-runtime-lv3, publishing registry.example.com through nginx-lv3 with the Harbor upload proxy settings, migrating the four check-runner images into Harbor, and verifying Trivy scan visibility plus build-worker pull compatibility.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -36,8 +36,8 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "registry.lv3.org",
-      "address": "https://registry.lv3.org"
+      "name": "registry.example.com",
+      "address": "https://registry.example.com"
     }
   ],
   "verification": [
@@ -49,17 +49,17 @@
     {
       "check": "Shared edge upload path",
       "result": "pass",
-      "observed": "On `nginx-lv3`, `/etc/nginx/sites-available/lv3-edge.conf` now renders `server_name registry.lv3.org;`, `client_max_body_size 0;`, `chunked_transfer_encoding on;`, `proxy_request_buffering off;`, `proxy_send_timeout 900s;`, and `proxy_read_timeout 900s;` for the Harbor upstream `http://10.10.10.20:8095`."
+      "observed": "On `nginx-lv3`, `/etc/nginx/sites-available/lv3-edge.conf` now renders `server_name registry.example.com;`, `client_max_body_size 0;`, `chunked_transfer_encoding on;`, `proxy_request_buffering off;`, `proxy_send_timeout 900s;`, and `proxy_read_timeout 900s;` for the Harbor upstream `http://10.10.10.20:8095`."
     },
     {
       "check": "Harbor project, repositories, and scan data",
       "result": "pass",
-      "observed": "`curl -fsS https://registry.lv3.org/api/v2.0/ping` returned `Pong`; `curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" https://registry.lv3.org/api/v2.0/projects/check-runner` reported `repo_count: 4`; and `curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" 'https://registry.lv3.org/api/v2.0/projects/check-runner/repositories/python/artifacts?with_scan_overview=true&page=1&page_size=20'` returned a successful Trivy scan overview for digest `sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff` with severity `High` and total `123` findings."
+      "observed": "`curl -fsS https://registry.example.com/api/v2.0/ping` returned `Pong`; `curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" https://registry.example.com/api/v2.0/projects/check-runner` reported `repo_count: 4`; and `curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" 'https://registry.example.com/api/v2.0/projects/check-runner/repositories/python/artifacts?with_scan_overview=true&page=1&page_size=20'` returned a successful Trivy scan overview for digest `sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff` with severity `High` and total `123` findings."
     },
     {
       "check": "Check-runner publication and pullback",
       "result": "pass",
-      "observed": "The quoting-safe remote helper replay on `docker-build-lv3` published all four `registry.lv3.org/check-runner/*` images and resolved digests `ansible sha256:c19da81d96d004664cf7b69b5d1da4b6847560b377981604b6a94abc6fd6a653`, `python sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`, `infra sha256:e1bed7b6f2a05d69a339832f7e85abf1fa1969fb89173569cf2709cc8c676b2a`, and `security sha256:91ca1ed581af8c169771a2928d0e868140d8b77aee4b5cdec34c29179dbe14ae`; a follow-up `docker pull registry.lv3.org/check-runner/python:3.12.10` on `docker-build-lv3` resolved `registry.lv3.org/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`."
+      "observed": "The quoting-safe remote helper replay on `docker-build-lv3` published all four `registry.example.com/check-runner/*` images and resolved digests `ansible sha256:c19da81d96d004664cf7b69b5d1da4b6847560b377981604b6a94abc6fd6a653`, `python sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`, `infra sha256:e1bed7b6f2a05d69a339832f7e85abf1fa1969fb89173569cf2709cc8c676b2a`, and `security sha256:91ca1ed581af8c169771a2928d0e868140d8b77aee4b5cdec34c29179dbe14ae`; a follow-up `docker pull registry.example.com/check-runner/python:3.12.10` on `docker-build-lv3` resolved `registry.example.com/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`."
     },
     {
       "check": "Repository validation and automation replay",
@@ -85,7 +85,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "The work was applied from the dedicated worktree `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-live-apply` on branch `codex/ws-0201-live-apply` so concurrent agents could continue without sharing controller-local state.",
+    "The work was applied from the dedicated worktree `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0201-live-apply` on branch `codex/ws-0201-live-apply` so concurrent agents could continue without sharing controller-local state.",
     "The Harbor publication path initially failed with `413 Request Entity Too Large` on the shared edge and then with a misquoted Harbor robot username during the rebuild helper replay; both were corrected before the final successful publication.",
     "Protected integration files remain intentionally unchanged in this receipt commit and are expected to be updated on the synchronized `main` branch immediately after merge: `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level `README.md` integrated status summary."
   ]

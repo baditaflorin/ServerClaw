@@ -20,11 +20,11 @@
   "repo_version_context": "0.177.12",
   "schema_version": "1.0.0",
   "source_commit": "f471a97b3b8f4596eec3f934db6fb2a6980e8d63",
-  "summary": "Created, validated, and destroyed preview environment ws-0185-live-apply.preview.lv3.org from branch codex/ws-0185-live-apply using profile runtime-smoke.",
+  "summary": "Created, validated, and destroyed preview environment ws-0185-live-apply.preview.example.com from branch codex/ws-0185-live-apply using profile runtime-smoke.",
   "targets": [
     {
       "kind": "preview_environment",
-      "name": "ws-0185-live-apply.preview.lv3.org"
+      "name": "ws-0185-live-apply.preview.example.com"
     },
     {
       "address": "10.20.10.130",
@@ -51,7 +51,7 @@
     },
     {
       "check": "Preview teardown",
-      "observed": "Destroyed preview environment ws-0185-live-apply.preview.lv3.org",
+      "observed": "Destroyed preview environment ws-0185-live-apply.preview.example.com",
       "result": "pass"
     }
   ],

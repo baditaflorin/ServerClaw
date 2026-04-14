@@ -8,7 +8,7 @@
   "repo_version_context": "0.114.1",
   "workflow_id": "configure-edge-publication",
   "adr": "0093",
-  "summary": "Applied the interactive ops portal live on ops.lv3.org with the corrected 8092 host-port contract, synchronized the docker-runtime guest firewall and Proxmox VM firewall for VM 120, and updated the nginx edge proxy to the interactive runtime.",
+  "summary": "Applied the interactive ops portal live on ops.example.com with the corrected 8092 host-port contract, synchronized the docker-runtime guest firewall and Proxmox VM firewall for VM 120, and updated the nginx edge proxy to the interactive runtime.",
   "targets": [
     {
       "kind": "guest",
@@ -24,7 +24,7 @@
     },
     {
       "kind": "public_hostname",
-      "name": "ops.lv3.org"
+      "name": "ops.example.com"
     }
   ],
   "verification": [
@@ -41,7 +41,7 @@
     {
       "check": "Public interactive portal endpoint",
       "result": "pass",
-      "observed": "https://ops.lv3.org/health returned HTTP 200 with the portal health payload, and https://ops.lv3.org/ returned HTTP 302 to the OIDC sign-in flow."
+      "observed": "https://ops.example.com/health returned HTTP 200 with the portal health payload, and https://ops.example.com/ returned HTTP 302 to the OIDC sign-in flow."
     }
   ],
   "evidence_refs": [

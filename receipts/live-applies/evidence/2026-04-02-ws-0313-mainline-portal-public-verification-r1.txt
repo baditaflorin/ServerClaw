@@ -18,6 +18,6 @@ REMOTE_MARKERS_OK /var/www/lv3-generated/changelog-portal/index.html
 REMOTE_MARKERS_OK /var/www/lv3-generated/changelog-portal/service/ops_portal/index.html
 remote-generated-portals-ok
 remote-digests-match-local
-PUBLIC https://ops.lv3.org/ status=302
-PUBLIC https://ops.lv3.org/ location=https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
-PUBLIC https://ops.lv3.org/ x-robots-tag=oindex, nofollow
+PUBLIC https://ops.example.com/ status=302
+PUBLIC https://ops.example.com/ location=https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/
+PUBLIC https://ops.example.com/ x-robots-tag=oindex, nofollow

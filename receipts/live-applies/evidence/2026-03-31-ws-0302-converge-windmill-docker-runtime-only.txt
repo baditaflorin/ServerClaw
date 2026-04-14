@@ -2,11 +2,11 @@
 Preflight workflow: converge-windmill
 Description: Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
-INFO generated windmill_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/database-password.txt
-INFO generated windmill_superadmin_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
+INFO generated windmill_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/windmill/database-password.txt
+INFO generated windmill_superadmin_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/windmill/superadmin-secret.txt
 Result: PASS (converge-windmill)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=d1a13d7782704f93a886cfd2f2dc6b44 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/inventory/hosts.yml --run-id d792c653fc394781b6efe1e3b22255ff --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply --limit docker-runtime-lv3
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=d1a13d7782704f93a886cfd2f2dc6b44 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/inventory/hosts.yml --run-id d792c653fc394781b6efe1e3b22255ff --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply --limit docker-runtime-lv3
 
 PLAY [Converge the Tailscale operator proxy for Windmill] **********************
 skipping: no hosts matched
@@ -405,38 +405,38 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:35:46.299Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=ci.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=data.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=flags.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=notebooks.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=ci.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=data.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=flags.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=notebooks.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:36:05.324Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -771,7 +771,7 @@ TASK [lv3.platform.common : Ensure managed directory tree entries exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:36:35.481Z","vm":"controller","workflow_id":"ansible-playbook"}
 ok: [docker-runtime-lv3] => (item={'path': '/opt/windmill', 'mode': '0755'})
 ok: [docker-runtime-lv3] => (item={'path': '/etc/lv3/windmill', 'mode': '0700'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server', 'mode': '0755'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server', 'mode': '0755'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:36:37.302Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the integration test runner password exists on the control machine] ***
@@ -866,7 +866,7 @@ ok: [docker-runtime-lv3] => (item=Makefile) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/Makefile"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/Makefile"
             }
         },
         "item": "Makefile",
@@ -902,7 +902,7 @@ ok: [docker-runtime-lv3] => (item=Makefile) => {
             "mode": "0644",
             "mtime": 1774933836.3844585,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/Makefile",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/Makefile",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -936,7 +936,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-gate.json) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/validation-gate.json"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/validation-gate.json"
             }
         },
         "item": "config/validation-gate.json",
@@ -972,7 +972,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-gate.json) => {
             "mode": "0644",
             "mtime": 1774931928.5643973,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/validation-gate.json",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/validation-gate.json",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1006,7 +1006,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-lanes.yaml) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/validation-lanes.yaml"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/validation-lanes.yaml"
             }
         },
         "item": "config/validation-lanes.yaml",
@@ -1042,7 +1042,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-lanes.yaml) => {
             "mode": "0644",
             "mtime": 1774931928.5680034,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/validation-lanes.yaml",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/validation-lanes.yaml",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1076,7 +1076,7 @@ ok: [docker-runtime-lv3] => (item=config/gate-bypass-waiver-catalog.json) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/gate-bypass-waiver-catalog.json"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/gate-bypass-waiver-catalog.json"
             }
         },
         "item": "config/gate-bypass-waiver-catalog.json",
@@ -1112,7 +1112,7 @@ ok: [docker-runtime-lv3] => (item=config/gate-bypass-waiver-catalog.json) => {
             "mode": "0644",
             "mtime": 1774889538.415393,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/gate-bypass-waiver-catalog.json",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/gate-bypass-waiver-catalog.json",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1146,7 +1146,7 @@ ok: [docker-runtime-lv3] => (item=scripts/__init__.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/__init__.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/__init__.py"
             }
         },
         "item": "scripts/__init__.py",
@@ -1182,7 +1182,7 @@ ok: [docker-runtime-lv3] => (item=scripts/__init__.py) => {
             "mode": "0644",
             "mtime": 1774871380.835733,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/__init__.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/__init__.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1216,7 +1216,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_checks.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/policy_checks.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/policy_checks.py"
             }
         },
         "item": "scripts/policy_checks.py",
@@ -1252,7 +1252,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_checks.py) => {
             "mode": "0644",
             "mtime": 1774871380.8582478,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/policy_checks.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/policy_checks.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1286,7 +1286,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_toolchain.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/policy_toolchain.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/policy_toolchain.py"
             }
         },
         "item": "scripts/policy_toolchain.py",
@@ -1322,7 +1322,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_toolchain.py) => {
             "mode": "0644",
             "mtime": 1774871380.8583572,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/policy_toolchain.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/policy_toolchain.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1356,7 +1356,7 @@ ok: [docker-runtime-lv3] => (item=scripts/command_catalog.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/command_catalog.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/command_catalog.py"
             }
         },
         "item": "scripts/command_catalog.py",
@@ -1392,7 +1392,7 @@ ok: [docker-runtime-lv3] => (item=scripts/command_catalog.py) => {
             "mode": "0755",
             "mtime": 1774871380.8410685,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/command_catalog.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/command_catalog.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1426,7 +1426,7 @@ ok: [docker-runtime-lv3] => (item=scripts/controller_automation_toolkit.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/controller_automation_toolkit.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/controller_automation_toolkit.py"
             }
         },
         "item": "scripts/controller_automation_toolkit.py",
@@ -1462,7 +1462,7 @@ ok: [docker-runtime-lv3] => (item=scripts/controller_automation_toolkit.py) => {
             "mode": "0644",
             "mtime": 1774871380.8422582,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/controller_automation_toolkit.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/controller_automation_toolkit.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1496,7 +1496,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_bypass_waivers.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/gate_bypass_waivers.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/gate_bypass_waivers.py"
             }
         },
         "item": "scripts/gate_bypass_waivers.py",
@@ -1532,7 +1532,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_bypass_waivers.py) => {
             "mode": "0644",
             "mtime": 1774889538.578649,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/gate_bypass_waivers.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/gate_bypass_waivers.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1566,7 +1566,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_status.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/gate_status.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/gate_status.py"
             }
         },
         "item": "scripts/gate_status.py",
@@ -1602,7 +1602,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_status.py) => {
             "mode": "0644",
             "mtime": 1774931928.838333,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/gate_status.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/gate_status.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1636,7 +1636,7 @@ ok: [docker-runtime-lv3] => (item=scripts/stage_smoke_suites.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/stage_smoke_suites.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/stage_smoke_suites.py"
             }
         },
         "item": "scripts/stage_smoke_suites.py",
@@ -1672,7 +1672,7 @@ ok: [docker-runtime-lv3] => (item=scripts/stage_smoke_suites.py) => {
             "mode": "0644",
             "mtime": 1774889538.585201,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/stage_smoke_suites.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/stage_smoke_suites.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1706,7 +1706,7 @@ ok: [docker-runtime-lv3] => (item=scripts/validation_lanes.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/validation_lanes.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/validation_lanes.py"
             }
         },
         "item": "scripts/validation_lanes.py",
@@ -1742,7 +1742,7 @@ ok: [docker-runtime-lv3] => (item=scripts/validation_lanes.py) => {
             "mode": "0644",
             "mtime": 1774871380.8759515,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/validation_lanes.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/validation_lanes.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1776,7 +1776,7 @@ ok: [docker-runtime-lv3] => (item=scripts/run_python_with_packages.sh) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/run_python_with_packages.sh"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/run_python_with_packages.sh"
             }
         },
         "item": "scripts/run_python_with_packages.sh",
@@ -1812,7 +1812,7 @@ ok: [docker-runtime-lv3] => (item=scripts/run_python_with_packages.sh) => {
             "mode": "0755",
             "mtime": 1774871380.8640492,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/run_python_with_packages.sh",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/run_python_with_packages.sh",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1846,7 +1846,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/gate-status.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/gate-status.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/gate-status.py"
             }
         },
         "item": "config/windmill/scripts/gate-status.py",
@@ -1882,7 +1882,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/gate-status.py) => {
             "mode": "0644",
             "mtime": 1774889538.4266615,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/gate-status.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/gate-status.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1916,7 +1916,7 @@ ok: [docker-runtime-lv3] => (item=collections/ansible_collections/lv3/platform/r
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
             }
         },
         "item": "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
@@ -1952,7 +1952,7 @@ ok: [docker-runtime-lv3] => (item=collections/ansible_collections/lv3/platform/r
             "mode": "0644",
             "mtime": 1774931928.5439262,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1986,7 +1986,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/stage-smoke-suites.py)
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/stage-smoke-suites.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/stage-smoke-suites.py"
             }
         },
         "item": "config/windmill/scripts/stage-smoke-suites.py",
@@ -2022,7 +2022,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/stage-smoke-suites.py)
             "mode": "0644",
             "mtime": 1774931928.5697658,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/stage-smoke-suites.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/config/windmill/scripts/stage-smoke-suites.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -2386,66 +2386,66 @@ ok: [docker-runtime-lv3]
 
 TASK [lv3.platform.common : Ensure managed directory tree entries exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:27.349Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/receipts/fixtures', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local', 'mode': '0755'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/reaper-runs', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/runtime', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/archive', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/locks', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/receipts/fixtures', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local', 'mode': '0755'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/reaper-runs', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/runtime', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/archive', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/locks', 'mode': '1777'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:38:31.480Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable directories exist with write access] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable directories exist with write access","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:31.534Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/operator-access', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/idempotency', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/scheduler', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fault-injection', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/network-impairment-matrix', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/integration-tests', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/stage-smoke-suites', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/governed-command/logs', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/governed-command/receipts', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/token-lifecycle', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/operator-access', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/idempotency', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/scheduler', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fault-injection', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/network-impairment-matrix', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/integration-tests', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/stage-smoke-suites', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/governed-command/logs', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/governed-command/receipts', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/token-lifecycle', 'mode': '0777'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable directories exist with write access","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:38:37.914Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Collect controller-side bootstrap sources for Windmill worker mutable files] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Collect controller-side bootstrap sources for Windmill worker mutable files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:37.942Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/proxmox_florin_server/config/operators.yaml', 'mode': '0666'})
-ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
-ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
+ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/platform_server/config/operators.yaml', 'mode': '0666'})
+ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
+ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Collect controller-side bootstrap sources for Windmill worker mutable files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:38:38.631Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Collect guest-side presence for Windmill worker mutable files] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Collect guest-side presence for Windmill worker mutable files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:38.659Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/config/operators.yaml', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/config/operators.yaml', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Collect guest-side presence for Windmill worker mutable files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:38:40.383Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Bootstrap missing Windmill worker mutable files from the controller checkout when available] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Bootstrap missing Windmill worker mutable files from the controller checkout when available","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:40.475Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/config/operators.yaml)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/config/operators.yaml)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.json)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.lock)
 skipping: [docker-runtime-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.windmill_runtime : Bootstrap missing Windmill worker mutable files from the controller checkout when available","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T05:38:40.500Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:40.526Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/config/operators.yaml)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/config/operators.yaml)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.json)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.lock)
 skipping: [docker-runtime-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.windmill_runtime : Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T05:38:40.552Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:40.578Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/config/operators.yaml', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/config/operators.yaml', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:38:42.015Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the controller-style compatibility parent exists for the worker checkout] ***
@@ -2533,11 +2533,11 @@ ok: [docker-runtime-lv3] => {
 
 TASK [lv3.platform.windmill_runtime : Remove stale packaging metadata from the Windmill worker checkout] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Remove stale packaging metadata from the Windmill worker checkout","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:38:52.028Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.venv)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/pyproject.toml)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/setup.py)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/setup.cfg)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/lv3_platform_cli.egg-info)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/.venv)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/pyproject.toml)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/setup.py)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/setup.cfg)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/lv3_platform_cli.egg-info)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Remove stale packaging metadata from the Windmill worker checkout","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:38:54.820Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Remove the local staging archive for the Windmill worker checkout] ***
@@ -2670,7 +2670,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:39:12.732Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T05:39:12.749Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T05:39:12.868Z","vm":"controller","workflow_id":"ansible-playbook"}

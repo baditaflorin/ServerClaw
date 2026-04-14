@@ -3,7 +3,7 @@ status: running
 ---
 #cloud-config
 hostname: runtime-control-lv3
-fqdn: runtime-control-lv3.lv3.org
+fqdn: runtime-control-lv3.example.com
 manage_etc_hosts: true
 package_update: false
 package_upgrade: false
@@ -19,7 +19,7 @@ users:
     sudo: ALL=(ALL) NOPASSWD:ALL
     lock_passwd: true
     ssh_authorized_keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@platform_server
 
 packages:
   - qemu-guest-agent

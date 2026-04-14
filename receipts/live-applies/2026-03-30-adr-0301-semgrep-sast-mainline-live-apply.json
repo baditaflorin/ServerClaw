@@ -21,7 +21,7 @@
     {
       "kind": "service_endpoint",
       "name": "GitHub Validate run 23762644306",
-      "address": "https://github.com/baditaflorin/proxmox_florin_server/actions/runs/23762644306"
+      "address": "https://github.com/baditaflorin/platform_server/actions/runs/23762644306"
     },
     {
       "kind": "service_endpoint",

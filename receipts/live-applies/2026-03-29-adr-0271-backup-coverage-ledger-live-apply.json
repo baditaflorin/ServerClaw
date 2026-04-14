@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "hypervisor",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -50,12 +50,12 @@
     {
       "check": "Latest origin/main worktree replay",
       "result": "pass",
-      "observed": "make configure-backup-vm succeeded from the merged branch head b18d04ad361416e242eac55f882e226462029eb3 with backup-lv3 : ok=46 changed=2 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0 and proxmox_florin : ok=35 changed=6 unreachable=0 failed=0 skipped=30 rescued=0 ignored=0."
+      "observed": "make configure-backup-vm succeeded from the merged branch head b18d04ad361416e242eac55f882e226462029eb3 with backup-lv3 : ok=46 changed=2 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0 and proxmox-host : ok=35 changed=6 unreachable=0 failed=0 skipped=30 rescued=0 ignored=0."
     },
     {
       "check": "Nightly PBS job now governs coolify-lv3",
       "result": "pass",
-      "observed": "sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty on proxmox_florin returned vmid : \"110,120,130,140,150,170\"."
+      "observed": "sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty on proxmox-host returned vmid : \"110,120,130,140,150,170\"."
     },
     {
       "check": "Immediate PBS artifact for VM 170",
@@ -65,7 +65,7 @@
     {
       "check": "Backup coverage ledger and Windmill wrapper",
       "result": "pass",
-      "observed": "make backup-coverage-ledger wrote receipts/backup-coverage/20260329T113418Z.json with Protected: 6 Degraded: 0 Uncovered: 1 Governed assets: 7, and python3 config/windmill/scripts/backup-coverage-ledger.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0271-backup-coverage-ledger returned status ok with the same 6/7 protected summary."
+      "observed": "make backup-coverage-ledger wrote receipts/backup-coverage/20260329T113418Z.json with Protected: 6 Degraded: 0 Uncovered: 1 Governed assets: 7, and python3 config/windmill/scripts/backup-coverage-ledger.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0271-backup-coverage-ledger returned status ok with the same 6/7 protected summary."
     },
     {
       "check": "Disaster recovery readiness surfaces",

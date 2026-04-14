@@ -13,14 +13,14 @@
   "targets": [
     {
       "kind": "repository",
-      "name": "proxmox_florin_server"
+      "name": "platform_server"
     }
   ],
   "verification": [
     {
       "check": "Standalone dependency-direction validator",
       "result": "pass",
-      "observed": "`python3 scripts/validate_dependency_direction.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-live-apply` returned `Dependency direction OK`."
+      "observed": "`python3 scripts/validate_dependency_direction.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0208-live-apply` returned `Dependency direction OK`."
     },
     {
       "check": "Local validation entrypoints",

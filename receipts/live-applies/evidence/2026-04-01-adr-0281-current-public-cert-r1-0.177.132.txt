@@ -1,4 +1,4 @@
-subject= /CN=nginx.lv3.org
+subject= /CN=nginx.example.com
 issuer= /C=US/O=Let's Encrypt/CN=E7
 notBefore=Mar 30 21:39:45 2026 GMT
 notAfter=Jun 28 21:39:44 2026 GMT

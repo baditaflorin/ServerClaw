@@ -1,2 +1,2 @@
 Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-live-apply/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0315-live-apply/README.md

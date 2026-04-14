@@ -19,7 +19,7 @@
       "./scripts/validate_repo.sh semgrep",
       "cd /private/tmp/ws0368-origin-main-verify && ./scripts/validate_repo.sh ansible-lint"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-15",
     "remediation_ref": "docs/workstreams/ws-0364-post-merge-validation.md"
   }

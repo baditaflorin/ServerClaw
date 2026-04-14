@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -45,24 +45,24 @@
     {
       "kind": "service_endpoint",
       "name": "Shared Gotenberg gateway route",
-      "address": "https://api.lv3.org/v1/gotenberg/health"
+      "address": "https://api.example.com/v1/gotenberg/health"
     }
   ],
   "verification": [
     {
       "check": "Release readiness and protected-surface cut",
       "result": "pass",
-      "observed": "`uv run --with pyyaml python3 scripts/release_manager.py status --json` recorded repository version `0.177.140` and platform version `0.130.88` as the latest mainline baseline before the initial exact-main cut. The first `--bump patch --released-on 2026-04-02` write updated the protected release surfaces to repository version `0.177.141`; the only failure was the post-write Outline sync to `wiki.lv3.org`, which returned `502 Bad Gateway` after the local repo surfaces had already been written. After ADR 0316 occupied `0.177.141` on `origin/main`, the final merge-to-main integration promoted this same verified runtime-ai rollout as repository version `0.177.142` without replaying the platform."
+      "observed": "`uv run --with pyyaml python3 scripts/release_manager.py status --json` recorded repository version `0.177.140` and platform version `0.130.88` as the latest mainline baseline before the initial exact-main cut. The first `--bump patch --released-on 2026-04-02` write updated the protected release surfaces to repository version `0.177.141`; the only failure was the post-write Outline sync to `wiki.example.com`, which returned `502 Bad Gateway` after the local repo surfaces had already been written. After ADR 0316 occupied `0.177.141` on `origin/main`, the final merge-to-main integration promoted this same verified runtime-ai rollout as repository version `0.177.142` without replaying the platform."
     },
     {
       "check": "Exact-main governed runtime-ai replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=runtime-ai-pool env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully from the refreshed exact-main worktree with final recap `docker-runtime-lv3 : ok=269 changed=144 unreachable=0 failed=0`, `monitoring-lv3 : ok=38 changed=0 unreachable=0 failed=0`, `proxmox_florin : ok=41 changed=8 unreachable=0 failed=0`, and `runtime-ai-lv3 : ok=305 changed=4 unreachable=0 failed=0`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=runtime-ai-pool env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully from the refreshed exact-main worktree with final recap `docker-runtime-lv3 : ok=269 changed=144 unreachable=0 failed=0`, `monitoring-lv3 : ok=38 changed=0 unreachable=0 failed=0`, `proxmox-host : ok=41 changed=8 unreachable=0 failed=0`, and `runtime-ai-lv3 : ok=305 changed=4 unreachable=0 failed=0`."
     },
     {
       "check": "Exact-main runtime-ai substrate, retirement, and gateway verification",
       "result": "pass",
-      "observed": "Post-verify checks confirmed the private Traefik ping endpoint, Dapr metadata endpoint, Apache Tika version endpoint, Gotenberg health endpoint, Tesseract OCR health endpoint, Dapr-to-Tika invocation bridge, active `lv3-nomad` service on `runtime-ai-lv3`, healthy `runtime-ai` namespace visibility from `monitoring-lv3`, present `DOCKER` and `DOCKER-FORWARD` chains on the monitoring guest, healthy `dozzle-agent`, retired legacy document-extraction containers on `docker-runtime-lv3`, and a healthy authenticated `https://api.lv3.org/v1/gotenberg/health` response."
+      "observed": "Post-verify checks confirmed the private Traefik ping endpoint, Dapr metadata endpoint, Apache Tika version endpoint, Gotenberg health endpoint, Tesseract OCR health endpoint, Dapr-to-Tika invocation bridge, active `lv3-nomad` service on `runtime-ai-lv3`, healthy `runtime-ai` namespace visibility from `monitoring-lv3`, present `DOCKER` and `DOCKER-FORWARD` chains on the monitoring guest, healthy `dozzle-agent`, retired legacy document-extraction containers on `docker-runtime-lv3`, and a healthy authenticated `https://api.example.com/v1/gotenberg/health` response."
     },
     {
       "check": "Final repository automation and publish gates",
@@ -106,7 +106,7 @@
   ],
   "notes": [
     "This receipt is the canonical exact-main record for ADR 0319 and ADR 0320. The earlier branch-local runtime-ai receipts remain historical evidence for the first replay and the troubleshooting cycle that produced the bounded monitoring-only Docker bridge-chain recovery path.",
-    "The initial exact-main release surfaces were written successfully for repository version `0.177.141`; the only release-manager failure was the external post-write Outline sync to `wiki.lv3.org`, which returned `502 Bad Gateway`.",
+    "The initial exact-main release surfaces were written successfully for repository version `0.177.141`; the only release-manager failure was the external post-write Outline sync to `wiki.example.com`, which returned `502 Bad Gateway`.",
     "After ADR 0316 occupied repository version `0.177.141` on `origin/main`, the final merge-to-main integration promoted this verified runtime-ai rollout as repository version `0.177.142` while keeping platform version `0.130.89` unchanged.",
     "The final merged `0.177.142` tree passed the closing local validation bundle, the remote validation lane, and the full pre-push gate before publication to `origin/main`."
   ]

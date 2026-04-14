@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -27,8 +27,8 @@
     },
     {
       "kind": "application",
-      "name": "api.lv3.org/v1/gotenberg",
-      "address": "https://api.lv3.org/v1/gotenberg"
+      "name": "api.example.com/v1/gotenberg",
+      "address": "https://api.example.com/v1/gotenberg"
     }
   ],
   "verification": [
@@ -60,7 +60,7 @@
     {
       "check": "Merged-main authenticated gateway verification",
       "result": "pass",
-      "observed": "Using the controller-local platform-context bearer token, `https://api.lv3.org/v1/gotenberg/health` returned `{\"status\":\"up\"...}`, and the authenticated Chromium gateway render returned `pdf_magic=%PDF` with `pdf_bytes=32038`, as captured in the `2026-03-30-ws-0278-merged-main-gateway-*` evidence files."
+      "observed": "Using the controller-local platform-context bearer token, `https://api.example.com/v1/gotenberg/health` returned `{\"status\":\"up\"...}`, and the authenticated Chromium gateway render returned `pdf_magic=%PDF` with `pdf_bytes=32038`, as captured in the `2026-03-30-ws-0278-merged-main-gateway-*` evidence files."
     }
   ],
   "evidence_refs": [
@@ -87,7 +87,7 @@
   ],
   "notes": [
     "This receipt is the canonical merged-main replay that justifies bumping `platform_version` from `0.130.60` to `0.130.61` for ADR 0278.",
-    "The service remains intentionally private on `docker-runtime-lv3`; the supported authenticated operator path is the governed API gateway route `https://api.lv3.org/v1/gotenberg`.",
+    "The service remains intentionally private on `docker-runtime-lv3`; the supported authenticated operator path is the governed API gateway route `https://api.example.com/v1/gotenberg`.",
     "The earlier branch-local receipt remains part of the audit trail, but the latest canonical Gotenberg live-apply evidence now points at the merged-main receipt recorded here."
   ]
 }

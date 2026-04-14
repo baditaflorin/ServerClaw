@@ -24,7 +24,7 @@
     {
       "check": "Build server workspace storage recovered",
       "result": "pass",
-      "observed": "`df -h /home/ops/builds/proxmox_florin_server` reports 119G available after cleanup."
+      "observed": "`df -h /home/ops/builds/platform_server` reports 119G available after cleanup."
     }
   ],
   "notes": [

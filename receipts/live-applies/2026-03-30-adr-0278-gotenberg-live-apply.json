@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -27,8 +27,8 @@
     },
     {
       "kind": "application",
-      "name": "api.lv3.org/v1/gotenberg",
-      "address": "https://api.lv3.org/v1/gotenberg"
+      "name": "api.example.com/v1/gotenberg",
+      "address": "https://api.example.com/v1/gotenberg"
     }
   ],
   "verification": [
@@ -55,7 +55,7 @@
     {
       "check": "Authenticated API gateway verification",
       "result": "pass",
-      "observed": "Using the controller-local platform-context bearer token, `https://api.lv3.org/v1/gotenberg/health` returned `{\"status\":\"up\"...}`, and the authenticated Chromium gateway render returned `pdf_magic=%PDF` with `pdf_bytes=17101`, proving the governed `/v1/gotenberg` route is live."
+      "observed": "Using the controller-local platform-context bearer token, `https://api.example.com/v1/gotenberg/health` returned `{\"status\":\"up\"...}`, and the authenticated Chromium gateway render returned `pdf_magic=%PDF` with `pdf_bytes=17101`, proving the governed `/v1/gotenberg` route is live."
     },
     {
       "check": "Exact-main integration still pending",
@@ -67,7 +67,7 @@
     "docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md",
     "docs/workstreams/ws-0278-live-apply.md",
     "docs/runbooks/configure-gotenberg.md",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "inventory/group_vars/platform.yml",
     "scripts/generate_platform_vars.py",
     "config/service-capability-catalog.json",
@@ -105,7 +105,7 @@
   ],
   "notes": [
     "The successful branch-local replay only happened after fixing four defects uncovered by the live apply itself: direct `playbooks/gotenberg.yml` scope registration, role defaults resolving service topology from the hostvars scope, Docker bridge-network creation failing because `DOCKER-FORWARD` was absent on the guest, and Chromium HTML uploads requiring the multipart filename `index.html`.",
-    "The service stays intentionally private on `docker-runtime-lv3`; the supported authenticated operator path is the governed API gateway route `https://api.lv3.org/v1/gotenberg`.",
+    "The service stays intentionally private on `docker-runtime-lv3`; the supported authenticated operator path is the governed API gateway route `https://api.example.com/v1/gotenberg`.",
     "Protected integration files remain intentionally untouched on this workstream branch. The final merge-to-main step still needs the newest `origin/main`, the exact-main replay, and the canonical release-surface updates before `versions/stack.yaml` can move."
   ]
 }

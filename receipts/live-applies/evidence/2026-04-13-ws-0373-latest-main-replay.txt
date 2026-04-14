@@ -10,8 +10,8 @@ Repo validation:
 - uv run --with pytest --with pyyaml --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_openbao_systemd_credentials_helper.py tests/test_restic_config_backup.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_linux_guest_firewall_role.py
 
 Governed backup replay:
-- LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production
-- LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger
+- LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production
+- LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger
 - Result: status=ok
 - Receipts:
   - receipts/restic-backups/20260413T105157Z.json
@@ -19,12 +19,12 @@ Governed backup replay:
   - receipts/restic-snapshots-latest.json
 
 Representative service replay:
-- LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true
+- LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true
 - Result: PLAY RECAP completed with failed=0
 - Runtime verification:
   - docker ps showed repo-intake healthy on 0.0.0.0:8101->8101/tcp
   - curl http://127.0.0.1:8101/health returned {"status":"ok"}
   - curl http://127.0.0.1:8101/ returned the expected Repo Intake HTML
 - Edge verification from nginx:
-  - curl -kfsS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/health returned the expected HTTP/2 302 OAuth redirect
-  - curl -kfsS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/ returned the same authenticated edge behavior
+  - curl -kfsS --resolve repo-intake.example.com:443:127.0.0.1 https://repo-intake.example.com/health returned the expected HTTP/2 302 OAuth redirect
+  - curl -kfsS --resolve repo-intake.example.com:443:127.0.0.1 https://repo-intake.example.com/ returned the same authenticated edge behavior

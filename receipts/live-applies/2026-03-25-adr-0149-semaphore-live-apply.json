@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -38,7 +38,7 @@
     {
       "check": "Repo-managed Semaphore converge",
       "result": "pass",
-      "observed": "`make converge-semaphore` completed successfully from the rebased integrated mainline release with `docker-runtime-lv3 : ok=133 changed=11 failed=0`, `postgres-lv3 : ok=50 changed=0 failed=0`, and `proxmox_florin : ok=29 changed=4 failed=0`."
+      "observed": "`make converge-semaphore` completed successfully from the rebased integrated mainline release with `docker-runtime-lv3 : ok=133 changed=11 failed=0`, `postgres-lv3 : ok=50 changed=0 failed=0`, and `proxmox-host : ok=29 changed=4 failed=0`."
     },
     {
       "check": "Private proxy health endpoint",

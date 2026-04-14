@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.75",
   "workflow_id": "adr-0279-grist-mainline-live-apply",
   "adr": "0279",
-  "summary": "Verified ADR 0279 from the latest realistic `origin/main` baseline at `0.177.112 / 0.130.74`, repaired the Grist persist ownership plus Keycloak and Docker-network recovery paths surfaced during the replay, and completed a successful `r5` live apply that left `grist.lv3.org` healthy and login-gated on platform version `0.130.75`.",
+  "summary": "Verified ADR 0279 from the latest realistic `origin/main` baseline at `0.177.112 / 0.130.74`, repaired the Grist persist ownership plus Keycloak and Docker-network recovery paths surfaced during the replay, and completed a successful `r5` live apply that left `grist.example.com` healthy and login-gated on platform version `0.130.75`.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,17 +34,17 @@
     {
       "kind": "service_endpoint",
       "name": "grist-status",
-      "address": "https://grist.lv3.org/status"
+      "address": "https://grist.example.com/status"
     },
     {
       "kind": "service_endpoint",
       "name": "grist-docs",
-      "address": "https://grist.lv3.org/o/docs/"
+      "address": "https://grist.example.com/o/docs/"
     },
     {
       "kind": "service_endpoint",
       "name": "keycloak-discovery",
-      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+      "address": "https://sso.example.com/realms/lv3/.well-known/openid-configuration"
     }
   ],
   "verification": [
@@ -71,7 +71,7 @@
     {
       "check": "Current public probes and auth flow",
       "result": "pass",
-      "observed": "Fresh probes in `receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-public-probes-r1.txt` show `https://grist.lv3.org/status` returning the canonical alive string, `https://grist.lv3.org/o/docs/` returning `HTTP/2 302` into the Keycloak auth flow, and the live discovery issuer still resolving to `https://sso.lv3.org/realms/lv3`."
+      "observed": "Fresh probes in `receipts/live-applies/evidence/2026-03-31-ws-0279-mainline-public-probes-r1.txt` show `https://grist.example.com/status` returning the canonical alive string, `https://grist.example.com/o/docs/` returning `HTTP/2 302` into the Keycloak auth flow, and the live discovery issuer still resolving to `https://sso.example.com/realms/lv3`."
     },
     {
       "check": "Current host and runtime state",

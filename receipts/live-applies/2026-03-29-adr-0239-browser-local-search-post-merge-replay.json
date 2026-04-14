@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -27,7 +27,7 @@
     {
       "kind": "service_endpoint",
       "name": "Developer portal",
-      "address": "https://docs.lv3.org/"
+      "address": "https://docs.example.com/"
     }
   ],
   "verification": [
@@ -49,7 +49,7 @@
     {
       "check": "External authenticated edge contract",
       "result": "pass",
-      "observed": "`curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and `x-robots-tag: noindex, nofollow` after the replay."
+      "observed": "`curl -ksSI https://docs.example.com/` returned `HTTP/2 302` with `location: https://docs.example.com/oauth2/sign_in?rd=https://docs.example.com/` and `x-robots-tag: noindex, nofollow` after the replay."
     }
   ],
   "evidence_refs": [

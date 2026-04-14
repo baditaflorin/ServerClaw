@@ -1,5 +1,5 @@
 Current version: 0.177.143
 Next version: 0.177.144
 Unreleased notes: 1
-Platform impact: platform version advances to 0.130.91 after the exact-main ADR 0310 replay re-verifies the first-run activation checklist, progressive capability reveal, and server-side launcher/runbook/service guardrails on ops.lv3.org while preserving the authenticated operator edge contract on top of the 0.130.90 baseline
+Platform impact: platform version advances to 0.130.91 after the exact-main ADR 0310 replay re-verifies the first-run activation checklist, progressive capability reveal, and server-side launcher/runbook/service guardrails on ops.example.com while preserving the authenticated operator edge contract on top of the 0.130.90 baseline
 Release notes index: docs/release-notes/README.md

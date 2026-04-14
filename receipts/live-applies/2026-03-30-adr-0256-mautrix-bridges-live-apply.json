@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.63",
   "workflow_id": "converge-matrix-synapse",
   "adr": "0256",
-  "summary": "Live-applied ADR 0256 from the workstream branch by converging Matrix Synapse plus repo-managed mautrix Discord and WhatsApp bridges on the shared Docker runtime, provisioning the bridge PostgreSQL databases, refreshing the controller proxy and public edge verification path, and proving both bridge management bots answer through https://matrix.lv3.org. This successful replay used source commit c43d7602cd84cbb359a72bd53c71e21ed352655e on the workstream branch; protected mainline truth surfaces and the exact-main replay still remain for the final merge-to-main step.",
+  "summary": "Live-applied ADR 0256 from the workstream branch by converging Matrix Synapse plus repo-managed mautrix Discord and WhatsApp bridges on the shared Docker runtime, provisioning the bridge PostgreSQL databases, refreshing the controller proxy and public edge verification path, and proving both bridge management bots answer through https://matrix.example.com. This successful replay used source commit c43d7602cd84cbb359a72bd53c71e21ed352655e on the workstream branch; protected mainline truth surfaces and the exact-main replay still remain for the final merge-to-main step.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Matrix public client API",
-      "address": "https://matrix.lv3.org"
+      "address": "https://matrix.example.com"
     },
     {
       "kind": "service_endpoint",
@@ -67,17 +67,17 @@
     {
       "check": "Governed branch-local converge",
       "result": "pass",
-      "observed": "`make converge-matrix-synapse` completed successfully from source commit `c43d7602cd84cbb359a72bd53c71e21ed352655e` with recap `docker-runtime-lv3 : ok=168 changed=13 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`, `localhost : ok=21 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`, `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`, `postgres-lv3 : ok=63 changed=0 unreachable=0 failed=0 skipped=20 rescued=0 ignored=0`, and `proxmox_florin : ok=34 changed=1 unreachable=0 failed=0 skipped=23 rescued=0 ignored=0`; the successful transcript is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r7.txt`."
+      "observed": "`make converge-matrix-synapse` completed successfully from source commit `c43d7602cd84cbb359a72bd53c71e21ed352655e` with recap `docker-runtime-lv3 : ok=168 changed=13 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`, `localhost : ok=21 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`, `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`, `postgres-lv3 : ok=63 changed=0 unreachable=0 failed=0 skipped=20 rescued=0 ignored=0`, and `proxmox-host : ok=34 changed=1 unreachable=0 failed=0 skipped=23 rescued=0 ignored=0`; the successful transcript is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r7.txt`."
     },
     {
       "check": "Public and controller Matrix verification",
       "result": "pass",
-      "observed": "`https://matrix.lv3.org/_matrix/client/versions` returned `HTTP/2 200`, `http://100.64.0.1:8015/_matrix/client/versions` returned `HTTP/1.1 200 OK`, and `python3 scripts/matrix_admin_register.py --base-url http://100.64.0.1:8015 ... --access-token-file ... --admin` returned `{\"status\": \"existing\", \"user_id\": \"@ops:matrix.lv3.org\"}`."
+      "observed": "`https://matrix.example.com/_matrix/client/versions` returned `HTTP/2 200`, `http://100.64.0.1:8015/_matrix/client/versions` returned `HTTP/1.1 200 OK`, and `python3 scripts/matrix_admin_register.py --base-url http://100.64.0.1:8015 ... --access-token-file ... --admin` returned `{\"status\": \"existing\", \"user_id\": \"@ops:matrix.example.com\"}`."
     },
     {
       "check": "Bridge management-room smoke",
       "result": "pass",
-      "observed": "`python3 scripts/matrix_bridge_smoke.py --base-url https://matrix.lv3.org --username ops --password-file ... --access-token-file ... --bot-user-id @discordbot:matrix.lv3.org --bot-user-id @whatsappbot:matrix.lv3.org` returned `{\"status\": \"ok\", \"bridges\": [{\"bot_user_id\": \"@discordbot:matrix.lv3.org\", \"reply\": \"Hello, I'm a Discord bridge bot.\"}, {\"bot_user_id\": \"@whatsappbot:matrix.lv3.org\", \"reply\": \"Hello, I'm a WhatsApp bridge bot.\\n\\nUse \\`help\\` for help or \\`login\\` to log in.\\n\\nThis room has been marked as your management room.\"}]}`."
+      "observed": "`python3 scripts/matrix_bridge_smoke.py --base-url https://matrix.example.com --username ops --password-file ... --access-token-file ... --bot-user-id @discordbot:matrix.example.com --bot-user-id @whatsappbot:matrix.example.com` returned `{\"status\": \"ok\", \"bridges\": [{\"bot_user_id\": \"@discordbot:matrix.example.com\", \"reply\": \"Hello, I'm a Discord bridge bot.\"}, {\"bot_user_id\": \"@whatsappbot:matrix.example.com\", \"reply\": \"Hello, I'm a WhatsApp bridge bot.\\n\\nUse \\`help\\` for help or \\`login\\` to log in.\\n\\nThis room has been marked as your management room.\"}]}`."
     },
     {
       "check": "Exact-main integration still pending",
@@ -127,7 +127,7 @@
   ],
   "notes": [
     "The successful branch-local replay only happened after fixing four live defects: Docker network-recovery handling on the shared runtime guest, Synapse-readable bridge registration permissions, existing-admin bootstrap behavior, and public verifier handling for the Matrix versions endpoint plus login rate limits.",
-    "The smoke helper now reuses a cached verified access token so repeated public verification does not burn the login budget on `matrix.lv3.org` when Synapse returns `M_LIMIT_EXCEEDED`.",
+    "The smoke helper now reuses a cached verified access token so repeated public verification does not burn the login budget on `matrix.example.com` when Synapse returns `M_LIMIT_EXCEEDED`.",
     "This receipt is intentionally branch-local. The exact-main replay and the canonical merged-main receipt still need to run from the newest synchronized `origin/main` before the platform version can advance."
   ]
 }

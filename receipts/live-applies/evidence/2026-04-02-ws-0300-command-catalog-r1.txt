@@ -1,1 +1,1 @@
-Command catalog OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/config/command-catalog.json
+Command catalog OK: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/config/command-catalog.json

@@ -1,4 +1,4 @@
 health_status 200
 health_body {"status":"ok"}
 root_status 302
-root_location https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
+root_location https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/

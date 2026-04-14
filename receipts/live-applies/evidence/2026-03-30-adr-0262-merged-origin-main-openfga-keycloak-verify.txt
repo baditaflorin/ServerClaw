@@ -6,4 +6,4 @@
   "scope": "email profile"
 }
 gateway_http_status=403
-{"error":{"code":"AUTH_INSUFFICIENT_ROLE","message":"Caller identity is authenticated but lacks the required role.","trace_id":"594859dd25054ffd9aadf3b510628885","retry_advice":"none","retry_after":null,"docs_url":"https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md","occurred_at":"2026-03-30T00:54:49.163756+00:00","context":{"required_role":"platform-operator","subject":"service-account-lv3-agent-hub","service_id":"openfga/healthz"}}}
+{"error":{"code":"AUTH_INSUFFICIENT_ROLE","message":"Caller identity is authenticated but lacks the required role.","trace_id":"594859dd25054ffd9aadf3b510628885","retry_advice":"none","retry_after":null,"docs_url":"https://github.com/baditaflorin/platform_server/blob/main/docs/runbooks/platform-api-error-codes.md","occurred_at":"2026-03-30T00:54:49.163756+00:00","context":{"required_role":"platform-operator","subject":"service-account-lv3-agent-hub","service_id":"openfga/healthz"}}}

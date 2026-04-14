@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -33,14 +33,14 @@
     {
       "kind": "service_endpoint",
       "name": "Gitea private release page",
-      "address": "http://git.lv3.org:3009/ops/proxmox_florin_server/releases/tag/bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a"
+      "address": "http://git.example.com:3009/ops/platform_server/releases/tag/bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a"
     }
   ],
   "verification": [
     {
       "check": "Merged-main-equivalent Gitea replay",
       "result": "pass",
-      "observed": "`make converge-gitea` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-main-merge` with final recap `docker-build-lv3 ok=100 changed=5 failed=0`, `docker-runtime-lv3 ok=227 changed=2 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0` while preserving the latest `origin/main` merge base."
+      "observed": "`make converge-gitea` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0233-main-merge` with final recap `docker-build-lv3 ok=100 changed=5 failed=0`, `docker-runtime-lv3 ok=227 changed=2 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, and `proxmox-host ok=36 changed=4 failed=0` while preserving the latest `origin/main` merge base."
     },
     {
       "check": "Private release-bundle publication and verification workflow",
@@ -50,12 +50,12 @@
     {
       "check": "Published asset set and manifest provenance",
       "result": "pass",
-      "observed": "Release `10` for tag `bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a` published the bundle tarball, checksum, and Sigstore bundle. The verification replay reported manifest fields `repository: ops/proxmox_florin_server`, `ref_name: codex/ws-0233-main-merge`, `ref_type: branch`, `commit: 2fb56c14b62a73d0de47cb367a78c987dfd257c5`, and `file_count: 1930`."
+      "observed": "Release `10` for tag `bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a` published the bundle tarball, checksum, and Sigstore bundle. The verification replay reported manifest fields `repository: ops/platform_server`, `ref_name: codex/ws-0233-main-merge`, `ref_type: branch`, `commit: 2fb56c14b62a73d0de47cb367a78c987dfd257c5`, and `file_count: 1930`."
     },
     {
       "check": "Controller-side private asset replay with Cosign",
       "result": "pass",
-      "observed": "`python3 scripts/release_bundle.py verify-release --gitea-url http://10.10.10.20:3003 --repository ops/proxmox_florin_server --release-tag bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a --output-dir /tmp/lv3-release-bundle-verify-main-0233 --public-key-path keys/gitea-release-bundle-cosign.pub --api-token \"$GITEA_TOKEN\" --cosign-path .tmp/bin/cosign-darwin` succeeded with `release_url: http://git.lv3.org:3009/ops/proxmox_florin_server/releases/tag/bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a` and `bundle_sha256: da9139777eadf4d0a6f4b520decc40781fb13282486ef67326217990e6223a8f`."
+      "observed": "`python3 scripts/release_bundle.py verify-release --gitea-url http://10.10.10.20:3003 --repository ops/platform_server --release-tag bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a --output-dir /tmp/lv3-release-bundle-verify-main-0233 --public-key-path keys/gitea-release-bundle-cosign.pub --api-token \"$GITEA_TOKEN\" --cosign-path .tmp/bin/cosign-darwin` succeeded with `release_url: http://git.example.com:3009/ops/platform_server/releases/tag/bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a` and `bundle_sha256: da9139777eadf4d0a6f4b520decc40781fb13282486ef67326217990e6223a8f`."
     }
   ],
   "evidence_refs": [

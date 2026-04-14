@@ -1,4 +1,4 @@
 [stage] generated-docs
 Generated status document validation
-dependency diagram error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/docs/site-generated/architecture/dependency-graph.md is stale. Run 'python3 scripts/generate_dependency_diagram.py --write'.
+dependency diagram error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1/docs/site-generated/architecture/dependency-graph.md is stale. Run 'python3 scripts/generate_dependency_diagram.py --write'.
 [fail:2] generated-docs

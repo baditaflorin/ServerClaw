@@ -9,11 +9,11 @@
   "repo_version_context": "0.166.0",
   "workflow_id": "converge-dozzle",
   "adr": "0150",
-  "summary": "Converged the repo-managed Dozzle hub on docker-runtime-lv3, joined the docker-build-lv3 and monitoring-lv3 agents over the guest network, updated the Proxmox guest firewall policy for agent reachability, and published logs.lv3.org through the shared Keycloak-authenticated NGINX edge.",
+  "summary": "Converged the repo-managed Dozzle hub on docker-runtime-lv3, joined the docker-build-lv3 and monitoring-lv3 agents over the guest network, updated the Proxmox guest firewall policy for agent reachability, and published logs.example.com through the shared Keycloak-authenticated NGINX edge.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -42,15 +42,15 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "logs.lv3.org",
-      "address": "https://logs.lv3.org"
+      "name": "logs.example.com",
+      "address": "https://logs.example.com"
     }
   ],
   "verification": [
     {
       "check": "Repo-managed live converge",
       "result": "pass",
-      "observed": "The final production Dozzle playbook converge completed successfully across proxmox_florin, nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3 with no failed tasks after the Proxmox guest firewall policy was brought under the same workflow."
+      "observed": "The final production Dozzle playbook converge completed successfully across proxmox-host, nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3 with no failed tasks after the Proxmox guest firewall policy was brought under the same workflow."
     },
     {
       "check": "Private hub health and remote agent reachability",
@@ -60,7 +60,7 @@
     {
       "check": "Public edge authentication path",
       "result": "pass",
-      "observed": "`curl -Ik --resolve logs.lv3.org:443:65.108.75.123 https://logs.lv3.org/` returned `HTTP/2 302` to `/oauth2/sign_in` with the expected shared edge security headers."
+      "observed": "`curl -Ik --resolve logs.example.com:443:203.0.113.1 https://logs.example.com/` returned `HTTP/2 302` to `/oauth2/sign_in` with the expected shared edge security headers."
     },
     {
       "check": "Focused repository validation",

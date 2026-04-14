@@ -19,9 +19,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -44,17 +44,17 @@
     {
       "kind": "service_endpoint",
       "name": "GlitchTip public health endpoint",
-      "address": "https://errors.lv3.org/api/0/internal/health/"
+      "address": "https://errors.example.com/api/0/internal/health/"
     },
     {
       "kind": "service_endpoint",
       "name": "GlitchTip public auth configuration",
-      "address": "https://errors.lv3.org/_allauth/browser/v1/config"
+      "address": "https://errors.example.com/_allauth/browser/v1/config"
     },
     {
       "kind": "service_endpoint",
       "name": "GlitchTip platform findings DSN",
-      "address": "https://errors.lv3.org/api/0/projects/platform-findings/platform-findings/store/"
+      "address": "https://errors.example.com/api/0/projects/platform-findings/platform-findings/store/"
     }
   ],
   "verification": [
@@ -76,7 +76,7 @@
     {
       "check": "Same-branch public surface, OIDC handoff, and event-ingest proof before the exact-main rerun",
       "result": "partial",
-      "observed": "Earlier on the same branch, before the `0.177.132` release cut, `errors.lv3.org` already re-verified with the correct certificate and public health endpoint, the public auth config exposed the `LV3 Keycloak` OIDC handoff, and the platform-findings smoke event reached the GlitchTip project; those supporting branch receipts are `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt`. The exact-main `0.177.132` replay has not yet reproduced those public checks because the quiet-window gate has not cleared."
+      "observed": "Earlier on the same branch, before the `0.177.132` release cut, `errors.example.com` already re-verified with the correct certificate and public health endpoint, the public auth config exposed the `LV3 Keycloak` OIDC handoff, and the platform-findings smoke event reached the GlitchTip project; those supporting branch receipts are `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt`. The exact-main `0.177.132` replay has not yet reproduced those public checks because the quiet-window gate has not cleared."
     },
     {
       "check": "Integrated repository automation and validation bundle",

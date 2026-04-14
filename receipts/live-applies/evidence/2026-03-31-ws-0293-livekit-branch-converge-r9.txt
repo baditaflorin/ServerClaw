@@ -1,18 +1,18 @@
 /Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=converge-livekit
 Preflight workflow: converge-livekit
-Description: Converge LiveKit on docker-runtime-lv3, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.
+Description: Converge LiveKit on docker-runtime-lv3, program Proxmox public TCP and UDP media forwarding, and publish livekit.example.com through the shared NGINX edge.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
 PASS env hetzner_dns_api_token: HETZNER_DNS_API_TOKEN is set
-INFO generated livekit_api_key: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-key.txt
-INFO generated livekit_api_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-secret.txt
+INFO generated livekit_api_key: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/livekit/api-key.txt
+INFO generated livekit_api_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/livekit/api-secret.txt
 Result: PASS (converge-livekit)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/scripts/subdomain_exposure_audit.py --validate
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/scripts/subdomain_exposure_audit.py --validate
 /Applications/Xcode.app/Contents/Developer/usr/bin/make generate-edge-static-sites
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/scripts/generate_changelog_portal.py --write
-uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2 --path build/changelog-portal
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/scripts/generate_changelog_portal.py --write
+uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2 --path build/changelog-portal
 Published artifact secret scan passed: 947 file(s) checked with builtin.
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/scripts/build_docs_portal.py
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/scripts/build_docs_portal.py
 
 [31m │  ⚠  Warning from the Material for MkDocs team[0m
 [31m │[0m
@@ -30,32 +30,32 @@ uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_
 [31m │[0m  [4mhttps://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/[0m
 [0m
 INFO    -  Cleaning site directory
-INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/build/docs-portal
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/image-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/api-publication.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/platform/graph', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
-INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
-INFO    -  Doc file 'runbooks/scaffold-new-service.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-extension-model/docs/runbooks/add-a-new-service.md', it was left as is.
+INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/build/docs-portal
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/image-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/api-publication.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/platform/graph', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
+INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
+INFO    -  Doc file 'runbooks/scaffold-new-service.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-extension-model/docs/runbooks/add-a-new-service.md', it was left as is.
 INFO    -  mkdocs_swagger_ui_tag: Processing file 'api/openapi.md'
 INFO    -  mkdocs_swagger_ui_tag: Copying swagger ui assets.
 INFO    -  Documentation built in 5.58 seconds
 
 Running Pagefind v1.4.0 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -79,9 +79,9 @@ Total:
 
 Finished in 2.048 seconds
 Published artifact secret scan passed: 1963 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/build/docs-portal
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/build/docs-portal
 HETZNER_DNS_API_TOKEN=${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=88964b15b80b4eaaa7adaa18a5ab9719 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/inventory/hosts.yml --run-id ca0b23e3b75744b18f9f2ee05f1e7fe5 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/playbooks/livekit.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=40f1fe161c21458e9024edeb56aa6ee3
+	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=88964b15b80b4eaaa7adaa18a5ab9719 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/inventory/hosts.yml --run-id ca0b23e3b75744b18f9f2ee05f1e7fe5 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/playbooks/livekit.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=40f1fe161c21458e9024edeb56aa6ee3
 
 PLAY [Ensure Hetzner DNS publication for LiveKit] ******************************
 
@@ -226,313 +226,313 @@ PLAY [Converge Proxmox public ingress forwarding for LiveKit] ******************
 
 TASK [Gathering Facts] *********************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:21.763Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:24.855Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:24.855Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Assert the requested execution environment is supported] *****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:24.866Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:24.898Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:24.898Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Load the controller secret manifest] *************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:24.909Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:24.967Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:24.967Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Assert required controller-local secret ids are declared] ****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:24.974Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.005Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.005Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Assert required host selectors resolve in the inventory] *****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:25.014Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => (item=proxmox_florin) => {
+ok: [proxmox-host -> localhost] => (item=proxmox-host) => {
     "ansible_loop_var": "item",
     "changed": false,
-    "item": "proxmox_florin",
+    "item": "proxmox-host",
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.043Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.043Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Initialize resolved required host list] **********************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:25.053Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.069Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.069Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Expand required host selectors into concrete inventory hosts] ************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:25.078Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => (item=proxmox_florin)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.108Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost] => (item=proxmox-host)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:25.108Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Verify SSH connectivity to required hosts] *******************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:25.118Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=proxmox_florin)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:26.549Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=proxmox-host)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:26.549Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Ensure the current target is Debian when required] ***********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:26.558Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:26.586Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:26.586Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Stat the mutation audit helper] ******************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:26.594Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:26.903Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:26.903Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Emit a best-effort playbook start audit event] ***************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:26.913Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook start audit event","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.291Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook start audit event","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.291Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:27.300Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.339Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.339Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validate Proxmox network inputs] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:27.349Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.385Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.385Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validate optional staging bridge inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:27.393Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.426Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:27.426Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure nftables is installed] *************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:27.436Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:28.481Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:28.481Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Persist IPv4 forwarding configuration] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:28.490Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:29.640Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:29.640Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Read the active IPv4 forwarding value] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:29.650Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:31.049Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:31.049Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Apply IPv4 forwarding configuration] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:31.057Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:31.079Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:31.079Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render Proxmox host network interfaces] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:31.088Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:32.192Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:32.192Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render nftables rules for VM egress] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:32.201Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:33.321Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:33.321Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable and start nftables] ****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:33.335Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:34.061Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:34.061Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:34.070Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:35.155Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:35.155Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install Proxmox firewall conntrack service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:35.164Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:36.258Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:36.258Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Reload systemd after conntrack service updates] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:36.267Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.288Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.288Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:36.295Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:36.809Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:36.809Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Reload nftables rules] ********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:36.817Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.839Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.839Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Apply network changes with ifreload] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:36.847Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.870Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.870Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Wait for SSH after network reload] ********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:36.878Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.900Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.900Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Refresh facts after network changes] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:36.907Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.931Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:00:36.931Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:36.939Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:37.327Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:37.327Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Read current guest configurations for firewall enablement] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:37.336Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=postgres-replica-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:49.005Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=postgres-replica-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:49.005Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:49.014Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:49.044Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:49.044Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:49.053Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:58.873Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:00:58.873Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:00:58.883Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:01.884Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:01.884Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:01.893Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=postgres-replica-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:01.974Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=postgres-replica-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:01.974Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:01.982Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:02.496Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:02.496Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Compile Proxmox firewall configuration] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:02.504Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:04.569Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:04.569Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:04.578Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:04.610Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:04.610Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:04.619Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:05.010Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:05.010Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:05.022Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:07.985Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:07.985Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Record guests that need restart after firewall activation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:07.995Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.074Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.074Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Stop guests that need firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:08.083Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.130Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.130Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Start guests after firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:08.138Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.183Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.183Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:08.192Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.238Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:01:08.238Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY [Converge LiveKit on the Docker runtime VM] *******************************
 
@@ -747,40 +747,40 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:01:29.940Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=ci.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=data.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=flags.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=livekit.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=notebooks.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=paperless.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=ci.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=data.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=flags.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=livekit.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=notebooks.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=paperless.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:01:47.252Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Check whether the current Docker daemon config exists] ***
@@ -1323,7 +1323,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:03:13.039Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:03:13.049Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:03:13.093Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1457,7 +1457,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:03:19.011Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:03:19.023Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Read OpenBao seal status before runtime secret injection for livekit] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before runtime secret injection for livekit","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:03:19.071Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1472,9 +1472,9 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for livekit] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for livekit","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:03:20.302Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for livekit","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:03:20.316Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key runtime secret injection for livekit #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key runtime secret injection for livekit #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:03:20.364Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1704,7 +1704,7 @@ ok: [docker-runtime-lv3]
 TASK [Run startup verification] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:04:03.439Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run startup verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:04:03.458Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe startup] **************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe startup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:04:03.513Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1729,7 +1729,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:04:04.125Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:04:04.137Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:04:04.180Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1759,7 +1759,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:04:04.835Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:04:04.850Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:04:04.894Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1983,11 +1983,11 @@ skipping: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:05:43.090Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
-ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:05:50.248Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -1997,8 +1997,8 @@ ok: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:05:51.669Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:05:58.877Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***
@@ -2023,42 +2023,42 @@ ok: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:05:59.968Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [nginx-lv3] => (item={'hostname': 'registry.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8095', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900})
-skipping: [nginx-lv3] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-skipping: [nginx-lv3] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
-skipping: [nginx-lv3] => (item={'hostname': 'nginx.lv3.org', 'kind': 'static', 'slug': 'nginx'})
-skipping: [nginx-lv3] => (item={'hostname': 'grafana.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
-skipping: [nginx-lv3] => (item={'hostname': 'realtime.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:19999', 'server_sent_events': True})
-skipping: [nginx-lv3] => (item={'hostname': 'headscale.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
-skipping: [nginx-lv3] => (item={'hostname': 'proxmox.lv3.org', 'kind': 'static', 'slug': 'proxmox'})
-skipping: [nginx-lv3] => (item={'hostname': 'docker.lv3.org', 'kind': 'static', 'slug': 'docker'})
-skipping: [nginx-lv3] => (item={'hostname': 'build.lv3.org', 'kind': 'static', 'slug': 'build'})
-skipping: [nginx-lv3] => (item={'hostname': 'uptime.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3001'})
-skipping: [nginx-lv3] => (item={'hostname': 'status.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3001', 'root_proxy_path': '/status/lv3-platform'})
-skipping: [nginx-lv3] => (item={'hostname': 'mail.lv3.org', 'kind': 'static', 'slug': 'mail'})
-ok: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
-skipping: [nginx-lv3] => (item={'hostname': 'matrix.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
-skipping: [nginx-lv3] => (item={'hostname': 'langfuse.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
-skipping: [nginx-lv3] => (item={'hostname': 'flags.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
-skipping: [nginx-lv3] => (item={'hostname': 'analytics.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-skipping: [nginx-lv3] => (item={'hostname': 'agents.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
-skipping: [nginx-lv3] => (item={'hostname': 'tasks.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
-ok: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
-skipping: [nginx-lv3] => (item={'hostname': 'wiki.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
-ok: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx-lv3] => (item={'hostname': 'logs.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
-skipping: [nginx-lv3] => (item={'hostname': 'draw.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
-skipping: [nginx-lv3] => (item={'hostname': 'chat.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
-skipping: [nginx-lv3] => (item={'hostname': 'n8n.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
-skipping: [nginx-lv3] => (item={'hostname': 'cloud.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx-lv3] => (item={'hostname': 'coolify.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
-skipping: [nginx-lv3] => (item={'hostname': 'apps.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.70:443', 'aliases': ['*.apps.lv3.org'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-skipping: [nginx-lv3] => (item={'hostname': 'api.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8083'})
-skipping: [nginx-lv3] => (item={'hostname': 'sso.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8091'})
-skipping: [nginx-lv3] => (item={'hostname': 'ops.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
-skipping: [nginx-lv3] => (item={'hostname': 'home.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3090'})
-skipping: [nginx-lv3] => (item={'hostname': 'data.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
-skipping: [nginx-lv3] => (item={'hostname': 'notebooks.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8097', 'client_max_body_size': '2g', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
+skipping: [nginx-lv3] => (item={'hostname': 'registry.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8095', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx-lv3] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+skipping: [nginx-lv3] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+skipping: [nginx-lv3] => (item={'hostname': 'nginx.example.com', 'kind': 'static', 'slug': 'nginx'})
+skipping: [nginx-lv3] => (item={'hostname': 'grafana.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
+skipping: [nginx-lv3] => (item={'hostname': 'realtime.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:19999', 'server_sent_events': True})
+skipping: [nginx-lv3] => (item={'hostname': 'headscale.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
+skipping: [nginx-lv3] => (item={'hostname': 'proxmox.example.com', 'kind': 'static', 'slug': 'proxmox'})
+skipping: [nginx-lv3] => (item={'hostname': 'docker.example.com', 'kind': 'static', 'slug': 'docker'})
+skipping: [nginx-lv3] => (item={'hostname': 'build.example.com', 'kind': 'static', 'slug': 'build'})
+skipping: [nginx-lv3] => (item={'hostname': 'uptime.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3001'})
+skipping: [nginx-lv3] => (item={'hostname': 'status.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3001', 'root_proxy_path': '/status/lv3-platform'})
+skipping: [nginx-lv3] => (item={'hostname': 'mail.example.com', 'kind': 'static', 'slug': 'mail'})
+ok: [nginx-lv3] => (item={'hostname': 'livekit.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
+skipping: [nginx-lv3] => (item={'hostname': 'matrix.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
+skipping: [nginx-lv3] => (item={'hostname': 'langfuse.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
+skipping: [nginx-lv3] => (item={'hostname': 'flags.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
+skipping: [nginx-lv3] => (item={'hostname': 'analytics.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx-lv3] => (item={'hostname': 'agents.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
+skipping: [nginx-lv3] => (item={'hostname': 'tasks.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
+ok: [nginx-lv3] => (item={'hostname': 'ci.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
+skipping: [nginx-lv3] => (item={'hostname': 'wiki.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
+ok: [nginx-lv3] => (item={'hostname': 'paperless.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx-lv3] => (item={'hostname': 'logs.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
+skipping: [nginx-lv3] => (item={'hostname': 'draw.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
+skipping: [nginx-lv3] => (item={'hostname': 'chat.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
+skipping: [nginx-lv3] => (item={'hostname': 'n8n.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
+skipping: [nginx-lv3] => (item={'hostname': 'cloud.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx-lv3] => (item={'hostname': 'coolify.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
+skipping: [nginx-lv3] => (item={'hostname': 'apps.example.com', 'kind': 'proxy', 'upstream': 'https://10.10.10.70:443', 'aliases': ['*.apps.example.com'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx-lv3] => (item={'hostname': 'api.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8083'})
+skipping: [nginx-lv3] => (item={'hostname': 'sso.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8091'})
+skipping: [nginx-lv3] => (item={'hostname': 'ops.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
+skipping: [nginx-lv3] => (item={'hostname': 'home.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3090'})
+skipping: [nginx-lv3] => (item={'hostname': 'data.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
+skipping: [nginx-lv3] => (item={'hostname': 'notebooks.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8097', 'client_max_body_size': '2g', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:06:00.240Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render NGINX public edge configuration] ***
@@ -2093,16 +2093,16 @@ skipping: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:06:06.441Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']})
-ok: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']})
-ok: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com']})
+ok: [nginx-lv3] => (item={'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com']})
+ok: [nginx-lv3] => (item={'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com']})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:06:07.971Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:06:08.034Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524437, 'dev': 2049, 'nlink': 1, 'atime': 1774934605.4955714, 'mtime': 1774934605.4875712, 'ctime': 1774934605.4875712, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/livekit.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/livekit.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ci.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524300, 'dev': 2049, 'nlink': 1, 'atime': 1774990104.000807, 'mtime': 1774903704.395339, 'ctime': 1774903704.395339, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ci.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/ci.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ci.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']}, 'ansible_loop_var': 'item'})
-ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/paperless.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 46, 'inode': 524497, 'dev': 2049, 'nlink': 1, 'atime': 1774946480.5884032, 'mtime': 1774946480.580403, 'ctime': 1774946480.580403, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/paperless.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/paperless.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/paperless.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/livekit.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524437, 'dev': 2049, 'nlink': 1, 'atime': 1774934605.4955714, 'mtime': 1774934605.4875712, 'ctime': 1774934605.4875712, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/livekit.example.com/fullchain1.pem', 'lnk_target': '../../archive/livekit.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/livekit.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ci.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524300, 'dev': 2049, 'nlink': 1, 'atime': 1774990104.000807, 'mtime': 1774903704.395339, 'ctime': 1774903704.395339, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ci.example.com/fullchain1.pem', 'lnk_target': '../../archive/ci.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ci.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/paperless.example.com/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 46, 'inode': 524497, 'dev': 2049, 'nlink': 1, 'atime': 1774946480.5884032, 'mtime': 1774946480.580403, 'ctime': 1774946480.580403, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/paperless.example.com/fullchain1.pem', 'lnk_target': '../../archive/paperless.example.com/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/paperless.example.com/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com']}, 'ansible_loop_var': 'item'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:06:09.616Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Build the site-local certificate SAN catalog] ***
@@ -2112,16 +2112,16 @@ ok: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:06:09.660Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']})
-ok: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']})
-ok: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com']})
+ok: [nginx-lv3] => (item={'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com']})
+ok: [nginx-lv3] => (item={'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com']})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:06:09.738Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:06:09.744Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org'], 'missing_domains': []})
-skipping: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org'], 'missing_domains': []})
-skipping: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'livekit.example.com', 'cert_name': 'livekit.example.com', 'domains': ['livekit.example.com'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'ci.example.com', 'cert_name': 'ci.example.com', 'domains': ['ci.example.com'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'paperless.example.com', 'cert_name': 'paperless.example.com', 'domains': ['paperless.example.com'], 'missing_domains': []})
 skipping: [nginx-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T21:06:09.762Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
@@ -2206,13 +2206,13 @@ FAILED - RETRYING: [localhost]: Verify the public LiveKit room lifecycle (4 retr
 FAILED - RETRYING: [localhost]: Verify the public LiveKit room lifecycle (3 retries left).
 FAILED - RETRYING: [localhost]: Verify the public LiveKit room lifecycle (2 retries left).
 FAILED - RETRYING: [localhost]: Verify the public LiveKit room lifecycle (1 retries left).
-fatal: [localhost]: FAILED! => {"attempts": 12, "changed": false, "cmd": ["python3", "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/scripts/livekit_tool.py", "verify-room-lifecycle", "--url", "https://livekit.lv3.org", "--api-key-file", "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-key.txt", "--api-secret-file", "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/livekit/api-secret.txt", "--room-prefix", "livekit-public-verify", "--identity", "livekit-public-probe", "--timeout-seconds", "120"], "delta": "0:00:00.221309", "end": "2026-04-01 00:07:26.765457", "msg": "non-zero return code", "rc": 1, "start": "2026-04-01 00:07:26.544148", "stderr": "livekit_tool error: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'livekit.lv3.org'. (_ssl.c:1017)>", "stderr_lines": ["livekit_tool error: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'livekit.lv3.org'. (_ssl.c:1017)>"], "stdout": "", "stdout_lines": []}
+fatal: [localhost]: FAILED! => {"attempts": 12, "changed": false, "cmd": ["python3", "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0293-live-apply-r2/scripts/livekit_tool.py", "verify-room-lifecycle", "--url", "https://livekit.example.com", "--api-key-file", "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/livekit/api-key.txt", "--api-secret-file", "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/livekit/api-secret.txt", "--room-prefix", "livekit-public-verify", "--identity", "livekit-public-probe", "--timeout-seconds", "120"], "delta": "0:00:00.221309", "end": "2026-04-01 00:07:26.765457", "msg": "non-zero return code", "rc": 1, "start": "2026-04-01 00:07:26.544148", "stderr": "livekit_tool error: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'livekit.example.com'. (_ssl.c:1017)>", "stderr_lines": ["livekit_tool error: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'livekit.example.com'. (_ssl.c:1017)>"], "stdout": "", "stdout_lines": []}
 {"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: Verify the public LiveKit room lifecycle","service_id":"ansible","target":"localhost","task_status":"failed","trace_id":"background","ts":"2026-03-31T21:07:26.794Z","vm":"localhost","workflow_id":"ansible-playbook"}
 
 PLAY RECAP *********************************************************************
 docker-runtime-lv3         : ok=182  changed=5    unreachable=0    failed=0    skipped=53   rescued=0    ignored=0
 localhost                  : ok=18   changed=0    unreachable=0    failed=1    skipped=7    rescued=0    ignored=0
 nginx-lv3                  : ok=46   changed=5    unreachable=0    failed=0    skipped=7    rescued=0    ignored=0
-proxmox_florin             : ok=32   changed=0    unreachable=0    failed=0    skipped=12   rescued=0    ignored=0
+proxmox-host             : ok=32   changed=0    unreachable=0    failed=0    skipped=12   rescued=0    ignored=0
 
 make: *** [converge-livekit] Error 2

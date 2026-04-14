@@ -1,5 +1,5 @@
 Current version: 0.177.108
 Next version: 0.177.109
 Unreleased notes: 1
-Platform impact: adds the repo-managed Directus REST and GraphQL data API, dedicated Postgres and Keycloak bootstrap path, and shared-edge publication at data.lv3.org; the verified mainline live-apply proof advances platform_version to 0.130.72
+Platform impact: adds the repo-managed Directus REST and GraphQL data API, dedicated Postgres and Keycloak bootstrap path, and shared-edge publication at data.example.com; the verified mainline live-apply proof advances platform_version to 0.130.72
 Release notes index: docs/release-notes/README.md

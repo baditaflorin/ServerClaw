@@ -1,4 +1,4 @@
 Updated canonical truth:
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout/changelog.md
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout/versions/stack.yaml
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0330-main-closeout/changelog.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0330-main-closeout/versions/stack.yaml
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0330-main-closeout/README.md

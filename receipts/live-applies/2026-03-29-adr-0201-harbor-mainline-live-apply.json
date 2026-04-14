@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.45",
   "workflow_id": "adr-0201-harbor-mainline-live-apply",
   "adr": "0201",
-  "summary": "Integrated ADR 0201 on top of synchronized repo release 0.177.62 by replaying `make converge-harbor` again after the latest-main Harbor probe regressed to `registry.lv3.org -> nginx.lv3.org` and `127.0.0.1:8095` went dark, preserving the exact-main OIDC readiness recycle and re-verifying registry.lv3.org, Harbor's runtime-local auth surface, and docker-build check-runner pulls end to end on the already-current platform baseline 0.130.45.",
+  "summary": "Integrated ADR 0201 on top of synchronized repo release 0.177.62 by replaying `make converge-harbor` again after the latest-main Harbor probe regressed to `registry.example.com -> nginx.example.com` and `127.0.0.1:8095` went dark, preserving the exact-main OIDC readiness recycle and re-verifying registry.example.com, Harbor's runtime-local auth surface, and docker-build check-runner pulls end to end on the already-current platform baseline 0.130.45.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "kind": "service_endpoint",
       "name": "Harbor public API",
-      "address": "https://registry.lv3.org/api/v2.0/ping"
+      "address": "https://registry.example.com/api/v2.0/ping"
     },
     {
       "kind": "service_endpoint",
       "name": "Harbor public registry auth surface",
-      "address": "https://registry.lv3.org/v2/"
+      "address": "https://registry.example.com/v2/"
     },
     {
       "kind": "service_endpoint",
@@ -62,12 +62,12 @@
     {
       "check": "Synchronized latest-main Harbor replay",
       "result": "pass",
-      "observed": "After `origin/main` advanced to repo release `0.177.62`, the first Harbor probe failed with `308 Permanent Redirect` to `https://nginx.lv3.org/...` and `127.0.0.1:8095` unavailable on `docker-runtime-lv3`; replaying `make converge-harbor` from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-push` repaired the latest-main state with final recap `docker-runtime-lv3 : ok=127 changed=8 failed=0 skipped=20` and `nginx-lv3 : ok=38 changed=3 failed=0 skipped=11`."
+      "observed": "After `origin/main` advanced to repo release `0.177.62`, the first Harbor probe failed with `308 Permanent Redirect` to `https://nginx.example.com/...` and `127.0.0.1:8095` unavailable on `docker-runtime-lv3`; replaying `make converge-harbor` from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0246-main-push` repaired the latest-main state with final recap `docker-runtime-lv3 : ok=127 changed=8 failed=0 skipped=20` and `nginx-lv3 : ok=38 changed=3 failed=0 skipped=11`."
     },
     {
       "check": "Public Harbor API and registry auth challenge",
       "result": "pass",
-      "observed": "`curl -fsS --max-time 20 https://registry.lv3.org/api/v2.0/ping` returned `Pong`, and `curl -skI --max-time 20 https://registry.lv3.org/v2/` returned `HTTP/2 401` with `docker-distribution-api-version: registry/2.0`, `www-authenticate: Bearer realm=\"https://registry.lv3.org/service/token\",service=\"harbor-registry\"`, and request id `724291f0-dcf8-4da7-8e2a-332f26d0a4d5`."
+      "observed": "`curl -fsS --max-time 20 https://registry.example.com/api/v2.0/ping` returned `Pong`, and `curl -skI --max-time 20 https://registry.example.com/v2/` returned `HTTP/2 401` with `docker-distribution-api-version: registry/2.0`, `www-authenticate: Bearer realm=\"https://registry.example.com/service/token\",service=\"harbor-registry\"`, and request id `724291f0-dcf8-4da7-8e2a-332f26d0a4d5`."
     },
     {
       "check": "Runtime-local Harbor admin API and registry auth challenge",
@@ -77,7 +77,7 @@
     {
       "check": "Docker-build check-runner pull from Harbor",
       "result": "pass",
-      "observed": "Via the same repo-managed SSH ProxyCommand, `docker pull registry.lv3.org/check-runner/python:3.12.10` on `docker-build-lv3` completed with digest `sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`, and `docker image inspect` reported `[\"registry.lv3.org/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff\"]`."
+      "observed": "Via the same repo-managed SSH ProxyCommand, `docker pull registry.example.com/check-runner/python:3.12.10` on `docker-build-lv3` completed with digest `sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`, and `docker image inspect` reported `[\"registry.example.com/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff\"]`."
     }
   ],
   "evidence_refs": [

@@ -4,7 +4,7 @@ docker-runtime-lv3 | CHANGED => {
     },
     "changed": true,
     "checksum": "2005a2e6fcfa6e493f4f047556998cd5d6388928",
-    "dest": "/srv/proxmox_florin_server/config/windmill/scripts/gate-status.py",
+    "dest": "/srv/platform_server/config/windmill/scripts/gate-status.py",
     "gid": 1000,
     "group": "ops",
     "md5sum": "07fe9bc2e69fefb5fabcc1169dc2ff5a",

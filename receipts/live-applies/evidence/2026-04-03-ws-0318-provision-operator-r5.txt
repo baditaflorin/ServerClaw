@@ -1,6 +1,6 @@
-[0] Will write a new password to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-tmp-002-password.txt after Keycloak user creation
+[0] Will write a new password to /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/florin.badita-tmp-002-password.txt after Keycloak user creation
 [2] Keycloak user created
-[2] Generated password -> /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-tmp-002-password.txt
+[2] Generated password -> /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/florin.badita-tmp-002-password.txt
 [2] User ID: d1c1c5b5-f4c8-47de-8865-c529789ada77
 [3] Role 'platform-admin' -> HTTP 204
 [4] Group 'lv3-platform-admins' -> HTTP 204
@@ -9,18 +9,18 @@
 [5] Groups: ['grafana-admins', 'lv3-platform-admins']
 [6] CA fingerprint: af5c395527799a9a68a86f9f512d7545cce88b1cbd3b25448918e6d624e331ac
 [hs] Created user 'florin-badita-tmp-002' (id=3)
-[hs] Pre-auth key generated -> /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/headscale/florin-badita-tmp-002-authkey.txt
+[hs] Pre-auth key generated -> /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/headscale/florin-badita-tmp-002-authkey.txt
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 691, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 691, in <module>
     main()
     ~~~~^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 687, in main
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 687, in main
     provision(args, dry_run=args.dry_run)
     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 637, in provision
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 637, in provision
     send_email_via_ssh_proxy(smtp_pass, SSH_KEY_FILE, msg, [args.email, args.requester])
     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 470, in send_email_via_ssh_proxy
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 470, in send_email_via_ssh_proxy
     raise RuntimeError(f"SSH/SMTP failed: {result.stderr.decode('utf-8', errors='replace')}")
 RuntimeError: SSH/SMTP failed: Traceback (most recent call last):
   File "<stdin>", line 8, in <module>

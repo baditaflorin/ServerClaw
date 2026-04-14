@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.81",
   "workflow_id": "converge-superset",
   "adr": "0292",
-  "summary": "Applied ADR 0292 from the latest realistic origin/main baseline by converging Apache Superset on docker-runtime-lv3, publishing bi.lv3.org through the shared NGINX edge, wiring the Keycloak OIDC client plus OpenBao-backed runtime secrets, reconciling the read-only PostgreSQL and Plausible ClickHouse datasource inventory together with the landing dashboard, and capturing fresh guest-local plus public verification after the replay completed cleanly on the synchronized 0.177.128 tree.",
+  "summary": "Applied ADR 0292 from the latest realistic origin/main baseline by converging Apache Superset on docker-runtime-lv3, publishing bi.example.com through the shared NGINX edge, wiring the Keycloak OIDC client plus OpenBao-backed runtime secrets, reconciling the read-only PostgreSQL and Plausible ClickHouse datasource inventory together with the landing dashboard, and capturing fresh guest-local plus public verification after the replay completed cleanly on the synchronized 0.177.128 tree.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "kind": "service_endpoint",
       "name": "Superset public health endpoint",
-      "address": "https://bi.lv3.org/health"
+      "address": "https://bi.example.com/health"
     },
     {
       "kind": "service_endpoint",
       "name": "Superset public OIDC handoff",
-      "address": "https://bi.lv3.org/login/keycloak"
+      "address": "https://bi.example.com/login/keycloak"
     },
     {
       "kind": "service_endpoint",
@@ -77,7 +77,7 @@
     {
       "check": "Fresh public publication and metadata verification",
       "result": "pass",
-      "observed": "Direct controller verification confirmed `https://bi.lv3.org/health` returned `OK`, the public `login/keycloak` handoff redirects to `sso.lv3.org`, and the authenticated public API still exposed the expected 31 datasource registrations plus the repo-managed dashboard and chart; the transcript is preserved in `receipts/live-applies/evidence/2026-04-01-ws-0292-superset-public-verification-r1.txt`."
+      "observed": "Direct controller verification confirmed `https://bi.example.com/health` returned `OK`, the public `login/keycloak` handoff redirects to `sso.example.com`, and the authenticated public API still exposed the expected 31 datasource registrations plus the repo-managed dashboard and chart; the transcript is preserved in `receipts/live-applies/evidence/2026-04-01-ws-0292-superset-public-verification-r1.txt`."
     }
   ],
   "evidence_refs": [

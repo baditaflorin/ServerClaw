@@ -14,7 +14,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -49,7 +49,7 @@
     {
       "check": "Non-destructive staging validation",
       "result": "pass",
-      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/services/grafana.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=staging -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check` passed from the same mainline worktree; `python scripts/integration_suite.py --mode gate --environment staging` returned a structured `skipped` result because no staged service bindings are active yet."
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/services/grafana.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=staging -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check` passed from the same mainline worktree; `python scripts/integration_suite.py --mode gate --environment staging` returned a structured `skipped` result because no staged service bindings are active yet."
     }
   ],
   "evidence_refs": [
@@ -65,7 +65,7 @@
   "notes": [
     "The stock `make remote-tofu-apply ENV=staging` wrapper still hit the known build-server session-runtime ownership bug after the reviewed plan was saved; the successful live apply repaired ownership under `.local/runs/adr0183-staging-live-20260327/tofu` and replayed `scripts/tofu_exec.sh apply staging` directly on `docker-build-lv3`.",
     "The first successful staged guest reachability required changing the staged VM NICs to `firewall=0`. Repository version `0.177.12` codifies that staged default until staged guest-network-policy automation exists.",
-    "The Proxmox API token verification step inside `make provision-api-access` still timed out against `https://proxmox.lv3.org:8006/api2/json/version` from the controller, even though the role and ACL convergence succeeded live and the staged OpenTofu apply proved the token had the needed privileges.",
+    "The Proxmox API token verification step inside `make provision-api-access` still timed out against `https://proxmox.example.com:8006/api2/json/version` from the controller, even though the role and ACL convergence succeeded live and the staged OpenTofu apply proved the token had the needed privileges.",
     "At receipt time, the staged guests were reachable over SSH but the QEMU guest agent still was not responding on VMIDs `220` and `240`, so the OpenTofu provider finished with agent-timeout warnings instead of guest-agent-published interface data."
   ]
 }

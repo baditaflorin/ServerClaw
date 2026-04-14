@@ -18,7 +18,7 @@ bd9f92ea90ee07df43caaafcf979701d4a9ccb41
       "lock_id": "3f8c30f544b7212af75f",
       "lock_type": "exclusive",
       "metadata": {},
-      "resource_path": "host:proxmox_florin"
+      "resource_path": "host:proxmox-host"
     },
     {
       "acquired_at": "2026-03-31T04:54:42Z",
@@ -28,7 +28,7 @@ bd9f92ea90ee07df43caaafcf979701d4a9ccb41
       "lock_id": "78f64a44b99be27439ff",
       "lock_type": "exclusive",
       "metadata": {},
-      "resource_path": "host:proxmox_florin/service:proxmox_network"
+      "resource_path": "host:proxmox-host/service:proxmox_network"
     },
     {
       "acquired_at": "2026-03-31T06:07:56Z",
@@ -91,7 +91,7 @@ bd9f92ea90ee07df43caaafcf979701d4a9ccb41
       "resource_path": "vm:120/service:typesense"
     }
   ],
-  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/lv3-concurrency/lock-registry.json"
+  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.git/lv3-concurrency/lock-registry.json"
 }
 
 ## acquire-vm120

@@ -50,7 +50,7 @@
     {
       "check": "Fresh-worktree generated platform vars and local overlay materialization",
       "result": "pass",
-      "observed": "`make generate-platform-vars` regenerated `inventory/group_vars/platform.yml` with the real `.local` identity overlay applied, restoring livekit.lv3.org and the runtime-comms topology in the fresh worktree; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-generate-platform-vars-r2-0.178.141.txt`."
+      "observed": "`make generate-platform-vars` regenerated `inventory/group_vars/platform.yml` with the real `.local` identity overlay applied, restoring livekit.example.com and the runtime-comms topology in the fresh worktree; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-generate-platform-vars-r2-0.178.141.txt`."
     },
     {
       "check": "Exact-main LiveKit replay and public verification",

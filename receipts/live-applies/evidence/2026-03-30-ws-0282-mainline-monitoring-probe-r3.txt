@@ -9,12 +9,12 @@ monitoring-lv3 | CHANGED | rc=0 >>
       "Read": false,
       "From": {
         "Name": "",
-        "Address": "monitoring@lv3.org"
+        "Address": "monitoring@example.com"
       },
       "To": [
         {
           "Name": "",
-          "Address": "mailpit-mainline@lv3.org"
+          "Address": "mailpit-mainline@example.com"
         }
       ],
       "Cc": null,

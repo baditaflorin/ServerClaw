@@ -1,13 +1,13 @@
 ws-0299 branch-local verification notes
 Date: 2026-04-03
-Worktree: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0299-live-apply
+Worktree: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0299-live-apply
 Branch: codex/ws-0299-live-apply
 
 Verified:
 - make converge-ntfy env=production completed after ntfy DNS, certificate-catalog, Docker bridge-chain, and edge publication fixes
-- https://ntfy.lv3.org/v1/health returned HTTP 200 from the controller
+- https://ntfy.example.com/v1/health returned HTTP 200 from the controller
 - docker-runtime-lv3 /opt/ntfy/server.yml now renders the governed auth contract with all expected users, `tk_...` bearer tokens, and governed ACLs
-- direct POST to https://ntfy.lv3.org/platform-ansible-info now returns HTTP 200 with the governed controller-side ansible bearer token
+- direct POST to https://ntfy.example.com/platform-ansible-info now returns HTTP 200 with the governed controller-side ansible bearer token
 - scripts/ntfy_publish.py now publishes successfully end to end even when callers pass colon-delimited logical sequence ids; the helper normalizes them into ntfy-safe ids before sending
 - make live-apply-service service=ntfy env=production clears its branch-local bootstrap preflight and then stops at check-canonical-truth, which is expected until the protected canonical-truth files are updated on final merged main
 
@@ -18,8 +18,8 @@ Observed live runtime state:
 
 Relevant commands:
 - make converge-ntfy env=production
-- curl -fsS https://ntfy.lv3.org/v1/health
-- curl -sS -D - --max-time 20 -H "Authorization: Bearer <controller ansible token>" -d 'Controller publish path verified after rebased latest-main ntfy live apply on 2026-04-03.' https://ntfy.lv3.org/platform-ansible-info
+- curl -fsS https://ntfy.example.com/v1/health
+- curl -sS -D - --max-time 20 -H "Authorization: Bearer <controller ansible token>" -d 'Controller publish path verified after rebased latest-main ntfy live apply on 2026-04-03.' https://ntfy.example.com/platform-ansible-info
 - ssh -J ops@100.64.0.1 ops@10.10.10.20 'sudo sed -n "1,220p" /opt/ntfy/server.yml'
 - uv run python3 scripts/ntfy_publish.py --publisher ansible --topic platform-ansible-info --message 'scripts/ntfy_publish.py succeeded after latest-main ntfy live apply on 2026-04-03.' --title 'ws-0299 latest-main verification' --priority 3 --sequence-id ws-0299:latest-main:verify --dedupe-state-file .local/state/ntfy/ws-0299-latest-main.json --dedupe-window-seconds 1
 - make live-apply-service service=ntfy env=production

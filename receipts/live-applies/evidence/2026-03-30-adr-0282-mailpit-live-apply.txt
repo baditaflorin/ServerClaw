@@ -35,7 +35,7 @@ Targeted repo validation before live apply:
 
 Correction loop before the successful replay:
 - Initial governed replay from branch commit `573a387a6f7d4fb0ce9e8b3a3dfe7690d3e38152` reached `lv3.platform.mailpit_runtime` and failed during role argument validation with `platform service catalog must be a mapping`.
-- Repair commit `ae60394c67d15486f7d64a90b327bac4ad0e7174` changed `mailpit_service_topology` to resolve from `hostvars['proxmox_florin'].platform_service_topology`, matching the canonical generated host catalog used by other runtime roles.
+- Repair commit `ae60394c67d15486f7d64a90b327bac4ad0e7174` changed `mailpit_service_topology` to resolve from `hostvars['proxmox-host'].platform_service_topology`, matching the canonical generated host catalog used by other runtime roles.
 - The targeted Mailpit/runtime test suite and syntax checks were rerun before the corrective replay.
 
 Successful governed live apply:
@@ -49,12 +49,12 @@ Successful governed live apply:
   - the role-local verification cleared captured messages, sent a repo-managed SMTP probe, read the Mailpit REST API, and asserted the expected subject match
 
 Independent post-apply verification:
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'curl -fsS http://127.0.0.1:8025/api/v1/info' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'curl -fsS http://127.0.0.1:8025/api/v1/info' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
   Result:
   `{"Version":"v1.29.5","LatestVersion":"disabled","Database":"/tmp/mailpit-1774826334813456156.db","DatabaseSize":90112,"Messages":1,"Unread":1,"Tags":{},"RuntimeStats":{"Uptime":351,"Memory":12204296,"MessagesDeleted":1,"SMTPAccepted":2,"SMTPAcceptedSize":984,"SMTPRejected":0,"SMTPIgnored":0}}`
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml monitoring-lv3 -m shell -a 'python3 -c ...' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml monitoring-lv3 -m shell -a 'python3 -c ...' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
   Result:
-  `{"subject": "LV3 Mailpit external verification", "to": [{"Name": "", "Address": "mailpit-external@lv3.org"}], "count": 1}`
+  `{"subject": "LV3 Mailpit external verification", "to": [{"Name": "", "Address": "mailpit-external@example.com"}], "count": 1}`
 
 Operator notes:
 - Direct `ssh -J ops@100.64.0.1` checks from the controller shell were not accepted by the jump host, but the repo-managed Ansible transport succeeded for both the converge and the independent post-apply verification.

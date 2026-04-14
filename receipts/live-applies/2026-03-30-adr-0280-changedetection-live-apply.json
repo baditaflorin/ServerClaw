@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -33,7 +33,7 @@
     {
       "kind": "service_endpoint",
       "name": "Changedetection authenticated gateway route",
-      "address": "https://api.lv3.org/v1/changedetection/"
+      "address": "https://api.example.com/v1/changedetection/"
     }
   ],
   "verification": [
@@ -60,12 +60,12 @@
     {
       "check": "Current host and Changedetection runtime state",
       "result": "pass",
-      "observed": "The current host probe confirmed `Debian-trixie-latest-amd64-base`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and `sudo qm status 120 => status: running`; the settled guest probe confirmed the `changedetection` container is `healthy`, the root page responds, `systeminfo.watch_count == 9`, `tag_count == 4`, and `/opt/changedetection/watch-sync-report.json` reports `changed=false` with zero pending actions."
+      "observed": "The current host probe confirmed `debian-base-template`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and `sudo qm status 120 => status: running`; the settled guest probe confirmed the `changedetection` container is `healthy`, the root page responds, `systeminfo.watch_count == 9`, `tag_count == 4`, and `/opt/changedetection/watch-sync-report.json` reports `changed=false` with zero pending actions."
     },
     {
       "check": "Authenticated gateway route",
       "result": "pass",
-      "observed": "An authenticated `curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/changedetection/` returned the private Changedetection UI HTML for version `0.54.7`, confirming the API gateway route is refreshing the live runtime."
+      "observed": "An authenticated `curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.example.com/v1/changedetection/` returned the private Changedetection UI HTML for version `0.54.7`, confirming the API gateway route is refreshing the live runtime."
     }
   ],
   "evidence_refs": [

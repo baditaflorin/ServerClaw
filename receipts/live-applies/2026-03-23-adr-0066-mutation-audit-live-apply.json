@@ -8,11 +8,11 @@
   "repo_version_context": "0.78.0",
   "workflow_id": "converge-monitoring",
   "adr": "0066",
-  "summary": "Applied ADR 0066 live on current main by validating host-side mutation audit sinks on proxmox_florin and docker-runtime-lv3, seeding and exercising the Windmill mutation-audit helper, shipping both the structured host file and OpenBao native audit file through the ADR 0052 Alloy-to-Loki path, and repairing current-main execution-gate regressions that blocked the verified monitoring and Windmill converges.",
+  "summary": "Applied ADR 0066 live on current main by validating host-side mutation audit sinks on proxmox-host and docker-runtime-lv3, seeding and exercising the Windmill mutation-audit helper, shipping both the structured host file and OpenBao native audit file through the ADR 0052 Alloy-to-Loki path, and repairing current-main execution-gate regressions that blocked the verified monitoring and Windmill converges.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -50,7 +50,7 @@
     {
       "check": "Host mutation audit sinks",
       "result": "pass",
-      "observed": "Ad-hoc Ansible checks on `proxmox_florin` and `docker-runtime-lv3` confirmed `/var/log/platform/mutation-audit.jsonl` exists, `/etc/alloy/config.alloy` references the expected mutation-audit paths, and `systemctl is-active alloy` returned `active`."
+      "observed": "Ad-hoc Ansible checks on `proxmox-host` and `docker-runtime-lv3` confirmed `/var/log/platform/mutation-audit.jsonl` exists, `/etc/alloy/config.alloy` references the expected mutation-audit paths, and `systemctl is-active alloy` returned `active`."
     },
     {
       "check": "Windmill helper emission",

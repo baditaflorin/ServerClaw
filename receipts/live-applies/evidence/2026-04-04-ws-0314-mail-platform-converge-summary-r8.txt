@@ -3,5 +3,5 @@ Restart Docker to restore bridge chains after guest firewall evaluation] ***
 Re-assert Docker bridge chains after guest firewall recovery restart] ****
 PLAY RECAP *********************************************************************
 monitoring-lv3             : ok=170  changed=13   unreachable=0    failed=0    skipped=19   rescued=0    ignored=0
-proxmox_florin             : ok=81   changed=3    unreachable=0    failed=0    skipped=32   rescued=0    ignored=0
+proxmox-host             : ok=81   changed=3    unreachable=0    failed=0    skipped=32   rescued=0    ignored=0
 runtime-control-lv3        : ok=262  changed=10   unreachable=0    failed=0    skipped=74   rescued=1    ignored=0

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "ntfy public health",
-      "address": "https://ntfy.lv3.org/v1/health"
+      "address": "https://ntfy.example.com/v1/health"
     },
     {
       "kind": "service_endpoint",
       "name": "ntfy governed publish topic",
-      "address": "https://ntfy.lv3.org/platform-ansible-info"
+      "address": "https://ntfy.example.com/platform-ansible-info"
     }
   ],
   "verification": [
@@ -51,7 +51,7 @@
     {
       "check": "Latest-main ntfy converge and governed publish path",
       "result": "pass",
-      "observed": "The rebased latest-main worktree passed `make converge-ntfy env=production`, the live `/opt/ntfy/server.yml` auth contract matched the governed publisher and ACL expectations, `https://ntfy.lv3.org/v1/health` returned successfully, and the direct controller publish to `https://ntfy.lv3.org/platform-ansible-info` plus the normalized `scripts/ntfy_publish.py` helper proof are preserved in `receipts/live-applies/evidence/2026-04-03-ws-0299-branch-verification.txt`."
+      "observed": "The rebased latest-main worktree passed `make converge-ntfy env=production`, the live `/opt/ntfy/server.yml` auth contract matched the governed publisher and ACL expectations, `https://ntfy.example.com/v1/health` returned successfully, and the direct controller publish to `https://ntfy.example.com/platform-ansible-info` plus the normalized `scripts/ntfy_publish.py` helper proof are preserved in `receipts/live-applies/evidence/2026-04-03-ws-0299-branch-verification.txt`."
     },
     {
       "check": "Exact-main immutable-guest gate and ntfy service replay",

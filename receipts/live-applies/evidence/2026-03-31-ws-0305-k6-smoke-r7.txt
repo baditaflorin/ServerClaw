@@ -2,13 +2,13 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-workspace=/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo
-uv run --with pyyaml --with nats-py python /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo/scripts/k6_load_testing.py --repo-root /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo --scenario smoke --runner-context build-server --environment production --service keycloak --service openfga
+workspace=/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo
+uv run --with pyyaml --with nats-py python /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo/scripts/k6_load_testing.py --repo-root /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo --scenario smoke --runner-context build-server --environment production --service keycloak --service openfga
 /bin/sh: 1: ruby: not found
 Using CPython 3.13.5 interpreter at: /usr/bin/python3
 Creating virtual environment at: .venv
-   Building lv3-platform-cli @ file:///home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo
-      Built lv3-platform-cli @ file:///home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo
+   Building lv3-platform-cli @ file:///home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo
+      Built lv3-platform-cli @ file:///home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo
 Installed 2 packages in 2ms
 {
   "status": "ok",

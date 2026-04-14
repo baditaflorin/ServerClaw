@@ -1,5 +1,5 @@
 {
-  "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'errors.lv3.org'. (_ssl.c:1032)>",
+  "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'errors.example.com'. (_ssl.c:1032)>",
   "error_type": "SSLCertVerificationError",
-  "url": "https://errors.lv3.org/api/3/store/?sentry_key=7b523db6e7a14aa2bd822cff46bb0943&sentry_version=7&sentry_client=journey-scorecards%2F1.0"
+  "url": "https://errors.example.com/api/3/store/?sentry_key=7b523db6e7a14aa2bd822cff46bb0943&sentry_version=7&sentry_client=journey-scorecards%2F1.0"
 }

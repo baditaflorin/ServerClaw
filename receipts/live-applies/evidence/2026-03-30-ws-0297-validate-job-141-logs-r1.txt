@@ -2,19 +2,19 @@
 2026-03-30T21:44:25.3132938Z workflow prepared
 2026-03-30T21:44:25.3133879Z evaluating expression 'success()'
 2026-03-30T21:44:25.3134521Z expression 'success()' evaluated to 'true'
-2026-03-30T21:44:25.3134823Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-30T21:44:25.3207925Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-30T21:44:25.3208234Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-30T21:44:25.3134823Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-30T21:44:25.3207925Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
+2026-03-30T21:44:25.3208234Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
 2026-03-30T21:44:25.3221994Z Image exists? true
-2026-03-30T21:44:25.3263448Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-30T21:44:25.3263448Z   🐳  docker create image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-30T21:44:25.3337977Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-30T21:44:25.3338414Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
+2026-03-30T21:44:25.3338414Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/platform_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
 2026-03-30T21:44:25.3338813Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038d448 OomKillDisable:0xc00038d343 PidsLimit:0xc00038d4a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
 2026-03-30T21:44:25.3339206Z --network and --net in the options will be ignored.
-2026-03-30T21:44:25.3339486Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038d448 OomKillDisable:0xc00038d343 PidsLimit:0xc00038d4a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-127_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-127_WORKFLOW-validate_JOB-validate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-30T21:44:25.3567707Z Created container name=GITEA-ACTIONS-TASK-127_WORKFLOW-validate_JOB-validate id=bf15dd49caf9be80bb2e4ad02a1aaff07bfd3c9c29e36277f9f70ea21a4f7090 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
+2026-03-30T21:44:25.3339486Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038d448 OomKillDisable:0xc00038d343 PidsLimit:0xc00038d4a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-127_WORKFLOW-validate_JOB-validate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-127_WORKFLOW-validate_JOB-validate Target:/workspace/ops/platform_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
+2026-03-30T21:44:25.3567707Z Created container name=GITEA-ACTIONS-TASK-127_WORKFLOW-validate_JOB-validate id=bf15dd49caf9be80bb2e4ad02a1aaff07bfd3c9c29e36277f9f70ea21a4f7090 from image registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
 2026-03-30T21:44:25.3568115Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-30T21:44:25.3568269Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-30T21:44:25.3568269Z   🐳  docker run image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-30T21:44:25.3568437Z Starting container: bf15dd49caf9be80bb2e4ad02a1aaff07bfd3c9c29e36277f9f70ea21a4f7090
 2026-03-30T21:44:25.4578269Z Started container: bf15dd49caf9be80bb2e4ad02a1aaff07bfd3c9c29e36277f9f70ea21a4f7090
 2026-03-30T21:44:25.5621465Z Writing entry to tarball workflow/event.json len:5922
@@ -22,7 +22,7 @@
 2026-03-30T21:44:25.5622478Z Extracting content to '/var/run/act/'
 2026-03-30T21:44:25.5776126Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-30T21:44:25.5776513Z evaluating expression 'format('{0}', github.repository)'
-2026-03-30T21:44:25.5776973Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-30T21:44:25.5776973Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
 2026-03-30T21:44:25.5777140Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
 2026-03-30T21:44:25.5777276Z evaluating expression 'format('{0}', github.token)'
 2026-03-30T21:44:25.5777520Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
@@ -49,7 +49,7 @@
 2026-03-30T21:44:25.6137363Z Extracting content to '/var/run/act'
 2026-03-30T21:44:25.6152963Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
 2026-03-30T21:44:25.6153263Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-30T21:44:25.6153540Z Working directory '/workspace/ops/proxmox_florin_server'
+2026-03-30T21:44:25.6153540Z Working directory '/workspace/ops/platform_server'
 2026-03-30T21:44:25.6842476Z hint: Using 'master' as the name for the initial branch. This default branch name
 2026-03-30T21:44:25.6843130Z hint: is subject to change. To configure the initial branch name to use in all
 2026-03-30T21:44:25.6843278Z hint: of your new repositories, which will suppress this warning, call:
@@ -60,8 +60,8 @@
 2026-03-30T21:44:25.6843833Z hint: 'development'. The just-created branch can be renamed via this command:
 2026-03-30T21:44:25.6843937Z hint:
 2026-03-30T21:44:25.6844032Z hint: 	git branch -m <name>
-2026-03-30T21:44:25.6844285Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-30T21:44:29.6169345Z From http://10.10.10.20:3003/ops/proxmox_florin_server
+2026-03-30T21:44:25.6844285Z Initialized empty Git repository in /workspace/ops/platform_server/.git/
+2026-03-30T21:44:29.6169345Z From http://10.10.10.20:3003/ops/platform_server
 2026-03-30T21:44:29.6170076Z  * branch            codex/ws-0297-live-apply -> FETCH_HEAD
 2026-03-30T21:44:29.6173328Z  * [new branch]      codex/ws-0297-live-apply -> origin/codex/ws-0297-live-apply
 2026-03-30T21:44:29.9915911Z Note: switching to '07c2649d7dfb6fe358114017243b70c32bf84b7f'.
@@ -105,7 +105,28 @@
 2026-03-30T21:44:32.7074480Z Get:1 http://deb.debian.org/debian trixie/main amd64 docker-cli amd64 26.1.5+dfsg1-9+b12 [7338 kB]
 2026-03-30T21:44:33.4454249Z Fetched 7338 kB in 0s (48.0 MB/s)
 2026-03-30T21:44:33.4624171Z Selecting previously unselected package docker-cli.
-2026-03-30T21:44:33.4686763Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
+2026-03-30T21:44:33.4686763Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9191 files and directories currently installed.)
 2026-03-30T21:44:33.4692697Z Preparing to unpack .../docker-cli_26.1.5+dfsg1-9+b12_amd64.deb ...
 2026-03-30T21:44:33.4709192Z Unpacking docker-cli (26.1.5+dfsg1-9+b12) ...
 2026-03-30T21:44:33.7172284Z Setting up docker-cli (26.1.5+dfsg1-9+b12) ...
@@ -140,98 +161,98 @@
 2026-03-30T21:44:46.3518412Z yaml-lint             failed 2.12
 2026-03-30T21:44:46.3518491Z
 2026-03-30T21:44:46.3518560Z [agent-standards] docker command
-2026-03-30T21:44:46.3518652Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh agent-standards
+2026-03-30T21:44:46.3518652Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh agent-standards
 2026-03-30T21:44:46.3518769Z [agent-standards] stderr
 2026-03-30T21:44:46.3518851Z sh: 1: ./scripts/validate_repo.sh: not found
 2026-03-30T21:44:46.3518926Z
 2026-03-30T21:44:46.3519018Z [alert-rule-validation] docker command
-2026-03-30T21:44:46.3519099Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/generate_slo_rules.py --check >/dev/null && python scripts/generate_https_tls_assurance.py --check >/dev/null && python scripts/validate_alert_rules.py
+2026-03-30T21:44:46.3519099Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/generate_slo_rules.py --check >/dev/null && python scripts/generate_https_tls_assurance.py --check >/dev/null && python scripts/validate_alert_rules.py
 2026-03-30T21:44:46.3519223Z [alert-rule-validation] stderr
 2026-03-30T21:44:46.3519311Z python: can't open file '/workspace/scripts/generate_slo_rules.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3519402Z
 2026-03-30T21:44:46.3519473Z [ansible-lint] docker command
-2026-03-30T21:44:46.3519673Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -v /workspace/ops/proxmox_florin_server/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/requirements.sha -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint
+2026-03-30T21:44:46.3519673Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -v /workspace/ops/platform_server/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/requirements.sha -w /workspace registry.example.com/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint
 2026-03-30T21:44:46.3519855Z [ansible-lint] stderr
 2026-03-30T21:44:46.3519937Z sh: 1: ./scripts/validate_repo.sh: not found
 2026-03-30T21:44:46.3520011Z
 2026-03-30T21:44:46.3520079Z [ansible-syntax] docker command
-2026-03-30T21:44:46.3520164Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -v /workspace/ops/proxmox_florin_server/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/requirements.sha -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
+2026-03-30T21:44:46.3520164Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -v /workspace/ops/platform_server/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/requirements.sha -w /workspace registry.example.com/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
 2026-03-30T21:44:46.3520326Z [ansible-syntax] stderr
 2026-03-30T21:44:46.3520401Z sh: 1: ./scripts/validate_repo.sh: not found
 2026-03-30T21:44:46.3520473Z
 2026-03-30T21:44:46.3520543Z [artifact-secret-scan] docker command
-2026-03-30T21:44:46.3520625Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/security:2026.03.23 sh -c python scripts/published_artifact_secret_scan.py --repo-root /workspace --enforce-gitleaks
+2026-03-30T21:44:46.3520625Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/security:2026.03.23 sh -c python scripts/published_artifact_secret_scan.py --repo-root /workspace --enforce-gitleaks
 2026-03-30T21:44:46.3520743Z [artifact-secret-scan] stderr
 2026-03-30T21:44:46.3520820Z python: can't open file '/workspace/scripts/published_artifact_secret_scan.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3520910Z
 2026-03-30T21:44:46.3520979Z [dependency-direction] docker command
-2026-03-30T21:44:46.3521088Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_direction.py >/dev/null
+2026-03-30T21:44:46.3521088Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_direction.py >/dev/null
 2026-03-30T21:44:46.3521376Z [dependency-direction] stderr
 2026-03-30T21:44:46.3521451Z python: can't open file '/workspace/scripts/validate_dependency_direction.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3521547Z
 2026-03-30T21:44:46.3521639Z [dependency-graph] docker command
-2026-03-30T21:44:46.3521752Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+2026-03-30T21:44:46.3521752Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
 2026-03-30T21:44:46.3521913Z [dependency-graph] stderr
 2026-03-30T21:44:46.3522008Z python: can't open file '/workspace/scripts/validate_dependency_graph.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3522104Z
 2026-03-30T21:44:46.3522174Z [documentation-index] docker command
-2026-03-30T21:44:46.3522267Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --check >/dev/null
+2026-03-30T21:44:46.3522267Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --check >/dev/null
 2026-03-30T21:44:46.3522379Z [documentation-index] stderr
 2026-03-30T21:44:46.3522463Z sh: 1: ./scripts/run_python_with_packages.sh: not found
 2026-03-30T21:44:46.3522540Z
 2026-03-30T21:44:46.3522611Z [generated-docs] docker command
-2026-03-30T21:44:46.3522701Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-docs
+2026-03-30T21:44:46.3522701Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-docs
 2026-03-30T21:44:46.3522817Z [generated-docs] stderr
 2026-03-30T21:44:46.3522895Z sh: 1: ./scripts/validate_repo.sh: not found
 2026-03-30T21:44:46.3522971Z
 2026-03-30T21:44:46.3523049Z [generated-portals] docker command
-2026-03-30T21:44:46.3523136Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-portals
+2026-03-30T21:44:46.3523136Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-portals
 2026-03-30T21:44:46.3523243Z [generated-portals] stderr
 2026-03-30T21:44:46.3523330Z sh: 1: ./scripts/validate_repo.sh: not found
 2026-03-30T21:44:46.3523407Z
 2026-03-30T21:44:46.3523483Z [integration-tests] docker command
-2026-03-30T21:44:46.3523569Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json
+2026-03-30T21:44:46.3523569Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json
 2026-03-30T21:44:46.3523710Z [integration-tests] stderr
 2026-03-30T21:44:46.3523786Z python: can't open file '/workspace/scripts/integration_suite.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3523869Z
 2026-03-30T21:44:46.3523946Z [packer-validate] docker command
-2026-03-30T21:44:46.3524029Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -v /workspace/ops/proxmox_florin_server/.local/packer-plugin-cache:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
+2026-03-30T21:44:46.3524029Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -v /workspace/ops/platform_server/.local/packer-plugin-cache:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.example.com/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
 2026-03-30T21:44:46.3524165Z [packer-validate] stderr
 2026-03-30T21:44:46.3524243Z sh: 1: ./scripts/validate_packer_templates.sh: not found
 2026-03-30T21:44:46.3524333Z
 2026-03-30T21:44:46.3524410Z [policy-validation] docker command
-2026-03-30T21:44:46.3546257Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -v /workspace/ops/proxmox_florin_server/.local/policy-toolchain:/opt/lv3/policy-toolchain -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_POLICY_TOOLCHAIN_ROOT=/opt/lv3/policy-toolchain -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/policy_checks.py --validate
+2026-03-30T21:44:46.3546257Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -v /workspace/ops/platform_server/.local/policy-toolchain:/opt/lv3/policy-toolchain -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_POLICY_TOOLCHAIN_ROOT=/opt/lv3/policy-toolchain -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/policy_checks.py --validate
 2026-03-30T21:44:46.3546534Z [policy-validation] stderr
 2026-03-30T21:44:46.3546616Z python: can't open file '/workspace/scripts/policy_checks.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3546731Z
 2026-03-30T21:44:46.3546811Z [schema-validation] docker command
-2026-03-30T21:44:46.3546942Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
+2026-03-30T21:44:46.3546942Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
 2026-03-30T21:44:46.3547165Z [schema-validation] stderr
 2026-03-30T21:44:46.3547249Z python: can't open file '/workspace/scripts/provider_boundary_catalog.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3547348Z
 2026-03-30T21:44:46.3547416Z [semgrep-sast] docker command
-2026-03-30T21:44:46.3547517Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python -m pip install --quiet --disable-pip-version-check semgrep==1.155.0 && ./scripts/validate_repo.sh semgrep
+2026-03-30T21:44:46.3547517Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python -m pip install --quiet --disable-pip-version-check semgrep==1.155.0 && ./scripts/validate_repo.sh semgrep
 2026-03-30T21:44:46.3547635Z [semgrep-sast] stderr
 2026-03-30T21:44:46.3547720Z WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
 2026-03-30T21:44:46.3547842Z sh: 1: ./scripts/validate_repo.sh: not found
 2026-03-30T21:44:46.3547919Z
 2026-03-30T21:44:46.3547992Z [service-completeness] docker command
-2026-03-30T21:44:46.3548072Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_service_completeness.py --validate >/dev/null
+2026-03-30T21:44:46.3548072Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c python scripts/validate_service_completeness.py --validate >/dev/null
 2026-03-30T21:44:46.3548214Z [service-completeness] stderr
 2026-03-30T21:44:46.3548291Z python: can't open file '/workspace/scripts/validate_service_completeness.py': [Errno 2] No such file or directory
 2026-03-30T21:44:46.3548376Z
 2026-03-30T21:44:46.3548447Z [type-check] docker command
-2026-03-30T21:44:46.3548566Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c mypy --cache-dir /tmp/mypy-cache scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py
+2026-03-30T21:44:46.3548566Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c mypy --cache-dir /tmp/mypy-cache scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py
 2026-03-30T21:44:46.3548757Z [type-check] stderr
 2026-03-30T21:44:46.3548838Z mypy: can't read file 'scripts/gate_bypass_waivers.py': No such file or directory
 2026-03-30T21:44:46.3548931Z
 2026-03-30T21:44:46.3549017Z [workstream-surfaces] docker command
-2026-03-30T21:44:46.3549105Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+2026-03-30T21:44:46.3549105Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
 2026-03-30T21:44:46.3549223Z [workstream-surfaces] stderr
 2026-03-30T21:44:46.3549301Z sh: 1: ./scripts/validate_repo.sh: not found
 2026-03-30T21:44:46.3549376Z
 2026-03-30T21:44:46.3549447Z [yaml-lint] docker command
-2026-03-30T21:44:46.3549532Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/proxmox_florin_server:/workspace -v /workspace/ops/proxmox_florin_server/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/requirements.sha -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c find . -path ./.git -prune -o -type f \( -name '*.yml' -o -name '*.yaml' \) -print0 | xargs -0 yamllint -c .yamllint
+2026-03-30T21:44:46.3549532Z /usr/bin/docker run --rm --cpus=4 -v /workspace/ops/platform_server:/workspace -v /workspace/ops/platform_server/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -e LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/requirements.sha -w /workspace registry.example.com/check-runner/ansible:2.17.10 sh -c find . -path ./.git -prune -o -type f \( -name '*.yml' -o -name '*.yaml' \) -print0 | xargs -0 yamllint -c .yamllint
 2026-03-30T21:44:46.3549679Z [yaml-lint] stderr
 2026-03-30T21:44:46.3549758Z usage: yamllint [-h] [-] [-c CONFIG_FILE | -d CONFIG_DATA] [--list-files]
 2026-03-30T21:44:46.3549873Z                 [-f {parsable,standard,colored,github,auto}] [-s]

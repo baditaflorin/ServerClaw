@@ -1,3 +1,3 @@
 Repository data model error: capacity-model coverage is missing inventory guest 'artifact-cache-staging-lv3'
-Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/receipts/live-applies
-Promotion receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/receipts/promotions (0 file(s))
+Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0296-live-apply/receipts/live-applies
+Promotion receipts OK: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0296-live-apply/receipts/promotions (0 file(s))

@@ -138,7 +138,28 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 #8 3.212 debconf: delaying package configuration, since apt-utils is not installed
 #8 3.245 Fetched 34.9 MB in 0s (73.8 MB/s)
 #8 3.262 Selecting previously unselected package perl-modules-5.36.
-#8 3.262 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 6096 files and directories currently installed.)
+#8 3.262 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 6096 files and directories currently installed.)
 #8 3.283 Preparing to unpack .../0-perl-modules-5.36_5.36.0-7+deb12u3_all.deb ...
 #8 3.284 Unpacking perl-modules-5.36 (5.36.0-7+deb12u3) ...
 #8 3.527 Selecting previously unselected package libgdbm6:amd64.
@@ -170,7 +191,28 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 #8 4.257 Setting up libexpat1:amd64 (2.5.0-1+deb12u2) ...
 #8 4.261 Setting up python3.11-minimal (3.11.2-6+deb12u6) ...
 #8 4.777 Selecting previously unselected package python3-minimal.
-#8 4.777 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 8428 files and directories currently installed.)
+#8 4.777 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 8428 files and directories currently installed.)
 #8 4.781 Preparing to unpack .../00-python3-minimal_3.11.2-1+b1_amd64.deb ...
 #8 4.783 Unpacking python3-minimal (3.11.2-1+b1) ...
 #8 4.799 Selecting previously unselected package media-types.
@@ -223,7 +265,28 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 #8 5.307 Unpacking libpython3-stdlib:amd64 (3.11.2-1+b1) ...
 #8 5.322 Setting up python3-minimal (3.11.2-1+b1) ...
 #8 5.428 Selecting previously unselected package python3.
-#8 5.428 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 8936 files and directories currently installed.)
+#8 5.428 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 8936 files and directories currently installed.)
 #8 5.435 Preparing to unpack .../00-python3_3.11.2-1+b1_amd64.deb ...
 #8 5.439 Unpacking python3 (3.11.2-1+b1) ...
 #8 5.459 Selecting previously unselected package openssl.
@@ -979,9 +1042,9 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 #14 exporting layers
 #14 exporting layers 4.7s done
 #14 writing image sha256:3a149cf57e8a24b3ca8939226274e40d48f63667dc06e7d4ad3f321f1810af8e done
-#14 naming to registry.lv3.org/check-runner/security:2026.03.30 done
+#14 naming to registry.example.com/check-runner/security:2026.03.30 done
 #14 DONE 4.7s
-The push refers to repository [registry.lv3.org/check-runner/security]
+The push refers to repository [registry.example.com/check-runner/security]
 41380c220ca3: Preparing
 4037aca4f272: Preparing
 1ee42f69c31c: Preparing

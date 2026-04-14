@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,7 +34,7 @@
     {
       "kind": "service_endpoint",
       "name": "Keycloak public discovery",
-      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+      "address": "https://sso.example.com/realms/lv3/.well-known/openid-configuration"
     },
     {
       "kind": "service_endpoint",
@@ -61,12 +61,12 @@
     {
       "check": "Exact-main Windmill converge regression discovery, repair, and rebased replay",
       "result": "pass",
-      "observed": "The first exact-main make converge-windmill env=production replay on 0.177.136 failed truthfully because the shared Docker nat-chain assertion evaluated stale post-retry state after the chain had already recovered. Refreshing the final nat and forward probes in collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml removed the false failure, the repaired replay passed on 0.177.136, and the rebased replay on 0.177.137 then passed with docker-runtime-lv3 ok=331 changed=46 failed=0, postgres-lv3 ok=93 changed=2 failed=0, and proxmox_florin ok=41 changed=4 failed=0."
+      "observed": "The first exact-main make converge-windmill env=production replay on 0.177.136 failed truthfully because the shared Docker nat-chain assertion evaluated stale post-retry state after the chain had already recovered. Refreshing the final nat and forward probes in collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml removed the false failure, the repaired replay passed on 0.177.136, and the rebased replay on 0.177.137 then passed with docker-runtime-lv3 ok=331 changed=46 failed=0, postgres-lv3 ok=93 changed=2 failed=0, and proxmox-host ok=41 changed=4 failed=0."
     },
     {
       "check": "Windmill operator-onboard dry run",
       "result": "pass",
-      "observed": "The rebased exact-main Windmill dry run against f/lv3/operator_onboard returned status ok, preserved the generated operator state path under /srv/proxmox_florin_server/.local/state/operator-access/, and resolved the managed roster path config/operators.yaml."
+      "observed": "The rebased exact-main Windmill dry run against f/lv3/operator_onboard returned status ok, preserved the generated operator state path under /srv/platform_server/.local/state/operator-access/, and resolved the managed roster path config/operators.yaml."
     },
     {
       "check": "Controller-local OpenBao tunnel fallback",

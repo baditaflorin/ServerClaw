@@ -25,8 +25,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -38,17 +38,17 @@
     {
       "check": "Windmill live apply from main",
       "result": "partial",
-      "observed": "Repeated `make live-apply-service service=windmill env=production` runs from current main deployed the worker checkout and converged proxmox_florin plus postgres-lv3, but both recaps ended with a late docker-runtime-lv3 SSH disconnect during the Windmill reseed path after the runtime had already been updated."
+      "observed": "Repeated `make live-apply-service service=windmill env=production` runs from current main deployed the worker checkout and converged proxmox-host plus postgres-lv3, but both recaps ended with a late docker-runtime-lv3 SSH disconnect during the Windmill reseed path after the runtime had already been updated."
     },
     {
       "check": "ADR 0157 worker checkout files",
       "result": "pass",
-      "observed": "Direct probes on docker-runtime-lv3 confirmed `/srv/proxmox_florin_server/config/execution-lanes.yaml`, `/srv/proxmox_florin_server/platform/scheduler/lanes.py`, and `/srv/proxmox_florin_server/scripts/execution_lanes.py` matched the current main checksums `8d4e2da0...`, `af08231c...`, and `1e2c2490...`."
+      "observed": "Direct probes on docker-runtime-lv3 confirmed `/srv/platform_server/config/execution-lanes.yaml`, `/srv/platform_server/platform/scheduler/lanes.py`, and `/srv/platform_server/scripts/execution_lanes.py` matched the current main checksums `8d4e2da0...`, `af08231c...`, and `1e2c2490...`."
     },
     {
       "check": "Live execution lane validation",
       "result": "pass",
-      "observed": "A direct guest-local run of `python3 /srv/proxmox_florin_server/scripts/execution_lanes.py --validate` on docker-runtime-lv3 returned `Execution lanes OK: /srv/proxmox_florin_server/config/execution-lanes.yaml (9 lane(s))`."
+      "observed": "A direct guest-local run of `python3 /srv/platform_server/scripts/execution_lanes.py --validate` on docker-runtime-lv3 returned `Execution lanes OK: /srv/platform_server/config/execution-lanes.yaml (9 lane(s))`."
     },
     {
       "check": "Windmill runtime health",
@@ -64,7 +64,7 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "Earlier on 2026-03-25 the same live apply was blocked before guest convergence because proxmox_florin was unreachable on the Tailscale SSH path; that transport issue was resolved before the successful deployment verification recorded here.",
+    "Earlier on 2026-03-25 the same live apply was blocked before guest convergence because proxmox-host was unreachable on the Tailscale SSH path; that transport issue was resolved before the successful deployment verification recorded here.",
     "The current Windmill seed catalog still contains two repo-managed entries for `f/lv3/scheduler_watchdog_loop`, which produces a path-conflict response during manual create replay and likely contributes noise during the late reseed step even though the ADR 0157 deployment itself is present and validated."
   ]
 }

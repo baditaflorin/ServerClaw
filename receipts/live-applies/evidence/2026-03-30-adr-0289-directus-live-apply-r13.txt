@@ -3,24 +3,24 @@ Preflight workflow: converge-directus
 Description: Deploy the Directus PostgreSQL backend, runtime, Keycloak client, and public edge publication, then verify REST, GraphQL, and OIDC access end to end.
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/build/ops-portal via `make generate-ops-portal`
-PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/build/changelog-portal via `make generate-changelog-portal`
-PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/build/docs-portal via `make docs`
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/build/ops-portal via `make generate-ops-portal`
+PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/build/changelog-portal via `make generate-changelog-portal`
+PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/build/docs-portal via `make docs`
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
 PASS env hetzner_dns_api_token: HETZNER_DNS_API_TOKEN is set
-INFO generated directus_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/database-password.txt
-INFO generated directus_key: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/key.txt
-INFO generated directus_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/secret.txt
-INFO generated directus_admin_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/admin-password.txt
-INFO generated directus_service_registry_token: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/service-registry-token.txt
-INFO generated keycloak_directus_client_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/directus-client-secret.txt
+INFO generated directus_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/directus/database-password.txt
+INFO generated directus_key: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/directus/key.txt
+INFO generated directus_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/directus/secret.txt
+INFO generated directus_admin_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/directus/admin-password.txt
+INFO generated directus_service_registry_token: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/directus/service-registry-token.txt
+INFO generated keycloak_directus_client_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/directus-client-secret.txt
 Result: PASS (converge-directus)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/subdomain_exposure_audit.py --validate
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/subdomain_exposure_audit.py --validate
 /Applications/Xcode.app/Contents/Developer/usr/bin/make generate-edge-static-sites
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/generate_changelog_portal.py --write
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply --path build/changelog-portal
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/generate_changelog_portal.py --write
+python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply --path build/changelog-portal
 Published artifact secret scan passed: 552 file(s) checked with builtin.
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/build_docs_portal.py
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/build_docs_portal.py
 
 [31m │  ⚠  Warning from the Material for MkDocs team[0m
 [31m │[0m
@@ -38,32 +38,32 @@ uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_
 [31m │[0m  [4mhttps://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/[0m
 [0m
 INFO    -  Cleaning site directory
-INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/build/docs-portal
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/image-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/api-publication.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/platform/graph', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
-INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
-INFO    -  Doc file 'runbooks/scaffold-new-service.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-extension-model/docs/runbooks/add-a-new-service.md', it was left as is.
+INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/build/docs-portal
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/image-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/api-publication.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/platform/graph', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
+INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
+INFO    -  Doc file 'runbooks/scaffold-new-service.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-extension-model/docs/runbooks/add-a-new-service.md', it was left as is.
 INFO    -  mkdocs_swagger_ui_tag: Processing file 'api/openapi.md'
 INFO    -  mkdocs_swagger_ui_tag: Copying swagger ui assets.
 INFO    -  Documentation built in 4.76 seconds
 
 Running Pagefind v1.4.0 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -87,9 +87,9 @@ Total:
 
 Finished in 1.764 seconds
 Published artifact secret scan passed: 1524 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/build/docs-portal
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/build/docs-portal
 HETZNER_DNS_API_TOKEN=${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=8a91f882b663436488379bcd5f97e4bb ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/inventory/hosts.yml --run-id ef9210a9822a446ab0f9244bb9cd2b7b --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/playbooks/directus.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=84ee684459bb43538d47c934256d5443
+	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=8a91f882b663436488379bcd5f97e4bb ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/inventory/hosts.yml --run-id ef9210a9822a446ab0f9244bb9cd2b7b --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/playbooks/directus.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=84ee684459bb43538d47c934256d5443
 
 PLAY [Ensure Hetzner DNS publication for Directus] *****************************
 
@@ -1022,35 +1022,35 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:33:26.043Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=data.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=data.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T19:33:41.361Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -1438,7 +1438,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:34:48.166Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T19:34:48.177Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:34:48.233Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2002,7 +2002,7 @@ ok: [docker-runtime-lv3 -> localhost]
 TASK [lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:36:12.775Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T19:36:12.787Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for docker-runtime-lv3
 
 TASK [lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:36:12.845Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2263,7 +2263,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:36:43.020Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T19:36:43.031Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:36:43.091Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2896,11 +2896,11 @@ skipping: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:37:41.947Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
-ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T19:37:49.063Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -2910,8 +2910,8 @@ ok: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T19:37:50.476Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T19:37:57.019Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***

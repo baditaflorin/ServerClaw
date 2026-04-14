@@ -1,4 +1,4 @@
 Updated canonical truth:
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/changelog.md
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/versions/stack.yaml
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/changelog.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/versions/stack.yaml
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-live-apply/README.md

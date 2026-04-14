@@ -1,3 +1,3 @@
-uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.claude/worktrees/affectionate-galileo/scripts/generate_changelog_portal.py --write
-uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.claude/worktrees/affectionate-galileo/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.claude/worktrees/affectionate-galileo --path build/changelog-portal
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.claude/worktrees/affectionate-galileo/scripts/generate_changelog_portal.py --write
+uv run --with tomli python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.claude/worktrees/affectionate-galileo/scripts/published_artifact_secret_scan.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.claude/worktrees/affectionate-galileo --path build/changelog-portal
 Published artifact secret scan passed: 1137 file(s) checked with builtin.

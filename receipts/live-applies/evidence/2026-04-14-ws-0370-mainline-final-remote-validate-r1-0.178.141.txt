@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/scripts/remote_exec.sh remote-validate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/scripts/remote_exec.sh remote-validate --local-fallback
 Validation lane selection
   mode: explicit_checks
   branch: HEAD
@@ -115,4 +115,4 @@ policy-validation     passed 0.31
 schema-validation     passed 30.19
 type-check            passed 0.44
 workstream-surfaces   passed 1.17
-run_gate_fallback: merged local rerun with synced remote gate status at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/.local/validation-gate/remote-validate-last-run.json
+run_gate_fallback: merged local rerun with synced remote gate status at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/.local/validation-gate/remote-validate-last-run.json

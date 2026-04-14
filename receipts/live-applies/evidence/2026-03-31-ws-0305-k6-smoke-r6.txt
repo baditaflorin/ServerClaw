@@ -2,37 +2,37 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo
+/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo
 /bin/sh: 1: ruby: not found
-uv run --with pyyaml --with nats-py python /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py --repo-root /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo --scenario smoke --runner-context build-server --environment production --service keycloak --service openfga
+uv run --with pyyaml --with nats-py python /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py --repo-root /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo --scenario smoke --runner-context build-server --environment production --service keycloak --service openfga
 Using CPython 3.13.5 interpreter at: /usr/bin/python3
 Creating virtual environment at: .venv
-   Building lv3-platform-cli @ file:///home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo
-      Built lv3-platform-cli @ file:///home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo
+   Building lv3-platform-cli @ file:///home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo
+      Built lv3-platform-cli @ file:///home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo
 Installed 2 packages in 2ms
 Traceback (most recent call last):
-  File "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 777, in <module>
+  File "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 777, in <module>
     raise SystemExit(main())
                      ~~~~^^
-  File "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 747, in main
+  File "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 747, in main
     receipts = build_receipts(
         repo_root=repo_root,
     ...<9 lines>...
         notify_ntfy_flag=args.notify_ntfy,
     )
-  File "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 592, in build_receipts
+  File "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 592, in build_receipts
     "source_commit": current_commit(repo_root),
                      ~~~~~~~~~~~~~~^^^^^^^^^^^
-  File "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 90, in current_commit
+  File "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 90, in current_commit
     return run_git(repo_root, "rev-parse", "HEAD")
-  File "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 106, in run_git
+  File "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094426Z-3e745bfb3f95/repo/scripts/k6_load_testing.py", line 106, in run_git
     raise RuntimeError(completed.stderr.strip() or f"git {' '.join(args)} failed")
-RuntimeError: fatal: not a git repository: /home/ops/builds/proxmox_florin_server/.git-remote/worktree
+RuntimeError: fatal: not a git repository: /home/ops/builds/platform_server/.git-remote/worktree
 make: *** [Makefile:1174: k6-smoke] Error 1
 remote_exec: remote command failed, falling back locally for remote-exec
 remote_exec: running local fallback for remote-exec
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply
-uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply/scripts/k6_load_testing.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply --scenario smoke --runner-context build-server --environment production --service keycloak --service openfga
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-live-apply
+uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-live-apply/scripts/k6_load_testing.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-live-apply --scenario smoke --runner-context build-server --environment production --service keycloak --service openfga
 {
   "status": "ok",
   "scenario": "smoke",

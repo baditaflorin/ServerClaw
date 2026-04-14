@@ -184,9 +184,9 @@ Shell lint
 JSON validation
 Semgrep SAST and secret-pattern validation
 Semgrep gate summary
-  repo: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
+  repo: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration
   source sha: fa5e9ead212cf7f16535e3787ee38f7693b6f78d
-  sarif: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/receipts/sast/fa5e9ead212cf7f16535e3787ee38f7693b6f78d.sarif.json
+  sarif: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration/receipts/sast/fa5e9ead212cf7f16535e3787ee38f7693b6f78d.sarif.json
   findings: error=0 warning=2 note=0 total=2
 Compose runtime env guard
 Retry guard

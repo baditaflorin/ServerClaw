@@ -14,7 +14,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -42,7 +42,7 @@
     {
       "kind": "service_endpoint",
       "name": "vaultwarden_private",
-      "address": "https://vault.lv3.org"
+      "address": "https://vault.example.com"
     }
   ],
   "verification": [
@@ -79,7 +79,7 @@
     {
       "check": "step-ca proxy health",
       "result": "pass",
-      "observed": "`curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health` returned `{\\\"status\\\":\\\"ok\\\"}`."
+      "observed": "`curl --cacert /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health` returned `{\\\"status\\\":\\\"ok\\\"}`."
     },
     {
       "check": "Renewal timers active on docker-runtime-lv3",

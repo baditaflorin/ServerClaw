@@ -11,12 +11,12 @@
   "platform_version_context": "0.130.56",
   "workflow_id": "adr-0254-serverclaw-distinct-product-surface-live-apply",
   "adr": "0254",
-  "summary": "Live-applied ADR 0254 from the rebased latest-origin/main worktree by replaying make converge-serverclaw from source commit c0576e42 on top of origin/main 7f1bbe50, preserving the dedicated ServerClaw chat surface on chat.lv3.org, reasserting the Proxmox and guest firewall lanes for the Coolify runtime, and re-verifying the internal upstream path, bootstrap admin sign-in, and public HTTPS entrypoint end to end.",
+  "summary": "Live-applied ADR 0254 from the rebased latest-origin/main worktree by replaying make converge-serverclaw from source commit c0576e42 on top of origin/main 7f1bbe50, preserving the dedicated ServerClaw chat surface on chat.example.com, reasserting the Proxmox and guest firewall lanes for the Coolify runtime, and re-verifying the internal upstream path, bootstrap admin sign-in, and public HTTPS entrypoint end to end.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,7 +39,7 @@
     {
       "kind": "service_endpoint",
       "name": "serverclaw",
-      "address": "https://chat.lv3.org/"
+      "address": "https://chat.example.com/"
     }
   ],
   "verification": [
@@ -51,22 +51,22 @@
     {
       "check": "Exact-main ServerClaw converge replay",
       "result": "pass",
-      "observed": "`make converge-serverclaw` completed successfully from source commit `c0576e42f6d4d776fd2d550aaaab1f9b93376cfd`, rebased on top of `origin/main` commit `7f1bbe50d3b88fd0a4c4f9581b2aa2660523c3dc`, with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=66 changed=3 failed=0 skipped=4`, `nginx-lv3 ok=38 changed=2 failed=0 skipped=8`, and `proxmox_florin ok=229 changed=0 failed=0 skipped=111`."
+      "observed": "`make converge-serverclaw` completed successfully from source commit `c0576e42f6d4d776fd2d550aaaab1f9b93376cfd`, rebased on top of `origin/main` commit `7f1bbe50d3b88fd0a4c4f9581b2aa2660523c3dc`, with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=66 changed=3 failed=0 skipped=4`, `nginx-lv3 ok=38 changed=2 failed=0 skipped=8`, and `proxmox-host ok=229 changed=0 failed=0 skipped=111`."
     },
     {
       "check": "Internal proxy and firewall path verification",
       "result": "pass",
-      "observed": "`pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)` remained active on `proxmox_florin`, `/etc/pve/firewall/170.fw` still contained `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`, `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3` succeeded, and `curl -sv --max-time 5 http://10.10.10.70:8096/ -o /dev/null` from `nginx-lv3` returned `HTTP/1.1 200 OK` from `uvicorn`."
+      "observed": "`pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)` remained active on `proxmox-host`, `/etc/pve/firewall/170.fw` still contained `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`, `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3` succeeded, and `curl -sv --max-time 5 http://10.10.10.70:8096/ -o /dev/null` from `nginx-lv3` returned `HTTP/1.1 200 OK` from `uvicorn`."
     },
     {
       "check": "Guest-local bootstrap admin sign-in",
       "result": "pass",
-      "observed": "A guest-local sign-in request on `coolify-lv3` to `http://127.0.0.1:8096/api/v1/auths/signin` returned JSON for `ops@lv3.org` with `role\":\"admin\"` and a bearer token, confirming the runtime remained healthy after the replay."
+      "observed": "A guest-local sign-in request on `coolify-lv3` to `http://127.0.0.1:8096/api/v1/auths/signin` returned JSON for `ops@example.com` with `role\":\"admin\"` and a bearer token, confirming the runtime remained healthy after the replay."
     },
     {
       "check": "Public ServerClaw edge verification",
       "result": "pass",
-      "observed": "`curl -I --max-time 15 http://chat.lv3.org/` returned `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.lv3.org/`, and `curl -I --max-time 15 https://chat.lv3.org/` returned `HTTP/2 200` with the repo-managed security headers and `content-type: text/html; charset=utf-8`."
+      "observed": "`curl -I --max-time 15 http://chat.example.com/` returned `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.example.com/`, and `curl -I --max-time 15 https://chat.example.com/` returned `HTTP/2 200` with the repo-managed security headers and `content-type: text/html; charset=utf-8`."
     }
   ],
   "evidence_refs": [

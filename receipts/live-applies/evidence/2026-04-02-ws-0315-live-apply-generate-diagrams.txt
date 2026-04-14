@@ -1,1 +1,1 @@
-Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-live-apply/docs/diagrams
+Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0315-live-apply/docs/diagrams

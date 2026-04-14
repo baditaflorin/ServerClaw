@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -24,8 +24,8 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "grafana.lv3.org",
-      "address": "https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview"
+      "name": "grafana.example.com",
+      "address": "https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview"
     }
   ],
   "verification": [
@@ -47,7 +47,7 @@
     {
       "check": "Published Grafana route remains healthy",
       "result": "pass",
-      "observed": "`curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` to `/login?redirectTo=%2Fd%2Flv3-platform-overview%2Flv3-platform-overview` with the expected shared edge security headers."
+      "observed": "`curl -Ik --resolve grafana.example.com:443:203.0.113.1 https://grafana.example.com/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` to `/login?redirectTo=%2Fd%2Flv3-platform-overview%2Flv3-platform-overview` with the expected shared edge security headers."
     },
     {
       "check": "Monitoring guest services and local health endpoints",

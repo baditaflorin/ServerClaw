@@ -44,12 +44,12 @@
     {
       "check": "Rebased live converges from the isolated worktree",
       "result": "pass",
-      "observed": "`make converge-api-gateway`, `make converge-ops-portal`, and the final repaired `make converge-windmill` all completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0209-live-apply`. The first rebased Windmill replay exposed a topology-default regression (`unknown platform service id: windmill`), which the workstream repaired by switching the runtime defaults back to the host-level port facts actually present in the play context before replaying the successful converge."
+      "observed": "`make converge-api-gateway`, `make converge-ops-portal`, and the final repaired `make converge-windmill` all completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0209-live-apply`. The first rebased Windmill replay exposed a topology-default regression (`unknown platform service id: windmill`), which the workstream repaired by switching the runtime defaults back to the host-level port facts actually present in the play context before replaying the successful converge."
     },
     {
       "check": "Direct Windmill worker and seeded script verification",
       "result": "pass",
-      "observed": "Over the documented Proxmox jump path to `ops@10.10.10.20`, `/srv/proxmox_florin_server/scripts/gate_status.py` was confirmed to contain `def build_status_payload`, and the guest-local Windmill request to `http://127.0.0.1:8000/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fgate-status` returned a payload with top-level `status: ok` and the current validation-gate summary."
+      "observed": "Over the documented Proxmox jump path to `ops@10.10.10.20`, `/srv/platform_server/scripts/gate_status.py` was confirmed to contain `def build_status_payload`, and the guest-local Windmill request to `http://127.0.0.1:8000/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fgate-status` returned a payload with top-level `status: ok` and the current validation-gate summary."
     },
     {
       "check": "API gateway structured runbook adapter",

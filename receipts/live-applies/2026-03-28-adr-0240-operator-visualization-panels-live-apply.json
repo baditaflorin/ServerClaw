@@ -26,8 +26,8 @@
     },
     {
       "kind": "public_surface",
-      "name": "ops.lv3.org",
-      "address": "https://ops.lv3.org"
+      "name": "ops.example.com",
+      "address": "https://ops.example.com"
     },
     {
       "kind": "runtime_artifact",
@@ -39,7 +39,7 @@
     {
       "check": "Focused portal validation slice",
       "result": "pass",
-      "observed": "`python3 -m py_compile scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py`, `make syntax-check-ops-portal`, `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_runtime_assurance_scoreboard.py tests/test_ops_portal.py` (`19 passed in 55.09s`), `make validate-data-models`, and `./scripts/validate_repo.sh agent-standards` all passed from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-live-apply`."
+      "observed": "`python3 -m py_compile scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py`, `make syntax-check-ops-portal`, `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_runtime_assurance_scoreboard.py tests/test_ops_portal.py` (`19 passed in 55.09s`), `make validate-data-models`, and `./scripts/validate_repo.sh agent-standards` all passed from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0240-live-apply`."
     },
     {
       "check": "Scoped converge replay attempts",
@@ -64,7 +64,7 @@
     {
       "check": "Published edge auth path",
       "result": "pass",
-      "observed": "`curl -k -I https://ops.lv3.org` returned `302` to `https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/` with the expected hardening headers and a CSP that still allows `https://unpkg.com` for the committed ECharts runtime source."
+      "observed": "`curl -k -I https://ops.example.com` returned `302` to `https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/` with the expected hardening headers and a CSP that still allows `https://unpkg.com` for the committed ECharts runtime source."
     }
   ],
   "evidence_refs": [

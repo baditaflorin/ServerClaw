@@ -1,6 +1,6 @@
 Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-registry.lv3.org/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d: Pulling from check-runner/renovate
+registry.example.com/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d: Pulling from check-runner/renovate
 20043066d3d5: Pulling fs layer
 2c632d479d46: Pulling fs layer
 d2fba9b595f4: Pulling fs layer
@@ -63,5 +63,5 @@ cf4eab7800bf: Pull complete
 7040a06fa864: Pull complete
 4f4fb700ef54: Pull complete
 Digest: sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
-Status: Downloaded newer image for registry.lv3.org/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
-registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+Status: Downloaded newer image for registry.example.com/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+registry.example.com/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d

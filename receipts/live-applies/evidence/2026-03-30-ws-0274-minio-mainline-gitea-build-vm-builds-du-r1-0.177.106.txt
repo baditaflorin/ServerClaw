@@ -5,4 +5,4 @@ Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 23M	/home/ops/builds/adr-0083-final
 23M	/home/ops/builds/adr-0083-final2
 261M	/home/ops/builds/main-0.90.0w
-79G	/home/ops/builds/proxmox_florin_server
+79G	/home/ops/builds/platform_server

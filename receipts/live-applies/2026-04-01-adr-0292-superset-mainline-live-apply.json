@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.82",
   "workflow_id": "adr-0292-superset-mainline-live-apply",
   "adr": "0292",
-  "summary": "Promoted ADR 0292 Apache Superset into canonical mainline truth as repository version `0.177.129` and first verified platform version `0.130.82` after refreshing from the latest realistic `origin/main` commit `3ccef3ea09cba8a3b5f4f46af28713aad4b8fb9e`. The exact-main replay re-verified `bi.lv3.org` on top of the shared Keycloak, PostgreSQL, MinIO, and Restic contracts, preserved the governed datasource and dashboard bootstrap, and recorded the Python 3.9 vulnerability-budget compatibility repair plus the shared Docker-runtime disk-pressure recovery evidence needed to keep future replays trustworthy.",
+  "summary": "Promoted ADR 0292 Apache Superset into canonical mainline truth as repository version `0.177.129` and first verified platform version `0.130.82` after refreshing from the latest realistic `origin/main` commit `3ccef3ea09cba8a3b5f4f46af28713aad4b8fb9e`. The exact-main replay re-verified `bi.example.com` on top of the shared Keycloak, PostgreSQL, MinIO, and Restic contracts, preserved the governed datasource and dashboard bootstrap, and recorded the Python 3.9 vulnerability-budget compatibility repair plus the shared Docker-runtime disk-pressure recovery evidence needed to keep future replays trustworthy.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "kind": "service_endpoint",
       "name": "Superset public health endpoint",
-      "address": "https://bi.lv3.org/health"
+      "address": "https://bi.example.com/health"
     },
     {
       "kind": "service_endpoint",
       "name": "Superset public OIDC handoff",
-      "address": "https://bi.lv3.org/login/keycloak"
+      "address": "https://bi.example.com/login/keycloak"
     },
     {
       "kind": "service_endpoint",
@@ -67,7 +67,7 @@
     {
       "check": "Guest-local and public Superset verification",
       "result": "pass",
-      "observed": "Fresh local verification on `docker-runtime-lv3` confirmed healthy `superset` and `superset-openbao-agent` containers plus a successful `verify-local` report, while the public verification confirmed `https://bi.lv3.org/health`, the expected `sso.lv3.org` redirect host, and the managed dashboard plus chart contract; the transcripts are preserved in `receipts/live-applies/evidence/2026-04-01-ws-0292-superset-direct-runtime-verification-r2.txt` and `receipts/live-applies/evidence/2026-04-01-ws-0292-superset-public-verification-r3.txt`."
+      "observed": "Fresh local verification on `docker-runtime-lv3` confirmed healthy `superset` and `superset-openbao-agent` containers plus a successful `verify-local` report, while the public verification confirmed `https://bi.example.com/health`, the expected `sso.example.com` redirect host, and the managed dashboard plus chart contract; the transcripts are preserved in `receipts/live-applies/evidence/2026-04-01-ws-0292-superset-direct-runtime-verification-r2.txt` and `receipts/live-applies/evidence/2026-04-01-ws-0292-superset-public-verification-r3.txt`."
     },
     {
       "check": "Shared backup and disk-pressure recovery dependency",

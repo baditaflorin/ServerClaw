@@ -25,8 +25,8 @@ Mar 31 18:28:11 monitoring-lv3 python3[3530397]: 2026-03-31 18:28:11,720 INFO 12
       "host": "postgres-lv3",
       "summary": "PostgreSQL accepted a connection for an unapproved login role.",
       "fingerprint": "c97bdb24c722fbd0",
-      "runbook_url": "https://docs.lv3.org/runbooks/postgres-audit/",
-      "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3"
+      "runbook_url": "https://docs.example.com/runbooks/postgres-audit/",
+      "dashboard_url": "https://grafana.example.com/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3"
     },
     "actor_id": "service/pgaudit-alert-relay",
     "context_id": "c97bdb24c722fbd0"

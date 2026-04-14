@@ -1,29 +1,29 @@
 pending
 -rw-rw-r-- 1 ops ops 0 Mar 31 13:42 /tmp/ws-0298-full-wrapper-r17.out
-2379046       00:41 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
-2379187       00:41 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2380015       00:39 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2379046       00:41 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/platform_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
+2379187       00:41 uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2380015       00:39 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
 pending
 -rw-rw-r-- 1 ops ops 0 Mar 31 13:42 /tmp/ws-0298-full-wrapper-r17.out
-2379046       01:12 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
-2379187       01:12 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2380015       01:10 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2390536       00:01 /usr/local/bin/grype sbom:/srv/proxmox_florin_server/receipts/sbom/4d8b065bf185.cdx.json --add-cpes-if-none -o json
+2379046       01:12 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/platform_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
+2379187       01:12 uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2380015       01:10 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2390536       00:01 /usr/local/bin/grype sbom:/srv/platform_server/receipts/sbom/4d8b065bf185.cdx.json --add-cpes-if-none -o json
 pending
 -rw-rw-r-- 1 ops ops 0 Mar 31 13:42 /tmp/ws-0298-full-wrapper-r17.out
-2379046       01:43 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
-2379187       01:43 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2380015       01:41 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2393954       00:00 /usr/local/bin/grype sbom:/srv/proxmox_florin_server/receipts/sbom/072dcba19d51.cdx.json --add-cpes-if-none -o json
+2379046       01:43 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/platform_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
+2379187       01:43 uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2380015       01:41 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2393954       00:00 /usr/local/bin/grype sbom:/srv/platform_server/receipts/sbom/072dcba19d51.cdx.json --add-cpes-if-none -o json
 pending
 -rw-rw-r-- 1 ops ops 0 Mar 31 13:42 /tmp/ws-0298-full-wrapper-r17.out
-2379046       02:14 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
-2379187       02:14 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2380015       02:13 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2397063       00:00 /usr/local/bin/grype sbom:/srv/proxmox_florin_server/receipts/sbom/b49009312361.cdx.json --add-cpes-if-none -o json
+2379046       02:14 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/platform_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
+2379187       02:14 uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2380015       02:13 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2397063       00:00 /usr/local/bin/grype sbom:/srv/platform_server/receipts/sbom/b49009312361.cdx.json --add-cpes-if-none -o json
 pending
 -rw-rw-r-- 1 ops ops 0 Mar 31 13:42 /tmp/ws-0298-full-wrapper-r17.out
-2379046       02:45 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
-2379187       02:45 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2380015       02:44 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-2400136       00:05 /usr/local/bin/grype sbom:/srv/proxmox_florin_server/receipts/sbom/c5058cf3491e.cdx.json --add-cpes-if-none -o json
+2379046       02:45 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/platform_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
+2379187       02:45 uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2380015       02:44 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2400136       00:05 /usr/local/bin/grype sbom:/srv/platform_server/receipts/sbom/c5058cf3491e.cdx.json --add-cpes-if-none -o json

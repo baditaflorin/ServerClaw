@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "hypervisor",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -45,7 +45,7 @@
     {
       "check": "Exact-main Windmill replay after wrapper contract fix",
       "result": "pass",
-      "observed": "The first exact-main Windmill replay exposed the missing gate_status.waiver_summary contract on the seeded validation-gate wrapper; after updating config/windmill/scripts/gate-status.py to rebuild the governed waiver summary, make converge-windmill env=production passed with final recap docker-runtime-lv3 : ok=353 changed=46 failed=0, postgres-lv3 : ok=91 changed=2 failed=0, proxmox_florin : ok=41 changed=4 failed=0."
+      "observed": "The first exact-main Windmill replay exposed the missing gate_status.waiver_summary contract on the seeded validation-gate wrapper; after updating config/windmill/scripts/gate-status.py to rebuild the governed waiver summary, make converge-windmill env=production passed with final recap docker-runtime-lv3 : ok=353 changed=46 failed=0, postgres-lv3 : ok=91 changed=2 failed=0, proxmox-host : ok=41 changed=4 failed=0."
     },
     {
       "check": "Seeded Windmill Atlas drift job",

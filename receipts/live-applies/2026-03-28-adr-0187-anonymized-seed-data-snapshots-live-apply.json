@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -37,7 +37,7 @@
     {
       "check": "Managed backup-vm seed snapshot store",
       "result": "pass",
-      "observed": "The production replay `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm env=production` completed successfully after promoting shared backup-vm datastore facts into inventory state, and `backup-lv3` now exposes `/var/lib/lv3/seed-data-snapshots/{tiny,standard,recovery}`."
+      "observed": "The production replay `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 make configure-backup-vm env=production` completed successfully after promoting shared backup-vm datastore facts into inventory state, and `backup-lv3` now exposes `/var/lib/lv3/seed-data-snapshots/{tiny,standard,recovery}`."
     },
     {
       "check": "Seed snapshot publish and remote verification",

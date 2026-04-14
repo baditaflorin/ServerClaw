@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -42,7 +42,7 @@
     {
       "check": "Worker checkout Proxmox credential bridge",
       "result": "pass",
-      "observed": "Guest verification on `docker-runtime-lv3` showed `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json` present with the mirrored `https://proxmox.lv3.org:8006/api2/json` token payload expected by repo-managed Windmill worker scripts."
+      "observed": "Guest verification on `docker-runtime-lv3` showed `/srv/platform_server/.local/proxmox-api/lv3-automation-primary.json` present with the mirrored `https://proxmox.example.com:8006/api2/json` token payload expected by repo-managed Windmill worker scripts."
     },
     {
       "check": "Live Windmill script and schedule",
@@ -52,7 +52,7 @@
     {
       "check": "Manual live reaper sweep",
       "result": "pass",
-      "observed": "A controller-side `run_wait_result` POST to `http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper` returned HTTP 200 with `{\"run_at\":\"2026-03-26T14:33:09.543811Z\",\"warned_vmids\":[],\"expired_vmids\":[],\"skipped_vmids\":[],\"retagged_vmids\":[]}`, and `docker-runtime-lv3` wrote matching receipt `/srv/proxmox_florin_server/receipts/fixtures/reaper-run-20260326T143309Z.json`."
+      "observed": "A controller-side `run_wait_result` POST to `http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper` returned HTTP 200 with `{\"run_at\":\"2026-03-26T14:33:09.543811Z\",\"warned_vmids\":[],\"expired_vmids\":[],\"skipped_vmids\":[],\"retagged_vmids\":[]}`, and `docker-runtime-lv3` wrote matching receipt `/srv/platform_server/receipts/fixtures/reaper-run-20260326T143309Z.json`."
     },
     {
       "check": "Repo automation tail replay",
@@ -67,7 +67,7 @@
     "docs/workstreams/adr-0106-ephemeral-lifecycle.md"
   ],
   "notes": [
-    "The first verified live path depends on the mounted worker checkout, not only the Windmill runtime env contract: sandboxed `run_wait_result` jobs did not reliably inherit the Proxmox API token from `runtime.env`, so the committed fix mirrors the controller-local payload into `/srv/proxmox_florin_server/.local/proxmox-api/` and the reaper wrappers now prefer that repo-local payload when runtime env injection is absent.",
+    "The first verified live path depends on the mounted worker checkout, not only the Windmill runtime env contract: sandboxed `run_wait_result` jobs did not reliably inherit the Proxmox API token from `runtime.env`, so the committed fix mirrors the controller-local payload into `/srv/platform_server/.local/proxmox-api/` and the reaper wrappers now prefer that repo-local payload when runtime env injection is absent.",
     "The guest-side `receipts/fixtures/` path had to remain writable for Windmill worker-generated reaper receipts, and the live run recorded here confirms that write path with `reaper-run-20260326T143309Z.json`.",
     "Protected integration files still wait for merge-to-main: `README.md`, `VERSION`, release sections in `changelog.md`, and `versions/stack.yaml`."
   ]

@@ -15,7 +15,7 @@
 5. `backup-lv3` still reported only the legacy `backup;lv3;pbs` tags after the replay, so one explicit follow-up command was executed on the host:
 
 ```bash
-qm set 160 --tags "aag-control-plane-recovery;backup;exc-same-domain;fd-host-proxmox-florin;lv3;pbs;pc-recovery"
+qm set 160 --tags "aag-control-plane-recovery;backup;exc-same-domain;fd-host-proxmox-host;lv3;pbs;pc-recovery"
 ```
 
 6. Final verification confirmed the expected tag set on all existing managed guests and re-confirmed that `151` remains absent.

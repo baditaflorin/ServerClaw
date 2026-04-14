@@ -6,8 +6,8 @@ dea914daf3d2   ghcr.io/windmill-labs/windmill-extra:1.662.0   "/entrypoint.sh"  
 d7fedfa6568e   openbao/openbao:2.5.1                          "docker-entrypoint.s…"   3 hours ago      Up 23 minutes (healthy)                                                                                                                                                                                                                                                                    windmill-openbao-agent
 ---
                 "/var/run/docker.sock:/var/run/docker.sock:rw",
-                "/srv/proxmox_florin_server:/srv/proxmox_florin_server:rw",
-                "Source": "/srv/proxmox_florin_server",
-                "Destination": "/srv/proxmox_florin_server",
+                "/srv/platform_server:/srv/platform_server:rw",
+                "Source": "/srv/platform_server",
+                "Destination": "/srv/platform_server",
                 "Source": "/var/run/docker.sock",
                 "Destination": "/var/run/docker.sock",

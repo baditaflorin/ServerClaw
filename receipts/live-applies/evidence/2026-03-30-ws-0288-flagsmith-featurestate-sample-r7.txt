@@ -51,7 +51,7 @@ ok: [docker-runtime-lv3] => {
             "num_segment_overrides": 0,
             "owners": [
                 {
-                    "email": "flagsmith.automation@lv3.org",
+                    "email": "flagsmith.automation@example.com",
                     "first_name": "",
                     "id": 1,
                     "last_login": "2026-03-30T18:36:44.765322Z",

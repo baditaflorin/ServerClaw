@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -53,7 +53,7 @@
     {
       "check": "Worker runtime contract",
       "result": "pass",
-      "observed": "On `docker-runtime-lv3`, the rendered Windmill runtime env exposed `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and the mirrored worker checkout secret file remained present at `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt` after the replay."
+      "observed": "On `docker-runtime-lv3`, the rendered Windmill runtime env exposed `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and the mirrored worker checkout secret file remained present at `/srv/platform_server/.local/windmill/superadmin-secret.txt` after the replay."
     }
   ],
   "evidence_refs": [

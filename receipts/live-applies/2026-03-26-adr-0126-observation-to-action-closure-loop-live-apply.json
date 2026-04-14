@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -47,7 +47,7 @@
     {
       "check": "Goal-achievement termination on the live checkout",
       "result": "pass",
-      "observed": "On `docker-runtime-lv3`, `sudo python3` from `/srv/proxmox_florin_server` started an `observation_finding` run with `goal_achieved: true` and returned `current_state: RESOLVED` with history `TRIAGED -> RESOLVED`."
+      "observed": "On `docker-runtime-lv3`, `sudo python3` from `/srv/platform_server` started an `observation_finding` run with `goal_achieved: true` and returned `current_state: RESOLVED` with history `TRIAGED -> RESOLVED`."
     }
   ],
   "evidence_refs": [

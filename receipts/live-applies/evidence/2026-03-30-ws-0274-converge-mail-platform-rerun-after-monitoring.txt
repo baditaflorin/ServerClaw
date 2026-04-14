@@ -2,672 +2,672 @@
 Preflight workflow: converge-mail-platform
 Description: Converge the Dockerized mail platform, host SMTP ingress, DNS, sender profiles, Grafana mail telemetry, and mail-gateway trace export.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
 PASS env hetzner_dns_api_token: HETZNER_DNS_API_TOKEN is set
-PASS file mail_platform_brevo_api_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/brevo-api-key.txt
+PASS file mail_platform_brevo_api_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/mail-platform/brevo-api-key.txt
 Result: PASS (converge-mail-platform)
 HETZNER_DNS_API_TOKEN=${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=a34878516fdd42dbb0614b9ebe4a7105 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/inventory/hosts.yml --run-id 55ca2cf21ded4d0c83230397b53800af --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/playbooks/mail-platform.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=a34878516fdd42dbb0614b9ebe4a7105 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/inventory/hosts.yml --run-id 55ca2cf21ded4d0c83230397b53800af --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/playbooks/mail-platform.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 PLAY [Publish mail DNS records] ************************************************
 
 TASK [Ensure Hetzner DNS records are present for the mail platform] ************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Ensure Hetzner DNS records are present for the mail platform","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:53.611Z","vm":"controller","workflow_id":"ansible-playbook"}
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Hetzner DNS records are present for the mail platform","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:53.633Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
-included: lv3.platform.hetzner_dns_records for proxmox_florin
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Hetzner DNS records are present for the mail platform","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:53.633Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+included: lv3.platform.hetzner_dns_records for proxmox-host
 
 TASK [lv3.platform.hetzner_dns_records : Validating arguments against arg spec 'main' - Hetzner DNS records role inputs.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Validating arguments against arg spec 'main' - Hetzner DNS records role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:53.644Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Validating arguments against arg spec 'main' - Hetzner DNS records role inputs.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:53.659Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Validating arguments against arg spec 'main' - Hetzner DNS records role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:53.659Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert Hetzner DNS API token is available] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert Hetzner DNS API token is available","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:53.661Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert Hetzner DNS API token is available","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:53.688Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert Hetzner DNS API token is available","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:53.688Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Read Hetzner DNS zone information] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Read Hetzner DNS zone information","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:53.691Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Read Hetzner DNS zone information","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.379Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Read Hetzner DNS zone information","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.379Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Translate Hetzner DNS zone provider payload into canonical zone facts] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Translate Hetzner DNS zone provider payload into canonical zone facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:54.382Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Translate Hetzner DNS zone provider payload into canonical zone facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.410Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Translate Hetzner DNS zone provider payload into canonical zone facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.410Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS zone lookup is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS zone lookup is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:54.412Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS zone lookup is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.437Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS zone lookup is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.437Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Record the canonical DNS zone reference] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Record the canonical DNS zone reference","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:54.439Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Record the canonical DNS zone reference","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.454Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Record the canonical DNS zone reference","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:54.454Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Read current Hetzner DNS records for the zone] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Read current Hetzner DNS records for the zone","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:54.456Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Read current Hetzner DNS records for the zone","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.070Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Read current Hetzner DNS records for the zone","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.070Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Translate Hetzner DNS record provider payload into canonical record facts] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Translate Hetzner DNS record provider payload into canonical record facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.072Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Translate Hetzner DNS record provider payload into canonical record facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.105Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Translate Hetzner DNS record provider payload into canonical record facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.105Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.107Z","vm":"controller","workflow_id":"ansible-playbook"}
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.128Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox_florin => (item={'name': 'mail', 'type': 'A', 'value': '65.108.75.123', 'ttl': 60})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox_florin => (item={'name': '@', 'type': 'MX', 'value': '10 mail.lv3.org.', 'ttl': 300})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox_florin => (item={'name': '@', 'type': 'TXT', 'value': '"v=spf1 mx include:spf.brevo.com -all"', 'value_match_regex': '^"v=spf1 ', 'ttl': 300})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox_florin => (item={'name': '_dmarc', 'type': 'TXT', 'value': '"v=DMARC1; p=quarantine; rua=mailto:baditaflorin@gmail.com"', 'ttl': 300})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox_florin => (item={'name': 'brevo1._domainkey', 'type': 'CNAME', 'value': 'b1.lv3-org.dkim.brevo.com.', 'value_match_regex': '^b1\\\\.lv3-org\\\\.dkim\\\\.brevo\\\\.com\\\\.?$', 'ttl': 300})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox_florin => (item={'name': 'brevo2._domainkey', 'type': 'CNAME', 'value': 'b2.lv3-org.dkim.brevo.com.', 'value_match_regex': '^b2\\\\.lv3-org\\\\.dkim\\\\.brevo\\\\.com\\\\.?$', 'ttl': 300})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox_florin => (item={'name': '@', 'type': 'TXT', 'value': '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"', 'value_match_regex': '^"brevo-code:', 'ttl': 300})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.128Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'mail', 'type': 'A', 'value': '203.0.113.1', 'ttl': 60})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'type': 'MX', 'value': '10 mail.example.com.', 'ttl': 300})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'type': 'TXT', 'value': '"v=spf1 mx include:spf.brevo.com -all"', 'value_match_regex': '^"v=spf1 ', 'ttl': 300})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '_dmarc', 'type': 'TXT', 'value': '"v=DMARC1; p=quarantine; rua=mailto:operator@example.com"', 'ttl': 300})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'brevo1._domainkey', 'type': 'CNAME', 'value': 'b1.lv3-org.dkim.brevo.com.', 'value_match_regex': '^b1\\\\.lv3-org\\\\.dkim\\\\.brevo\\\\.com\\\\.?$', 'ttl': 300})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'brevo2._domainkey', 'type': 'CNAME', 'value': 'b2.lv3-org.dkim.brevo.com.', 'value_match_regex': '^b2\\\\.lv3-org\\\\.dkim\\\\.brevo\\\\.com\\\\.?$', 'ttl': 300})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'type': 'TXT', 'value': '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"', 'value_match_regex': '^"brevo-code:', 'ttl': 300})
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.164Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.190Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.190Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.192Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.216Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.216Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.218Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.245Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.245Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.247Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.269Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.269Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.271Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.295Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.295Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.297Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.319Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.319Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.322Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.342Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.342Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.344Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.367Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.367Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.369Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.393Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.393Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.395Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.422Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.422Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.423Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.448Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.448Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.450Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.477Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.477Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.479Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.503Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.503Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.505Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.528Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.528Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.530Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.555Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.555Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.557Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.581Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.581Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.583Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.605Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.605Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.607Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.632Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.632Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.634Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.660Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.660Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.662Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.687Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.687Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.690Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.717Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.717Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.719Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.742Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.742Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.744Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.769Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.769Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.771Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.795Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.795Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.797Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.820Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.820Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.822Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.846Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.846Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.848Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.874Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:55.874Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.876Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.903Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.903Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.905Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.932Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.932Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.934Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.963Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.963Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.965Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.991Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:55.991Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:55.995Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.022Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.022Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.026Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.054Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.054Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.056Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.082Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.082Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.085Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.109Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.109Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.111Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.137Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.137Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.139Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.167Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.167Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.169Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.196Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.196Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.198Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.230Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.230Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.232Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.259Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.259Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.261Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.288Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.288Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.290Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.324Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.324Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.326Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.348Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.348Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.350Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.372Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.372Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.374Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.398Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.398Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.400Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.425Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.425Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.427Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.453Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.453Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.455Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.481Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.481Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.483Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.506Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.506Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.508Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.531Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.531Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.533Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.557Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.557Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.559Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.579Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.579Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.581Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.602Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.602Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.604Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.627Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.627Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.629Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.655Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.655Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.657Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.683Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.683Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.685Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.712Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.712Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.714Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.740Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.740Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.742Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost] => {
+ok: [proxmox-host -> localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.767Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.767Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.770Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin -> localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.796Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:56.796Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.798Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.821Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.821Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.823Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.847Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.847Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.850Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.873Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:15:56.873Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY [Converge public mail ingress forwarding on the Proxmox host] *************
 
 TASK [Gathering Facts] *********************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:56.883Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:59.937Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:15:59.937Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:15:59.961Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:00.012Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validating arguments against arg spec 'main' - Configure the Proxmox host bridge, NAT, and per-VM firewall policy.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:00.012Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validate Proxmox network inputs] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:00.024Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:00.071Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate Proxmox network inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:00.071Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Validate optional staging bridge inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:00.081Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:00.121Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Validate optional staging bridge inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:00.121Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure nftables is installed] *************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:00.129Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:01.914Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure nftables is installed","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:01.914Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Persist IPv4 forwarding configuration] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:01.922Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:03.172Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Persist IPv4 forwarding configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:03.172Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Read the active IPv4 forwarding value] ****
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:03.180Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:03.629Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read the active IPv4 forwarding value","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:03.629Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Apply IPv4 forwarding configuration] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:03.637Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:03.664Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply IPv4 forwarding configuration","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:03.664Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render Proxmox host network interfaces] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:03.672Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:04.772Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render Proxmox host network interfaces","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:04.772Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render nftables rules for VM egress] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:04.779Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:05.899Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render nftables rules for VM egress","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:05.899Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable and start nftables] ****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:05.907Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:06.620Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable and start nftables","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:06.620Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:06.627Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:07.756Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack helper","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:07.756Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install Proxmox firewall conntrack service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:07.763Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:08.888Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:08.888Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Reload systemd after conntrack service updates] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:08.896Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:08.920Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload systemd after conntrack service updates","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:08.920Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:08.927Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:09.465Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Enable Proxmox firewall conntrack service","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:09.465Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Reload nftables rules] ********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:09.475Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.498Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Reload nftables rules","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.498Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Apply network changes with ifreload] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:09.505Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.528Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Apply network changes with ifreload","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.528Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Wait for SSH after network reload] ********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:09.536Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.561Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for SSH after network reload","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.561Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Refresh facts after network changes] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:09.569Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.593Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Refresh facts after network changes","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:09.593Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:09.600Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:10.003Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall configuration directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:10.003Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Read current guest configurations for firewall enablement] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:10.011Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=postgres-replica-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:19.273Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=postgres-replica-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Read current guest configurations for firewall enablement","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:19.273Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:19.282Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:19.322Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Record guests that currently exist on the Proxmox host","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:19.322Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:19.329Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:27.127Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Render per-guest Proxmox firewall policy to staging files","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:27.127Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:27.135Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:29.834Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Install per-guest Proxmox firewall policy","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:29.834Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:29.843Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=postgres-replica-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:29.949Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=postgres-replica-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Enable Proxmox firewall on each guest net0 interface","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:29.949Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:29.960Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:30.505Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall service is enabled and started","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:30.505Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Compile Proxmox firewall configuration] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:30.513Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:31.595Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Compile Proxmox firewall configuration","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:31.595Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:31.602Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:31.632Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Restart Proxmox firewall after guest policy changes","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:31.632Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:31.640Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:32.056Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Ensure Proxmox firewall conntrack rule is active","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:32.056Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:32.064Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=nginx-lv3)
-ok: [proxmox_florin] => (item=docker-runtime-lv3)
-ok: [proxmox_florin] => (item=docker-build-lv3)
-ok: [proxmox_florin] => (item=monitoring-lv3)
-ok: [proxmox_florin] => (item=postgres-lv3)
-ok: [proxmox_florin] => (item=backup-lv3)
-ok: [proxmox_florin] => (item=coolify-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:34.744Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=nginx-lv3)
+ok: [proxmox-host] => (item=docker-runtime-lv3)
+ok: [proxmox-host] => (item=docker-build-lv3)
+ok: [proxmox-host] => (item=monitoring-lv3)
+ok: [proxmox-host] => (item=postgres-lv3)
+ok: [proxmox-host] => (item=backup-lv3)
+ok: [proxmox-host] => (item=coolify-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_network : Check guest SSH reachability from the Proxmox host","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:16:34.744Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Record guests that need restart after firewall activation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:34.751Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.823Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Record guests that need restart after firewall activation","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.823Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Stop guests that need firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:34.831Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.869Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Stop guests that need firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.869Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Start guests after firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:34.877Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.918Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Start guests after firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.918Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:16:34.926Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=nginx-lv3)
-skipping: [proxmox_florin] => (item=docker-runtime-lv3)
-skipping: [proxmox_florin] => (item=docker-build-lv3)
-skipping: [proxmox_florin] => (item=monitoring-lv3)
-skipping: [proxmox_florin] => (item=postgres-lv3)
-skipping: [proxmox_florin] => (item=backup-lv3)
-skipping: [proxmox_florin] => (item=coolify-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.970Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=nginx-lv3)
+skipping: [proxmox-host] => (item=docker-runtime-lv3)
+skipping: [proxmox-host] => (item=docker-build-lv3)
+skipping: [proxmox-host] => (item=monitoring-lv3)
+skipping: [proxmox-host] => (item=postgres-lv3)
+skipping: [proxmox-host] => (item=backup-lv3)
+skipping: [proxmox-host] => (item=coolify-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_network : Wait for guest SSH after firewall activation restart","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T14:16:34.970Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY [Converge the mail platform runtime on the Docker runtime VM] *************
 
@@ -905,14 +905,14 @@ ok: [docker-runtime-lv3] => (item=operator-alerts) => {
         "credential_scope": "Scoped gateway API key and mailbox password for operator-facing alert traffic only.",
         "description": "LV3 operator alert sender",
         "id": "operator-alerts",
-        "mailbox_address": "alerts@lv3.org",
+        "mailbox_address": "alerts@example.com",
         "mailbox_localpart": "alerts",
         "observability_policy": "Track requests, fallback use, and delivery failures per profile in the mail gateway state and Grafana mail dashboard.",
         "owner": "Platform operations",
         "rate_expectation": "Low volume with bursty spikes during incidents; never used for bulk campaigns.",
-        "reply_to": "server@lv3.org",
+        "reply_to": "server@example.com",
         "retention_policy": "Retain gateway counters and Stalwart delivery logs under the managed platform observability and host retention policies.",
-        "sender_email": "alerts@lv3.org",
+        "sender_email": "alerts@example.com",
         "sender_name": "LV3 Operator Alerts"
     },
     "msg": "All assertions passed"
@@ -924,14 +924,14 @@ ok: [docker-runtime-lv3] => (item=platform-transactional) => {
         "credential_scope": "Scoped gateway API key and mailbox password for repo-managed platform services.",
         "description": "LV3 platform transactional sender",
         "id": "platform-transactional",
-        "mailbox_address": "platform@lv3.org",
+        "mailbox_address": "platform@example.com",
         "mailbox_localpart": "platform",
         "observability_policy": "Track profile-specific send volume and failures in the shared mail dashboard and gateway state.",
         "owner": "Platform services",
         "rate_expectation": "Low to moderate transactional volume; message flows must stay application-driven and auditable.",
-        "reply_to": "server@lv3.org",
+        "reply_to": "server@example.com",
         "retention_policy": "Retain gateway counters and delivery traces needed to audit transactional notifications without treating the profile as a mailbox for operators.",
-        "sender_email": "platform@lv3.org",
+        "sender_email": "platform@example.com",
         "sender_name": "LV3 Platform"
     },
     "msg": "All assertions passed"
@@ -943,14 +943,14 @@ ok: [docker-runtime-lv3] => (item=agent-reports) => {
         "credential_scope": "Scoped gateway API key and mailbox password for agents, scheduled workflows, and machine-generated reports.",
         "description": "LV3 agent and workflow reporting sender",
         "id": "agent-reports",
-        "mailbox_address": "agents@lv3.org",
+        "mailbox_address": "agents@example.com",
         "mailbox_localpart": "agents",
         "observability_policy": "Track request, success, fallback, and failure counters per agent profile in the gateway state and Grafana mail dashboard.",
         "owner": "Repository automation",
         "rate_expectation": "Low to moderate report volume with occasional bursts during audits or recovery workflows.",
-        "reply_to": "server@lv3.org",
+        "reply_to": "server@example.com",
         "retention_policy": "Retain gateway counters and delivery traces long enough to audit agent-generated reports and incident outputs.",
-        "sender_email": "agents@lv3.org",
+        "sender_email": "agents@example.com",
         "sender_name": "LV3 Agent Reports"
     },
     "msg": "All assertions passed"
@@ -1592,7 +1592,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:18:58.587Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:18:58.606Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:18:58.642Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1622,7 +1622,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:19:00.044Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:19:00.074Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:19:00.124Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2171,7 +2171,7 @@ ok: [monitoring-lv3]
 TASK [lv3.platform.monitoring_vm : Include tracing infrastructure tasks] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Include tracing infrastructure tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:19:56.358Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Include tracing infrastructure tasks","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T14:19:56.380Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml for monitoring-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml for monitoring-lv3
 
 TASK [lv3.platform.monitoring_vm : Download Tempo Debian package] **************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Download Tempo Debian package","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T14:19:56.442Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2996,4 +2996,4 @@ ok: [monitoring-lv3]
 PLAY RECAP *********************************************************************
 docker-runtime-lv3         : ok=184  changed=8    unreachable=0    failed=0    skipped=42   rescued=0    ignored=0
 monitoring-lv3             : ok=162  changed=0    unreachable=0    failed=0    skipped=21   rescued=0    ignored=0
-proxmox_florin             : ok=80   changed=0    unreachable=0    failed=0    skipped=33   rescued=0    ignored=0
+proxmox-host             : ok=80   changed=0    unreachable=0    failed=0    skipped=33   rescued=0    ignored=0

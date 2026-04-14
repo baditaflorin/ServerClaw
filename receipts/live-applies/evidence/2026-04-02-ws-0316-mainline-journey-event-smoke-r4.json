@@ -6,7 +6,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -16,7 +16,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -26,7 +26,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -36,7 +36,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -46,7 +46,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -56,7 +56,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -66,7 +66,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -76,7 +76,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -86,7 +86,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -96,7 +96,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -106,7 +106,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -116,7 +116,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -126,7 +126,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -136,7 +136,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -146,7 +146,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -159,7 +159,7 @@
         "message": "Inventory alert",
         "requested": true
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -169,7 +169,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     },
@@ -179,7 +179,7 @@
         "emitted": false,
         "requested": false
       },
-      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "ledger_path": "/srv/platform_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
       "returncode": 0,
       "status": "ok"
     }

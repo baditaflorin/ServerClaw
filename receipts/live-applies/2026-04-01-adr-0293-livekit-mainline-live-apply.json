@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.82",
   "workflow_id": "adr-0293-livekit-mainline-live-apply",
   "adr": "0293",
-  "summary": "Cut repository release 0.177.132 from the exact-main LiveKit source commit 9cad64c634f304bce0e8946529fd9386a67f317e, replayed the governed live-apply-service path for LiveKit across proxmox_florin, docker-runtime-lv3, and nginx-lv3, re-verified the public HTTPS and certificate contract at livekit.lv3.org, and passed both the in-playbook and standalone controller-side room lifecycle probes, which advances platform_version to 0.130.83.",
+  "summary": "Cut repository release 0.177.132 from the exact-main LiveKit source commit 9cad64c634f304bce0e8946529fd9386a67f317e, replayed the governed live-apply-service path for LiveKit across proxmox-host, docker-runtime-lv3, and nginx-lv3, re-verified the public HTTPS and certificate contract at livekit.example.com, and passed both the in-playbook and standalone controller-side room lifecycle probes, which advances platform_version to 0.130.83.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,7 +34,7 @@
     {
       "kind": "service_endpoint",
       "name": "LiveKit public endpoint",
-      "address": "https://livekit.lv3.org"
+      "address": "https://livekit.example.com"
     }
   ],
   "verification": [
@@ -46,12 +46,12 @@
     {
       "check": "Exact-main LiveKit governed replay",
       "result": "pass",
-      "observed": "ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=livekit env=production completed successfully with final recap proxmox_florin ok=32 changed=0 failed=0, docker-runtime-lv3 ok=184 changed=4 failed=0, nginx-lv3 ok=46 changed=5 failed=0, and localhost ok=19 changed=0 failed=0."
+      "observed": "ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=livekit env=production completed successfully with final recap proxmox-host ok=32 changed=0 failed=0, docker-runtime-lv3 ok=184 changed=4 failed=0, nginx-lv3 ok=46 changed=5 failed=0, and localhost ok=19 changed=0 failed=0."
     },
     {
       "check": "Public HTTPS and certificate contract",
       "result": "pass",
-      "observed": "Independent controller-side probes after the exact-main replay returned HTTP/2 200 for https://livekit.lv3.org and presented subject CN=livekit.lv3.org with DNS:livekit.lv3.org in the SAN set."
+      "observed": "Independent controller-side probes after the exact-main replay returned HTTP/2 200 for https://livekit.example.com and presented subject CN=livekit.example.com with DNS:livekit.example.com in the SAN set."
     },
     {
       "check": "Public LiveKit room lifecycle",

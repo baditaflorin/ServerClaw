@@ -1,1 +1,1 @@
-Validation runner contracts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/config/validation-runner-contracts.json
+Validation runner contracts OK: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0304-mainline/config/validation-runner-contracts.json

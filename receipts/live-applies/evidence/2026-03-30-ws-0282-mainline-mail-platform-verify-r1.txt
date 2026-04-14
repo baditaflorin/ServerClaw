@@ -3,10 +3,10 @@ PLAY [Warm the host graph for guest jump access] *******************************
 
 TASK [Record mail verification start] ******************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Record mail verification start","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T07:21:45.229Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "msg": "Starting mail platform live verification for staging."
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Record mail verification start","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T07:21:45.250Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Record mail verification start","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T07:21:45.250Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY [Prepare the mail verification target state] ******************************
 
@@ -27,4 +27,4 @@ fatal: [docker-runtime-staging-lv3]: FAILED! => {"changed": false, "content": ""
 
 PLAY RECAP *********************************************************************
 docker-runtime-staging-lv3 : ok=1    changed=0    unreachable=0    failed=1    skipped=1    rescued=0    ignored=0
-proxmox_florin             : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+proxmox-host             : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

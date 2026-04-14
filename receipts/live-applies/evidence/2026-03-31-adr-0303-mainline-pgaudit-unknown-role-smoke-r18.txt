@@ -22,10 +22,10 @@ Traceback (most recent call last):
     raise errors.Error("nats: empty response from server when expecting INFO message")
 nats.errors.Error: nats: empty response from server when expecting INFO message
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/platform/retry/policy.py", line 179, in async_with_retry
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/platform/retry/policy.py", line 179, in async_with_retry
     return await fn()
            ^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/drift_lib.py", line 360, in connect_once
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/scripts/drift_lib.py", line 360, in connect_once
     await nc.connect(**kwargs)
   File "/Users/live/.cache/uv/archive-v0/NuiKTQWn27AXIXK0QKiv3/lib/python3.13/site-packages/nats/aio/client.py", line 569, in connect
     raise e
@@ -52,13 +52,13 @@ Traceback (most recent call last):
   File "/tmp/adr0303_smoke_v3.py", line 98, in last_subject_message
     nc = await connect_nats(f"nats://127.0.0.1:{local_port}", credentials)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/drift_lib.py", line 363, in connect_nats
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/scripts/drift_lib.py", line 363, in connect_nats
     return await async_with_retry(
            ^^^^^^^^^^^^^^^^^^^^^^^
     ...<3 lines>...
     )
     ^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/platform/retry/policy.py", line 202, in async_with_retry
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/platform/retry/policy.py", line 202, in async_with_retry
     raise MaxRetriesExceeded(
     ...<3 lines>...
     ) from last_error

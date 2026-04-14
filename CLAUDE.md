@@ -248,7 +248,7 @@ real values into `platform.yml`. The publish pipeline sanitises the real values
 when syncing to the public mirror. The private repo's `platform.yml` must
 always reflect actual deployment reality.
 
-> **Incident**: This gap caused `headscale.lv3.org` DNS to point at `203.0.113.1`
+> **Incident**: This gap caused `headscale.example.com` DNS to point at `203.0.113.1`
 > (a non-routable documentation IP), breaking Tailscale VPN for the entire
 > deployment.
 

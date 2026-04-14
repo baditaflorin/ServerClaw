@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0368-main-integration-r3/scripts/remote_exec.sh check-build-server
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0368-main-integration-r3/scripts/remote_exec.sh check-build-server
 Checking SSH connectivity to ops@10.10.10.30
 build-server-ok
 Checking remote workspace root /home/ops/builds/serverclaw-platform

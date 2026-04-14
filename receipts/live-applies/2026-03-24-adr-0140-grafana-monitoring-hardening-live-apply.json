@@ -19,14 +19,14 @@
     },
     {
       "kind": "public_hostname",
-      "name": "grafana.lv3.org"
+      "name": "grafana.example.com"
     }
   ],
   "verification": [
     {
       "check": "Grafana public-surface verification tasks",
       "result": "pass",
-      "observed": "During `make live-apply-service service=grafana env=production`, the monitoring role passed the ADR 0140 checks that verify dashboard redirects, `https://grafana.lv3.org/api/health` returning `404`, and login-header stripping at the public edge."
+      "observed": "During `make live-apply-service service=grafana env=production`, the monitoring role passed the ADR 0140 checks that verify dashboard redirects, `https://grafana.example.com/api/health` returning `404`, and login-header stripping at the public edge."
     },
     {
       "check": "Prometheus SLO rule loading",
