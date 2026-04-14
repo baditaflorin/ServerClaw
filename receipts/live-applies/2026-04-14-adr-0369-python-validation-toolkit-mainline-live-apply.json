@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_by": "codex",
+  "workflow_id": "validate",
+  "adr": "0369",
+  "workstream": "ws-0369-live-apply",
+  "source_branch": "main",
+  "source_commit": "30597c8cb32de423a0df2c8de9fc91980f95ba09",
+  "repo_version_context": "0.178.142",
+  "integrated_repo_version": "0.178.142",
+  "result": "pass",
+  "summary": "Finalized ADR 0369 from the latest exact-main base by re-verifying the shared Python validation toolkit contract, the duplicate-validator enforcement path, and the repository data-model plus agent-standards wrapper on the merged mainline tree after refreshing the governed generated inputs required by the validation path.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Toolkit unit test contract",
+      "result": "pass",
+      "observed": "`python3 scripts/test_validation_toolkit.py` passed on the rebased mainline integration tree."
+    },
+    {
+      "check": "Focused pytest validation slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest tests/test_validation_toolkit_contract.py tests/test_validate_repo_cache.py -q` passed with 24 tests."
+    },
+    {
+      "check": "All-files toolkit enforcement",
+      "result": "pass",
+      "observed": "`bash scripts/enforce_validation_toolkit.sh --all-files` completed successfully and failed no canonical validator redefinitions."
+    },
+    {
+      "check": "Governed validation wrapper",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh data-models agent-standards` passed on the exact-main integration tree after `make generate-platform-vars` and `python3 scripts/generate_topology_snapshot.py`; the wrapper emitted only the non-blocking ADR 0167 warning that the temporary integration branch is not listed in `workstreams.yaml`."
+    }
+  ],
+  "evidence_refs": [
+    "AGENTS.md",
+    "docs/adr/0369-python-validation-toolkit.md",
+    "docs/workstreams/ws-0369-live-apply.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "scripts/generate_cross_cutting_artifacts.py",
+    "scripts/generate_platform_vars.py",
+    "scripts/enforce_validation_toolkit.sh",
+    "scripts/topology-snapshot.json",
+    "scripts/validate_repo.sh",
+    "scripts/validation_toolkit.py",
+    "tests/test_validation_toolkit_contract.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This was a repo-only exact-main live apply: no host, guest, or service converge was executed during the ADR 0369 closeout.",
+    "The authoritative code change for the receipt is source commit `30597c8cb32de423a0df2c8de9fc91980f95ba09`, which was rebased onto the latest reachable origin/main before the protected mainline metadata update.",
+    "Fresh-worktree validation required materializing ignored generated artifacts under `config/generated/` plus the local `inventory/group_vars/platform_hairpin.yml` overlay; those inputs were regenerated locally for verification and were not added to git.",
+    "The latest reachable origin/main tip introduced a deployment-specific `AGENTS.md` hostvars path on a public entrypoint, so this closeout restored that line to the generic `inventory/host_vars/<topology-host>.yml` form before the final green validation sweep."
+  ]
+}

@@ -1575,7 +1575,7 @@ adrs:
       functions. All 43+ catalog/registry scripts must i
     filename: 0369-python-validation-toolkit.md
     path: docs/adr/0369-python-validation-toolkit.md
-    implemented_in_repo_version: 0.178.140
+    implemented_in_repo_version: 0.178.142
     implemented_on: '2026-04-14'
   - adr: '0370'
     title: Service Lifecycle Task Includes

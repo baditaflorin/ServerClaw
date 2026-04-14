@@ -513,7 +513,7 @@ The script updates all three registry fields atomically:
 |----------|-------|-----------|
 | `inventory/group_vars/all/platform_services.yml` | `host_group` | **AUTHORITATIVE** |
 | `inventory/group_vars/all/platform_services.yml` | `proxy.upstream_host` | derived — kept in sync |
-| `inventory/host_vars/proxmox-host.yml` | `lv3_service_topology[svc].owning_vm` | derived — kept in sync |
+| `inventory/host_vars/<topology-host>.yml` | `lv3_service_topology[svc].owning_vm` | derived — kept in sync |
 
 Then runs converges in the correct dependency order:
 `postgres-vm` → `teardown-service (stop old)` → `converge-<svc>` → `nginx-edge`

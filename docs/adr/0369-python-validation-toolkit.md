@@ -1,7 +1,7 @@
 # ADR 0369: Python Validation Toolkit
 
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.178.140
+- Implemented In Repo Version: 0.178.142
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-04-14
 - **Date**: 2026-04-06
