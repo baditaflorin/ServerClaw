@@ -41,8 +41,8 @@ def test_keycloak_service_topology_points_at_runtime_control() -> None:
 
     assert host_topology["owning_vm"] == "runtime-control"
     assert "runtime-control" in host_topology["private_ip"]
-    assert "docker-runtime" in host_topology["edge"]["upstream"]
-    assert "docker-runtime" in host_topology["urls"]["internal"]
+    assert "runtime-control" in host_topology["edge"]["upstream"]
+    assert "runtime-control" in host_topology["urls"]["internal"]
     assert host_topology["urls"]["public"] == "https://sso.{{ platform_domain }}"
 
 

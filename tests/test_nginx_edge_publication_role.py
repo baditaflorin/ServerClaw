@@ -107,6 +107,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "minio-console.{{ platform_domain }}",
                 "n8n.{{ platform_domain }}",
                 "ops.{{ platform_domain }}",
+                "repo-intake.{{ platform_domain }}",
                 "tasks.{{ platform_domain }}",
             ],
         )
@@ -159,6 +160,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("unauthenticated_paths", protected_sites["changelog.{{ platform_domain }}"])
         self.assertNotIn("unauthenticated_paths", protected_sites["logs.{{ platform_domain }}"])
         self.assertNotIn("unauthenticated_paths", protected_sites["home.{{ platform_domain }}"])
+        self.assertEqual(
+            protected_sites["repo-intake.{{ platform_domain }}"]["auth_proxy_upstream"], "http://127.0.0.1:4180"
+        )
         self.assertEqual(protected_sites["tasks.{{ platform_domain }}"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
@@ -166,6 +170,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
         self.assertIn("Resolve public edge site and certificate catalogs", task_names)
         self.assertIn("Install the pinned Certbot Hetzner DNS plugin", task_names)
+        self.assertIn("Discover existing public edge certificate lineages", task_names)
+        self.assertIn("Resolve the effective public edge certificate name", task_names)
         self.assertIn(
             "Derive site-local certificate requests for hostnames missing from the shared certificate",
             task_names,
@@ -174,6 +180,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             "Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate",
             task_names,
         )
+        self.assertIn("Re-discover existing public edge certificate lineages", task_names)
+        self.assertIn("Re-resolve the effective public edge certificate name", task_names)
         self.assertIn(
             "Assert the Hetzner DNS credential file is available when DNS-01 is enabled",
             task_names,
@@ -207,6 +215,10 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(obtain_task["until"], "public_edge_certbot_issue.rc == 0")
         self.assertEqual(site_local_task["loop"], "{{ public_edge_site_certificate_requirements | default([]) }}")
         self.assertEqual(site_local_task["when"], "item.missing_domains | length > 0")
+        check_task = next(
+            task for task in self.tasks if task["name"] == "Check whether the public edge certificate exists"
+        )
+        self.assertIn("public_edge_effective_cert_name", check_task["ansible.builtin.stat"]["path"])
 
     def test_tasks_resolve_edge_catalogs_before_validation(self) -> None:
         task_names = [task["name"] for task in self.tasks]
@@ -220,6 +232,39 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("public_edge_extra_sites", resolved_facts["public_edge_certificate_domains"])
         self.assertIn("service_topology_edge_sites", resolved_facts["public_edge_sites"])
         self.assertIn("public_edge_extra_sites", resolved_facts["public_edge_sites"])
+
+    def test_tasks_resolve_shared_certificate_lineage_fallbacks(self) -> None:
+        discover_task = next(
+            task for task in self.tasks if task["name"] == "Discover existing public edge certificate lineages"
+        )
+        resolve_task = next(
+            task for task in self.tasks if task["name"] == "Resolve the effective public edge certificate name"
+        )
+        rediscover_task = next(
+            task for task in self.tasks if task["name"] == "Re-discover existing public edge certificate lineages"
+        )
+        reresolve_task = next(
+            task for task in self.tasks if task["name"] == "Re-resolve the effective public edge certificate name"
+        )
+        recheck_task = next(
+            task for task in self.tasks if task["name"] == "Re-check whether the public edge certificate exists"
+        )
+
+        self.assertEqual(discover_task["ansible.builtin.find"]["paths"], "/etc/letsencrypt/live")
+        self.assertEqual(
+            discover_task["ansible.builtin.find"]["patterns"],
+            ["{{ public_edge_cert_name }}", "{{ public_edge_cert_name }}-*"],
+        )
+        self.assertFalse(discover_task["ansible.builtin.find"]["recurse"])
+        self.assertEqual(rediscover_task["ansible.builtin.find"], discover_task["ansible.builtin.find"])
+        effective_name_expr = resolve_task["ansible.builtin.set_fact"]["public_edge_effective_cert_name"]
+        self.assertIn("public_edge_certificate_lineages.files | default([])", effective_name_expr)
+        self.assertIn("sort(attribute='mtime', reverse=True)", effective_name_expr)
+        self.assertIn("map('basename')", effective_name_expr)
+        self.assertIn("default(public_edge_cert_name, true)", effective_name_expr)
+        reresolve_expr = reresolve_task["ansible.builtin.set_fact"]["public_edge_effective_cert_name"]
+        self.assertIn("public_edge_certificate_lineages_after.files | default([])", reresolve_expr)
+        self.assertIn("public_edge_effective_cert_name", recheck_task["ansible.builtin.stat"]["path"])
 
     def test_certificate_san_regex_preserves_domains_with_s_characters(self) -> None:
         derive_task = next(
@@ -305,8 +350,13 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn('add_header X-Robots-Tag "{{ public_edge_robots_meta_content }}" always;', self.template)
         self.assertIn("location = /robots.txt {", self.template)
         self.assertIn("server_name {{ public_edge_apex_hostname }};", self.template)
+        self.assertIn("macro shared_tls_certificate_name()", self.template)
         self.assertIn("site_tls_certificate_name(site)", self.template)
-        self.assertIn("public_edge_site_tls_materials.get(site.hostname, public_edge_cert_name)", self.template)
+        self.assertIn("public_edge_effective_cert_name | default(public_edge_cert_name)", self.template)
+        self.assertIn(
+            "public_edge_site_tls_materials.get(site.hostname, shared_tls_certificate_name())",
+            self.template,
+        )
 
     def test_certificate_domain_expression_includes_additional_domains(self) -> None:
         certificate_domains_expr = self.defaults["public_edge_certificate_domains"]
@@ -354,6 +404,10 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("location ^~ {{ route.path }} {", self.template)
         self.assertIn("proxy_buffering off;", self.template)
         self.assertIn("site_tls_enabled = public_edge_tls_enabled or", self.template)
+        self.assertIn(
+            "ssl_certificate /etc/letsencrypt/live/{{ shared_tls_certificate_name() }}/fullchain.pem;",
+            self.template,
+        )
         self.assertIn(
             "ssl_certificate /etc/letsencrypt/live/{{ site_tls_certificate_name(site) }}/fullchain.pem;", self.template
         )

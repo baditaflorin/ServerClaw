@@ -121,6 +121,107 @@ workstreams:
     Related postmortem: ADR 0415.
 
     '
+- id: ws-0382-live-apply
+  adr: 0382
+  title: Latest-main Keycloak interactive login incident closure
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0382-main-integration-r2
+  worktree_path: .worktrees/ws-0382-main
+  doc: docs/workstreams/ws-0382-live-apply.md
+  depends_on:
+  - adr-0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps
+  - adr-0381-login-service-contracts-and-session-recovery-automation
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0382-live-apply.yaml
+  - docs/workstreams/ws-0382-live-apply.md
+  - docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/by-concern/*.yaml
+  - docs/adr/index/by-range/*.yaml
+  - docs/adr/index/by-status/*.yaml
+  - docs/runbooks/configure-keycloak.md
+  - docs/runbooks/keycloak-down.md
+  - playbooks/keycloak.yml
+  - playbooks/services/keycloak.yml
+  - inventory/group_vars/all/platform_services.yml
+  - inventory/host_vars/proxmox-host.yml
+  - scripts/session_logout_verify.py
+  - roles/nginx_edge_publication/tasks/main.yml
+  - roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+  - tests/test_keycloak_playbook.py
+  - tests/test_session_logout_verify.py
+  - tests/test_nginx_edge_publication_role.py
+  - receipts/live-applies/
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0382_live_apply_tracking
+      paths:
+      - workstreams/active/ws-0382-live-apply.yaml
+      - docs/workstreams/ws-0382-live-apply.md
+      - docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md
+      - docs/runbooks/configure-keycloak.md
+      - docs/runbooks/keycloak-down.md
+      mode: exclusive
+    - id: ws_0382_keycloak_runtime_contract
+      paths:
+      - playbooks/keycloak.yml
+      - playbooks/services/keycloak.yml
+      - inventory/group_vars/all/platform_services.yml
+      - inventory/host_vars/proxmox-host.yml
+      - scripts/session_logout_verify.py
+      - tests/test_keycloak_playbook.py
+      - tests/test_session_logout_verify.py
+      mode: shared_contract
+      contract: adr-0381-login-service-contracts-v1
+    - id: ws_0382_edge_tls_recovery_contract
+      paths:
+      - roles/nginx_edge_publication/tasks/main.yml
+      - roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+      - tests/test_nginx_edge_publication_role.py
+      mode: shared_contract
+      contract: public-edge-tls-lineage-v1
+    - id: ws_0382_adr_index
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/by-concern/*.yaml
+      - docs/adr/index/by-range/*.yaml
+      - docs/adr/index/by-status/*.yaml
+      mode: shared_contract
+      contract: adr-discovery-v1
+    - id: ws_0382_live_apply_evidence
+      paths:
+      - receipts/live-applies/
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+  notes: "Replay ADR 0382 from the latest origin/main baseline after mainline moved\n\
+    Keycloak and OpenBao onto runtime-control-backed topology surfaces.\n\nCurrent\
+    \ baseline:\n- origin/main head: c6f9564acb39c3927a805574a30da3e51833c1ad\n- repo\
+    \ VERSION on origin/main: 0.178.138\n- Keycloak converge target on main: runtime-control\n\
+    - OpenBao secret metadata for services/restic-config-backup/runtime-config is\n\
+    \  still version 6 from 2026-03-31, and the current controller-local password\n\
+    \  matches the live OpenBao/runtime credential payload again.\n\nRemaining work:\n\
+    - rerun exact-main repo validation on this branch\n- replay the governed Keycloak\
+    \ live-apply path from latest main\n- repair the exact-main nginx edge TLS lineage\
+    \ lookup so the shared SAN certificate remains live when Certbot has rotated it\
+    \ to a suffixed lineage name\n- verify restic backup and interactive login/logout\
+    \ behavior end to end\n- update ADR 0382 implementation state and final receipts\
+    \ once the replay is\n  complete\n"
+  blockers: []
+  plane_issue_id: 23269acc-d55b-4944-8fc5-5a7bf9ab1e2d
 - id: ws-0375-certificate-validation
   adr: '0375'
   title: Certificate Validation and Concordance Enforcement

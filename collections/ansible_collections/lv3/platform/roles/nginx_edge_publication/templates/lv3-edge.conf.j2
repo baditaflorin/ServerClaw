@@ -92,8 +92,11 @@ map $http_authorization $lv3_logout_id_token {
         proxy_hide_header X-Robots-Tag;
 {% endif %}
 {%- endmacro %}
+{% macro shared_tls_certificate_name() -%}
+{{ public_edge_effective_cert_name | default(public_edge_cert_name) }}
+{%- endmacro %}
 {% macro site_tls_certificate_name(site) -%}
-{{ public_edge_site_tls_materials.get(site.hostname, public_edge_cert_name) if public_edge_site_tls_materials is mapping else public_edge_cert_name }}
+{{ public_edge_site_tls_materials.get(site.hostname, shared_tls_certificate_name()) if public_edge_site_tls_materials is mapping else shared_tls_certificate_name() }}
 {%- endmacro %}
 
 server {
@@ -152,8 +155,8 @@ server {
 {{ crawl_policy_headers() }}
 {{ robots_txt_location() }}
 
-    ssl_certificate /etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_cert_name }}/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/{{ shared_tls_certificate_name() }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ shared_tls_certificate_name() }}/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
 
