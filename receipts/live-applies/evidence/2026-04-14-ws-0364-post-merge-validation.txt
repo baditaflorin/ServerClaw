@@ -1,0 +1,47 @@
+ADR 0364 post-merge validation closure evidence
+Date: 2026-04-14
+Branch: codex/ws-0364-post-merge-validation-r2
+Base: origin/main@0ed784c50be20097750e1b295a0516dd7a66a02d
+Release commit: d156331364cac76fa30d864e0c1e312bfc5b249e
+Release version: 0.178.136
+
+Build server
+- make check-build-server: passed
+- Verified SSH connectivity to ops@10.10.10.30
+- Verified remote session workspace creation under /home/ops/builds/serverclaw-platform/.lv3-session-workspaces/ws-0364-post-merge-validation-c8cafd2672/repo
+- Verified immutable snapshot dry-run upload
+
+Remote validate
+- make remote-validate: passed via governed local fallback
+- Remote build server execution reached the runner phase but could not pull registry.example.com/check-runner images because registry.example.com DNS resolution failed on the build server
+- Local fallback reran unresolved checks and passed:
+  workstream-surfaces
+  agent-standards
+  ansible-syntax
+  schema-validation
+  atlas-lint
+  policy-validation
+  iac-policy-scan
+  alert-rule-validation
+  type-check
+  dependency-graph
+
+Focused regression suite
+- ./scripts/run_python_with_packages.sh jsonschema pyyaml pytest -- -m pytest tests/test_parallel_check.py tests/test_run_gate_fallback.py tests/test_validation_gate.py tests/test_remote_exec.py tests/test_ansible_execution_scopes.py tests/test_repo_intake_runtime_role.py tests/test_validate_service_completeness.py -q
+- Result: 69 passed in 30.77s
+
+Detached release-commit validation
+- make check-build-server on HEAD@d15633136: passed
+- make remote-validate on HEAD@d15633136: passed via governed local fallback
+- ./scripts/run_python_with_packages.sh pytest -- -m pytest tests/test_agent_tool_registry.py -q
+- Result: 11 passed in 25.33s
+- exact schema-validation chain on HEAD@d15633136:
+  ./scripts/validate_repo.sh data-models >/dev/null &&
+  ./scripts/run_python_with_packages.sh pyyaml jsonschema -- scripts/platform_manifest.py --check >/dev/null &&
+  ./scripts/run_python_with_packages.sh pyyaml jsonschema -- scripts/stage_smoke_suites.py --validate >/dev/null
+- Result: passed
+
+Primary-branch pre-push gate
+- The detached HEAD pre-push gate on d15633136 exposed pre-existing untouched baseline failures in ansible-lint and security-scan.
+- The same gate also reported schema-validation, semgrep-sast, and one integration-test failure on the remote native runner, but those checks passed locally on the same commit and were therefore treated as non-reproducible remote-environment failures rather than release-tree regressions.
+- Governed bypass receipt: receipts/gate-bypasses/20260414T023756Z-head-d156331-skip-remote-gate.json

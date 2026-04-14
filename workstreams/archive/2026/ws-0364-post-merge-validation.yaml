@@ -64,6 +64,7 @@ shared_surfaces:
 - playbooks/verify-platform.yml
 - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
 - receipts/live-applies/evidence/2026-04-14-ws-0364-post-merge-validation.txt
+- receipts/gate-bypasses/20260414T023756Z-head-d156331-skip-remote-gate.json
 - scripts/ansible_scope_runner.py
 - scripts/gate_bypass_waivers.py
 - scripts/parallel_check.py
@@ -94,6 +95,7 @@ ownership_manifest:
     paths:
     - docs/workstreams/ws-0364-post-merge-validation.md
     - receipts/live-applies/evidence/2026-04-14-ws-0364-post-merge-validation.txt
+    - receipts/gate-bypasses/20260414T023756Z-head-d156331-skip-remote-gate.json
     mode: exclusive
   - id: ws_0364_gate_validation_repairs
     paths:
@@ -175,5 +177,15 @@ notes: 'Closure workstream for ADR 0364 after the earlier live-apply merge.
   remote runner image pull failed on registry.example.com DNS resolution, and
 
   the focused regression pytest suite passed with 69 tests on the final tree.
+
+  Release integration was committed as d15633136 / 0.178.136, detached
+
+  HEAD@d15633136 revalidated check-build-server plus remote-validate, and the
+
+  final origin/main push used the governed skip_remote_gate bypass with reason
+
+  code pre_existing_gate_failures after the full primary-branch gate reduced to
+
+  untouched ansible-lint and security-scan baseline failures.
 
   '
