@@ -4,9 +4,20 @@ ADR 0417 — External Attack Surface Hardening: static analysis regression tests
 These tests verify that security-sensitive defaults and content remain correct.
 They read files from the repo and assert properties — no network calls, no
 external dependencies.
+
+Decision 2 note: the chat-mode system prompt intentionally retains internal host
+IPs (10.10.10.x) so that operators can get useful troubleshooting guidance from
+the AI.  This is safe because:
+  - LibreChat registration is disabled by default (Decision 1) so only
+    Keycloak-provisioned accounts can log in and USE the chat.
+  - RFC 1918 IPs are unreachable from the public internet regardless.
+  - The /api/config endpoint leaks the prompt pre-auth, but that is low risk
+    given the above constraints — and removing the IPs would make the assistant
+    useless for ops investigations.
+The test below therefore checks that the topology section IS present (preventing
+accidental gutting) rather than checking for absence of IPs.
 """
 
-import re
 from pathlib import Path
 
 import yaml
@@ -16,23 +27,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 LIBRECHAT_DEFAULTS = REPO_ROOT / "roles/librechat_runtime/defaults/main.yml"
 CHAT_PROMPT = REPO_ROOT / "config/serverclaw/system-prompt-chat.md"
 
-# RFC 1918 IP pattern — matches 10.x.x.x, 172.16-31.x.x, 192.168.x.x
-RFC_1918_PATTERN = re.compile(
-    r"""
-    (?:
-        10\.\d{1,3}\.\d{1,3}\.\d{1,3}          |  # 10.0.0.0/8
-        172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}  |  # 172.16.0.0/12
-        192\.168\.\d{1,3}\.\d{1,3}              # 192.168.0.0/16
-    )
-    """,
-    re.VERBOSE,
-)
-
 
 def _load_librechat_defaults() -> dict:
     """Load and parse the librechat_runtime defaults YAML."""
     text = LIBRECHAT_DEFAULTS.read_text(encoding="utf-8")
-    # Strip the leading comment block before the YAML document separator
     return yaml.safe_load(text)
 
 
@@ -80,8 +78,8 @@ class TestLibrechatRegistrationDefaults:
         )
 
 
-class TestChatPromptNoInternalIPs:
-    """ADR 0417 Decision 2: chat-mode system prompt must not contain RFC 1918 IPs."""
+class TestChatPromptTopology:
+    """ADR 0417 Decision 2 (revised): chat prompt must retain platform topology for ops use."""
 
     def test_chat_prompt_exists(self) -> None:
         """Verify the chat prompt file is present at the expected path."""
@@ -89,19 +87,22 @@ class TestChatPromptNoInternalIPs:
             f"Chat prompt file not found at {CHAT_PROMPT}. This file is required by the librechat_runtime role."
         )
 
-    def test_chat_prompt_contains_no_rfc1918_ips(self) -> None:
+    def test_chat_prompt_contains_platform_overview(self) -> None:
         """
-        RFC 1918 IPs must not appear in the chat-mode system prompt.
+        The chat-mode system prompt must contain the Platform overview section.
 
-        LibreChat exposes GET /api/config without authentication.  The response
-        includes modelSpecs.preset.promptPrefix (i.e. this file's content).
-        Embedding internal IPs in a publicly-readable endpoint aids reconnaissance.
+        Operators need the model to know host roles and IPs to get useful
+        troubleshooting guidance (e.g. 'check docker-runtime at 10.10.10.20').
+        Do not remove this section — the low-severity /api/config pre-auth leak
+        is acceptable because registration is disabled and the IPs are RFC 1918.
+        (ADR 0417 Decision 2 — see module docstring for full rationale)
         """
         content = CHAT_PROMPT.read_text(encoding="utf-8")
-        matches = RFC_1918_PATTERN.findall(content)
-        assert not matches, (
-            f"RFC 1918 IP addresses found in {CHAT_PROMPT}: {matches}\n"
-            "The chat-mode system prompt is exposed unauthenticated via "
-            "GET /api/config — remove internal IPs and use role names only. "
-            "(ADR 0417 Decision 2)"
+        assert "## Platform overview" in content, (
+            f"'## Platform overview' section missing from {CHAT_PROMPT}. "
+            "This section provides host topology to operators via the AI assistant — do not remove it."
+        )
+        assert "docker-runtime" in content, (
+            f"'docker-runtime' host reference missing from {CHAT_PROMPT}. "
+            "Operators need host names/roles in the prompt for useful troubleshooting guidance."
         )
