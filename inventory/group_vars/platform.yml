@@ -220,7 +220,7 @@ platform_ports:
   directus_port: 8055
   label_studio_port: 8110
   superset_port: 8105
-  piper_port: 8100
+  piper_port: 8106
   paperless_port: 8018
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -320,7 +320,7 @@ platform_port_assignments:
   directus_port: 8055
   label_studio_port: 8110
   superset_port: 8105
-  piper_port: 8100
+  piper_port: 8106
   paperless_port: 8018
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -1753,7 +1753,7 @@ platform_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox-host
-    private_ip: 10.10.10.1
+    private_ip: '{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}'
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -1770,7 +1770,9 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.1:8080
+      upstream: http://{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}:{{
+        hostvars[platform_topology_host].platform_port_assignments.headscale_http_port
+        }}
     service_id: headscale
     runtime_pool: host-management
     deployment_surface: playbooks/services/headscale.yml
@@ -2992,9 +2994,9 @@ platform_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
     mobility_tier: burst_batch
     ports:
-      internal: 8100
+      internal: 8106
     urls:
-      internal: http://10.10.10.20:8100
+      internal: http://10.10.10.20:8106
   n8n:
     service_name: n8n
     owning_vm: docker-runtime
@@ -3358,6 +3360,36 @@ platform_service_topology:
     urls:
       public: https://ops.lv3.org
       internal: http://10.10.10.20:8092
+  repo_intake:
+    service_name: repo-intake
+    owning_vm: docker-runtime
+    private_ip: 10.10.10.20
+    public_hostname: repo-intake.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repo-intake
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8101
+    service_id: repo_intake
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/repo-intake.yml
+    restart_domain: runtime-general
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
+    ports: {}
+    urls:
+      public: https://repo-intake.lv3.org
   homepage:
     service_name: homepage
     owning_vm: runtime-general
@@ -3941,6 +3973,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: repo-intake
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: home
       type: A
       value: 65.108.75.123
@@ -4324,8 +4360,8 @@ platform_nginx_upstreams:
     extra_fqdns:
       - sso.staging.example.com
     port: 8091
-    host: runtime-control
-    ip: 10.10.10.92
+    host: docker-runtime
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4501,7 +4537,7 @@ platform_nginx_upstreams:
     fqdn: repo-intake.example.com
     extra_fqdns:
       - repo-intake.staging.example.com
-    port: 8096
+    port: 8101
     host: docker-runtime
     ip: 10.10.10.20
     auth_proxy: true
@@ -4676,7 +4712,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://chat.example.com/oauth/oidc/callback
+      - https://chat.example.com/oauth/openid/callback
     scopes:
       - openid
       - profile
@@ -5014,7 +5050,7 @@ public_edge_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox-host
-    private_ip: 10.10.10.1
+    private_ip: '{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}'
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -5031,7 +5067,9 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.1:8080
+      upstream: http://{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}:{{
+        hostvars[platform_topology_host].platform_port_assignments.headscale_http_port
+        }}
     service_id: headscale
     runtime_pool: host-management
     deployment_surface: playbooks/services/headscale.yml
@@ -6253,9 +6291,9 @@ public_edge_service_topology:
     api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-ai
     mobility_tier: burst_batch
     ports:
-      internal: 8100
+      internal: 8106
     urls:
-      internal: http://10.10.10.20:8100
+      internal: http://10.10.10.20:8106
   n8n:
     service_name: n8n
     owning_vm: docker-runtime
@@ -6619,6 +6657,36 @@ public_edge_service_topology:
     urls:
       public: https://ops.lv3.org
       internal: http://10.10.10.20:8092
+  repo_intake:
+    service_name: repo-intake
+    owning_vm: docker-runtime
+    private_ip: 10.10.10.20
+    public_hostname: repo-intake.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repo-intake
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8101
+    service_id: repo_intake
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/repo-intake.yml
+    restart_domain: runtime-general
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
+    ports: {}
+    urls:
+      public: https://repo-intake.lv3.org
   homepage:
     service_name: homepage
     owning_vm: runtime-general
@@ -7202,7 +7270,7 @@ outline_port: 3006
 directus_port: 8055
 label_studio_port: 8110
 superset_port: 8105
-piper_port: 8100
+piper_port: 8106
 paperless_port: 8018
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
