@@ -1,0 +1,80 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-final-r3/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+
+CHECK                STATUS             DURATION(s)
+agent-standards       passed             2.27
+alert-rule-validation passed             2.21
+ansible-lint          passed             188.68
+ansible-syntax        passed             115.96
+artifact-secret-scan  passed             3.02
+dependency-direction  passed             1.99
+dependency-graph      passed             3.24
+documentation-index   passed             1.66
+generated-docs        passed             9.27
+generated-portals     passed             29.80
+integration-tests     passed             1.35
+packer-validate       runner_unavailable 0.17
+policy-validation     passed             1.55
+schema-validation     passed             16.53
+security-scan         passed             24.27
+semgrep-sast          passed             57.37
+service-completeness  passed             1.76
+tofu-validate         runner_unavailable 0.17
+type-check            passed             3.82
+workstream-surfaces   passed             3.95
+yaml-lint             passed             15.64
+
+[packer-validate] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0298-main-final-r3-fbca9c5097/repo/.lv3-runs/20260331T130402Z-39c148783541/repo:/workspace -v /opt/builds/.packer.d:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=39c14878354195eea45c998ec20774e532ce20745498c166d1574458aed2fe22 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T13:03:48.995266+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=7e74e1de8f7ef946fa743a159042bd71a130883c -e LV3_SNAPSHOT_BRANCH=HEAD -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
+[packer-validate] stderr
+Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
+
+Run 'docker run --help' for more information
+
+[tofu-validate] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0298-main-final-r3-fbca9c5097/repo/.lv3-runs/20260331T130402Z-39c148783541/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=39c14878354195eea45c998ec20774e532ce20745498c166d1574458aed2fe22 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T13:03:48.995266+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=7e74e1de8f7ef946fa743a159042bd71a130883c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi
+[tofu-validate] stderr
+Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
+
+Run 'docker run --help' for more information
+remote_exec: remote command failed, falling back locally for pre-push-gate
+remote_exec: running local fallback for pre-push-gate
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 14.07
+alert-rule-validation passed 13.84
+ansible-lint          passed 427.12
+ansible-syntax        passed 283.51
+artifact-secret-scan  passed 27.23
+dependency-direction  passed 16.88
+dependency-graph      passed 18.88
+documentation-index   passed 16.71
+generated-docs        passed 38.13
+generated-portals     passed 97.64
+integration-tests     passed 5.83
+packer-validate       passed 49.95
+policy-validation     passed 30.13
+schema-validation     passed 135.02
+security-scan         passed 90.63
+semgrep-sast          passed 112.56
+service-completeness  passed 12.59
+tofu-validate         passed 6.56
+type-check            passed 24.23
+workstream-surfaces   passed 22.54
+yaml-lint             passed 49.52

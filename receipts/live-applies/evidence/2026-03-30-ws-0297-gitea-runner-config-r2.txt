@@ -1,0 +1,17 @@
+log:
+  level: info
+
+runner:
+  file: .runner
+  capacity: 2
+  envs:
+    DOCKER_HOST: unix:///var/run/docker.sock
+
+container:
+  network: host
+  privileged: false
+  valid_volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
+cache:
+  enabled: false

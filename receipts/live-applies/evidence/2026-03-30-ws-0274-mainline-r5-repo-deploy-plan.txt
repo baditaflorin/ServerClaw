@@ -1,0 +1,102 @@
+{
+  "generated_at": "2026-03-30T12:16:52Z",
+  "profile_count": 1,
+  "profiles": [
+    {
+      "allowed_build_packs": [
+        "dockercompose"
+      ],
+      "bundle_ids": [
+        "language-build-images",
+        "runtime-base-images",
+        "stateful-service-images"
+      ],
+      "deployment_lane": "coolify",
+      "freshness_hours": 24,
+      "id": "coolify-dockercompose-go-static-web"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "seed_images": [
+    {
+      "bundle_ids": [
+        "stateful-service-images"
+      ],
+      "concerns": [
+        "stateful_service"
+      ],
+      "freshness_hours": 24,
+      "image_ids": [
+        "postgres-runtime"
+      ],
+      "profile_ids": [
+        "coolify-dockercompose-go-static-web"
+      ],
+      "ref": "docker.io/library/postgres:17.4-alpine3.21"
+    },
+    {
+      "bundle_ids": [
+        "runtime-base-images"
+      ],
+      "concerns": [
+        "runtime_base"
+      ],
+      "freshness_hours": 24,
+      "image_ids": [
+        "alpine-runtime"
+      ],
+      "profile_ids": [
+        "coolify-dockercompose-go-static-web"
+      ],
+      "ref": "mirror.gcr.io/library/alpine:3.21.3"
+    },
+    {
+      "bundle_ids": [
+        "language-build-images"
+      ],
+      "concerns": [
+        "language_build"
+      ],
+      "freshness_hours": 24,
+      "image_ids": [
+        "go-build"
+      ],
+      "profile_ids": [
+        "coolify-dockercompose-go-static-web"
+      ],
+      "ref": "mirror.gcr.io/library/golang:1.25.0-alpine3.21"
+    },
+    {
+      "bundle_ids": [
+        "language-build-images"
+      ],
+      "concerns": [
+        "language_build"
+      ],
+      "freshness_hours": 24,
+      "image_ids": [
+        "node-build"
+      ],
+      "profile_ids": [
+        "coolify-dockercompose-go-static-web"
+      ],
+      "ref": "mirror.gcr.io/library/node:22.14.0-bookworm-slim"
+    },
+    {
+      "bundle_ids": [
+        "runtime-base-images"
+      ],
+      "concerns": [
+        "runtime_base"
+      ],
+      "freshness_hours": 24,
+      "image_ids": [
+        "nginx-unprivileged-runtime"
+      ],
+      "profile_ids": [
+        "coolify-dockercompose-go-static-web"
+      ],
+      "ref": "mirror.gcr.io/nginxinc/nginx-unprivileged:1.27.5-alpine3.21"
+    }
+  ]
+}

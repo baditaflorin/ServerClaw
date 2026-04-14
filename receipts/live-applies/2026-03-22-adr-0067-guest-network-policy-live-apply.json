@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0067-guest-network-policy-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "540a98016681ca20a748ff39925abdd2800dc570",
+  "repo_version_context": "0.64.0",
+  "workflow_id": "converge-guest-network-policy",
+  "adr": "0067",
+  "summary": "Applied explicit default-deny guest network policy on the Proxmox host and every managed Debian guest, with matched Proxmox VM firewall rules plus guest nftables enforcement.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.118.189.95"
+    },
+    {
+      "kind": "guest_group",
+      "name": "lv3_guests",
+      "address": "10.10.10.0/24"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Workflow convergence and idempotence",
+      "result": "pass",
+      "observed": "`make converge-guest-network-policy` completed successfully after live apply, and a follow-up rerun on the rebased `main` integration branch finished with `changed=0` on `proxmox_florin` plus every guest except `docker-runtime-lv3`, which reapplied the same verified nftables policy without changing the observed allow/deny behavior."
+    },
+    {
+      "check": "Management and NAT continuity",
+      "result": "pass",
+      "observed": "The Proxmox host retained SSH reachability to every managed guest on port 22, and `docker-build-lv3` reached `1.1.1.1` over NAT after the managed `fwbr+` conntrack-zone helper was installed."
+    },
+    {
+      "check": "Allowed east-west flows",
+      "result": "pass",
+      "observed": "`docker-runtime-lv3 -> postgres-lv3:5432`, `nginx-lv3 -> docker-runtime-lv3:3001`, and `docker-build-lv3 -> monitoring-lv3:3100` all completed successfully from inside the source guests."
+    },
+    {
+      "check": "Denied east-west flows",
+      "result": "pass",
+      "observed": "`backup-lv3 -> postgres-lv3:5432` and `postgres-lv3 -> docker-runtime-lv3:8082` both timed out with `rc=124`, confirming default-deny for unlisted inter-guest traffic."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0067-guest-network-policy-enforcement.md",
+    "docs/runbooks/configure-guest-network-policy.md",
+    "docs/runbooks/network-policy-reference.md",
+    "docs/workstreams/adr-0067-guest-network-policy.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The Proxmox host nftables forward model had to move from pre-firewall bridge-name matching to internal-subnet matching because VM firewalls rewire traffic through `fwbr`, `fwln`, and `fwpr` interfaces.",
+    "Guest-side defence in depth now mirrors the allow matrix in both nftables `input` and `forward` chains so Docker-published services remain reachable only from approved sources."
+  ]
+}

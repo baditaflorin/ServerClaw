@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0279-grist-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_by": "codex",
+  "source_commit": "f965aa3101fa2cd2260a8e6fda165f366365ed80",
+  "repo_version_context": "0.177.90",
+  "platform_version_context": "0.130.60",
+  "workflow_id": "adr-0279-grist-live-apply",
+  "adr": "0279",
+  "summary": "Live-applied ADR 0279 from the isolated worktree by deploying the repo-managed Grist runtime on docker-runtime-lv3, wiring the dedicated Keycloak OIDC client plus shared-edge publication for grist.lv3.org, hardening the OpenBao compose-env helper so secret injection survives concurrent Docker restarts, and verifying public health, auth redirection, TLS coverage, guest runtime state, and repo automation gates while protected mainline truth files remained deferred for the final synchronized main integration.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "grist-status",
+      "address": "https://grist.lv3.org/status"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "grist-docs",
+      "address": "https://grist.lv3.org/o/docs/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest origin/main baseline and isolated worktree context",
+      "result": "pass",
+      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` had advanced to commit `72ee92ef77cae2cf73e3c42168b2e193984c05c1` while this isolated worktree still carried replay source commit `f965aa3101fa2cd2260a8e6fda165f366365ed80`, proving the live apply and closeout work remained isolated from concurrent mainline churn."
+    },
+    {
+      "check": "Focused Grist regression and helper coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with jsonschema --with pyyaml python -m pytest -q tests/test_grist_runtime_role.py tests/test_grist_playbook.py tests/test_keycloak_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_ansible_execution_scopes.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_container_image_policy.py` returned `58 passed in 4.81s`, and `python3 scripts/validate_service_completeness.py --service grist` passed."
+    },
+    {
+      "check": "Repo validation and live-apply guardrails",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces data-models` passed after the workstream ownership manifest was constrained to the shared platform-topology, service-catalog, generated-portal, and OpenBao helper contracts; `make preflight WORKFLOW=live-apply-service service=grist env=production`, `uvx --from pyyaml python scripts/interface_contracts.py --check-live-apply service:grist`, `uv run --with pyyaml python scripts/standby_capacity.py --service grist`, `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service grist`, and `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grist --allow-in-place-mutation` all passed."
+    },
+    {
+      "check": "Scoped Ansible syntax verification",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0279syntax2 --playbook playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check` passed."
+    },
+    {
+      "check": "Scoped Grist live apply replay",
+      "result": "pass",
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ./scripts/run_with_namespace.sh uvx --from pyyaml python ./scripts/ansible_scope_runner.py run --inventory ./inventory/hosts.yml --run-id ws0279apply-recover --playbook ./playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed successfully with final recap `docker-runtime-lv3 ok=222 changed=16 failed=0`, `localhost ok=24 changed=0 failed=0`, and `nginx-lv3 ok=39 changed=5 failed=0`."
+    },
+    {
+      "check": "Public health, auth redirect, and TLS coverage",
+      "result": "pass",
+      "observed": "`curl -fsS https://grist.lv3.org/status` returned `Grist server(home,docs,static) is alive.`; `curl -sSI https://grist.lv3.org/o/docs/` returned `HTTP/2 302` to `https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?...client_id=grist...redirect_uri=https%3A%2F%2Fgrist.lv3.org%2Foauth2%2Fcallback...`; and `echo | openssl s_client -servername grist.lv3.org -connect grist.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName` showed a Let's Encrypt issuer (`CN=E7`) with SAN coverage for `DNS:grist.lv3.org`."
+    },
+    {
+      "check": "Controller-local secrets and guest runtime state",
+      "result": "pass",
+      "observed": "Controller-local secrets exist at `.local/keycloak/grist-client-secret.txt` and `.local/grist/session-secret.txt`; guest-local verification on `docker-runtime-lv3` confirmed `/opt/grist/docker-compose.yml`, `/opt/grist/openbao/agent.hcl`, and `/run/lv3-secrets/grist/runtime.env`; and `sudo docker ps --no-trunc | egrep 'grist|openbao'` showed the `grist`, `grist-openbao-agent`, and `lv3-openbao` containers running."
+    },
+    {
+      "check": "Image scan evidence for the Grist runtime image",
+      "result": "pass",
+      "observed": "The branch records the Grist image-scan outputs `receipts/image-scans/2026-03-30-grist-runtime.json` and `receipts/image-scans/2026-03-30-grist-runtime.trivy.json` for the runtime image introduced by ADR 0279."
+    },
+    {
+      "check": "Manual DNS exception before the successful rerun",
+      "result": "partial",
+      "observed": "The first replay failed inside the hidden Hetzner DNS task before the live evidence could determine whether the `grist` record had been created. To unblock the rerun, a manual Hetzner DNS API `POST` created the `grist` A record pointing at `65.108.75.123`, returning record id `0b604871e23c549236e54742c5790ba8`; the successful scoped replay then observed that record and converged idempotently."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md",
+    "docs/adr/.index.yaml",
+    "docs/workstreams/ws-0279-live-apply.md",
+    "docs/runbooks/configure-grist.md",
+    "workstreams.yaml",
+    "playbooks/grist.yml",
+    "playbooks/services/grist.yml",
+    "collections/ansible_collections/lv3/platform/roles/grist_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/grist_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/grist_runtime/tasks/publish.yml",
+    "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml",
+    "config/subdomain-catalog.json",
+    "config/certificate-catalog.json",
+    "config/health-probe-catalog.json",
+    "config/service-capability-catalog.json",
+    "config/service-completeness.json",
+    "config/service-redundancy-catalog.json",
+    "config/alertmanager/rules/grist.yml",
+    "config/grafana/dashboards/grist.json",
+    "receipts/image-scans/2026-03-30-grist-runtime.json",
+    "receipts/image-scans/2026-03-30-grist-runtime.trivy.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0279-grist-live-apply.txt",
+    "receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json"
+  ],
+  "notes": [
+    "This receipt records the branch-local live apply from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-live-apply` on branch `codex/ws-0279-live-apply` while protected integration files still remained off the workstream branch.",
+    "The OpenBao helper change in `collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml` was required because the first replay raced with a Docker restart and reached `127.0.0.1:8201` before `lv3-openbao` was back up.",
+    "Remaining for the synchronized `main` integration: pull the newest `origin/main`, replay the exact-main Grist apply from that tree, update protected release truth surfaces from main only, and replace this branch-local receipt reference with the canonical mainline receipt."
+  ]
+}

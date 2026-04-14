@@ -1,0 +1,7 @@
+Service: tika
+Name: Apache Tika
+Guest: runtime-ai-lv3
+Tier: R1
+Exposure: private-only
+Immutable Guest Replacement: no
+Reason: guest is not governed by ADR 0191 immutable replacement policy

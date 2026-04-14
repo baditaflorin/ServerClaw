@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0239-browser-local-search-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T22:15:33Z",
+  "recorded_by": "codex",
+  "source_commit": "1cd7aa76fc77cea42e1918c6d6b851349225e244",
+  "repo_version_context": "0.177.56",
+  "platform_version_context": "0.130.43",
+  "workflow_id": "adr-0239-browser-local-search-live-apply",
+  "adr": "0239",
+  "summary": "Implemented ADR 0239 from the rebased latest-origin/main worktree by replacing the docs portal's built-in search with a Pagefind-backed browser-local search flow, generating Pagefind bundles and filter metadata in the shared docs publication path, repairing the shared edge publication wrapper so it refreshes both static portals, and replaying `make deploy-docs-portal` onto `nginx-lv3`.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Developer portal",
+      "address": "https://docs.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0239 regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with-requirements requirements/docs.txt pytest -q tests/test_docs_site.py` returned `7 passed in 20.10s`, covering generated frontmatter, the Pagefind bundle, the custom search partials, and the dependency-graph regression that previously leaked raw frontmatter into rendered HTML."
+    },
+    {
+      "check": "Generated portal validation gate",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh generated-portals workstream-surfaces agent-standards` passed from the rebased worktree after the workstream surfaces were declared for `docs/runbooks/deployment-history-portal.md` and `docs/site-generated/architecture/dependency-graph.md`, and after the shared publication wrapper was updated to build both `build/changelog-portal/` and `build/docs-portal/` before replaying the edge lane."
+    },
+    {
+      "check": "Local docs portal build with Pagefind",
+      "result": "pass",
+      "observed": "`make docs` completed successfully and `python3 - <<'PY' ... print('portal_display' in Path('build/docs-portal/architecture/dependency-graph/index.html').read_text())` returned `False`. The Pagefind build reported `Indexed 764 pages`, `Indexed 14869 words`, and `Indexed 6 filters`, and the generated artifact scan passed for the published docs tree."
+    },
+    {
+      "check": "Live docs publication through the shared edge lane",
+      "result": "pass",
+      "observed": "A final `make deploy-docs-portal` replay from source commit `1cd7aa76fc77cea42e1918c6d6b851349225e244` completed successfully with playbook run id `8f20aa39e60847a8940ea9c84cdfd38f` and recap `nginx-lv3 ok=61 changed=3 failed=0 skipped=14`, after syncing both `changelog-portal` and `docs-portal` into `/var/www/lv3-generated/` on `nginx-lv3`."
+    },
+    {
+      "check": "External and guest verification of the published search surface",
+      "result": "pass",
+      "observed": "`curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and `x-robots-tag: noindex, nofollow`. Direct guest checks on `nginx-lv3` confirmed `pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css`, plus `pagefind/pagefind-ui.js`, `id=\"pagefind-search\"`, and `data-pagefind-filter=\"section\"` in the published HTML for the home, Keycloak, and ports pages; `portal_display: full` no longer appears in `/var/www/lv3-generated/docs-portal/architecture/dependency-graph/index.html`."
+    }
+  ],
+  "evidence_refs": [
+    "Makefile",
+    "docs/adr/0239-browser-local-search-experience-via-pagefind.md",
+    "docs/runbooks/developer-portal.md",
+    "docs/runbooks/deployment-history-portal.md",
+    "docs/site-generated/architecture/dependency-graph.md",
+    "docs/theme-overrides/main.html",
+    "docs/theme-overrides/partials/header.html",
+    "docs/theme-overrides/partials/search.html",
+    "docs/theme-overrides/partials/content.html",
+    "docs/theme-overrides/assets/javascripts/pagefind-search.js",
+    "docs/theme-overrides/assets/stylesheets/pagefind-search.css",
+    "docs/workstreams/ws-0239-live-apply.md",
+    "mkdocs.yml",
+    "requirements/docs.txt",
+    "receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json",
+    "scripts/build_docs_portal.py",
+    "scripts/generate_docs_site.py",
+    "scripts/validate_repo.sh",
+    "tests/test_docs_site.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The first `make deploy-docs-portal` attempt surfaced a real automation defect: `configure-edge-publication` always syncs both shared edge static directories, so the wrapper now regenerates `build/changelog-portal/` alongside `build/docs-portal/` before replaying the shared publication lane.",
+    "The dependency-graph page initially rendered a duplicated frontmatter block after the Pagefind wrapper was introduced; the live apply includes a normalization pass that strips pre-existing frontmatter and sensitivity notices before adding the Pagefind-aware wrapper, and the final deploy verified that the raw `portal_display: full` text no longer appears in the published HTML."
+  ]
+}

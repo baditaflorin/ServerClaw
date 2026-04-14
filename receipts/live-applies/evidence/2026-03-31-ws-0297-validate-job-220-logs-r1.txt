@@ -1,0 +1,35 @@
+2026-03-31T04:01:48.8613228Z docker-build-lv3(version:v0.2.12) received task 207 of job validate, be triggered by event: pull_request
+2026-03-31T04:01:48.8616685Z workflow prepared
+2026-03-31T04:01:48.8617407Z evaluating expression 'success()'
+2026-03-31T04:01:48.8617899Z expression 'success()' evaluated to 'true'
+2026-03-31T04:01:48.8625252Z   ☁  git clone 'https://github.com/actions/checkout' # ref=v4
+2026-03-31T04:01:48.8625590Z   cloning https://github.com/actions/checkout to /root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
+2026-03-31T04:01:54.4067524Z Cloned https://github.com/actions/checkout to /root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
+2026-03-31T04:01:54.4559879Z Checked out v4
+2026-03-31T04:01:54.4563466Z evaluating expression ''
+2026-03-31T04:01:54.4563750Z expression '' evaluated to 'true'
+2026-03-31T04:01:54.4563834Z ⭐ Run Main Checkout
+2026-03-31T04:01:54.4566893Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
+2026-03-31T04:01:54.4567011Z evaluating expression 'format('{0}', github.repository)'
+2026-03-31T04:01:54.4567234Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-31T04:01:54.4567403Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
+2026-03-31T04:01:54.4567472Z evaluating expression 'format('{0}', github.token)'
+2026-03-31T04:01:54.4567668Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
+2026-03-31T04:01:54.4567965Z type=remote-action actionDir=/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab actionPath= workdir=/workspace/ops/proxmox_florin_server actionCacheDir=/root/.cache/act actionName=c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab containerActionDir=/root/.cache/act/348d87c189714806/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
+2026-03-31T04:01:54.4568111Z /root/.cache/act/348d87c189714806/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
+2026-03-31T04:01:54.4568272Z Removing /root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/.gitignore before docker cp
+2026-03-31T04:01:54.4568733Z Stripping prefix:/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/ src:/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/
+2026-03-31T04:01:54.5734692Z executing remote job container: [node /root/.cache/act/348d87c189714806/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/dist/index.js]
+2026-03-31T04:01:54.5735737Z Cannot find: node in PATH
+2026-03-31T04:01:54.5735876Z   ❌  Failure - Main Checkout
+2026-03-31T04:01:54.5737668Z Cannot find: node in PATH
+2026-03-31T04:01:54.5739661Z evaluating expression 'always()'
+2026-03-31T04:01:54.5739783Z expression 'always()' evaluated to 'true'
+2026-03-31T04:01:54.5739853Z ⭐ Run Post Checkout
+2026-03-31T04:01:54.5740760Z run post step for 'Checkout'
+2026-03-31T04:01:54.5741266Z executing remote job container: [node /root/.cache/act/348d87c189714806/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/dist/index.js]
+2026-03-31T04:01:54.5741641Z Cannot find: node in PATH
+2026-03-31T04:01:54.5741795Z   ❌  Failure - Post Checkout
+2026-03-31T04:01:54.5743137Z Cleaning up container for job validate
+2026-03-31T04:01:54.6060283Z 🏁  Job failed
+2026-03-31T04:01:54.6061158Z Error occurred running finally: Error occurred running finally: Error occurred running finally: Cannot find: node in PATH (original error: <nil>) (original error: <nil>) (original error: <nil>)

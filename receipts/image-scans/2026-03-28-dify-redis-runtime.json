@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "dify_redis_runtime",
+  "image_ref": "docker.io/library/redis:6.2.20-alpine@sha256:77697a75da9f94e9357b61fcaf8345f69e3d9d32e9d15032c8415c21263977dc",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-28",
+  "summary": {
+    "critical": 6,
+    "high": 41
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/library/redis:6.2.20-alpine@sha256:77697a75da9f94e9357b61fcaf8345f69e3d9d32e9d15032c8415c21263977dc (alpine 3.21.5)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 2,
+      "high": 4
+    },
+    {
+      "target": "usr/local/bin/gosu",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 4,
+      "high": 37
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-28-dify-redis-runtime.trivy.json"
+}

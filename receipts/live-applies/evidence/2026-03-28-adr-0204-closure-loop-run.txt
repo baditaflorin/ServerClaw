@@ -1,0 +1,121 @@
+{
+  "approved_instruction": null,
+  "context_id": null,
+  "correction_loop": {
+    "escalation_target": "operator",
+    "loop_id": "runtime_self_correction_watchers",
+    "repair_action_kinds": [
+      "no_op",
+      "reconcile",
+      "rollback",
+      "escalate"
+    ],
+    "retry_budget_cycles": 3,
+    "verification_source": "The durable loop run record, watchdog heartbeat or action history, and the workflow or service-health verification probe chosen by the runtime.",
+    "workflow_id": "platform-observation-loop"
+  },
+  "created_at": "2026-03-28T12:14:48Z",
+  "current_state": "ESCALATED_FOR_APPROVAL",
+  "cycle_count": 0,
+  "escalation_reason": "top triage hypothesis is not auto-executable",
+  "execution_ref": null,
+  "execution_result": null,
+  "history": [
+    {
+      "actor": "agent/observation-loop",
+      "at": "2026-03-28T12:14:48Z",
+      "from_state": "OBSERVED",
+      "to_state": "TRIAGED",
+      "trigger": "auto-triage from observation_finding"
+    },
+    {
+      "actor": "agent/observation-loop",
+      "at": "2026-03-28T12:14:48Z",
+      "from_state": "TRIAGED",
+      "to_state": "ESCALATED_FOR_APPROVAL",
+      "trigger": "top hypothesis requires approval"
+    }
+  ],
+  "operator_approved": false,
+  "proposed_intent": null,
+  "resolution": null,
+  "resolved_at": null,
+  "run_id": "71ec1385-9d52-471d-8fbf-e1fbcec6c6ca",
+  "service_id": "windmill",
+  "triage_report": {
+    "affected_service": "windmill",
+    "auto_check_result": null,
+    "context_summary": {
+      "downstream_dependency_count": 2,
+      "maintenance_window_active": false,
+      "recent_deployment_count": 0,
+      "recent_log_count": 0,
+      "recent_mutation_count": 0,
+      "upstream_dependency_count": 0
+    },
+    "elapsed_ms": 355,
+    "hypotheses": [
+      {
+        "auto_check": false,
+        "cheapest_first_action": "Inspect logs for windmill and confirm upstream health.",
+        "confidence": 0.2,
+        "description": "Fallback hypothesis when no configured rule matches the assembled signal set.",
+        "discriminating_checks": [
+          {
+            "query": "service=\"windmill\" level=\"error\"",
+            "type": "log_query",
+            "window": "15m"
+          },
+          {
+            "instruction": "Check upstream dependencies for windmill",
+            "type": "manual"
+          }
+        ],
+        "evidence": [
+          "service_health_probe_failing=True",
+          "error_log_count_15m=0"
+        ],
+        "hypothesis": "No triage rule matched. Inspect recent logs and upstream dependencies manually.",
+        "id": "unclassified-incident",
+        "rank": 1
+      }
+    ],
+    "incident_id": "adr-0204-manual-verify:1",
+    "rule_table_version": "0.1.0",
+    "signal_set": {
+      "cpu_utilisation_pct": null,
+      "db_connection_count_pct": null,
+      "deployment_actor": "unknown",
+      "disk_utilisation_pct": null,
+      "downstream_services_affected_count": 2,
+      "error_log_count_15m": 0,
+      "maintenance_window_active": false,
+      "memory_utilisation_pct": null,
+      "recent_deployment_within_2h": false,
+      "recent_drift_detected": false,
+      "service_health_probe_failing": true,
+      "tls_cert_expiry_days": null,
+      "unhealthy_upstream_count": 0,
+      "upstream_db_healthy": null
+    },
+    "status": "firing",
+    "triage_at": "2026-03-28T12:14:48Z",
+    "triggered_by_alert": "manual-self-correcting-contract"
+  },
+  "trigger_payload": {
+    "alert_name": "manual-self-correcting-contract",
+    "finding": {
+      "check": "manual-self-correcting-contract",
+      "service_id": "windmill",
+      "severity": "critical"
+    },
+    "incident_id": "adr-0204-manual-verify:1",
+    "service_id": "windmill",
+    "severity": "critical",
+    "status": "firing"
+  },
+  "trigger_ref": "adr-0204-manual-verify:1",
+  "trigger_type": "observation_finding",
+  "updated_at": "2026-03-28T12:14:48Z",
+  "verification_result": null
+}

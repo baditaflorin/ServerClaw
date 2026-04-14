@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0337-fork-first-workstream-metadata-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T13:35:00Z",
+  "recorded_by": "codex",
+  "source_commit": "8459e919b7b7c4ff70cc130c6916b6bf6030e95c",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0337-fork-first-workstream-metadata-live-apply",
+  "adr": "0337",
+  "summary": "Live-applied ADR 0337 on `codex/ws-0337-live-apply` by tightening the repo-relative path contract to reject repository escapes, normalizing legacy workstream shard metadata back to canonical in-repo worktree and doc paths, hardening worktree creation and service scaffolding against out-of-repo metadata, and recording branch-local verification from the latest realistic `origin/main` base while leaving protected generated surfaces for the final mainline integration step.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "workstreams.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "docs/status/history/merged-workstreams.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "docs/adr/.index.yaml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Workstream registry and public-entrypoint contract",
+      "result": "pass",
+      "observed": "`python3 scripts/workstream_registry.py --check` and `python3 scripts/validate_public_entrypoints.py --check` both passed after the shard normalization, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-registry-check-r1.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0337-validate-public-entrypoints-r1.txt`."
+    },
+    {
+      "check": "Branch ownership and repository gate slices",
+      "result": "pass",
+      "observed": "`python3 scripts/workstream_surface_ownership.py --validate-branch --base-ref origin/main`, `./scripts/validate_repo.sh agent-standards`, and `./scripts/validate_repo.sh workstream-surfaces` all passed on the branch-local tree, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-surfaces-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0337-agent-standards-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-surfaces-gate-r1.txt`."
+    },
+    {
+      "check": "Data-model and focused regression coverage",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate` and `uv run --with pytest --with pyyaml python -m pytest tests/test_scaffold_service.py tests/test_validate_public_entrypoints.py tests/test_workstream_surface_ownership.py -q` both passed, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-data-models-r1.txt` and `receipts/live-applies/evidence/2026-04-04-ws-0337-targeted-tests-r1.txt`."
+    },
+    {
+      "check": "Release-readiness snapshot",
+      "result": "partial",
+      "observed": "`uv run --with pyyaml python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, zero workstreams in progress, and a blocked release cut because three pre-existing `controller_dependency_gap` waiver blockers remain open through `2026-04-06`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-release-status-r1.json`."
+    },
+    {
+      "check": "Patch hygiene",
+      "result": "pass",
+      "observed": "`git diff --check` passed after the registry normalization, validator updates, and evidence capture, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0337-git-diff-check-r1.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0337-fork-first-workstream-and-worktree-metadata.md",
+    "docs/adr/.index.yaml",
+    "docs/adr/index/by-concern/agent-discovery.yaml",
+    "docs/adr/index/by-range/0300-0399.yaml",
+    "docs/adr/index/by-status/implemented.yaml",
+    "docs/runbooks/workstream-registry-shards.md",
+    "docs/status/history/merged-workstreams.md",
+    "docs/workstreams/ws-0337-live-apply.md",
+    "platform/repo.py",
+    "scripts/create-workstream.sh",
+    "scripts/scaffold_service.py",
+    "scripts/validate_public_entrypoints.py",
+    "scripts/validate_repository_data_models.py",
+    "scripts/workstream_surface_ownership.py",
+    "tests/test_scaffold_service.py",
+    "tests/test_validate_public_entrypoints.py",
+    "tests/test_workstream_surface_ownership.py",
+    "workstreams.yaml",
+    "workstreams/archive/2026/ws-0337-live-apply.yaml",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-registry-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-validate-public-entrypoints-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-surfaces-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-agent-standards-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-workstream-surfaces-gate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-data-models-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-targeted-tests-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-release-status-r1.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0337-git-diff-check-r1.txt"
+  ],
+  "notes": [
+    "This is the branch-local live-apply receipt for a repo-only ADR, so it records the dedicated worktree verification without claiming an integrated repo version yet.",
+    "The protected `README.md`, `changelog.md`, and `versions/stack.yaml` surfaces remain untouched in this branch so the final shared-surface replay can happen from fresh `main` during integration.",
+    "Because ADR 0337 changes repository coordination metadata and tooling rather than live platform state, `Implemented In Platform Version` remains `not applicable (repo-only)` and the platform version stays `0.130.98`."
+  ]
+}

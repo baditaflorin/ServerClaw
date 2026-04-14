@@ -1,0 +1,21 @@
+# HELP alloy_build_info A metric with a constant '1' value labeled by version, revision, branch, goversion from which alloy was built, and the goos and goarch for the build.
+# TYPE alloy_build_info gauge
+alloy_build_info{branch="HEAD",goarch="amd64",goos="linux",goversion="go1.25.7",revision="fea47a9",tags="netgo,embedalloyui,promtail_journal_enabled",version="v1.14.1"} 1
+# HELP alloy_component_controller_evaluating Tracks if the controller is currently in the middle of a graph evaluation
+# TYPE alloy_component_controller_evaluating gauge
+alloy_component_controller_evaluating{controller_id="",controller_path="/"} 0
+alloy_component_controller_evaluating{controller_id="remotecfg",controller_path="/"} 0
+# HELP alloy_component_controller_running_components Total number of running components.
+# TYPE alloy_component_controller_running_components gauge
+alloy_component_controller_running_components{controller_id="",controller_path="/",health_type="healthy"} 5
+# HELP alloy_component_dependencies_wait_seconds Time spent by components waiting to be evaluated after their dependency is updated.
+# TYPE alloy_component_dependencies_wait_seconds histogram
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="0.005"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="0.025"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="0.1"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="0.5"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="1"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="5"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="10"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_id="",controller_path="/",le="30"} 5
+alloy_component_dependencies_wait_seconds_bucket{controller_

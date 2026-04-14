@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "matrix_mautrix_discord_runtime",
+  "image_ref": "dock.mau.dev/mautrix/discord:v0.7.6@sha256:e4946b0df6a2786c88ed490e0d2692e352f1b79b9ff0e821a33764bd8bd1fffd",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 1,
+    "high": 4
+  },
+  "targets_with_findings": [
+    {
+      "target": "dock.mau.dev/mautrix/discord:v0.7.6@sha256:e4946b0df6a2786c88ed490e0d2692e352f1b79b9ff0e821a33764bd8bd1fffd (alpine 3.23.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 1,
+      "high": 2
+    },
+    {
+      "target": "usr/bin/mautrix-discord",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 0,
+      "high": 2
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-matrix-mautrix-discord-runtime.trivy.json"
+}

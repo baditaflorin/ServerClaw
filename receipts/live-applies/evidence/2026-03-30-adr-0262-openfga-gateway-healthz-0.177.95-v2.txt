@@ -1,0 +1,2 @@
+{"error":{"code":"AUTH_INSUFFICIENT_ROLE","message":"Caller identity is authenticated but lacks the required role.","trace_id":"8794ba15acbc47d7bc2159af027dc9e9","retry_advice":"none","retry_after":null,"docs_url":"https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md","occurred_at":"2026-03-30T02:48:13.121420+00:00","context":{"required_role":"platform-operator","subject":"service-account-lv3-agent-hub","service_id":"openfga/healthz"}}}
+HTTP_STATUS=403

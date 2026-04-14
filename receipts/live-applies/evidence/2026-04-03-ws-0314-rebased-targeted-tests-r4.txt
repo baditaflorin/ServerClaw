@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply
+configfile: pytest.ini
+plugins: anyio-4.13.0
+collected 125 items
+
+tests/test_interactive_ops_portal.py ................................... [ 28%]
+.......                                                                  [ 33%]
+tests/test_ops_portal_playbook.py .......                                [ 39%]
+tests/test_ops_portal_runtime_role.py ....                               [ 42%]
+tests/test_api_gateway.py ...........................                    [ 64%]
+tests/test_runbook_use_cases.py ....                                     [ 67%]
+tests/test_runbook_executor.py .....                                     [ 71%]
+tests/test_restic_config_backup.py .........................             [ 91%]
+tests/test_typesense_runtime_role.py ...........                         [100%]
+
+============================= 125 passed in 13.81s =============================

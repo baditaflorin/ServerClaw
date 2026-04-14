@@ -1,0 +1,7 @@
+Agent standards validation (ADR 0163-0168)
+WARNING: Inventory changed since topology snapshot was generated (ADR 0344).
+  Newer file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0339-live-apply/inventory/group_vars/all.yml
+  Run: python3 scripts/generate_topology_snapshot.py
+  Then: git add scripts/topology-snapshot.json
+Workstream surface ownership validation
+Repository data model validation

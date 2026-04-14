@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0278-gotenberg-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-29T22:55:42Z",
+  "recorded_by": "codex",
+  "source_commit": "8613ecf8fa4b5f43124bcc404acb1d7fd1213b36",
+  "repo_version_context": "0.177.89",
+  "platform_version_context": "0.130.59",
+  "workflow_id": "converge-gotenberg",
+  "adr": "0278",
+  "summary": "Implemented ADR 0278 on the live platform by converging the private Gotenberg runtime on `docker-runtime-lv3`, refreshing the authenticated `/v1/gotenberg` API gateway route, and verifying both health plus real Chromium and LibreOffice PDF renders from the guest-local service and the gateway-backed operator path. The successful replay used source commit `8613ecf8fa4b5f43124bcc404acb1d7fd1213b36`; protected mainline truth surfaces still wait for the exact-main integration step.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "application",
+      "name": "api.lv3.org/v1/gotenberg",
+      "address": "https://api.lv3.org/v1/gotenberg"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repo automation and validation slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest tests/test_gotenberg_runtime_role.py -q` returned `11 passed in 0.41s`; `make syntax-check-gotenberg` passed; `uvx --from pyyaml python scripts/ansible_scope_runner.py validate` passed; `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` passed; `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --service gotenberg` plus `--check-live-apply --service gotenberg` passed; `uv run --with pyyaml python scripts/standby_capacity.py --service gotenberg` approved the declared standby path; `uv run --with pyyaml --with jsonschema python scripts/service_completeness.py --service gotenberg` passed; `uvx --from pyyaml python scripts/interface_contracts.py --check-live-apply service:gotenberg` passed; and `./scripts/validate_repo.sh agent-standards` passed on the workstream tree."
+    },
+    {
+      "check": "Pinned image contract and scan receipt",
+      "result": "pass",
+      "observed": "`config/image-catalog.json` now pins `docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5`, and `receipts/image-scans/2026-03-30-gotenberg-runtime.json` records the accompanying Trivy scan with `critical=0` and `high=40` for the pinned linux/amd64 image."
+    },
+    {
+      "check": "Governed branch-local converge",
+      "result": "pass",
+      "observed": "`make converge-gotenberg` completed successfully from source commit `8613ecf8fa4b5f43124bcc404acb1d7fd1213b36` with recap `docker-runtime-lv3 : ok=256 changed=113 unreachable=0 failed=0 skipped=28 rescued=1 ignored=0`; the successful transcript is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0278-converge-gotenberg-r5.txt`."
+    },
+    {
+      "check": "Private runtime verification",
+      "result": "pass",
+      "observed": "The guest-local health probe returned `{\"status\":\"up\"...}` from `http://127.0.0.1:3007/health`; the local Chromium render returned `pdf_magic=%PDF` and `pdf_bytes=18591`; and the local LibreOffice render returned `pdf_magic=%PDF` and `pdf_bytes=14003`, as captured in the `2026-03-30-ws-0278-local-*` evidence files."
+    },
+    {
+      "check": "Authenticated API gateway verification",
+      "result": "pass",
+      "observed": "Using the controller-local platform-context bearer token, `https://api.lv3.org/v1/gotenberg/health` returned `{\"status\":\"up\"...}`, and the authenticated Chromium gateway render returned `pdf_magic=%PDF` with `pdf_bytes=17101`, proving the governed `/v1/gotenberg` route is live."
+    },
+    {
+      "check": "Exact-main integration still pending",
+      "result": "partial",
+      "observed": "`./scripts/validate_repo.sh generated-docs` now fails only because canonical truth is stale for protected mainline surfaces `changelog.md` and `versions/stack.yaml`, which must wait for the final exact-main integration step. `origin/main` also advanced again during this workstream, so the authoritative replay still needs to be repeated from the newest synchronized mainline before pushing `origin/main`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md",
+    "docs/workstreams/ws-0278-live-apply.md",
+    "docs/runbooks/configure-gotenberg.md",
+    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/group_vars/platform.yml",
+    "scripts/generate_platform_vars.py",
+    "config/service-capability-catalog.json",
+    "config/health-probe-catalog.json",
+    "config/image-catalog.json",
+    "config/service-completeness.json",
+    "config/service-redundancy-catalog.json",
+    "config/api-gateway-catalog.json",
+    "config/dependency-graph.json",
+    "config/slo-catalog.json",
+    "config/data-catalog.json",
+    "config/command-catalog.json",
+    "config/workflow-catalog.json",
+    "config/ansible-execution-scopes.yaml",
+    "playbooks/gotenberg.yml",
+    "playbooks/services/gotenberg.yml",
+    "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/templates/docker-compose.yml.j2",
+    "tests/test_gotenberg_runtime_role.py",
+    "receipts/image-scans/2026-03-30-gotenberg-runtime.json",
+    "receipts/image-scans/2026-03-30-gotenberg-runtime.trivy.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-converge-gotenberg.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-converge-gotenberg-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-converge-gotenberg-r3.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-converge-gotenberg-r4.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-converge-gotenberg-r5.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-local-health.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-local-chromium.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-local-libreoffice.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-gateway-health.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-gateway-chromium.txt",
+    "receipts/live-applies/2026-03-30-adr-0278-gotenberg-live-apply.json"
+  ],
+  "notes": [
+    "The successful branch-local replay only happened after fixing four defects uncovered by the live apply itself: direct `playbooks/gotenberg.yml` scope registration, role defaults resolving service topology from the hostvars scope, Docker bridge-network creation failing because `DOCKER-FORWARD` was absent on the guest, and Chromium HTML uploads requiring the multipart filename `index.html`.",
+    "The service stays intentionally private on `docker-runtime-lv3`; the supported authenticated operator path is the governed API gateway route `https://api.lv3.org/v1/gotenberg`.",
+    "Protected integration files remain intentionally untouched on this workstream branch. The final merge-to-main step still needs the newest `origin/main`, the exact-main replay, and the canonical release-surface updates before `versions/stack.yaml` can move."
+  ]
+}

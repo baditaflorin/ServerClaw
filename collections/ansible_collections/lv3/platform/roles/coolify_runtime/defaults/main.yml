@@ -8,6 +8,11 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+coolify_site_dir: /opt/coolify
+coolify_compose_file: "{{ coolify_site_dir }}/docker-compose.yml"
+coolify_env_file: "{{ coolify_data_root }}/source/.env"
+coolify_internal_port: "{{ platform_service_topology | platform_service_port('coolify', 'internal') }}"
+coolify_local_artifact_dir: "{{ repo_shared_local_root }}/coolify"
 coolify_app_image: ghcr.io/coollabsio/coolify:latest
 coolify_realtime_image: ghcr.io/coollabsio/coolify-realtime:1.0.11
 coolify_postgres_image: postgres:15-alpine

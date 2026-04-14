@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "dify_sandbox_runtime",
+  "image_ref": "docker.io/langgenius/dify-sandbox:0.2.14@sha256:a56b9ca13d7aed8344a511cfc219aeaf12d589fa84f25d88875181285e69f560",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-28",
+  "summary": {
+    "critical": 0,
+    "high": 4
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/langgenius/dify-sandbox:0.2.14@sha256:a56b9ca13d7aed8344a511cfc219aeaf12d589fa84f25d88875181285e69f560 (debian 13.4)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 0,
+      "high": 2
+    },
+    {
+      "target": "main",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 0,
+      "high": 1
+    },
+    {
+      "target": "var/sandbox/sandbox-python/python.so",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 0,
+      "high": 1
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-28-dify-sandbox-runtime.trivy.json"
+}

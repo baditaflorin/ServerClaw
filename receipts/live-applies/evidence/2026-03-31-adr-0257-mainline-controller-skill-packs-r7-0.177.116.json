@@ -1,0 +1,131 @@
+{
+  "active_skill_count": 2,
+  "active_skills": [
+    {
+      "browser_refs": [],
+      "connector_refs": [],
+      "description": "Prepare or review governed platform mutations without bypassing approval, validation, or receipt policy.",
+      "memory_refs": [],
+      "metadata": {
+        "lv3": {
+          "tool_refs": [
+            "check-command-approval",
+            "run-governed-command",
+            "query-platform-context"
+          ]
+        },
+        "openclaw": {
+          "compatibility": "skill-md"
+        }
+      },
+      "prompt_markdown": "Use this skill when the task is drifting from advice into a potential live mutation.\n\nCheck the approval contract before proposing execution. If more context is needed, query the platform context and explain the approval, validation, and receipt expectations clearly. Do not imply that SKILL.md access bypasses governed-command policy.",
+      "search_refs": [],
+      "skill_id": "change-approval",
+      "source_path": "config/serverclaw/skills/shared/change-approval/SKILL.md",
+      "source_tier": "shared",
+      "title": "Change Approval",
+      "tool_refs": [
+        "check-command-approval",
+        "run-governed-command",
+        "query-platform-context"
+      ]
+    },
+    {
+      "browser_refs": [],
+      "connector_refs": [],
+      "description": "Workspace-local override that prioritizes production receipts, live-applied runbooks, and current operator-safe routes.",
+      "memory_refs": [
+        "memory:platform-context"
+      ],
+      "metadata": {
+        "lv3": {
+          "memory_refs": [
+            "memory:platform-context"
+          ],
+          "search_refs": [
+            "search:local-search"
+          ],
+          "tool_refs": [
+            "get-platform-status",
+            "list-recent-receipts",
+            "query-platform-context"
+          ]
+        },
+        "openclaw": {
+          "compatibility": "skill-md"
+        }
+      },
+      "prompt_markdown": "Use this workspace-local override for the `ops` workspace whenever a question touches the live estate.\n\nPrefer the latest live-apply receipts and current runbooks over older architecture-only notes. When there is tension between intent and live state, surface the discrepancy explicitly and anchor the answer in the most recent verified evidence.",
+      "search_refs": [
+        "search:local-search"
+      ],
+      "skill_id": "platform-observe",
+      "source_path": "config/serverclaw/workspaces/ops/skills/platform-observe/SKILL.md",
+      "source_tier": "workspace",
+      "title": "Platform Observe (Ops Workspace Override)",
+      "tool_refs": [
+        "get-platform-status",
+        "list-recent-receipts",
+        "query-platform-context"
+      ]
+    }
+  ],
+  "default_workspace_id": "ops",
+  "imported_skills": [
+    {
+      "browser_refs": [],
+      "connector_refs": [],
+      "description": "Mirrored third-party example retained for review and comparison, not for automatic activation.",
+      "enabled": false,
+      "memory_refs": [],
+      "metadata": {
+        "lv3": {
+          "tool_refs": [
+            "query-platform-context"
+          ]
+        },
+        "openclaw": {
+          "compatibility": "skill-md",
+          "source": "mirrored-third-party"
+        }
+      },
+      "prompt_markdown": "This mirrored skill pack is retained only for compatibility review.\n\nDo not activate or rely on this pack automatically. Promote reviewed content into the governed shared skill root before making it available to live workspaces.",
+      "provider": "openclaw-mirror",
+      "review_state": "mirrored_unreviewed",
+      "search_refs": [],
+      "skill_id": "openclaw-mirror-observe",
+      "source_path": "config/serverclaw/skills/imported/openclaw-mirror-observe/SKILL.md",
+      "source_tier": "imported",
+      "source_url": "https://docs.openclaw.ai/tools/creating-skills",
+      "title": "OpenClaw Mirror Observe",
+      "tool_refs": [
+        "query-platform-context"
+      ]
+    }
+  ],
+  "prompt_manifest": [
+    {
+      "description": "Prepare or review governed platform mutations without bypassing approval, validation, or receipt policy.",
+      "skill_id": "change-approval",
+      "source_path": "config/serverclaw/skills/shared/change-approval/SKILL.md",
+      "source_tier": "shared",
+      "title": "Change Approval"
+    },
+    {
+      "description": "Workspace-local override that prioritizes production receipts, live-applied runbooks, and current operator-safe routes.",
+      "skill_id": "platform-observe",
+      "source_path": "config/serverclaw/workspaces/ops/skills/platform-observe/SKILL.md",
+      "source_tier": "workspace",
+      "title": "Platform Observe (Ops Workspace Override)"
+    }
+  ],
+  "shadowed_skills": [
+    {
+      "active_source_tier": "workspace",
+      "shadowed_source_path": "config/serverclaw/skills/bundled/platform-observe/SKILL.md",
+      "shadowed_source_tier": "bundled",
+      "skill_id": "platform-observe"
+    }
+  ],
+  "workspace_id": "ops"
+}

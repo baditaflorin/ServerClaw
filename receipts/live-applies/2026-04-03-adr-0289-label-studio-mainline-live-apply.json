@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0289-label-studio-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T10:26:10Z",
+  "recorded_by": "codex",
+  "source_commit": "cb7a375c784347f600f136a73ed91991808fb828",
+  "repo_version_context": "0.177.153",
+  "platform_version_context": "0.130.97",
+  "workflow_id": "adr-0289-label-studio-mainline-live-apply",
+  "adr": "0289",
+  "summary": "Promoted ADR 0289 into canonical mainline truth as repository version `0.177.153` and platform version `0.130.97` after replaying Label Studio from the latest realistic `origin/main` baseline on source commit `cb7a375c784347f600f136a73ed91991808fb828`, preserving the earlier rebased exact-main success on `0.177.152` / `0.130.95`, repairing shared Coolify apps truth drift exposed by the rebase, and re-verifying the public oauth2-proxy redirect boundary at `annotate.lv3.org`.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Label Studio public edge",
+      "address": "https://annotate.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest-realistic mainline Label Studio replay",
+      "result": "pass",
+      "observed": "After `origin/main` advanced to `26e6849be` while this workstream was in flight, the final replay from merged head `cb7a375c784347f600f136a73ed91991808fb828` succeeded with recap `docker-runtime-lv3 ok=492 changed=144 failed=0`, `postgres-lv3 ok=73 changed=0 failed=0`, `nginx-lv3 ok=100 changed=5 failed=0`, and `localhost ok=22 changed=0 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r8-0.177.153.txt`."
+    },
+    {
+      "check": "Rebased exact-main correction loop",
+      "result": "pass",
+      "observed": "The first post-rebase generator and converge attempts exposed stale shared `coolify_apps` truth after ADR 0340 landed on main, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-edge-static-sites-r1-0.177.152.txt` and `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r6-0.177.152.txt`; after repairing the shared service catalogs and capacity model, the rebased exact-main replay succeeded on the `0.177.152` / `0.130.95` baseline, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r7-0.177.152.txt`."
+    },
+    {
+      "check": "Public shared-edge redirect verification",
+      "result": "pass",
+      "observed": "Standalone curl verification preserved in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r4-0.177.153.txt` confirms both `https://annotate.lv3.org/` and `https://annotate.lv3.org/api/projects` return `302` redirects into `https://annotate.lv3.org/oauth2/sign_in`, preserving the shared oauth2-proxy and Keycloak browser boundary."
+    },
+    {
+      "check": "Protected truth refresh and workstream validation",
+      "result": "pass",
+      "observed": "The final integration refreshed the ADR index, canonical truth, diagrams, platform manifest, subdomain exposure registry, and generated edge portals in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-adr-index-r4-0.177.153.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-canonical-truth-r2-0.177.153.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-diagrams-r1-0.177.153.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-platform-manifest-r1-0.177.153.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-subdomain-exposure-r1-0.177.153.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-edge-static-sites-r3-0.177.153.txt`; the repo automation gate for agent standards, workstream surfaces, and health probes also passed in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-validate-repo-r3-0.177.153.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/.index.yaml",
+    "docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md",
+    "docs/release-notes/README.md",
+    "docs/release-notes/0.177.153.md",
+    "docs/runbooks/configure-label-studio.md",
+    "docs/workstreams/ws-0289-label-studio-live-apply.md",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r6-0.177.152.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r7-0.177.152.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r8-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-adr-index-r4-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-canonical-truth-r2-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-diagrams-r1-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-platform-manifest-r1-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-subdomain-exposure-r1-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-generate-edge-static-sites-r3-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-validate-repo-r3-0.177.153.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r4-0.177.153.txt",
+    "receipts/live-applies/2026-04-03-adr-0289-label-studio-mainline-live-apply.json",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt is the canonical exact-main proof for ADR 0289 on repository version `0.177.153` and the first verified platform promotion to `0.130.97`.",
+    "The latest realistic mainline baseline was inconsistent when this workstream reached it: `VERSION` still read `0.177.152` while `versions/stack.yaml` already read `0.177.153` / `0.130.96`. This closeout repaired those protected release surfaces while preserving the live apply proof from merged head `cb7a375c784347f600f136a73ed91991808fb828`.",
+    "The automated release-manager write path remained blocked by unrelated active workstreams `ws-0330-public-github-readiness` and `ws-0340-implementation`, so the `0.177.153` release surfaces were reconciled manually as part of this exact-main integration."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-03-ws-0289-coolify-split-truth-and-latest-main-replay",
+    "surface": "Rebased and latest-main Label Studio exact-main replay",
+    "diagnosis": "contract_drift",
+    "repair_action": "Repaired the shared Coolify apps service catalogs and capacity model after ADR 0340 landed on main, preserved the rebased `0.177.152` exact-main success, merged the newer `origin/main` head, and reran the full Label Studio converge on merged head `cb7a375c784347f600f136a73ed91991808fb828` before promoting the protected release surfaces.",
+    "verification": "receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-mainline-converge-r8-0.177.153.txt"
+  }
+}

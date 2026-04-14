@@ -1,0 +1,62 @@
+source_commit: 591eb347cfda43a4e2ae8d26499211df9536d7b5
+recorded_at: 2026-04-03T10:45:17Z
+
+[commit-summary]
+commit 591eb347cfda43a4e2ae8d26499211df9536d7b5
+Author: Florin Badita-Nistor <baditaflorin@gmail.com>
+Date:   Fri Apr 3 13:22:30 2026 +0300
+
+    [ws-0340] Finalize live apply: HTTP upstream, DB migration, full completion
+
+    - Fix *.apps.lv3.org NGINX upstream from https://10.10.10.71:443 to
+      http://10.10.10.71:80 so NGINX terminates TLS and Caddy serves apps
+      on port 80 without needing its own ACME cert (Finding 10)
+    - Update platform.yml both production and staging coolify_apps service
+      entries with correct port (80) and URL scheme (http)
+    - Record apps_migration_status: migrated_via_db (direct psql UPDATE)
+    - Record nginx_edge_updated: true and repo_smoke_public_http_verified: true
+    - Update ADR 0340 Implementation Status: Implemented
+    - Add Finding 7 resolution (DB migration SQL) and Finding 10 (NGINX TLS)
+    - Mark ws-0340-implementation: status=completed, live_applied=true
+    - Fix coolify_tool.py migrate fallback: to_dest or to_uuid (preserves test)
+
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+ .../0340-dedicated-coolify-apps-vm-separation.md   | 41 ++++++++++++++++++----
+ inventory/group_vars/platform.yml                  | 12 +++----
+ scripts/coolify_tool.py                            | 38 +++++++++++++++++---
+ versions/stack.yaml                                |  5 +--
+ workstreams.yaml                                   |  6 ++--
+ 5 files changed, 80 insertions(+), 22 deletions(-)
+
+[stack-truth]
+88:    coolify_apps: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
+911:    apps_migration_status: migrated_via_db  # Direct DB: UPDATE applications SET destination_id=34 WHERE destination_id=1 via docker exec coolify-db psql
+912:    nginx_edge_updated: true  # *.apps.lv3.org upstream updated from 10.10.10.70 to http://10.10.10.71:80
+914:    repo_smoke_public_http_verified: true
+
+[inventory-upstream]
+571:      ipv4: 10.10.10.71
+895:      ipv4: 10.10.10.71
+1223:      ipv4: 10.10.10.71
+2844:  coolify_apps:
+2847:    private_ip: 10.10.10.71
+2864:      upstream: http://10.10.10.71:80
+2870:    service_id: coolify_apps
+2880:      internal: http://10.10.10.71:80
+5240:  coolify_apps:
+5243:    private_ip: 10.10.10.71
+5260:      upstream: http://10.10.10.71:80
+5266:    service_id: coolify_apps
+5276:      internal: http://10.10.10.71:80
+
+[automation-fallback]
+791:    to_uuid = to_server["uuid"]
+805:        if app_server_uuid == to_uuid:
+813:        to_destination_uuid = (app.get("destination") or {}).get("uuid", "")
+816:        to_dest = next(
+821:                    (a.get("server") or {}).get("uuid") == to_uuid
+822:                    or (a.get("destination") or {}).get("server", {}).get("uuid") == to_uuid
+831:            # which is caught below and recorded as migrated_via_db.
+832:            patch_uuid = to_dest or to_destination_uuid or to_uuid
+843:                skipped.append(f"{app_name}:migrated_via_db")

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "plausible_postgres_runtime",
+  "image_ref": "docker.io/library/postgres:16-alpine@sha256:60b180625695e90b6e450405d5f0bcb74bc8c52c65d1cd11aeb3da46cac06dd8",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 1,
+    "high": 6
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/library/postgres:16-alpine@sha256:60b180625695e90b6e450405d5f0bcb74bc8c52c65d1cd11aeb3da46cac06dd8 (alpine 3.23.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 0,
+      "high": 1
+    },
+    {
+      "target": "usr/local/bin/gosu",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 1,
+      "high": 5
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-plausible-postgres-runtime.trivy.json"
+}

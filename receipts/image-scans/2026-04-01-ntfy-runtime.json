@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "ntfy_runtime",
+  "image_ref": "docker.io/binwiederhier/ntfy:v2.21.0@sha256:28cb21ed7011425d02adbff38b380f39390a7ae20f281c335b5649f9a41fc7c1",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-04-01",
+  "sbom_receipt": "receipts/sbom/28cb21ed7011.cdx.json",
+  "cve_receipt": "receipts/cve/28cb21ed7011-20260401T155934Z.grype.json",
+  "summary": {
+    "critical": 0,
+    "high": 2,
+    "medium": 4,
+    "low": 0,
+    "unknown": 0,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 6
+  }
+}

@@ -1,0 +1,19 @@
+2026-04-01T06:22:17Z
+## billing root
+HTTP/2 308
+server: nginx
+date: Wed, 01 Apr 2026 06:22:17 GMT
+content-type: text/html
+content-length: 164
+location: https://nginx.lv3.org/
+x-robots-tag: noindex, nofollow
+
+
+## billing health
+HTTP/2 308
+server: nginx
+date: Wed, 01 Apr 2026 06:22:18 GMT
+content-type: text/html
+content-length: 164
+location: https://nginx.lv3.org/api/health
+x-robots-tag: noindex, nofollow

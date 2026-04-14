@@ -1,0 +1,1 @@
+subdomain exposure audit error: Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'.

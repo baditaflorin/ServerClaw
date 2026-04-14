@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0105-capacity-model-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "2907637daca87ee2bb739c0dd821eee0834aa319",
+  "repo_version_context": "0.177.5",
+  "workflow_id": "adr-0105-capacity-model-mainline-live-apply",
+  "adr": "0105",
+  "summary": "Replayed ADR 0105 from the latest origin/main integration branch, verified the live LV3 capacity dashboard and capacity-report entrypoints end to end on monitoring-lv3, and fixed the separate-worktree live-apply path by shortening per-run Ansible SSH control-socket directories while preserving primary inventory group vars for scoped runs.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "grafana.lv3.org",
+      "address": "https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0105 repository validation",
+      "result": "pass",
+      "observed": "Focused ADR 0105 validation passed on the mainline integration worktree with `uv run --with pytest python -m pytest tests/test_ansible_execution_scopes.py tests/test_monitoring_vm_role.py tests/test_weekly_capacity_report_windmill.py tests/test_capacity_report.py tests/test_lv3_cli.py tests/test_promotion_pipeline.py -q` returning `67 passed`, plus `make syntax-check-monitoring` succeeding."
+    },
+    {
+      "check": "Separate-worktree automation regression coverage",
+      "result": "pass",
+      "observed": "The fresh-worktree automation regression suite `uv run --with pytest python -m pytest tests/test_run_namespace.py tests/test_ansible_execution_scopes.py tests/test_remote_exec.py -q` returned `20 passed` after `scripts/run_namespace.py` moved per-run Ansible SSH control sockets to compact `/tmp/lv3-acp/<token>` paths while `platform/ansible/execution_scopes.py` kept the primary inventory alongside shard inventories."
+    },
+    {
+      "check": "Capacity report entry points and quota gate",
+      "result": "pass",
+      "observed": "`make capacity-report NO_LIVE_METRICS=true`, `make capacity-report`, `make weekly-capacity-report NO_LIVE_METRICS=true`, and `make weekly-capacity-report` all rendered successfully, and `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100` rejected the proposed change because projected RAM commitment and vCPU commitment would exceed the target ceilings."
+    },
+    {
+      "check": "Mainline monitoring replay",
+      "result": "pass",
+      "observed": "The official replay `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'` completed cleanly from the separate latest-main worktree with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`."
+    },
+    {
+      "check": "Published Grafana dashboard path",
+      "result": "pass",
+      "observed": "The public dashboard route `https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to `/login`, confirming the live route for dashboard uid `lv3-capacity-overview` while unauthenticated viewers remain gated."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml",
+    "config/windmill/scripts/weekly-capacity-report.py",
+    "docs/adr/0105-platform-capacity-model.md",
+    "docs/runbooks/capacity-model.md",
+    "docs/workstreams/adr-0105-capacity-model.md",
+    "docs/workstreams/ws-0105-live-apply.md",
+    "platform/ansible/execution_scopes.py",
+    "scripts/run_namespace.py",
+    "tests/test_ansible_execution_scopes.py",
+    "tests/test_monitoring_vm_role.py",
+    "tests/test_run_namespace.py",
+    "tests/test_weekly_capacity_report_windmill.py",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The first 2026-03-26 production replay from `codex/ws-0105-live-apply` imported and verified the capacity dashboard before a later transient SSH reachability failure in downstream blackbox verification; the immediate replay then completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`.",
+    "The first 2026-03-27 replay from the fresh latest-main worktree failed before host connection because the longer worktree path overflowed the default Ansible SSH `ControlPath`; the rebased implementation commit `2907637daca87ee2bb739c0dd821eee0834aa319` shortened those per-run socket directories and the official replay then succeeded from the same isolated worktree model.",
+    "Fresh worktrees do not include untracked `.local/` controller secrets, so the live apply used an explicit absolute `BOOTSTRAP_KEY` path from the main checkout."
+  ]
+}

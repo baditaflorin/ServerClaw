@@ -1,0 +1,48 @@
+Timestamp: 2026-03-29T22:59:38Z
+
+## Public registry ping
+HTTP/2 308
+server: nginx
+date: Sun, 29 Mar 2026 22:59:39 GMT
+content-type: text/html
+content-length: 164
+location: https://nginx.lv3.org/api/v2.0/ping
+x-robots-tag: noindex, nofollow
+
+<html>
+<head><title>308 Permanent Redirect</title></head>
+<body>
+<center><h1>308 Permanent Redirect</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+
+## Public SSO well-known status
+status=200
+
+## docker-runtime-lv3 Harbor, Keycloak, and OpenBao checks
+2026-03-29T22:59:41Z
+
+lv3-control-plane-backup-openbao-agent   Up 35 seconds
+lv3-openbao                              Up 4 minutes                       0.0.0.0:8200->8200/tcp, 127.0.0.1:8201->8201/tcp
+keycloak-keycloak-1                      Up 9 minutes                       8443/tcp, 10.10.10.20:8091->8080/tcp, 127.0.0.1:18080->8080/tcp, 127.0.0.1:19000->9000/tcp
+keycloak-openbao-agent                   Up 9 minutes (healthy)
+nextcloud-openbao-agent                  Up 10 minutes (healthy)
+mail-platform-openbao-agent              Up 13 minutes (healthy)
+harbor-jobservice                        Up 17 minutes (health: starting)
+harbor-core                              Up 17 minutes (health: starting)
+harbor-db                                Up 17 minutes (health: starting)
+harbor-portal                            Up 17 minutes (health: starting)
+harbor-log                               Up 18 minutes (healthy)            127.0.0.1:1514->10514/tcp
+windmill-openbao-agent                   Up 13 minutes (healthy)
+
+Host IP Harbor ping
+
+Loopback Harbor ping
+
+Keycloak local well-known status
+status=200
+
+OpenBao local health status
+status=200

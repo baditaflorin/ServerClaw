@@ -1,0 +1,40 @@
+---file
+     1	#!/usr/bin/env python3
+     2
+     3	from __future__ import annotations
+     4
+     5	import argparse
+     6	import base64
+     7	import ipaddress
+     8	import json
+     9	import socket
+    10	import subprocess
+    11	import sys
+    12	import time
+    13	from dataclasses import dataclass
+    14	from enum import Enum
+    15	from pathlib import Path
+    16	from typing import Any, Callable, Iterable
+    17	from urllib.parse import urlsplit
+    18
+    19	try:
+    20	    from script_bootstrap import ensure_repo_root_on_path
+    21	except ModuleNotFoundError:
+    22	    def ensure_repo_root_on_path(script_file: str) -> Path:
+    23	        script_path = Path(script_file).resolve()
+    24	        repo_root = script_path.parents[1]
+    25	        for candidate in (repo_root, script_path.parent):
+    26	            candidate_text = str(candidate)
+    27	            if candidate_text not in sys.path:
+    28	                sys.path.insert(0, candidate_text)
+    29	        if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    30	            del sys.modules["platform"]
+---help
+usage: lv3-docker-publication-assurance [-h] --service-id SERVICE_ID
+                                        --service-probe-base64 SERVICE_PROBE_BASE64
+                                        --contract-base64 CONTRACT_BASE64
+                                        [--heal]
+                                        [--allow-listener-warmup-after-heal]
+                                        [--listener-timeout LISTENER_TIMEOUT]
+
+Verify and optionally heal Docker publication contracts.

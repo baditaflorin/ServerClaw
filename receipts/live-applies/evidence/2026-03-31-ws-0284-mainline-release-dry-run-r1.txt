@@ -1,0 +1,5 @@
+Current version: 0.177.112
+Next version: 0.177.113
+Unreleased notes: 1
+Platform impact: platform version remains 0.130.74 while the exact-main ADR 0284 replay integrates the already-live private Piper 8100 voice path and Docker recovery hardening into canonical repo truth
+Release notes index: docs/release-notes/README.md

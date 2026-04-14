@@ -1,0 +1,2 @@
+[34m[90mChecking apps...[39m[39m
+[34m[32mAll metadata up-to-date[39m[39m

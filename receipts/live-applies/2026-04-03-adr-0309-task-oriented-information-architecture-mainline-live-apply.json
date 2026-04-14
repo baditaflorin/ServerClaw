@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T00:18:54Z",
+  "recorded_by": "codex",
+  "source_commit": "571572815bddad5bde4c3bd26763f74d6b9f4b9d",
+  "repo_version_context": "0.177.148",
+  "platform_version_context": "0.130.93",
+  "workflow_id": "adr-0309-task-oriented-information-architecture-mainline-live-apply",
+  "adr": "0309",
+  "summary": "Replayed ADR 0309 from the refreshed exact-main candidate on source commit `571572815bddad5bde4c3bd26763f74d6b9f4b9d`, cut repository version `0.177.148` on top of platform version `0.130.92`, verified the task-oriented Start, Observe, Change, Learn, and Recover information architecture on the live interactive ops portal, and promoted the verified platform lineage to `0.130.93` after closing the post-apply OpenBao and restic correction loop.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Interactive ops portal",
+      "address": "https://ops.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0309 regression slice",
+      "result": "pass",
+      "observed": "`python3 -m py_compile` passed for the affected portal-adjacent Python surfaces, the focused pytest slice returned `53 passed`, `scripts/validate_repository_data_models.py --validate` passed, `scripts/generate_ops_portal.py --check` passed, `make syntax-check-ops-portal` passed, and the owned `validate_repo.sh` gates passed before the final exact-main replay."
+    },
+    {
+      "check": "Exact-main ops portal replay correction loop",
+      "result": "pass",
+      "observed": "The first guarded exact-main replay failed in `2026-04-03-ws-0309-mainline-live-apply-r19.txt` because the worktree-local SSH key path was missing. The corrected replay in `2026-04-03-ws-0309-mainline-live-apply-r20.txt` converged the live runtime but stalled controller-side after the Docker-runtime phase, so the live result was accepted only after direct guest-local verification proved the deployed `ops_portal` runtime was healthy and serving the ADR 0309 lane surfaces."
+    },
+    {
+      "check": "Guest-local ops portal verification",
+      "result": "pass",
+      "observed": "`2026-04-03-ws-0309-mainline-ops-portal-guest-runtime-r21.txt` records guest-local `{\"status\":\"ok\"}`, the expected lane/help markers, the deployed `workbench_information_architecture.py` helper, the synced `workbench-information-architecture.json` data file, a healthy `ops-portal` container, and the expected internal and public unauthenticated `302` redirect contract for `ops.lv3.org`."
+    },
+    {
+      "check": "Post-apply backup and OpenBao recovery",
+      "result": "pass",
+      "observed": "The first post-apply backup trigger failed in `2026-04-03-ws-0309-mainline-restic-trigger-r1.txt` because `/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json` was missing while the local OpenBao API was sealed. A narrow repo-managed unseal replay in `2026-04-03-ws-0309-mainline-openbao-unseal-r2.txt` restored `sealed: false`, and the rerun in `2026-04-03-ws-0309-mainline-restic-trigger-r2.txt` succeeded, producing `receipts/restic-backups/20260403T001854Z.json` and the refreshed `receipts/restic-snapshots-latest.json`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md",
+    "docs/release-notes/0.177.148.md",
+    "docs/release-notes/README.md",
+    "docs/workstreams/ws-0309-live-apply.md",
+    "docs/workstreams/ws-0309-main-integration.md",
+    "receipts/live-applies/2026-04-03-adr-0309-task-oriented-information-architecture-mainline-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-03-ws-0309-mainline-live-apply-r19.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0309-mainline-live-apply-r20.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0309-mainline-openbao-unseal-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0309-mainline-ops-portal-guest-runtime-r21.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0309-mainline-release-write-r3.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0309-mainline-restic-trigger-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0309-mainline-restic-trigger-r2.txt",
+    "receipts/restic-backups/20260403T001854Z.json",
+    "receipts/restic-snapshots-latest.json",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The release cut wrote the `0.177.148` surfaces successfully, but the final Outline knowledge sync step returned `HTTP 502`; the repository truth surfaces remained updated and are preserved in `2026-04-03-ws-0309-mainline-release-write-r3.txt`.",
+    "The canonical latest receipt for `ops_portal` now points at this ADR 0309 mainline receipt in `versions/stack.yaml` and the generated status surfaces.",
+    "After this exact-main replay completed, `origin/main` advanced to `ef412b0f061517b64920b7328102e23b89b0774d` with repo-local operator-tool scripts only. The final merge-to-main sync can absorb that commit without changing the already-verified deployed `ops_portal` payload or the `0.130.93` platform lineage recorded here."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-03-adr-0309-mainline-live-apply-and-backup-recovery",
+    "surface": "exact-main ops portal replay, guest-local verification, and post-apply backup trigger",
+    "repair_action": "Corrected the live-apply SSH key path to use the shared repo-root controller key, accepted the stalled replay only after guest-local runtime verification proved the lane overlay was live, recovered the sealed local OpenBao API with a narrow repo-managed unseal play, and reran the restic live-apply trigger until the governed backup receipt was written successfully.",
+    "verification": "The live portal now serves the ADR 0309 lane model, the guest-local runtime is healthy, OpenBao again reports `sealed: false`, and the restic live-apply trigger produced `receipts/restic-backups/20260403T001854Z.json` plus the refreshed `receipts/restic-snapshots-latest.json`.",
+    "diagnosis": "transient_failure"
+  }
+}

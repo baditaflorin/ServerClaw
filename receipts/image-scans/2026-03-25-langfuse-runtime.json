@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "langfuse_runtime",
+  "image_ref": "docker.io/langfuse/langfuse:3@sha256:0c1d6df13e1f02f3e83a90e59c7a1d11b1ecff1d599fc9fc0689c4fc03c3ddd3",
+  "scanner": "trivy",
+  "scanner_image": "binary:trivy-0.69.3-macOS-ARM64",
+  "scanned_on": "2026-03-25",
+  "summary": {
+    "critical": 2,
+    "high": 6
+  },
+  "targets_with_findings": [
+    {
+      "target": "usr/bin/migrate",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 2,
+      "high": 6
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-25-langfuse-runtime.trivy.json"
+}

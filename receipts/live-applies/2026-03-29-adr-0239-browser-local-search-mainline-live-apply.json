@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0239-browser-local-search-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T00:50:14Z",
+  "recorded_by": "codex",
+  "source_commit": "33c6c8ee925ac196c9dd6c144f967601414a9f57",
+  "repo_version_context": "0.177.62",
+  "platform_version_context": "0.130.45",
+  "workflow_id": "adr-0239-browser-local-search-mainline-live-apply",
+  "adr": "0239",
+  "summary": "Replayed ADR 0239 from the exact committed 0.177.62 mainline candidate by rebuilding the changelog and docs portals with the Pagefind-backed browser-local search experience, publishing the refreshed static directories through the shared NGINX edge lane, and re-verifying both the authenticated public edge contract and the published docs assets on nginx-lv3.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Developer portal",
+      "address": "https://docs.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0239 regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with-requirements requirements/docs.txt pytest -q tests/test_docs_site.py` returned `7 passed in 89.51s`, covering the Pagefind assets, the custom search partials, release-note wiring, and the dependency-graph regression that previously leaked raw frontmatter into rendered HTML."
+    },
+    {
+      "check": "Repo-managed docs portal build paths",
+      "result": "pass",
+      "observed": "`uv run --with-requirements requirements/docs.txt python3 scripts/build_docs_portal.py --generated-dir \"$(mktemp -d /tmp/lv3-docs-generated.XXXXXX)\" --output-dir \"$(mktemp -d /tmp/lv3-docs-portal.XXXXXX)\" --openapi-url \"\"` completed successfully, and `make docs` rebuilt `build/docs-portal/` with Pagefind reporting `Indexed 784 pages`, `Indexed 15027 words`, and `Indexed 6 filters` while the published-artifact secret scan passed."
+    },
+    {
+      "check": "Exact-commit shared edge replay",
+      "result": "pass",
+      "observed": "A final `make deploy-docs-portal` replay from source commit `33c6c8ee925ac196c9dd6c144f967601414a9f57` completed successfully with `LV3_RUN_ID=c97cb4aa1dac456aa2ddf84efc3847f7`, playbook run id `6ff57b66f24244569474e12f830c9e1b`, and recap `nginx-lv3 ok=61 changed=3 failed=0 skipped=14` after publishing both `changelog-portal` and `docs-portal` into `/var/www/lv3-generated/`."
+    },
+    {
+      "check": "External and guest verification of the published search surface",
+      "result": "pass",
+      "observed": "`curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and `x-robots-tag: noindex, nofollow`. Direct guest checks on `nginx-lv3` confirmed `/var/www/lv3-generated/docs-portal/pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css`; the published home page contains `id=\"pagefind-search\"` plus `pagefind/pagefind-ui.js`; `releases/0.177.62/index.html` contains `0.130.45`; and `architecture/dependency-graph/index.html` contains `data-pagefind-filter=\"section\"` without the earlier raw frontmatter leak."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/0239-browser-local-search-experience-via-pagefind.md",
+    "docs/release-notes/0.177.62.md",
+    "docs/runbooks/deployment-history-portal.md",
+    "docs/runbooks/developer-portal.md",
+    "docs/site-generated/architecture/dependency-graph.md",
+    "docs/theme-overrides/assets/javascripts/pagefind-search.js",
+    "docs/theme-overrides/assets/stylesheets/pagefind-search.css",
+    "docs/theme-overrides/main.html",
+    "docs/theme-overrides/partials/content.html",
+    "docs/theme-overrides/partials/header.html",
+    "docs/theme-overrides/partials/search.html",
+    "docs/workstreams/ws-0239-live-apply.md",
+    "docs/workstreams/ws-0239-main-merge.md",
+    "mkdocs.yml",
+    "receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json",
+    "requirements/docs.txt",
+    "scripts/build_docs_portal.py",
+    "scripts/generate_docs_site.py",
+    "scripts/validate_repo.sh",
+    "tests/test_docs_site.py",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This exact-main receipt supersedes the earlier branch-local ADR 0239 receipt as the canonical docs-search evidence on main.",
+    "The replay preserved the authenticated edge contract while advancing the mainline platform baseline from 0.130.44 to 0.130.45."
+  ]
+}

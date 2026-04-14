@@ -90,7 +90,8 @@ def test_build_platform_vars_includes_livekit_publication_topology() -> None:
     assert livekit["ports"]["media_tcp"] == 7881
     assert livekit["ports"]["media_udp"] == 7882
     assert livekit["urls"]["public"] == "https://livekit.example.com"
-    assert livekit["urls"]["internal"] == "http://10.10.10.20:7880"
+    assert livekit["urls"]["internal"] == "http://10.10.10.21:7880"
+    assert livekit["owning_vm"] == "runtime-comms"
     assert livekit["edge"]["noindex"] is True
     assert livekit["edge"]["kind"] == "proxy"
 

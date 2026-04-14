@@ -1,0 +1,42 @@
+$ python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.20:9998 --tesseract-url http://10.10.10.20:3008
+{
+  "filename": "ocr-ok.png",
+  "content_type": "image/png",
+  "extraction_method": "tesseract",
+  "fallback_used": true,
+  "text": "OCR OK",
+  "metadata": {
+    "Transparency Alpha": "none",
+    "X-TIKA:Parsed-By-Full-Set": [
+      "org.apache.tika.parser.DefaultParser",
+      "org.apache.tika.parser.image.ImageParser"
+    ],
+    "tiff:ImageLength": "280",
+    "Compression CompressionTypeName": "deflate",
+    "Data BitsPerSample": "8 8 8",
+    "language": "",
+    "Data PlanarConfiguration": "PixelInterleaved",
+    "IHDR": "width=900, height=280, bitDepth=8, colorType=RGB, compressionMethod=deflate, filterMethod=adaptive, interlaceMethod=none",
+    "Chroma ColorSpaceType": "RGB",
+    "Content-Length": "11459",
+    "tiff:BitsPerSample": "8 8 8",
+    "Content-Type-Override": "image/png",
+    "Content-Type": "image/png",
+    "height": "280",
+    "imagereader:NumImages": "1",
+    "Dimension PixelAspectRatio": "1.0",
+    "Compression NumProgressiveScans": "1",
+    "X-TIKA:Parsed-By": [
+      "org.apache.tika.parser.DefaultParser",
+      "org.apache.tika.parser.image.ImageParser"
+    ],
+    "Chroma BlackIsZero": "true",
+    "Compression Lossless": "true",
+    "width": "900",
+    "Dimension ImageOrientation": "Normal",
+    "tiff:ImageWidth": "900",
+    "Chroma NumChannels": "3",
+    "Data SampleFormat": "UnsignedIntegral"
+  },
+  "tika_text": ""
+}

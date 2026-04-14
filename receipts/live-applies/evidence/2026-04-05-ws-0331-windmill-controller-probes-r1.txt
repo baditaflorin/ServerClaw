@@ -1,0 +1,14 @@
+# ws-0331 windmill controller probe evidence
+# recorded_on: 2026-04-05
+
+## controller_proxy
+$ curl -fsS --max-time 10 http://100.64.0.1:8005/api/version
+exit_code: 0
+stdout:
+CE v1.662.0
+
+## private_ip_direct
+$ curl -fsS --max-time 10 http://10.10.10.92:8000/api/version
+exit_code: 28
+stderr:
+curl: (28) Connection timed out after 10005 milliseconds

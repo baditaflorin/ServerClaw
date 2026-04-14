@@ -1,0 +1,18 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-main-closeout-r8/scripts/remote_exec.sh remote-validate --local-fallback
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 2.45
+alert-rule-validation passed 2.04
+ansible-syntax        passed 149.79
+atlas-lint            passed 2.94
+dependency-graph      passed 2.80
+iac-policy-scan       passed 31.58
+policy-validation     passed 1.56
+schema-validation     passed 15.12
+type-check            passed 6.44
+workstream-surfaces   passed 3.45

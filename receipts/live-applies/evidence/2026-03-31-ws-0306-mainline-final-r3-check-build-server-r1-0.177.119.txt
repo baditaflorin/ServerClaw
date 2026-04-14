@@ -1,0 +1,12 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-main-context-v2/scripts/remote_exec.sh check-build-server
+Checking SSH connectivity to ops@10.10.10.30
+build-server-ok
+Checking remote workspace root /home/ops/builds/proxmox_florin_server
+Checking remote session workspace /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0306-main-context-v2-4e23c764d0/repo
+/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0306-main-context-v2-4e23c764d0/repo
+Checking immutable snapshot dry-run upload from codex/ws-0306-mainline-final-r3@3f97ba8ad93355d9972d6939dbca2915a45a450c
+Transfer starting: 1 files
+repository-snapshot-df92a084d922c743838fe2aa847a19140357d886b836993ecd8a63cea411c25e.tar.gz
+
+sent 186 bytes  received 26 bytes  1461 bytes/sec
+total size is 25956274  speedup is 122434.68

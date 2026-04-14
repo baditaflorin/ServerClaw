@@ -1,0 +1,14 @@
+Platform 1.0.0 readiness
+- Generated: 2026-03-30T14:27:10.242240+00:00
+- Repository version: 0.177.103
+- Platform version: 0.130.69
+- Release blockers: 1 blocking workstreams: ws-0267-live-apply
+- Gate bypass waivers: 0 open, 0 warnings, 0 blockers
+- Criteria met: 1/7 (14.29%)
+- PENDING ADR window 0001-0111: 99/111 implemented; first pending: 0014, 0020, 0024, 0025, 0028
+- PENDING SLO error budgets: pending (missing receipts/slo-reports/latest.json)
+- PENDING Backup restore verification: 0/2 consecutive passes from 4 receipt(s)
+- PENDING Ops portal: pending (<urlopen error [Errno 36] Operation now in progress>)
+- PENDING Status page: pending (<urlopen error [Errno 36] Operation now in progress>)
+- PENDING Docs site: pending (<urlopen error [Errno 36] Operation now in progress>)
+- OK DR table-top review: latest receipt: 2026-03-23-adr-0100-disaster-recovery-review.json

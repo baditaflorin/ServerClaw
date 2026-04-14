@@ -1,0 +1,110 @@
+# ws-0314 ops_portal concurrency collision evidence
+
+recorded_at=2026-04-02T07:53:14Z
+lock_holder=agent:codex:ws-0314-live-apply
+
+## active ops_portal playbooks
+14648       09:31 S    /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python /opt/homebrew/bin/ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/inventory/hosts.yml -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/.ansible/shards/f5afc7e1340547fb97e7ad412aa41115/ops_portal-production.json --limit docker-runtime-lv3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/playbooks/services/ops_portal.yml -e env=production --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=fc53d277fd6c416ea18ee3335e1dd907 -e bypass_promotion=true
+16326    02:31:16 Ss   /bin/zsh -lc while ps -ef | rg -q "ws-0314-live-apply.*ops_portal.yml|ansible-playbook.*ws-0314-live-apply.*ops_portal"; do echo "WAITING $(date -u +%Y-%m-%dT%H:%M:%SZ)"; sleep 10; done; echo "CLEARED $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+31789       00:00 Rs   /bin/zsh -lc set -o pipefail\012{\012  echo '# ws-0314 ops_portal concurrency collision evidence'\012  echo\012  date -u '+recorded_at=%Y-%m-%dT%H:%M:%SZ'\012  echo 'lock_holder=agent:codex:ws-0314-live-apply'\012  echo\012  echo '## active ops_portal playbooks'\012  ps -axo pid=,etime=,stat=,command= | rg 'ws-0310-live-apply|ws-0314-live-apply' | rg 'ops_portal.yml|playbooks/services/ops_portal.yml' || true\012  echo\012  echo '## ws-0314 failing verify tail'\012  tail -n 40 .local/runs/e87c84376dce40fe9f64e366130b5c3d/logs/ansible.log\012  echo\012  echo '## ws-0310 active tail'\012  tail -n 40 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/.local/runs/6c9df9c2936b41f6ba7bf7015badc803/logs/ansible.log\012  echo\012  echo '## live guest task route status'\012  ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o StrictHostKeyChecking=no ops@10.10.10.20 "curl -sS -D - http://127.0.0.1:8092/partials/tasks | sed -n '1,12p'"\012  echo\012  echo '## remote source markers'\012  ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o StrictHostKeyChecking=no ops@10.10.10.20 "sudo python3 - <<'PY'\012from pathlib import Path\012for path in [Path('/opt/ops-portal/service/ops_portal/app.py'), Path('/opt/ops-portal/build-context/ops_portal/app.py')]:\012    text = path.read_text()\012    print(path)\012    print('/partials/tasks' in text, 'build_task_panel_model' in text, 'fetch_runbook_tasks' in text)\012PY"\012} > receipts/live-applies/evidence/2026-04-02-ws-0314-ops-portal-concurrency-collision-r1.txt
+93221       23:54 S    /opt/homebrew/bin/uv tool uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/inventory/hosts.yml --run-id f5afc7e1340547fb97e7ad412aa41115 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/playbooks/services/ops_portal.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=fc53d277fd6c416ea18ee3335e1dd907 -e bypass_promotion=true
+93226       23:54 S    python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/inventory/hosts.yml --run-id f5afc7e1340547fb97e7ad412aa41115 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/playbooks/services/ops_portal.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=fc53d277fd6c416ea18ee3335e1dd907 -e bypass_promotion=true
+93245       23:52 S    /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python /opt/homebrew/bin/ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/inventory/hosts.yml -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/.ansible/shards/f5afc7e1340547fb97e7ad412aa41115/ops_portal-production.json --limit docker-runtime-lv3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply/playbooks/services/ops_portal.yml -e env=production --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=fc53d277fd6c416ea18ee3335e1dd907 -e bypass_promotion=true
+
+## ws-0314 failing verify tail
+2026-04-02 10:43:41,781 p=63440 u=live n=ansible INFO| ok: [docker-runtime-lv3]
+2026-04-02 10:43:41,782 p=63440 u=live n=ansible INFO| {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ops_portal_runtime : Verify the runtime assurance matrix partial renders locally","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-02T07:43:41.782Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+2026-04-02 10:43:41,813 p=63440 u=live n=ansible INFO| TASK [lv3.platform.ops_portal_runtime : Assert the runtime assurance matrix panel is present] ***
+2026-04-02 10:43:41,813 p=63440 u=live n=ansible INFO| {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ops_portal_runtime : Assert the runtime assurance matrix panel is present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T07:43:41.813Z","vm":"controller","workflow_id":"ansible-playbook"}
+2026-04-02 10:43:41,871 p=63440 u=live n=ansible INFO| ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+2026-04-02 10:43:41,871 p=63440 u=live n=ansible INFO| {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ops_portal_runtime : Assert the runtime assurance matrix panel is present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-02T07:43:41.871Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+2026-04-02 10:43:41,895 p=63440 u=live n=ansible INFO| TASK [lv3.platform.ops_portal_runtime : Assert the runtime assurance matrix panel is not degraded] ***
+2026-04-02 10:43:41,895 p=63440 u=live n=ansible INFO| {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ops_portal_runtime : Assert the runtime assurance matrix panel is not degraded","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T07:43:41.895Z","vm":"controller","workflow_id":"ansible-playbook"}
+2026-04-02 10:43:41,955 p=63440 u=live n=ansible INFO| ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+2026-04-02 10:43:41,956 p=63440 u=live n=ansible INFO| {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.ops_portal_runtime : Assert the runtime assurance matrix panel is not degraded","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-02T07:43:41.956Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+2026-04-02 10:43:41,984 p=63440 u=live n=ansible INFO| TASK [lv3.platform.ops_portal_runtime : Verify the return-to-task partial renders locally] ***
+2026-04-02 10:43:41,984 p=63440 u=live n=ansible INFO| {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.ops_portal_runtime : Verify the return-to-task partial renders locally","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-02T07:43:41.984Z","vm":"controller","workflow_id":"ansible-playbook"}
+2026-04-02 10:43:43,077 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (18 retries left).
+2026-04-02 10:43:49,268 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (17 retries left).
+2026-04-02 10:43:55,349 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (16 retries left).
+2026-04-02 10:44:01,652 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (15 retries left).
+2026-04-02 10:44:07,737 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (14 retries left).
+2026-04-02 10:44:13,890 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (13 retries left).
+2026-04-02 10:44:20,038 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (12 retries left).
+2026-04-02 10:44:26,106 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (11 retries left).
+2026-04-02 10:44:32,228 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (10 retries left).
+2026-04-02 10:44:38,311 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (9 retries left).
+2026-04-02 10:44:44,513 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (8 retries left).
+2026-04-02 10:44:50,703 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (7 retries left).
+2026-04-02 10:44:56,809 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (6 retries left).
+2026-04-02 10:45:03,039 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (5 retries left).
+2026-04-02 10:45:09,167 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (4 retries left).
+2026-04-02 10:45:15,290 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (3 retries left).
+2026-04-02 10:45:21,410 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (2 retries left).
+2026-04-02 10:45:27,476 p=63440 u=live n=ansible INFO| FAILED - RETRYING: [docker-runtime-lv3]: Verify the return-to-task partial renders locally (1 retries left).
+2026-04-02 10:45:33,566 p=63440 u=live n=ansible INFO| fatal: [docker-runtime-lv3]: FAILED! => {"attempts": 18, "changed": false, "connection": "close", "content": "{\"detail\":\"Not Found\"}", "content_length": "22", "content_type": "application/json", "date": "Thu, 02 Apr 2026 07:45:32 GMT", "elapsed": 0, "json": {"detail": "Not Found"}, "msg": "Status code was 404 and not [200]: HTTP Error 404: Not Found", "redirected": false, "server": "uvicorn", "status": 404, "url": "http://10.10.10.20:8092/partials/tasks"}
+2026-04-02 10:45:33,567 p=63440 u=live n=ansible INFO| {"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"Status code was 404 and not [200]: HTTP Error 404: Not Found","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.ops_portal_runtime : Verify the return-to-task partial renders locally","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-04-02T07:45:33.566Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+2026-04-02 10:45:33,573 p=63440 u=live n=ansible INFO| PLAY RECAP *********************************************************************
+2026-04-02 10:45:33,573 p=63440 u=live n=ansible INFO| docker-runtime-lv3         : ok=176  changed=12   unreachable=0    failed=1    skipped=22   rescued=0    ignored=0
+
+## ws-0310 active tail
+2026-04-02 10:51:43,481 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply.json)
+2026-04-02 10:51:47,003 p=93245 u=live n=ansible INFO| changed: [docker-runtime-lv3] => (item=receipts/live-applies/2026-04-02-adr-0315-canonical-page-states-live-apply.json)
+2026-04-02 10:51:49,072 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply.json)
+2026-04-02 10:51:51,296 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply.json)
+2026-04-02 10:51:53,319 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-26-adr-0134-changelog-redaction-live-apply.json)
+2026-04-02 10:51:55,453 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-04-01-adr-0297-build-server-workspace-cleanup-live-apply.json)
+2026-04-02 10:51:57,619 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json)
+2026-04-02 10:51:59,667 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-31-adr-0297-renovate-live-apply.json)
+2026-04-02 10:52:02,007 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply.json)
+2026-04-02 10:52:04,353 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-22-adr-0029-backup-vm-live-apply.json)
+2026-04-02 10:52:06,604 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-28-adr-0198-semantic-rag-mainline-live-apply.json)
+2026-04-02 10:52:09,242 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply.json)
+2026-04-02 10:52:11,634 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-04-01-adr-0292-superset-mainline-live-apply.json)
+2026-04-02 10:52:14,626 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-22-adr-0046-identity-classes-live-apply.json)
+2026-04-02 10:52:16,888 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-31-adr-0279-grist-mainline-live-apply.json)
+2026-04-02 10:52:19,032 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-25-adr-0136-http-security-headers-live-apply.json)
+2026-04-02 10:52:21,099 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-29-adr-0248-session-logout-authority-mainline-live-apply.json)
+2026-04-02 10:52:23,148 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-31-adr-0303-pgaudit-mainline-live-apply.json)
+2026-04-02 10:52:25,135 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0262-openfga-keycloak-exact-main-live-apply.json)
+2026-04-02 10:52:27,233 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0288-flagsmith-live-apply.json)
+2026-04-02 10:52:29,399 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply.json)
+2026-04-02 10:52:31,518 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json)
+2026-04-02 10:52:33,649 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-29-adr-0271-backup-coverage-ledger-live-apply.json)
+2026-04-02 10:52:36,103 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-28-adr-0204-self-correcting-automation-loops-live-apply.json)
+2026-04-02 10:52:38,541 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-22-adr-0060-open-webui-live-apply.json)
+2026-04-02 10:52:40,724 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0283-plausible-analytics-mainline-live-apply.json)
+2026-04-02 10:52:42,911 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-31-adr-0303-pgaudit-live-apply.json)
+2026-04-02 10:52:45,040 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply.json)
+2026-04-02 10:52:47,759 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply.json)
+2026-04-02 10:52:50,004 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-04-01-adr-0294-one-api-mainline-live-apply.json)
+2026-04-02 10:52:52,266 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-22-adr-0041-email-platform-live-apply.json)
+2026-04-02 10:52:54,384 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply.json)
+2026-04-02 10:52:56,605 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply.json)
+2026-04-02 10:52:58,760 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-28-adr-0197-dify-mainline-live-apply.json)
+2026-04-02 10:53:01,017 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json)
+2026-04-02 10:53:03,414 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-24-adr-0140-grafana-monitoring-hardening-live-apply.json)
+2026-04-02 10:53:05,954 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-27-adr-0191-immutable-guest-replacement-live-apply.json)
+2026-04-02 10:53:08,176 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply.json)
+2026-04-02 10:53:10,955 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json)
+2026-04-02 10:53:13,685 p=93245 u=live n=ansible INFO| ok: [docker-runtime-lv3] => (item=receipts/live-applies/2026-03-30-adr-0279-grist-mainline-live-apply.json)
+
+## live guest task route status
+HTTP/1.1 404 Not Found
+date: Thu, 02 Apr 2026 07:53:15 GMT
+server: uvicorn
+content-length: 22
+content-type: application/json
+
+{"detail":"Not Found"}
+## remote source markers
+/opt/ops-portal/service/ops_portal/app.py
+False False False
+/opt/ops-portal/build-context/ops_portal/app.py
+False False False

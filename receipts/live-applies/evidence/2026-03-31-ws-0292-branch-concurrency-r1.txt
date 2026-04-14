@@ -1,0 +1,36 @@
+Branch-local live-apply concurrency note for ws-0292 (2026-03-31)
+
+1. The workstream replay updated the shared API gateway source from this branch.
+   Evidence from `2026-03-31-ws-0292-converge-r15.txt`:
+   - task `lv3.platform.api_gateway_runtime : Sync the API gateway application sources`
+   - `changed: [docker-runtime-lv3] => (item=api_gateway/main.py)`
+   - task timestamp: `2026-03-31T09:17:54.683Z`
+
+2. The shared API gateway service tree on `docker-runtime-lv3` no longer matched
+   the workstream source by the time the replay reached final verification.
+   Observed on host:
+   - `/opt/api-gateway/service/api_gateway/main.py`
+   - last modified: `2026-03-31 09:20:18.084678411 +0000`
+   - file length: `86061`
+   - contains `/v1/billing/health`: `False`
+
+3. The running `api-gateway` container matched that older source.
+   Observed in container:
+   - `/app/api_gateway/main.py`
+   - file length: `86061`
+   - contains `/v1/billing/health`: `False`
+   - registered `/v1/*` routes included `/v1/health`
+   - registered `/v1/*` routes did not include any `/v1/billing/*` routes
+
+4. The public billing health path diverged accordingly.
+   Observed responses:
+   - `https://billing.lv3.org/api/health` returned `308` with
+     `location: https://nginx.lv3.org/api/health`
+   - branch-local `converge-r15` final readiness probe failed with
+     `CERTIFICATE_VERIFY_FAILED` because the served certificate was not valid
+     for `billing.lv3.org`
+
+Conclusion:
+The branch-local workstream fixes are present in this repo state, but the live
+shared API gateway and edge surfaces were not durable while ADR 0292 remained
+outside integrated `main`. The next step is exact-main integration and replay.

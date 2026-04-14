@@ -1,0 +1,112 @@
+
+PLAY [Smoke test Hetzner DNS role create path] *********************************
+
+TASK [Create the temporary smoke-test DNS record] ******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Create the temporary smoke-test DNS record","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:00.284Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Create the temporary smoke-test DNS record","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:00.297Z","vm":"localhost","workflow_id":"ansible-playbook"}
+included: lv3.platform.hetzner_dns_records for localhost
+
+TASK [lv3.platform.hetzner_dns_records : Validating arguments against arg spec 'main' - Hetzner DNS records role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Validating arguments against arg spec 'main' - Hetzner DNS records role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:00.318Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Validating arguments against arg spec 'main' - Hetzner DNS records role inputs.","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:00.335Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Assert Hetzner DNS API token is available] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert Hetzner DNS API token is available","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:00.337Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert Hetzner DNS API token is available","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:00.371Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Read Hetzner DNS zone information] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Read Hetzner DNS zone information","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:00.374Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Read Hetzner DNS zone information","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:01.648Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Translate Hetzner DNS zone provider payload into canonical zone facts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Translate Hetzner DNS zone provider payload into canonical zone facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:01.650Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Translate Hetzner DNS zone provider payload into canonical zone facts","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:01.685Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS zone lookup is unambiguous] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS zone lookup is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:01.690Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS zone lookup is unambiguous","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:01.727Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Record the canonical DNS zone reference] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Record the canonical DNS zone reference","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:01.728Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Record the canonical DNS zone reference","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:01.757Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Read current Hetzner DNS records for the zone] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Read current Hetzner DNS records for the zone","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:01.759Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Read current Hetzner DNS records for the zone","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:02.826Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Translate Hetzner DNS record provider payload into canonical record facts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Translate Hetzner DNS record provider payload into canonical record facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:02.828Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Translate Hetzner DNS record provider payload into canonical record facts","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:02.874Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:02.877Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:02.896Z","vm":"localhost","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for localhost => (item={'name': 'ws0274-smoke-1774874819', 'type': 'A', 'value': '65.108.75.123', 'ttl': 60})
+
+TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:02.905Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:02.947Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:02.956Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select exact canonical DNS record matches by value","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:03.012Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:03.014Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Select canonical managed DNS records by value identity","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:03.072Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:03.075Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the canonical DNS record match is unambiguous","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:03.118Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:03.120Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Assert the desired DNS record state is supported","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:03.163Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:03.165Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Build the canonical DNS record provider payload","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:03.206Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:03.209Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-30T12:47:03.239Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:03.241Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [localhost]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Create the canonical DNS record when it does not exist","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:47:04.970Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:47:04.972Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_records : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-30T12:47:05.007Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=17   changed=1    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0

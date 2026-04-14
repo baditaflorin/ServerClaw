@@ -1,0 +1,2 @@
+Repository data model validation
+Repository data model error: service redundancy catalog must match the service capability catalog: missing services: one_api

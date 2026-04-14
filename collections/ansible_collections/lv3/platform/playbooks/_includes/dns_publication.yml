@@ -3,37 +3,44 @@
 # Purpose: Converge a single Hetzner DNS A record from the subdomain catalog.
 # Input: service_dns_fqdn (string) — the FQDN to publish (e.g., "data.{{ platform_domain }}")
 # Usage: import_playbook with -e service_dns_fqdn=data.{{ platform_domain }}, or set in a vars file.
-#
-# IP placeholder substitution (ADR 0407):
-# The committed subdomain-catalog.json stores the generic placeholder IP 203.0.113.1
-# for all public-ingress A records. At runtime this include loads .local/identity.yml
-# (gitignored) to resolve management_ipv4 to the real deployment IP, so DNS records
-# are always set to the actual server address without any real IP ever touching git.
 
-- name: "Ensure Hetzner DNS publication for {{ service_dns_fqdn | default('service.example.com') }}"
+- name: "Ensure Hetzner DNS publication {{ service_dns_fqdn_resolved }}"
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
     subdomain_catalog_path: "{{ playbook_dir }}/../../../../../../config/subdomain-catalog.json"
     inventory_defaults_path: "{{ playbook_dir }}/../../../../../../inventory/group_vars/all/identity.yml"
-    local_identity_path: "{{ playbook_dir }}/../../../../../../.local/identity.yml"
-    # The committed catalog stays generic-by-default even when the scoped runner
-    # injects the real deployment domain from .local/identity.yml.
-    catalog_placeholder_domain: example.com
-    # Sentinel: the placeholder stored in committed catalog files.
-    # Any catalog target equal to this value is replaced with management_ipv4 at runtime.
+    repo_root_path: "{{ playbook_dir }}/../../../../../../"
+    service_dns_fqdn_resolved: "{{ service_dns_fqdn | default('example.com') }}"
     _dns_public_ip_placeholder: "203.0.113.1"
 
   tasks:
-    - name: Load controller defaults (generic — example.com / placeholder IPs)
+    - name: Load controller defaults
       ansible.builtin.include_vars:
         file: "{{ inventory_defaults_path }}"
 
-    - name: Load local identity overlay (real deployment values — gitignored)
+    - name: Resolve the shared repository root for controller-local overlays
+      ansible.builtin.set_fact:
+        controller_repo_shared_root: >-
+          {{
+            (
+              lookup(
+                'ansible.builtin.pipe',
+                'git -C ' ~ (repo_root_path | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+              )
+              | dirname
+            )
+          }}
+
+    - name: Resolve the local identity overlay path
+      ansible.builtin.set_fact:
+        controller_local_identity_path: "{{ controller_repo_shared_root }}/.local/identity.yml"
+
+    - name: Load local identity overlay
       ansible.builtin.include_vars:
-        file: "{{ local_identity_path }}"
-      when: local_identity_path is file
+        file: "{{ controller_local_identity_path }}"
+      when: controller_local_identity_path is file
       no_log: true
 
     - name: Load the subdomain catalog
@@ -41,59 +48,62 @@
         file: "{{ subdomain_catalog_path }}"
         name: subdomain_catalog
 
-    - name: Derive the catalog lookup FQDN from the requested service hostname
+    - name: Resolve the generic catalog FQDN for the requested service hostname
       ansible.builtin.set_fact:
-        catalog_lookup_fqdn: >-
+        service_dns_catalog_fqdn: >-
           {{
-            service_dns_fqdn
-            if (
-              subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', service_dns_fqdn)
-              | list
+            (
+              service_dns_fqdn_resolved.rsplit('.' ~ platform_domain, 1)[0] ~ '.example.com'
             )
-            else (
-              catalog_placeholder_domain
-              if service_dns_fqdn == hetzner_dns_zone_name
-              else (
-                service_dns_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
-                ~ '.'
-                ~ catalog_placeholder_domain
-              )
-            )
+            if service_dns_fqdn_resolved.endswith('.' ~ platform_domain)
+            else service_dns_fqdn_resolved
           }}
 
-    - name: "Select the {{ service_dns_fqdn | default('service.example.com') }} subdomain entry"
+    - name: "Select subdomain entry {{ service_dns_fqdn_resolved }}"
       ansible.builtin.set_fact:
         selected_subdomain: >-
           {{
             (
               subdomain_catalog.subdomains
-              | selectattr('fqdn', 'equalto', catalog_lookup_fqdn)
+              | selectattr('fqdn', 'equalto', service_dns_catalog_fqdn)
               | list
               | first
             ) | default({})
           }}
 
-    - name: "Assert {{ service_dns_fqdn | default('service.example.com') }} is catalogued"
+    - name: Derive the runtime subdomain FQDN from the generic catalog entry
+      ansible.builtin.set_fact:
+        selected_subdomain_runtime_fqdn: >-
+          {{
+            (
+              selected_subdomain.fqdn.rsplit('.example.com', 1)[0] ~ '.' ~ platform_domain
+            )
+            if selected_subdomain.fqdn.endswith('.example.com')
+            else selected_subdomain.fqdn
+          }}
+      when: selected_subdomain != {}
+
+    - name: "Assert subdomain is catalogued {{ service_dns_fqdn_resolved }}"
       ansible.builtin.assert:
         that:
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn == catalog_lookup_fqdn
-        fail_msg: "{{ service_dns_fqdn | default('service.example.com') }} must exist in config/subdomain-catalog.json before live apply."
+          - selected_subdomain_runtime_fqdn == service_dns_fqdn_resolved
+          - selected_subdomain_runtime_fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "{{ service_dns_fqdn }} must exist in config/subdomain-catalog.json before live apply."
 
     - name: Derive the managed Hetzner record name
       ansible.builtin.set_fact:
         selected_subdomain_record_name: >-
           {{
             '@'
-            if service_dns_fqdn == hetzner_dns_zone_name
+            if selected_subdomain_runtime_fqdn == hetzner_dns_zone_name
             else (
-              service_dns_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+              selected_subdomain_runtime_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
             )
           }}
 
-    - name: Resolve DNS target (substitute placeholder with real management IP from .local/)
+    - name: Resolve DNS target
       ansible.builtin.set_fact:
         resolved_dns_target: >-
           {{
@@ -102,7 +112,7 @@
             else selected_subdomain.target
           }}
 
-    - name: "Converge the {{ service_dns_fqdn | default('service.example.com') }} Hetzner DNS record"
+    - name: "Converge Hetzner DNS record {{ service_dns_fqdn_resolved }}"
       ansible.builtin.include_role:
         name: lv3.platform.hetzner_dns_record
       vars:

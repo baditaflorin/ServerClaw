@@ -1,0 +1,33 @@
+# docker-runtime-lv3 disk-pressure recovery for ws-0274
+# recorded_at=2026-03-31T22:41:08Z
+BEFORE_DF
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        95G   84G  7.1G  93% /
+
+BEFORE_DOCKER_SYSTEM_DF
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          59        59        38.67GB   38.67GB (100%)
+Containers      94        71        1.096GB   125.2MB (11%)
+Local Volumes   1445      55        1.21GB    66.36MB (5%)
+Build Cache     0         0         0B        0B
+
+APT_CLEAN
+
+JOURNAL_VACUUM
+
+DOCKER_IMAGE_PRUNE
+Total reclaimed space: 0B
+
+DOCKER_BUILDER_PRUNE
+Total:	0B
+
+AFTER_DF
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        95G   84G  7.2G  93% /
+
+AFTER_DOCKER_SYSTEM_DF
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          59        59        38.67GB   38.67GB (100%)
+Containers      94        71        1.096GB   125.2MB (11%)
+Local Volumes   1445      55        1.21GB    66.36MB (5%)
+Build Cache     0         0         0B        0B

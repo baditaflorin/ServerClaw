@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "mail_platform_gateway_python_base",
+  "image_ref": "docker.io/library/python:3.13.12-slim-trixie@sha256:7d8999b140f22939451e00b79c0fd86f13d0bc0577b369f8212fce063101fb2a",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-22",
+  "summary": {
+    "critical": 0,
+    "high": 0
+  },
+  "targets_with_findings": [],
+  "raw_report": "receipts/image-scans/2026-03-22-mail-platform-gateway-python-base.trivy.json"
+}

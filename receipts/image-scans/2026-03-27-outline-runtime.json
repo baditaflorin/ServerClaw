@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "outline_runtime",
+  "image_ref": "docker.io/outlinewiki/outline:1.6.1@sha256:8ea6637e09f38e31eaceb39479963db258a18f7525c6d522d108636c2c166db1",
+  "scanner": "trivy",
+  "scanner_version": "0.69.3",
+  "scanned_on": "2026-03-27",
+  "summary": {
+    "critical": 2,
+    "high": 72
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/outlinewiki/outline:1.6.1@sha256:8ea6637e09f38e31eaceb39479963db258a18f7525c6d522d108636c2c166db1 (debian 12.12)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 1,
+      "high": 7
+    },
+    {
+      "target": "Node.js",
+      "class": "lang-pkgs",
+      "type": "node-pkg",
+      "critical": 1,
+      "high": 65
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-27-outline-runtime.trivy.json"
+}

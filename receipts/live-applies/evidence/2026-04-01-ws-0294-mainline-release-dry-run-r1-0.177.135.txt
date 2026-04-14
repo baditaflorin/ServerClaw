@@ -1,0 +1,5 @@
+Current version: 0.177.134
+Next version: 0.177.135
+Unreleased notes: 1
+Platform impact: advances the live platform baseline to 0.130.85 by replaying the exact-main One-API lane, migrating Open WebUI and ServerClaw onto the governed private OpenAI-compatible connector, and re-verifying the platform-context memory path plus the documented docker-runtime disk-recovery procedure
+Release notes index: docs/release-notes/README.md

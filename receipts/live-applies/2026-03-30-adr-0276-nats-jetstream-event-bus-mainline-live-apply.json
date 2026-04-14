@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T08:17:04Z",
+  "recorded_by": "codex",
+  "source_commit": "11009b71644263cb59832c290183696483035b37",
+  "repo_version_context": "0.177.97",
+  "platform_version_context": "0.130.64",
+  "workflow_id": "adr-0276-nats-jetstream-event-bus-mainline-live-apply",
+  "adr": "0276",
+  "summary": "Replayed ADR 0276 from the committed 0.177.97 mainline release baseline, carried the private NATS JetStream runtime and preserved multi-principal auth contract onto the current 0.130.63 live platform, recovered a short shared Docker-runtime interference window during the exact-main replay, and re-verified clean stream reconciliation plus platform, secret-rotation, and RAG publish paths before advancing the platform version to 0.130.64.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "NATS client listener",
+      "address": "nats://10.10.10.20:4222"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "NATS monitor",
+      "address": "http://127.0.0.1:8222/healthz"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Rebased targeted ADR 0276 regression coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest -m pytest -q tests/test_nats_jetstream_runtime_role.py tests/test_secret_rotation.py tests/test_service_id_resolver.py tests/unit/test_event_taxonomy.py tests/unit/test_ledger_writer.py tests/test_ansible_execution_scopes.py` returned `38 passed in 0.62s` on the final exact-main tree."
+    },
+    {
+      "check": "Rebased syntax and preflight validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276syntax-postrebase --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check` passed, and `make preflight WORKFLOW=live-apply-service` also passed on the synchronized worktree."
+    },
+    {
+      "check": "Exact-main NATS replay with correction loop",
+      "result": "pass",
+      "observed": "The exact-main replay from committed source `11009b71644263cb59832c290183696483035b37` first succeeded as `ws0276mainline-r1` with final recap `docker-runtime-lv3 : ok=78 changed=1 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`, then a shared Docker-runtime restart path left `lv3-nats-jetstream` manually stopped; after a temporary compose recovery bridge, the authoritative replay `ws0276mainline-r2` completed successfully with final recap `docker-runtime-lv3 : ok=80 changed=4 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0` and re-verified the loopback monitor endpoint."
+    },
+    {
+      "check": "Current guest-local NATS runtime state",
+      "result": "pass",
+      "observed": "A fresh guest-local probe after `ws0276mainline-r2` confirmed `lv3-nats-jetstream` stayed `Up`, `curl -fsS http://127.0.0.1:8222/healthz` returned `{\"status\":\"ok\"}`, and JetStream reported `10` streams including `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION`."
+    },
+    {
+      "check": "Controller-side stream reconciliation path",
+      "result": "pass",
+      "observed": "After the exact-main replay, `make check-nats-streams` and `make apply-nats-streams` both returned `PLATFORM_EVENTS: none`, `RAG_DOCUMENT: none`, and `SECRET_ROTATION: none`."
+    },
+    {
+      "check": "Platform, secret-rotation, and RAG smoke publishes",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with nats-py python scripts/nats_streams.py --smoke-publish` advanced `PLATFORM_EVENTS` to sequence `170`, and follow-up raw JSON publishes advanced `SECRET_ROTATION` and `RAG_DOCUMENT` to stream-local sequence `3` with `stream_message_count=3`."
+    },
+    {
+      "check": "Local repository validation bundle",
+      "result": "pass",
+      "observed": "`git diff --check`, `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` all passed on the final tree."
+    },
+    {
+      "check": "Remote validation lanes",
+      "result": "pass",
+      "observed": "`make remote-validate` passed on the exact final tree in detached `HEAD` mode, with `agent-standards`, `alert-rule-validation`, `ansible-syntax`, `dependency-graph`, `policy-validation`, `schema-validation`, `type-check`, and `workstream-surfaces` all reported as `passed`."
+    },
+    {
+      "check": "Pre-push gate",
+      "result": "pass",
+      "observed": "`make pre-push-gate` passed on the same exact final tree in detached `HEAD` mode, with `workstream-surfaces`, `agent-standards`, `documentation-index`, `yaml-lint`, `schema-validation`, `policy-validation`, `alert-rule-validation`, `dependency-direction`, `generated-docs`, `generated-portals`, `dependency-graph`, `artifact-secret-scan`, `ansible-syntax`, `ansible-lint`, `type-check`, `service-completeness`, `packer-validate`, `tofu-validate`, `security-scan`, and `integration-tests` all reported as `passed`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md",
+    "docs/workstreams/ws-0276-live-apply.md",
+    "docs/runbooks/nats-jetstream-event-bus.md",
+    "docs/release-notes/0.177.97.md",
+    "config/nats-streams.yaml",
+    "platform/ledger/writer.py",
+    "scripts/nats_streams.py",
+    "scripts/secret_rotation.py",
+    "tests/test_nats_jetstream_runtime_role.py",
+    "tests/test_secret_rotation.py",
+    "tests/test_service_id_resolver.py",
+    "tests/unit/test_event_taxonomy.py",
+    "tests/unit/test_ledger_writer.py",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-03-30-adr-0276-nats-jetstream-event-bus-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-targeted-checks-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-live-apply-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-live-apply-r2-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-nats-diagnosis-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-nats-manual-restart-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-nats-stability-check-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-post-status-r2-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-check-nats-streams-r2-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-apply-nats-streams-r2-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-platform-smoke-r2-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-domain-smoke-r2-0.177.97.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-live-apply-receipts-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-data-model-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-remote-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-mainline-pre-push-gate-r1.txt",
+    "receipts/live-applies/2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt is the canonical exact-main proof for ADR 0276 on top of repository version 0.177.97 and the prior live platform baseline 0.130.63.",
+    "The earlier branch-local receipt remains part of the audit trail, but the canonical NATS JetStream receipt for integrated main now points at this exact-main replay.",
+    "The first exact-main replay encountered a short shared Docker-runtime interference window that manually stopped the NATS container with exit code 0; the same committed tree was replayed again after recovery and ended green."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-30-adr-0276-mainline-nats-runtime-correction",
+    "surface": "docker-runtime-lv3:/opt/nats-jetstream",
+    "repair_action": "Inspected the exited container, brought `lv3-nats-jetstream` back with `/opt/nats-jetstream/docker-compose.yml` as a temporary bridge, then reran `playbooks/nats-jetstream.yml` from committed source `11009b71644263cb59832c290183696483035b37` as `ws0276mainline-r2`.",
+    "verification": "The replay re-verified `http://127.0.0.1:8222/healthz`, controller-side check/apply both returned no drift, and the platform plus cross-domain smoke publishes landed in the expected streams.",
+    "diagnosis": "transient_failure"
+  }
+}

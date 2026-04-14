@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "paperless_runtime",
+  "image_ref": "ghcr.io/paperless-ngx/paperless-ngx:2.20.4@sha256:0dd610e06781c9ffafe413eaccdacd7305bcba54ab3457fe080ed3071315e27c",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.69.3",
+  "scanned_on": "2026-03-31",
+  "summary": {
+    "critical": 57,
+    "high": 229
+  },
+  "targets_with_findings": [
+    {
+      "target": "ghcr.io/paperless-ngx/paperless-ngx:2.20.4@sha256:0dd610e06781c9ffafe413eaccdacd7305bcba54ab3457fe080ed3071315e27c (debian 13.2)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 55,
+      "high": 213
+    },
+    {
+      "target": "Python",
+      "class": "lang-pkgs",
+      "type": "python-pkg",
+      "critical": 2,
+      "high": 16
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-paperless-runtime.trivy.json"
+}

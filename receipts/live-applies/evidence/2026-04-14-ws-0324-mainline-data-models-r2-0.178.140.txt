@@ -1,0 +1,3 @@
+Repository data model validation
+Service definition bundle validation
+PASS

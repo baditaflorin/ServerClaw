@@ -125,8 +125,6 @@ def docker_run_prefix(network_mode: str | None) -> list[str]:
 
 
 def find_native_syft_binary() -> str | None:
-    if platform.system() != "Linux":
-        return None
     candidates: list[str] = []
     override = os.environ.get("LV3_SYFT_BINARY", "").strip()
     if override:
@@ -140,8 +138,6 @@ def find_native_syft_binary() -> str | None:
 
 
 def find_native_grype_binary() -> str | None:
-    if platform.system() != "Linux":
-        return None
     candidates: list[str] = []
     override = os.environ.get("LV3_GRYPE_BINARY", "").strip()
     if override:

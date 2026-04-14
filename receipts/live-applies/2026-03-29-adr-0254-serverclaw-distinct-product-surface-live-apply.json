@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T16:12:00Z",
+  "recorded_by": "codex",
+  "source_commit": "c0576e42f6d4d776fd2d550aaaab1f9b93376cfd",
+  "repo_version_context": "0.177.82",
+  "platform_version_context": "0.130.56",
+  "workflow_id": "adr-0254-serverclaw-distinct-product-surface-live-apply",
+  "adr": "0254",
+  "summary": "Live-applied ADR 0254 from the rebased latest-origin/main worktree by replaying make converge-serverclaw from source commit c0576e42 on top of origin/main 7f1bbe50, preserving the dedicated ServerClaw chat surface on chat.lv3.org, reasserting the Proxmox and guest firewall lanes for the Coolify runtime, and re-verifying the internal upstream path, bootstrap admin sign-in, and public HTTPS entrypoint end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "serverclaw",
+      "address": "https://chat.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0254 regression and syntax-check slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_linux_guest_firewall_role.py tests/test_serverclaw_playbook.py tests/test_coolify_playbook.py tests/test_open_webui_runtime_role.py tests/test_keycloak_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_openbao_compose_env_helper.py` returned `38 passed in 1.37s`, and `make syntax-check-serverclaw` passed on the rebased latest-main worktree."
+    },
+    {
+      "check": "Exact-main ServerClaw converge replay",
+      "result": "pass",
+      "observed": "`make converge-serverclaw` completed successfully from source commit `c0576e42f6d4d776fd2d550aaaab1f9b93376cfd`, rebased on top of `origin/main` commit `7f1bbe50d3b88fd0a4c4f9581b2aa2660523c3dc`, with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=66 changed=3 failed=0 skipped=4`, `nginx-lv3 ok=38 changed=2 failed=0 skipped=8`, and `proxmox_florin ok=229 changed=0 failed=0 skipped=111`."
+    },
+    {
+      "check": "Internal proxy and firewall path verification",
+      "result": "pass",
+      "observed": "`pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)` remained active on `proxmox_florin`, `/etc/pve/firewall/170.fw` still contained `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`, `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3` succeeded, and `curl -sv --max-time 5 http://10.10.10.70:8096/ -o /dev/null` from `nginx-lv3` returned `HTTP/1.1 200 OK` from `uvicorn`."
+    },
+    {
+      "check": "Guest-local bootstrap admin sign-in",
+      "result": "pass",
+      "observed": "A guest-local sign-in request on `coolify-lv3` to `http://127.0.0.1:8096/api/v1/auths/signin` returned JSON for `ops@lv3.org` with `role\":\"admin\"` and a bearer token, confirming the runtime remained healthy after the replay."
+    },
+    {
+      "check": "Public ServerClaw edge verification",
+      "result": "pass",
+      "observed": "`curl -I --max-time 15 http://chat.lv3.org/` returned `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.lv3.org/`, and `curl -I --max-time 15 https://chat.lv3.org/` returned `HTTP/2 200` with the repo-managed security headers and `content-type: text/html; charset=utf-8`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md",
+    "docs/runbooks/configure-serverclaw.md",
+    "docs/workstreams/ws-0254-live-apply.md",
+    "playbooks/serverclaw.yml",
+    "collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2",
+    "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml",
+    "tests/test_linux_guest_firewall_role.py",
+    "tests/test_serverclaw_playbook.py",
+    "tests/test_coolify_playbook.py",
+    "tests/test_open_webui_runtime_role.py",
+    "tests/test_keycloak_runtime_role.py",
+    "tests/test_nginx_edge_publication_role.py",
+    "receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This branch-local receipt records the latest-main candidate replay before the protected integration surfaces are updated on main.",
+    "The rebased exact-main replay also self-healed an unrelated Docker runtime drift on `docker-runtime-lv3` by reapplying the forward-compat nftables patch and restarting Docker to restore the expected nat and forward chains before the Keycloak lane continued.",
+    "The earlier branch-local debugging on 2026-03-29 surfaced two real path defects before this exact-main replay: the Proxmox-side VM firewall for `coolify-lv3` was not being refreshed from the ServerClaw workflow, and the guest nftables template treated remapped container ports as host-port matches instead of forwarding matches when `allow_container_forwarding` was enabled.",
+    "The remaining main-only integration work after this receipt is to merge the rebased branch, cut the next patch release, update the top-level README and `versions/stack.yaml`, record the canonical mainline receipt, and push `origin/main`."
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0201-harbor-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_by": "codex",
+  "source_commit": "77176b61fbfe5a0a1badb1f4987cfbf382b9609c",
+  "repo_version_context": "0.177.12",
+  "workflow_id": "converge-harbor",
+  "adr": "0201",
+  "summary": "Applied ADR 0201 from the dedicated latest-main worktree by converging Harbor on docker-runtime-lv3, publishing registry.lv3.org through nginx-lv3 with the Harbor upload proxy settings, migrating the four check-runner images into Harbor, and verifying Trivy scan visibility plus build-worker pull compatibility.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "registry.lv3.org",
+      "address": "https://registry.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Harbor converge replay",
+      "result": "pass",
+      "observed": "`make converge-harbor` completed successfully from commit `77176b61` with `docker-runtime-lv3 : ok=113 changed=6 unreachable=0 failed=0 skipped=13` and `nginx-lv3 : ok=43 changed=4 unreachable=0 failed=0 skipped=6`."
+    },
+    {
+      "check": "Shared edge upload path",
+      "result": "pass",
+      "observed": "On `nginx-lv3`, `/etc/nginx/sites-available/lv3-edge.conf` now renders `server_name registry.lv3.org;`, `client_max_body_size 0;`, `chunked_transfer_encoding on;`, `proxy_request_buffering off;`, `proxy_send_timeout 900s;`, and `proxy_read_timeout 900s;` for the Harbor upstream `http://10.10.10.20:8095`."
+    },
+    {
+      "check": "Harbor project, repositories, and scan data",
+      "result": "pass",
+      "observed": "`curl -fsS https://registry.lv3.org/api/v2.0/ping` returned `Pong`; `curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" https://registry.lv3.org/api/v2.0/projects/check-runner` reported `repo_count: 4`; and `curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" 'https://registry.lv3.org/api/v2.0/projects/check-runner/repositories/python/artifacts?with_scan_overview=true&page=1&page_size=20'` returned a successful Trivy scan overview for digest `sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff` with severity `High` and total `123` findings."
+    },
+    {
+      "check": "Check-runner publication and pullback",
+      "result": "pass",
+      "observed": "The quoting-safe remote helper replay on `docker-build-lv3` published all four `registry.lv3.org/check-runner/*` images and resolved digests `ansible sha256:c19da81d96d004664cf7b69b5d1da4b6847560b377981604b6a94abc6fd6a653`, `python sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`, `infra sha256:e1bed7b6f2a05d69a339832f7e85abf1fa1969fb89173569cf2709cc8c676b2a`, and `security sha256:91ca1ed581af8c169771a2928d0e868140d8b77aee4b5cdec34c29179dbe14ae`; a follow-up `docker pull registry.lv3.org/check-runner/python:3.12.10` on `docker-build-lv3` resolved `registry.lv3.org/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`."
+    },
+    {
+      "check": "Repository validation and automation replay",
+      "result": "partial",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_service_topology_filters.py tests/test_live_apply_receipts.py tests/test_remote_exec.py tests/test_validation_gate.py` returned `26 passed`; `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml python scripts/live_apply_receipts.py --validate`, `uv run --with pyyaml python scripts/interface_contracts.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --validate`, `python3 scripts/container_image_policy.py --validate`, and `make syntax-check-harbor` all passed; `make remote-validate` reached the remote worker generated-docs stage and then stopped on intentional branch-local canonical-truth drift because the protected `README.md` mainline status summary was intentionally deferred to the final merge-to-main step."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py",
+    "collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+    "config/check-runner-manifest.json",
+    "config/dependency-graph.json",
+    "config/service-redundancy-catalog.json",
+    "config/windmill/scripts/check-runner-rebuild.py",
+    "docs/adr/0201-harbor-container-registry-with-cve-scanning.md",
+    "docs/runbooks/configure-harbor.md",
+    "docs/runbooks/docker-check-runners.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/workstreams/ws-0201-live-apply.md",
+    "playbooks/harbor.yml",
+    "playbooks/services/harbor.yml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The work was applied from the dedicated worktree `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-live-apply` on branch `codex/ws-0201-live-apply` so concurrent agents could continue without sharing controller-local state.",
+    "The Harbor publication path initially failed with `413 Request Entity Too Large` on the shared edge and then with a misquoted Harbor robot username during the rebuild helper replay; both were corrected before the final successful publication.",
+    "Protected integration files remain intentionally unchanged in this receipt commit and are expected to be updated on the synchronized `main` branch immediately after merge: `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level `README.md` integrated status summary."
+  ]
+}

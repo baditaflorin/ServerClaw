@@ -1,0 +1,35 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: .repo-structure.yaml, Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 1.37
+alert-rule-validation passed 2.98
+ansible-lint          passed 193.63
+ansible-syntax        passed 120.09
+artifact-secret-scan  passed 5.26
+dependency-direction  passed 3.09
+dependency-graph      passed 3.53
+documentation-index   passed 3.18
+generated-docs        passed 8.41
+generated-portals     passed 31.01
+iac-policy-scan       passed 38.09
+integration-tests     passed 2.35
+packer-validate       passed 6.60
+policy-validation     passed 1.95
+schema-validation     passed 16.65
+security-scan         passed 33.09
+semgrep-sast          passed 61.27
+service-completeness  passed 2.81
+tofu-validate         passed 2.33
+type-check            passed 4.78
+workstream-surfaces   passed 3.88
+yaml-lint             passed 17.12

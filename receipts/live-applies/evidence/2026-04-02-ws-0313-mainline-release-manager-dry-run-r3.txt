@@ -1,0 +1,5 @@
+Current version: 0.177.138
+Next version: 0.177.139
+Unreleased notes: 1
+Platform impact: platform version advances to 0.130.87 after the refreshed exact-main ADR 0313 replay re-verifies the shared contextual-help, glossary, and escalation drawer across ops.lv3.org, docs.lv3.org, and changelog.lv3.org on top of the 0.130.86 baseline plus the newer ADR 0308 and bridge-chain hardening already merged to origin/main
+Release notes index: docs/release-notes/README.md

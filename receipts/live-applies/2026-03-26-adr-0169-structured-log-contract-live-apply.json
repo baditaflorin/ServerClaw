@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0169-structured-log-contract-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "550fd37645f66e25d0d195123efc17b6a9458a04",
+  "repo_version_context": "0.159.0",
+  "workflow_id": "adr-0169-structured-log-contract-live-apply",
+  "adr": "0169",
+  "summary": "Verified ADR 0169 live on the production platform-context API path after shipping the missing runtime helper bundle, fixing corpus-root-relative observability defaults, and manually replaying the build-server-to-runtime apply path when the ansible jump transport stayed unstable.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "platform-context-api",
+      "address": "100.64.0.1:8010"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused platform-context live-apply regression coverage",
+      "result": "pass",
+      "observed": "Focused regression coverage passed with `11 passed in 0.89s` for `tests/test_platform_context_service.py` and `tests/test_rag_context_runtime_role.py`, followed by `./scripts/validate_repo.sh ansible-syntax`."
+    },
+    {
+      "check": "Guest-local platform-context health and rebuild",
+      "result": "pass",
+      "observed": "On `docker-runtime-lv3`, `http://127.0.0.1:8010/healthz` returned `{\"status\":\"ok\",\"collection\":\"platform_context\"}` and `/v1/admin/rebuild-local` returned `{\"collection_name\":\"platform_context\",\"indexed_chunks\":2542,\"source\":\"/opt/platform-context/corpus\"}`."
+    },
+    {
+      "check": "Guest-local authenticated query",
+      "result": "pass",
+      "observed": "On `docker-runtime-lv3`, `/v1/context/query` answered the step-ca question with cited matches including `docs/adr/0042-step-ca-for-ssh-and-internal-tls.md`."
+    },
+    {
+      "check": "Host proxy health and authenticated query",
+      "result": "pass",
+      "observed": "From the controller, `http://100.64.0.1:8010/healthz` returned `{\"status\":\"ok\",\"collection\":\"platform_context\"}` and the proxied authenticated query returned cited matches for the step-ca question."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0169-structured-log-field-contract.md",
+    "docs/workstreams/adr-0169-structured-log-field-contract.md",
+    "receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json",
+    "scripts/platform_context_service.py",
+    "collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Repeated ansible live-apply attempts from the build-server runner hit intermittent SSH banner-exchange timeouts on the `docker-runtime-lv3` jump path even when direct SSH from the same build server succeeded.",
+    "The final live apply used the tested repository artifacts from commit `550fd37645f66e25d0d195123efc17b6a9458a04`, copied them from the build-server session workspace onto `docker-runtime-lv3`, rebuilt the `platform-context-api` image, restarted Docker once to restore the missing nat chain, and recreated the full compose stack to restore service-to-service DNS for Qdrant.",
+    "The host-side Tailscale proxy for `platform-context-api` was already present as `lv3-tailscale-proxy-platform-context-api.socket`; the earlier proxy failure was a startup race while the guest service was still converging."
+  ]
+}

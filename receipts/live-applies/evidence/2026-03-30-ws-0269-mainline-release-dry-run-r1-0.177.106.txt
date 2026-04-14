@@ -1,0 +1,5 @@
+Current version: 0.177.105
+Next version: 0.177.106
+Unreleased notes: 1
+Platform impact: Replayed ADR 0269 on the exact 0.177.105 main tree, preserved the refreshed Windmill vulnerability-budget and freshness gates plus worker-checkout and OpenBao secret-delivery fixes, and advanced the live platform baseline to 0.130.71.
+Release notes index: docs/release-notes/README.md

@@ -1,0 +1,29 @@
+Ansible lint
+WARNING  /Users/live/.cache/uv/archive-v0/nZbiyLBJesc1GsqCW5-Oz/lib/python3.10/site-packages/ansible/parsing/yaml/constructor.py:74 AnsibleWarning While constructing a mapping from <unicode string>, line 357, column 3, found a duplicate dict key (when). Using last defined value only.
+WARNING  /Users/live/.cache/uv/archive-v0/nZbiyLBJesc1GsqCW5-Oz/lib/python3.10/site-packages/ansible/parsing/yaml/constructor.py:74 AnsibleWarning While constructing a mapping from /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/collections/ansible_collections/lv3/platform/roles/paperless_runtime/tasks/main.yml, line 357, column 3, found a duplicate dict key (when). Using last defined value only.
+WARNING  Listing 3 violation(s) marked as ignored, likely already known
+WARNING  Listing 3 violation(s) that are fatal
+Read documentation for instructions on how to ignore specific rule violations.
+
+# Rule Violation Summary
+
+  3 jinja profile:basic tags:formatting
+
+Passed: 0 failure(s), 6 warning(s) in 1039 files processed of 1161 encountered. Last profile that met the validation criteria was 'min'.
+complexity[tasks]: File contains 121 tasks, exceeding the maximum of 100. Consider using `ansible.builtin.include_tasks` to split the tasks into smaller files. (warning) # ignored
+collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml:1
+
+complexity[tasks]: File contains 121 tasks, exceeding the maximum of 100. Consider using `ansible.builtin.include_tasks` to split the tasks into smaller files. (warning) # ignored
+collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml:1
+
+complexity[tasks]: File contains 186 tasks, exceeding the maximum of 100. Consider using `ansible.builtin.include_tasks` to split the tasks into smaller files. (warning) # ignored
+collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml:1
+
+jinja[spacing]: Jinja2 spacing could be improved: CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; -> CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD '{{ password }}' VALID UNTIL '{{ expiration }}'; (warning)
+collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml:1 Jinja2 template rewrite recommendation: `CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD '{{ password }}' VALID UNTIL '{{ expiration }}';`.
+
+jinja[spacing]: Jinja2 spacing could be improved: DROP ROLE IF EXISTS "{{name}}"; -> DROP ROLE IF EXISTS "{{ name }}"; (warning)
+collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml:1 Jinja2 template rewrite recommendation: `DROP ROLE IF EXISTS "{{ name }}";`.
+
+jinja[spacing]: Jinja2 spacing could be improved: GRANT pg_read_all_data TO "{{name}}"; -> GRANT pg_read_all_data TO "{{ name }}"; (warning)
+collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml:1 Jinja2 template rewrite recommendation: `GRANT pg_read_all_data TO "{{ name }}";`.

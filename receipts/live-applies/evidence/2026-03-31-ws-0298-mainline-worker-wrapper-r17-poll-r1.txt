@@ -1,0 +1,5 @@
+pending
+-rw-rw-r-- 1 ops ops 0 Mar 31 13:42 /tmp/ws-0298-full-wrapper-r17.out
+2379046       00:26 bash -lc docker exec windmill-windmill_worker_native-1 sh -lc "cd /srv/proxmox_florin_server && export LV3_NTFY_TOPIC=platform-alerts-sbom-verify && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server" > /tmp/ws-0298-full-wrapper-r17.out 2>&1; rc=$?; printf "%s\n" "$rc" > /tmp/ws-0298-full-wrapper-r17.rc
+2379187       00:25 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+2380015       00:24 /tmp/windmill/cache/uv/builds-v0/.tmpS4CkdO/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json

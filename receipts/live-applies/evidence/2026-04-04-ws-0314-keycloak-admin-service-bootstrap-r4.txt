@@ -1,0 +1,30 @@
+runtime-control-lv3 | CHANGED | rc=0 >>
+PRE_READY
+STOP_KEYCLOAK
+RUN_BOOTSTRAP
+Changes detected in configuration. Updating the server image.
+Updating the configuration and installing your custom providers, if any. Please wait.
+2026-04-04 07:27:47,476 INFO  [io.quarkus.deployment.QuarkusAugmentor] (main) Quarkus augmentation completed in 6222ms
+Server configuration updated and persisted. Run the following command to review the configuration:
+
+	kc.sh show-config
+
+Next time you run the server, just run:
+
+	kc.sh bootstrap-admin service --no-prompt --client-id lv3-recovery-admin --client-secret:env KEYCLOAK_RECOVERY_ADMIN_SERVICE_CLIENT_SECRET --optimized
+
+2026-04-04 07:27:50,289 INFO  [org.infinispan.CONTAINER] (main) Virtual threads support enabled
+2026-04-04 07:27:51,063 INFO  [org.hibernate.orm.jdbc.batch] (JPA Startup Thread) HHH100501: Automatic JDBC statement batching enabled (maximum batch size 32)
+2026-04-04 07:27:52,149 INFO  [org.infinispan.CONTAINER] (main) ISPN000556: Starting user marshaller 'org.infinispan.commons.marshall.ImmutableProtoStreamMarshaller'
+2026-04-04 07:27:52,541 INFO  [org.keycloak.connections.infinispan.DefaultInfinispanConnectionProviderFactory] (main) Node name: node_649830, Site name: null
+2026-04-04 07:27:52,835 INFO  [io.quarkus] (main) Keycloak 26.5.4 on JVM (powered by Quarkus 3.27.2) started in 5.256s. Listening on: . Management interface listening on http://0.0.0.0:9000.
+2026-04-04 07:27:52,835 INFO  [io.quarkus] (main) Profile nonserver activated.
+2026-04-04 07:27:52,836 INFO  [io.quarkus] (main) Installed features: [agroal, cdi, hibernate-orm, jdbc-postgresql, keycloak, micrometer, narayana-jta, opentelemetry, reactive-routes, rest, rest-jackson, smallrye-context-propagation, smallrye-health, vertx]
+2026-04-04 07:27:53,049 INFO  [org.keycloak.services] (main) KC-SERVICES0078: Created temporary admin service account with client id lv3-recovery-admin
+2026-04-04 07:27:53,077 INFO  [com.arjuna.ats.jbossatx] (main) ARJUNA032014: Stopping transaction recovery manager
+2026-04-04 07:27:53,091 INFO  [io.quarkus] (main) Keycloak stopped in 0.033s
+BOOTSTRAP_RC=0curl: (56) Recv failure: Connection reset by peer
+ Container keycloak-keycloak-1 Stopping
+ Container keycloak-keycloak-1 Stopped
+ Container keycloak-keycloak-run-a85cf700856a Creating
+ Container keycloak-keycloak-run-a85cf700856a Created

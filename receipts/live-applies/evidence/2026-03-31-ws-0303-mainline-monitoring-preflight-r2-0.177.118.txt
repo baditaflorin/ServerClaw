@@ -1,0 +1,6 @@
+== prometheus up query ==
+[{"metric":{"__name__":"up","component":"pgaudit","instance":"10.10.10.50:12345","job":"postgres-audit-alloy","service":"postgres"},"value":[1774968981.487,"0"]}]
+
+== relay health ==
+{"status":"ok"}
+== direct postgres metrics probe ==

@@ -1,0 +1,14 @@
+Ansible role idempotency policy
+Validated Ansible role idempotency policy: 3 enforced, 108 tracked, 3 exempt.
+Tracked roles remain on the migration inventory until they gain a CI-safe scenario.
+PASSED  preflight: zero changes on second run
+PASSED  secret_fact: zero changes on second run
+PASSED  wait_for_healthy: zero changes on second run
+Shell lint
+JSON validation
+Compose runtime env guard
+Dependency direction validation
+Repository data model validation
+ADR 0230 policy validation
+Architecture fitness validation
+Workstream surface ownership validation

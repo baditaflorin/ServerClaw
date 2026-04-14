@@ -1,0 +1,58 @@
+postgres-lv3 | CHANGED | rc=0 >>
+Get:1 file:/etc/apt/mirrors/debian.list Mirrorlist [30 B]
+Get:2 file:/etc/apt/mirrors/debian-security.list Mirrorlist [39 B]
+Hit:7 https://apt.grafana.com stable InRelease
+Hit:3 https://deb.debian.org/debian trixie InRelease
+Hit:4 https://deb.debian.org/debian trixie-updates InRelease
+Hit:5 https://deb.debian.org/debian trixie-backports InRelease
+Hit:6 https://deb.debian.org/debian-security trixie-security InRelease
+Ign:8 https://download.falco.org/packages/deb stable InRelease
+Hit:9 http://repository.netdata.cloud/repos/stable/debian trixie/ InRelease
+Hit:10 http://repository.netdata.cloud/repos/repoconfig/debian trixie/ InRelease
+Ign:8 https://download.falco.org/packages/deb stable InRelease
+Ign:8 https://download.falco.org/packages/deb stable InRelease
+Err:8 https://download.falco.org/packages/deb stable InRelease
+  503  Service Temporarily Unavailable [IP: 3.67.33.93 443]
+Reading package lists...
+W: Failed to fetch https://download.falco.org/packages/deb/dists/stable/InRelease  503  Service Temporarily Unavailable [IP: 3.67.33.93 443]
+W: Some index files failed to download. They have been ignored, or old ones used instead.
+__APT_RC__=0
+__ROUTE__
+default via 10.10.10.1 dev eth0 proto static
+10.10.10.0/24 dev eth0 proto kernel scope link src 10.10.10.50
+__DNS__
+2a04:4e42::644  debian.map.fastlydns.net
+2a04:4e42:400::644 debian.map.fastlydns.net
+2a04:4e42:600::644 debian.map.fastlydns.net
+2a04:4e42:200::644 debian.map.fastlydns.net
+2a04:4e42::644  security.debian.org
+2a04:4e42:200::644 security.debian.org
+2a04:4e42:400::644 security.debian.org
+2a04:4e42:600::644 security.debian.org
+__SOURCES__
+/etc/apt/sources.list.d/debian.sources:Types: deb deb-src
+/etc/apt/sources.list.d/debian.sources:URIs: mirror+file:///etc/apt/mirrors/debian.list
+/etc/apt/sources.list.d/debian.sources:Suites: trixie trixie-updates trixie-backports
+/etc/apt/sources.list.d/debian.sources:Components: main
+/etc/apt/sources.list.d/debian.sources:Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+/etc/apt/sources.list.d/debian.sources:Types: deb deb-src
+/etc/apt/sources.list.d/debian.sources:URIs: mirror+file:///etc/apt/mirrors/debian-security.list
+/etc/apt/sources.list.d/debian.sources:Suites: trixie-security
+/etc/apt/sources.list.d/debian.sources:Components: main
+/etc/apt/sources.list.d/debian.sources:Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+/etc/apt/sources.list.d/falcosecurity.list:deb [signed-by=/etc/apt/keyrings/falcosecurity.asc] https://download.falco.org/packages/deb stable main
+/etc/apt/sources.list.d/grafana.list:deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main
+/etc/apt/sources.list.d/netdata.sources:X-Repolib-Name: Netdata stable repository
+/etc/apt/sources.list.d/netdata.sources:Types: deb
+/etc/apt/sources.list.d/netdata.sources:URIs: http://repository.netdata.cloud/repos/stable/debian/
+/etc/apt/sources.list.d/netdata.sources:Suites: trixie/
+/etc/apt/sources.list.d/netdata.sources:Signed-By: /usr/share/keyrings/netdata-archive-keyring.gpg
+/etc/apt/sources.list.d/netdata.sources:By-Hash: Yes
+/etc/apt/sources.list.d/netdata.sources:Enabled: Yes
+/etc/apt/sources.list.d/netdata.sources:X-Repolib-Name: Netdata repository configuration repository
+/etc/apt/sources.list.d/netdata.sources:Types: deb
+/etc/apt/sources.list.d/netdata.sources:URIs: http://repository.netdata.cloud/repos/repoconfig/debian/
+/etc/apt/sources.list.d/netdata.sources:Suites: trixie/
+/etc/apt/sources.list.d/netdata.sources:Signed-By: /usr/share/keyrings/netdata-archive-keyring.gpg
+/etc/apt/sources.list.d/netdata.sources:By-Hash: Yes
+/etc/apt/sources.list.d/netdata.sources:Enabled: Yes

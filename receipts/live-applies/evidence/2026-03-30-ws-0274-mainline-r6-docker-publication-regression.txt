@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-v3
+configfile: pytest.ini
+collected 26 items
+
+tests/test_docker_publication_assurance.py ..................            [ 69%]
+tests/test_docker_runtime_role.py ........                               [100%]
+
+============================= 26 passed in 24.61s ==============================

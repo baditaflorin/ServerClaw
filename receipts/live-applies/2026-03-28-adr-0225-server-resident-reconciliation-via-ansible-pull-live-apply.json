@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T17:54:58Z",
+  "recorded_by": "codex",
+  "source_commit": "aacd8443b064aa2a14f9929f11a3ae45ae530095",
+  "repo_version_context": "0.177.43",
+  "platform_version_context": "0.130.40",
+  "workflow_id": "adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply",
+  "adr": "0225",
+  "summary": "Applied ADR 0225 on proxmox_florin by bootstrapping a durable server-resident ansible-pull reconcile loop, minting a least-privilege Gitea read token for the host, correcting repeated host-local replays with a dedicated local ansible-pull inventory, publishing the exact rebased 0.177.43 integration candidate into the private Gitea source, and proving the timer-backed systemd path end to end through a successful latest-main host-local receipt.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private Gitea controller",
+      "address": "http://100.64.0.1:3009"
+    },
+    {
+      "kind": "managed_path",
+      "name": "Server-resident checkout",
+      "address": "/srv/proxmox_florin_server"
+    },
+    {
+      "kind": "managed_path",
+      "name": "Host-local receipt directory",
+      "address": "/var/lib/lv3/server-resident-reconciliation/receipts"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused role regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_server_resident_reconciliation.py` passed with `7 passed in 0.06s`, `ansible-playbook -i inventory/hosts.yml playbooks/server-resident-reconciliation.yml --syntax-check` passed, and `./scripts/validate_repo.sh data-models architecture-fitness generated-docs agent-standards` passed from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply` once the ADR index and generated truth surfaces were refreshed."
+    },
+    {
+      "check": "Controller-driven bootstrap and runtime-inventory repair",
+      "result": "pass",
+      "observed": "The isolated worktree replay installed `ansible-core`, the managed askpass helper, wrapper, and `lv3-server-resident-reconciliation.timer` on `proxmox_florin`, mirrored the low-privilege Gitea token to `/etc/lv3/server-resident-reconciliation/gitea-read-token`, and later re-rendered `/var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml` plus the wrapper after the latest-main replay exposed an `ansible-pull` checkout mismatch on repeated runs."
+    },
+    {
+      "check": "Private Gitea source publication",
+      "result": "pass",
+      "observed": "After rebasing onto the latest `origin/main`, the private repo `ops/proxmox_florin_server` published exact snapshot commit `5b121f700d0f1cd372ef85f24288691fb8a88e0c` for source commit `aacd8443b064aa2a14f9929f11a3ae45ae530095`, which made the final 0.177.43 integration candidate available to the trusted host-local `ansible-pull` runner without changing the source URL."
+    },
+    {
+      "check": "Host-local ansible-pull replay",
+      "result": "pass",
+      "observed": "On `2026-03-28T17:53:04Z`, `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox_florin`, `/srv/proxmox_florin_server` checked out `5b121f700d0f1cd372ef85f24288691fb8a88e0c`, the working tree stayed clean, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`, `exit_code: 0`, `duration_seconds: 9`, and `inventory_path: /var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md",
+    "docs/workstreams/ws-0225-live-apply.md",
+    "docs/runbooks/server-resident-reconciliation.md",
+    "playbooks/server-resident-reconciliation.yml",
+    "collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation",
+    "tests/test_server_resident_reconciliation.py",
+    "receipts/live-applies/evidence/2026-03-28-adr-0225-bootstrap-ansible-playbook.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0225-bootstrap-ansible-playbook-retry1.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0225-bootstrap-ansible-playbook-retry2.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0225-controller-reapply-runtime-inventory.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0225-gitea-mainline-snapshot.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0225-host-service-run.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0225-host-receipt-and-journal.txt",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "Gitea 1.25.5 accepted admin-token auth for user lifecycle calls but required basic auth as the restricted service identity for access-token listing, deletion, and creation, so the bootstrap now resets that restricted password only when minting or rotating the mirrored read token.",
+    "The trusted host-local source is the private Gitea repository, not GitHub origin. The final latest-main replay therefore published exact snapshot commit `5b121f700d0f1cd372ef85f24288691fb8a88e0c` for source commit `aacd8443b064aa2a14f9929f11a3ae45ae530095` before the last manual systemd replay.",
+    "Repeated host-local replays initially failed because `ansible-pull` reused the repo inventory for its own checkout step after the first run, which left no matching `localhost` or hostname target. The final fix renders `/var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml` so checkout and playbook execution both succeed on repeat runs.",
+    "This workstream became the final verified integration step, so the protected release and canonical-truth files were finalized on the same branch after the exact-main host-local ansible-pull verification completed and platform version 0.130.40 was recorded."
+  ]
+}

@@ -1,0 +1,8 @@
+Branch-local pre-push gate summary for ADR 0325
+==============================================
+
+- `make pre-push-gate` completed successfully on the rebased `codex/ws-0325-live-apply` tree before the final `live_applied` metadata flip.
+- The remote build-server replay passed every selected content check except `atlas-lint`.
+- Remote `atlas-lint` failed only because the build-host Atlas dev database timed out and `scripts/atlas_schema.py` hit the `docker.errors` exception-wrapper path while handling that remote container failure.
+- `scripts/run_gate_fallback.py` then reran only the unresolved `atlas-lint` check locally; the merged `.local/validation-gate/last-run.json` result ended in `status: passed`.
+- After recording the workstream as `live_applied`, protected canonical-truth surfaces on the branch are intentionally pending until the final `main` integration step updates `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`.

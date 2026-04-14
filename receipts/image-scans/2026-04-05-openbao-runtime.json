@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "openbao_runtime",
+  "image_ref": "docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-04-05",
+  "sbom_receipt": "receipts/sbom/8843249c9bc0.cdx.json",
+  "cve_receipt": "receipts/cve/8843249c9bc0-20260405T010618Z.grype.json",
+  "summary": {
+    "critical": 1,
+    "high": 6,
+    "medium": 5,
+    "low": 3,
+    "unknown": 0,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 15
+  }
+}

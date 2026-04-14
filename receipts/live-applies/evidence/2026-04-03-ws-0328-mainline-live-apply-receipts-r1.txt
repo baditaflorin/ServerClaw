@@ -1,0 +1,1 @@
+Live apply receipt error: 2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply.json: evidence ref 'receipts/live-applies/evidence/2026-04-03-ws-0328-mainline-pre-push-gate-r1.txt' does not exist

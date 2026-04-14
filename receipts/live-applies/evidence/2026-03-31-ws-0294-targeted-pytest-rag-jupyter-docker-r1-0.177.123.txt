@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-live-apply
+configfile: pytest.ini
+collected 37 items
+
+tests/test_jupyterhub_runtime_role.py ......                             [ 16%]
+tests/test_rag_context_runtime_role.py ...................               [ 67%]
+tests/test_rag_context_playbook.py .                                     [ 70%]
+tests/test_docker_runtime_role.py ...........                            [100%]
+
+============================== 37 passed in 0.71s ==============================

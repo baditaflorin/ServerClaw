@@ -1,0 +1,7 @@
+returncode= 0
+stdout=
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        95G   90G  723M 100% /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        95G   89G  2.1G  98% /
+stderr=

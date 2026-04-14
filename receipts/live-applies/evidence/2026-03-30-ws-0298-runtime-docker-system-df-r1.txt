@@ -1,0 +1,221 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+Images space usage:
+
+REPOSITORY                             TAG                  IMAGE ID       CREATED         SIZE      SHARED SIZE   UNIQUE SIZE   CONTAINERS
+lv3-platform-context-api               latest               82c0c8847382   3 hours ago     256MB     256.4MB       0B            1
+mail-platform-mail-gateway             latest               523bb866cb7b   3 hours ago     155MB     117.6MB       36.96MB       1
+lv3/tesseract-ocr                      latest               6993ce9d355d   3 hours ago     288MB     288.4MB       4.705kB       1
+<none>                                 <none>               5c9e93d51d90   4 hours ago     152MB     117.6MB       34.13MB       0
+lv3-platform-api-gateway               latest               21c7975a9e6f   4 hours ago     299MB     299.3MB       0B            1
+lv3-ops-portal                         latest               9f3b3f9dc52d   4 hours ago     145MB     119.2MB       26.05MB       1
+<none>                                 <none>               4283e1289c16   19 hours ago    152MB     117.6MB       34.13MB       0
+<none>                                 <none>               5840efd3a69e   20 hours ago    258MB     257.7MB       0B            0
+<none>                                 <none>               236c0e1bb58e   26 hours ago    119MB     119.2MB       121B          1
+lv3/browser-runner                     latest               b322ee33642e   26 hours ago    1.58GB    1.584GB       14.1kB        1
+<none>                                 <none>               daa6443bdee8   37 hours ago    36.7MB    8.442MB       28.3MB        1
+<none>                                 <none>               f70dca64fec5   44 hours ago    1.85GB    78.61MB       1.775GB       1
+<none>                                 <none>               3a67b3eead98   2 days ago      705MB     78.61MB       626.5MB       1
+<none>                                 <none>               67676c08b3b8   3 days ago      1.45GB    78.61MB       1.37GB        2
+mattermost/mattermost-team-edition     release-10.11        089732d728b7   3 days ago      710MB     0B            709.6MB       1
+<none>                                 <none>               f65cc58fffcf   4 days ago      882MB     74.83MB       806.9MB       1
+<none>                                 <none>               9b188598cfa1   5 days ago      2.92GB    124.3MB       2.799GB       3
+<none>                                 <none>               17b217cdd2c5   5 days ago      341MB     8.442MB       332.6MB       1
+<none>                                 <none>               469ccccb7ceb   5 days ago      570MB     0B            569.5MB       1
+<none>                                 <none>               72be80496b6d   5 days ago      869MB     7.835MB       861MB         1
+<none>                                 <none>               d0c869620ad3   5 days ago      261MB     0B            261.5MB       1
+nats                                   2.11-alpine          d4916f00b11d   6 days ago      26.3MB    8.322MB       17.95MB       1
+<none>                                 <none>               d83ae1aee920   6 days ago      1.01GB    162.1MB       848.9MB       1
+<none>                                 <none>               4e2996981bc9   6 days ago      296MB     0B            296.5MB       0
+<none>                                 <none>               205d3d5d7592   6 days ago      1.02GB    162.1MB       861.7MB       1
+<none>                                 <none>               e7bcab22efa7   6 days ago      77.8MB    0B            77.78MB       1
+<none>                                 <none>               c3eeb475671b   6 days ago      337MB     117.6MB       219.9MB       1
+<none>                                 <none>               cf3975016bb1   7 days ago      58.1MB    0B            58.14MB       2
+<none>                                 <none>               c273e605a10d   9 days ago      497MB     9.551MB       487.4MB       1
+<none>                                 <none>               3d9496d1c315   9 days ago      101MB     9.551MB       91.77MB       4
+ghcr.io/windmill-labs/windmill-extra   latest               c3075e9546ec   9 days ago      4.74GB    74.83MB       4.665GB       1
+ghcr.io/windmill-labs/windmill         1.662.0              c3d499a449b8   10 days ago     4.2GB     74.83MB       4.127GB       3
+<none>                                 <none>               5847b3d7ff82   10 days ago     796MB     0B            795.7MB       1
+portainer/portainer-ce                 lts                  c687e3efcb24   10 days ago     181MB     0B            180.7MB       1
+<none>                                 <none>               b35f2515fa47   11 days ago     84.7MB    0B            84.73MB       0
+goharbor/redis-photon                  v2.15.0              4ed296911e8b   11 days ago     173MB     40.34MB       132.4MB       1
+goharbor/trivy-adapter-photon          v2.15.0              e9d91b67c413   11 days ago     408MB     40.34MB       367.6MB       1
+goharbor/harbor-registryctl            v2.15.0              4b2b3294a46c   11 days ago     166MB     40.34MB       126MB         1
+goharbor/registry-photon               v2.15.0              5b02673a2fa2   11 days ago     87.7MB    40.34MB       47.35MB       1
+goharbor/harbor-log                    v2.15.0              9e71d0bc1e73   11 days ago     170MB     40.34MB       130MB         1
+goharbor/harbor-jobservice             v2.15.0              2fe35692621f   11 days ago     185MB     40.34MB       144.2MB       1
+goharbor/harbor-core                   v2.15.0              87a862e24da8   11 days ago     210MB     40.34MB       169.8MB       1
+goharbor/harbor-portal                 v2.15.0              b3939ccdd07f   11 days ago     166MB     40.34MB       126MB         1
+goharbor/harbor-db                     v2.15.0              e66097841983   11 days ago     274MB     40.34MB       233.5MB       1
+smallstep/step-ca                      0.30.1               6ad1069568c0   11 days ago     145MB     8.442MB       137MB         1
+outlinewiki/outline                    1.6.1                8c5f0f021a93   11 days ago     995MB     0B            995.4MB       3
+<none>                                 <none>               b0ca46bc1c92   11 days ago     6.01GB    78.14MB       5.929GB       1
+goharbor/nginx-photon                  v2.15.0              77728976f2e8   12 days ago     158MB     40.34MB       117.4MB       1
+glitchtip/glitchtip                    6                    7def969f22e2   12 days ago     720MB     117.6MB       602.8MB       0
+<none>                                 <none>               bced9fdd0f15   13 days ago     729MB     78.14MB       650.4MB       2
+python                                 3.12-slim-bookworm   623a8ce0f1ff   13 days ago     124MB     124.3MB       0B            0
+python                                 3.12-slim            fb1118f126b5   13 days ago     119MB     119.2MB       0B            1
+<none>                                 <none>               ca792c8c99f6   13 days ago     117MB     74.83MB       42.24MB       2
+<none>                                 <none>               118bf7af4f0c   2 weeks ago     196MB     163.2MB       32.5MB        1
+<none>                                 <none>               476b83ba1f90   2 weeks ago     170MB     8.322MB       162MB         1
+valkey/valkey                          8.1-alpine           e0cd36901ed6   2 weeks ago     42MB      8.442MB       33.54MB       1
+valkey/valkey                          9                    ceec8dafea71   2 weeks ago     113MB     78.62MB       34.11MB       0
+<none>                                 <none>               fc369b73d7da   2 weeks ago     43.5MB    8.442MB       35.02MB       1
+ghcr.io/open-webui/open-webui          v0.8.9               45d0a041bce0   3 weeks ago     4.68GB    0B            4.678GB       1
+<none>                                 <none>               9fd8d573974e   3 weeks ago     938MB     162.2MB       775.7MB       1
+<none>                                 <none>               a4221cced719   3 weeks ago     74MB      48.24MB       25.8MB        1
+<none>                                 <none>               db11cc77287e   3 weeks ago     65.3MB    8.442MB       56.84MB       1
+<none>                                 <none>               7a22e9ad21d6   3 weeks ago     894MB     162.2MB       731.4MB       1
+<none>                                 <none>               b5052fbcc193   3 weeks ago     303MB     0B            302.8MB       4
+<none>                                 <none>               fb4c46a43a7e   3 weeks ago     108MB     0B            108.4MB       1
+<none>                                 <none>               a348d1c88f30   4 weeks ago     998MB     78.62MB       919.2MB       1
+<none>                                 <none>               108b27c919e6   4 weeks ago     276MB     8.442MB       267.6MB       1
+ghcr.io/dani-garcia/vaultwarden        latest               28bfca0619ca   4 weeks ago     242MB     78.62MB       163.7MB       1
+openbao/openbao                        2.5.1                6235b43459a2   5 weeks ago     196MB     8.442MB       187.9MB       26
+<none>                                 <none>               aa189b5a1954   5 weeks ago     41.4MB    7.835MB       33.58MB       1
+quay.io/keycloak/keycloak              26.5.4               df40cddb0957   5 weeks ago     463MB     0B            462.8MB       1
+<none>                                 <none>               c079b8cea2ef   5 weeks ago     42MB      8.442MB       33.53MB       5
+<none>                                 <none>               799430267962   6 weeks ago     182MB     163.2MB       19.33MB       1
+stalwartlabs/stalwart                  latest               d54303723b25   6 weeks ago     191MB     78.62MB       112.3MB       1
+<none>                                 <none>               e216cfe8ba0e   7 weeks ago     81.1MB    0B            81.1MB        0
+alpine                                 3.21                 6aeafe801b80   2 months ago    7.84MB    7.835MB       0B            0
+<none>                                 <none>               c138e8c0e115   2 months ago    1.49GB    0B            1.49GB        1
+<none>                                 <none>               477d748c74a5   2 months ago    3.8GB     0B            3.803GB       1
+<none>                                 <none>               9d0207ddceef   2 months ago    162MB     8.322MB       153.4MB       1
+<none>                                 <none>               3e5996d82f4a   2 months ago    1.02GB    0B            1.016GB       1
+<none>                                 <none>               07c0e92abbdf   2 months ago    94.3MB    48.24MB       46.04MB       1
+<none>                                 <none>               e0bcec13ebe3   3 months ago    270MB     0B            270MB         1
+<none>                                 <none>               f49c57d20819   4 months ago    205MB     0B            205.5MB       1
+<none>                                 <none>               8806dc00a010   4 months ago    396MB     8.322MB       387.8MB       1
+<none>                                 <none>               5d38c514e769   5 months ago    1.68GB    0B            1.684GB       1
+<none>                                 <none>               a58b74ba639d   5 months ago    30.2MB    0B            30.19MB       1
+<none>                                 <none>               26fad49b93a5   6 months ago    358MB     0B            357.5MB       1
+<none>                                 <none>               4a86014ec699   7 months ago    52.5MB    8.311MB       44.23MB       1
+binwiederhier/ntfy                     v2.14.0              872b12a82258   7 months ago    74.2MB    8.311MB       65.93MB       1
+qdrant/qdrant                          v1.15.1              da4c45d5134b   8 months ago    198MB     0B            197.9MB       1
+<none>                                 <none>               a98a9d647e70   8 months ago    175MB     0B            175.3MB       3
+<none>                                 <none>               8237ba78756a   9 months ago    973MB     0B            973.3MB       1
+<none>                                 <none>               26fae682f69c   12 months ago   560MB     7.834MB       552.5MB       1
+<none>                                 <none>               e7cb95ab55c6   2 years ago     162MB     0B            161.6MB       1
+<none>                                 <none>               5c6e0650e959   2 years ago     178MB     0B            177.9MB       1
+<none>                                 <none>               0f6dde3909f6   2 years ago     330MB     0B            329.8MB       1
+busybox                                1.36                 b116e1550744   2 years ago     4.42MB    0B            4.417MB       0
+
+Containers space usage:
+
+CONTAINER ID   IMAGE                                                COMMAND                   LOCAL VOLUMES   SIZE      CREATED             STATUS                                NAMES
+7dddd69f5d17   temporalio/admin-tools:1.30.2                        "temporal operator c…"    0               0B        7 seconds ago       Up 2 seconds                          temporal-temporal-admin-tools-run-bc3783350d52
+676b69b73f66   temporalio/server:1.30.2                             "/bin/sh -lc 'sed \"s…"   0               2.1kB     38 seconds ago      Restarting (0) 8 seconds ago          temporal-frontend
+dc8e10517fe7   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    1               0B        2 minutes ago       Up 2 minutes                          lv3-openbao
+407b85cdedfb   unclecode/crawl4ai:0.8.0                             "supervisord -c supe…"    0               0B        4 minutes ago       Created                               crawl4ai
+a97c7096d9e1   temporalio/server:1.30.2                             "/bin/sh -lc 'sed \"s…"   0               2.1kB     7 minutes ago       Restarting (0) 11 seconds ago         temporal-worker
+19223f0a8d6a   temporalio/ui:2.43.3                                 "./start-ui-server.sh"    0               0B        7 minutes ago       Up 7 minutes                          temporal-ui
+a26f72783a3e   temporalio/server:1.30.2                             "/bin/sh -lc 'sed \"s…"   0               2.1kB     7 minutes ago       Restarting (0) 8 seconds ago          temporal-matching
+a8bc04037b92   temporalio/server:1.30.2                             "/bin/sh -lc 'sed \"s…"   0               2.1kB     7 minutes ago       Restarting (0) 9 seconds ago          temporal-history
+7cc64b7330d3   vaultwarden/server:1.35.4                            "/start.sh"               0               0B        7 minutes ago       Up 7 minutes (health: starting)       vaultwarden
+7388e42742cb   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        7 minutes ago       Up 7 minutes (healthy)                temporal-openbao-agent
+6e522d22a446   outlinewiki/outline:1.6.1                            "docker-entrypoint.s…"    1               0B        7 minutes ago       Up 7 minutes (health: starting)       outline
+2f6c91fe0c24   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        7 minutes ago       Up 7 minutes (healthy)                outline-openbao-agent
+849e9a7d1826   minio/minio:RELEASE.2025-07-23T15-54-02Z             "/usr/bin/docker-ent…"    0               0B        7 minutes ago       Up 7 minutes                          outline-minio
+810c7e270f73   redis:7                                              "docker-entrypoint.s…"    1               0B        7 minutes ago       Up 7 minutes (healthy)                outline-redis
+45858649de44   ghcr.io/plausible/community-edition:v3.2.0           "/entrypoint.sh sh -…"    1               0B        8 minutes ago       Up 8 minutes                          plausible
+c32e5213343f   clickhouse/clickhouse-server:24.12-alpine            "/entrypoint.sh"          2               5.67kB    8 minutes ago       Up 8 minutes (healthy)                plausible-events-db
+7541563b9988   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        8 minutes ago       Up 8 minutes (healthy)                plausible-openbao-agent
+30e484357d69   postgres:16-alpine                                   "docker-entrypoint.s…"    1               63B       8 minutes ago       Up 8 minutes (healthy)                plausible-db
+cf58aca096ec   nextcloud:33.0.1-apache                              "/cron.sh"                0               2B        8 minutes ago       Up 8 minutes                          nextcloud-cron
+8eaf56e53545   nextcloud:33.0.1-apache                              "/entrypoint.sh apac…"    0               221B      8 minutes ago       Up 8 minutes                          nextcloud-app
+8af5e9a904ed   redis:7.4-alpine                                     "docker-entrypoint.s…"    0               0B        8 minutes ago       Up 8 minutes (healthy)                nextcloud-redis
+c8787a2f1331   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        8 minutes ago       Up 8 minutes (healthy)                nextcloud-openbao-agent
+78475f7891ab   ghcr.io/gethomepage/homepage:v1.8.0                  "docker-entrypoint.s…"    0               0B        9 minutes ago       Up 9 minutes (healthy)                homepage
+6506b95334b3   goharbor/harbor-jobservice:v2.15.0                   "/harbor/entrypoint.…"    0               1.84MB    9 minutes ago       Up 9 minutes (health: starting)       harbor-jobservice
+39491bf544e8   goharbor/nginx-photon:v2.15.0                        "nginx -g 'daemon of…"    3               2B        9 minutes ago       Up 9 minutes (health: starting)       nginx
+607c6e576627   goharbor/harbor-core:v2.15.0                         "/harbor/entrypoint.…"    0               1.84MB    9 minutes ago       Up 9 minutes (health: starting)       harbor-core
+931fcef3b2ab   goharbor/trivy-adapter-photon:v2.15.0                "/home/scanner/entry…"    0               1.84MB    9 minutes ago       Up 9 minutes (health: starting)       trivy-adapter
+c7ad9ec25f20   goharbor/harbor-db:v2.15.0                           "/docker-entrypoint.…"    0               64B       9 minutes ago       Up 9 minutes (health: starting)       harbor-db
+71eaeb8484de   goharbor/redis-photon:v2.15.0                        "redis-server /etc/r…"    0               0B        9 minutes ago       Up 9 minutes (health: starting)       redis
+3213a816a8e5   goharbor/harbor-registryctl:v2.15.0                  "/home/harbor/start.…"    1               1.84MB    9 minutes ago       Up 9 minutes (health: starting)       registryctl
+1cda0d8309f5   goharbor/registry-photon:v2.15.0                     "/home/harbor/entryp…"    0               1.84MB    9 minutes ago       Up 9 minutes (health: starting)       registry
+656f6edfe5c3   goharbor/harbor-portal:v2.15.0                       "nginx -g 'daemon of…"    3               2B        9 minutes ago       Up 9 minutes (health: starting)       harbor-portal
+a1aafbc4dcd4   goharbor/harbor-log:v2.15.0                          "/bin/sh -c /usr/loc…"    2               0B        9 minutes ago       Up 9 minutes (healthy)                harbor-log
+8e25b3e05a66   nginx:1.29.1-alpine                                  "sh -c 'cp /docker-e…"    0               1.39kB    10 minutes ago      Up 10 minutes (health: starting)      dify-nginx
+afd5d66d8b07   langgenius/dify-api:1.13.3                           "/bin/bash /entrypoi…"    0               52.3MB    10 minutes ago      Up 25 seconds                         dify-worker
+c874e86f249f   langgenius/dify-api:1.13.3                           "/bin/bash /entrypoi…"    0               51.4MB    10 minutes ago      Up About a minute                     dify-worker-beat
+a42b433ffe79   langgenius/dify-api:1.13.3                           "/bin/bash /entrypoi…"    0               50.6MB    10 minutes ago      Up 7 minutes                          dify-api
+354cdc06fda0   langgenius/dify-plugin-daemon:0.5.3-local            "/bin/bash -c /app/e…"    0               0B        10 minutes ago      Up 10 minutes                         dify-plugin-daemon
+943a52f2d0a7   redis:6.2.20-alpine                                  "docker-entrypoint.s…"    0               0B        10 minutes ago      Up 10 minutes (healthy)               dify-redis
+cdb74be12946   ubuntu/squid:6.6-24.04_beta                          "sh -c 'cp /docker-e…"    2               1.15kB    10 minutes ago      Up 10 minutes                         dify-ssrf-proxy
+083501c7716e   langgenius/dify-web:1.13.3                           "/bin/sh ./entrypoin…"    0               0B        10 minutes ago      Up 10 minutes                         dify-web
+3afc54f086ea   qdrant/qdrant:v1.8.3                                 "./entrypoint.sh"         0               0B        10 minutes ago      Up 10 minutes                         dify-qdrant
+c6f0e6ef6b59   langgenius/dify-sandbox:0.2.14                       "/entrypoint.sh"          0               328MB     10 minutes ago      Up 10 minutes (healthy)               dify-sandbox
+4c5e5d2f5798   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        10 minutes ago      Up 10 minutes (healthy)               dify-openbao-agent
+7c7f843a0371   smallstep/step-ca:0.30.1                             "/usr/local/bin/step…"    1               0B        29 minutes ago      Up 28 minutes (health: starting)      step-ca
+1a5d614c0f83   binwiederhier/ntfy:v2.14.0                           "ntfy serve --config…"    0               0B        About an hour ago   Up About an hour                      ntfy
+c3d3749bcf90   gitea/gitea:1.25.5-rootless                          "/usr/bin/dumb-init …"    1               0B        About an hour ago   Up About an hour                      gitea
+0104ed1d35f1   glitchtip/glitchtip:6.1.3                            "./bin/run-all-in-on…"    0               419kB     About an hour ago   Up About an hour (healthy)            glitchtip
+56cea019537a   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        About an hour ago   Up 26 minutes (healthy)               glitchtip-openbao-agent
+1a4570663e6e   valkey/valkey:9.0.3-alpine                           "docker-entrypoint.s…"    0               5.03kB    About an hour ago   Up About an hour (healthy)            glitchtip-valkey
+c639537414bf   langfuse/langfuse:3                                  "dumb-init -- ./web/…"    0               1.02kB    About an hour ago   Up About an hour (health: starting)   langfuse-web
+474ded6c98b1   langfuse/langfuse-worker:3                           "dumb-init -- ./work…"    0               0B        About an hour ago   Up About an hour                      langfuse-worker
+d9e79d6ae03b   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        About an hour ago   Up 26 minutes (healthy)               langfuse-openbao-agent
+5977ce79b235   clickhouse/clickhouse-server:25.8                    "/entrypoint.sh"          0               6.21kB    About an hour ago   Up About an hour (healthy)            langfuse-clickhouse
+f581c7404c9e   redis:7                                              "docker-entrypoint.s…"    0               0B        About an hour ago   Up About an hour (healthy)            langfuse-redis
+4ae71b4c1a11   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        About an hour ago   Up About an hour (healthy)            gitea-openbao-agent
+50138a1146e4   quay.io/keycloak/keycloak:26.5.4                     "/opt/keycloak/bin/k…"    0               167MB     2 hours ago         Up 2 hours                            keycloak-keycloak-1
+8ea0629942de   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        2 hours ago         Up 27 minutes (healthy)               keycloak-openbao-agent
+a9212ab46c3e   mail-platform-mail-gateway                           "sh -c 'uvicorn app:…"    0               1.48MB    2 hours ago         Up 2 hours                            lv3-mail-gateway
+37738267ab3e   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               0B        2 hours ago         Restarting (1) 1 second ago           mail-platform-openbao-agent
+ebfdc50c2898   stalwartlabs/stalwart:v0.15.5                        "/bin/sh /usr/local/…"    0               7MB       2 hours ago         Up 2 hours                            lv3-mail-stalwart
+9f05214d6369   minio/minio:RELEASE.2025-07-23T15-54-02Z             "/usr/bin/docker-ent…"    0               0B        2 hours ago         Up 2 hours                            minio
+435af80d2ce3   openbao/openbao:2.5.1                                "/bin/sh -lc 'vault …"    2               0B        2 hours ago         Up 21 seconds                         minio-openbao-agent
+81c806d6a22e   lv3/tesseract-ocr:latest                             "uvicorn tesseract_o…"    0               722kB     2 hours ago         Up 2 hours (healthy)                  tesseract-ocr
+07556526ff16   apache/tika:3.2.3.0                                  "/bin/sh -c 'exec ja…"    0               16B       2 hours ago         Up 2 hours                            tika
+75895a9fdeda   amir20/dozzle:v10.2.0                                "/dozzle --addr :808…"    0               0B        2 hours ago         Up 2 hours (healthy)                  dozzle
+7e54d229de99   amir20/dozzle:v10.2.0                                "/dozzle --no-analyt…"    0               9B        2 hours ago         Up 2 hours (healthy)                  dozzle-agent
+275a73ce2ac3   lv3-platform-context-api:latest                      "uvicorn platform_co…"    0               1.1MB     3 hours ago         Up 3 hours                            platform-context-api
+2611094cff49   ollama/ollama:0.18.2                                 "/bin/ollama serve"       0               0B        3 hours ago         Up 3 hours                            ollama
+3f14b16f1982   excalidraw/excalidraw-room:sha-03ff435               "docker-entrypoint.s…"    0               119B      3 hours ago         Up 3 hours                            excalidraw-room
+93661ba3149c   excalidraw/excalidraw:latest                         "/bin/sh /opt/lv3/bo…"    0               1.96MB    3 hours ago         Up 3 hours (health: starting)         excalidraw-app
+2a2e519bf012   gristlabs/grist:1.7.11                               "./sandbox/docker_en…"    0               0B        3 hours ago         Up 3 hours (health: starting)         grist
+db885b534bdc   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        3 hours ago         Up 25 minutes (healthy)               grist-openbao-agent
+c603f163047e   louislam/uptime-kuma:2.0.0                           "/usr/bin/dumb-init …"    0               217kB     4 hours ago         Up 4 hours (healthy)                  uptime-kuma
+022763a17aa2   lv3-platform-api-gateway:latest                      "uvicorn api_gateway…"    0               1.81MB    4 hours ago         Up 4 hours (healthy)                  api-gateway
+e1bf6652410c   lv3-ops-portal:latest                                "uvicorn ops_portal.…"    0               194kB     4 hours ago         Up 4 hours (healthy)                  ops-portal
+63bc091106ce   ghcr.io/windmill-labs/windmill:1.662.0               "windmill"                1               7.18MB    4 hours ago         Up 4 hours                            windmill-windmill_worker_native-1
+dc50491bfafc   ghcr.io/windmill-labs/windmill-extra:1.662.0         "/entrypoint.sh"          1               251MB     4 hours ago         Up 4 hours                            windmill-windmill_extra-1
+e10d406417f6   ghcr.io/windmill-labs/windmill:1.662.0               "windmill"                2               48.2MB    4 hours ago         Up 4 hours                            windmill-windmill_worker-1
+01c0a715b546   ghcr.io/windmill-labs/windmill:1.662.0               "windmill"                1               10.1kB    4 hours ago         Up 4 hours                            windmill-windmill_server-1
+5f50e71951bc   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        4 hours ago         Up 25 minutes (healthy)               windmill-openbao-agent
+361ff578b190   mattermost/mattermost-team-edition:release-10.11     "/mattermost/bin/mat…"    0               664MB     6 hours ago         Exited (137) 4 hours ago              lv3-mattermost
+7c68d924e084   typesense/typesense:29.0                             "/opt/typesense-serv…"    1               0B        6 hours ago         Exited (0) 4 hours ago                typesense
+c7ac30435a19   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               0B        6 hours ago         Exited (0) 4 hours ago                typesense-openbao-agent
+4ef451dc89ff   dock.mau.dev/mautrix/whatsapp:v0.2603.0              "/docker-run.sh"          0               0B        9 hours ago         Exited (0) 4 hours ago                matrix-mautrix-whatsapp
+412f52db8c2f   dock.mau.dev/mautrix/discord:v0.7.6                  "/docker-run.sh"          0               0B        9 hours ago         Exited (0) 4 hours ago                matrix-mautrix-discord
+2f788dd46fc5   matrixdotorg/synapse:v1.150.0                        "/start.py"               0               2.42MB    9 hours ago         Exited (137) 4 hours ago              matrix-synapse
+fbc323820e19   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               0B        9 hours ago         Exited (0) 4 hours ago                matrix-synapse-openbao-agent
+37b2e88e3dea   ghcr.io/dgtlmoon/changedetection.io:0.54.7           "/docker-entrypoint.…"    1               4.92MB    9 hours ago         Up 4 hours (healthy)                  changedetection
+612933ff22a6   nats:2.11-alpine                                     "docker-entrypoint.s…"    0               0B        10 hours ago        Up 2 hours                            lv3-nats-jetstream
+8deaaea2a997   openfga/openfga:v1.13.1                              "/openfga run"            0               0B        17 hours ago        Exited (0) 10 hours ago               lv3-openfga
+41a913479a70   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               0B        17 hours ago        Exited (0) 10 hours ago               openfga-openbao-agent
+31076e503131   axllent/mailpit:v1.29.5                              "/mailpit"                0               0B        17 hours ago        Exited (0) 10 hours ago               mailpit
+dd9c56fa6f48   gotenberg/gotenberg:8.29.0                           "/usr/bin/tini -- go…"    0               254MB     17 hours ago        Exited (0) 10 hours ago               gotenberg
+cccd7195908e   openbao/openbao:2.5.1                                "docker-entrypoint.s…"    2               1B        21 hours ago        Up 27 minutes (healthy)               platform-context-openbao-agent
+ab6a8383b988   qdrant/qdrant:v1.15.1                                "./entrypoint.sh"         0               0B        21 hours ago        Up 3 hours                            qdrant-platform-context
+ca9ee628190c   python:3.12-slim                                     "sleep 30"                0               0B        21 hours ago        Created                               tmp-platform-port-check
+4e07ff288104   fa191ad9dc5c                                         "/bin/sh -c 'pip ins…"    0               0B        21 hours ago        Created                               pensive_ganguly
+c15615f1557f   fa191ad9dc5c                                         "/bin/sh -c 'pip ins…"    0               0B        21 hours ago        Created                               wizardly_zhukovsky
+9f5beba7207f   236c0e1bb58e                                         "/bin/sh -c 'pip ins…"    0               58.1MB    26 hours ago        Exited (0) 26 hours ago               elastic_hamilton
+a204d3ef3873   lv3/browser-runner:latest                            "uvicorn browser_run…"    0               932kB     26 hours ago        Exited (0) 10 hours ago               browser-runner
+a58b1cb5b781   0556f81a589e                                         "/bin/sh -c 'pip ins…"    0               1.46GB    26 hours ago        Exited (0) 26 hours ago               priceless_gates
+7248c60d7ddf   0556f81a589e                                         "/bin/sh -c 'pip ins…"    0               1.46GB    26 hours ago        Exited (0) 26 hours ago               nervous_lewin
+d5ad938309e6   0556f81a589e                                         "/bin/sh -c 'pip ins…"    0               1.46GB    26 hours ago        Exited (0) 26 hours ago               festive_bouman
+0bce3ce6d604   0556f81a589e                                         "/bin/sh -c 'pip ins…"    0               1.46GB    26 hours ago        Exited (0) 26 hours ago               focused_allen
+daefb27cbe7f   0556f81a589e                                         "/bin/sh -c 'pip ins…"    0               1.46GB    26 hours ago        Exited (0) 26 hours ago               fervent_pasteur
+9683c0115ebb   docker.n8n.io/n8nio/n8n:2.2.6                        "tini -- /docker-ent…"    0               46.7MB    30 hours ago        Exited (0) 21 hours ago               n8n
+1c628402f076   valkey/valkey:8.1.5-alpine                           "docker-entrypoint.s…"    0               0B        2 days ago          Exited (0) 21 hours ago               plane-valkey
+ebea4ad5d14a   artifacts.plane.so/makeplane/plane-proxy:v1.2.3      "caddy run --config …"    0               1.57kB    2 days ago          Exited (0) 21 hours ago               plane-proxy
+f7e851567783   artifacts.plane.so/makeplane/plane-live:v1.2.3       "docker-entrypoint.s…"    0               0B        2 days ago          Exited (0) 21 hours ago               plane-live
+32ebc3a350d3   artifacts.plane.so/makeplane/plane-admin:v1.2.3      "/docker-entrypoint.…"    0               1.09kB    2 days ago          Exited (0) 21 hours ago               plane-admin
+2efba952af19   artifacts.plane.so/makeplane/plane-space:v1.2.3      "docker-entrypoint.s…"    0               1.45MB    2 days ago          Exited (0) 21 hours ago               plane-space
+b32dd48f3c69   artifacts.plane.so/makeplane/plane-frontend:v1.2.3   "/docker-entrypoint.…"    0               1.09kB    2 days ago          Exited (0) 21 hours ago               plane-web
+ecff6dd3993a   artifacts.plane.so/makeplane/plane-backend:v1.2.3    "./bin/docker-entryp…"    0               0B        2 days ago          Exited (137) 21 hours ago             plane-worker
+b3d1422ffce1   artifacts.plane.so/makeplane/plane-backend:v1.2.3    "./bin/docker-entryp…"    0               0B        2 days ago          Exited (137) 21 hours ago             plane-beat-worker
+c180374df7ce   artifacts.plane.so/makeplane/plane-backend:v1.2.3    "./bin/docker-entryp…"    0               0B        2 days ago          Exited (0) 21 hours ago               plane-api

@@ -1,0 +1,7 @@
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.70' (ED25519) to the list of known hosts.
+docker.io/library/postgres:17.4-alpine3.21
+mirror.gcr.io/library/alpine:3.21.3
+mirror.gcr.io/library/golang:1.25.0-alpine3.21
+mirror.gcr.io/library/node:22.14.0-bookworm-slim
+mirror.gcr.io/nginxinc/nginx-unprivileged:1.27.5-alpine3.21

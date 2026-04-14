@@ -1,0 +1,2 @@
+Workstream surface ownership validation
+Workstream surface ownership validation failed: path pattern 'config/windmill/scripts/gate-status.py' is claimed as exclusive by both 'ws-0266-validation-runner-capability-contracts' and 'ws-0308-live-apply'

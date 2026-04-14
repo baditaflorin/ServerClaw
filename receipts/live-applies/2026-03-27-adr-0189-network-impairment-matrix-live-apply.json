@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0189-network-impairment-matrix-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-28",
+  "recorded_by": "codex",
+  "source_commit": "5ebdd2afcf1e298a0fd13431a6cef0c044d1f31c",
+  "repo_version_context": "0.177.12",
+  "workflow_id": "network-impairment-matrix",
+  "adr": "0189",
+  "summary": "Implemented the ADR 0189 governed network-impairment matrix on the live Windmill worker, repaired the shared repo-checkout packaging regression that had been breaking seeded Python jobs, and verified the staging matrix slice end to end through the Windmill API and the mirrored worker checkout.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "http://100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0189 validation and repo automation gates",
+      "result": "pass",
+      "observed": "`python3 -m py_compile config/windmill/scripts/network-impairment-matrix.py scripts/network_impairment_matrix.py platform/faults/network_impairment_matrix.py`, `uv run --with pytest --with pyyaml python -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q` (`11 passed`), `make syntax-check-windmill`, `uv run --with pyyaml python scripts/workflow_catalog.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `make pre-push-gate` all completed successfully from the isolated worktree."
+    },
+    {
+      "check": "Full local validation sweep",
+      "result": "partial",
+      "observed": "`make validate` still stops on pre-existing unrelated `ansible-lint` warnings outside the ADR 0189 surface, including existing warnings under `control_plane_recovery`, `openbao_runtime`, and other shared roles; no ADR 0189-specific validation failures surfaced in that broader sweep."
+    },
+    {
+      "check": "Windmill script publication and shared job-loader recovery",
+      "result": "pass",
+      "observed": "`GET /api/w/lv3/scripts/get/p/f%2Flv3%2Fnetwork-impairment-matrix` returned HTTP 200 with hash `65063c8a80599a06`, and after replaying `make live-apply-service service=windmill env=production EXTRA_ARGS='-e bypass_promotion=true'` the older `fault-injection` script also returned `status: planned` again through `POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Ffault-injection` in `dry_run` mode, confirming the stale worker-checkout packaging metadata regression was cleared."
+    },
+    {
+      "check": "Governed ADR 0189 live render",
+      "result": "pass",
+      "observed": "`POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix` with `{\"target_class\":\"staging\"}` returned `status: planned`, `entry_count: 4`, and `report_file: /srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json`; a guest-local read of that JSON file on `docker-runtime-lv3` returned the same `planned` staging slice."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md",
+    "docs/workstreams/ws-0189-live-apply.md",
+    "docs/runbooks/network-impairment-matrix.md",
+    "workstreams.yaml",
+    "config/network-impairment-matrix.yaml"
+  ],
+  "notes": [
+    "This workstream branch intentionally leaves `VERSION`, numbered release sections in `changelog.md`, `versions/stack.yaml`, and the top-level integrated `README.md` status summary for the final merge-to-main integration step.",
+    "The live repair added a shared Windmill runtime safeguard that removes stale `/srv/proxmox_florin_server/pyproject.toml` and `lv3_platform_cli.egg-info` from the mirrored worker checkout so repo-managed Python jobs no longer trigger `uv` editable-build startup failures before their wrappers run.",
+    "The ADR 0189 rollout remains on the safe diagnostic path only: it renders governed staging, preview, fixture, standby, and recovery matrix slices but does not authorize ad hoc production impairments; actual higher-fidelity execution lanes remain follow-up work under ADR 0088 and ADR 0185."
+  ]
+}

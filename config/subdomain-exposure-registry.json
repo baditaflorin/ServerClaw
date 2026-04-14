@@ -2138,7 +2138,7 @@
           "service_id": "livekit",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}",
           "target_port": 443
         }
       },
@@ -2181,7 +2181,7 @@
           "noindex": true,
           "proxy_read_timeout_seconds": 3600,
           "proxy_send_timeout_seconds": 3600,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.livekit_signal_port }}"
         },
         "tls": {
           "provider": "letsencrypt",

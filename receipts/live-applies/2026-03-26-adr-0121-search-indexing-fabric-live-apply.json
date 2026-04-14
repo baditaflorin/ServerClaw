@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0121-search-indexing-fabric-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "edb470e49076cb6018f30098f0c16002b15f3ef4",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "adr-0121-search-indexing-fabric-live-apply",
+  "adr": "0121",
+  "summary": "Completed the ADR 0121 production live apply by hardening the search collectors for non-UTF8 and malformed JSON inputs, syncing docs and receipts into the API gateway runtime image, correcting the Windmill worker checkout source paths, manually recovering the live runtime trees after unrelated converge drift, and verifying both the public `/v1/search` endpoint and the worker-side rebuild helper.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "api-gateway",
+      "address": "https://api.lv3.org/v1/search"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill-worker-checkout",
+      "address": "/srv/proxmox_florin_server"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repository validation and automation paths",
+      "result": "pass",
+      "observed": "Focused and broad validation completed successfully on the workstream branch: `uv run --with pytest --with pyyaml --with fastapi --with httpx --with cryptography --with jinja2 --with itsdangerous --with python-multipart python -m pytest tests/test_search_fabric.py tests/test_lv3_cli.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py tests/test_api_gateway_runtime_role.py tests/test_windmill_operator_admin_app.py -q` returned `82 passed`, `make syntax-check-api-gateway syntax-check-windmill` passed, and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` reported repository data models and live apply receipts OK."
+    },
+    {
+      "check": "Public API search route",
+      "result": "pass",
+      "observed": "Authenticated production queries succeeded after the live recovery. `GET /v1/search?q=certificate%20renewal&collection=runbooks&limit=5` returned `count: 5` with `runbook:cert-expired` ranked first, and `GET /v1/search?q=converge%20netbox&collection=command_catalog&limit=5` returned `count: 5` with `command:converge-netbox` ranked first."
+    },
+    {
+      "check": "API gateway runtime contents",
+      "result": "pass",
+      "observed": "Inside the running `api-gateway` container, `/app/docs` and `/app/receipts` both exist, and `/app/search_fabric/utils.py` contains the hardened `load_json()` fallback that returns the collector default on malformed JSON."
+    },
+    {
+      "check": "Windmill worker checkout rebuild helper",
+      "result": "pass",
+      "observed": "After syncing the corrected checkout content and repairing ownership on `/srv/proxmox_florin_server/build`, `python3 /srv/proxmox_florin_server/config/windmill/scripts/rebuild-search-index.py --repo-path /srv/proxmox_florin_server` completed successfully and wrote `/srv/proxmox_florin_server/build/search-index/documents.json` with collection counts including `adrs: 178`, `runbooks: 158`, `configs: 57`, `receipts: 167`, and `command_catalog: 156`."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "scripts/search_fabric/utils.py",
+    "scripts/search_fabric/collectors/receipt_collector.py",
+    "docs/adr/0121-local-search-and-indexing-fabric.md",
+    "docs/runbooks/search-indexing-fabric.md",
+    "docs/workstreams/adr-0121-search-indexing-fabric.md"
+  ],
+  "notes": [
+    "The repository implementation for ADR 0121 already existed on `main`, but the live runtime was incomplete: the API gateway image did not include `docs/` or `receipts/`, the worker checkout source path was stale, and malformed/non-UTF8 corpus files could crash indexing.",
+    "Automated production converges were partially successful but noisy for reasons outside ADR 0121. The API gateway converge failed at its final Keycloak bearer-token verification step and a later retry hit a transient SSH reconnect. The limited Windmill converge failed before the worker checkout stage on the unrelated `Ensure the pinned uv binaries are executable` privilege-escalation task.",
+    "To finish the live apply in the same turn, the corrected `scripts/search_fabric/` tree was manually synchronized into `/opt/api-gateway/service` and `/srv/proxmox_florin_server`, the API gateway container was rebuilt with `docker compose build api-gateway && docker compose up -d api-gateway`, checkout ownership under `/srv/proxmox_florin_server/build` was repaired for `ops`, and AppleDouble `._*` sidecar files introduced by the manual tar sync were removed before the final worker rebuild verification."
+  ]
+}

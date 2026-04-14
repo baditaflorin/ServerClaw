@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0333-private-overlay-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T15:03:02Z",
+  "recorded_by": "codex",
+  "source_commit": "aa86822664ed78182744f322430410c6a1c3e8f0",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0333-private-overlay-live-apply",
+  "adr": "0333",
+  "summary": "Live-applied ADR 0333 on `codex/ws-0333-private-overlay` by moving the remaining active controller-local bootstrap-key and private-overlay contracts onto shared `.local` aliases, materializing the canonical bootstrap alias automatically for fresh worktrees, updating the build-server and controller automation consumers to use the shared overlay root, and re-verifying the rebased branch from the latest realistic `origin/main` while leaving the protected exact-main replay for the final merge step.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/build-server.json"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/worktree-bootstrap-manifests.json"
+    },
+    {
+      "kind": "artifact",
+      "name": "docs/diagrams/agent-coordination-map.excalidraw"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Live controller alias materialization and preflight",
+      "result": "pass",
+      "observed": "`python3 scripts/materialize_bootstrap_key_alias.py`, `make preflight WORKFLOW=configure-edge-publication`, and `./scripts/remote_exec.sh check-build-server` all succeeded from the dedicated worktree, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-bootstrap-alias-r1.json`, `receipts/live-applies/evidence/2026-04-04-adr-0333-preflight-configure-edge-publication-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-adr-0333-check-build-server-r1.txt`."
+    },
+    {
+      "check": "Focused ADR 0333 regression coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_materialize_bootstrap_key_alias.py tests/test_controller_automation_toolkit.py tests/test_preflight_controller_local.py tests/test_remote_exec.py tests/test_ephemeral_windmill_wrappers.py tests/test_provision_operator.py tests/test_validation_runner_contracts.py -q` returned `53 passed in 22.98s`, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-targeted-tests-r2.txt`."
+    },
+    {
+      "check": "Repository automation and generated-surface validation",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces data-models`, `python3 scripts/workstream_registry.py --write`, `python3 scripts/generate_diagrams.py --write`, and the dependency-graph check all passed after the workstream-surface refresh, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-validate-repo-r4.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-workstream-registry-r4.txt`, `receipts/live-applies/evidence/2026-04-04-adr-0333-diagrams-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-adr-0333-dependency-graph-r3.txt`."
+    },
+    {
+      "check": "Remote validation replay",
+      "result": "partial",
+      "observed": "`make remote-validate` reached the real remote builder first and then exercised the local fallback; the final lane summary passed `agent-standards`, `workstream-surfaces`, `atlas-lint`, `policy-validation`, `iac-policy-scan`, `alert-rule-validation`, `type-check`, and `dependency-graph`, while the heavy fallback `ansible-syntax` and `schema-validation` lanes timed out locally, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-remote-validate-r3.txt`."
+    },
+    {
+      "check": "Release-readiness snapshot",
+      "result": "partial",
+      "observed": "`python3 scripts/release_manager.py status --json` still reports repository version `0.178.3`, platform version `0.130.98`, and a blocked release cut because this workstream has not yet been merged to exact main and the pre-existing `controller_dependency_gap` waiver blockers remain open through `2026-04-06`, preserved in `receipts/live-applies/evidence/2026-04-04-adr-0333-release-status-r2.json`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md",
+    "docs/adr/.index.yaml",
+    "docs/runbooks/controller-local-secrets-and-preflight.md",
+    "docs/runbooks/initial-access.md",
+    "docs/runbooks/operator-onboarding.md",
+    "docs/workstreams/adr-0333-private-overlay-live-apply.md",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "platform/repo.py",
+    "scripts/controller_automation_toolkit.py",
+    "scripts/drift_lib.py",
+    "scripts/materialize_bootstrap_key_alias.py",
+    "scripts/remote_exec.sh",
+    "scripts/resolve_local_overlay_root.sh",
+    "scripts/validation_runner_contracts.py",
+    "config/build-server.json",
+    "config/controller-local-secrets.json",
+    "config/workflow-catalog.json",
+    "config/worktree-bootstrap-manifests.json",
+    "inventory/build_server.yml",
+    "inventory/group_vars/all.yml",
+    "tests/test_materialize_bootstrap_key_alias.py",
+    "tests/test_controller_automation_toolkit.py",
+    "tests/test_preflight_controller_local.py",
+    "tests/test_remote_exec.py",
+    "tests/test_ephemeral_windmill_wrappers.py",
+    "tests/test_provision_operator.py",
+    "tests/test_validation_runner_contracts.py",
+    "workstreams.yaml",
+    "workstreams/archive/2026/adr-0333-private-overlay-live-apply.yaml",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-bootstrap-alias-r1.json",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-preflight-configure-edge-publication-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-check-build-server-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-targeted-tests-r2.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-validate-repo-r4.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-workstream-registry-r4.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-diagrams-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-dependency-graph-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-remote-validate-r3.txt",
+    "receipts/live-applies/evidence/2026-04-04-adr-0333-release-status-r2.json"
+  ],
+  "notes": [
+    "This is the branch-local live-apply receipt for an ADR that changes shared controller automation contracts and live operator workflows without cutting a new numbered repo release yet.",
+    "The branch now records the canonical `.local/ssh/bootstrap.id_ed25519` alias contract and verifies it against the live controller and build-server paths on platform version `0.130.98`.",
+    "Protected exact-main surfaces and the canonical mainline receipt still need the fresh `main` replay and merge-to-`origin/main` step, which follows this branch-local closeout."
+  ]
+}

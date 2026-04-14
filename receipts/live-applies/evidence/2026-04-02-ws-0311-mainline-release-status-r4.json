@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-04-02T10:52:09.221303+00:00",
+  "repo_version": "0.177.142",
+  "platform_version": "0.130.90",
+  "release_blockers": {
+    "status": "met",
+    "detail": "0 workstreams in progress",
+    "met": true
+  },
+  "gate_bypass_waivers": {
+    "totals": {
+      "all_receipts": 64,
+      "legacy_receipts": 63,
+      "compliant_receipts": 1,
+      "open_waivers": 1,
+      "expired_waivers": 0,
+      "invalid_receipts": 0
+    },
+    "warnings": [],
+    "release_blockers": [],
+    "open_waivers": [
+      {
+        "path": "receipts/gate-bypasses/20260330T180508Z-codex-ws-0286-live-apply-r3-c666abf-skip-remote-gate.json",
+        "created_at": "2026-03-30T18:05:08Z",
+        "bypass": "skip_remote_gate",
+        "reason_code": "controller_dependency_gap",
+        "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
+        "owner": "baditaflorin@gmail.com",
+        "expires_on": "2026-04-02",
+        "remediation_ref": "ws-0286-live-apply"
+      }
+    ]
+  },
+  "target_version": "1.0.0",
+  "criteria": [
+    {
+      "id": "adr-window",
+      "label": "ADR window 0001-0111",
+      "status": "pending",
+      "detail": "99/111 implemented; first pending: 0014, 0020, 0024, 0025, 0028",
+      "met": false
+    },
+    {
+      "id": "slo-error-budgets",
+      "label": "SLO error budgets",
+      "status": "pending",
+      "detail": "pending (missing receipts/slo-reports/latest.json)",
+      "met": false
+    },
+    {
+      "id": "restore-verification",
+      "label": "Backup restore verification",
+      "status": "pending",
+      "detail": "0/2 consecutive passes from 4 receipt(s)",
+      "met": false
+    },
+    {
+      "id": "service-ops_portal",
+      "label": "Ops portal",
+      "status": "met",
+      "detail": "HTTP 200",
+      "met": true
+    },
+    {
+      "id": "service-status_page",
+      "label": "Status page",
+      "status": "pending",
+      "detail": "pending (HTTP 502)",
+      "met": false
+    },
+    {
+      "id": "service-docs_portal",
+      "label": "Docs site",
+      "status": "met",
+      "detail": "HTTP 200",
+      "met": true
+    },
+    {
+      "id": "dr-table-top-review",
+      "label": "DR table-top review",
+      "status": "met",
+      "detail": "latest receipt: 2026-03-23-adr-0100-disaster-recovery-review.json",
+      "met": true
+    }
+  ],
+  "summary": {
+    "met": 3,
+    "total": 7,
+    "percent": 42.86,
+    "ready": false
+  }
+}

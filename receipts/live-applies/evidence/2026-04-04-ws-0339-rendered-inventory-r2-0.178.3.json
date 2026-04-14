@@ -1,0 +1,81 @@
+{
+    "_meta": {
+        "hostvars": {
+            "edge-gateway": {
+                "ansible_host": "10.42.0.10",
+                "deployment_environment": "production",
+                "playbook_execution_allowed_envs": [
+                    "production"
+                ],
+                "playbook_execution_env": "{{ env | default('production') }}"
+            },
+            "reference-proxmox": {
+                "ansible_become": true,
+                "ansible_become_method": "sudo",
+                "ansible_host": "100.64.10.1",
+                "ansible_user": "ops",
+                "host_public_hostname": "reference-proxmox-node",
+                "management_gateway4": "203.0.113.1",
+                "management_ipv4": "203.0.113.10",
+                "management_ipv4_cidr": 24,
+                "management_tailscale_ipv4": "100.64.10.1",
+                "playbook_execution_allowed_envs": [
+                    "production"
+                ],
+                "playbook_execution_env": "{{ env | default('production') }}",
+                "proxmox_internal_bridge": "vmbr10",
+                "proxmox_internal_cidr": 24,
+                "proxmox_internal_ipv4": "10.42.0.1",
+                "proxmox_internal_network": "10.42.0.0/24",
+                "proxmox_node_name": "reference-proxmox-node",
+                "proxmox_public_edge_ipv4": "10.42.0.10",
+                "reference_dns_provider": "dns-provider",
+                "reference_infrastructure_provider": "dedicated-host-provider",
+                "reference_operator_base_domain": "private.example.test",
+                "reference_public_base_domain": "apps.example.test"
+            },
+            "runtime-apps": {
+                "ansible_host": "10.42.0.20",
+                "deployment_environment": "production",
+                "playbook_execution_allowed_envs": [
+                    "production"
+                ],
+                "playbook_execution_env": "{{ env | default('production') }}"
+            }
+        },
+        "profile": "inventory_legacy"
+    },
+    "all": {
+        "children": [
+            "ungrouped",
+            "production",
+            "platform",
+            "proxmox_hosts",
+            "lv3_guests"
+        ]
+    },
+    "lv3_guests": {
+        "hosts": [
+            "edge-gateway",
+            "runtime-apps"
+        ]
+    },
+    "platform": {
+        "children": [
+            "proxmox_hosts",
+            "lv3_guests"
+        ]
+    },
+    "production": {
+        "hosts": [
+            "reference-proxmox",
+            "edge-gateway",
+            "runtime-apps"
+        ]
+    },
+    "proxmox_hosts": {
+        "hosts": [
+            "reference-proxmox"
+        ]
+    }
+}

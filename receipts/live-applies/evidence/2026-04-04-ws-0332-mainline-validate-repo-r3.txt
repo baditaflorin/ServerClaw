@@ -1,0 +1,8 @@
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- README.md: outside declared owned surfaces for ws-0332-resilience-predictability
+- build/platform-manifest.json: outside declared owned surfaces for ws-0332-resilience-predictability
+- changelog.md: outside declared owned surfaces for ws-0332-resilience-predictability
+- docs/status/history/live-apply-evidence.md: outside declared owned surfaces for ws-0332-resilience-predictability
+- docs/status/history/merged-workstreams.md: outside declared owned surfaces for ws-0332-resilience-predictability
+- versions/stack.yaml: outside declared owned surfaces for ws-0332-resilience-predictability

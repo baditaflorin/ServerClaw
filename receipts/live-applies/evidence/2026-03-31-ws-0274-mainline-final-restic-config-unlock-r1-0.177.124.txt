@@ -1,0 +1,2 @@
+# restic stale-lock cleanup for ws-0274
+# recorded_at=2026-03-31T22:42:43Z

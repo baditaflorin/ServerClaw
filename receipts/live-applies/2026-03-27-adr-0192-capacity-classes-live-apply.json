@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0192-capacity-classes-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "40df2935",
+  "repo_version_context": "0.177.12",
+  "workflow_id": "adr-0192-capacity-classes-live-apply",
+  "adr": "0192",
+  "summary": "Verified ADR 0192 from branch commit `40df2935` against the live platform state by rendering the class-aware capacity report with and without live metrics, checking preview and recovery admission paths, and confirming the live preview pool occupancy through the fixture manager. No server-side mutable replay step was required because ADR 0192 is a controller-side policy, reporting, and admission change.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "capacity_pool",
+      "name": "ephemeral-pool"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_capacity_report.py tests/test_fixture_manager.py tests/test_restore_verification.py tests/test_standby_capacity.py tests/test_validate_ephemeral_vmid.py -q` returned `24 passed`, and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` returned `Repository data models OK`."
+    },
+    {
+      "check": "No-live capacity report",
+      "result": "pass",
+      "observed": "`make capacity-report NO_LIVE_METRICS=true` rendered the three class summaries with `ha_reserved` 12 GB RAM / 6 vCPU / 128 GB disk, `recovery_reserved` 4 GB RAM / 2 vCPU / 48 GB disk, and `preview_burst` 20 GB RAM / 8 vCPU / 100 GB disk."
+    },
+    {
+      "check": "Live metrics capacity report",
+      "result": "pass",
+      "observed": "`make capacity-report` completed successfully from the branch worktree and reported `Metrics source: ssh+influx` while preserving the same class summaries."
+    },
+    {
+      "check": "Preview admission",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-class-request --requester-class preview --proposed-change 4,2,32` returned `approved: true` with `primary_class: preview_burst` and no borrowing."
+    },
+    {
+      "check": "Recovery admission",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-class-request --requester-class restore-verification --declared-drill --proposed-change 4,2,48` returned `approved: true` with `primary_class: recovery_reserved`."
+    },
+    {
+      "check": "Live preview occupancy",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/fixture_manager.py list --no-refresh-health` returned `No active fixtures`, so `preview_burst` occupancy was zero at verification time."
+    },
+    {
+      "check": "Broader repo gate",
+      "result": "partial",
+      "observed": "`./scripts/validate_repo.sh data-models` still fails on the unrelated mainline issue `ansible-scope-runner error: playbook 'playbooks/proxmox-staging-bridge.yml' does not define imports or a leaf catalog entry`."
+    }
+  ],
+  "evidence_refs": [
+    "config/capacity-model.json",
+    "docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md",
+    "docs/runbooks/capacity-classes.md",
+    "docs/workstreams/ws-0192-live-apply.md",
+    "docs/schema/capacity-model.schema.json",
+    "receipts/live-applies/2026-03-27-adr-0192-capacity-classes-live-apply.json",
+    "scripts/capacity_report.py",
+    "scripts/fixture_manager.py",
+    "scripts/restore_verification.py",
+    "tests/test_capacity_report.py",
+    "tests/test_fixture_manager.py",
+    "tests/test_restore_verification.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt records a branch-local live verification from `codex/ws-0192-live-apply`, not a merge-to-main release.",
+    "The platform version remains `0.130.31` until a synchronized `main` replay updates the protected integration surfaces.",
+    "Merge-to-main still needs `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml` updated from the integrated branch state."
+  ]
+}

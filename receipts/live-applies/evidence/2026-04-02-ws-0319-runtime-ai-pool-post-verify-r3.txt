@@ -1,0 +1,41 @@
+# runtime_ai_local_checks
+runtime-ai-lv3 | CHANGED | rc=0 >>
+OK
+{"id":"runtime-ai-router","runtimeVersion":"1.16.0","enabledFeatures":["SchedulerReminders"],"extended":{"daprRuntimeVersion":"1.16.0"},"appConnectionProperties":{"port":9080,"protocol":"http","channelAddress":"127.0.0.1"},"actorRuntime":{"runtimeStatus":"DISABLED","hostReady":false,"placement":"placement: disconnected"},"workflows":{}}
+
+Apache Tika 3.2.3
+{"status":"up","details":{"chromium":{"status":"up","timestamp":"2026-04-01T23:59:47.587045408Z"},"libreoffice":{"status":"up","timestamp":"2026-04-01T23:59:47.586702572Z"}}}
+{"status":"ok","default_language":"eng","max_pages":20,"render_dpi":200}
+Apache Tika 3.2.3
+Apr 01 23:48:16 runtime-ai-lv3 nomad[710]:     2026-04-01T23:48:16.721Z [INFO]  client: setting node identity token
+Apr 01 23:48:16 runtime-ai-lv3 nomad[710]:     2026-04-01T23:48:16.721Z [INFO]  client: started client: node_id=e5c373a5-395e-b988-9e32-0d203782ef9e
+Apr 01 23:48:16 runtime-ai-lv3 nomad[710]:     2026-04-01T23:48:16.721Z [INFO]  client: setting node identity token
+Apr 01 23:48:16 runtime-ai-lv3 nomad[710]:     2026-04-01T23:48:16.721Z [INFO]  agent: starting TLS expiration metric process
+Apr 01 23:48:16 runtime-ai-lv3 nomad[710]:     2026-04-01T23:48:16.725Z [INFO]  client: node registration complete
+Apr 01 23:48:26 runtime-ai-lv3 nomad[710]:     2026-04-01T23:48:26.119Z [INFO]  client: node registration complete
+Apr 01 23:49:17 runtime-ai-lv3 nomad[710]:     2026-04-01T23:49:17.284Z [INFO]  client.driver_mgr: driver health state has changed: driver=docker previous=undetected current=healthy description=Healthy
+Apr 01 23:49:24 runtime-ai-lv3 nomad[710]:     2026-04-01T23:49:24.544Z [INFO]  client: node registration complete
+# monitoring_nomad_and_docker_checks
+monitoring-lv3 | CHANGED | rc=0 >>
+Name                   = runtime-ai
+Description            = Runtime AI pool namespace for the dedicated document-extraction and bursty AI guest.
+Quota                  = <none>
+Enabled Drivers        = *
+Disabled Drivers       = <none>
+Enabled Network Modes  = *
+Disabled Network Modes = <none>
+e5c373a5  default    dc1  runtime-ai-lv3      runtime-ai  false  eligible     ready
+-N DOCKER
+-N DOCKER-FORWARD
+-A DOCKER-FORWARD -j DOCKER-CT
+-A DOCKER-FORWARD -j DOCKER-INTERNAL
+-A DOCKER-FORWARD -j DOCKER-BRIDGE
+-A DOCKER-FORWARD -i docker0 -j ACCEPT
+dozzle-agent:Up 2 days (healthy)
+
+==> View and manage Nomad clients in the Web UI: https://10.10.10.40:4646/ui/clients
+# legacy_runtime_retirement
+docker-runtime-lv3 | CHANGED | rc=0 >>
+legacy_containers_absent
+# gateway_route
+{"status":"up","details":{"chromium":{"status":"up","timestamp":"2026-04-01T23:59:54.477642296Z"},"libreoffice":{"status":"up","timestamp":"2026-04-01T23:59:54.477328674Z"}}}

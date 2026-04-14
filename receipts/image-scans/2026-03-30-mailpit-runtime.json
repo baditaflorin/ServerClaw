@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "mailpit_runtime",
+  "image_ref": "docker.io/axllent/mailpit:v1.29.5@sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.69.3",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 0,
+    "high": 0
+  },
+  "targets_with_findings": [],
+  "raw_report": "receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json"
+}

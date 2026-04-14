@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import subprocess
 import sys
@@ -15,7 +16,7 @@ from container_image_policy import (
     resolve_remote_digest,
     validate_image_catalog,
 )
-from controller_automation_toolkit import emit_cli_error, repo_path, write_json
+from controller_automation_toolkit import emit_cli_error, repo_path, shared_repo_root, write_json
 from sbom_scanner import (
     CVE_RECEIPTS_DIR,
     SBOM_RECEIPTS_DIR,
@@ -29,6 +30,37 @@ from sbom_scanner import (
 
 
 DEFAULT_WORKING_ROOT = repo_path(".local", "image-upgrade-scans")
+
+
+def catalog_repo_root() -> Path:
+    return shared_repo_root(IMAGE_CATALOG_PATH.parent.parent)
+
+
+def explicit_exception_requested(args: argparse.Namespace) -> bool:
+    return any(
+        (
+            args.exception_justification,
+            args.exception_reason,
+            args.exception_owner,
+            args.exception_expires_on,
+            args.exception_review_by,
+            args.exception_control,
+            args.exception_controls_json,
+            args.exception_remediation_plan,
+        )
+    )
+
+
+def renew_exception_window(exception: dict, *, scanned_on: str) -> dict:
+    renewed = dict(exception)
+    approved_on = dt.date.fromisoformat(str(exception["approved_on"]))
+    expiry_key = "expires_on" if exception.get("expires_on") is not None else "review_by"
+    expires_on = dt.date.fromisoformat(str(exception[expiry_key]))
+    window_days = max(1, (expires_on - approved_on).days)
+    new_approved = dt.date.fromisoformat(scanned_on)
+    renewed["approved_on"] = scanned_on
+    renewed[expiry_key] = (new_approved + dt.timedelta(days=window_days)).isoformat()
+    return renewed
 
 
 def build_ref(registry_ref: str, tag: str, digest: str) -> str:
@@ -76,13 +108,15 @@ def update_catalog(
     scanned_on: str,
     receipt_path: Path,
     exception: dict | None,
+    preserve_pin: bool = False,
 ) -> dict:
     entry = catalog["images"][image_id]
-    entry["tag"] = tag
-    entry["digest"] = digest
-    entry["ref"] = build_ref(entry["registry_ref"], tag, digest)
-    entry["pinned_on"] = scanned_on
-    entry["scan_receipt"] = relpath(receipt_path)
+    if not preserve_pin:
+        entry["tag"] = tag
+        entry["digest"] = digest
+        entry["ref"] = build_ref(entry["registry_ref"], tag, digest)
+        entry["pinned_on"] = scanned_on
+    entry["scan_receipt"] = str(receipt_path.relative_to(catalog_repo_root()))
     if exception is None:
         entry["scan_status"] = "pass_no_critical"
         entry.pop("exception", None)
@@ -117,6 +151,22 @@ def main() -> int:
     )
     parser.add_argument("--image-id", required=True, help="Catalog image id to upgrade.")
     parser.add_argument("--tag", help="Override tag instead of reusing the catalog tag.")
+    parser.add_argument(
+        "--refresh-scan-only",
+        action="store_true",
+        help=(
+            "Re-scan the currently pinned digest and refresh scan receipts without changing "
+            "the catalog tag, digest, ref, or pinned_on date."
+        ),
+    )
+    parser.add_argument(
+        "--renew-existing-exception",
+        action="store_true",
+        help=(
+            "When --refresh-scan-only encounters critical findings and the catalog already has an "
+            "exception, renew that exception by shifting its existing approval window forward."
+        ),
+    )
     parser.add_argument(
         "--apply", action="store_true", help="Run the catalog apply_targets after updating the catalog."
     )
@@ -153,6 +203,10 @@ def main() -> int:
     try:
         if args.apply and not args.write:
             raise ValueError("--apply requires --write so the updated catalog is persisted before converge targets run")
+        if args.refresh_scan_only and args.tag:
+            raise ValueError("--tag cannot be combined with --refresh-scan-only")
+        if args.renew_existing_exception and not args.refresh_scan_only:
+            raise ValueError("--renew-existing-exception requires --refresh-scan-only")
 
         catalog = load_image_catalog()
         validate_image_catalog(catalog)
@@ -163,9 +217,14 @@ def main() -> int:
         scanned_at = now_utc()
         scanned_on = scanned_at.date().isoformat()
         entry = catalog["images"][args.image_id]
-        tag = args.tag or entry["tag"]
-        digest = resolve_remote_digest(entry["registry_ref"], tag, entry["platform"])
-        image_ref = build_ref(entry["registry_ref"], tag, digest)
+        if args.refresh_scan_only:
+            tag = entry["tag"]
+            digest = entry["digest"]
+            image_ref = entry["ref"]
+        else:
+            tag = args.tag or entry["tag"]
+            digest = resolve_remote_digest(entry["registry_ref"], tag, entry["platform"])
+            image_ref = build_ref(entry["registry_ref"], tag, digest)
 
         if args.write:
             sbom_dir = SBOM_RECEIPTS_DIR
@@ -211,27 +270,42 @@ def main() -> int:
 
         exception = None
         if receipt["summary"]["critical"] != 0:
-            justification = args.exception_justification or args.exception_reason
-            expires_on = args.exception_expires_on or args.exception_review_by
-            controls = list(args.exception_control)
-            if args.exception_controls_json:
-                controls.extend(json.loads(args.exception_controls_json))
-            if not (
-                justification and args.exception_owner and expires_on and controls and args.exception_remediation_plan
-            ):
+            if explicit_exception_requested(args):
+                justification = args.exception_justification or args.exception_reason
+                expires_on = args.exception_expires_on or args.exception_review_by
+                controls = list(args.exception_control)
+                if args.exception_controls_json:
+                    controls.extend(json.loads(args.exception_controls_json))
+                if not (
+                    justification
+                    and args.exception_owner
+                    and expires_on
+                    and controls
+                    and args.exception_remediation_plan
+                ):
+                    raise ValueError(
+                        f"{image_ref} has {receipt['summary']['critical']} critical vulnerabilities; "
+                        "provide --exception-justification, --exception-owner, --exception-expires-on, "
+                        "--exception-control or --exception-controls-json, and --exception-remediation-plan to allow it"
+                    )
+                exception = {
+                    "justification": justification,
+                    "owner": args.exception_owner,
+                    "compensating_controls": controls,
+                    "approved_on": scanned_on,
+                    "expires_on": expires_on,
+                    "remediation_plan": args.exception_remediation_plan,
+                }
+            elif args.refresh_scan_only and isinstance(entry.get("exception"), dict):
+                exception = dict(entry["exception"])
+                if args.renew_existing_exception:
+                    exception = renew_exception_window(exception, scanned_on=scanned_on)
+            else:
                 raise ValueError(
                     f"{image_ref} has {receipt['summary']['critical']} critical vulnerabilities; "
                     "provide --exception-justification, --exception-owner, --exception-expires-on, "
                     "--exception-control or --exception-controls-json, and --exception-remediation-plan to allow it"
                 )
-            exception = {
-                "justification": justification,
-                "owner": args.exception_owner,
-                "compensating_controls": controls,
-                "approved_on": scanned_on,
-                "expires_on": expires_on,
-                "remediation_plan": args.exception_remediation_plan,
-            }
 
         apply_results = []
         updated_catalog = update_catalog(
@@ -242,6 +316,7 @@ def main() -> int:
             scanned_on=scanned_on,
             receipt_path=receipt_path,
             exception=exception,
+            preserve_pin=args.refresh_scan_only,
         )
 
         if args.write:
@@ -257,6 +332,7 @@ def main() -> int:
                     "image_ref": image_ref,
                     "write": args.write,
                     "apply": args.apply,
+                    "refresh_scan_only": args.refresh_scan_only,
                     "scan_receipt": relpath(receipt_path),
                     "sbom_receipt": relpath(sbom_path),
                     "cve_receipt": relpath(cve_path),

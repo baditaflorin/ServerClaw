@@ -1,0 +1,4 @@
+HEAD 965420b859988d6c77844ee034708e7a6f42d410
+VERSION 0.177.103
+platform_version 0.130.69
+Canonical truth OK

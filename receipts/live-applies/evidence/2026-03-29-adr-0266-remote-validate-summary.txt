@@ -1,0 +1,16 @@
+{
+  "source": "build-server-validate",
+  "status": "passed",
+  "runner_id": "build-server-validation",
+  "runner_contract": null,
+  "cpu_architecture": "x86_64",
+  "container_runtime_available": true,
+  "checks": {
+    "ansible-syntax": "passed",
+    "schema-validation": "passed",
+    "policy-validation": "passed",
+    "alert-rule-validation": "passed",
+    "type-check": "passed",
+    "dependency-graph": "passed"
+  }
+}

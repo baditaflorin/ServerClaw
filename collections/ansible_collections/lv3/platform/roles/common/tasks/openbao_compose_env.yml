@@ -53,10 +53,20 @@
     common_openbao_compose_env_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
   no_log: true
 
+- name: Record OpenBao API facts for compose env injection
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_api_url: >-
+      {{
+        common_openbao_compose_env_openbao_address
+        | default('http://127.0.0.1:' ~ (openbao_http_port | string), true)
+      }}
+  no_log: true
+
 - name: Recover the local OpenBao runtime before helper API calls
   ansible.builtin.include_tasks: ensure_local_openbao_runtime.yml
   vars:
     common_local_openbao_runtime_consumer_name: "{{ common_openbao_compose_env_service_name }}"
+  when: common_openbao_compose_env_manage_local_openbao_runtime | bool
 
 - name: Ensure the controller-local SSH control path directory exists before OpenBao API retries
   ansible.builtin.file:
@@ -72,8 +82,12 @@
   ansible.builtin.set_fact:
     common_openbao_compose_env_runtime_needs_recovery: >-
       {{
-        (common_local_openbao_runtime_probe.status | default(0))
-        not in [200, 429, 472, 473, 501, 503]
+        (
+          (common_local_openbao_runtime_probe.status | default(0))
+          not in [200, 429, 472, 473, 501, 503]
+        )
+        if common_openbao_compose_env_manage_local_openbao_runtime | bool
+        else false
       }}
 
 - name: Wait for the Docker daemon to answer after networking recovery
@@ -90,9 +104,9 @@
   until: common_openbao_compose_env_docker_info.rc == 0
   when: common_openbao_compose_env_runtime_needs_recovery | bool
 
-- name: Wait for the local OpenBao API to answer
+- name: Wait for the configured OpenBao API to answer before runtime secret injection
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     status_code:
       - 200
@@ -107,16 +121,16 @@
   until: common_openbao_compose_env_api_health.status in [200, 429, 472, 473, 501, 503]
   changed_when: false
 
-- name: Ensure the local OpenBao API is unsealed before runtime secret injection
+- name: Ensure the configured OpenBao API is unsealed before runtime secret injection
   ansible.builtin.include_tasks: unseal_openbao_api.yml
   vars:
-    common_openbao_unseal_api_url: "http://127.0.0.1:{{ openbao_http_port }}"
+    common_openbao_unseal_api_url: "{{ common_openbao_compose_env_api_url }}"
     common_openbao_unseal_context: "runtime secret injection for {{ common_openbao_compose_env_service_name }}"
     common_openbao_unseal_init_payload: "{{ common_openbao_compose_env_init_payload }}"
 
-- name: Confirm the local OpenBao API is unsealed
+- name: Confirm the configured OpenBao API is unsealed
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
     method: GET
     return_content: true
     status_code: 200
@@ -128,7 +142,7 @@
     - not (common_openbao_compose_env_unsealed_status.json.sealed | bool)
   changed_when: false
 
-- name: Assert the local OpenBao API is unsealed before runtime secret injection
+- name: Assert the configured OpenBao API is unsealed before runtime secret injection
   ansible.builtin.assert:
     that:
       - not (common_openbao_compose_env_unsealed_status.json.sealed | bool)
@@ -136,9 +150,9 @@
       OpenBao remained sealed on the runtime host while preparing secret injection
       for {{ common_openbao_compose_env_service_name }}.
 
-- name: Wait for the local OpenBao API to become active
+- name: Wait for the configured OpenBao API to become active
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     status_code:
       - 200
@@ -178,7 +192,7 @@
 
 - name: Probe the current runtime secret payload from OpenBao
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: GET
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
@@ -194,9 +208,9 @@
   failed_when: false
   no_log: true
 
-- name: Read the local OpenBao seal status after a transient runtime secret payload read failure
+- name: Read the configured OpenBao seal status after a transient runtime secret payload read failure
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
     method: GET
     return_content: true
     status_code: 200
@@ -207,9 +221,9 @@
   changed_when: false
   when: common_openbao_compose_env_current_secret_probe.status == 503
 
-- name: Unseal the local OpenBao API when runtime secret payload reads catch it sealed
+- name: Unseal the configured OpenBao API when runtime secret payload reads catch it sealed
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/unseal"
     method: POST
     body_format: json
     body:
@@ -225,9 +239,9 @@
     - common_openbao_compose_env_secret_recovery_seal_status.json.sealed | bool
   no_log: true
 
-- name: Wait for the local OpenBao API to become active after runtime secret payload recovery
+- name: Wait for the configured OpenBao API to become active after runtime secret payload recovery
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     status_code:
       - 200
@@ -243,7 +257,7 @@
 
 - name: Read the current runtime secret payload from OpenBao
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: GET
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
@@ -263,7 +277,7 @@
 
 - name: Store the runtime secret payload in OpenBao
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: POST
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
@@ -282,7 +296,7 @@
 
 - name: Read the current OpenBao policy for the runtime AppRole
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
     method: GET
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
@@ -302,7 +316,7 @@
 
 - name: Upsert the OpenBao policy for the runtime AppRole
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
     method: PUT
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
@@ -321,7 +335,7 @@
 
 - name: Upsert the OpenBao AppRole for the runtime agent
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}"
     method: POST
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
@@ -342,7 +356,7 @@
 
 - name: Read the OpenBao AppRole role ID
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/role-id"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/role-id"
     method: GET
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
@@ -376,7 +390,7 @@
 
 - name: Generate a durable OpenBao AppRole secret ID
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/secret-id"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/secret-id"
     method: POST
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"

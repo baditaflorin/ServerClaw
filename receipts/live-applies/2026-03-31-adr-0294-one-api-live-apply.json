@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0294-one-api-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T08:30:45Z",
+  "recorded_by": "codex",
+  "source_commit": "0809adf0cc84fdab5e151dafdcf80a6dedb0ef3c",
+  "repo_version_context": "0.177.112",
+  "platform_version_context": "0.130.74",
+  "workflow_id": "adr-0294-one-api-live-apply",
+  "adr": "0294",
+  "summary": "Live-applied ADR 0294 from the isolated `codex/ws-0294-live-apply` worktree on top of repository version `0.177.112` by hardening the Docker bridge, PostgreSQL, firewall, and Ollama recovery paths that surfaced during truthful replay, converging One-API with its repo-managed Ollama backend dependency, and re-verifying the unified OpenAI-compatible lane end to end through One-API, Open WebUI, and ServerClaw.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private One-API controller proxy",
+      "address": "http://100.64.0.1:8018"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private Open WebUI controller proxy",
+      "address": "http://100.64.0.1:8008"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ServerClaw public edge",
+      "address": "https://chat.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused branch validation for the recovery and contract surfaces",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_one_api_runtime_role.py tests/test_docker_runtime_role.py tests/test_linux_guest_firewall_role.py tests/test_ollama_runtime_role.py tests/test_postgres_vm_role.py tests/test_postgres_vm_access_policy.py` returned `37 passed in 2.46s`, and `make syntax-check-one-api` passed from the branch worktree."
+    },
+    {
+      "check": "Branch-local One-API live converge",
+      "result": "pass",
+      "observed": "`make converge-one-api` completed successfully with final recap `docker-runtime-lv3 : ok=192 changed=2 failed=0`, `localhost : ok=3 failed=0`, `postgres-lv3 : ok=58 changed=5 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0` after the playbook converged `ollama_runtime` before `one_api_runtime`."
+    },
+    {
+      "check": "Controller-side bootstrap verification and provider contract generation",
+      "result": "pass",
+      "observed": "The settled bootstrap report records `verification_passed: true`, managed root user `root / LV3 Platform Root`, chat probe excerpt `READY`, embedding dimensions `768`, available models `gpt-4.1-mini`, `gpt-4o-mini`, and `text-embedding-3-small`, the three governed Ollama-backed channels, and both downstream provider env files present."
+    },
+    {
+      "check": "Governed downstream consumer contract",
+      "result": "pass",
+      "observed": "The generated provider env files point Open WebUI at `http://host.docker.internal:8101/v1` and ServerClaw at `http://10.10.10.20:8101/v1`, preserving a single repo-managed OpenAI-compatible contract while keeping One-API private."
+    },
+    {
+      "check": "Open WebUI downstream replay",
+      "result": "pass",
+      "observed": "`make converge-open-webui` completed successfully with final recap `docker-runtime-lv3 : ok=125 changed=6 failed=0` and `proxmox_florin : ok=41 changed=4 failed=0`, including the admin sign-in verification path."
+    },
+    {
+      "check": "ServerClaw downstream replay",
+      "result": "pass",
+      "observed": "`make converge-serverclaw` completed successfully with final recap `coolify-lv3 : ok=79 changed=5 failed=0`, `docker-runtime-lv3 : ok=81 changed=2 failed=0`, `nginx-lv3 : ok=45 changed=4 failed=0`, and `proxmox_florin : ok=272 changed=3 failed=0`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md",
+    "docs/runbooks/configure-one-api.md",
+    "docs/workstreams/ws-0294-live-apply.md",
+    "playbooks/one-api.yml",
+    "collections/ansible_collections/lv3/platform/roles/one_api_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/ollama_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml",
+    "tests/test_one_api_runtime_role.py",
+    "tests/test_docker_runtime_role.py",
+    "tests/test_linux_guest_firewall_role.py",
+    "tests/test_ollama_runtime_role.py",
+    "tests/test_postgres_vm_role.py",
+    "tests/test_postgres_vm_access_policy.py",
+    "receipts/live-applies/evidence/2026-03-31-ws-0294-targeted-pytest-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0294-syntax-check-one-api-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0294-bootstrap-report-r1.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0294-bootstrap-summary-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0294-provider-env-base-urls-r2.txt",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This branch-local receipt preserves the first settled ADR 0294 live replay before the protected release and canonical-truth surfaces are refreshed from the latest `origin/main` lineage.",
+    "Exact-main integration still needs to replay or reverify from the latest `origin/main` baseline and then update `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and the canonical mainline receipt together."
+  ]
+}

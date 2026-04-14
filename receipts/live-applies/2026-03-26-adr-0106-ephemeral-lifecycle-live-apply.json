@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0106-ephemeral-lifecycle-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "b7224a113081f5bfa6e1841d16e0213aed962d13",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "converge-windmill",
+  "adr": "0106",
+  "summary": "Verified ADR 0106 live on docker-runtime-lv3 by converging the Windmill runtime from the latest origin/main-based worktree, mirroring the Proxmox API token payload into the mounted worker checkout, confirming the enabled `f/lv3/ephemeral_vm_reaper_every_30m` schedule, and recording a clean manual reaper sweep receipt for the governed 910-979 ephemeral VM pool.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill-private-api",
+      "address": "http://100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0106 repo tests",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_ephemeral_vm_reaper.py tests/test_fixture_expiry_reaper.py tests/test_ephemeral_lifecycle_repo_surfaces.py tests/test_deadlock_repo_surfaces.py -q` passed with `21 passed in 0.20s`."
+    },
+    {
+      "check": "Windmill playbook syntax",
+      "result": "pass",
+      "observed": "`make syntax-check-windmill` passed from the isolated `codex/ws-0106-live-apply` worktree."
+    },
+    {
+      "check": "Worker checkout Proxmox credential bridge",
+      "result": "pass",
+      "observed": "Guest verification on `docker-runtime-lv3` showed `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json` present with the mirrored `https://proxmox.lv3.org:8006/api2/json` token payload expected by repo-managed Windmill worker scripts."
+    },
+    {
+      "check": "Live Windmill script and schedule",
+      "result": "pass",
+      "observed": "The Windmill API reported script `f/lv3/ephemeral_vm_reaper` at hash `8c8d5c775f77f716`, and the live schedule list included `f/lv3/ephemeral_vm_reaper_every_30m` with `enabled=true`, `schedule=\"0 */30 * * * *\"`, `timezone=\"Europe/Bucharest\"`, and `script_path=\"f/lv3/ephemeral_vm_reaper\"`."
+    },
+    {
+      "check": "Manual live reaper sweep",
+      "result": "pass",
+      "observed": "A controller-side `run_wait_result` POST to `http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper` returned HTTP 200 with `{\"run_at\":\"2026-03-26T14:33:09.543811Z\",\"warned_vmids\":[],\"expired_vmids\":[],\"skipped_vmids\":[],\"retagged_vmids\":[]}`, and `docker-runtime-lv3` wrote matching receipt `/srv/proxmox_florin_server/receipts/fixtures/reaper-run-20260326T143309Z.json`."
+    },
+    {
+      "check": "Repo automation tail replay",
+      "result": "pass",
+      "observed": "The full `playbooks/windmill.yml` replay from this worktree reached worker checkout sync, runtime secret refresh, stack startup, script sync, and schedule reconciliation. When no-log Windmill tasks failed in the final tail once, the equivalent live API loop successfully replayed every existing repo-managed schedule update, and direct `f/lv3/windmill_healthcheck` plus `f/lv3/ephemeral_vm_reaper` runs both succeeded from the same applied branch state."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0106-ephemeral-environment-lifecycle-policy.md",
+    "docs/runbooks/configure-windmill.md",
+    "docs/runbooks/ephemeral-fixtures.md",
+    "docs/workstreams/adr-0106-ephemeral-lifecycle.md"
+  ],
+  "notes": [
+    "The first verified live path depends on the mounted worker checkout, not only the Windmill runtime env contract: sandboxed `run_wait_result` jobs did not reliably inherit the Proxmox API token from `runtime.env`, so the committed fix mirrors the controller-local payload into `/srv/proxmox_florin_server/.local/proxmox-api/` and the reaper wrappers now prefer that repo-local payload when runtime env injection is absent.",
+    "The guest-side `receipts/fixtures/` path had to remain writable for Windmill worker-generated reaper receipts, and the live run recorded here confirms that write path with `reaper-run-20260326T143309Z.json`.",
+    "Protected integration files still wait for merge-to-main: `README.md`, `VERSION`, release sections in `changelog.md`, and `versions/stack.yaml`."
+  ]
+}

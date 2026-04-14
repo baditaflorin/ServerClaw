@@ -1,0 +1,43 @@
+make pre-push-gate
+remote_exec.sh pre-push-gate --local-fallback was not relied on for the final branch evidence; the exact configured local_fallback_command was executed from the worktree.
+
+$ mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback
+run_gate_fallback: ignoring stale non-remote gate status and running the requested local checks.
+Validation lane selection
+  mode: auto
+  branch: codex/ws-0304-mainline
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, atlas-lint, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK                STATUS    DURATION(s)
+agent-standards       passed    45.92
+alert-rule-validation passed    23.99
+ansible-lint          timed_out 900.04
+ansible-syntax        passed    798.73
+artifact-secret-scan  passed    80.13
+atlas-lint            passed    103.97
+dependency-direction  passed    36.62
+dependency-graph      passed    40.60
+documentation-index   passed    39.75
+generated-docs        passed    65.25
+generated-portals     passed    346.85
+iac-policy-scan       passed    245.18
+integration-tests     passed    20.08
+packer-validate       passed    147.22
+policy-validation     passed    55.78
+schema-validation     passed    523.37
+security-scan         passed    395.60
+semgrep-sast          passed    462.66
+service-completeness  passed    34.95
+tofu-validate         passed    14.64
+type-check            passed    73.42
+workstream-surfaces   passed    259.05
+yaml-lint             passed    159.25
+
+[ansible-lint] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint
+[ansible-lint] stdout
+Ansible lint
+[ansible-lint] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested

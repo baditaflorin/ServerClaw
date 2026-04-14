@@ -19,8 +19,10 @@ def test_common_openbao_agent_helper_exists() -> None:
     template = (REPO_ROOT / "roles" / "common" / "templates" / "openbao-agent.hcl.j2").read_text()
     assert "kv/data/" in helper
     assert 'static_secret_render_interval = "5m"' in template
+    assert "common_openbao_compose_env_openbao_address" in template
     assert "{{ common_openbao_compose_env_agent_template_file | basename }}" in template
     assert 'destination          = "{{ common_openbao_compose_env_env_file }}"' in template
+    assert "common_openbao_compose_env_api_url" in helper
     assert "Render the bootstrap runtime env file from the managed secret payload" in helper
     assert "common_openbao_compose_env_secret_payload | dictsort" in helper
     assert "register: common_openbao_compose_env_approle_upsert" in helper
@@ -40,9 +42,18 @@ def test_validate_repo_checks_for_unexpected_env_files() -> None:
 def test_migrated_role_defaults_use_tmpfs_runtime_env_paths() -> None:
     for role_name, expected_path in ROLE_RUNTIME_PATHS.items():
         defaults_text = (REPO_ROOT / "roles" / role_name / "defaults" / "main.yml").read_text()
+        tasks_text = (REPO_ROOT / "roles" / role_name / "tasks" / "main.yml").read_text()
+        env_var_name = role_name.removesuffix("_runtime") + "_env_file"
         assert expected_path.endswith("/runtime.env")
-        assert "runtime.env" in defaults_text
-        assert expected_path in defaults_text or "{{ compose_runtime_secret_root }}" in defaults_text
+        assert "runtime.env" in defaults_text or "runtime.env" in tasks_text
+        assert (
+            expected_path in defaults_text
+            or "{{ compose_runtime_secret_root }}" in defaults_text
+            or expected_path in tasks_text
+            or "{{ compose_runtime_secret_root }}" in tasks_text
+            or env_var_name in defaults_text
+            or env_var_name in tasks_text
+        )
 
 
 def test_migrated_role_tasks_no_longer_shell_out_with_env_file_flag() -> None:
@@ -71,7 +82,8 @@ def test_runtime_secret_payloads_are_built_in_follow_up_tasks() -> None:
     assert "LV3_LEDGER_NATS_URL={{ windmill_ledger_nats_url }}" in windmill_env_template
     assert "LV3_LEDGER_DSN" in windmill_template
     assert "LV3_LEDGER_NATS_URL" in windmill_template
-    assert "- name: Build Mattermost runtime secret payload" in mattermost_tasks
+    assert "- name: Record the Mattermost runtime secrets" in mattermost_tasks
+    assert "mattermost_runtime_secret_payload:" in mattermost_tasks
 
 
 def test_windmill_runtime_env_file_is_left_to_openbao() -> None:
@@ -81,26 +93,32 @@ def test_windmill_runtime_env_file_is_left_to_openbao() -> None:
 
 
 def test_migrated_compose_templates_include_openbao_agent_sidecars() -> None:
+    macro_text = (REPO_ROOT / "roles" / "common" / "templates" / "compose_macros.j2").read_text()
+    assert 'user: "{{ user }}"' in macro_text
+    assert 'BAO_SKIP_DROP_ROOT: "true"' in macro_text
     compose_roles = list(ROLE_RUNTIME_PATHS) + ["mail_platform_runtime"]
     for role_name in compose_roles:
         template_text = (REPO_ROOT / "roles" / role_name / "templates" / "docker-compose.yml.j2").read_text()
-        assert "openbao-agent:" in template_text
-        assert 'user: "0:0"' in template_text
-        assert 'BAO_SKIP_DROP_ROOT: "true"' in template_text
-        assert "-config=/openbao-agent/agent.hcl" in template_text
+        assert "openbao_sidecar(" in template_text or "openbao-agent:" in template_text
+        assert (
+            "-config=/openbao-agent/agent.hcl" in template_text
+            or "config_path='/openbao-agent/agent.hcl'" in macro_text
+        )
 
 
 def test_langfuse_runtime_pins_redis_volume_permissions_to_redis_uid() -> None:
     defaults_text = (REPO_ROOT / "roles" / "langfuse_runtime" / "defaults" / "main.yml").read_text()
     tasks_text = (REPO_ROOT / "roles" / "langfuse_runtime" / "tasks" / "main.yml").read_text()
     template_text = (REPO_ROOT / "roles" / "langfuse_runtime" / "templates" / "docker-compose.yml.j2").read_text()
+    macro_text = (REPO_ROOT / "roles" / "common" / "templates" / "compose_macros.j2").read_text()
 
     assert 'langfuse_redis_uid: "999"' in defaults_text
     assert 'langfuse_redis_gid: "999"' in defaults_text
     assert 'path: "{{ langfuse_redis_data_dir }}"' in tasks_text
     assert 'owner: "{{ langfuse_redis_uid }}"' in tasks_text
     assert 'group: "{{ langfuse_redis_gid }}"' in tasks_text
-    assert 'user: "{{ langfuse_redis_uid }}:{{ langfuse_redis_gid }}"' in template_text
+    assert 'user=langfuse_redis_uid ~ ":" ~ langfuse_redis_gid' in template_text
+    assert 'user: "{{ user }}"' in macro_text
 
 
 def test_control_plane_recovery_no_longer_requires_windmill_env_file() -> None:

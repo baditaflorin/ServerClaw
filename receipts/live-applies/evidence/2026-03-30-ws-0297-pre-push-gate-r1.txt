@@ -1,0 +1,53 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+rsync: [Receiver] change_dir#3 "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643/repo/.lv3-snapshots" failed: No such file or directory (2)
+rsync error: errors selecting input/output files, dirs (code 3) at main.c(829) [Receiver=3.4.1]
+rsync(14289): error: unexpected end of file
+remote_exec: snapshot upload failed, falling back locally for pre-push-gate
+remote_exec: running local fallback for pre-push-gate
+Validation lane selection
+  mode: auto
+  branch: codex/ws-0297-live-apply
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, integration-tests
+  changed files: .ansible-lint-ignore, .gitea/workflows/renovate.yml, README.md, build/platform-manifest.json, collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml, collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml, ...
+  widened to all lanes because of unknown surfaces: .ansible-lint-ignore, .gitea/workflows/renovate.yml, platform/repo.py, renovate.json
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 10.63
+alert-rule-validation passed 11.06
+ansible-lint          passed 282.96
+ansible-syntax        passed 164.72
+artifact-secret-scan  passed 21.77
+dependency-direction  passed 14.71
+dependency-graph      passed 17.62
+documentation-index   passed 13.07
+generated-docs        passed 31.62
+generated-portals     passed 74.52
+integration-tests     passed 5.18
+packer-validate       passed 44.32
+policy-validation     passed 19.32
+schema-validation     passed 87.72
+security-scan         passed 55.72
+service-completeness  passed 8.52
+tofu-validate         passed 6.15
+type-check            passed 22.32
+workstream-surfaces   failed 27.08
+yaml-lint             passed 45.16
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0297-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0297-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=048caa1363f5ba14164bfda67fc6fb5d99dd4e2df5896c53d87879abb8a43c3c -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T15:54:39.308776+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=fda101055488683559311d0a919e1f397050eca5 -e LV3_SNAPSHOT_BRANCH=codex/ws-0297-live-apply -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- README.md: outside declared owned surfaces for ws-0297-live-apply
+- build/platform-manifest.json: outside declared owned surfaces for ws-0297-live-apply
+- docs/diagrams/agent-coordination-map.excalidraw: outside declared owned surfaces for ws-0297-live-apply
+- platform/repo.py: outside declared owned surfaces for ws-0297-live-apply
+make: *** [pre-push-gate] Error 1

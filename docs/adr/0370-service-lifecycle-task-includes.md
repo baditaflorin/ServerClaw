@@ -2,6 +2,10 @@
 
 - **Date**: 2026-04-06
 - **Status**: Accepted
+- **Implementation Status**: Live applied
+- **Implemented In Repo Version**: 0.178.141
+- **Implemented In Platform Version**: 0.178.141
+- **Implemented On**: 2026-04-14
 - **Deciders**: platform team
 - **Concern**: platform, dry
 - **Tags**: ansible, roles, dry, lifecycle, tasks

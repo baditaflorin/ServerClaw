@@ -1,0 +1,29 @@
+docker-build-lv3 | CHANGED | rc=0 >>
+listeners
+LISTEN 0      250          0.0.0.0:3142       0.0.0.0:*
+LISTEN 0      4096               *:5002             *:*
+LISTEN 0      4096               *:5003             *:*
+LISTEN 0      4096               *:5001             *:*
+LISTEN 0      4096               *:5004             *:*
+LISTEN 0      250             [::]:3142          [::]:*
+containers
+artifact-cache-docker-hub
+artifact-cache-ghcr
+artifact-cache-n8n
+artifact-cache-plane
+buildkit_service=active
+seed_images=50
+buildx
+Name:          lv3-cache
+Driver:        remote
+Last Activity: 2026-03-28 16:11:28 +0000 UTC
+
+Nodes:
+Name:             lv3-cache0
+Endpoint:         unix:///run/buildkit/buildkitd.sock
+Status:           running
+BuildKit version: v0.28.0
+Platforms:        linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/386
+Labels:
+ org.mobyproject.buildkit.worker.executor:         oci
+apt_cacher_http=200

@@ -1,0 +1,16 @@
+HTTP/2 200
+server: nginx
+date: Mon, 30 Mar 2026 02:58:53 GMT
+content-type: application/json
+content-length: 4525
+x-gateway-request-id: ebd9cb8c-138b-4d2a-9ab9-aefaa6f24e6a
+x-trace-id: 154d56bea5384d438665c9cb879df0fb
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
+x-robots-tag: noindex, nofollow

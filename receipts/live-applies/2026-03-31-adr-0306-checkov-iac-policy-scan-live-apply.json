@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T09:30:23Z",
+  "recorded_by": "codex",
+  "source_commit": "ef2803b3830cf05bb22128dcfa7860f9002b75b0",
+  "repo_version_context": "0.177.115",
+  "platform_version_context": "0.130.74",
+  "workflow_id": "adr-0306-checkov-iac-policy-scan-live-apply",
+  "adr": "0306",
+  "summary": "Replayed ADR 0306 from the latest `origin/main` lineage on `codex/ws-0306-mainline-v2`, landed the repo-managed Checkov IaC policy gate across the shared validation and build-server automation surfaces, and verified the settled branch end to end. The branch-local proof now includes targeted pytest, direct offline Checkov scanning, `check-build-server`, `remote-validate`, `pre-push-gate`, private Gitea branch validation, and repo-managed recovery of the host proxy, Gitea runtime, and Gitea runner path after the hosted control-plane listener drifted offline.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private Gitea controller",
+      "address": "http://100.64.0.1:3009"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository regression slice",
+      "result": "pass",
+      "observed": "The settled branch passed `python3 -m py_compile scripts/iac_policy_scan.py config/checkov/checks/terraform/lv3_proxmox_checks.py`, `bash -n scripts/remote_exec.sh`, and the targeted pytest bundle with `58 passed in 309.49s` across the Checkov wrapper, lane selection, validation gate, runner contracts, remote execution, and validate-repo cache surfaces."
+    },
+    {
+      "check": "Direct Checkov and build-server validation path",
+      "result": "pass",
+      "observed": "The branch passed the direct offline scan via `uv run --with checkov==3.2.469 --with pyyaml python3 scripts/iac_policy_scan.py` with `0 error, 2 warning, 876 note, 0 suppressed`, `make check-build-server`, `make remote-validate`, and `make pre-push-gate` on the settled `0.177.115` tree."
+    },
+    {
+      "check": "Hosted branch validation on the private Gitea snapshot",
+      "result": "pass",
+      "observed": "After publishing the branch into the private repo, `validate.yml` run `177` / job `234` concluded `success` on `codex/ws-0306-mainline-v2`."
+    },
+    {
+      "check": "Repo-managed hosted-control-plane recovery",
+      "result": "pass",
+      "observed": "Host evidence first captured the Gitea proxy serving connection refusals while `10.10.10.20:3003` was down. The repo-managed `playbooks/gitea.yml` runtime replay restored the private Gitea listener and host proxy path, and the runner replay reasserted the `lv3-gitea-runner` container on `docker-build-lv3` before both plays hit the shared non-blocking SBOM tail."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md",
+    "docs/workstreams/ws-0306-live-apply.md",
+    "docs/runbooks/iac-policy-scanning.md",
+    "docs/runbooks/remote-build-gateway.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/runbooks/validation-gate.md",
+    "scripts/iac_policy_scan.py",
+    "scripts/remote_exec.sh",
+    "tests/test_iac_policy_scan.py",
+    "tests/test_validate_repo_cache.py",
+    "tests/test_validation_lanes.py",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-targeted-pytest-r3-0.177.114.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-checkov-scan-r3-0.177.114.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-check-build-server-r2-0.177.114.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-remote-validate-r3-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-pre-push-gate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-branch-push-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-validate-run-r1-0.177.115.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-validate-jobs-r1-0.177.115.json",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-live-apply-receipts-validate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-data-models-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-canonical-truth-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-platform-manifest-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-git-diff-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-agent-standards-generated-r2-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-proxy-recovery-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runtime-converge-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runner-converge-r2-0.177.115.txt"
+  ],
+  "notes": [
+    "This branch-local receipt preserves the settled live replay from the isolated worktree before the protected canonical-truth surfaces were refreshed for merge to `main`.",
+    "The private Gitea repository is an internal hosted-verification snapshot, so this receipt records the branch-local hosted proof separately from the later exact-main private-main replay."
+  ]
+}

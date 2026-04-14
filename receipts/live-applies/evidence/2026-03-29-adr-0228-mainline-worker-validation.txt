@@ -1,0 +1,18 @@
+ADR 0228 worker-local validation proof
+Date: 2026-03-29
+Command:
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o StrictHostKeyChecking=no -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o StrictHostKeyChecking=no -W %h:%p ops@100.64.0.1' ops@10.10.10.20 'cd /srv/proxmox_florin_server && ./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals'
+
+Result
+- exit code: 0
+- stages:
+  Generated platform vars validation
+  Role argument specs
+  JSON validation
+  Alert rule validation
+  Generated status document validation
+  Generated portal validation
+- mkdocs build completed successfully during generated-docs/generated-portals validation
+
+Purpose
+- proves the worker-local fallback path now parses and validates `scripts/generate_ops_portal.py` successfully under Python 3.11

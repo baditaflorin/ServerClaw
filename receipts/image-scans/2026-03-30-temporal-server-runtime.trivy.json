@@ -1,0 +1,207 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-30T17:10:44.323073917Z",
+  "ArtifactName": "docker.io/temporalio/server:1.30.2@sha256:d5334ee3ddce1617efbe280a10afc85916cf8d81798415c98988dbda2b46773e",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 102297600,
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.23.3"
+    },
+    "ImageID": "sha256:3d9496d1c3156936e6e4263fd6a09c08e359cb0e7241f1999e7d5ccec467ea34",
+    "DiffIDs": [
+      "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+      "sha256:27262e58b8e6deda59e5335c6d1ea97fb999037b9728eed1d1ae8ee9a603003c",
+      "sha256:fecc932ac322f228fb5c0241e2caa2feaaa0e4359d116c3fb08806f95a06953a",
+      "sha256:041a6007186bddce21b094a16405fdd5447582f2b86f7dceee085f051084b1e2",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+    ],
+    "RepoDigests": [
+      "temporalio/server@sha256:d5334ee3ddce1617efbe280a10afc85916cf8d81798415c98988dbda2b46773e"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2026-03-21T03:39:35.077586023Z",
+      "history": [
+        {
+          "created": "2026-01-28T01:18:04.977843834Z",
+          "created_by": "ADD alpine-minirootfs-3.23.3-x86_64.tar.gz / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-01-28T01:18:04.977843834Z",
+          "created_by": "CMD [\"/bin/sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-21T03:39:33.666586219Z",
+          "created_by": "ARG TARGETARCH=amd64",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-21T03:39:33.666586219Z",
+          "created_by": "RUN |1 TARGETARCH=amd64 /bin/sh -c apk add --no-cache     ca-certificates     tzdata \u0026\u0026     apk upgrade --no-cache zlib \u0026\u0026     addgroup -g 1000 temporal \u0026\u0026     adduser -u 1000 -G temporal -D temporal # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-21T03:39:35.010268828Z",
+          "created_by": "COPY --chmod=755 ./build/amd64/temporal-server /usr/local/bin/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-21T03:39:35.057224493Z",
+          "created_by": "COPY --chmod=755 ./scripts/sh/entrypoint.sh /etc/temporal/entrypoint.sh # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-21T03:39:35.077586023Z",
+          "created_by": "WORKDIR /etc/temporal",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-21T03:39:35.077586023Z",
+          "created_by": "USER temporal",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-21T03:39:35.077586023Z",
+          "created_by": "CMD [\"/etc/temporal/entrypoint.sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+          "sha256:27262e58b8e6deda59e5335c6d1ea97fb999037b9728eed1d1ae8ee9a603003c",
+          "sha256:fecc932ac322f228fb5c0241e2caa2feaaa0e4359d116c3fb08806f95a06953a",
+          "sha256:041a6007186bddce21b094a16405fdd5447582f2b86f7dceee085f051084b1e2",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "/etc/temporal/entrypoint.sh"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ],
+        "Labels": {
+          "com.temporal.server.version": "1.30.2",
+          "org.opencontainers.image.created": "2026-03-21T03:39:30Z",
+          "org.opencontainers.image.description": "Temporal Server",
+          "org.opencontainers.image.licenses": "MIT",
+          "org.opencontainers.image.revision": "df877a85b229bd0c6d77e72f1416dd2fbe1aa6e3",
+          "org.opencontainers.image.source": "https://github.com/temporalio/temporal",
+          "org.opencontainers.image.title": "server",
+          "org.opencontainers.image.url": "https://github.com/temporalio/temporal",
+          "org.opencontainers.image.version": "1.30.2"
+        },
+        "User": "temporal",
+        "WorkingDir": "/etc/temporal",
+        "ArgsEscaped": true
+      }
+    },
+    "Layers": [
+      {
+        "Size": 8724480,
+        "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+        "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+      },
+      {
+        "Size": 1798144,
+        "Digest": "sha256:4e468eb2697cb6594ca8b45a03f6dc50919bc0948eec19ff41015316e3fb875c",
+        "DiffID": "sha256:27262e58b8e6deda59e5335c6d1ea97fb999037b9728eed1d1ae8ee9a603003c"
+      },
+      {
+        "Size": 91770368,
+        "Digest": "sha256:04424545cd1dbd8428c57b347246b94618c5092d75f717aa02bea50e49aa672a",
+        "DiffID": "sha256:fecc932ac322f228fb5c0241e2caa2feaaa0e4359d116c3fb08806f95a06953a"
+      },
+      {
+        "Size": 3584,
+        "Digest": "sha256:e2d285b5c4fa36fd212da2b8e74161d3e687898c8ae3f48d389bd418978295a2",
+        "DiffID": "sha256:041a6007186bddce21b094a16405fdd5447582f2b86f7dceee085f051084b1e2"
+      },
+      {
+        "Size": 1024,
+        "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "DiffID": "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/temporalio/server:1.30.2@sha256:d5334ee3ddce1617efbe280a10afc85916cf8d81798415c98988dbda2b46773e (alpine 3.23.3)",
+      "Class": "os-pkgs",
+      "Type": "alpine"
+    },
+    {
+      "Target": "usr/local/bin/temporal-server",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-26958",
+          "PkgID": "filippo.io/edwards25519@v1.1.0",
+          "PkgName": "filippo.io/edwards25519",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/filippo.io/edwards25519@v1.1.0",
+            "UID": "a01382fb6f3a810f"
+          },
+          "InstalledVersion": "v1.1.0",
+          "FixedVersion": "1.1.1",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:04424545cd1dbd8428c57b347246b94618c5092d75f717aa02bea50e49aa672a",
+            "DiffID": "sha256:fecc932ac322f228fb5c0241e2caa2feaaa0e4359d116c3fb08806f95a06953a"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-26958",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "filippo.io/edwards25519: filippo.io/edwards25519: Cryptographic integrity bypass due to incorrect MultiScalarMult results",
+          "Description": "filippo.io/edwards25519 is a Go library implementing the edwards25519 elliptic curve with APIs for building cryptographic primitives. In versions 1.1.0 and earlier, MultiScalarMult produces invalid results or undefined behavior if the receiver is not the identity point. If (*Point).MultiScalarMult is called on an initialized point that is not the identity point, it returns an incorrect result. If the method is called on an uninitialized point, the behavior is undefined. In particular, if the receiver is the zero value, MultiScalarMult returns an invalid point that compares Equal to every other point. Note that MultiScalarMult is a rarely used, advanced API. For example, users who depend on filippo.io/edwards25519 only through github.com/go-sql-driver/mysql are not affected. This issue has been fixed in version 1.1.1.",
+          "Severity": "LOW",
+          "CweIDs": [
+            "CWE-665"
+          ],
+          "VendorSeverity": {
+            "ghsa": 1,
+            "redhat": 1
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:U",
+              "V40Score": 1.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "V3Score": 3.7
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-26958",
+            "https://github.com/FiloSottile/edwards25519",
+            "https://github.com/FiloSottile/edwards25519/commit/d1c650afb95fad0742b98d95f2eb2cf031393abb",
+            "https://github.com/FiloSottile/edwards25519/releases/tag/v1.1.1",
+            "https://github.com/FiloSottile/edwards25519/security/advisories/GHSA-fw7p-63qq-7hpr",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-26958",
+            "https://www.cve.org/CVERecord?id=CVE-2026-26958"
+          ],
+          "PublishedDate": "2026-02-19T23:16:26.577Z",
+          "LastModifiedDate": "2026-02-20T13:49:47.623Z"
+        }
+      ]
+    }
+  ]
+}

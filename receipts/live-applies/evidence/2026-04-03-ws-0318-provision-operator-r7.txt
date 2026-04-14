@@ -1,0 +1,20 @@
+[0] Reusing existing password from /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-tmp-002-password.txt
+[1] Keycloak user already exists: d1c1c5b5-f4c8-47de-8865-c529789ada77
+[3] Role 'platform-admin' -> HTTP 204
+[4] Group 'lv3-platform-admins' -> HTTP 204
+[4] Group 'grafana-admins' -> HTTP 204
+[5] Roles:  ['default-roles-lv3', 'platform-admin']
+[5] Groups: ['grafana-admins', 'lv3-platform-admins']
+[6] CA fingerprint: af5c395527799a9a68a86f9f512d7545cce88b1cbd3b25448918e6d624e331ac
+[hs] Reusing existing authkey from /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/headscale/florin-badita-tmp-002-authkey.txt
+Email sent to baditaflorin+tmp002@gmail.com, baditaflorin@gmail.com
+
+✓ Operator 'Florin Badita Temporary' fully provisioned.
+  Keycloak username  : florin.badita-tmp-002
+  Keycloak user ID   : d1c1c5b5-f4c8-47de-8865-c529789ada77
+  Password file      : /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-tmp-002-password.txt
+  Headscale user     : florin-badita-tmp-002
+  Headscale authkey  : /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/headscale/florin-badita-tmp-002-authkey.txt
+  CA fingerprint     : af5c395527799a9a68a86f9f512d7545cce88b1cbd3b25448918e6d624e331ac
+  Email sent to      : baditaflorin+tmp002@gmail.com (CC: baditaflorin@gmail.com)
+  Expires            : 2026-04-10T00:00:00Z

@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0289-directus-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T19:44:26Z",
+  "recorded_by": "codex",
+  "source_commit": "4db2d1f4dc788fa391f3cf1bf39facfcac00c218",
+  "repo_version_context": "0.177.106",
+  "platform_version_context": "0.130.71",
+  "workflow_id": "adr-0289-directus-live-apply",
+  "adr": "0289",
+  "summary": "Live-applied ADR 0289 from the latest synchronized origin/main lineage by converging Directus on docker-runtime-lv3 as the repo-managed REST and GraphQL operational data API, backing it with a dedicated PostgreSQL database on postgres-lv3, delegating routine browser sign-in to Keycloak, publishing data.lv3.org through the shared NGINX edge, and replaying the bootstrap, access-model, Docker recovery, and shared edge publication fixes until the end-to-end public verification contract passed.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 130,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Directus public edge",
+      "address": "https://data.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Directus runtime local health",
+      "address": "http://10.10.10.20:8055/server/health"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Targeted Directus regression coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest pytest -q tests/test_directus_playbook.py tests/test_directus_bootstrap.py tests/test_directus_runtime_role.py tests/test_directus_postgres_role.py tests/test_keycloak_runtime_role.py tests/test_compose_runtime_secret_injection.py tests/test_edge_publication_makefile.py tests/test_plausible_playbook.py` returned `51 passed in 1.26s` after the bootstrap, access-model, and shared-edge bootstrap fixes landed."
+    },
+    {
+      "check": "Directus preflight and repository validation paths",
+      "result": "pass",
+      "observed": "`make syntax-check-directus`, `make preflight WORKFLOW=converge-directus`, `./scripts/validate_repo.sh agent-standards`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `make validate-generated-portals` all passed on the synchronized worktree. The Directus preflight now proves the `shared-edge-generated-portals` bootstrap manifest by requiring the generated `ops-portal`, `changelog-portal`, and `docs-portal` directories before publication."
+    },
+    {
+      "check": "Governed production Directus converge replay",
+      "result": "pass",
+      "observed": "`make converge-directus env=production` completed successfully with final recap `docker-runtime-lv3 : ok=274 changed=2 unreachable=0 failed=0 skipped=88 rescued=0 ignored=0`, `postgres-lv3 : ok=70 changed=4 unreachable=0 failed=0 skipped=23 rescued=0 ignored=0`, `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`, and `localhost : ok=23 changed=0 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Guest-local Directus runtime state",
+      "result": "pass",
+      "observed": "A fresh ad hoc probe through the repo-managed Proxmox host jump path showed `directus` and `directus-openbao-agent` both `Up`, with the Directus container published on `10.10.10.20:8055` and `127.0.0.1:8055`. A second guest-local probe returned `{\"status\":\"ok\"}` from `/server/health` and `pong` from `/server/ping`."
+    },
+    {
+      "check": "Public Directus publication, REST, GraphQL, and OIDC contract",
+      "result": "pass",
+      "observed": "`python3 scripts/directus_bootstrap.py verify-public --base-url https://data.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/service-registry-token.txt --collection service_registry --expected-service-name directus --expected-sso-host sso.lv3.org --openapi-output receipts/live-applies/evidence/2026-03-30-adr-0289-directus-openapi.json` returned `{\"status\": \"ok\", \"collection\": \"service_registry\", \"service_name\": \"directus\", \"rest_items\": 1, \"graphql_items\": 1}`. Public health also returned `{\"status\":\"ok\"}`, and `data.lv3.org` resolved to `65.108.75.123`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md",
+    "docs/workstreams/ws-0289-live-apply.md",
+    "docs/runbooks/configure-directus.md",
+    "playbooks/directus.yml",
+    "playbooks/services/directus.yml",
+    "roles/directus_postgres/",
+    "roles/directus_runtime/",
+    "scripts/directus_bootstrap.py",
+    "Makefile",
+    "config/workflow-catalog.json",
+    "receipts/image-scans/2026-03-30-directus-runtime.json",
+    "receipts/image-scans/2026-03-30-directus-runtime.trivy.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-live-apply-r10.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-live-apply-r11.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-live-apply-r12.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-live-apply-r13.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-compose-ps.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-local-health.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-public-health.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-public-dns.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-public-verify.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-directus-openapi.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-preflight.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-syntax-check-directus.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-targeted-pytest.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-validate-agent-standards.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-validate-data-models.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-validate-generated-portals.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-hetzner-brownout-probe-pre-retry.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0289-hetzner-brownout-wait.txt",
+    "receipts/live-applies/2026-03-30-adr-0289-directus-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt records the branch-local latest-main live-apply proof before the protected integration surfaces on exact main are updated.",
+    "A manual Hetzner DNS bridge was required during the provider brownout window: `data.lv3.org` was created manually as `65.108.75.123` with provider record id `644d501af8a99d37d91f388ac4585349`, after which later governed replays observed the canonical state.",
+    "The Directus correction loop fixed bootstrap script path resolution and change detection, ensured the access-model SQL seed is rendered with `postgres` ownership and quoted `directus_access.\"user\"`, verified the Docker nat chain after recovery before Directus startup, and taught `converge-directus` plus the workflow catalog preflight to build the shared generated edge portals before the NGINX publication role republishes them.",
+    "The branch-local `make validate-generated-docs` check remains intentionally deferred because it regenerates the protected top-level `README.md` status fragments. The exact-main integration step still needs to refresh that surface, bump `VERSION`, update `changelog.md`, update `versions/stack.yaml`, rerun the live apply from `main`, and then record the mainline receipt."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-30-adr-0289-directus-bootstrap-and-edge-recovery",
+    "surface": "Directus bootstrap, access-model seeding, Docker recovery gating, and shared edge publication bootstrap",
+    "repair_action": "Exposed the Hetzner brownout error path clearly, bridged the missing `data.lv3.org` record manually when the provider window blocked automation, corrected Directus bootstrap invocation and change detection, fixed the PostgreSQL seed-file ownership and reserved-column quoting, added a final nat-chain verification after Docker recovery, and regenerated the shared edge portal artifacts before NGINX publication.",
+    "verification": "Reran the focused pytest suite, Directus preflight, repository validation, and the full governed `make converge-directus env=production` replay, then confirmed local health, public health, and public REST plus GraphQL reads with the repo-managed service token.",
+    "diagnosis": "contract_drift"
+  }
+}

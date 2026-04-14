@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0301-semgrep-sast-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T19:10:00Z",
+  "recorded_by": "codex",
+  "source_commit": "9b539fa6fb3e0f26531f461fc71573491da370ab",
+  "repo_version_context": "0.177.108",
+  "platform_version_context": "0.130.71",
+  "workflow_id": "adr-0301-semgrep-sast-mainline-live-apply",
+  "adr": "0301",
+  "summary": "Merged ADR 0301 onto `main` as repository version `0.177.108` from exact-main source commit `9b539fa6fb3e0f26531f461fc71573491da370ab`, with the Semgrep wrapper, no-git snapshot path, remote build-server replay, and local pre-push gate all passing from that release tree. The first hosted-main replay remains externally blocked: GitHub `Validate` on `main` failed before runner startup because the account billing state prevented hosted jobs, and the private Gitea controller at `http://100.64.0.1:3009` kept resetting git and API connections. Because those hosted paths were not verifiably live from `main`, `platform_version` remains `0.130.71` and ADR 0301 is recorded as implemented in the repo but not yet promoted to a first verified platform version.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "docker-build-lv3",
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "GitHub Validate run 23762644306",
+      "address": "https://github.com/baditaflorin/proxmox_florin_server/actions/runs/23762644306"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Private Gitea controller",
+      "address": "http://100.64.0.1:3009"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact-main repo-side validation bundle",
+      "result": "pass",
+      "observed": "The exact-main `0.177.108` tree passed the focused Semgrep regression slice, direct Semgrep wrapper, no-git snapshot replay, `make remote-validate`, and `make pre-push-gate`; the transcripts are preserved in `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-targeted-pytest-r1-0.177.108.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-validate-semgrep-r1-0.177.108.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-no-git-semgrep-r1-0.177.108.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-remote-validate-r2-0.177.108.txt`, and `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-pre-push-gate-r1-0.177.108.txt`."
+    },
+    {
+      "check": "Mainline repository merge state",
+      "result": "pass",
+      "observed": "`origin/main` now resolves to `9b539fa6fb3e0f26531f461fc71573491da370ab`, preserved in `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-origin-main-r1-0.177.108.txt`."
+    },
+    {
+      "check": "GitHub hosted mainline validation",
+      "result": "partial",
+      "observed": "GitHub Actions created `Validate` run `23762644306` for `main`, but the job never started because the account billing state blocked hosted runners; the run payload and annotation are preserved in `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-github-run-r1-0.177.108.json` and `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-github-annotations-r1-0.177.108.json`."
+    },
+    {
+      "check": "Private Gitea hosted validation",
+      "result": "partial",
+      "observed": "The private Gitea branch-validation replay could not be re-established because `http://100.64.0.1:3009` reset both git and direct HTTP/API probes during the validation window; the failed push and controller transcripts are preserved in `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-push-r2-0.177.108.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-head-r1-0.177.108.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-api-version-r1-0.177.108.json`, and `receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-manual-http-r1-0.177.108.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md",
+    "docs/release-notes/0.177.108.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/docker-check-runners.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/runbooks/validation-gate.md",
+    "docs/workstreams/ws-0301-live-apply.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-03-30-adr-0301-semgrep-sast-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-origin-main-r1-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-targeted-pytest-r1-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-validate-semgrep-r1-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-no-git-semgrep-r1-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-remote-validate-r2-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-pre-push-gate-r1-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-github-run-r1-0.177.108.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-github-annotations-r1-0.177.108.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-push-r2-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-head-r1-0.177.108.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-api-version-r1-0.177.108.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0301-mainline-gitea-manual-http-r1-0.177.108.txt"
+  ],
+  "notes": [
+    "ADR 0301 is merged on `main` and implemented in repository version `0.177.108`.",
+    "The first verified platform promotion is intentionally deferred: GitHub billing blocked hosted runner startup and the private Gitea controller reset connections during the same validation window.",
+    "When hosted validation recovers, rerun the GitHub and Gitea checks from `main`, then update `versions/stack.yaml`, `workstreams.yaml`, and the ADR metadata to record the first verified platform version for ADR 0301."
+  ]
+}

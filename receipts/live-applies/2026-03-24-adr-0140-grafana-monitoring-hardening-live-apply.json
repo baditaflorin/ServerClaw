@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-24-adr-0140-grafana-monitoring-hardening-live-apply",
+  "applied_on": "2026-03-24",
+  "recorded_on": "2026-03-24",
+  "recorded_by": "codex",
+  "source_commit": "8e36e3ff59f632acf3257a702df91456bf018843",
+  "repo_version_context": "0.130.1",
+  "workflow_id": "converge-monitoring",
+  "adr": "0140",
+  "environment": "production",
+  "summary": "Applied the Grafana runtime hardening on monitoring-lv3, verified the public access controls, and restored Prometheus SLO rule loading with the corrected latency-rule generator output.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "grafana.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Grafana public-surface verification tasks",
+      "result": "pass",
+      "observed": "During `make live-apply-service service=grafana env=production`, the monitoring role passed the ADR 0140 checks that verify dashboard redirects, `https://grafana.lv3.org/api/health` returning `404`, and login-header stripping at the public edge."
+    },
+    {
+      "check": "Prometheus SLO rule loading",
+      "result": "pass",
+      "observed": "`curl -s http://127.0.0.1:9090/api/v1/rules` on `monitoring-lv3` returned rule groups including both `slo_recording_rules` and `slo_alert_rules` after the corrected `slo_rules.yml` was applied."
+    },
+    {
+      "check": "Shared Alertmanager ntfy prerequisite",
+      "result": "partial",
+      "observed": "The trailing shared Alertmanager validation in the same converge path still expects the controller-local file `.local/ntfy/alertmanager-password.txt`; its absence in this worktree did not roll back the Grafana or Prometheus changes already applied."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0140-grafana-public-access-hardening.md",
+    "docs/runbooks/monitoring-stack.md",
+    "docs/release-notes/0.130.1.md"
+  ],
+  "notes": [
+    "Before the SLO generator fix, `promtool check config /etc/prometheus/prometheus.yml` on `monitoring-lv3` rejected the generated `keycloak-latency` rules because the latency recording expressions used an invalid range selector on a comparison expression.",
+    "After applying the corrected recording rules from source commit `8e36e3f`, Prometheus loaded the shared SLO rule groups successfully and the Grafana-facing ADR 0140 verification contract passed."
+  ]
+}

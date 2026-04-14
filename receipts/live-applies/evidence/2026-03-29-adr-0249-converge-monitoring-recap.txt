@@ -1,0 +1,9 @@
+PLAY RECAP *********************************************************************
+backup-lv3                 : ok=14   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+coolify-lv3                : ok=14   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+docker-build-lv3           : ok=46   changed=0    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+docker-runtime-lv3         : ok=72   changed=2    unreachable=0    failed=0    skipped=14   rescued=0    ignored=0
+monitoring-lv3             : ok=396  changed=0    unreachable=0    failed=0    skipped=76   rescued=0    ignored=0
+nginx-lv3                  : ok=150  changed=4    unreachable=0    failed=0    skipped=34   rescued=0    ignored=0
+postgres-lv3               : ok=38   changed=0    unreachable=0    failed=0    skipped=16   rescued=0    ignored=0
+proxmox_florin             : ok=100  changed=0    unreachable=0    failed=0    skipped=47   rescued=0    ignored=0

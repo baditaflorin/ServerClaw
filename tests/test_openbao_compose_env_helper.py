@@ -61,10 +61,15 @@ RECOVERY_TASKS_PATH = (
 
 def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
+    defaults = (REPO_ROOT / "roles" / "common" / "defaults" / "main.yml").read_text(encoding="utf-8")
     unseal_tasks = UNSEAL_HELPER_TASKS_PATH.read_text(encoding="utf-8")
     unseal_step_tasks = UNSEAL_HELPER_STEP_TASKS_PATH.read_text(encoding="utf-8")
 
+    assert 'common_openbao_compose_env_openbao_address: ""' in defaults
+    assert "common_openbao_compose_env_manage_local_openbao_runtime: true" in defaults
+    assert "common_openbao_compose_env_api_url" in tasks
     assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
+    assert "common_openbao_compose_env_manage_local_openbao_runtime | bool" in tasks
     assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
     assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
     assert "- name: Record whether the local OpenBao runtime needed recovery for compose env injection" in tasks
@@ -73,14 +78,14 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "register: common_openbao_compose_env_docker_info" in tasks
     assert "until: common_openbao_compose_env_docker_info.rc == 0" in tasks
     assert "- name: Recover the local OpenBao runtime before helper API calls" in tasks
-    assert "- name: Wait for the local OpenBao API to become active" in tasks
-    assert "- name: Ensure the local OpenBao API is unsealed before runtime secret injection" in tasks
+    assert "- name: Wait for the configured OpenBao API to become active" in tasks
+    assert "- name: Ensure the configured OpenBao API is unsealed before runtime secret injection" in tasks
     assert "include_tasks: unseal_openbao_api.yml" in tasks
     assert (
         'common_openbao_unseal_context: "runtime secret injection for {{ common_openbao_compose_env_service_name }}"'
         in tasks
     )
-    assert 'common_openbao_unseal_api_url: "http://127.0.0.1:{{ openbao_http_port }}"' in tasks
+    assert 'common_openbao_unseal_api_url: "{{ common_openbao_compose_env_api_url }}"' in tasks
     assert "Read OpenBao seal status before" in unseal_tasks
     assert "common_openbao_unseal_completed" in unseal_tasks
     assert "include_tasks: unseal_openbao_api_key.yml" in unseal_tasks
@@ -89,8 +94,8 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "register: common_openbao_compose_env_unsealed_status" in tasks
     assert "common_openbao_compose_env_unsealed_status.status == 200" in tasks
     assert "not (common_openbao_compose_env_unsealed_status.json.sealed | bool)" in tasks
-    assert "- name: Assert the local OpenBao API is unsealed before runtime secret injection" in tasks
-    assert "- name: Wait for the local OpenBao API to become active" in tasks
+    assert "- name: Assert the configured OpenBao API is unsealed before runtime secret injection" in tasks
+    assert "- name: Wait for the configured OpenBao API to become active" in tasks
     assert "- name: Upsert the OpenBao AppRole for the runtime agent" in tasks
     assert "register: common_openbao_compose_env_approle_upsert" in tasks
     assert 'retries: "{{ common_openbao_api_operation_retries }}"' in tasks
@@ -105,9 +110,11 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "ansible.builtin.copy" in tasks
     assert "ansible.builtin.template" in tasks
     assert "- name: Probe the current runtime secret payload from OpenBao" in tasks
-    assert "- name: Read the local OpenBao seal status after a transient runtime secret payload read failure" in tasks
-    assert "- name: Unseal the local OpenBao API when runtime secret payload reads catch it sealed" in tasks
-    assert "- name: Wait for the local OpenBao API to become active after runtime secret payload recovery" in tasks
+    assert (
+        "- name: Read the configured OpenBao seal status after a transient runtime secret payload read failure" in tasks
+    )
+    assert "- name: Unseal the configured OpenBao API when runtime secret payload reads catch it sealed" in tasks
+    assert "- name: Wait for the configured OpenBao API to become active after runtime secret payload recovery" in tasks
     assert "- name: Read the current runtime secret payload from OpenBao" in tasks
     assert "until: common_openbao_compose_env_current_secret.status in [200, 404]" in tasks
     assert "register: common_openbao_compose_env_secret_upsert" in tasks

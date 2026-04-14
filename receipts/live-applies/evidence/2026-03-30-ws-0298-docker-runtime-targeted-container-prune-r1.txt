@@ -1,0 +1,36 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+tmp-platform-port-check
+pensive_ganguly
+wizardly_zhukovsky
+elastic_hamilton
+priceless_gates
+nervous_lewin
+festive_bouman
+focused_allen
+fervent_pasteur
+Deleted Images:
+untagged: temporalio/admin-tools@sha256:024c6473df113e4b220b3caf6056d30964582ffcae6f6e46a1074aa6c67968d3
+deleted: sha256:c273e605a10d4298895dfc09c8fa6d5e00973d1a1014be106e84b5585ae3ca16
+deleted: sha256:9b1a793b57dd6762f37284744f35b1cbfbc0dcc78c46625a9ab276fb51ce6825
+deleted: sha256:38147ddf3b40cd5f979766620dd16c5da25695181a98a9ebde26ebac98fd2d42
+untagged: python:3.12-slim
+untagged: python@sha256:3d5ed973e45820f5ba5e46bd065bd88b3a504ff0724d85980dcd05eab361fcf4
+deleted: sha256:236c0e1bb58eb3c5eab90a06dcf1b92abde6a70caaefe5262d8ca334d2afa3c4
+deleted: sha256:76c9c55b7ebe3c4aaf81dc27499634d29e9df87be481fe70d79fb5e4f9aa56ea
+untagged: alpine:3.21
+untagged: alpine@sha256:c3f8e73fdb79deaebaa2037150150191b9dcbfba68b4a46d70103204c53f4709
+deleted: sha256:6aeafe801b80d22202e15849e99930f83810df4f0e535158480c590da19ecbd7
+untagged: anchore/syft@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f
+deleted: sha256:e216cfe8ba0e67d0353040118691c5e39e76cff5e48213070403d444261a958e
+deleted: sha256:6ecd81adad2314a8526eb0ab162a1d92a465958f29ece8bedbfdddaaa9255e07
+deleted: sha256:67cb0593db1b6d1338444b9c7cbbcc2293d15319bf3c579fcc63b8a2f958ea4f
+deleted: sha256:1d7ecf4607f7ad490540ba5e43c76501d612301ab562a996698d6b1e2c207fd0
+
+Total reclaimed space: 568.5MB
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        95G   82G  8.5G  91% /
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          84        84        56.11GB   56.11GB (100%)
+Containers      133       86        2.005GB   1.02GB (50%)
+Local Volumes   953       82        1.095GB   1.162MB (0%)
+Build Cache     0         0         0B        0B

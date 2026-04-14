@@ -1,0 +1,23 @@
+[ERROR]: Task failed: Finalization of task args for 'ansible.builtin.shell' failed: Error while resolving value for '_raw_params': Syntax error in template: unexpected '.'
+
+Task failed.
+Origin: <adhoc 'shell' task>
+
+{'action': 'shell', 'args': {'_raw_params': "docker ps -a --format '{{.Names}} {{.Status}}' | grep windmill"}, [...]
+
+<<< caused by >>>
+
+Finalization of task args for 'ansible.builtin.shell' failed.
+Origin: <CLI option '-m'>
+
+shell
+
+<<< caused by >>>
+
+Error while resolving value for '_raw_params': Syntax error in template: unexpected '.'
+Origin: <CLI option '-a'>
+
+docker ps -a --format '{{.Names}} {{.Status}}' | grep windmill
+
+docker-runtime-lv3 | FAILED | rc=-1 >>
+Task failed: Finalization of task args for 'ansible.builtin.shell' failed: Error while resolving value for '_raw_params': Syntax error in template: unexpected '.'

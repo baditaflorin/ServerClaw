@@ -1,0 +1,15 @@
+uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/k6_load_testing.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final --scenario smoke --service keycloak --service openfga
+{
+  "status": "ok",
+  "scenario": "smoke",
+  "runner_context": "manual",
+  "services": [
+    "keycloak",
+    "openfga"
+  ],
+  "receipts": [
+    "receipts/k6/smoke-keycloak-20260331T120025Z.json",
+    "receipts/k6/smoke-openfga-20260331T120025Z.json"
+  ],
+  "summary_export": "receipts/k6/raw/20260331T120025Z-smoke-summary.json"
+}

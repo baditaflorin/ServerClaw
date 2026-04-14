@@ -1,0 +1,1 @@
+docker-runtime-lv3 | CHANGED | rc=0 | (stdout) {"detail_has_last_safe_resume_point": true, "detail_has_next_action": true, "detail_has_resume_button": true, "detail_has_resume_summary": false, "home_has_task_link": true, "run_id": "runbook-ce657f08-5672-43f9-b04f-f9f035cb1c53"}

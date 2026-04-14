@@ -1,0 +1,82 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host errors.lv3.org:443 was resolved.
+* IPv6: (none)
+* IPv4: 65.108.75.123
+*   Trying 65.108.75.123:443...
+* Connected to errors.lv3.org (65.108.75.123) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+} [319 bytes data]
+* (304) (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* (304) (IN), TLS handshake, Unknown (8):
+{ [41 bytes data]
+* (304) (IN), TLS handshake, Certificate (11):
+{ [2039 bytes data]
+* (304) (IN), TLS handshake, CERT verify (15):
+{ [78 bytes data]
+* (304) (IN), TLS handshake, Finished (20):
+{ [36 bytes data]
+* (304) (OUT), TLS handshake, Finished (20):
+} [36 bytes data]
+* SSL connection using TLSv1.3 / AEAD-CHACHA20-POLY1305-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=errors.lv3.org
+*  start date: Mar 31 04:41:34 2026 GMT
+*  expire date: Jun 29 04:41:33 2026 GMT
+*  issuer: C=US; O=Let's Encrypt; CN=E8
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://errors.lv3.org/api/0/internal/health/
+* [HTTP/2] [1] [:method: HEAD]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: errors.lv3.org]
+* [HTTP/2] [1] [:path: /api/0/internal/health/]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+> HEAD /api/0/internal/health/ HTTP/2
+> Host: errors.lv3.org
+> User-Agent: curl/8.7.1
+> Accept: */*
+>
+* Request completely sent off
+< HTTP/2 200
+< server: nginx
+< date: Fri, 03 Apr 2026 00:49:51 GMT
+< content-type: application/json
+< content-length: 31
+< vary: Accept-Language, origin
+< content-language: en
+< cross-origin-opener-policy: same-origin
+< x-robots-tag: noindex, nofollow
+< strict-transport-security: max-age=63072000; includeSubDomains; preload
+< cross-origin-resource-policy: same-origin
+< x-content-type-options: nosniff
+< x-frame-options: DENY
+< referrer-policy: strict-origin-when-cross-origin
+< permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+< content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+< x-robots-tag: noindex, nofollow
+<
+{ [0 bytes data]
+  0    31    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+* Connection #0 to host errors.lv3.org left intact
+HTTP/2 200
+server: nginx
+date: Fri, 03 Apr 2026 00:49:51 GMT
+content-type: application/json
+content-length: 31
+vary: Accept-Language, origin
+content-language: en
+cross-origin-opener-policy: same-origin
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow

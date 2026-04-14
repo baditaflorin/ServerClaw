@@ -217,3 +217,12 @@ def load_yaml_with_identity(path: Path) -> Any:
     raw = path.read_text()
     resolved = resolve_jinja2_vars(raw)
     return yaml.safe_load(resolved)
+
+
+def apply_identity_domain_overlay(payload: Any, *, platform_domain: str | None = None) -> Any:
+    """Backward-compatible alias for example.com placeholder resolution."""
+    if platform_domain is None:
+        platform_domain = load_identity_vars().get("platform_domain", "example.com")
+    if platform_domain == "example.com":
+        return payload
+    return resolve_public_domain_placeholders(payload)

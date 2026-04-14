@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "a755423ed994c813d45bb9738c283c7d118c1dc5",
+  "repo_version_context": "0.169.0",
+  "workflow_id": "platform-observation-loop",
+  "adr": "0126",
+  "summary": "Completed the ADR 0126 production activation from the rebased current-main `0.169.0` tree by reseeding the repo-managed Windmill scripts with the committed sync helper, verifying the live observation-loop wrapper, and proving that a production observation_finding run stops at RESOLVED when goal achievement is already true.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill_internal",
+      "address": "http://100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repo-managed Windmill script reseed from the rebased branch",
+      "result": "pass",
+      "observed": "Running `scripts/sync_windmill_seed_scripts.py` against the production Windmill API from source commit `a755423ed994c813d45bb9738c283c7d118c1dc5` synced 38 repo-managed scripts, including `f/lv3/platform_observation_loop` and `f/lv3/world_state/refresh_service_health`, with all items succeeding on the first attempt."
+    },
+    {
+      "check": "Windmill runtime health after the closure-loop reseed",
+      "result": "pass",
+      "observed": "POST `http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck` with probe `rebased-branch-check` returned HTTP `200` and `{\"workspace\":\"lv3\",\"job_id_present\":true}` from the live worker."
+    },
+    {
+      "check": "Live observation wrapper execution",
+      "result": "pass",
+      "observed": "POST `http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fplatform_observation_loop` with a critical `windmill` service-health finding returned HTTP `200` and a structured closure-loop payload with one processed run in `ESCALATED_FOR_APPROVAL`, proving the Windmill wrapper now executes successfully on production."
+    },
+    {
+      "check": "Goal-achievement termination on the live checkout",
+      "result": "pass",
+      "observed": "On `docker-runtime-lv3`, `sudo python3` from `/srv/proxmox_florin_server` started an `observation_finding` run with `goal_achieved: true` and returned `current_state: RESOLVED` with history `TRIAGED -> RESOLVED`."
+    }
+  ],
+  "evidence_refs": [
+    "config/windmill/scripts/platform-observation-loop.py",
+    "config/windmill/scripts/world-state/refresh-service-health.py",
+    "scripts/sync_windmill_seed_scripts.py",
+    "docs/adr/0126-observation-to-action-closure-loop.md",
+    "docs/runbooks/observation-to-action-closure-loop.md",
+    "docs/workstreams/adr-0126-observation-to-action-closure-loop.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "A direct `make live-apply-service service=windmill env=production` replay exposed a Windmill API race where script deletes and creates could disagree about path existence during reseed. The durable fix is the committed helper `scripts/sync_windmill_seed_scripts.py`, which is now wired into the Windmill runtime role.",
+    "The `world_state/refresh_service_health` Windmill job still did not return through `jobs/run_wait_result` during this turn, so the production termination proof used a live `observation_finding` run with explicit `goal_achieved: true` on the managed checkout instead of waiting on that wrapper path."
+  ]
+}

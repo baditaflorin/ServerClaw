@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0246-runtime-state-semantics-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T23:19:23Z",
+  "recorded_by": "codex",
+  "source_commit": "dc0624974fff094ff0f50a096ea5c411d64d53bf",
+  "repo_version_context": "0.177.57",
+  "platform_version_context": "0.130.44",
+  "workflow_id": "adr-0246-runtime-state-semantics-live-apply",
+  "adr": "0246",
+  "summary": "Applied ADR 0246 from the latest origin/main candidate by teaching the shared runtime-assurance paths to classify startup, ready, degraded, and failed states consistently, then replaying Windmill and API Gateway on docker-runtime-lv3 and re-verifying the new runtime-state surfaces through the observation loop and authenticated platform-health API.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Platform health API",
+      "address": "https://api.lv3.org/v1/platform/health"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository test slice after rebase",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_post_verify_tasks.py tests/test_platform_observation_tool.py tests/test_world_state_workers.py tests/test_health_composite.py tests/test_scaffold_service.py tests/unit/test_graph_client.py` returned `36 passed in 2.25s`, and `./scripts/validate_repo.sh data-models health-probes agent-standards yaml json ansible-syntax workstream-surfaces` completed successfully from rebased branch head `dc0624974fff094ff0f50a096ea5c411d64d53bf`."
+    },
+    {
+      "check": "Windmill live replay",
+      "result": "pass",
+      "observed": "After fixing the repo-managed schedule enabled sync task to stop inferring success from wrapper stdout, the scoped replay starting at `Generate the Windmill superadmin secret` completed successfully on `docker-runtime-lv3` with final recap `ok=106 changed=21 failed=0 skipped=23`; `Converge repo-managed Windmill schedule enabled flags`, `Run the Windmill seeded healthcheck script`, and `Assert the Windmill seeded healthcheck result` all passed."
+    },
+    {
+      "check": "API gateway live replay",
+      "result": "pass",
+      "observed": "`make converge-api-gateway` completed successfully from the same rebased worktree with final recap `docker-runtime-lv3 : ok=236 changed=106 failed=0 skipped=40`; the replay verified the authenticated platform service-catalog endpoint, the anonymous `/v1/health` rejection contract, and the shared startup, liveness, and readiness post-verify path."
+    },
+    {
+      "check": "Observation-loop runtime-state evidence",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/platform_observation_tool.py --checks check-service-health --output-dir .local/platform-observation/ws-0246-verify --digest-path .local/platform-observation/ws-0246-verify/digest.md` recorded `runtime_state=ready` with structured `phase_results` for `api_gateway`, `platform_context_api`, and `windmill`. The same finding reported overall counts `ready=20`, `startup=10`, `failed=11`, and `degraded=0`, confirming the new semantics are live even though unrelated services outside ADR 0246 remain in pre-existing failed or startup states."
+    },
+    {
+      "check": "Public platform-health API semantics",
+      "result": "pass",
+      "observed": "Authenticated queries to `https://api.lv3.org/v1/platform/health/{api_gateway,platform_context_api,windmill}` each returned `status=healthy`, `composite_status=healthy`, `safe_to_act=true`, and a `health_probe` signal with `value=ready`; `https://api.lv3.org/healthz` returned `{ \"status\": \"ok\" }`."
+    },
+    {
+      "check": "Latest host and guest state snapshot",
+      "result": "pass",
+      "observed": "`ops@100.64.0.1` reported hostname `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`. On `docker-runtime-lv3`, direct container inspection and `docker ps` confirmed `api-gateway` running after the replay, `platform-context-api` running, and the Windmill server plus workers present."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md",
+    "docs/workstreams/ws-0246-live-apply.md",
+    "docs/runbooks/health-probe-contracts.md",
+    "docs/runbooks/service-uptime-contracts.md",
+    "docs/runbooks/scaffold-new-service.md",
+    "config/health-probe-catalog.json",
+    "playbooks/tasks/post-verify.yml",
+    "collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "platform/health/semantics.py",
+    "platform/health/composite.py",
+    "platform/graph/client.py",
+    "platform/world_state/workers.py",
+    "scripts/platform_observation_tool.py",
+    "scripts/scaffold_service.py",
+    "scripts/validate_repository_data_models.py",
+    "tests/test_post_verify_tasks.py",
+    "tests/test_platform_observation_tool.py",
+    "tests/test_world_state_workers.py",
+    "tests/test_health_composite.py",
+    "tests/test_scaffold_service.py",
+    "tests/unit/test_graph_client.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The first full Windmill replay exposed a false negative in `Converge repo-managed Windmill schedule enabled flags`: the SQL updates succeeded against the live database, but the task tried to derive change from wrapper stdout under `no_log`. The live-applied fix made that step explicitly non-changing while preserving the database update behavior.",
+    "An earlier full rerun was manually interrupted after the former blocker while copying the Windmill app sync root. The successful verification replay therefore resumed from `Generate the Windmill superadmin secret` so the required bootstrap facts and login token were recomputed before downstream sync tasks.",
+    "The worktree was rebased onto `origin/main` after ADR 0250 landed. Those incoming monitoring-only changes were already live-applied on platform version `0.130.44`, so ADR 0246 verification did not need another monitoring replay.",
+    "Protected integration files still remain for the main merge step: `VERSION`, `changelog.md`, `RELEASE.md`, versioned release notes, `README.md`, `versions/stack.yaml`, and `build/platform-manifest.json`."
+  ]
+}

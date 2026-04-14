@@ -1,0 +1,34 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/scripts/remote_exec.sh remote-validate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+remote_exec: remote command failed, falling back locally for remote-validate
+remote_exec: running local fallback for remote-validate
+Validation lane selection
+  mode: explicit_checks
+  branch: codex/ws-0336-live-apply
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+  changed files: README.md, build/platform-manifest.json, docs/adr/0336-public-entrypoint-leakage-validation.md, docs/diagrams/agent-coordination-map.excalidraw, docs/status/history/merged-workstreams.md, docs/workstreams/ws-0336-live-apply.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 51.66
+alert-rule-validation passed 26.03
+ansible-syntax        passed 840.00
+atlas-lint            passed 37.13
+dependency-graph      passed 37.62
+iac-policy-scan       passed 213.10
+policy-validation     passed 41.21
+schema-validation     passed 477.68
+type-check            passed 58.28
+workstream-surfaces   failed 25.50
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/.local/validation-gate/docker-cids/workstream-surfaces-2r2eaelx.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0336-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=d0e29fb525d73eccb4929629c78b0a9fb29e9f983d9def97ba6e91be7a653ab8 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-04T15:07:13.459875+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=d13eac7006b6a7d65e89adbbd667a07795820b41 -e LV3_SNAPSHOT_BRANCH=codex/ws-0336-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["README.md", "build/platform-manifest.json", "docs/adr/0336-public-entrypoint-leakage-validation.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/status/history/merged-workstreams.md", "docs/workstreams/ws-0336-live-apply.md", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-live-apply.json", "receipts/live-applies/2026-04-04-adr-0336-public-entrypoint-leakage-mainline-live-apply.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-canonical-truth-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-generate-diagrams-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-git-diff-check-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-live-apply-receipts-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-platform-manifest-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-status-docs-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-mainline-workstream-registry-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-pre-push-gate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-release-status-r1.json", "receipts/live-applies/evidence/2026-04-04-ws-0336-remote-validate-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-targeted-tests-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-public-entrypoints-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r1.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r2.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r3.txt", "receipts/live-applies/evidence/2026-04-04-ws-0336-validate-repo-r4.txt", "workstreams.yaml", "workstreams/archive/2026/ws-0336-live-apply.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Workstream surface ownership validation failed: branch 'codex/ws-0336-live-apply' is not registered in workstreams.yaml
+make: *** [remote-validate] Error 1

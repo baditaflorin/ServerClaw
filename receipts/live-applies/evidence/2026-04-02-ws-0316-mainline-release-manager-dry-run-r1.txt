@@ -1,0 +1,5 @@
+Current version: 0.177.139
+Next version: 0.177.140
+Unreleased notes: 1
+Platform impact: Implements ADR 0316 journey analytics and onboarding success scorecards for the Windmill operator admin surface and prepares the corresponding Plausible registration and worker-side scorecard automation.
+Release notes index: docs/release-notes/README.md

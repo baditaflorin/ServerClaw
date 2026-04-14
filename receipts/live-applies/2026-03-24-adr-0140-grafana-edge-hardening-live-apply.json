@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-24-adr-0140-grafana-edge-hardening-live-apply",
+  "applied_on": "2026-03-24",
+  "recorded_on": "2026-03-24",
+  "recorded_by": "codex",
+  "source_commit": "8e36e3ff59f632acf3257a702df91456bf018843",
+  "repo_version_context": "0.130.1",
+  "workflow_id": "configure-edge-publication",
+  "adr": "0140",
+  "environment": "production",
+  "summary": "Applied the public-edge Grafana hardening so unauthenticated dashboard URLs stay on the login path, `/api/health` returns 404, and the hostname is marked noindex.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "grafana.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Public Grafana dashboard redirect",
+      "result": "pass",
+      "observed": "`curl -I https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` with `location: /login?redirectTo=%2Fd%2Flv3-platform-overview%2Flv3-platform-overview`."
+    },
+    {
+      "check": "Public Grafana health endpoint block",
+      "result": "pass",
+      "observed": "`curl -I https://grafana.lv3.org/api/health` returned `HTTP/2 404` with `x-robots-tag: noindex`."
+    },
+    {
+      "check": "Public Grafana login headers",
+      "result": "pass",
+      "observed": "`curl -I https://grafana.lv3.org/login` returned `HTTP/2 200` with `x-robots-tag: noindex` and without `X-Grafana-Version` or `Via` headers."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0140-grafana-public-access-hardening.md",
+    "docs/runbooks/configure-edge-publication.md",
+    "docs/release-notes/0.130.1.md"
+  ],
+  "notes": [
+    "The full `make configure-edge-publication` path spent several minutes in `Publish generated static site directories` even when the published site artifacts were already current.",
+    "The final config render, validation, and NGINX reload for this rollout were completed through `playbooks/public-edge.yml --start-at-task 'Check whether the public edge certificate exists'` so the Grafana edge rules landed without republishing unchanged static directories."
+  ]
+}

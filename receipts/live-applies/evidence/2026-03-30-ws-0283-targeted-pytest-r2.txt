@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-live-apply
+configfile: pytest.ini
+collected 54 items
+
+tests/test_plausible_playbook.py ....                                    [  7%]
+tests/test_plausible_runtime_role.py ....                                [ 14%]
+tests/test_generate_platform_vars.py ....................                [ 51%]
+tests/test_nginx_edge_publication_role.py ..............                 [ 77%]
+tests/test_service_topology_filters.py ......                            [ 88%]
+tests/test_ansible_execution_scopes.py ......                            [100%]
+
+============================== 54 passed in 2.33s ==============================

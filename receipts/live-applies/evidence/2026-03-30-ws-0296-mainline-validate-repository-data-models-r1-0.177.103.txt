@@ -1,0 +1,3 @@
+Repository data model error: versions/stack.yaml.release_tracks.platform_versioning.current must match platform_version
+Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/receipts/live-applies
+Promotion receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/receipts/promotions (0 file(s))

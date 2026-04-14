@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T18:30:00Z",
+  "recorded_by": "codex",
+  "source_commit": "2d29892b05fbcabfadc96d00384d02cfdc75058f",
+  "repo_version_context": "0.178.2",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0341-open-webui-keycloak-oidc-live-apply",
+  "adr": "0341",
+  "summary": "Converged ADR 0341 on the live platform by reconciling a dedicated `open-webui` Keycloak client on `docker-runtime-lv3`, switching Open WebUI to repo-managed OIDC for routine sign-in, keeping the local bootstrap admin as break-glass recovery, and aligning the stale Keycloak playbook and topology surfaces with the already-live Docker runtime placement.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Open WebUI operator proxy",
+      "address": "http://100.64.0.1:8008"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Keycloak public realm discovery",
+      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused auth regression slice",
+      "result": "pass",
+      "observed": "The targeted pytest slice covering the Keycloak playbook, Open WebUI playbook, Open WebUI runtime, Docker runtime, and PostgreSQL runtime returned `67 passed in 28.33s`; `make syntax-check-open-webui` and `make syntax-check-keycloak` also passed before the live replay."
+    },
+    {
+      "check": "Production Open WebUI converge replay",
+      "result": "pass",
+      "observed": "`make converge-open-webui` completed successfully on 2026-04-03 after the topology and OIDC discovery fixes, with final recap `docker-runtime-lv3 ok=273 changed=3 failed=0` and `proxmox_florin ok=40 changed=4 failed=0`."
+    },
+    {
+      "check": "Public Keycloak discovery and Open WebUI OIDC redirect",
+      "result": "pass",
+      "observed": "A direct fetch of `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` returned `HTTP 200` with issuer `https://sso.lv3.org/realms/lv3`, and `http://100.64.0.1:8008/oauth/oidc/login` returned `HTTP 302` to the Keycloak `open-webui` authorization endpoint."
+    },
+    {
+      "check": "Break-glass bootstrap admin still works",
+      "result": "pass",
+      "observed": "The mirrored bootstrap admin from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt` authenticated successfully at `http://100.64.0.1:8008/api/v1/auths/signin` as `ops@lv3.org` with role `admin`, and the same credentials also succeeded directly against the runtime on `http://127.0.0.1:8088/api/v1/auths/signin`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0341-open-webui-keycloak-oidc-with-break-glass-fallback.md",
+    "docs/runbooks/configure-keycloak.md",
+    "docs/runbooks/configure-open-webui.md",
+    "docs/workstreams/ws-0334-auth-convergence.md",
+    "playbooks/keycloak.yml",
+    "playbooks/open-webui.yml",
+    "inventory/group_vars/platform.yml",
+    "inventory/host_vars/proxmox_florin.yml",
+    "tests/test_keycloak_playbook.py",
+    "tests/test_keycloak_runtime_role.py",
+    "tests/test_open_webui_playbook.py",
+    "tests/test_open_webui_runtime_role.py",
+    "receipts/live-applies/2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply.json"
+  ],
+  "notes": [
+    "Open WebUI now uses the internal Keycloak discovery URL derived from `platform_service_topology.keycloak.urls.internal` because the container could not reliably hairpin through the public `sso.lv3.org` route even after the edge `502` was repaired.",
+    "The downstream Keycloak client reconcile path depends on the controller-local bootstrap admin mirror at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt`; that mirror was resynced from `/etc/lv3/keycloak/bootstrap-admin-password` during the correction loop before the final successful replay."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-03-adr-0341-open-webui-keycloak-auth-correction-loop",
+    "surface": "Keycloak client reconciliation, shared SSO edge health, and Open WebUI runtime OIDC discovery",
+    "repair_action": "Aligned the top-level Keycloak playbook and topology to the actual live host `docker-runtime-lv3`, repaired the public Keycloak edge publication with a narrow `nginx-lv3` replay when `sso.lv3.org` returned `HTTP 502`, resynced the controller-local Keycloak bootstrap admin password mirror from the runtime after recovery, and changed Open WebUI's OIDC provider URL to the internal Keycloak discovery endpoint reachable from inside the container.",
+    "verification": "The final replay completed without failures, `sso.lv3.org` discovery returned `HTTP 200`, `http://100.64.0.1:8008/oauth/oidc/login` now redirects into Keycloak, and the break-glass login still returns the expected `ops@lv3.org` admin identity.",
+    "diagnosis": "transient_failure"
+  }
+}

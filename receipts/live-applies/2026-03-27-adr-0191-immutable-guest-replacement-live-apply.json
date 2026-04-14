@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0191-immutable-guest-replacement-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "b323baa14615cb9bf50af3dad590edb4f5c919fb",
+  "repo_version_context": "0.177.12",
+  "workflow_id": "converge-monitoring",
+  "adr": "0191",
+  "summary": "Added the repo-managed immutable guest replacement catalog and live-apply guard for governed services, proved the Grafana production preflight fails closed without an override, and completed a bounded monitoring replay with the documented ADR 0191 in-place exception while preserving end-to-end service health.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "grafana.lv3.org",
+      "address": "https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0191 repository validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_immutable_guest_replacement.py tests/test_service_redundancy.py tests/test_live_apply_receipts.py` returned `16 passed`, `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --validate` and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` both passed, and `python3 -m py_compile scripts/immutable_guest_replacement.py scripts/validate_repository_data_models.py` succeeded."
+    },
+    {
+      "check": "Immutable replacement planner and failed-closed preflight",
+      "result": "pass",
+      "observed": "`make immutable-guest-replacement-plan service=grafana` resolved `grafana -> monitoring-lv3`, and `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grafana` exited `2` with `Immutable guest replacement is required before in-place live apply` until the documented override was supplied."
+    },
+    {
+      "check": "Bounded production monitoring replay",
+      "result": "pass",
+      "observed": "The official replay `make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'` completed cleanly from the isolated worktree with `monitoring-lv3 : ok=176 changed=0 unreachable=0 failed=0 skipped=34`, and the preflight logged that the governed service remained under the immutable replacement policy while the narrow override was acknowledged for this run."
+    },
+    {
+      "check": "Published Grafana route remains healthy",
+      "result": "pass",
+      "observed": "`curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` to `/login?redirectTo=%2Fd%2Flv3-platform-overview%2Flv3-platform-overview` with the expected shared edge security headers."
+    },
+    {
+      "check": "Monitoring guest services and local health endpoints",
+      "result": "pass",
+      "observed": "On `monitoring-lv3`, `grafana-server.service`, `lv3-prometheus.service`, `prometheus-alertmanager.service`, `prometheus-blackbox-exporter.service`, `tempo.service`, and `otelcol-contrib.service` all remained `active`, while `curl -fsS http://127.0.0.1:3000/api/health`, `curl -fsS http://127.0.0.1:9093/-/healthy`, `curl -fsS http://127.0.0.1:9090/-/ready`, `curl -fsS http://127.0.0.1:9115/-/healthy`, and `curl -fsS http://127.0.0.1:3200/ready` all returned healthy responses."
+    }
+  ],
+  "evidence_refs": [
+    "config/immutable-guest-replacement-catalog.json",
+    "docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md",
+    "docs/runbooks/immutable-guest-replacement.md",
+    "docs/schema/immutable-guest-replacement-catalog.schema.json",
+    "docs/workstreams/ws-0191-live-apply.md",
+    "scripts/immutable_guest_replacement.py",
+    "tests/test_immutable_guest_replacement.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The production replay was performed from a separate latest-main worktree on `codex/ws-0191-live-apply` so parallel agents could continue safely without sharing controller-local state.",
+    "The successful live apply intentionally used the documented ADR 0191 narrow exception for an in-place monitoring replay; this workstream does not yet implement a full guest replacement controller.",
+    "Protected integration files remain intentionally unchanged on this branch: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level README integrated status summary."
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-14T10:28:37Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0370-service-lifecycle-task-includes-mainline-live-apply",
+  "adr": "0370",
+  "workstream": "ws-0370-live-apply",
+  "source_branch": "codex/ws-0370-exact-main",
+  "source_commit": "e6d74fd8419684f68eeb090b8c39847748491c82",
+  "repo_version_context": "0.178.140",
+  "platform_version_context": "0.178.138",
+  "integrated_repo_version": "0.178.141",
+  "integrated_platform_version": "0.178.141",
+  "summary": "Replay ADR 0370 from the latest realistic 0.178.140 origin/main base, finish the remaining shared lifecycle helper adoption and fresh-worktree local-overlay repairs, rerun LiveKit from the merged main candidate on runtime-comms, and carry the verified result into integrated repo and platform version 0.178.141.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-comms"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "LiveKit public room lifecycle"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ws-0370 regression slice on the exact-main integration tree",
+      "result": "pass",
+      "observed": "`pytest -q tests/test_openbao_compose_env_helper.py tests/test_compose_runtime_secret_injection.py tests/test_livekit_runtime_role.py` passed with `20 passed in 0.22s`; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-pytest-r1-0.178.141.txt`."
+    },
+    {
+      "check": "LiveKit syntax validation and fresh-worktree generated platform vars",
+      "result": "pass",
+      "observed": "`make syntax-check-livekit` passed, and `make generate-platform-vars` regenerated `inventory/group_vars/platform.yml` with the real `.local` identity overlay applied; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-syntax-livekit-r1-0.178.141.txt` and `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-generate-platform-vars-r2-0.178.141.txt`."
+    },
+    {
+      "check": "Exact-main LiveKit replay and public room lifecycle verification",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=livekit env=production` completed cleanly from the merged main candidate, including controller-side public room lifecycle verification; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-livekit-live-apply-r2-0.178.141.txt`."
+    },
+    {
+      "check": "Direct repository gate bundle on the integrated candidate",
+      "result": "pass",
+      "observed": "The direct repo gates passed from the integrated candidate; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-repo-gates-r1-0.178.141.txt`."
+    },
+    {
+      "check": "Live-apply receipt validation and whitespace diff check",
+      "result": "pass",
+      "observed": "`python3 scripts/live_apply_receipts.py --validate` and `git diff --check` passed; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-live-apply-receipts-r1-0.178.141.txt` and `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-git-diff-check-r1-0.178.141.txt`."
+    },
+    {
+      "check": "Build-server reachability and remote validate path",
+      "result": "pass",
+      "observed": "`./scripts/remote_exec.sh check-build-server` and `make remote-validate` passed from the integrated candidate; evidence: `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-check-build-server-r1-0.178.141.txt` and `receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-remote-validate-r1-0.178.141.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0370-service-lifecycle-task-includes.md",
+    "docs/workstreams/ws-0370-live-apply.md",
+    "workstreams/archive/2026/ws-0370-live-apply.yaml",
+    "collections/ansible_collections/lv3/platform/playbooks/livekit.yml",
+    "playbooks/livekit.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml",
+    "collections/ansible_collections/lv3/platform/roles/livekit_runtime/tasks/main.yml",
+    "inventory/group_vars/all/platform_services.yml",
+    "inventory/host_vars/proxmox-host.yml",
+    "inventory/group_vars/platform.yml",
+    "tests/test_openbao_compose_env_helper.py",
+    "tests/test_compose_runtime_secret_injection.py",
+    "tests/test_livekit_runtime_role.py",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-pytest-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-syntax-livekit-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-generate-platform-vars-r2-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-livekit-live-apply-r2-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-repo-gates-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-live-apply-receipts-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-git-diff-check-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-check-build-server-r1-0.178.141.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0370-mainline-final-remote-validate-r1-0.178.141.txt"
+  ],
+  "notes": [
+    "The exact-main replay started from origin/main@3cb78f677e3ed6b0f3343c86085c405fdecac8d9, the latest realistic reachable mainline revision with repo version 0.178.140 and platform version 0.178.138 at apply time.",
+    "Fresh-worktree generated surfaces initially replayed committed example.com placeholders until the platform vars generator re-applied the ignored .local identity overlay. That repair was required for truthful LiveKit, TLS, and edge-publication replay from a separate worktree.",
+    "The integrated closeout updates VERSION, RELEASE.md, docs/release-notes/0.178.141.md, README.md, versions/stack.yaml, the archived ws-0370 workstream metadata, and this receipt so repo version 0.178.141 and platform version 0.178.141 describe the same verified state."
+  ]
+}

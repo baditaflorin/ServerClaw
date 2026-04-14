@@ -1,0 +1,36 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0336-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, atlas-lint, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: docs/adr/0336-public-entrypoint-leakage-validation.md, docs/diagrams/agent-coordination-map.excalidraw, docs/workstreams/ws-0336-live-apply.md, receipts/live-applies/evidence/2026-04-04-ws-0336-data-models-r1.txt, receipts/live-applies/evidence/2026-04-04-ws-0336-generate-diagrams-r1.txt, receipts/live-applies/evidence/2026-04-04-ws-0336-git-diff-check-r1.txt, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 4.99
+alert-rule-validation passed 3.90
+ansible-lint          passed 309.04
+ansible-syntax        passed 209.64
+artifact-secret-scan  passed 8.36
+atlas-lint            passed 5.70
+dependency-direction  passed 4.62
+dependency-graph      passed 5.97
+documentation-index   passed 3.17
+generated-docs        passed 15.36
+generated-portals     passed 43.84
+iac-policy-scan       passed 59.16
+integration-tests     passed 2.90
+packer-validate       passed 8.31
+policy-validation     passed 2.21
+schema-validation     passed 22.07
+security-scan         passed 59.36
+semgrep-sast          passed 83.00
+service-completeness  passed 1.53
+tofu-validate         passed 2.21
+type-check            passed 10.77
+workstream-surfaces   passed 3.73
+yaml-lint             passed 1.62

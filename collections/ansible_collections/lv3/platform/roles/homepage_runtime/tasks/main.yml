@@ -1,4 +1,30 @@
 ---
+# Purpose: Converge the Homepage dashboard runtime and generate its catalog-backed configuration from repo truth.
+# Use case: Run during Homepage deploys, topology updates, and recovery when the dashboard links and widgets must match canonical catalogs.
+#
+# Inputs (required):
+#   - Runtime paths, bind settings, image pin, and public or private URLs for the Homepage deployment.
+#   - Local generator script inputs used to render Homepage config from the repo-managed catalogs.
+#
+# Inputs (optional):
+#   - homepage_allowed_hosts (list, optional): Hostnames allowed by the Homepage runtime for inbound requests.
+#
+# Outputs:
+#   - A rendered Homepage compose deployment plus generated dashboard configuration derived from canonical service catalogs.
+#
+# Idempotency: Fully idempotent
+#              The generated config and compose runtime are rendered deterministically from repo-managed inputs.
+#
+# Dependencies:
+#   - ADR 0165: Requires role metadata for governed automation entrypoints.
+#   - ADR 0373: Conventional service defaults are derived from the service registry before task execution.
+#   - Requires: Canonical catalog generation and the local Homepage config generator script.
+#
+# Related ADRs: 0165, 0324, 0373
+# Related Runbooks: docs/runbooks/configure-homepage.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
 - name: Derive Homepage conventional defaults from the service registry
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -72,6 +98,7 @@
     - services.yaml
     - settings.yaml
     - widgets.yaml
+  register: homepage_config_copy
 
 - name: Remove the temporary local Homepage config directory
   ansible.builtin.file:
@@ -88,40 +115,19 @@
     owner: root
     group: root
     mode: "0644"
+  register: homepage_compose_template
 
-- name: Pull the Homepage image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ homepage_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ homepage_site_dir }}"
-  register: homepage_pull
-  changed_when: >-
-    'Pulling' in homepage_pull.stdout
-    or 'Downloaded newer image' in homepage_pull.stdout
-    or 'Pull complete' in homepage_pull.stdout
-
-- name: Start the Homepage stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ homepage_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ homepage_site_dir }}"
-  register: homepage_up
-  changed_when: >-
-    'Creating' in homepage_up.stdout
-    or 'Recreating' in homepage_up.stdout
-    or 'Starting' in homepage_up.stdout
+- name: Converge the Homepage stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ homepage_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ homepage_site_dir }}"
+    common_docker_compose_converge_service_name: homepage
+    common_docker_compose_converge_template_results:
+      - "{{ homepage_config_copy }}"
+      - "{{ homepage_compose_template }}"
 
 - name: Wait for Homepage to listen locally
   ansible.builtin.wait_for:

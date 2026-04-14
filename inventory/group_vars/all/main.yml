@@ -211,6 +211,7 @@ openbao_postgres_rotator_password_local_file: "{{ repo_shared_local_root }}/open
 openbao_controller_approle_local_file: "{{ repo_shared_local_root }}/openbao/controller-automation-approle.json"
 openbao_atlas_approle_local_file: "{{ repo_shared_local_root }}/openbao/atlas-approle.json"
 openbao_mail_platform_approle_local_file: "{{ repo_shared_local_root }}/openbao/mail-platform-approle.json"
+typesense_local_artifact_dir: "{{ repo_shared_local_root }}/typesense"
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 compose_runtime_secret_root: /run/lv3-secrets
 openbao_site_dir: /opt/openbao

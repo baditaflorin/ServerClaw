@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0279-grist-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T15:13:44Z",
+  "recorded_by": "codex",
+  "source_commit": "eab6bac1ab76953ab0cef8da1c33f477befb73b4",
+  "repo_version_context": "0.177.105",
+  "platform_version_context": "0.130.70",
+  "workflow_id": "adr-0279-grist-mainline-live-apply",
+  "adr": "0279",
+  "summary": "Verified ADR 0279 from the latest-main integration worktree on top of the synchronized 0.177.104 / 0.130.69 baseline. The exact-main replay exposed and fixed the Docker bridge-chain helper regression, preserved the broader Keycloak and mail-platform recovery hardening, reran the Grist service live apply successfully in r5, re-expanded the shared edge certificate to include grist.lv3.org, and refreshed the integrated platform baseline to 0.130.70 while preserving the earlier first-live Grist proof on 0.130.60.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "grist-status",
+      "address": "https://grist.lv3.org/status"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "grist-docs",
+      "address": "https://grist.lv3.org/o/docs/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused latest-main regression slice",
+      "result": "pass",
+      "observed": "The synchronized latest-main compatibility slice returned `44 passed` across `tests/test_common_docker_bridge_chains_helper.py`, `tests/test_grist_runtime_role.py`, `tests/test_keycloak_runtime_role.py`, `tests/test_mail_platform_runtime_role.py`, and `tests/test_docker_runtime_role.py`."
+    },
+    {
+      "check": "Syntax and live-apply guardrails",
+      "result": "pass",
+      "observed": "`ansible-playbook -i inventory/hosts.yml playbooks/services/grist.yml --syntax-check`, `ansible-playbook -i inventory/hosts.yml playbooks/mail-platform.yml --syntax-check`, and `ansible-playbook -i inventory/hosts.yml playbooks/keycloak.yml --syntax-check` all passed from the integration worktree. The governed replay also passed the live-apply contract, standby-capacity check, and immutable-guest-replacement gate once rerun with the documented `ALLOW_IN_PLACE_MUTATION=true` exception for this stateful edge service."
+    },
+    {
+      "check": "Exact-main replay chronology",
+      "result": "pass",
+      "observed": "The exact-main chronology is preserved in `receipts/live-applies/evidence/2026-03-30-adr-0279-grist-mainline-live-apply-0.177.105.txt`, `...-r2.txt`, `...-r3.txt`, `...-r4.txt`, and the successful `...-r5.txt`. Those runs record the initial worktree-relative SSH key mistake, the generated-portal bootstrap gap, the Docker bridge-chain regression on the latest baseline, the immutable-guest-replacement reminder, the transient Let's Encrypt CAA recheck failure, and the final successful retry."
+    },
+    {
+      "check": "Authoritative exact-main replay from committed source",
+      "result": "pass",
+      "observed": "The final governed replay with `ALLOW_IN_PLACE_MUTATION=true` succeeded from committed source `eab6bac1ab76953ab0cef8da1c33f477befb73b4` in `receipts/live-applies/evidence/2026-03-30-adr-0279-grist-mainline-live-apply-0.177.105-r5.txt` with play recap `docker-runtime-lv3 : ok=264 changed=3 failed=0`, `nginx-lv3 : ok=40 changed=5 failed=0`, and `localhost : ok=24 changed=0 failed=0`."
+    },
+    {
+      "check": "Current public probes and TLS",
+      "result": "pass",
+      "observed": "Fresh public probes in `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-public-probes-r2.txt` show `https://grist.lv3.org/status` returning `Grist server(home,docs,static) is alive.`, `https://grist.lv3.org/o/docs/` returning `HTTP/2 302` into the Keycloak auth flow, `https://docs.lv3.org/` and `https://changelog.lv3.org/` continuing to redirect into their oauth2-proxy sign-in flow, and the active Let's Encrypt certificate SAN set containing `grist.lv3.org`, `docs.lv3.org`, `changelog.lv3.org`, and `ops.lv3.org`."
+    },
+    {
+      "check": "Current host and runtime state",
+      "result": "pass",
+      "observed": "Fresh host and guest snapshots in `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-host-state-r2.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-runtime-state-r2.txt` reconfirm `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, `pve-manager/9.1.6`, the guest-local `http://127.0.0.1:8484/status` endpoint answering the canonical alive string, and the live env split where `/opt/grist/grist.env` carries only static OIDC settings while `/run/lv3-secrets/grist/runtime.env` carries the session secret and OIDC client secret."
+    },
+    {
+      "check": "Service redundancy rehearsal gate remains unproven",
+      "result": "partial",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service grist` still reports `grist: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime-lv3`. The service is live and reachable, but no R1 rehearsal proof has been recorded yet."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md",
+    "docs/workstreams/ws-0279-live-apply.md",
+    "docs/workstreams/ws-0279-main-merge.md",
+    "docs/runbooks/configure-grist.md",
+    "workstreams.yaml",
+    "playbooks/services/grist.yml",
+    "playbooks/grist.yml",
+    "collections/ansible_collections/lv3/platform/roles/grist_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/grist_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/grist_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/grist_runtime/templates/grist.env.j2",
+    "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml",
+    "receipts/live-applies/evidence/2026-03-30-adr-0279-grist-mainline-live-apply-0.177.105.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0279-grist-mainline-live-apply-0.177.105-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0279-grist-mainline-live-apply-0.177.105-r3.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0279-grist-mainline-live-apply-0.177.105-r4.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0279-grist-mainline-live-apply-0.177.105-r5.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-host-state-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-runtime-state-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-public-probes-r2.txt",
+    "receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json",
+    "receipts/live-applies/2026-03-30-adr-0279-grist-mainline-live-apply.json"
+  ],
+  "notes": [
+    "Grist first became true on production during the earlier workstream replay on platform version `0.130.60`; this canonical mainline receipt records the later synchronized latest-main verification on top of the `0.177.104 / 0.130.69` baseline and the resulting integrated platform baseline advance to `0.130.70`.",
+    "The earlier branch-local receipt `receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json` remains part of the audit trail, but `2026-03-30-adr-0279-grist-mainline-live-apply` is now the canonical receipt for the `grist` capability on main.",
+    "The current public docs route returns an HTTP redirect into the Keycloak auth flow, and the exact-main runtime proof confirms the split static-plus-secret Grist env model on `docker-runtime-lv3`."
+  ]
+}

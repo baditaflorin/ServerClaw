@@ -1,0 +1,5 @@
+Current version: 0.177.120
+Next version: 0.177.121
+Unreleased notes: 1
+Platform impact: no live platform version bump; this release integrates ADR 0303 onto main, keeps platform version 0.130.77, and records the repaired PostgreSQL unknown-role alert relay path through Alertmanager and JetStream
+Release notes index: docs/release-notes/README.md

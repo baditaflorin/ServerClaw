@@ -1,0 +1,48 @@
+..............F..............................................            [100%]
+=================================== FAILURES ===================================
+_ test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rotation _
+
+    def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rotation() -> None:
+        tasks = yaml.safe_load(TASKS_PATH.read_text())
+        rotate_tasks = yaml.safe_load(ROTATE_TASKS_PATH.read_text())
+        nat_check = next(
+            task
+            for task in tasks
+            if task.get("name") == "Check whether the Docker nat chain exists before recreating mail-platform published ports"
+        )
+        nat_restore = next(
+            task
+            for task in tasks
+            if task.get("name") == "Restore Docker networking when bridge chains are missing before mail-platform startup"
+        )
+        force_recreate_down = next(
+            task
+            for task in tasks
+            if task.get("name") == "Reset the mail platform stack before a force recreate"
+        )
+        force_recreate_network_cleanup = next(
+            task
+            for task in tasks
+            if task.get("name") == "Remove stale mail platform compose networks before recovery"
+        )
+        force_recreate = next(
+            task
+            for task in tasks
+            if task.get("name") == "Force-recreate the mail platform stack after Docker networking recovery"
+        )
+        rotate_nat_check = next(
+            task
+            for task in rotate_tasks
+            if task.get("name") == "Check whether the Docker nat chain exists before mail-platform rotation recreates published ports"
+        )
+>       rotate_nat_restore = next(
+            task
+            for task in rotate_tasks
+            if task.get("name") == "Restore Docker networking when the nat chain is missing before mail-platform rotation"
+        )
+E       StopIteration
+
+tests/test_mail_platform_runtime_role.py:252: StopIteration
+=========================== short test summary info ============================
+FAILED tests/test_mail_platform_runtime_role.py::test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rotation
+1 failed, 60 passed in 2.41s

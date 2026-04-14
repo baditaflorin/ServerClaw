@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "typesense_runtime",
+  "image_ref": "docker.io/typesense/typesense:29.0@sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 0,
+    "high": 1
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/typesense/typesense:29.0@sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088 (ubuntu 22.04)",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "critical": 0,
+      "high": 1
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-typesense-runtime.trivy.json"
+}

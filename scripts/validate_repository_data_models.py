@@ -48,7 +48,7 @@ from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_recei
 from platform.circuit import load_circuit_policies
 from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
-from platform.repo import validate_repo_relative_path, TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, validate_repo_relative_path
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from gate_bypass_waivers import load_catalog as load_gate_bypass_waiver_catalog
 from gate_bypass_waivers import summarize_receipts as summarize_gate_bypass_waivers

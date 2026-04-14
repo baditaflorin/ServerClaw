@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0042-step-ca-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "647bd809b8695738b8c43dfc2a0b6fdd6241de22",
+  "repo_version_context": "0.46.0",
+  "workflow_id": "converge-step-ca",
+  "adr": "0042",
+  "summary": "Applied the private step-ca runtime live on docker-runtime-lv3, published it through the Proxmox host Tailscale path, and verified SSH and internal X.509 issuance end to end.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime-lv3",
+      "vmid": "120",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "ca_endpoint",
+      "name": "step-ca",
+      "address": "100.118.189.95:9443"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Step-ca converge from main",
+      "result": "pass",
+      "observed": "make converge-step-ca completed successfully from the main integration worktree after the compose path and certificate-chain verification fixes landed."
+    },
+    {
+      "check": "Private CA health over Tailscale",
+      "result": "pass",
+      "observed": "curl with the mirrored root certificate returned {\"status\":\"ok\"} from https://100.118.189.95:9443/health."
+    },
+    {
+      "check": "Human SSH certificate login",
+      "result": "pass",
+      "observed": "A locally issued ops SSH certificate successfully logged into Debian-trixie-latest-amd64-base over Tailscale and docker-runtime-lv3 through the Proxmox jump path."
+    },
+    {
+      "check": "Proxied X.509 issuance",
+      "result": "pass",
+      "observed": "A locally issued services certificate for local-step-ca-test.lv3.internal was minted through the proxied controller URL and inspected as issued by LV3 Internal CA Intermediate CA."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0042-step-ca-for-ssh-and-internal-tls.md",
+    "docs/runbooks/configure-step-ca.md",
+    "docs/workstreams/adr-0042-step-ca.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The live rollout required aligning the compose mount layout with the absolute paths written by step ca init so the container could reuse the initialized host-side PKI directory.",
+    "The converge verification now validates service certificates against the intermediate chain because step-ca issues through an intermediate CA rather than directly from the root."
+  ]
+}

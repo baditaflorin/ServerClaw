@@ -1,0 +1,4 @@
+$ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-04-01T13:36:53Z
+$ curl -fsS --max-time 30 https://errors.lv3.org/_allauth/browser/v1/config
+{"status": 200, "data": {"account": {"login_methods": ["email"], "is_open_for_signup": false, "email_verification_by_code_enabled": false, "login_by_code_enabled": false, "password_reset_by_code_enabled": false, "authentication_method": "email"}, "socialaccount": {"providers": [{"id": "keycloak", "name": "LV3 Keycloak", "flows": ["provider_redirect", "provider_token"], "client_id": "glitchtip", "openid_configuration_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"}]}, "mfa": {"supported_types": ["totp", "webauthn", "recovery_codes"], "passkey_login_enabled": true}}}

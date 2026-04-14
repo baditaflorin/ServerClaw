@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0285-paperless-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T18:43:13Z",
+  "recorded_by": "codex",
+  "source_commit": "c6407a7c40399f5a36392c61037054179b23352b",
+  "repo_version_context": "0.177.121",
+  "platform_version_context": "0.130.78",
+  "workflow_id": "adr-0285-paperless-live-apply",
+  "adr": "0285",
+  "summary": "Integrated ADR 0285 onto main as repository version 0.177.121 after rebasing onto the latest realistic origin/main baseline at commit 2589093d44df851883360a9de929f2a610b4d4cb, which carried repository version 0.177.120 and platform version 0.130.77. The exact-candidate replay from committed source c6407a7c40399f5a36392c61037054179b23352b then completed cleanly: OpenBao recovery succeeded with the audit-log hardening in place, Keycloak and API gateway convergence stayed healthy, Paperless local and public publication checks passed including taxonomy reconciliation and smoke upload, and the post-apply restic backup recorded snapshot 0ea3c5176e2e123d8e56cc9e6b398e8a49d190d8e25f0c2587838850a7b3692c for config/ plus snapshot 64fa6fc807fb63c6c057c82e67a4abe7ca803b2662ab6548f75a3bb2983340f5 for versions/stack.yaml. Final targeted pytest, service completeness, repo validation, and make pre-push-gate all passed on the 0.177.121 candidate, while the remote pre-push lane truthfully preserved transient 502 Bad Gateway pulls of registry.lv3.org/check-runner/infra:2026.03.23 before the repo's unresolved-only local fallback reran packer-validate and tofu-validate successfully.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Paperless public endpoint",
+      "address": "https://paperless.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest realistic mainline baseline and release cut",
+      "result": "pass",
+      "observed": "origin/main commit 2589093d44df851883360a9de929f2a610b4d4cb already carried repository version 0.177.120 and platform version 0.130.77. The protected mainline release write then produced repository version 0.177.121 in receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-release-write-r1-0.177.121.txt."
+    },
+    {
+      "check": "Targeted merged-tree regression suite",
+      "result": "pass",
+      "observed": "uv run --with pytest python -m pytest tests/test_openbao_compose_env_helper.py tests/test_openbao_runtime_role.py tests/test_restic_config_backup.py tests/test_restic_config_backup_role.py tests/test_docker_runtime_role.py tests/test_paperless_runtime_role.py tests/test_paperless_playbook.py tests/test_paperless_sync.py tests/test_paperless_metadata.py passed with 72 tests in 0.95s in receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-targeted-pytest-r3-0.177.121.txt."
+    },
+    {
+      "check": "Service completeness and repo validation bundle",
+      "result": "pass",
+      "observed": "python3 scripts/validate_service_completeness.py --service paperless passed in receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-validate-service-completeness-r1-0.177.121.txt, and ./scripts/validate_repo.sh agent-standards data-models health-probes workstream-surfaces passed in receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-validate-repo-r2-0.177.121.txt."
+    },
+    {
+      "check": "Exact-main live apply and public verification",
+      "result": "pass",
+      "observed": "make live-apply-service service=paperless env=production completed with PLAY RECAP success for docker-runtime-lv3, localhost, nginx-lv3, and postgres-lv3 in receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-live-apply-r1-0.177.121.txt. The same run verified Paperless local root and authenticated documents access, taxonomy reconciliation, shared NGINX publication, public token-authenticated API access, and the public smoke upload path."
+    },
+    {
+      "check": "Post-apply restic backup snapshots",
+      "result": "pass",
+      "observed": "The live-apply wrapper triggered restic config backup immediately after the replay, recording snapshot 0ea3c5176e2e123d8e56cc9e6b398e8a49d190d8e25f0c2587838850a7b3692c for /srv/proxmox_florin_server/config and snapshot 64fa6fc807fb63c6c057c82e67a4abe7ca803b2662ab6548f75a3bb2983340f5 for /srv/proxmox_florin_server/versions/stack.yaml."
+    },
+    {
+      "check": "Final pre-push gate and local fallback",
+      "result": "pass",
+      "observed": "make pre-push-gate passed in receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-pre-push-gate-r2-0.177.121.txt. The remote builder truthfully recorded transient 502 Bad Gateway pulls for registry.lv3.org/check-runner/infra:2026.03.23, then run_gate_fallback reran only packer-validate and tofu-validate locally and merged the passing status back into .local/validation-gate/last-run.json."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "docs/adr/.index.yaml",
+    "docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md",
+    "docs/workstreams/ws-0285-live-apply.md",
+    "docs/release-notes/0.177.121.md",
+    "docs/runbooks/configure-paperless.md",
+    "docs/runbooks/restic-config-backups.md",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml",
+    "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/paperless_runtime/tasks/main.yml",
+    "scripts/restic_config_backup.py",
+    "scripts/trigger_restic_live_apply.py",
+    "tests/test_openbao_compose_env_helper.py",
+    "tests/test_openbao_runtime_role.py",
+    "tests/test_paperless_metadata.py",
+    "tests/test_paperless_playbook.py",
+    "tests/test_paperless_runtime_role.py",
+    "tests/test_paperless_sync.py",
+    "tests/test_restic_config_backup.py",
+    "tests/test_restic_config_backup_role.py",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-release-write-r1-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-live-apply-r1-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-targeted-pytest-r3-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-validate-service-completeness-r1-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-validate-repo-r2-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-ansible-lint-r2-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-pre-push-gate-r1-0.177.121.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-final-pre-push-gate-r2-0.177.121.txt"
+  ],
+  "notes": [
+    "ADR 0285 first became true on platform version 0.130.75; this canonical mainline closeout advances the integrated platform truth to 0.130.78 without changing that first-live milestone.",
+    "The first final pre-push attempt correctly failed ansible-lint on task key order for the Keycloak and Paperless force-recreate blocks; the repo now carries the reorder fix and the second pre-push attempt passed cleanly.",
+    "The remote builder still intermittently returned 502 Bad Gateway while pulling registry.lv3.org/check-runner/infra:2026.03.23, but the repo's local fallback reran only the unresolved packer-validate and tofu-validate checks and preserved the final passing gate state."
+  ]
+}

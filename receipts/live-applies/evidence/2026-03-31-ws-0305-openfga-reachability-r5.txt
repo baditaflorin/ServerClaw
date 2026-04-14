@@ -1,0 +1,42 @@
+# ADR 0305 required private-path verification
+UTC 2026-03-31T09:43:25Z
+
+## runtime-openfga-local
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+docker-runtime-lv3
+{"status":"SERVING"}
+status=0
+
+## monitoring-prometheus-local
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.40' (ED25519) to the list of known hosts.
+monitoring-lv3
+Prometheus Server is Ready.
+13:  --web.listen-address=0.0.0.0:9090 \
+LISTEN 0      4096               *:9090             *:*    users:(("prometheus",pid=3767272,fd=6))
+status=0
+
+## host-openfga-runtime
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Debian-trixie-latest-amd64-base
+{"status":"SERVING"}
+status=0
+
+## build-openfga-and-prometheus
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+docker-build-lv3
+{"status":"SERVING"}
+Prometheus Server is Ready.
+status=0
+
+## monitoring-openfga-and-blackbox
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.40' (ED25519) to the list of known hosts.
+monitoring-lv3
+{"status":"SERVING"}
+probe_success 1
+status=0
+
+overall_status=0

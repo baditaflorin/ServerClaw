@@ -1,0 +1,3 @@
+Updated canonical truth:
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-main-integration/versions/stack.yaml
+- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0317-main-integration/README.md

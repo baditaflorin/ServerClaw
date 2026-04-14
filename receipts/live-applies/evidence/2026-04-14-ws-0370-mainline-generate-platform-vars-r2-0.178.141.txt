@@ -1,0 +1,71 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make generate-cross-cutting-artifacts
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/scripts/generate_cross_cutting_artifacts.py --write
+Loading registry from inventory/group_vars/all/platform_services.yml ...
+
+[HAIRPIN]
+  Wrote 11 hairpin entries to inventory/group_vars/platform_hairpin.yml
+
+[DNS]
+  WARN: api.lv3.org (service=api_gateway) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: agents.lv3.org (service=dify) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: data.lv3.org (service=directus) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: logs.lv3.org (service=dozzle) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: draw.lv3.org (service=excalidraw) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: flags.lv3.org (service=flagsmith) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: git.lv3.org (service=gitea) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: errors.lv3.org (service=glitchtip) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: grist.lv3.org (service=grist) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: registry.lv3.org (service=harbor) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: sso.lv3.org (service=keycloak) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: annotate.lv3.org (service=label_studio) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: billing.lv3.org (service=lago) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: langfuse.lv3.org (service=langfuse) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: livekit.lv3.org (service=livekit) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: mail.lv3.org (service=mail_platform) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: matrix.lv3.org (service=matrix_synapse) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: minio.lv3.org (service=minio) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: minio-console.lv3.org (service=minio) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: s3.lv3.org (service=minio) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: n8n.lv3.org (service=n8n) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: cloud.lv3.org (service=nextcloud) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: ntfy.lv3.org (service=ntfy) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: ops.lv3.org (service=ops_portal) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: repo-intake.lv3.org (service=repo_intake) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: wiki.lv3.org (service=outline) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: paperless.lv3.org (service=paperless) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: tasks.lv3.org (service=plane) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: analytics.lv3.org (service=plausible) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: repowise.lv3.org (service=repowise) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: search.lv3.org (service=searxng) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: files.lv3.org (service=sftpgo) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: bi.lv3.org (service=superset) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: uptime.lv3.org (service=uptime_kuma) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: vault.lv3.org (service=vaultwarden) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: ci.lv3.org (service=woodpecker) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: chat.lv3.org (service=librechat) declared in registry but NOT in config/subdomain-catalog.json — add it before live-apply.
+  WARN: apps.example.com (service_id=coolify_apps) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: browser.example.com (service_id=neko) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: changelog.example.com (service_id=changelog_portal) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: coolify.example.com (service_id=coolify) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: docs.example.com (service_id=docs_portal) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: grafana.example.com (service_id=grafana) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: grafana.staging.example.com (service_id=grafana) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: headscale.example.com (service_id=headscale) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: home.example.com (service_id=homepage) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: nginx.example.com (service_id=nginx_edge) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: scheduler.example.com (service_id=nomad) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  WARN: status.example.com (service_id=status_page) is in subdomain-catalog.json with no registry dns declaration — potential stale catalog entry.
+  Wrote 37 DNS declarations to config/generated/dns-declarations.yaml
+
+[TLS]
+  Wrote 35 TLS cert declarations to inventory/group_vars/platform_tls_certs.yml
+
+[PROXY]
+  Wrote 32 nginx upstreams to config/generated/nginx-upstreams.conf and config/generated/nginx-upstreams.yaml
+
+[SSO]
+  Wrote 16 SSO client declarations to config/generated/sso-clients.yaml
+
+All concerns passed.
+PYTHONPATH=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/scripts/generate_platform_vars.py --write
+Wrote generated platform vars to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/inventory/group_vars/platform.yml

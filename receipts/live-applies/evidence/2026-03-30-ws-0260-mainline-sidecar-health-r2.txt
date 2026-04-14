@@ -1,0 +1,3 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+nextcloud-redis healthy
+nextcloud-openbao-agent healthy

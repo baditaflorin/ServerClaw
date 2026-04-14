@@ -1,0 +1,88 @@
+# adr0303 unknown-role smoke
+role=adr0303_smoke_role
+started_at=2026-03-31T06:26:44Z
+baseline_counter=[]
+baseline_alert=[]
+create_role_start
+DROP ROLE
+CREATE ROLE
+GRANT
+NOTICE:  role "adr0303_smoke_role" does not exist, skipping
+connection_attempt=1 result=adr0303_smoke_role@postgres
+connection_attempt=2 result=adr0303_smoke_role@postgres
+connection_attempt=3 result=adr0303_smoke_role@postgres
+poll_attempt=1
+metric_result=[]
+alert_result=[]
+poll_attempt=2
+metric_result=[]
+alert_result=[]
+poll_attempt=3
+metric_result=[]
+alert_result=[]
+poll_attempt=4
+metric_result=[]
+alert_result=[]
+poll_attempt=5
+metric_result=[]
+alert_result=[]
+poll_attempt=6
+metric_result=[]
+alert_result=[]
+poll_attempt=7
+metric_result=[]
+alert_result=[]
+poll_attempt=8
+metric_result=[]
+alert_result=[]
+poll_attempt=9
+metric_result=[]
+alert_result=[]
+poll_attempt=10
+metric_result=[]
+alert_result=[]
+poll_attempt=11
+metric_result=[]
+alert_result=[]
+poll_attempt=12
+metric_result=[]
+alert_result=[]
+poll_attempt=13
+metric_result=[]
+alert_result=[]
+poll_attempt=14
+metric_result=[]
+alert_result=[]
+poll_attempt=15
+metric_result=[]
+alert_result=[]
+poll_attempt=16
+metric_result=[]
+alert_result=[]
+poll_attempt=17
+metric_result=[]
+alert_result=[]
+poll_attempt=18
+metric_result=[]
+alert_result=[]
+poll_attempt=19
+metric_result=[]
+alert_result=[]
+poll_attempt=20
+metric_result=[]
+alert_result=[]
+poll_attempt=21
+metric_result=[]
+alert_result=[]
+poll_attempt=22
+metric_result=[]
+alert_result=[]
+poll_attempt=23
+metric_result=[]
+alert_result=[]
+poll_attempt=24
+metric_result=[]
+alert_result=[]
+cleanup_rc=1
+ERROR:  role "adr0303_smoke_role" cannot be dropped because some objects depend on it
+DETAIL:  privileges for database postgres

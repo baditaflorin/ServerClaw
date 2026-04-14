@@ -1,0 +1,5 @@
+Repository data model validation
+ADR 0230 policy validation
+Architecture fitness validation
+Workstream surface ownership validation
+Workstream surface ownership validation failed: branch 'codex/ws-0294-main-integration' is not registered in workstreams.yaml

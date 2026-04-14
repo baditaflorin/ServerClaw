@@ -1,4 +1,30 @@
 ---
+# Purpose: Converge the SearXNG runtime, companion Valkey cache, and repo-managed search configuration.
+# Use case: Run during SearXNG deploys, updates, and recovery when the search frontend and cache-backed limiter settings must match repo truth.
+#
+# Inputs (required):
+#   - Runtime paths, pinned images, stable URLs, and trusted proxy settings for the SearXNG deployment.
+#   - Default verification query and cache or limiter paths used to render deterministic runtime configuration.
+#
+# Inputs (optional):
+#   - searxng_runtime_pass_ip_ranges (list, optional): Client ranges that may bypass selected limiter logic.
+#
+# Outputs:
+#   - A converged SearXNG plus Valkey compose deployment and rendered search settings derived from repo-managed inputs.
+#
+# Idempotency: Fully idempotent
+#              The role renders deterministic configuration and converges the runtime to declared state.
+#
+# Dependencies:
+#   - ADR 0165: Requires role metadata for governed automation entrypoints.
+#   - ADR 0373: Conventional service defaults are derived from the service registry before task execution.
+#   - Requires: Docker runtime and generated service topology for SearXNG public, controller, and internal URLs.
+#
+# Related ADRs: 0165, 0373
+# Related Runbooks: docs/runbooks/configure-searxng.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
 - name: Derive Searxng conventional defaults from the service registry
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -130,68 +156,21 @@
     mode: "0644"
   register: searxng_runtime_compose_template
 
-- name: Pull the SearXNG images
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ searxng_runtime_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ searxng_runtime_site_dir }}"
-  register: searxng_runtime_pull
-  changed_when: >-
-    'Pulling' in searxng_runtime_pull.stdout
-    or 'Downloaded newer image' in searxng_runtime_pull.stdout
-    or 'Pull complete' in searxng_runtime_pull.stdout
-
-- name: Recreate the SearXNG runtime when config changes
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ searxng_runtime_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
-  args:
-    chdir: "{{ searxng_runtime_site_dir }}"
-  register: searxng_runtime_up_recreate
-  changed_when: >-
-    'Creating' in searxng_runtime_up_recreate.stdout
-    or 'Recreating' in searxng_runtime_up_recreate.stdout
-    or 'Starting' in searxng_runtime_up_recreate.stdout
-  when: >-
-    searxng_runtime_settings_template.changed
-    or searxng_runtime_limiter_template.changed
-    or searxng_runtime_compose_template.changed
-
-- name: Ensure the SearXNG runtime is running
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ searxng_runtime_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ searxng_runtime_site_dir }}"
-  register: searxng_runtime_up
-  changed_when: >-
-    'Creating' in searxng_runtime_up.stdout
-    or 'Recreating' in searxng_runtime_up.stdout
-    or 'Starting' in searxng_runtime_up.stdout
-  when: >-
-    not (
-      searxng_runtime_settings_template.changed
-      or searxng_runtime_limiter_template.changed
-      or searxng_runtime_compose_template.changed
-    )
+- name: Converge the SearXNG runtime
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ searxng_runtime_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ searxng_runtime_site_dir }}"
+    common_docker_compose_converge_service_name: searxng
+    common_docker_compose_converge_template_results:
+      - "{{ searxng_runtime_settings_template }}"
+      - "{{ searxng_runtime_limiter_template }}"
+      - "{{ searxng_runtime_compose_template }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_health_port: "{{ searxng_runtime_port }}"
+    common_docker_compose_converge_health_url: "{{ searxng_runtime_internal_base_url }}"
 
 - name: Wait for SearXNG to listen locally
   ansible.builtin.wait_for:

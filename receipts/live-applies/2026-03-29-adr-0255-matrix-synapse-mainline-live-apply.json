@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0255-matrix-synapse-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T18:59:08Z",
+  "recorded_by": "codex",
+  "source_commit": "169d7e6549e539747d140497acd8a01e9049c330",
+  "repo_version_context": "0.177.85",
+  "platform_version_context": "0.130.58",
+  "workflow_id": "adr-0255-matrix-synapse-mainline-live-apply",
+  "adr": "0255",
+  "summary": "Integrated ADR 0255 on synchronized main release 0.177.85 by replaying the exact-main Matrix converge from release commit cdf1b9a4adaaa35b048f7ecd41e4d6087c07e5cf, correcting the public HTTPS/TLS assurance lane from source commit 169d7e6549e539747d140497acd8a01e9049c330 so blackbox probes connect through the internal edge with matrix.lv3.org as the hostname override, and re-verifying public publication, controller access, runtime health, and monitoring evidence while platform version remained 0.130.58 on top of the already-recorded ADR 0264 mainline baseline.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "matrix-public",
+      "address": "https://matrix.lv3.org/_matrix/client/versions"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "matrix-controller",
+      "address": "http://100.64.0.1:8015/_matrix/client/versions"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest origin/main baseline and protected release context",
+      "result": "pass",
+      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline had advanced to commit `430e364e`, which marked ADR 0264 merged on main; ADR 0255 was rebased onto that head before the final metadata recording, while repository version `0.177.85` and platform version `0.130.58` remained the synchronized mainline context."
+    },
+    {
+      "check": "Focused Matrix regression and repository automation coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_edge_publication_makefile.py tests/test_matrix_synapse_runtime_role.py tests/test_matrix_synapse_postgres_role.py tests/test_matrix_synapse_playbook.py tests/test_generate_platform_vars.py` returned `26 passed in 1.26s`; `make syntax-check-matrix-synapse` passed; and `make pre-push-gate` passed on the rebased ADR 0255 workstream branch before the protected main integration."
+    },
+    {
+      "check": "Exact-main HTTPS/TLS assurance probe-fix coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py` returned `16 passed in 0.34s` after the internal-edge connect-target fix for public blackbox probes."
+    },
+    {
+      "check": "Exact-main Matrix converge replay",
+      "result": "pass",
+      "observed": "`make converge-matrix-synapse` completed successfully from release commit `cdf1b9a4adaaa35b048f7ecd41e4d6087c07e5cf`, with final recap `docker-runtime-lv3 ok=131 changed=5 failed=0`, `localhost ok=18 changed=0 failed=0`, `nginx-lv3 ok=38 changed=3 failed=0`, `postgres-lv3 ok=51 changed=0 failed=0`, and `proxmox_florin ok=31 changed=4 failed=0`."
+    },
+    {
+      "check": "Exact-main monitoring replay after internal-edge assurance correction",
+      "result": "pass",
+      "observed": "`make converge-monitoring` completed successfully from source commit `169d7e6549e539747d140497acd8a01e9049c330`, with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=14 changed=0 failed=0`, `docker-build-lv3 ok=46 changed=0 failed=0`, `docker-runtime-lv3 ok=72 changed=2 failed=0`, `monitoring-lv3 ok=397 changed=2 failed=0`, `nginx-lv3 ok=150 changed=3 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox_florin ok=100 changed=0 failed=0`."
+    },
+    {
+      "check": "Public and controller Matrix endpoint plus login verification",
+      "result": "pass",
+      "observed": "`https://matrix.lv3.org/_matrix/client/versions` returned `status 200` from `server nginx` with `versions_count 20` and `unstable_features 34`; `https://matrix.lv3.org/_matrix/client/v3/login` returned `status 200` in `0.60s` with `user_id @ops:matrix.lv3.org`, `home_server matrix.lv3.org`, and well-known base `https://matrix.lv3.org/`; `http://100.64.0.1:8015/_matrix/client/versions` returned `status 200` with `server Synapse/1.150.0`; the controller login path also returned `status 200` in `9.27s`; and `sudo ss -ltnp` on `proxmox_florin` confirmed the controller listener is bound on `100.64.0.1:8015`."
+    },
+    {
+      "check": "Runtime container health",
+      "result": "pass",
+      "observed": "`sudo docker compose --file /opt/matrix-synapse/docker-compose.yml ps --format json` on `docker-runtime-lv3` showed `matrixdotorg/synapse:v1.150.0` in `running` state with status `Up 3 hours (healthy)` and the `openbao-agent` sidecar healthy."
+    },
+    {
+      "check": "Monitoring rule, target, and probe-success verification",
+      "result": "pass",
+      "observed": "Prometheus on `monitoring-lv3` reported `probe_success{job=\"https-tls-blackbox\",assurance_id=\"matrix-synapse-public\"} = 1`, `up{job=\"matrix_synapse-readiness\"} = 1`, and `up{job=\"matrix_synapse-liveness\"} = 1`. The live target file at `/etc/prometheus/file_sd/https-tls-targets.yml` now points Matrix at `https://10.10.10.10:443/_matrix/client/versions` with `probe_hostname: matrix.lv3.org`, and `/etc/prometheus/rules/https-tls-alerts.yml` still carries the `matrix-synapse-public` alert definitions."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md",
+    "docs/runbooks/configure-matrix-synapse.md",
+    "docs/workstreams/ws-0255-live-apply.md",
+    "docs/release-notes/0.177.85.md",
+    "config/health-probe-catalog.json",
+    "config/prometheus/file_sd/https_tls_targets.yml",
+    "config/prometheus/rules/https_tls_alerts.yml",
+    "playbooks/matrix-synapse.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/tasks/verify.yml",
+    "scripts/https_tls_assurance_targets.py",
+    "tests/test_https_tls_assurance_targets.py",
+    "receipts/live-applies/2026-03-29-adr-0255-matrix-synapse-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0255-matrix-synapse-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This canonical receipt supersedes the branch-local evidence in `2026-03-29-adr-0255-matrix-synapse-live-apply` and the earlier exact-main candidate that predated the internal-edge HTTPS assurance correction.",
+    "Public HTTPS/TLS blackbox probes now connect to the shared internal edge `10.10.10.10` with the public hostname override because guest-network hairpin access to `65.108.75.123:443` is not reliable from `monitoring-lv3`.",
+    "Platform version remained `0.130.58` on this merge because the latest `origin/main` baseline already carried ADR 0264's exact-main live-apply truth before ADR 0255 recorded its final synchronized-main receipt."
+  ]
+}

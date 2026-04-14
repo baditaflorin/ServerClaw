@@ -1,0 +1,2 @@
+coolify: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@coolify-lv3
+  rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.

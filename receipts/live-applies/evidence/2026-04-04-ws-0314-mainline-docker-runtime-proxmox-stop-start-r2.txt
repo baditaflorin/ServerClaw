@@ -1,0 +1,277 @@
+[2026-04-04T15:54:11Z] Terminating wedged ops-portal exact-main replay r8 before VM recovery
+[2026-04-04T15:54:13Z] Recovering VM 120 (docker-runtime-lv3) with Proxmox stop/start
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+--- STATUS BEFORE ---
+status: running
+--- STOP ---
+stop_poll:1 status:stopped
+--- START ---
+generating cloud-init ISO
+ssh_wait_poll:1
+ssh: connect to host 10.10.10.20 port 22: Connection timed out
+ssh_wait_poll:2
+ssh: connect to host 10.10.10.20 port 22: Connection refused
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:3
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:4
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:5
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:6
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:7
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:8
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:9
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:10
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:11
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:12
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:13
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:14
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:15
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:16
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:17
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:18
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:19
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:20
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:21
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:22
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:23
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:24
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:25
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:26
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:27
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:28
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:29
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:30
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:31
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:32
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:33
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:34
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:35
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:36
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:37
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:38
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:39
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:40
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:41
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:42
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:43
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:44
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:45
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:46
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:47
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:48
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:49
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:50
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:51
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:52
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:53
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:54
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:55
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:56
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:57
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:58
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:59
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:60
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:61
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:62
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:63
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:64
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:65
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:66
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:67
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:68
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:69
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:70
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:71
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:72
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:73
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:74
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:75
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:76
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:77
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:78
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:79
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:80
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:81
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:82
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:83
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:84
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:85
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:86
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ssh_wait_poll:87
+ops@10.10.10.20: Permission denied (publickey).
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:88
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:89
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+ops@10.10.10.20: Permission denied (publickey).
+ssh_wait_poll:90

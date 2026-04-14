@@ -2,6 +2,40 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+# NOTE: Ansible validates role argument specs before tasks run, so service-wrapper
+# entrypoints also need the conventional defaults declared here.
+# Purpose: Default runtime and controller-bootstrap inputs for the Portainer deployment.
+# Use case: Consumed whenever the Portainer runtime, admin session bootstrap, or verification path must match repo truth.
+#
+# Inputs (required):
+#   - platform_service_topology (generated): Shared service topology and port assignments for `portainer`.
+#   - repo_shared_local_root (generated): Controller-local artifact storage used for admin bootstrap state.
+#
+# Inputs (optional):
+#   - portainer_verify_ssl (bool, optional): Whether controller-side verification should enforce TLS certificate validation.
+#
+# Outputs:
+#   - Stable defaults for the Portainer compose runtime, controller URL mapping, and local admin bootstrap artifacts.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0165: Requires role metadata for governed automation entrypoints.
+#   - ADR 0373: Conventional service defaults are derived from the service registry and generated topology catalogs.
+#   - Requires: Shared controller-local artifact storage and generated Portainer service topology.
+#
+# Related ADRs: 0165, 0373
+# Related Runbooks: docs/runbooks/configure-portainer.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
+portainer_image: "{{ container_image_catalog.images.portainer_runtime.ref }}"
+portainer_container_name: portainer
+portainer_site_dir: /opt/portainer
+portainer_data_dir: "{{ portainer_site_dir }}/data"
+portainer_compose_file: "{{ portainer_site_dir }}/docker-compose.yml"
+portainer_local_artifact_dir: "{{ repo_shared_local_root }}/portainer"
 portainer_https_port: "{{ platform_service_topology | platform_service_port('portainer', 'internal') }}"
 portainer_host_proxy_port: "{{ platform_service_topology | platform_service_port('portainer', 'controller') }}"
 portainer_endpoint_name: local

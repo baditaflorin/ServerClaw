@@ -1,0 +1,7 @@
+LISTEN 0      4096               *:4222             *:*    users:(("nats-server",pid=89169,fd=7))
+---
+NAMES                                    STATUS                            PORTS
+lv3-nats-jetstream                       Up 23 seconds
+---
+{"status":"ok"}---
+ntfy_health_fail

@@ -1,0 +1,2 @@
+docker-runtime-lv3 | FAILED | rc=2 >>
+SBOM refresh error: [0094] ERROR [31mcould not determine source: an error occurred attempting to resolve '10.10.10.30:5001/library/nginx:1.29.1-alpine@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8': oci-registry: failed to get image descriptor from registry: Get "https://10.10.10.30:5001/v2/": dial tcp 10.10.10.30:5001: i/o timeout; Get "http://10.10.10.30:5001/v2/": dial tcp 10.10.10.30:5001: i/o timeout[0mnon-zero return code

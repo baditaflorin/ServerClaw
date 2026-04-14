@@ -1,0 +1,6 @@
+{"type":"shamir","initialized":true,"sealed":false,"t":2,"n":3,"progress":0,"nonce":"","version":"2.5.1","build_date":"2026-02-23T17:30:29Z","migration":false,"cluster_name":"vault-cluster-0a1cd33d","cluster_id":"64f388be-6224-ad5f-c9f2-bef4c7b7791b","recovery_seal":false,"storage_type":"raft"}
+{"type":"shamir","initialized":true,"sealed":true,"t":2,"n":3,"progress":1,"nonce":"60dc32ae-eca7-af7d-ee02-bc1b465a9c20","version":"2.5.1","build_date":"2026-02-23T17:30:29Z","migration":false,"recovery_seal":false,"storage_type":"raft"}
+{"type":"shamir","initialized":true,"sealed":true,"t":2,"n":3,"progress":1,"nonce":"60dc32ae-eca7-af7d-ee02-bc1b465a9c20","version":"2.5.1","build_date":"2026-02-23T17:30:29Z","migration":false,"recovery_seal":false,"storage_type":"raft"}
+-- unseal key 1 --
+-- unseal key 2 --
+-- final seal status --

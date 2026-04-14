@@ -7,11 +7,12 @@ This runbook covers the repo-managed LiveKit deployment introduced by
 
 The LiveKit workflow converges:
 
-- the LiveKit server runtime on `docker-runtime`
+- the LiveKit server runtime on `runtime-comms`
 - controller-local API credentials mirrored under `.local/livekit/`
 - public signalling at `https://livekit.example.com` through the shared NGINX edge
-- direct public TCP `7881` and UDP `7882` forwarding from the Proxmox host to `docker-runtime`
+- direct public TCP `7881` and UDP `7882` forwarding from the Proxmox host to `runtime-comms`
 - guest-local and public room-lifecycle verification through the repo-managed helper script
+- OpenBao-backed runtime secret delivery from `runtime-control` over the private guest network
 
 ## Preconditions
 
@@ -39,7 +40,7 @@ For the governed production service lane, run:
 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=livekit env=production
 ```
 
-`docker-runtime` is governed by ADR 0191 immutable guest replacement, so
+`runtime-comms` is governed by ADR 0191 immutable guest replacement, so
 the in-place mutation override is a documented narrow exception for this
 initial LiveKit rollout and any later exact-main replay must record that
 exception in the live-apply receipt.
@@ -70,7 +71,7 @@ python3 scripts/livekit_tool.py verify-room-lifecycle \
   --identity livekit-runbook-probe \
   --timeout-seconds 120
 
-ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime \
+ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml runtime-comms \
   -m shell \
   -a "ss -lnt | grep -E ':(7880|7881) ' && ss -lun | grep -E ':(7882) '" \
   --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
@@ -81,10 +82,10 @@ Expected results:
 
 - the public verification command creates, lists, and deletes a synthetic room
   successfully through `https://livekit.example.com`
-- `docker-runtime` shows local listeners on TCP `7880`, TCP `7881`, and UDP
+- `runtime-comms` shows local listeners on TCP `7880`, TCP `7881`, and UDP
   `7882`
-- the Proxmox host forwards public TCP `7881` and UDP `7882` to
-  `10.10.10.20`
+- the Proxmox host forwards public TCP `7881` and UDP `7882` to the
+  `runtime-comms` guest
 
 ## Notes
 

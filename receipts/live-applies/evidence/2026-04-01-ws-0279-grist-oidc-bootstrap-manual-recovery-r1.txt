@@ -1,0 +1,40 @@
+ADR: 0279 Grist As The No Code Operational Spreadsheet Database
+Workstream: ws-0279-live-apply
+Date: 2026-04-01
+Operator: Codex
+
+Purpose
+- Confirm whether the live Grist failure mode was a sticky OIDC bootstrap miss rather than bad static configuration.
+
+Observed failure before recovery
+- Public route: `https://grist.lv3.org/o/docs/`
+- Response: HTTP 400
+- Grist page config contained:
+  - `"supportAnon":false`
+  - `"errMessage":"No login system is configured"`
+- Runtime logs on `docker-runtime-lv3` showed:
+  - `2026-04-01 16:44:03.373` `Error initializing login middleware`
+  - `Failed to initialize OIDC client for issuer https://sso.lv3.org/realms/lv3: expected 200 OK, got: 502 Bad Gateway`
+  - `loginMiddlewareComment: no-provider`
+
+Manual diagnostic action
+- Connected through the governed repo key path:
+  - bootstrap key: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
+  - proxmox hop: `ops@100.64.0.1`
+  - runtime host: `ops@10.10.10.20`
+- Ran:
+  - `cd /opt/grist && sudo docker compose --file /opt/grist/docker-compose.yml up -d --force-recreate --no-deps grist`
+
+Observed recovery result
+- Grist logs after restart showed:
+  - `2026-04-01 16:53:20.228` `OIDCConfig: initialized with issuer https://sso.lv3.org/realms/lv3`
+  - `loginMiddlewareComment: oidc`
+- Public route after restart:
+  - `2026-04-01 16:53:28Z`
+  - HTTP 302
+  - `location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?...client_id=grist...`
+
+Conclusion
+- Static Grist OIDC configuration was correct.
+- The failure mode was a transient Keycloak/edge `502` during Grist bootstrap, which left Grist in the blocked `no-provider` login state until the container was restarted.
+- Repo automation must detect this blocked-login state and self-recreate Grist after the issuer route is healthy.

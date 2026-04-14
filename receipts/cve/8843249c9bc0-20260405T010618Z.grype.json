@@ -1,0 +1,326 @@
+{
+  "schema_version": "1.0.0",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "generated_at": "2026-04-05T01:06:18Z",
+  "scanned_on": "2026-04-05",
+  "image_id": "openbao_runtime",
+  "image_ref": "docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b",
+  "runtime_host": "docker-runtime-lv3",
+  "sbom_receipt": "receipts/sbom/8843249c9bc0.cdx.json",
+  "summary": {
+    "critical": 1,
+    "high": 6,
+    "medium": 5,
+    "low": 3,
+    "unknown": 0,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 15
+  },
+  "matches": [
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox-binsh",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "ssl_client",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2673",
+      "aliases": [
+        "CVE-2026-2673"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Issue summary: An OpenSSL TLS 1.3 server may fail to negotiate the expected\npreferred key exchange group when its key exchange group configuration includes\nthe default by using the 'DEFAULT' keyword.\n\nImpact summary: A less preferred key exchange may be used even when a more\npreferred group is supported by both client and server, if the group\nwas not included among the client's initial predicated keyshares.\nThis will sometimes be the case with the new hybrid post-quantum groups,\nif the client chooses to defer their use until specifically requested by\nthe server.\n\nIf an OpenSSL TLS 1.3 server's configuration uses the 'DEFAULT' keyword to\ninterpolate the built-in default group list into its own configuration, perhaps\nadding or removing specific elements, then an implementation defect causes the\n'DEFAULT' list to lose its 'tuple' structure, and all server-supported groups\nwere treated as a single sufficiently secure 'tuple', with the server not\nsending a Hello Retry Request (HRR) even when a group in a more preferred tuple\nwas mutually supported.\n\nAs a result, the client and server might fail to negotiate a mutually supported\npost-quantum key agreement group, such as 'X25519MLKEM768', if the client's\nconfiguration results in only 'classical' groups (such as 'X25519' being the\nonly ones in the client's initial keyshare prediction).\n\nOpenSSL 3.5 and later support a new syntax for selecting the most preferred TLS\n1.3 key agreement group on TLS servers.  The old syntax had a single 'flat'\nlist of groups, and treated all the supported groups as sufficiently secure.\nIf any of the keyshares predicted by the client were supported by the server\nthe most preferred among these was selected, even if other groups supported by\nthe client, but not included in the list of predicted keyshares would have been\nmore preferred, if included.\n\nThe new syntax partitions the groups into distinct 'tuples' of roughly\nequivalent security.  Within each tuple the most preferred group included among\nthe client's predicted keyshares is chosen, but if the client supports a group\nfrom a more preferred tuple, but did not predict any corresponding keyshares,\nthe server will ask the client to retry the ClientHello (by issuing a Hello\nRetry Request or HRR) with the most preferred mutually supported group.\n\nThe above works as expected when the server's configuration uses the built-in\ndefault group list, or explicitly defines its own list by directly defining the\nvarious desired groups and group 'tuples'.\n\nNo OpenSSL FIPS modules are affected by this issue, the code in question lies\noutside the FIPS boundary.\n\nOpenSSL 3.6 and 3.5 are vulnerable to this issue.\n\nOpenSSL 3.6 users should upgrade to OpenSSL 3.6.2 once it is released.\nOpenSSL 3.5 users should upgrade to OpenSSL 3.5.6 once it is released.\n\nOpenSSL 3.4, 3.3, 3.0, 1.0.2 and 1.1.1 are not affected by this issue.",
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2673",
+      "aliases": [
+        "CVE-2026-2673"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Issue summary: An OpenSSL TLS 1.3 server may fail to negotiate the expected\npreferred key exchange group when its key exchange group configuration includes\nthe default by using the 'DEFAULT' keyword.\n\nImpact summary: A less preferred key exchange may be used even when a more\npreferred group is supported by both client and server, if the group\nwas not included among the client's initial predicated keyshares.\nThis will sometimes be the case with the new hybrid post-quantum groups,\nif the client chooses to defer their use until specifically requested by\nthe server.\n\nIf an OpenSSL TLS 1.3 server's configuration uses the 'DEFAULT' keyword to\ninterpolate the built-in default group list into its own configuration, perhaps\nadding or removing specific elements, then an implementation defect causes the\n'DEFAULT' list to lose its 'tuple' structure, and all server-supported groups\nwere treated as a single sufficiently secure 'tuple', with the server not\nsending a Hello Retry Request (HRR) even when a group in a more preferred tuple\nwas mutually supported.\n\nAs a result, the client and server might fail to negotiate a mutually supported\npost-quantum key agreement group, such as 'X25519MLKEM768', if the client's\nconfiguration results in only 'classical' groups (such as 'X25519' being the\nonly ones in the client's initial keyshare prediction).\n\nOpenSSL 3.5 and later support a new syntax for selecting the most preferred TLS\n1.3 key agreement group on TLS servers.  The old syntax had a single 'flat'\nlist of groups, and treated all the supported groups as sufficiently secure.\nIf any of the keyshares predicted by the client were supported by the server\nthe most preferred among these was selected, even if other groups supported by\nthe client, but not included in the list of predicted keyshares would have been\nmore preferred, if included.\n\nThe new syntax partitions the groups into distinct 'tuples' of roughly\nequivalent security.  Within each tuple the most preferred group included among\nthe client's predicted keyshares is chosen, but if the client supports a group\nfrom a more preferred tuple, but did not predict any corresponding keyshares,\nthe server will ask the client to retry the ClientHello (by issuing a Hello\nRetry Request or HRR) with the most preferred mutually supported group.\n\nThe above works as expected when the server's configuration uses the built-in\ndefault group list, or explicitly defines its own list by directly defining the\nvarious desired groups and group 'tuples'.\n\nNo OpenSSL FIPS modules are affected by this issue, the code in question lies\noutside the FIPS boundary.\n\nOpenSSL 3.6 and 3.5 are vulnerable to this issue.\n\nOpenSSL 3.6 users should upgrade to OpenSSL 3.6.2 once it is released.\nOpenSSL 3.5 users should upgrade to OpenSSL 3.5.6 once it is released.\n\nOpenSSL 3.4, 3.3, 3.0, 1.0.2 and 1.1.1 are not affected by this issue.",
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-25679",
+      "aliases": [
+        "CVE-2026-25679"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.25.7",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-p436-gjf2-799p",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:go",
+      "description": "Docker CLI Plugins: Uncontrolled Search Path Element Leads to Local Privilege Escalation on Windows",
+      "package": {
+        "name": "github.com/docker/cli",
+        "version": "v29.0.3+incompatible",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-p77j-4mvh-x3m3",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:go",
+      "description": "gRPC-Go has an authorization bypass via missing leading slash in :path",
+      "package": {
+        "name": "google.golang.org/grpc",
+        "version": "v1.78.0",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-q9hv-hpm4-hj6x",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:go",
+      "description": "CIRCL has an incorrect calculation in secp384r1 CombinedMult",
+      "package": {
+        "name": "github.com/cloudflare/circl",
+        "version": "v1.6.1",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27142",
+      "aliases": [
+        "CVE-2026-27142"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Actions which insert URLs into the content attribute of HTML meta tags are not escaped. This can allow XSS if the meta tag also has an http-equiv attribute with the value \"refresh\". A new GODEBUG setting has been added, htmlmetacontenturlescape, which can be used to disable escaping URLs in actions in the meta content attribute which follow \"url=\" by setting htmlmetacontenturlescape=0.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.25.7",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-fw7p-63qq-7hpr",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:go",
+      "description": "filippo.io/edwards25519 MultiScalarMult produces invalid results or undefined behavior if receiver is not the identity",
+      "package": {
+        "name": "filippo.io/edwards25519",
+        "version": "v1.1.0",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27171",
+      "aliases": [
+        "CVE-2026-27171"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "zlib",
+        "version": "1.3.1-r2",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27139",
+      "aliases": [
+        "CVE-2026-27139"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "On Unix platforms, when listing the contents of a directory using File.ReadDir or File.Readdir the returned FileInfo could reference a file outside of the Root in which the File was opened. The impact of this escape is limited to reading metadata provided by lstat from arbitrary locations on the filesystem without permitting reading or writing files outside the root.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.25.7",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-78h2-9frx-2jm8",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:go",
+      "description": "Go JOSE Panics in JWE decryption",
+      "package": {
+        "name": "github.com/go-jose/go-jose/v3",
+        "version": "v3.0.4",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-78h2-9frx-2jm8",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:go",
+      "description": "Go JOSE Panics in JWE decryption",
+      "package": {
+        "name": "github.com/go-jose/go-jose/v4",
+        "version": "v4.1.3",
+        "type": "go-module",
+        "locations": [
+          "/bin/bao"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    }
+  ]
+}

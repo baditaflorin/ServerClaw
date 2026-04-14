@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0251-stage-smoke-suites-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T14:06:37Z",
+  "recorded_by": "codex",
+  "source_commit": "1710174671ab5c698835fbc3b5df1a4eac0d5499",
+  "repo_version_context": "0.177.78",
+  "platform_version_context": "0.130.53",
+  "workflow_id": "converge-windmill",
+  "adr": "0251",
+  "summary": "Applied ADR 0251 from the latest origin/main-based worktree by declaring stage-scoped smoke suites, enforcing smoke evidence in the promotion pipeline, seeding Windmill with the same repo-managed smoke runner, and hardening the live worker checkout so worker-local Windmill execution and approval validation both succeed end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill-api",
+      "address": "http://100.64.0.1:8005/api"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0251 validation slices",
+      "result": "pass",
+      "observed": "The focused pytest slices for tests/test_windmill_integration_wrappers.py, tests/test_integration_suite.py, tests/test_stage_smoke_suites.py, tests/test_windmill_playbook.py, tests/test_windmill_default_operations_surface.py, tests/test_backup_coverage_ledger.py, tests/test_backup_coverage_ledger_windmill.py, tests/test_disaster_recovery.py, and tests/test_windmill_operator_admin_app.py all passed after the worker-local runtime and checkout sync fixes."
+    },
+    {
+      "check": "Repository validation and playbook syntax",
+      "result": "pass",
+      "observed": "./scripts/validate_repo.sh agent-standards passed and ANSIBLE_HOME=$PWD/.ansible-home-apply ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check passed from the isolated worktree."
+    },
+    {
+      "check": "Latest origin/main-based Windmill replay",
+      "result": "pass",
+      "observed": "make converge-windmill succeeded twice with committed evidence in receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-12.txt and receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-13.txt, including successful stage smoke suite verification and validation-gate status checks."
+    },
+    {
+      "check": "Direct stage smoke suite helper execution",
+      "result": "pass",
+      "observed": "scripts/windmill_run_wait_result.py successfully ran f/lv3/stage-smoke-suites with payload {\"service\":\"windmill\",\"environment\":\"production\"}; the returned targets resolved windmill_url to the worker-local http://127.0.0.1:8000 endpoint."
+    },
+    {
+      "check": "Worker-side approval and gate validation",
+      "result": "pass",
+      "observed": "On docker-runtime-lv3, python3 scripts/policy_checks.py --validate, python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned, and python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server all passed after the worker mirror began syncing .gitea/workflows."
+    },
+    {
+      "check": "Windmill runtime health after replay",
+      "result": "pass",
+      "observed": "A direct scripts/windmill_run_wait_result.py replay of f/lv3/windmill_healthcheck returned status ok with hostname docker-runtime-lv3 and confirmed the current live worker runtime is healthy after the ADR 0251 replay."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md",
+    "docs/workstreams/ws-0251-live-apply.md",
+    "docs/runbooks/environment-promotion-pipeline.md",
+    "docs/runbooks/integration-test-suite.md",
+    "docs/runbooks/live-apply-receipts-and-verification-evidence.md",
+    "docs/runbooks/configure-windmill.md",
+    "config/stage-smoke-suites.json",
+    "config/service-capability-catalog.json",
+    "config/windmill/scripts/stage-smoke-suites.py",
+    "config/windmill/scripts/windmill_integration_env.py",
+    "config/workflow-catalog.json",
+    "config/command-catalog.json",
+    "scripts/stage_smoke_suites.py",
+    "scripts/integration_suite.py",
+    "scripts/promotion_pipeline.py",
+    "scripts/live_apply_receipts.py",
+    "scripts/windmill_run_wait_result.py",
+    "platform/datetime_compat.py",
+    "platform/enum_compat.py",
+    "platform/ansible/__init__.py",
+    "platform/scheduler/windmill_client.py",
+    "playbooks/windmill.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml",
+    "tests/test_integration_suite.py",
+    "tests/test_stage_smoke_suites.py",
+    "tests/test_windmill_integration_wrappers.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "tests/test_windmill_playbook.py",
+    "receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-12.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-13.txt",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This branch-local receipt captures the successful latest-origin/main replay that preceded the protected-file integration on main.",
+    "The worker-local validation path initially failed because .gitea/workflows was absent from the mirrored checkout; syncing that hidden path fixed command approval validation without requiring manual server edits.",
+    "Worker-side command approval emitted a non-fatal mutation-audit permission warning for /srv/proxmox_florin_server/.local/state/mutation-audit/mutation-audit.jsonl, but the governed approval and gate-status checks still returned success.",
+    "The later mainline integration updates VERSION, changelog.md, README.md, versions/stack.yaml, release notes, and the generated platform manifest without changing the already-verified live workload payload."
+  ]
+}

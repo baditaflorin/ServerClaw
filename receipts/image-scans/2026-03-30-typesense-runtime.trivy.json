@@ -1,0 +1,236 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-30T07:34:51.895170251Z",
+  "ArtifactName": "docker.io/typesense/typesense:29.0@sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 976138752,
+    "OS": {
+      "Family": "ubuntu",
+      "Name": "22.04"
+    },
+    "ImageID": "sha256:8237ba78756ab0179849e02a5c32d3586c58c19a57dbbb9ac90f4608d0041b58",
+    "DiffIDs": [
+      "sha256:f862e1968e4b4c3c3af141e37d2ec22b19ec0fd50d6a8aaf683de6729e296226",
+      "sha256:1c9fb0e276cbd071bb097c47e8254bf62b5644428bc1ce2f16c7f073163405cc",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:554f50725efe77a36ae3ca13b2bc20c3f41d904cdbcfb48d268fce93a982c030",
+      "sha256:554f50725efe77a36ae3ca13b2bc20c3f41d904cdbcfb48d268fce93a982c030"
+    ],
+    "RepoDigests": [
+      "typesense/typesense@sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2025-06-29T17:50:20.536722866Z",
+      "history": [
+        {
+          "created": "2025-05-30T22:30:42.898627637Z",
+          "created_by": "/bin/sh -c #(nop)  ARG RELEASE",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-05-30T22:30:42.9234878Z",
+          "created_by": "/bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-05-30T22:30:42.946285582Z",
+          "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.ref.name=ubuntu",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-05-30T22:30:42.971145847Z",
+          "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.version=22.04",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-05-30T22:30:45.205253722Z",
+          "created_by": "/bin/sh -c #(nop) ADD file:82f38ebced7b2756311fb492d3d44cc131b22654e8620baa93883537a3e355aa in / "
+        },
+        {
+          "created": "2025-05-30T22:30:45.500168088Z",
+          "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/bash\"]",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-06-03T17:41:47.252690499Z",
+          "created_by": "RUN /bin/sh -c apt-get -y update \u0026\u0026 apt-get -y install ca-certificates # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-06-03T17:41:47.473534188Z",
+          "created_by": "RUN /bin/sh -c mkdir -p /opt # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-06-29T17:50:17.38156402Z",
+          "created_by": "COPY typesense-server /opt # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-06-29T17:50:20.536722866Z",
+          "created_by": "RUN /bin/sh -c chmod +x /opt/typesense-server # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-06-29T17:50:20.536722866Z",
+          "created_by": "EXPOSE map[8108/tcp:{}]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-06-29T17:50:20.536722866Z",
+          "created_by": "ENTRYPOINT [\"/opt/typesense-server\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:f862e1968e4b4c3c3af141e37d2ec22b19ec0fd50d6a8aaf683de6729e296226",
+          "sha256:1c9fb0e276cbd071bb097c47e8254bf62b5644428bc1ce2f16c7f073163405cc",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+          "sha256:554f50725efe77a36ae3ca13b2bc20c3f41d904cdbcfb48d268fce93a982c030",
+          "sha256:554f50725efe77a36ae3ca13b2bc20c3f41d904cdbcfb48d268fce93a982c030"
+        ]
+      },
+      "config": {
+        "Entrypoint": [
+          "/opt/typesense-server"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ],
+        "Labels": {
+          "org.opencontainers.image.ref.name": "ubuntu",
+          "org.opencontainers.image.version": "22.04"
+        },
+        "ExposedPorts": {
+          "8108/tcp": {}
+        }
+      }
+    },
+    "Layers": [
+      {
+        "Size": 80410624,
+        "Digest": "sha256:89dc6ea4eae2b38a3550534ece4983005a7d2e90e4fa503ed04dcfc58ee71159",
+        "DiffID": "sha256:f862e1968e4b4c3c3af141e37d2ec22b19ec0fd50d6a8aaf683de6729e296226"
+      },
+      {
+        "Size": 66660864,
+        "Digest": "sha256:4e5e23e89863859042e26592ad4fd37f8008d5d51e7ba973e1243f3f61360f11",
+        "DiffID": "sha256:1c9fb0e276cbd071bb097c47e8254bf62b5644428bc1ce2f16c7f073163405cc"
+      },
+      {
+        "Size": 1024,
+        "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "DiffID": "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      },
+      {
+        "Size": 414533120,
+        "Digest": "sha256:b1e36243c865420cd03e5f04e7f21443fed526f3f0b4ede4e6f51f11de07beb3",
+        "DiffID": "sha256:554f50725efe77a36ae3ca13b2bc20c3f41d904cdbcfb48d268fce93a982c030"
+      },
+      {
+        "Size": 414533120,
+        "Digest": "sha256:b1e36243c865420cd03e5f04e7f21443fed526f3f0b4ede4e6f51f11de07beb3",
+        "DiffID": "sha256:554f50725efe77a36ae3ca13b2bc20c3f41d904cdbcfb48d268fce93a982c030"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/typesense/typesense:29.0@sha256:3f1d38d0d944d959890fd5d32d6109f18095e1ddf05f8a23d1b4b5cc3a595088 (ubuntu 22.04)",
+      "Class": "os-pkgs",
+      "Type": "ubuntu",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-68973",
+          "PkgID": "gpgv@2.2.27-3ubuntu2.3",
+          "PkgName": "gpgv",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/gpgv@2.2.27-3ubuntu2.3?arch=amd64\u0026distro=ubuntu-22.04",
+            "UID": "9aad67e8cb3be1ea"
+          },
+          "InstalledVersion": "2.2.27-3ubuntu2.3",
+          "FixedVersion": "2.2.27-3ubuntu2.5",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:89dc6ea4eae2b38a3550534ece4983005a7d2e90e4fa503ed04dcfc58ee71159",
+            "DiffID": "sha256:f862e1968e4b4c3c3af141e37d2ec22b19ec0fd50d6a8aaf683de6729e296226"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-68973",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-675",
+            "CWE-787"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "cbl-mariner": 3,
+            "nvd": 3,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 3,
+            "rocky": 3,
+            "ubuntu": 3
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
+              "V3Score": 7.8
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/12/29/11",
+            "https://access.redhat.com/errata/RHSA-2026:0719",
+            "https://access.redhat.com/security/cve/CVE-2025-68973",
+            "https://bugzilla.redhat.com/2425966",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
+            "https://dev.gnupg.org/T7906",
+            "https://dev.gnupg.org/T8001",
+            "https://errata.almalinux.org/9/ALSA-2026-0719.html",
+            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
+            "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
+            "https://github.com/gpg/gnupg/commit/1e929abd20fa2e4be3797a137caca63a971d5372 (gnupg-2.2.51)",
+            "https://github.com/gpg/gnupg/commit/4ecc5122f20e10c17172ed72f4fa46c784b5fb48 (gnupg-2.4.9)",
+            "https://github.com/gpg/gnupg/compare/gnupg-2.2.50...gnupg-2.2.51",
+            "https://gpg.fail/memcpy",
+            "https://linux.oracle.com/cve/CVE-2025-68973.html",
+            "https://linux.oracle.com/errata/ELSA-2026-1677.html",
+            "https://lists.debian.org/debian-lts-announce/2026/01/msg00008.html",
+            "https://media.ccc.de/v/39c3-to-sign-or-not-to-sign-practical-vulnerabilities-i",
+            "https://news.ycombinator.com/item?id=46403200",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-68973",
+            "https://ubuntu.com/security/notices/USN-7946-1",
+            "https://ubuntu.com/security/notices/USN-7946-2",
+            "https://www.cve.org/CVERecord?id=CVE-2025-68973",
+            "https://www.openwall.com/lists/oss-security/2025/12/28/5"
+          ],
+          "PublishedDate": "2025-12-28T17:16:01.5Z",
+          "LastModifiedDate": "2026-01-14T19:16:46.857Z"
+        }
+      ]
+    }
+  ]
+}

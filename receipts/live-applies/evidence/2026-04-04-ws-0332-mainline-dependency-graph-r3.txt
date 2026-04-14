@@ -1,0 +1,3 @@
+Dependency graph OK
+Dependency diagram OK
+Architecture diagrams OK

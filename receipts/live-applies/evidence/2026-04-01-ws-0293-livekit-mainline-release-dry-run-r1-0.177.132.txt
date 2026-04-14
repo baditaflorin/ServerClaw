@@ -1,0 +1,5 @@
+Current version: 0.177.131
+Next version: 0.177.132
+Unreleased notes: 1
+Platform impact: LiveKit is now the repo-managed real-time audio and voice channel for agent sessions at livekit.lv3.org, with exact-main runtime convergence and verified public room-lifecycle automation.
+Release notes index: docs/release-notes/README.md

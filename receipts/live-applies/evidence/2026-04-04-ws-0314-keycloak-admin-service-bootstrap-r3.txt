@@ -1,0 +1,13 @@
+runtime-control-lv3 | FAILED | rc=2 >>
+PRE_READY
+HTTP/1.1 503 Service Unavailable
+content-type: application/json; charset=UTF-8
+cache-control: no-store
+content-length: 365
+
+STOP_KEYCLOAK
+RUN_BOOTSTRAP Container keycloak-keycloak-1 Stopping
+ Container keycloak-keycloak-1 Stopped
+ Container keycloak-keycloak-run-0c218b319488 Creating
+ Container keycloak-keycloak-run-0c218b319488 Created
+The '--optimized' flag was used for first ever server start. Please don't use this flag for the first startup or use 'kc.sh build' to build the server first.non-zero return code

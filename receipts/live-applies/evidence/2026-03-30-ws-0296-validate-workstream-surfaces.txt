@@ -1,0 +1,2 @@
+Workstream surface ownership validation
+Workstream surface ownership validation failed: path pattern 'inventory/group_vars/platform.yml' is claimed as exclusive by both 'ws-0296-live-apply' and 'ws-0224-repo-intake'

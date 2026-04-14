@@ -1,0 +1,42 @@
+...........F............................................................ [ 98%]
+.                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_ntfy_runtime_restarts_container_when_auth_config_changes _________
+
+    def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
+        defaults = load_yaml(NTFY_ROLE_DEFAULTS)
+        tasks = load_yaml(NTFY_ROLE_TASKS)
+        handlers = load_yaml(NTFY_ROLE_HANDLERS)
+        verify_tasks = load_yaml(NTFY_ROLE_VERIFY)
+
+        render_config = next(task for task in tasks if task["name"] == "Render ntfy server config")
+        render_compose = next(task for task in tasks if task["name"] == "Render ntfy compose file")
+        snapshot_acl = next(task for task in tasks if task["name"] == "Snapshot provisioned ntfy ACL state")
+        repair_acl = next(task for task in tasks if task["name"] == "Force-recreate the ntfy stack when provisioned ACL entries are stale")
+        restart_handler = next(task for task in handlers if task["name"] == "Restart ntfy stack")
+        verify_acl = next(
+            task
+            for task in verify_tasks
+            if task["name"] == "Verify provisioned ntfy ACL topics are writable for the managed publisher"
+        )
+
+        assert defaults["ntfy_runtime_expected_write_topics"] == [
+            "platform-alerts",
+            "platform-security-critical",
+        ]
+        assert render_config["notify"] == "Restart ntfy stack"
+        assert render_compose["notify"] == "Restart ntfy stack"
+        assert snapshot_acl["environment"]["NTFY_RUNTIME_EXPECTED_TOPICS"] == "{{ ntfy_runtime_expected_write_topics | to_json }}"
+>       assert repair_acl["when"] == "ntfy_runtime_acl_state.rc != 0"
+E       AssertionError: assert 'ntfy_runtime...out | trim\n)' == 'ntfy_runtime...state.rc != 0'
+E
+E         - ntfy_runtime_acl_state.rc != 0
+E         + ntfy_runtime_container_config_raw.rc != 0 or (
+E         +   ntfy_runtime_host_config_raw.content | b64decode | trim
+E         +   != ntfy_runtime_container_config_raw.stdout | trim
+E         + )
+
+tests/test_falco_runtime_role.py:219: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_falco_runtime_role.py::test_ntfy_runtime_restarts_container_when_auth_config_changes
+1 failed, 72 passed in 4.87s

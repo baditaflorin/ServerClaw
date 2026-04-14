@@ -1,0 +1,26 @@
+hostname=runtime-ai-lv3
+date=2026-04-03T06:39:35+00:00
+docker_ps:
+tika	Up 5 minutes	0.0.0.0:9998->9998/tcp, [::]:9998->9998/tcp
+ss_listeners:
+LISTEN 0      4096         0.0.0.0:9998       0.0.0.0:*
+LISTEN 0      4096            [::]:9998          [::]:*
+http_probe:
+{
+  "meta": {
+    "content_type": null,
+    "parsed_by": null,
+    "status": 406,
+    "text": ""
+  },
+  "tika": {
+    "content_type": "text/plain",
+    "status": 200,
+    "text": "Hello from Apache Tika."
+  },
+  "version": {
+    "content_type": "text/plain",
+    "status": 200,
+    "text": "Apache Tika 3.2.3"
+  }
+}

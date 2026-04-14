@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0124-platform-event-taxonomy-live-apply",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "b1d67b3f214841da6d273bbf35258e2b5c629cf9",
+  "repo_version_context": "0.162.0",
+  "workflow_id": "adr-0124-platform-event-taxonomy-live-apply",
+  "adr": "0124",
+  "summary": "Activated ADR 0124 on the live docker-runtime-lv3 NATS runtime by reconciling the PLATFORM_EVENTS JetStream stream to config/nats-streams.yaml, expanding the live jetstream-admin publish authorization to include platform.>, restarting lv3-nats-jetstream, and verifying a canonical platform.findings.observation publish reached the stream.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "container",
+      "name": "lv3-nats-jetstream"
+    }
+  ],
+  "verification": [
+    {
+      "check": "JetStream stream reconciliation",
+      "result": "pass",
+      "observed": "The first `make check-nats-streams` run reported that `PLATFORM_EVENTS` was absent. `make apply-nats-streams` created the stream from `config/nats-streams.yaml`, and the final `make check-nats-streams` run returned `PLATFORM_EVENTS: none`."
+    },
+    {
+      "check": "Live NATS publish authorization for canonical platform topics",
+      "result": "pass",
+      "observed": "The live NATS auth file at `/opt/nats-jetstream/config/nats-server.conf` was backed up, updated so `jetstream-admin` can publish to `platform.>`, and `lv3-nats-jetstream` was restarted successfully on `docker-runtime-lv3`."
+    },
+    {
+      "check": "Canonical smoke publish into PLATFORM_EVENTS",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with nats-py python scripts/nats_streams.py --smoke-publish` returned an ack for `platform.findings.observation` on stream `PLATFORM_EVENTS` with sequence `1` after the auth update and container restart."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0124-platform-event-taxonomy-and-canonical-nats-topics.md",
+    "docs/workstreams/adr-0124-platform-event-taxonomy.md",
+    "docs/runbooks/platform-event-taxonomy.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The committed repo automation for the live stream contract landed in source commit `b1d67b3f214841da6d273bbf35258e2b5c629cf9` via `scripts/nats_streams.py`, `make check-nats-streams`, and `make apply-nats-streams`.",
+    "A manual server-side auth edit was unavoidable because the live NATS runtime config under `/opt/nats-jetstream/config/nats-server.conf` is not yet repo-managed. The on-host file was backed up to `/opt/nats-jetstream/config/nats-server.conf.bak.<timestamp>` before the change.",
+    "The broader ADR 0080 maintenance-window `$KV.maintenance-windows.>` publish-rights gap was not part of this live apply and remains separate from ADR 0124."
+  ]
+}

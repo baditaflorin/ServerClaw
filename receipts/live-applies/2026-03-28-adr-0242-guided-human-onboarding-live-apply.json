@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0242-guided-human-onboarding-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T22:25:47Z",
+  "recorded_by": "codex",
+  "source_commit": "12b3e420935f8b1e10a0b1dc1da797ccdf80e793",
+  "repo_version_context": "0.177.56",
+  "platform_version_context": "0.130.43",
+  "workflow_id": "adr-0242-guided-human-onboarding-live-apply",
+  "adr": "0242",
+  "summary": "Live-applied ADR 0242 by adding Shepherd-powered guided onboarding to the Windmill operator admin raw app, fixing the Windmill runtime to install locked raw-app frontend dependencies before `wmill sync push`, replaying `make converge-windmill` successfully, and then performing an exact-worktree app sync to correct concurrent staging drift before verifying the live app source end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill controller URL",
+      "address": "http://100.64.0.1:8005"
+    },
+    {
+      "kind": "workspace_app",
+      "name": "f/lv3/operator_access_admin"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repo automation regression slice",
+      "result": "pass",
+      "observed": "`make syntax-check-windmill` passed from branch head `12b3e420935f8b1e10a0b1dc1da797ccdf80e793`, `./scripts/validate_repo.sh agent-standards` passed after the raw-app lockfile contract update, `uv run --with pytest --with pyyaml python -m pytest tests/test_windmill_operator_admin_app.py -q` returned `10 passed in 0.43s`, and a Windmill-container dependency probe resolved `shepherd.js` successfully after `npm ci` from the exact raw-app folder."
+    },
+    {
+      "check": "Latest-origin/main Windmill converge replay",
+      "result": "pass",
+      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-live-apply` with final recap `docker-runtime-lv3 ok=232 changed=42 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=37 changed=7 failed=0`."
+    },
+    {
+      "check": "Live Windmill identity and app registration",
+      "result": "pass",
+      "observed": "`curl -s http://100.64.0.1:8005/api/version` returned `CE v1.662.0`, `curl -s -H \"Authorization: Bearer <secret>\" http://100.64.0.1:8005/api/users/whoami` returned the managed bootstrap identity `superadmin_secret@windmill.dev`, and `curl -s -H \"Authorization: Bearer <secret>\" http://100.64.0.1:8005/api/w/lv3/apps/list` reported raw app `f/lv3/operator_access_admin` as version `15` edited at `2026-03-28T22:24:39.014189Z`."
+    },
+    {
+      "check": "Concurrent staging drift detected and corrected",
+      "result": "pass",
+      "observed": "Immediate post-converge verification found a mixed Windmill raw-app snapshot during concurrent activity on the shared `seed-apps` surface: the live app and `/opt/windmill/seed-apps` still exposed an older schema-first `App.tsx` shell while `touring.ts` had already advanced. A corrective exact-worktree `wmill sync push` from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-live-apply/config/windmill/apps` applied 7 changes, removed stale `/schemas.ts` and `backend/update_operator_notes.yaml`, and rebuilt the app bundle directly from the rebased worktree."
+    },
+    {
+      "check": "Live app source after exact-worktree sync",
+      "result": "pass",
+      "observed": "`apps/get/p/f/lv3/operator_access_admin` after the corrective sync returned exactly `/App.tsx`, `/index.css`, `/index.tsx`, `/package.json`, `/touring.ts`, and `/tsconfig.json`; the live `App.tsx` contained `data-tour-target=\"tour-launcher\"` and `Task-specific Shepherd tours for first-run operators`, `touring.ts` contained storage key `lv3.operator_access_admin.shepherd.v1`, and the live `package.json` exposed dependency `shepherd.js: 15.2.2`."
+    }
+  ],
+  "evidence_refs": [
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md",
+    "docs/runbooks/configure-windmill.md",
+    "docs/runbooks/operator-onboarding.md",
+    "docs/runbooks/operator-offboarding.md",
+    "docs/runbooks/windmill-operator-access-admin.md",
+    "docs/workstreams/ws-0242-live-apply.md",
+    "receipts/live-applies/2026-03-28-adr-0242-guided-human-onboarding-live-apply.json",
+    "scripts/validate_repo.sh",
+    "tests/test_windmill_operator_admin_app.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The repo-managed Windmill runtime now installs raw-app frontend dependencies with `npm ci` from committed lockfiles before `wmill sync push`, so future branch-local live applies do not depend on controller-local `node_modules/` state.",
+    "A manual exact-worktree app sync was required in the same turn because concurrent Windmill staging activity left `/opt/windmill/seed-apps` and the live app source on a mixed snapshot after the successful converge. This receipt documents that manual correction as part of the live apply.",
+    "Protected integration files still remain for merge to `main`: `VERSION`, `changelog.md`, the top-level `README.md` integrated status summary, `versions/stack.yaml`, and the final numeric repo-version metadata for ADR 0242."
+  ]
+}

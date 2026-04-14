@@ -1,0 +1,32 @@
+monitoring-lv3 | CHANGED | rc=0 >>
+{
+  "subject": "LV3 Mailpit exact-main verification",
+  "message_count": 1,
+  "matching": [
+    {
+      "ID": "HqEBNj8NCAu4H6PohGhm52",
+      "MessageID": "fXcrnkeAwHXqumq8wDZWcp@mailpit",
+      "Read": false,
+      "From": {
+        "Name": "",
+        "Address": "monitoring@lv3.org"
+      },
+      "To": [
+        {
+          "Name": "",
+          "Address": "mailpit-mainline@lv3.org"
+        }
+      ],
+      "Cc": null,
+      "Bcc": null,
+      "ReplyTo": [],
+      "Subject": "LV3 Mailpit exact-main verification",
+      "Created": "2026-03-30T03:52:58.852Z",
+      "Username": "",
+      "Tags": [],
+      "Size": 533,
+      "Attachments": 0,
+      "Snippet": "Refreshed exact-main Mailpit verification through monitoring-lv3"
+    }
+  ]
+}

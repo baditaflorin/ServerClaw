@@ -1,0 +1,3 @@
+proxmox_florin | CHANGED | rc=0 >>
+generating cloud-init ISO
+status: running

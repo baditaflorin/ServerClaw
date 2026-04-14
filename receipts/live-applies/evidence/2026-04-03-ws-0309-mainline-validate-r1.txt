@@ -1,0 +1,253 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0309-main-integration/scripts/validate_repo.sh
+Generated platform vars validation
+Syntax check: playbooks/api-gateway.yml
+Syntax check: playbooks/artifact-cache-vm.yml
+Syntax check: playbooks/backup-vm.yml
+Syntax check: playbooks/browser-runner.yml
+Syntax check: playbooks/build-artifact-cache.yml
+Syntax check: playbooks/changedetection.yml
+Syntax check: playbooks/control-plane-recovery.yml
+Syntax check: playbooks/coolify.yml
+Syntax check: playbooks/crawl4ai.yml
+Syntax check: playbooks/data-retention.yml
+Syntax check: playbooks/database-dns.yml
+Syntax check: playbooks/dify.yml
+Syntax check: playbooks/directus.yml
+Syntax check: playbooks/docker-publication-assurance.yml
+Syntax check: playbooks/docker-runtime.yml
+Syntax check: playbooks/dozzle.yml
+Syntax check: playbooks/excalidraw.yml
+Syntax check: playbooks/flagsmith.yml
+Syntax check: playbooks/gitea.yml
+Syntax check: playbooks/gotenberg.yml
+Syntax check: playbooks/grist.yml
+Syntax check: playbooks/groups/access.yml
+Syntax check: playbooks/groups/automation.yml
+Syntax check: playbooks/groups/communication.yml
+Syntax check: playbooks/groups/data.yml
+Syntax check: playbooks/groups/observability.yml
+Syntax check: playbooks/groups/platform-apps.yml
+Syntax check: playbooks/groups/security.yml
+Syntax check: playbooks/guest-access.yml
+Syntax check: playbooks/guest-network-policy.yml
+Syntax check: playbooks/harbor.yml
+Syntax check: playbooks/headscale.yml
+Syntax check: playbooks/homepage.yml
+Syntax check: playbooks/jupyterhub.yml
+Syntax check: playbooks/keycloak.yml
+Syntax check: playbooks/lago.yml
+Syntax check: playbooks/langfuse.yml
+Syntax check: playbooks/livekit.yml
+Syntax check: playbooks/mail-platform-diagnostics.yml
+Syntax check: playbooks/mail-platform-notification-profiles-verify.yml
+Syntax check: playbooks/mail-platform-send-gmail.yml
+Syntax check: playbooks/mail-platform-verify.yml
+Syntax check: playbooks/mail-platform.yml
+Syntax check: playbooks/mailpit.yml
+Syntax check: playbooks/matrix-synapse.yml
+Syntax check: playbooks/mattermost.yml
+Syntax check: playbooks/minio.yml
+Syntax check: playbooks/monitoring-stack.yml
+Syntax check: playbooks/n8n.yml
+Syntax check: playbooks/nats-jetstream.yml
+Syntax check: playbooks/netbox.yml
+Syntax check: playbooks/nextcloud.yml
+Syntax check: playbooks/nomad.yml
+Syntax check: playbooks/ntfy.yml
+Syntax check: playbooks/ntopng.yml
+Syntax check: playbooks/ollama.yml
+Syntax check: playbooks/one-api.yml
+Syntax check: playbooks/open-webui.yml
+Syntax check: playbooks/openbao.yml
+Syntax check: playbooks/openfga.yml
+Syntax check: playbooks/ops-portal.yml
+Syntax check: playbooks/outline.yml
+Syntax check: playbooks/paperless.yml
+Syntax check: playbooks/piper.yml
+Syntax check: playbooks/plane.yml
+Syntax check: playbooks/plausible.yml
+Syntax check: playbooks/portainer.yml
+Syntax check: playbooks/postgres-vm.yml
+Syntax check: playbooks/provision-subdomain.yml
+Syntax check: playbooks/proxmox-install.yml
+Syntax check: playbooks/proxmox-staging-bridge.yml
+Syntax check: playbooks/public-edge.yml
+Syntax check: playbooks/rag-context.yml
+Syntax check: playbooks/realtime.yml
+Syntax check: playbooks/redpanda.yml
+Syntax check: playbooks/restic-config-backup.yml
+Syntax check: playbooks/route-dns-assertion-ledger.yml
+Syntax check: playbooks/runtime-ai-pool.yml
+Syntax check: playbooks/runtime-control-pool.yml
+Syntax check: playbooks/runtime-general-pool.yml
+Syntax check: playbooks/searxng.yml
+Syntax check: playbooks/secret-rotation.yml
+Syntax check: playbooks/semaphore-self.yml
+Syntax check: playbooks/semaphore.yml
+Syntax check: playbooks/server-resident-reconciliation.yml
+Syntax check: playbooks/serverclaw.yml
+Syntax check: playbooks/services/api-gateway.yml
+Syntax check: playbooks/services/backup-vm.yml
+Syntax check: playbooks/services/browser-runner.yml
+Syntax check: playbooks/services/build-artifact-cache.yml
+Syntax check: playbooks/services/changedetection.yml
+Syntax check: playbooks/services/coolify.yml
+Syntax check: playbooks/services/crawl4ai.yml
+Syntax check: playbooks/services/dify.yml
+Syntax check: playbooks/services/directus.yml
+Syntax check: playbooks/services/docker-build-observability.yml
+Syntax check: playbooks/services/docker-runtime-observability.yml
+Syntax check: playbooks/services/dozzle.yml
+Syntax check: playbooks/services/excalidraw.yml
+Syntax check: playbooks/services/flagsmith.yml
+Syntax check: playbooks/services/gitea.yml
+Syntax check: playbooks/services/gotenberg.yml
+Syntax check: playbooks/services/grafana.yml
+Syntax check: playbooks/services/grist.yml
+Syntax check: playbooks/services/guest-access.yml
+Syntax check: playbooks/services/guest-log-shipping.yml
+Syntax check: playbooks/services/harbor.yml
+Syntax check: playbooks/services/headscale.yml
+Syntax check: playbooks/services/homepage.yml
+Syntax check: playbooks/services/jupyterhub.yml
+Syntax check: playbooks/services/lago.yml
+Syntax check: playbooks/services/langfuse.yml
+Syntax check: playbooks/services/livekit.yml
+Syntax check: playbooks/services/mail-platform.yml
+Syntax check: playbooks/services/mailpit.yml
+Syntax check: playbooks/services/matrix-synapse.yml
+Syntax check: playbooks/services/minio.yml
+Syntax check: playbooks/services/n8n.yml
+Syntax check: playbooks/services/nats-jetstream.yml
+Syntax check: playbooks/services/nextcloud.yml
+Syntax check: playbooks/services/nginx-observability.yml
+Syntax check: playbooks/services/nomad.yml
+Syntax check: playbooks/services/ollama.yml
+Syntax check: playbooks/services/one-api.yml
+Syntax check: playbooks/services/openbao.yml
+Syntax check: playbooks/services/openfga.yml
+Syntax check: playbooks/services/ops-portal.yml
+Syntax check: playbooks/services/ops_portal.yml
+Syntax check: playbooks/services/outline.yml
+Syntax check: playbooks/services/paperless.yml
+Syntax check: playbooks/services/piper.yml
+Syntax check: playbooks/services/plane.yml
+Syntax check: playbooks/services/plausible.yml
+Syntax check: playbooks/services/postgres-vm.yml
+Syntax check: playbooks/services/proxmox-host-log-shipping.yml
+Syntax check: playbooks/services/proxmox-metrics.yml
+Syntax check: playbooks/services/public-edge.yml
+Syntax check: playbooks/services/rag-context.yml
+Syntax check: playbooks/services/realtime.yml
+Syntax check: playbooks/services/redpanda.yml
+Syntax check: playbooks/services/runtime-ai-pool.yml
+Syntax check: playbooks/services/runtime-control-pool.yml
+Syntax check: playbooks/services/runtime-general-pool.yml
+Syntax check: playbooks/services/semaphore.yml
+Syntax check: playbooks/services/sftpgo.yml
+Syntax check: playbooks/services/step-ca.yml
+Syntax check: playbooks/services/superset.yml
+Syntax check: playbooks/services/temporal.yml
+Syntax check: playbooks/services/tesseract-ocr.yml
+Syntax check: playbooks/services/tika.yml
+Syntax check: playbooks/services/typesense.yml
+Syntax check: playbooks/services/uptime-kuma.yml
+Syntax check: playbooks/services/vaultwarden.yml
+Syntax check: playbooks/services/vikunja.yml
+Syntax check: playbooks/services/windmill.yml
+Syntax check: playbooks/services/woodpecker.yml
+Syntax check: playbooks/sftpgo.yml
+Syntax check: playbooks/site.yml
+Syntax check: playbooks/step-ca.yml
+Syntax check: playbooks/superset.yml
+Syntax check: playbooks/temporal.yml
+Syntax check: playbooks/tesseract-ocr.yml
+Syntax check: playbooks/tika.yml
+Syntax check: playbooks/typesense.yml
+Syntax check: playbooks/uptime-kuma.yml
+Syntax check: playbooks/vaultwarden.yml
+Syntax check: playbooks/vikunja.yml
+Syntax check: playbooks/windmill.yml
+Syntax check: playbooks/woodpecker.yml
+YAML lint
+Role argument specs
+Ansible lint
+WARNING  Listing 3 violation(s) marked as ignored, likely already known
+
+Passed: 0 failure(s), 3 warning(s) in 1174 files processed of 1301 encountered. Last profile that met the validation criteria was 'production'.
+complexity[tasks]: File contains 144 tasks, exceeding the maximum of 100. Consider using `ansible.builtin.include_tasks` to split the tasks into smaller files. (warning) # ignored
+collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml:1
+
+complexity[tasks]: File contains 124 tasks, exceeding the maximum of 100. Consider using `ansible.builtin.include_tasks` to split the tasks into smaller files. (warning) # ignored
+collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml:1
+
+complexity[tasks]: File contains 166 tasks, exceeding the maximum of 100. Consider using `ansible.builtin.include_tasks` to split the tasks into smaller files. (warning) # ignored
+collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml:1
+
+Ansible role idempotency policy
+Validated Ansible role idempotency policy: 3 enforced, 141 tracked, 3 exempt.
+Tracked roles remain on the migration inventory until they gain a CI-safe scenario.
+PASSED  preflight: zero changes on second run
+PASSED  secret_fact: zero changes on second run
+PASSED  wait_for_healthy: zero changes on second run
+Shell lint
+JSON validation
+Semgrep SAST and secret-pattern validation
+Semgrep gate summary
+  repo: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0309-main-integration
+  source sha: 571572815bddad5bde4c3bd26763f74d6b9f4b9d
+  sarif: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0309-main-integration/receipts/sast/571572815bddad5bde4c3bd26763f74d6b9f4b9d.sarif.json
+  findings: error=0 warning=3 note=0 total=3
+Compose runtime env guard
+Retry guard
+Dependency direction validation
+Health probe contract validation
+Alert rule validation
+OpenTofu validation
+Repository data model validation
+ADR 0230 policy validation
+Architecture fitness validation
+Workstream surface ownership validation
+Generated status document validation
+Generated portal validation
+
+[31m │  ⚠  Warning from the Material for MkDocs team[0m
+[31m │[0m
+[31m │[0m  MkDocs 2.0, the underlying framework of Material for MkDocs,
+[31m │[0m  will introduce backward-incompatible changes, including:
+[31m │[0m
+[31m │  × [0mAll plugins will stop working – the plugin system has been removed
+[31m │  × [0mAll theme overrides will break – the theming system has been rewritten
+[31m │  × [0mNo migration path exists – existing projects cannot be upgraded
+[31m │  × [0mClosed contribution model – community members can't report bugs
+[31m │  × [0mCurrently unlicensed – unsuitable for production use
+[31m │[0m
+[31m │[0m  Our full analysis:
+[31m │[0m
+[31m │[0m  [4mhttps://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/[0m
+[0m
+INFO    -  Cleaning site directory
+INFO    -  Building documentation to directory: /private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/lv3-docs-portal.aaYJU1
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/image-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/api-publication.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/platform/graph', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
+INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
+INFO    -  Doc file 'runbooks/scaffold-new-service.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-extension-model/docs/runbooks/add-a-new-service.md', it was left as is.
+INFO    -  mkdocs_swagger_ui_tag: Processing file 'api/openapi.md'
+INFO    -  mkdocs_swagger_ui_tag: Copying swagger ui assets.
+INFO    -  Documentation built in 9.71 seconds
+Agent standards validation (ADR 0163-0168)

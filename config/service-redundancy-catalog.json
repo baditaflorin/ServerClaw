@@ -565,13 +565,13 @@
       },
       "backup_sources": [
         "git_repository",
-        "pbs_vm_120"
+        "pbs_vm_121"
       ],
       "standby": {
         "kind": "cold",
-        "location": "docker-runtime",
-        "failover_trigger": "Restore docker-runtime when LiveKit, its public signalling path, or its media listener contract cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime, then rerun the LiveKit converge from git."
+        "location": "runtime-comms",
+        "failover_trigger": "Restore runtime-comms when LiveKit, its public signalling path, or its media listener contract cannot be recovered in place.",
+        "failback_method": "Restore or rebuild runtime-comms, then rerun the LiveKit converge from git."
       }
     },
     "mail_platform": {

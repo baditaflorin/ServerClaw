@@ -8,8 +8,10 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
+| `livekit` | `2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply` |
 | `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
@@ -39,7 +41,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `homepage` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `harbor` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `api_gateway` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `service_definition_catalog_assembly` | `2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply` |
 | `searxng` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
 | `runbook_task_reentry` | `2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply` |
 | `reference_deployment_samples` | `2026-04-04-adr-0339-reference-deployment-samples-mainline-live-apply` |
@@ -78,7 +79,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `serverclaw` | `2026-04-01-adr-0294-one-api-mainline-live-apply` |
 | `platform_context` | `2026-04-01-adr-0294-one-api-mainline-live-apply` |
 | `one_api` | `2026-04-01-adr-0294-one-api-mainline-live-apply` |
-| `livekit` | `2026-04-01-adr-0293-livekit-mainline-live-apply` |
 | `lago` | `2026-04-01-adr-0292-lago-mainline-live-apply` |
 | `typesense` | `2026-03-31-adr-0277-typesense-mainline-live-apply` |
 | `serverclaw_skills` | `2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply` |

@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0190-synthetic-transaction-replay-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "d04a8e6ab30f0f4295615f86520af6b572ea4617",
+  "repo_version_context": "0.177.12",
+  "workflow_id": "adr-0190-synthetic-transaction-replay-live-apply",
+  "adr": "0190",
+  "summary": "Implemented ADR 0190 from the latest `origin/main` worktree by adding the synthetic transaction replay harness, wiring it into restore verification, and replaying the restored `docker-runtime-lv3` target from production backups; the governed live path now reaches the guest through Proxmox `qga` when SSH never appears, but the restored docker-runtime services still fail recovery validation, so platform-version advancement remains blocked.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "restore_target",
+      "name": "restore-verify-docker-runtime-lv3",
+      "vmid": 901,
+      "address": "10.20.10.100"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repository implementation tests",
+      "result": "pass",
+      "observed": "`python3 -m py_compile scripts/restore_verification.py scripts/synthetic_transaction_replay.py` passed, `uv run --with pytest --with pyyaml pytest tests/test_synthetic_transaction_replay.py tests/test_restore_verification.py tests/test_restore_verification_windmill.py -q` passed with `13 passed`, and `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` passed after the ADR 0190 workstream surfaces landed."
+    },
+    {
+      "check": "Restore-verification workflow contract",
+      "result": "pass",
+      "observed": "`make workflow-info WORKFLOW=restore-verification`, `make synthetic-transaction-replay SYNTHETIC_REPLAY_ARGS='--target restore-docker-runtime --dry-run'`, and `make restore-verification RESTORE_ARGS='--help'` all exercised the updated workflow, catalog, and Make entrypoints from this isolated worktree."
+    },
+    {
+      "check": "Initial latest-main replay",
+      "result": "partial",
+      "observed": "The first replay from this worktree wrote `receipts/restore-verifications/2026-03-27-ws0190-attempt1.json`, proving the restore path from current production backups but exposing two unrelated live gaps outside ADR 0190 itself: the default 5-minute SSH wait was too short for restored guests, and `backup-lv3` currently has no PBS backup available."
+    },
+    {
+      "check": "Focused qga fallback replay",
+      "result": "pass",
+      "observed": "The focused `docker-runtime-lv3` replay wrote `receipts/restore-verifications/2026-03-27-ws0190-attempt2-qga.json` and showed the new Proxmox guest-agent fallback working end to end: the restored guest never exposed SSH, but the workflow still executed guest-local smoke probes and the full ADR 0190 synthetic replay through `qga`."
+    },
+    {
+      "check": "Restored docker-runtime service health",
+      "result": "fail",
+      "observed": "The final focused replay in `receipts/restore-verifications/2026-03-27.json` still failed the actual recovery target: Keycloak loopback discovery returned connection refused, NetBox and Windmill reset loopback connections, OpenBao remained sealed with HTTP `503`, and all four synthetic control-plane scenarios reported `0/12` successful requests on the restored target even after a 420-second warm-up window."
+    }
+  ],
+  "evidence_refs": [
+    "config/synthetic-transaction-catalog.json",
+    "scripts/synthetic_transaction_replay.py",
+    "scripts/restore_verification.py",
+    "tests/test_synthetic_transaction_replay.py",
+    "tests/test_restore_verification.py",
+    "docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md",
+    "docs/runbooks/backup-restore-verification.md",
+    "docs/runbooks/synthetic-transaction-replay.md",
+    "docs/workstreams/ws-0190-live-apply.md",
+    "receipts/restore-verifications/2026-03-27-ws0190-attempt1.json",
+    "receipts/restore-verifications/2026-03-27-ws0190-attempt2-qga.json",
+    "receipts/restore-verifications/2026-03-27.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This workstream intentionally does not bump `VERSION`, change `changelog.md`, update `README.md`, or advance `versions/stack.yaml` because it is not the protected integration step on `main`.",
+    "ADR 0190 repository implementation is complete on this branch, but `Implemented In Platform Version` remains `not yet` because the restored docker-runtime services themselves are still unhealthy during replay.",
+    "The most actionable follow-up is not more harness work: it is understanding why the restored docker-runtime backup comes up with OpenBao sealed and the other control-plane services still unavailable on loopback even after extended warm-up."
+  ]
+}

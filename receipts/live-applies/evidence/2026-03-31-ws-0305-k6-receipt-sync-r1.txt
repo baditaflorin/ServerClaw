@@ -1,0 +1,16 @@
+syncing remote smoke receipts from /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T094803Z-9cc48e36de6e/repo
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+syncing remote load receipts from /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T101919Z-249dd9d6f1ae/repo
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+---
+receipts/k6/.gitkeep
+receipts/k6/load-keycloak-20260331T101930Z.json
+receipts/k6/load-openfga-20260331T101930Z.json
+receipts/k6/raw/.gitkeep
+receipts/k6/raw/20260331T094543Z-smoke-summary.json
+receipts/k6/raw/20260331T094813Z-smoke-summary.json
+receipts/k6/raw/20260331T101930Z-load-summary.json
+receipts/k6/smoke-keycloak-20260331T094543Z.json
+receipts/k6/smoke-keycloak-20260331T094813Z.json
+receipts/k6/smoke-openfga-20260331T094543Z.json
+receipts/k6/smoke-openfga-20260331T094813Z.json

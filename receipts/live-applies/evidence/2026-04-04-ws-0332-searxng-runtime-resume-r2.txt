@@ -1,0 +1,23 @@
+
+PLAY [Converge the Tailscale operator proxy for SearXNG] ***********************
+skipping: no hosts matched
+
+PLAY [Converge SearXNG and refresh Open WebUI search settings on the Docker runtime VM] ***
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T14:00:24.299Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T14:00:30.983Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.searxng_runtime : Pull the SearXNG images] ******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.searxng_runtime : Pull the SearXNG images","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T14:00:31.080Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.searxng_runtime : Pull the SearXNG images","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T14:00:32.454Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.searxng_runtime : Recreate the SearXNG runtime when config changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.searxng_runtime : Recreate the SearXNG runtime when config changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T14:00:32.488Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [docker-runtime-lv3]: FAILED! => {"msg": "The conditional check 'searxng_runtime_settings_template.changed or searxng_runtime_limiter_template.changed or searxng_runtime_compose_template.changed' failed. The error was: error while evaluating conditional (searxng_runtime_settings_template.changed or searxng_runtime_limiter_template.changed or searxng_runtime_compose_template.changed): 'searxng_runtime_settings_template' is undefined\n\nThe error appears to be in '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/collections/ansible_collections/lv3/platform/roles/searxng_runtime/tasks/main.yml': line 141, column 3, but may\nbe elsewhere in the file depending on the exact syntax problem.\n\nThe offending line appears to be:\n\n\n- name: Recreate the SearXNG runtime when config changes\n  ^ here\n"}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"The conditional check 'searxng_runtime_settings_template.changed or searxng_runtime_limiter_template.changed or searxng_runtime_compose_template.changed' failed. The error was: error while evaluating conditional (searxng_runtime_settings_template.changed or searxng_runtime_limiter_template.changed or searxng_runtime_compose_template.changed): 'searxng_runtime_settings_template' is undefined\n\nThe error appears to be in '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-live-apply/collections/ansible_collections/lv3/platform/roles/searxng_runtime/tasks/main.yml': line 141, column 3, but may\nbe elsewhere in the file depending on the exact syntax problem.\n\nThe offending line appears to be:\n\n\n- name: Recreate the SearXNG runtime when config changes\n  ^ here","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.searxng_runtime : Recreate the SearXNG runtime when config changes","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-04-04T14:00:32.506Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-lv3         : ok=2    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0

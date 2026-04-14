@@ -1,0 +1,196 @@
+{
+  "event_results": [
+    {
+      "event_type": "session_started",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "checklist_item_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "tour_started",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "tour_dismissed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "tour_resumed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "tour_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "checklist_item_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "search_started",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "search_destination_opened",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "checklist_item_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "help_opened",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "help_task_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "checklist_item_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "safe_task_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "checklist_item_completed",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "alert_emitted",
+      "glitchtip": {
+        "emitted": false,
+        "error": "delivery_failed",
+        "level": "error",
+        "message": "Inventory alert",
+        "requested": true
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "alert_acknowledged",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    },
+    {
+      "event_type": "alert_resolved",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "returncode": 0,
+      "status": "ok"
+    }
+  ],
+  "flow_ids": {
+    "alert": "alert-2a604b6e7e",
+    "help": "help-2a604b6e7e",
+    "search": "search-2a604b6e7e",
+    "tour": "tour-2a604b6e7e"
+  },
+  "recorded_at": "2026-04-02T07:55:34.146574Z",
+  "session_id": "session-2a604b6e7e",
+  "visitor_id": "visitor-2a604b6e7e"
+}

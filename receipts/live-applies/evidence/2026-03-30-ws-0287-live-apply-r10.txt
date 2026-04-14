@@ -1,0 +1,694 @@
+
+PLAY [Converge the Tailscale operator proxy for Woodpecker] ********************
+
+PLAY [Ensure Hetzner DNS publication for Woodpecker] ***************************
+
+PLAY [Converge PostgreSQL access for Woodpecker] *******************************
+
+PLAY [Converge Woodpecker on the Docker runtime VM] ****************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:34.710Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:42.560Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:42.584Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:43.775Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Prepare the Gitea OAuth application for Woodpecker] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Prepare the Gitea OAuth application for Woodpecker","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:43.799Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3 -> localhost]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Prepare the Gitea OAuth application for Woodpecker","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:44.413Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Record the Woodpecker runtime inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Record the Woodpecker runtime inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:44.439Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Record the Woodpecker runtime inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:44.491Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Prepare OpenBao agent runtime secret injection for Woodpecker] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: Prepare OpenBao agent runtime secret injection for Woodpecker","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:44.515Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Prepare OpenBao agent runtime secret injection for Woodpecker","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:44.525Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3 => (item=(censored due to no_log))
+
+TASK [lv3.platform.common : Validate OpenBao compose env helper inputs] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate OpenBao compose env helper inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:44.595Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate OpenBao compose env helper inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:44.670Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the controller-local OpenBao init payload exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the controller-local OpenBao init payload exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:44.696Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether the controller-local OpenBao init payload exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:44.986Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Fail when the controller-local OpenBao init payload is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Fail when the controller-local OpenBao init payload is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:45.009Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Fail when the controller-local OpenBao init payload is missing","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:45.021Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Record the controller-local OpenBao init payload] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the controller-local OpenBao init payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:45.045Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Record the controller-local OpenBao init payload","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:45.129Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:45.152Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:45.163Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+
+TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:45.222Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:45.307Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Probe whether the local OpenBao API already answers] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Probe whether the local OpenBao API already answers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:45.362Z","vm":"controller","workflow_id":"ansible-playbook"}
+[WARNING]: reset_connection task does not support when conditional
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Probe whether the local OpenBao API already answers","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:46.442Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Reset SSH connection before recovering the local OpenBao runtime] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Reset SSH connection before recovering the local OpenBao runtime","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.469Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Inspect current OpenBao container networks before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Inspect current OpenBao container networks before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.585Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Inspect current OpenBao container networks before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.601Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Inspect current OpenBao published ports before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Inspect current OpenBao published ports before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.628Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Inspect current OpenBao published ports before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.641Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Record whether the local OpenBao runtime lost its Docker publication state] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record whether the local OpenBao runtime lost its Docker publication state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.665Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Record whether the local OpenBao runtime lost its Docker publication state","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.677Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker nat chain exists before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker nat chain exists before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.719Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker nat chain exists before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.732Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker forward chain exists before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker forward chain exists before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.754Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker forward chain exists before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.767Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Restart Docker when required chains are missing before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Restart Docker when required chains are missing before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.790Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Restart Docker when required chains are missing before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.803Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker nat chain before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker nat chain before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.827Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker nat chain before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.840Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker forward chain before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker forward chain before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.864Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker forward chain before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.877Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker bridge chains are present before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker bridge chains are present before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.900Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker bridge chains are present before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.913Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the local OpenBao Compose file exists before recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the local OpenBao Compose file exists before recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.940Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether the local OpenBao Compose file exists before recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.953Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Fail when the local OpenBao Compose file is missing during recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Fail when the local OpenBao Compose file is missing during recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:46.977Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Fail when the local OpenBao Compose file is missing during recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:46.991Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the OpenBao compose network exists before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the OpenBao compose network exists before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:47.013Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether the OpenBao compose network exists before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:47.026Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Remove the detached OpenBao container before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Remove the detached OpenBao container before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:47.049Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Remove the detached OpenBao container before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:47.063Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Remove the stale OpenBao compose network before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Remove the stale OpenBao compose network before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:47.086Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Remove the stale OpenBao compose network before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:47.099Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recover the local OpenBao stack when the API is unavailable] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao stack when the API is unavailable","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:47.121Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recover the local OpenBao stack when the API is unavailable","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:47.134Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao loopback port after recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao loopback port after recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:47.161Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait for the local OpenBao loopback port after recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:47.174Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao API to answer after recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao API to answer after recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:47.197Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait for the local OpenBao API to answer after recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:47.209Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao API to answer] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao API to answer","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:47.232Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Wait for the local OpenBao API to answer","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:49.941Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the local OpenBao seal status] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the local OpenBao seal status","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:49.966Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the local OpenBao seal status","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:51.110Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Unseal the local OpenBao API when runtime secret injection finds it sealed] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Unseal the local OpenBao API when runtime secret injection finds it sealed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:51.144Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3] => (item=None)
+skipping: [docker-runtime-lv3] => (item=None)
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Unseal the local OpenBao API when runtime secret injection finds it sealed","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:51.161Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Confirm the local OpenBao API is unsealed] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Confirm the local OpenBao API is unsealed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:51.185Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Confirm the local OpenBao API is unsealed","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:52.295Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert the local OpenBao API is unsealed before runtime secret injection] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:52.331Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Assert the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:52.356Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao API to become active] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao API to become active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:52.379Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Wait for the local OpenBao API to become active","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:53.452Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Ensure the OpenBao agent and runtime env directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the OpenBao agent and runtime env directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:53.490Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item={'path': '/opt/woodpecker/openbao', 'mode': '0700'})
+ok: [docker-runtime-lv3] => (item={'path': '/run/lv3-secrets/woodpecker', 'mode': '0700'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the OpenBao agent and runtime env directories exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:54.585Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the current runtime secret payload from OpenBao] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the current runtime secret payload from OpenBao","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:54.619Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the current runtime secret payload from OpenBao","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:55.727Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Store the runtime secret payload in OpenBao] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Store the runtime secret payload in OpenBao","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:55.762Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Store the runtime secret payload in OpenBao","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:55.777Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the current OpenBao policy for the runtime AppRole] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the current OpenBao policy for the runtime AppRole","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:55.801Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the current OpenBao policy for the runtime AppRole","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:56.898Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Upsert the OpenBao policy for the runtime AppRole] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Upsert the OpenBao policy for the runtime AppRole","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:56.936Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Upsert the OpenBao policy for the runtime AppRole","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:06:56.951Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Upsert the OpenBao AppRole for the runtime agent] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Upsert the OpenBao AppRole for the runtime agent","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:56.975Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Upsert the OpenBao AppRole for the runtime agent","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:58.063Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the OpenBao AppRole role ID] ******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the OpenBao AppRole role ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:58.087Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the OpenBao AppRole role ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:59.157Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Persist the OpenBao AppRole role ID] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Persist the OpenBao AppRole role ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:59.180Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Persist the OpenBao AppRole role ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:00.594Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the OpenBao AppRole secret ID already exists on disk] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the OpenBao AppRole secret ID already exists on disk","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:00.620Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether the OpenBao AppRole secret ID already exists on disk","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:01.166Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Generate a durable OpenBao AppRole secret ID] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Generate a durable OpenBao AppRole secret ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:01.189Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Generate a durable OpenBao AppRole secret ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:01.201Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Persist the durable OpenBao AppRole secret ID] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Persist the durable OpenBao AppRole secret ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:01.229Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Persist the durable OpenBao AppRole secret ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:01.241Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent configuration] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:01.265Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Render the OpenBao agent configuration","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:02.732Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent runtime env template] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:02.758Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:02.770Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent runtime env template] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:02.794Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:02.808Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent runtime env template] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:02.830Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:04.316Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Remove legacy compose-directory env files] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Remove legacy compose-directory env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:04.339Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=/opt/woodpecker/woodpecker.env)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Remove legacy compose-directory env files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:04.814Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Render the Woodpecker environment file] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Render the Woodpecker environment file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:04.865Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Render the Woodpecker environment file","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:06.407Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Render the Woodpecker compose file] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Render the Woodpecker compose file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:06.432Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Render the Woodpecker compose file","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:07.888Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Pull the Woodpecker images] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Pull the Woodpecker images","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:07.913Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Pull the Woodpecker images","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:08.811Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Start the Woodpecker stack] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Start the Woodpecker stack","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:08.844Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Start the Woodpecker stack","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:10.623Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Wait for Woodpecker to listen locally] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Wait for Woodpecker to listen locally","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:10.658Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Wait for Woodpecker to listen locally","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:11.323Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Wait for the Woodpecker local health endpoint] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Wait for the Woodpecker local health endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:11.365Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Wait for the Woodpecker local health endpoint","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:12.522Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Render the Woodpecker bootstrap specification locally] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Render the Woodpecker bootstrap specification locally","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:12.557Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Render the Woodpecker bootstrap specification locally","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:12.940Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify Woodpecker health probes] *****************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify Woodpecker health probes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:12.986Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify Woodpecker health probes","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:12.997Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.woodpecker_runtime for docker-runtime-lv3
+
+TASK [lv3.platform.woodpecker_runtime : Verify the Woodpecker containers are running] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Verify the Woodpecker containers are running","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:13.051Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Verify the Woodpecker containers are running","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:13.772Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Assert the Woodpecker server and agent are running] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Assert the Woodpecker server and agent are running","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:13.803Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Assert the Woodpecker server and agent are running","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:13.824Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Verify the Woodpecker local health endpoint] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Verify the Woodpecker local health endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:13.847Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Verify the Woodpecker local health endpoint","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:14.922Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.woodpecker_runtime : Verify the Woodpecker local version endpoint] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.woodpecker_runtime : Verify the Woodpecker local version endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:14.946Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.woodpecker_runtime : Verify the Woodpecker local version endpoint","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:16.017Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the health probe catalog] *******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the health probe catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.067Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the health probe catalog","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:16.140Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested service health probe exists] ************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested service health probe exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.207Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested service health probe exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:16.236Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Record the active service health probe contract] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Record the active service health probe contract","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.259Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Record the active service health probe contract","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:16.283Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run startup verification] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.307Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run startup verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:16.323Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run liveness verification] ***********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.347Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:16.358Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+
+TASK [Run HTTP probe liveness] *************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.411Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run HTTP probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:17.552Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run TCP probe liveness] **************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run TCP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:17.596Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run TCP probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:17.610Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run command probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run command probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:17.633Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run command probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:17.646Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run systemd probe liveness] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run systemd probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:17.669Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run systemd probe liveness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:17.681Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Repair Docker publication before readiness verification] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Repair Docker publication before readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:17.704Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Repair Docker publication before readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:17.718Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Run readiness verification] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:17.741Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:17.753Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook completion audit event] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:17.776Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook completion audit event","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:18.081Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Build the shared playbook notification payload] **************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Build the shared playbook notification payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:18.109Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Build the shared playbook notification payload","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:18.129Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort Mattermost completion notification] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:18.151Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:18.167Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort NATS completion notification command] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:18.189Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:18.204Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY [Publish Woodpecker through the NGINX edge] *******************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:18.212Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:22.483Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:22.486Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:22.501Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:22.505Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:22.544Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:22.547Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:22.565Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:22.569Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => (item=nginx-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "nginx-lv3",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:22.586Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:22.589Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:22.600Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:22.604Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => (item=nginx-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:22.621Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:22.625Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item=nginx-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:24.790Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:24.794Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:24.817Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:24.820Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:25.045Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:25.051Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Emit a best-effort playbook start audit event","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:25.063Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validating arguments against arg spec 'main' - Publish repo-managed public services through the NGINX edge VM.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validating arguments against arg spec 'main' - Publish repo-managed public services through the NGINX edge VM.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:25.067Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validating arguments against arg spec 'main' - Publish repo-managed public services through the NGINX edge VM.","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:25.111Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Resolve public edge site and certificate catalogs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Resolve public edge site and certificate catalogs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:25.114Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Resolve public edge site and certificate catalogs","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:25.142Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validate public edge publication inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validate public edge publication inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:25.146Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validate public edge publication inputs","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:25.172Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Ensure public edge packages are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Ensure public edge packages are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:25.176Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Ensure public edge packages are present","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:26.315Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Ensure public edge directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Ensure public edge directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:26.319Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item=/var/www/lv3-edge)
+ok: [nginx-lv3] => (item=/var/www/lv3-generated)
+ok: [nginx-lv3] => (item=/var/www/lv3-edge-acme)
+ok: [nginx-lv3] => (item=/etc/nginx/sites-available)
+ok: [nginx-lv3] => (item=/etc/nginx/sites-enabled)
+ok: [nginx-lv3] => (item=/etc/letsencrypt/renewal-hooks/deploy)
+ok: [nginx-lv3] => (item=/etc/letsencrypt)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Ensure public edge directories exist","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:29.743Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:29.747Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:29.771Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Install the pinned Certbot Hetzner DNS plugin] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Install the pinned Certbot Hetzner DNS plugin","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:29.775Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Install the pinned Certbot Hetzner DNS plugin","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:29.786Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Write the Hetzner DNS credential file when a controller token is present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Write the Hetzner DNS credential file when a controller token is present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:29.790Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Write the Hetzner DNS credential file when a controller token is present","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:29.801Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Check the Hetzner DNS credential file] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Check the Hetzner DNS credential file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:29.805Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Check the Hetzner DNS credential file","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:29.818Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Assert the Hetzner DNS credential file is available when DNS-01 is enabled] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Assert the Hetzner DNS credential file is available when DNS-01 is enabled","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:29.821Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Assert the Hetzner DNS credential file is available when DNS-01 is enabled","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:29.833Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:29.837Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:38.095Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:38.100Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:39.501Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:39.505Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:46.617Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:46.622Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:47.118Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Read current public edge certificate SANs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Read current public edge certificate SANs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:47.122Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Read current public edge certificate SANs","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:47.637Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Derive current and missing public edge certificate domains] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive current and missing public edge certificate domains","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:47.641Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive current and missing public edge certificate domains","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:47.663Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render NGINX public edge configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render NGINX public edge configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:47.667Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render NGINX public edge configuration","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:50.681Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Enable the public edge site] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Enable the public edge site","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:50.685Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Enable the public edge site","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:51.162Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Disable the default NGINX site] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Disable the default NGINX site","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:51.166Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Disable the default NGINX site","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:51.646Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validate NGINX configuration before issuing certificates] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validate NGINX configuration before issuing certificates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:51.650Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validate NGINX configuration before issuing certificates","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:52.199Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:52.204Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:53.091Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Obtain the public edge Let's Encrypt certificate] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Obtain the public edge Let's Encrypt certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:53.095Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Obtain the public edge Let's Encrypt certificate","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T20:07:53.106Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Expand the public edge Let's Encrypt certificate when domains were added] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Expand the public edge Let's Encrypt certificate when domains were added","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:53.110Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Expand the public edge Let's Encrypt certificate when domains were added","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:11.478Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Install NGINX reload hook for certificate renewal] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Install NGINX reload hook for certificate renewal","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:11.482Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Install NGINX reload hook for certificate renewal","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:12.928Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Re-check whether the public edge certificate exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Re-check whether the public edge certificate exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:12.935Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Re-check whether the public edge certificate exists","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:13.447Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render final NGINX public edge configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render final NGINX public edge configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:13.450Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render final NGINX public edge configuration","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:15.642Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validate final NGINX configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validate final NGINX configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:15.648Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validate final NGINX configuration","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:16.136Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Enable and reload NGINX] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Enable and reload NGINX","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:16.140Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Enable and reload NGINX","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:16.857Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the NGINX service is active] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the NGINX service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:16.861Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the NGINX service is active","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:17.389Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:17.393Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:18.459Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the HTTPS edge entrypoint responds for the probe hostname] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the HTTPS edge entrypoint responds for the probe hostname","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:18.463Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the HTTPS edge entrypoint responds for the probe hostname","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:19.543Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the probe hostname response applies the crawl policy header] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the probe hostname response applies the crawl policy header","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:19.547Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the probe hostname response applies the crawl policy header","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:20.044Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the probe hostname robots.txt disallows crawling] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the probe hostname robots.txt disallows crawling","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:20.049Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the probe hostname robots.txt disallows crawling","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:20.546Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the probe hostname HTML includes the robots meta tag] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the probe hostname HTML includes the robots meta tag","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:20.549Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the probe hostname HTML includes the robots meta tag","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:21.040Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the apex hostname robots.txt is available over TLS] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the apex hostname robots.txt is available over TLS","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:21.043Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the apex hostname robots.txt is available over TLS","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:21.535Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+PLAY [Bootstrap the controller-local Woodpecker auth artifacts and seed repository] ***
+
+TASK [Wait for the public Woodpecker health endpoint to answer] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Wait for the public Woodpecker health endpoint to answer","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:21.543Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Wait for the public Woodpecker health endpoint to answer","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:08:22.204Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Bootstrap the Woodpecker seed repository and auth artifacts] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Bootstrap the Woodpecker seed repository and auth artifacts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:08:22.206Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [localhost]: FAILED! => {"censored": "the output has been hidden due to the fact that 'no_log: true' was specified for this result", "changed": false}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","ignored":false,"level":"ERROR","msg":"Task failed: Bootstrap the Woodpecker seed repository and auth artifacts","service_id":"ansible","target":"localhost","task_status":"failed","trace_id":"background","ts":"2026-03-30T20:08:23.104Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-lv3         : ok=45   changed=1    unreachable=0    failed=0    skipped=33   rescued=0    ignored=0
+localhost                  : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
+nginx-lv3                  : ok=40   changed=5    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0

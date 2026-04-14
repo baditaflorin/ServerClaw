@@ -1,0 +1,8 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+PING 10.10.10.80 (10.10.10.80) 56(84) bytes of data.
+
+--- 10.10.10.80 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+10.10.10.80 dev eth0 src 10.10.10.20 uid 0
+    cache

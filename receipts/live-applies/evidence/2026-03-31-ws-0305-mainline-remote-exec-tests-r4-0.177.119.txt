@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final
+configfile: pytest.ini
+collected 16 items
+
+tests/test_remote_exec.py ......F.........                               [100%]
+
+=================================== FAILURES ===================================
+_______ test_remote_exec_syncs_remote_gate_status_before_local_fallback ________
+
+tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/pytest-of-live/pytest-496/test_remote_exec_syncs_remote_0')
+
+    def test_remote_exec_syncs_remote_gate_status_before_local_fallback(tmp_path: Path) -> None:
+        completed = run_remote_exec(
+            tmp_path,
+            "pre-push-gate",
+            "--local-fallback",
+            extra_env={
+                "REMOTE_EXEC_REMOTE_FAIL": "1",
+                "REMOTE_EXEC_STATUS_PAYLOAD": json.dumps(
+                    {
+                        "status": "failed",
+                        "source": "build-server",
+                        "checks": [
+                            {"id": "policy-validation", "status": "passed"},
+                            {"id": "packer-validate", "status": "runner_unavailable"},
+                        ],
+                        "requested_checks": ["policy-validation", "packer-validate"],
+                    }
+                ),
+            },
+            local_command=(
+                'python3 - <<\'PY\' > "$REMOTE_EXEC_MARKER"\n'
+                "import json\n"
+                "from pathlib import Path\n"
+                "payload = json.loads(Path('.local/validation-gate/last-run.json').read_text())\n"
+                "print(','.join(check['id'] for check in payload['checks'] if check['status'] != 'passed'))\n"
+                "PY"
+            ),
+        )
+
+>       assert completed.returncode == 0
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/..."Expecting value", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n').returncode
+
+tests/test_remote_exec.py:376: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_remote_exec.py::test_remote_exec_syncs_remote_gate_status_before_local_fallback
+=================== 1 failed, 15 passed in 298.78s (0:04:58) ===================

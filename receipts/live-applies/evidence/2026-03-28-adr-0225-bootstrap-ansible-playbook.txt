@@ -1,0 +1,91 @@
+
+PLAY [Bootstrap and maintain server-resident reconciliation on the Proxmox host] ***
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:50.933Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:53.938Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the target host is Debian] ****************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the target host is Debian","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:53.947Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the target host is Debian","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:53.991Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Validating arguments against arg spec 'main' - Bootstrap and maintain a server-resident ansible-pull reconcile loop.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Validating arguments against arg spec 'main' - Bootstrap and maintain a server-resident ansible-pull reconcile loop.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:54.005Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Validating arguments against arg spec 'main' - Bootstrap and maintain a server-resident ansible-pull reconcile loop.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:54.055Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Validate server-resident reconciliation inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Validate server-resident reconciliation inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:54.061Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Validate server-resident reconciliation inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:54.104Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Bootstrap low-privilege Gitea pull access from the controller] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Bootstrap low-privilege Gitea pull access from the controller","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:54.110Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Bootstrap low-privilege Gitea pull access from the controller","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:54.132Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply/collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/tasks/bootstrap_gitea_access.yml for proxmox_florin
+
+TASK [lv3.platform.server_resident_reconciliation : Ensure the controller-local Gitea artifact directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Ensure the controller-local Gitea artifact directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:54.159Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Ensure the controller-local Gitea artifact directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:54.493Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Ensure the controller-local Gitea admin token exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Ensure the controller-local Gitea admin token exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:54.501Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Ensure the controller-local Gitea admin token exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:54.879Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Fail if the controller-local Gitea admin token is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Fail if the controller-local Gitea admin token is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:54.888Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [proxmox_florin]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Fail if the controller-local Gitea admin token is missing","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-28T16:17:54.918Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Check whether the controller-local low-privilege Gitea token already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Check whether the controller-local low-privilege Gitea token already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:54.927Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Check whether the controller-local low-privilege Gitea token already exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:55.226Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Check whether the host-local low-privilege Gitea token already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Check whether the host-local low-privilege Gitea token already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:55.234Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Check whether the host-local low-privilege Gitea token already exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:55.629Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Read the host-local low-privilege Gitea token when the controller copy is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Read the host-local low-privilege Gitea token when the controller copy is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:55.637Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [proxmox_florin]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Read the host-local low-privilege Gitea token when the controller copy is missing","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-28T16:17:55.664Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Restore the controller-local low-privilege Gitea token from the host copy] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Restore the controller-local low-privilege Gitea token from the host copy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:55.673Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [proxmox_florin]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.server_resident_reconciliation : Restore the controller-local low-privilege Gitea token from the host copy","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-28T16:17:55.687Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Recheck the controller-local low-privilege Gitea token after host recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Recheck the controller-local low-privilege Gitea token after host recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:55.694Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Recheck the controller-local low-privilege Gitea token after host recovery","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:55.970Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Read the controller-local Gitea admin token] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Read the controller-local Gitea admin token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:55.978Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Read the controller-local Gitea admin token","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:56.402Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Record the controller-local Gitea admin token] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Record the controller-local Gitea admin token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:56.412Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.server_resident_reconciliation : Record the controller-local Gitea admin token","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-28T16:17:56.453Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.server_resident_reconciliation : Query Gitea for the reconcile user] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.server_resident_reconciliation : Query Gitea for the reconcile user","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-28T16:17:56.462Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [proxmox_florin -> localhost]: FAILED! => {"censored": "the output has been hidden due to the fact that 'no_log: true' was specified for this result", "changed": false}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.server_resident_reconciliation : Query Gitea for the reconcile user","service_id":"ansible","target":"proxmox_florin","task_status":"failed","trace_id":"background","ts":"2026-03-28T16:17:56.962Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+proxmox_florin             : ok=12   changed=0    unreachable=0    failed=1    skipped=3    rescued=0    ignored=0

@@ -1,0 +1,24 @@
+    747  325592 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+ 875173   53122 /usr/bin/python3 /opt/lv3/falco-event-bridge/falco_event_bridge_server.py
+1364122    1490 /usr/bin/python3 /usr/bin/supervisord -c supervisord.conf
+1365188    1488 /usr/local/bin/python3.12 /usr/local/bin/gunicorn --bind 0.0.0.0:11235 --workers 1 --threads 4 --timeout 1800 --graceful-timeout 30 --keep-alive 300 --log-level info --worker-class uvicorn.workers.UvicornWorker server:app
+1365853    1487 /usr/local/bin/python3.12 /usr/local/bin/gunicorn --bind 0.0.0.0:11235 --workers 1 --threads 4 --timeout 1800 --graceful-timeout 30 --keep-alive 300 --log-level info --worker-class uvicorn.workers.UvicornWorker server:app
+1368542    1482 /usr/local/lib/python3.12/site-packages/playwright/driver/node /usr/local/lib/python3.12/site-packages/playwright/driver/package/cli.js run-driver
+1377923    1467 /usr/bin/tini -s -- node ./sandbox/supervisor.mjs
+1378272    1467 node ./sandbox/supervisor.mjs
+1378408    1466 node _build/stubs/app/server/server.js
+1394948    1376 node /usr/local/bin/pm2-runtime start ecosystem.config.cjs
+1396729    1365 node /directus/cli.js
+1398579    1350 /usr/local/bin/python3 -m uvicorn open_webui.main:app --host 0.0.0.0 --port 8080 --forwarded-allow-ips * --workers 1
+1402270    1323 node build/server/index.js
+1403948    1311 /usr/local/bin/node /opt/outline/build/server/index.js
+1408560    1287 python3 manage.py document_consumer
+1437859    1098 windmill
+1438165    1097 windmill
+1438399    1096 python3 pyls_launcher.py
+1438400    1096 bun run dap_debug_service.ts --host 0.0.0.0 --port 3003 --windmill /usr/local/bin/windmill
+1438401    1096 node gateway.mjs
+1486324     785 /usr/local/bin/python3.12 /usr/local/bin/uvicorn api_gateway.main:app --host 0.0.0.0 --port 8083
+1558377     201 windmill
+1564304     147 /srv/venv/bin/python3 /srv/venv/bin/jupyterhub
+1564903     143 node /usr/local/bin/configurable-http-proxy --ip 0.0.0.0 --port 8000 --api-ip 127.0.0.1 --api-port 8001 --error-target http://jupyterhub:8081/hub/error --log-level info

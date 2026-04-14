@@ -1,0 +1,289 @@
+[34m[90mComputing the files to update on the remote to match local (taking wmill.yaml includes/excludes into account)[39m[39m
+[34m[90mRemote version: CE v1.662.0[39m[39m
+[34mremote (lv3) <- local: 5 changes to apply[39m
+[33mWarning: Missing folder.meta.yaml for:
+  - lv3
+Run 'wmill folder add-missing' to create them locally, then push again.[39m
+[34m[33m~ raw_app f/lv3/operator_access_admin.raw_app/App.tsx[90m[33m[39m[39m
+[34mDiff too large to display[39m
+[34m[32m+ raw_app f/lv3/operator_access_admin.raw_app/backend/command_palette_search.yaml[90m[32m[39m[39m
+[34m[32m+ raw_app f/lv3/operator_access_admin.raw_app/commandPalette.ts[90m[32m[39m[39m
+[34m[33m~ raw_app f/lv3/operator_access_admin.raw_app/index.css[90m[33m[39m[39m
+[34m[37m:root {
+  color-scheme: light;
+...
+
+[0m[32m.commandPaletteModal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: start center;
+  padding: 24px 16px;
+  background: rgba(28, 26, 22, 0.38);
+  backdrop-filter: blur(18px);
+}
+
+.commandPaletteShell {
+  width: min(860px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+[cmdk-root].commandPalette {
+  display: grid;
+  gap: 14px;
+  background: rgba(255, 250, 242, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 30px 80px rgba(28, 26, 22, 0.22);
+  padding: 22px;
+}
+
+.commandPaletteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.commandPaletteHeader h2 {
+  margin: 4px 0 0;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.05;
+}
+
+.commandPaletteEyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.commandPaletteClose,
+.commandPaletteShortcut,
+.heroShortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 82px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.commandPaletteClose {
+  cursor: pointer;
+}
+
+.commandPaletteInputRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+[cmdk-input].commandPaletteInput {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: white;
+  color: var(--ink);
+  padding: 16px 18px;
+  font-size: 1.02rem;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+[cmdk-input].commandPaletteInput:focus {
+  border-color: rgba(165, 65, 28, 0.4);
+  box-shadow: 0 0 0 4px rgba(217, 106, 51, 0.12);
+}
+
+[cmdk-list].commandPaletteList {
+  max-height: min(56vh, 560px);
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.commandPaletteStatus,
+[cmdk-empty].commandPaletteEmpty {
+  padding: 10px 12px;
+  color: var(--muted);
+}
+
+.commandPaletteStatusWarning {
+  color: var(--pause);
+}
+
+[cmdk-group].commandPaletteGroup {
+  padding-top: 8px;
+}
+
+[cmdk-group-heading] {
+  padding: 10px 8px 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+[cmdk-item].commandPaletteItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: 0 4px 6px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+[cmdk-item].commandPaletteItem[data-selected="true"] {
+  background: rgba(165, 65, 28, 0.08);
+  border-color: rgba(165, 65, 28, 0.18);
+  transform: translateY(-1px);
+}
+
+.commandPaletteItemCopy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.commandPaletteItemMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.commandPaletteBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(28, 26, 22, 0.06);
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.commandPaletteBadge.highlighted {
+  background: rgba(165, 65, 28, 0.12);
+  color: var(--accent);
+}
+
+.commandPaletteItemLabel {
+  font-weight: 700;
+}
+
+.commandPaletteItemDescription {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.commandPaletteFavorite {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+  color: var(--accent);
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.commandPaletteFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.86rem;
+  padding-top: 4px;
+}
+
+[0m[37m.hero {
+  display: grid;
+...
+
+[0m[32m.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+[0m[37m.heroStats {
+  display: grid;
+...
+
+[0m[32m  .commandPaletteModal {
+    padding: 16px 12px;
+  }
+
+  .commandPaletteHeader,
+  .commandPaletteInputRow,
+  .heroActions,
+  .commandPaletteFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .commandPaletteClose,
+  .commandPaletteShortcut,
+  .heroShortcut {
+    width: fit-content;
+  }
+
+[0m[37m  .tourMeta {
+    justify-items: start;
+...
+}
+[0m[39m
+[34m[33m~ raw_app f/lv3/operator_access_admin.raw_app/package.json[90m[33m[39m[39m
+[34m[37m{
+  "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+[0m[31m    "ag-grid-community": "35.2.0",
+    "ag-grid-react": "35.2.0",
+[0m[37m    "@tanstack/react-query": "^5.85.1",
+    "@tiptap/extension-table": "3.21.0",
+...
+    "@tiptap/starter-kit": "3.21.0",
+[0m[32m    "ag-grid-community": "35.2.0",
+    "ag-grid-react": "35.2.0",
+    "cmdk": "1.1.1",
+[0m[37m    "react": "19.0.0",
+    "react-dom": "19.0.0",
+...
+}
+[0m[39m
+[34m[90mApplying changes to files ...[39m[39m
+[34mfound changes for 1 items with a total of 5 files to process[39m
+[34m[90mLoaded 7 runnables from backend folder[39m[39m
+[34m[90mGenerating fresh policy for app f/lv3/operator_access_admin...[39m[39m
+[34m[1m[33mCreating raw app f/lv3/operator_access_admin bundle...[39m[22m[39m
+[34m[34m📦 Building bundle...[39m[39m
+[34m[33m[wmill-virtual] Intercepted: ./wmill[39m[39m
+[34m[33m[wmill-virtual] Loading virtual module: ./wmill[39m[39m
+[34m[32m✅ Bundle created successfully[39m[39m
+[34m[33m[1mUpdating app f/lv3/operator_access_admin...[22m[39m[39m
+[34m[4m[32m[1m
+Done! All 5 changes pushed to the remote workspace lv3 named lv3 (2013ms)[22m[39m[24m[39m

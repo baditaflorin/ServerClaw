@@ -1,0 +1,2 @@
+Repository data model validation
+Repository data model error: versions/stack.yaml.latest_receipts references unknown receipt '2026-03-31-adr-0274-minio-object-storage-mainline-live-apply'

@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0184-failure-domain-labels-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "7170cd157adaedb865a9c34b28f7e5fbdf1f818f",
+  "repo_version_context": "0.177.12",
+  "workflow_id": "adr-0184-failure-domain-labels-and-anti-affinity-policy-live-apply",
+  "adr": "0184",
+  "summary": "Implemented ADR 0184 in repo truth, replayed the guest-label convergence from the latest-main worktree, verified the new Proxmox tags on the existing managed guests, and recorded the pre-existing PostgreSQL standby drift where VM 151 is still absent on the live host.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "backup-lv3",
+      "vmid": 160,
+      "address": "10.10.10.60"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0184 regression tests",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with jsonschema --with pyyaml pytest -q tests/test_failure_domain_policy.py tests/test_validate_service_catalog.py tests/test_service_redundancy.py tests/test_standby_capacity.py` passed with `17 passed in 0.67s`."
+    },
+    {
+      "check": "Repository data-model validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` passed after regenerating `inventory/group_vars/platform.yml` from the updated host vars."
+    },
+    {
+      "check": "Automation wrapper coverage",
+      "result": "partial",
+      "observed": "`scripts/validate_repo.sh agent-standards` exited 0 but printed arithmetic-syntax errors in its warning helpers, and `scripts/validate_repo.sh data-models` still fails on the existing `ansible_scope_runner.py validate` catalog issue for `playbooks/proxmox-staging-bridge.yml` before reaching the direct ADR 0184 validator."
+    },
+    {
+      "check": "Ansible syntax validation",
+      "result": "pass",
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/proxmox-install.yml --syntax-check --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519` passed."
+    },
+    {
+      "check": "Initial full guest converge",
+      "result": "partial",
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False make provision-guests` reached the updated guest role but failed on existing live drift because `qm status 151` reports `postgres-replica-lv3` missing and template `9002` for `lv3-postgres-host` is absent on the host."
+    },
+    {
+      "check": "Scoped guest label replay",
+      "result": "pass",
+      "observed": "`LV3_RUN_ID=ws0184labels ./scripts/run_with_namespace.sh ansible-playbook -i inventory/hosts.yml playbooks/site.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 --tags guests -e @.local/ws-0184-proxmox-guests-active.json` completed successfully against the existing guest set `110/120/130/140/150/160`."
+    },
+    {
+      "check": "Live Proxmox tag verification",
+      "result": "pass",
+      "observed": "The final `qm config` tag snapshot confirms ADR 0184 labels on `110/120/130/140/150/160`, including `aag-*`, `fd-host-proxmox-florin`, `pc-*`, and the recovery waiver tag on `backup-lv3`."
+    },
+    {
+      "check": "PostgreSQL standby live drift",
+      "result": "partial",
+      "observed": "`qm list` still shows no `151`, and `qm status 151` returns `Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/151.conf' does not exist`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md",
+    "docs/runbooks/failure-domain-policy.md",
+    "docs/workstreams/ws-0184-live-apply.md",
+    "inventory/host_vars/proxmox_florin.yml",
+    "config/environment-topology.json",
+    "scripts/failure_domain_policy.py",
+    "scripts/validate_repository_data_models.py",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml",
+    "tests/test_failure_domain_policy.py",
+    "receipts/live-applies/2026-03-27-adr-0184-failure-domain-policy-report.txt",
+    "receipts/live-applies/2026-03-27-adr-0184-proxmox-tag-verification.txt",
+    "receipts/live-applies/2026-03-27-adr-0184-proxmox-live-state.txt",
+    "receipts/live-applies/2026-03-27-adr-0184-live-apply-summary.md",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "Protected integration files intentionally remain untouched on this workstream branch: `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml` still need a normal merge-to-main decision path.",
+    "The backup guest required one explicit `qm set 160 --tags ...` follow-up after the scoped replay so its live recovery tags matched the repo policy; that manual host command is documented in the summary evidence file.",
+    "The missing `postgres-replica-lv3` object and missing template `9002` are pre-existing live drift outside ADR 0184 and should remain visible until a separate recovery or reprovisioning change repairs them."
+  ]
+}

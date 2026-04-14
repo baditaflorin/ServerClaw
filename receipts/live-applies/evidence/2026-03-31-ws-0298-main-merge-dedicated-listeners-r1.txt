@@ -1,0 +1,5 @@
+artifact-cache-lv3 | UNREACHABLE! => {
+    "changed": false,
+    "msg": "Failed to connect to the host via ssh: ops@10.10.10.80: Permission denied (publickey).",
+    "unreachable": true
+}

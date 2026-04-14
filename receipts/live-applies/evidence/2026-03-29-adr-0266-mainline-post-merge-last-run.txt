@@ -1,0 +1,32 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+{
+  "status": "passed",
+  "source": "windmill-post-merge-local-fallback",
+  "workspace": "/srv/proxmox_florin_server",
+  "manifest": "/srv/proxmox_florin_server/config/validation-gate.json",
+  "executed_at": "2026-03-29T22:24:37.498783+00:00",
+  "checks": [
+    {
+      "id": "local-fallback",
+      "severity": "error",
+      "description": "Run the worker-local validate_repo fallback when runner images are unavailable on the worker host.",
+      "status": "passed",
+      "returncode": 0,
+      "duration_seconds": 20.97,
+      "docker_command": [],
+      "commands": [
+        {
+          "command": "./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals",
+          "returncode": 0
+        },
+        {
+          "command": "uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate",
+          "returncode": 0
+        }
+      ]
+    }
+  ],
+  "requested_checks": [
+    "local-fallback"
+  ]
+}

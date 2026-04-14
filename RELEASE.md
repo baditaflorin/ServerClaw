@@ -1,12 +1,13 @@
-# Release 0.178.140
+# Release 0.178.141
 
 - Date: 2026-04-14
 
 ## Summary
-- centralize shared Python validation helpers across catalog and registry scripts per ADR 0369
+- complete ADR 0370 shared lifecycle helper adoption across the remaining runtime-service wrappers and compose converge paths
+- repair fresh-worktree live-apply bootstrap so shared `.local` identity overlays, generated artifacts, and validation tooling stay aligned during governed replays
 
 ## Platform Impact
-- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+- complete ADR 0370 shared lifecycle adoption and verify the latest-origin/main live replay that promotes the platform to this release
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

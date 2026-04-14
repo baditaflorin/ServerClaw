@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-01-adr-0281-glitchtip-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-01",
+  "recorded_on": "2026-04-01",
+  "recorded_at": "2026-04-01T17:23:30Z",
+  "recorded_by": "codex",
+  "workstream": "ws-0281-live-apply",
+  "service": "glitchtip",
+  "source_branch": "codex/ws-0281-mainline-v2",
+  "source_commit": "2f6602f77b8c7996317150729479e66d3de62475",
+  "repo_version_context": "0.177.132",
+  "platform_version_context": "0.130.82",
+  "result": "partial",
+  "workflow_id": "adr-0281-glitchtip-mainline-live-apply",
+  "adr": "0281",
+  "summary": "Rebased ADR 0281 onto the latest realistic origin/main release train and cut repository version `0.177.132`, then replayed the exact-main GlitchTip automation far enough to reconverge PostgreSQL, Docker runtime recovery, Keycloak, the GlitchTip runtime, and the NGINX publication path from the integrated tree. The final public verification block remains partial because the controller-local quiet-window gate is still competing with concurrent playbooks from other worktrees on `docker-runtime-lv3` and `nginx-lv3`, so platform version `0.130.82` remains the last fully verified mainline truth until that gate clears or the replay is retried in a quiet window.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "GlitchTip public health endpoint",
+      "address": "https://errors.lv3.org/api/0/internal/health/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "GlitchTip public auth configuration",
+      "address": "https://errors.lv3.org/_allauth/browser/v1/config"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "GlitchTip platform findings DSN",
+      "address": "https://errors.lv3.org/api/0/projects/platform-findings/platform-findings/store/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Docker bridge-chain regression coverage for exact-main replay",
+      "result": "pass",
+      "observed": "The GlitchTip exact-main replay initially exposed a Docker bridge-chain assertion mismatch, then the branch-local helper and dependent runtime assertions were corrected and `uv run --with pytest python -m pytest -q tests/test_common_docker_bridge_chains_helper.py tests/test_docker_runtime_role.py tests/test_keycloak_runtime_role.py tests/test_jupyterhub_runtime_role.py tests/test_superset_runtime_role.py tests/test_glitchtip_runtime_role.py tests/test_glitchtip_playbook.py` returned `61 passed in 3.27s`, preserved in `receipts/live-applies/evidence/2026-04-01-adr-0281-docker-bridge-chain-fix-tests-r2-0.177.132.txt`."
+    },
+    {
+      "check": "Exact-main GlitchTip replay from the integrated release tree",
+      "result": "partial",
+      "observed": "The first integrated replay failed in `lv3.platform.common` after Docker recovered its chains, preserved in `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-live-apply-r1-0.177.132.txt`. The corrected replay in `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-live-apply-r2-0.177.132.txt` then progressed through PostgreSQL, Docker-runtime recovery, Keycloak, the GlitchTip runtime, repo-managed org/team/project bootstrap, and NGINX publication before stopping at the final controller-local quiet-window gate for public verification."
+    },
+    {
+      "check": "Controller-local quiet-window for public verification",
+      "result": "partial",
+      "observed": "The first 30-minute `scripts/await_ansible_quiet.py` wait timed out while concurrent `ansible-playbook` processes from `ws-0303-main-integration` and `ws-0286-live-apply-r2` continued touching `docker-runtime-lv3` and/or `nginx-lv3`; when the playbook entered its second 30-minute retry wait, the replay was manually stopped to avoid consuming shared-host capacity without a realistic path to fresh public verification. The blocker snapshot and operator stop note are preserved in `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-quiet-window-blocked-r1-0.177.132.txt` and `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-manual-stop-r1-0.177.132.txt`."
+    },
+    {
+      "check": "Same-branch public surface, OIDC handoff, and event-ingest proof before the exact-main rerun",
+      "result": "partial",
+      "observed": "Earlier on the same branch, before the `0.177.132` release cut, `errors.lv3.org` already re-verified with the correct certificate and public health endpoint, the public auth config exposed the `LV3 Keycloak` OIDC handoff, and the platform-findings smoke event reached the GlitchTip project; those supporting branch receipts are `receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt`, `receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt`, and `receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt`. The exact-main `0.177.132` replay has not yet reproduced those public checks because the quiet-window gate has not cleared."
+    },
+    {
+      "check": "Integrated repository automation and validation bundle",
+      "result": "partial",
+      "observed": "`make validate` advanced through syntax checks, YAML lint, role-argument validation, ansible-lint, idempotency policy, shell lint, JSON validation, Semgrep, dependency direction, health-probe contracts, alert rules, OpenTofu, and repository data models, then failed only because `versions/stack.yaml` already referenced this receipt before the file existed. That first integrated run is preserved in `receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-validate-r1-0.177.132.txt`; the validate, remote-validate, pre-push, and build-server bundle still needs a final rerun after this receipt and the exact-main live result settle."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "build/platform-manifest.json",
+    "docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md",
+    "docs/release-notes/0.177.132.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/configure-glitchtip.md",
+    "docs/workstreams/ws-0281-live-apply.md",
+    "workstreams.yaml",
+    "versions/stack.yaml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml",
+    "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/jupyterhub_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/superset_runtime/tasks/main.yml",
+    "tests/test_common_docker_bridge_chains_helper.py",
+    "tests/test_docker_runtime_role.py",
+    "tests/test_keycloak_runtime_role.py",
+    "tests/test_jupyterhub_runtime_role.py",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-release-write-r1-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-docker-bridge-chain-fix-tests-r1-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-docker-bridge-chain-fix-tests-r2-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-live-apply-r1-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-live-apply-r2-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-quiet-window-blocked-r1-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-manual-stop-r1-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-mainline-validate-r1-0.177.132.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-current-public-surface-r2-0.177.129.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-public-auth-config-r1-0.177.129.txt",
+    "receipts/live-applies/evidence/2026-04-01-adr-0281-event-smoke-r2-0.177.129.txt"
+  ],
+  "notes": [
+    "This provisional mainline receipt exists so the integrated `0.177.132` release tree truthfully references a real artifact while the exact-main public verification gate is still blocked by concurrent playbooks on shared hosts.",
+    "Platform version remains `0.130.82` in this receipt because the final exact-main public verification and event-ingest rerun have not yet completed from the integrated release tree.",
+    "origin/main advanced again to `6bf10bdd178871e44df4af5285ac7084a311869f` at repository version `0.177.132` while this branch was waiting on the quiet-window gate, so any eventual merge will require a fresh rebase and a new release-surface refresh even though this branch-local receipt already exists.",
+    "Once the controller-local quiet window clears, this receipt should be updated in place with the final exact-main public verification receipts, the integrated event-smoke proof, the final repo-automation bundle, and the promoted platform version if verification succeeds."
+  ]
+}

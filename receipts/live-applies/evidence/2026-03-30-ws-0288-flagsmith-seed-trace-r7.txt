@@ -1,0 +1,47 @@
+
+PLAY [Trace Flagsmith seed reconcile on docker-runtime-lv3] ********************
+
+TASK [Run the seed helper through a traceback wrapper] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Run the seed helper through a traceback wrapper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:35:14.030Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [docker-runtime-lv3]: FAILED! => {"ansible_facts": {"discovered_interpreter_python": "/usr/bin/python3.13"}, "changed": false, "cmd": "set -euo pipefail\npython3 - <<'PY'\nimport argparse\nimport importlib.util\nimport os\nimport traceback\nfrom pathlib import Path\n\nscript_path = Path(os.environ[\"SCRIPT_PATH\"])\nspec = importlib.util.spec_from_file_location(\"flagsmith_seed_debug\", script_path)\nmodule = importlib.util.module_from_spec(spec)\nassert spec.loader is not None\nspec.loader.exec_module(module)\n\nargs = argparse.Namespace(\n    base_url=os.environ[\"BASE_URL\"],\n    admin_email=os.environ[\"ADMIN_EMAIL\"],\n    admin_password_file=Path(os.environ[\"ADMIN_PASSWORD_FILE\"]),\n    organisation_name=os.environ[\"ORGANISATION_NAME\"],\n    project_name=os.environ[\"PROJECT_NAME\"],\n    environment_spec_json=os.environ[\"ENVIRONMENT_SPEC_JSON\"],\n    feature_spec_json=os.environ[\"FEATURE_SPEC_JSON\"],\n)\ntry:\n    raise SystemExit(module.reconcile(args))\nexcept SystemExit:\n    raise\nexcept Exception:\n    traceback.print_exc()\n    raise\nPY\n", "delta": "0:00:01.526409", "end": "2026-03-30 18:35:18.261679", "msg": "non-zero return code", "rc": 1, "start": "2026-03-30 18:35:16.735270", "stderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 23, in <module>\n  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile\n    \"id\": int(feature_state[\"id\"]),\n              ~~~~~~~~~~~~~^^^^^^\nKeyError: 'id'\nTraceback (most recent call last):\n  File \"<stdin>\", line 23, in <module>\n  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile\n    \"id\": int(feature_state[\"id\"]),\n              ~~~~~~~~~~~~~^^^^^^\nKeyError: 'id'", "stderr_lines": ["Traceback (most recent call last):", "  File \"<stdin>\", line 23, in <module>", "  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile", "    \"id\": int(feature_state[\"id\"]),", "              ~~~~~~~~~~~~~^^^^^^", "KeyError: 'id'", "Traceback (most recent call last):", "  File \"<stdin>\", line 23, in <module>", "  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile", "    \"id\": int(feature_state[\"id\"]),", "              ~~~~~~~~~~~~~^^^^^^", "KeyError: 'id'"], "stdout": "", "stdout_lines": []}
+...ignoring
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":true,"level":"ERROR","msg":"Task failed: Run the seed helper through a traceback wrapper","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-30T18:35:18.350Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Show seed trace result] **************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Show seed trace result","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:35:18.352Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "seed_trace": {
+        "ansible_facts": {
+            "discovered_interpreter_python": "/usr/bin/python3.13"
+        },
+        "changed": false,
+        "cmd": "set -euo pipefail\npython3 - <<'PY'\nimport argparse\nimport importlib.util\nimport os\nimport traceback\nfrom pathlib import Path\n\nscript_path = Path(os.environ[\"SCRIPT_PATH\"])\nspec = importlib.util.spec_from_file_location(\"flagsmith_seed_debug\", script_path)\nmodule = importlib.util.module_from_spec(spec)\nassert spec.loader is not None\nspec.loader.exec_module(module)\n\nargs = argparse.Namespace(\n    base_url=os.environ[\"BASE_URL\"],\n    admin_email=os.environ[\"ADMIN_EMAIL\"],\n    admin_password_file=Path(os.environ[\"ADMIN_PASSWORD_FILE\"]),\n    organisation_name=os.environ[\"ORGANISATION_NAME\"],\n    project_name=os.environ[\"PROJECT_NAME\"],\n    environment_spec_json=os.environ[\"ENVIRONMENT_SPEC_JSON\"],\n    feature_spec_json=os.environ[\"FEATURE_SPEC_JSON\"],\n)\ntry:\n    raise SystemExit(module.reconcile(args))\nexcept SystemExit:\n    raise\nexcept Exception:\n    traceback.print_exc()\n    raise\nPY\n",
+        "delta": "0:00:01.526409",
+        "end": "2026-03-30 18:35:18.261679",
+        "failed": true,
+        "msg": "non-zero return code",
+        "rc": 1,
+        "start": "2026-03-30 18:35:16.735270",
+        "stderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 23, in <module>\n  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile\n    \"id\": int(feature_state[\"id\"]),\n              ~~~~~~~~~~~~~^^^^^^\nKeyError: 'id'\nTraceback (most recent call last):\n  File \"<stdin>\", line 23, in <module>\n  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile\n    \"id\": int(feature_state[\"id\"]),\n              ~~~~~~~~~~~~~^^^^^^\nKeyError: 'id'",
+        "stderr_lines": [
+            "Traceback (most recent call last):",
+            "  File \"<stdin>\", line 23, in <module>",
+            "  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile",
+            "    \"id\": int(feature_state[\"id\"]),",
+            "              ~~~~~~~~~~~~~^^^^^^",
+            "KeyError: 'id'",
+            "Traceback (most recent call last):",
+            "  File \"<stdin>\", line 23, in <module>",
+            "  File \"/opt/flagsmith/flagsmith_seed.py\", line 453, in reconcile",
+            "    \"id\": int(feature_state[\"id\"]),",
+            "              ~~~~~~~~~~~~~^^^^^^",
+            "KeyError: 'id'"
+        ],
+        "stdout": "",
+        "stdout_lines": []
+    }
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Show seed trace result","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:35:18.409Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-lv3         : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1

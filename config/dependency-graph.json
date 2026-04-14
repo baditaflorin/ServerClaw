@@ -283,8 +283,8 @@
       "id": "livekit",
       "service": "livekit",
       "name": "LiveKit",
-      "vm": "docker-runtime",
-      "tier": 2,
+      "vm": "runtime-comms",
+      "tier": 1,
       "category": "communication",
       "adr": "0293"
     },
@@ -1264,12 +1264,6 @@
       "to": "postgres",
       "type": "hard",
       "description": "LiteLLM Proxy stores virtual keys and usage data in PostgreSQL."
-    },
-    {
-      "from": "livekit",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "LiveKit runs as a repo-managed Docker Compose workload on docker-runtime."
     },
     {
       "from": "livekit",

@@ -2,7 +2,7 @@
 # Purpose: Converge the LiveKit runtime, OpenBao-backed API credentials, and the repo-managed verification helper.
 # Use case: Run during LiveKit deploys, updates, and recovery when livekit.{{ platform_domain }} and the guest media listeners must match repo truth.
 # Inputs: Runtime paths, image pins, controller-local credential files, and OpenBao integration settings.
-# Outputs: A running LiveKit stack on docker-runtime plus controller-local API credentials mirrored for public verification.
+# Outputs: A running LiveKit stack on runtime-comms plus controller-local API credentials mirrored for public verification.
 # Idempotency: Partially idempotent because controller-local API credentials are generated once and the runtime may be recreated during updates.
 # Dependencies: ADR 0165, ADR 0021, ADR 0077, and ADR 0293.
 - name: Derive Livekit conventional defaults from the service registry
@@ -82,6 +82,25 @@
     group: root
     mode: "0755"
 
+- name: Probe whether the dedicated OpenBao API is reachable from the LiveKit runtime
+  ansible.builtin.uri:
+    url: "{{ livekit_runtime_openbao_address }}/v1/sys/health"
+    method: GET
+    return_content: false
+    status_code:
+      - 200
+      - 429
+      - 472
+      - 473
+      - 501
+      - 503
+    timeout: 5
+  register: livekit_runtime_remote_openbao_probe
+  retries: 12
+  delay: 5
+  until: livekit_runtime_remote_openbao_probe.status in [200, 429, 472, 473, 501, 503]
+  changed_when: false
+
 - name: Prepare OpenBao agent runtime secret injection for LiveKit
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -113,6 +132,8 @@
     common_openbao_compose_env_role_id_file: "{{ livekit_openbao_agent_dir }}/role_id"
     common_openbao_compose_env_secret_id_file: "{{ livekit_openbao_agent_dir }}/secret_id"
     common_openbao_compose_env_image: "{{ livekit_openbao_agent_image }}"
+    common_openbao_compose_env_openbao_address: "{{ livekit_runtime_openbao_address }}"
+    common_openbao_compose_env_manage_local_openbao_runtime: false
     common_openbao_compose_env_legacy_env_files:
       - "{{ livekit_legacy_env_file }}"
   no_log: true
@@ -124,6 +145,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: livekit_config_template
 
 - name: Install the LiveKit verification helper on the runtime host
   ansible.builtin.copy:
@@ -142,22 +164,7 @@
     mode: "0644"
   vars:
     ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
-
-- name: Pull the LiveKit image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ livekit_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ livekit_site_dir }}"
-  register: livekit_pull
-  changed_when: >-
-    'Pulling' in livekit_pull.stdout
-    or 'Downloaded newer image' in livekit_pull.stdout
-    or 'Pull complete' in livekit_pull.stdout
+  register: livekit_compose_template
 
 - name: Start the LiveKit OpenBao agent
   ansible.builtin.command:
@@ -195,24 +202,17 @@
   no_log: true
 
 - name: Converge the LiveKit runtime stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ livekit_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-      - livekit
-  args:
-    chdir: "{{ livekit_site_dir }}"
-  register: livekit_up
-  changed_when: >-
-    'Creating' in livekit_up.stdout
-    or 'Recreating' in livekit_up.stdout
-    or 'Starting' in livekit_up.stdout
-    or 'Running' in livekit_up.stdout
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ livekit_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ livekit_site_dir }}"
+    common_docker_compose_converge_service_name: livekit
+    common_docker_compose_converge_template_results:
+      - "{{ livekit_config_template }}"
+      - "{{ livekit_compose_template }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
 
 - name: Wait for the LiveKit signal listener
   ansible.builtin.wait_for:

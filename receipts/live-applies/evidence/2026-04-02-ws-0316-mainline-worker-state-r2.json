@@ -1,0 +1,164 @@
+{
+  "last_events": [
+    {
+      "checklist_item": null,
+      "duration_ms": null,
+      "event_id": "94c9a76a58be4722ab4f02aa1e9cd9e9",
+      "event_type": "alert_emitted",
+      "flow_id": "alert-2a604b6e7e",
+      "glitchtip": {
+        "emitted": false,
+        "error": "delivery_failed",
+        "level": "error",
+        "message": "Inventory alert",
+        "requested": true
+      },
+      "milestone": "inventory",
+      "occurred_at": "2026-04-02T07:48:09.275484Z",
+      "plausible": {},
+      "properties": {
+        "alert_source": "inventory"
+      },
+      "recorded_at": "2026-04-02T07:55:29Z",
+      "result": null,
+      "route": "https://ops.lv3.org/journeys/operator-access-admin/alert",
+      "schema_version": 1,
+      "session_id": "session-2a604b6e7e",
+      "stage": "alert",
+      "surface": "windmill.operator_access_admin",
+      "visitor_id": "visitor-2a604b6e7e"
+    },
+    {
+      "checklist_item": null,
+      "duration_ms": null,
+      "event_id": "c35d70d896e14f98be4f7682e51ceafb",
+      "event_type": "alert_acknowledged",
+      "flow_id": "alert-2a604b6e7e",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "milestone": "inventory",
+      "occurred_at": "2026-04-02T07:48:19.275484Z",
+      "plausible": {},
+      "properties": {
+        "alert_source": "inventory"
+      },
+      "recorded_at": "2026-04-02T07:55:31Z",
+      "result": null,
+      "route": "https://ops.lv3.org/journeys/operator-access-admin/alert",
+      "schema_version": 1,
+      "session_id": "session-2a604b6e7e",
+      "stage": "alert",
+      "surface": "windmill.operator_access_admin",
+      "visitor_id": "visitor-2a604b6e7e"
+    },
+    {
+      "checklist_item": null,
+      "duration_ms": null,
+      "event_id": "fe849c1f19f64293a0b1426ba53bf7ee",
+      "event_type": "alert_resolved",
+      "flow_id": "alert-2a604b6e7e",
+      "glitchtip": {
+        "emitted": false,
+        "requested": false
+      },
+      "milestone": "inventory_refreshed",
+      "occurred_at": "2026-04-02T07:49:19.275484Z",
+      "plausible": {},
+      "properties": {
+        "alert_source": "inventory"
+      },
+      "recorded_at": "2026-04-02T07:55:33Z",
+      "result": null,
+      "route": "https://ops.lv3.org/journeys/operator-access-admin/alert",
+      "schema_version": 1,
+      "session_id": "session-2a604b6e7e",
+      "stage": "alert",
+      "surface": "windmill.operator_access_admin",
+      "visitor_id": "visitor-2a604b6e7e"
+    }
+  ],
+  "latest_report": {
+    "failure_signals": {
+      "glitchtip_events": 0
+    },
+    "generated_at": "2026-04-02T07:55:34Z",
+    "population": {
+      "events": 52,
+      "sessions": 3,
+      "visitors": 3
+    },
+    "route_aggregates": {
+      "pageviews": {
+        "/journeys/operator-access-admin/alert": 2,
+        "/journeys/operator-access-admin/checklist": 2,
+        "/journeys/operator-access-admin/help": 2,
+        "/journeys/operator-access-admin/help-success": 2,
+        "/journeys/operator-access-admin/resume": 2,
+        "/journeys/operator-access-admin/safe-task": 2,
+        "/journeys/operator-access-admin/search": 2,
+        "/journeys/operator-access-admin/search-result": 2,
+        "/journeys/operator-access-admin/start": 2
+      },
+      "site_domain": "ops.lv3.org",
+      "status": "ok",
+      "window_days": 30
+    },
+    "scorecards": {
+      "alert_handoffs": {
+        "acknowledged_alerts": 3,
+        "alerts_emitted": 3,
+        "median_acknowledgement_seconds": 15,
+        "median_resolution_seconds": 45,
+        "resolved_alerts": 3,
+        "status": "ok"
+      },
+      "help_to_successful_recovery": {
+        "help_opens": 3,
+        "median_success_seconds": 30,
+        "status": "ok",
+        "success_rate": 100.0,
+        "successful_help_flows": 3
+      },
+      "onboarding_checklist_completion": {
+        "completed_visitors": 3,
+        "completion_rate": 100.0,
+        "median_completion_seconds": 240,
+        "started_visitors": 3,
+        "status": "ok"
+      },
+      "resumable_task_completion": {
+        "completed_after_resume": 3,
+        "completion_rate": 100.0,
+        "interrupted_flows": 3,
+        "resumed_flows": 3,
+        "status": "ok"
+      },
+      "search_to_destination_success": {
+        "median_success_seconds": 30,
+        "started_searches": 3,
+        "status": "ok",
+        "success_rate": 100.0,
+        "successful_searches": 3
+      },
+      "time_to_first_safe_action": {
+        "median_seconds": 720,
+        "sample_size": 3,
+        "status": "ok"
+      }
+    },
+    "sources": {
+      "latest_report_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json",
+      "ledger_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-events.jsonl",
+      "plausible_site_domain": "ops.lv3.org"
+    },
+    "status": "ok",
+    "surface": "windmill.operator_access_admin",
+    "window_days": 30
+  },
+  "latest_report_exists": true,
+  "latest_report_path": "/srv/proxmox_florin_server/.local/state/journey-analytics/operator-access-admin-latest.json",
+  "ledger_exists": true,
+  "ledger_line_count": 52
+}

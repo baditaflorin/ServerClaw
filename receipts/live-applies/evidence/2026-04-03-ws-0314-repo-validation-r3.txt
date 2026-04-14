@@ -1,0 +1,20 @@
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/tasks/main.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml: outside declared owned surfaces for ws-0314-live-apply
+- collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml: outside declared owned surfaces for ws-0314-live-apply
+- inventory/group_vars/postgres_guests.yml: outside declared owned surfaces for ws-0314-live-apply
+- inventory/host_vars/proxmox_florin.yml: outside declared owned surfaces for ws-0314-live-apply
+- playbooks/openbao.yml: outside declared owned surfaces for ws-0314-live-apply
+- playbooks/runtime-control-pool.yml: outside declared owned surfaces for ws-0314-live-apply
+- receipts/sbom/host-runtime-control-lv3-2026-04-03.cdx.json: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_mail_platform_runtime_role.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_openbao_playbook.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_openbao_runtime_role.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_postgres_vm_access_policy.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_postgres_vm_config.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_proxmox_network_role.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_runtime_control_pool_playbook.py: outside declared owned surfaces for ws-0314-live-apply
+- tests/test_step_ca_runtime_role.py: outside declared owned surfaces for ws-0314-live-apply

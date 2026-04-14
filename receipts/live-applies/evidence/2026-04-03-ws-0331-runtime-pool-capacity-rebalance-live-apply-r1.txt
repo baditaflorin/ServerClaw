@@ -1,0 +1,353 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=live-apply-service
+Preflight workflow: live-apply-service
+Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
+Bootstrap manifest: controller-local-base
+Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/.local/packer-plugin-cache
+Bootstrap manifest: shared-edge-generated-portals
+Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
+PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/build/ops-portal via `make generate-ops-portal`
+PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/build/changelog-portal via `make generate-changelog-portal`
+PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/build/docs-portal via `make docs`
+Result: PASS (live-apply-service)
+/Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/scripts/canonical_truth.py --check
+Canonical truth OK
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/scripts/interface_contracts.py --check-live-apply "service:runtime-pool-capacity-rebalance"
+Live apply contract OK: service:runtime-pool-capacity-rebalance -> playbooks/services/runtime-pool-capacity-rebalance.yml
+{
+  "ts": "2026-04-03T00:01:05Z",
+  "actor": {
+    "class": "operator",
+    "id": "live"
+  },
+  "surface": "manual",
+  "action": "promotion_bypassed",
+  "target": "runtime-pool-capacity-rebalance",
+  "outcome": "success",
+  "correlation_id": "break-glass:service:runtime-pool-capacity-rebalance:20260403T000105Z",
+  "evidence_ref": "docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md"
+}
+INFO live-apply-service: skipping service-catalog gates for non-catalog playbook 'runtime-pool-capacity-rebalance'
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=1ff74de9393644d798199fccb6589200 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/inventory/hosts.yml --run-id c8d4a818bfd74255bf11df660c9523fb --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/playbooks/services/runtime-pool-capacity-rebalance.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=ecc4dd3589c14fce995bfc71f629e6ae  -e bypass_promotion=true
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/playbooks/services/runtime-pool-capacity-rebalance.yml (env=production)
+Running scoped playbook: playbooks/services/runtime-pool-capacity-rebalance.yml limit=proxmox_florin,artifact-cache-lv3,coolify-lv3,docker-build-lv3,docker-runtime-lv3 shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0331-runtime-control-live-apply/.ansible/shards/c8d4a818bfd74255bf11df660c9523fb/runtime-pool-capacity-rebalance-production.json
+
+PLAY [Rebalance the existing runtime-supporting VMs on the Proxmox host] *******
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:11.272Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:14.496Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:14.504Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:14.534Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:14.542Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:14.580Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Ensure snippets directory exists] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:14.589Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:15.047Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validate each guest references a declared template] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:15.054Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=docker-runtime-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 4,
+        "disk_gb": 160,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.20",
+        "macaddr": "BC:24:11:AA:99:7C",
+        "memory_mb": 18432,
+        "name": "docker-runtime-lv3",
+        "packages": [
+            "docker.io"
+        ],
+        "placement": {
+            "anti_affinity_group": "runtime-shared",
+            "co_location_exceptions": [],
+            "failure_domain": "host:proxmox_florin",
+            "placement_class": "primary"
+        },
+        "proxmox_firewall_enabled": false,
+        "role": "docker-runtime",
+        "tags": [
+            "docker",
+            "runtime",
+            "lv3"
+        ],
+        "template_key": "lv3-docker-host",
+        "vmid": 120
+    },
+    "msg": "All assertions passed"
+}
+ok: [proxmox_florin] => (item=docker-build-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 12,
+        "disk_gb": 160,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.30",
+        "macaddr": "BC:24:11:0F:8A:F2",
+        "memory_mb": 12288,
+        "name": "docker-build-lv3",
+        "packages": [
+            "docker.io",
+            "git",
+            "make",
+            "build-essential",
+            "rsync"
+        ],
+        "placement": {
+            "anti_affinity_group": "build-jobs",
+            "co_location_exceptions": [],
+            "failure_domain": "host:proxmox_florin",
+            "placement_class": "primary"
+        },
+        "role": "docker-build",
+        "tags": [
+            "docker",
+            "build",
+            "lv3"
+        ],
+        "template_key": "lv3-docker-host",
+        "vmid": 130
+    },
+    "msg": "All assertions passed"
+}
+ok: [proxmox_florin] => (item=coolify-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 4,
+        "disk_gb": 96,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.70",
+        "macaddr": "BC:24:11:C7:84:19",
+        "memory_mb": 6144,
+        "name": "coolify-lv3",
+        "packages": [
+            "docker.io",
+            "git"
+        ],
+        "placement": {
+            "anti_affinity_group": "paas-control-plane",
+            "co_location_exceptions": [],
+            "failure_domain": "host:proxmox_florin",
+            "placement_class": "primary"
+        },
+        "role": "coolify",
+        "tags": [
+            "paas",
+            "coolify",
+            "lv3"
+        ],
+        "template_key": "lv3-debian-base",
+        "vmid": 170
+    },
+    "msg": "All assertions passed"
+}
+ok: [proxmox_florin] => (item=artifact-cache-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 4,
+        "disk_gb": 160,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.80",
+        "macaddr": "BC:24:11:18:AC:80",
+        "memory_mb": 4096,
+        "name": "artifact-cache-lv3",
+        "packages": [
+            "docker.io"
+        ],
+        "placement": {
+            "anti_affinity_group": "artifact-cache-plane",
+            "co_location_exceptions": [],
+            "failure_domain": "host:proxmox_florin",
+            "placement_class": "primary"
+        },
+        "role": "artifact-cache",
+        "tags": [
+            "artifact-cache",
+            "cache",
+            "docker",
+            "lv3"
+        ],
+        "template_key": "lv3-debian-base",
+        "vmid": 180
+    },
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:15.119Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Build failure-domain live label map] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:15.129Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:15.154Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:15.162Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=docker-runtime-lv3)
+changed: [proxmox_florin] => (item=docker-build-lv3)
+changed: [proxmox_florin] => (item=coolify-lv3)
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:23.461Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Check which guest VMs already exist] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:23.473Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=docker-runtime-lv3)
+ok: [proxmox_florin] => (item=docker-build-lv3)
+ok: [proxmox_florin] => (item=coolify-lv3)
+ok: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:29.527Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Read current guest configurations] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:29.540Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=docker-runtime-lv3)
+ok: [proxmox_florin] => (item=docker-build-lv3)
+ok: [proxmox_florin] => (item=coolify-lv3)
+ok: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:33.463Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Clone guest VMs from template] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:33.471Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [proxmox_florin] => (item=docker-runtime-lv3)
+skipping: [proxmox_florin] => (item=docker-build-lv3)
+skipping: [proxmox_florin] => (item=coolify-lv3)
+skipping: [proxmox_florin] => (item=artifact-cache-lv3)
+skipping: [proxmox_florin]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-03T00:01:33.505Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Resize guest disks on first clone] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:33.513Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [proxmox_florin] => (item=docker-runtime-lv3)
+skipping: [proxmox_florin] => (item=docker-build-lv3)
+skipping: [proxmox_florin] => (item=coolify-lv3)
+skipping: [proxmox_florin] => (item=artifact-cache-lv3)
+skipping: [proxmox_florin]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-03T00:01:33.545Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:33.553Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=docker-runtime-lv3)
+changed: [proxmox_florin] => (item=docker-build-lv3)
+changed: [proxmox_florin] => (item=coolify-lv3)
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:39.621Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Attach additional guest disks when declared] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:39.629Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [proxmox_florin]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-04-03T00:01:39.654Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:39.661Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=docker-runtime-lv3)
+changed: [proxmox_florin] => (item=docker-build-lv3)
+changed: [proxmox_florin] => (item=coolify-lv3)
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:45.150Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Start guest VMs] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:45.157Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=docker-runtime-lv3)
+ok: [proxmox_florin] => (item=docker-build-lv3)
+ok: [proxmox_florin] => (item=coolify-lv3)
+ok: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:01:49.211Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [Restart each rebalanced guest so the new memory setting takes effect] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: Restart each rebalanced guest so the new memory setting takes effect","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:01:49.230Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=docker-runtime-lv3)
+changed: [proxmox_florin] => (item=docker-build-lv3)
+changed: [proxmox_florin] => (item=coolify-lv3)
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Restart each rebalanced guest so the new memory setting takes effect","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:00.197Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [Verify the rebalanced guest memory from Proxmox] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify the rebalanced guest memory from Proxmox","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:02:00.205Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=docker-runtime-lv3)
+ok: [proxmox_florin] => (item=docker-build-lv3)
+ok: [proxmox_florin] => (item=coolify-lv3)
+ok: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify the rebalanced guest memory from Proxmox","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:05.327Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+PLAY [Verify the rebalanced guests come back with SSH and Docker] **************
+
+TASK [Wait for SSH after the rebalance restart] ********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Wait for SSH after the rebalance restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:02:05.334Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Wait for SSH after the rebalance restart","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:08.582Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Wait for SSH after the rebalance restart","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:08.630Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Wait for SSH after the rebalance restart","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:08.805Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Wait for SSH after the rebalance restart","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:11.877Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Gather facts after the rebalance restart] ********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gather facts after the rebalance restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:02:11.880Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gather facts after the rebalance restart","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:13.654Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gather facts after the rebalance restart","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:13.710Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gather facts after the rebalance restart","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:14.895Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gather facts after the rebalance restart","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:14.898Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify Docker is active on the rebalanced guest] *************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify Docker is active on the rebalanced guest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:02:14.901Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [docker-build-lv3]: FAILED! => {"changed": false, "cmd": ["systemctl", "is-active", "docker.service"], "delta": "0:00:00.009864", "end": "2026-04-03 00:02:14.929812", "failed_when_result": true, "msg": "non-zero return code", "rc": 3, "start": "2026-04-03 00:02:14.919948", "stderr": "", "stderr_lines": [], "stdout": "inactive", "stdout_lines": ["inactive"]}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: Verify Docker is active on the rebalanced guest","service_id":"ansible","target":"docker-build-lv3","task_status":"failed","trace_id":"background","ts":"2026-04-03T00:02:15.432Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+fatal: [coolify-lv3]: FAILED! => {"changed": false, "cmd": ["systemctl", "is-active", "docker.service"], "delta": "0:00:00.008026", "end": "2026-04-03 00:02:15.106933", "failed_when_result": true, "msg": "non-zero return code", "rc": 3, "start": "2026-04-03 00:02:15.098907", "stderr": "", "stderr_lines": [], "stdout": "deactivating", "stdout_lines": ["deactivating"]}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: Verify Docker is active on the rebalanced guest","service_id":"ansible","target":"coolify-lv3","task_status":"failed","trace_id":"background","ts":"2026-04-03T00:02:15.440Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+fatal: [artifact-cache-lv3]: FAILED! => {"changed": false, "cmd": ["systemctl", "is-active", "docker.service"], "delta": "0:00:00.013286", "end": "2026-04-03 00:02:15.211260", "failed_when_result": true, "msg": "non-zero return code", "rc": 3, "start": "2026-04-03 00:02:15.197974", "stderr": "", "stderr_lines": [], "stdout": "inactive", "stdout_lines": ["inactive"]}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: Verify Docker is active on the rebalanced guest","service_id":"ansible","target":"artifact-cache-lv3","task_status":"failed","trace_id":"background","ts":"2026-04-03T00:02:15.517Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify Docker is active on the rebalanced guest","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:15.535Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY [Verify host free memory after the rebalance] *****************************
+
+TASK [Read the host memory summary after the rebalance] ************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Read the host memory summary after the rebalance","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:02:15.547Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Read the host memory summary after the rebalance","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:15.961Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [Emit the host memory summary after the rebalance] ************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit the host memory summary after the rebalance","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T00:02:15.969Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => {
+    "runtime_pool_capacity_rebalance_free.stdout_lines": [
+        "               total        used        free      shared  buff/cache   available",
+        "Mem:           125Gi        54Gi        59Gi       104Mi        13Gi        71Gi",
+        "Swap:          4.0Gi        36Ki       4.0Gi"
+    ]
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit the host memory summary after the rebalance","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-04-03T00:02:15.998Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+artifact-cache-lv3         : ok=2    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
+coolify-lv3                : ok=2    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
+docker-build-lv3           : ok=2    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
+docker-runtime-lv3         : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+proxmox_florin             : ok=16   changed=4    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+
+make: *** [live-apply-service] Error 2

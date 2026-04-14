@@ -1,0 +1,55 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply/scripts/remote_exec.sh remote-validate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.89
+alert-rule-validation passed 1.47
+ansible-syntax        passed 128.14
+dependency-graph      passed 2.28
+iac-policy-scan       passed 31.67
+policy-validation     passed 1.10
+schema-validation     passed 13.47
+type-check            passed 3.19
+workstream-surfaces   failed 2.72
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0308-live-apply-e489a6fd6b/repo/.lv3-runs/20260401T234005Z-f4d0c5e063de/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=f4d0c5e063def5e47fe5258059714cb7605867f8ccb2cecbff8dda0900898718 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-01T23:39:57.516778+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=b97c0d5bc20619229829525d49a7e07f6a48ebbf -e LV3_SNAPSHOT_BRANCH=codex/ws-0308-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["build/platform-manifest.json", "collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml", "config/windmill/scripts/gate-status.py", "config/workflow-catalog.json", "docs/adr/.index.yaml", "docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/runbooks/operator-onboarding.md", "docs/workstreams/ws-0308-live-apply.md", "platform/repo.py", "receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json", "receipts/live-applies/evidence/2026-04-02-ws-0308-adr-index-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-agent-standards-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-canonical-truth-check-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r2.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r3-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r2.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r3-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r4-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-generate-diagrams-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-live-apply-receipts-validate-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-platform-manifest-write-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-preflight-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-preflight-r2-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-pytest-r4-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r2-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-validate-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-validate-r2-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r2.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r3-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r2-0.177.136.txt", "scripts/gate_status.py", "scripts/preflight_controller_local.py", "scripts/workflow_catalog.py", "tests/test_common_docker_bridge_chains_helper.py", "tests/test_controller_automation_toolkit.py", "tests/test_docker_runtime_role.py", "tests/test_preflight_controller_local.py", "workstreams.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- build/platform-manifest.json: outside declared owned surfaces for ws-0308-live-apply
+- docs/diagrams/agent-coordination-map.excalidraw: outside declared owned surfaces for ws-0308-live-apply
+remote_exec: remote command failed, falling back locally for remote-validate
+remote_exec: running local fallback for remote-validate
+run_gate_fallback: rerunning unresolved remote checks locally: workstream-surfaces
+Validation lane selection
+  mode: explicit_checks
+  branch: codex/ws-0308-live-apply
+  selected lanes: none
+  blocking checks: workstream-surfaces, agent-standards
+  changed files: build/platform-manifest.json, collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml, config/windmill/scripts/gate-status.py, config/workflow-catalog.json, docs/adr/.index.yaml, docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md, ...
+
+CHECK              STATUS DURATION(s)
+agent-standards     passed 1.14
+workstream-surfaces failed 3.27
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0308-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0308-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=f4d0c5e063def5e47fe5258059714cb7605867f8ccb2cecbff8dda0900898718 -e LV3_SNAPSHOT_GENERATED_AT=2026-04-01T23:39:57.516778+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=b97c0d5bc20619229829525d49a7e07f6a48ebbf -e LV3_SNAPSHOT_BRANCH=codex/ws-0308-live-apply -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["build/platform-manifest.json", "collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml", "config/windmill/scripts/gate-status.py", "config/workflow-catalog.json", "docs/adr/.index.yaml", "docs/adr/0308-llm-agent-execution-surface-and-connectivity-contracts-for-operator-provisioning.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/runbooks/operator-onboarding.md", "docs/workstreams/ws-0308-live-apply.md", "platform/repo.py", "receipts/live-applies/2026-04-02-adr-0308-operator-provisioning-connectivity-live-apply.json", "receipts/live-applies/evidence/2026-04-02-ws-0308-adr-index-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-agent-standards-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-canonical-truth-check-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r2.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-controller-fallback-r3-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r2.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r3-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-converge-windmill-r4-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-generate-diagrams-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-live-apply-receipts-validate-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-platform-manifest-write-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-preflight-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-preflight-r2-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-pytest-r4-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-remote-validate-r2-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-validate-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-validate-r2-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r1.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r2.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-windmill-dry-run-r3-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r1-0.177.136.txt", "receipts/live-applies/evidence/2026-04-02-ws-0308-workstream-surfaces-r2-0.177.136.txt", "scripts/gate_status.py", "scripts/preflight_controller_local.py", "scripts/workflow_catalog.py", "tests/test_common_docker_bridge_chains_helper.py", "tests/test_controller_automation_toolkit.py", "tests/test_docker_runtime_role.py", "tests/test_preflight_controller_local.py", "workstreams.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- build/platform-manifest.json: outside declared owned surfaces for ws-0308-live-apply
+- docs/diagrams/agent-coordination-map.excalidraw: outside declared owned surfaces for ws-0308-live-apply
+run_gate_fallback: merged local rerun with synced remote gate status at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply/.local/validation-gate/remote-validate-last-run.json
+make: *** [remote-validate] Error 1

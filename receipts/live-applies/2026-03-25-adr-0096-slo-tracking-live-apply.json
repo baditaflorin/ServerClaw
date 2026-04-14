@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0096-slo-tracking-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_by": "codex",
+  "source_commit": "b203c2edd6b692df11631def24e99462d432e473",
+  "repo_version_context": "0.143.0",
+  "workflow_id": "converge-monitoring",
+  "adr": "0096",
+  "summary": "Re-converged ADR 0096 on monitoring-lv3 from the integrated 0.143.0 mainline, verified blackbox-backed Prometheus SLO rule loading and the LV3 SLO Grafana dashboard, and refreshed the public Grafana edge controls required by the monitoring verification gate.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "grafana.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Grafana monitoring live apply",
+      "result": "pass",
+      "observed": "`make live-apply-service service=grafana env=production` completed successfully on 2026-03-25 with the monitoring role, Alertmanager runtime, and health-probe verification all passing on `monitoring-lv3`."
+    },
+    {
+      "check": "Monitoring services and SLO rules",
+      "result": "pass",
+      "observed": "`systemctl is-active lv3-prometheus grafana-server prometheus-blackbox-exporter prometheus-alertmanager` returned four `active` states on `monitoring-lv3`, and `promtool check rules` reported `SUCCESS: 90 rules found` for `/etc/prometheus/rules/slo-rules.yml` plus `SUCCESS: 30 rules found` for `/etc/prometheus/rules/slo-alerts.yml`."
+    },
+    {
+      "check": "Public Grafana verification gate",
+      "result": "pass",
+      "observed": "`https://grafana.lv3.org/api/health` now returns `404`, while `https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview` returns `302` to `/login?redirectTo=...`, matching the repo-managed ADR 0140 verification contract used by the ADR 0096 monitoring apply."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0096-slo-definitions-and-error-budget-tracking.md",
+    "docs/runbooks/slo-tracking.md",
+    "docs/workstreams/adr-0096-slo-tracking.md",
+    "docs/release-notes/0.143.1.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The live apply refreshed the controller-local ntfy prerequisite in the same turn with `make converge-ntfy` before the successful monitoring converge.",
+    "A full `public-edge` converge in this fresh worktree stalled during the static-site copy phase, so the Grafana edge fix was applied from repo state with a narrower rerender path starting at `Check whether the public edge certificate exists`; this still rendered the managed NGINX config, validated it, and reloaded `nginx-lv3` successfully."
+  ]
+}

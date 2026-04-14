@@ -9,6 +9,7 @@ from typing import Any
 
 import yaml
 
+from validation_toolkit import apply_identity_domain_overlay
 from controller_automation_toolkit import load_json, load_yaml, repo_path
 
 
@@ -79,7 +80,7 @@ def yaml_dump(payload: Any) -> str:
 
 
 def load_service_catalog() -> dict[str, Any]:
-    payload = load_json(SERVICE_CATALOG_PATH)
+    payload = apply_identity_domain_overlay(load_json(SERVICE_CATALOG_PATH))
     services = payload.get("services")
     if not isinstance(services, list):
         raise ValueError(f"{SERVICE_CATALOG_PATH} must define a services list")
@@ -87,7 +88,7 @@ def load_service_catalog() -> dict[str, Any]:
 
 
 def load_subdomain_catalog() -> dict[str, Any]:
-    payload = load_json(SUBDOMAIN_CATALOG_PATH)
+    payload = apply_identity_domain_overlay(load_json(SUBDOMAIN_CATALOG_PATH))
     subdomains = payload.get("subdomains")
     if not isinstance(subdomains, list):
         raise ValueError(f"{SUBDOMAIN_CATALOG_PATH} must define a subdomains list")

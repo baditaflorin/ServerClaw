@@ -1,0 +1,16 @@
+HTTP/2 200
+server: nginx
+date: Tue, 31 Mar 2026 01:50:30 GMT
+content-type: text/plain
+content-length: 4
+set-cookie: sid=36b9c5b0aaf8865be55b40996c930098; Path=/; HttpOnly
+x-request-id: 7f682730-976c-47d7-bdba-9c1a79ef4fee
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow

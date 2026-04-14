@@ -1,0 +1,31 @@
+# Public probes
+captured_at=2026-03-31T06:55:25Z
+
+[grist_status]
+Grist server(home,docs,static) is alive.
+
+[grist_docs_headers]
+HTTP/2 302
+server: nginx
+date: Tue, 31 Mar 2026 06:55:25 GMT
+content-type: text/plain; charset=utf-8
+content-length: 344
+x-powered-by: Express
+content-language: en
+location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?client_id=grist&scope=openid%20profile%20email&response_type=code&redirect_uri=https%3A%2F%2Fgrist.lv3.org%2Foauth2%2Fcallback&state=h1K4hSGnI5m3zT9N98yMNGIvB0gjzsYWox7VthCaWJs&code_challenge=8xyZbkY-sLBs8MDJBORMcGdQ9QkvEpd6h4HlPG0KKGk&code_challenge_method=S256
+vary: Accept
+set-cookie: grist_core=s%3Ag-b1410b43adff82c79d8694dec51d769eba20168c896d4db276088b6490d577f7.STvJS1P5ZbY8DMiXHghGHfZq8HmyLtIRmjBSnltizUQ; Path=/; HttpOnly; SameSite=Lax
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+
+[keycloak_discovery]
+https://sso.lv3.org/realms/lv3
+https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth

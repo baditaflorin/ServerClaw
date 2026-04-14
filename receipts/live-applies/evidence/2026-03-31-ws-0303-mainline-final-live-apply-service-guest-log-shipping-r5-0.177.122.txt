@@ -1,0 +1,625 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=live-apply-service
+Preflight workflow: live-apply-service
+Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
+Bootstrap manifest: controller-local-base
+Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/.local/packer-plugin-cache
+Bootstrap manifest: shared-edge-generated-portals
+Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/build/docs-portal
+Result: PASS (live-apply-service)
+/Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/scripts/canonical_truth.py --check
+Canonical truth OK
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/scripts/interface_contracts.py --check-live-apply "service:guest-log-shipping"
+Live apply contract OK: service:guest-log-shipping -> playbooks/services/guest-log-shipping.yml
+INFO live-apply-service: skipping service-catalog gates for non-catalog playbook 'guest-log-shipping'
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=2bb7be53e7ac4930bee022012e61fa76 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/inventory/hosts.yml --run-id 7fb2d8e0c66140ab8ac8af7430ac1547 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/guest-log-shipping.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=31389fa922c940d1b14bf41172faac7f
+
+PLAY [Converge guest log shipping] *********************************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:10.866Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:14.284Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:14.321Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:14.329Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:14.389Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:16.733Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:17.518Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:17.683Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:18.710Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:18.716Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:18.736Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:18.740Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:18.783Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:18.786Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:18.803Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:18.806Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => (item=lv3_guests:&production) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "lv3_guests:&production",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:18.826Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:18.830Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:18.842Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:18.845Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => (item=lv3_guests:&production)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:18.865Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:18.870Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item=nginx-lv3)
+ok: [nginx-lv3 -> docker-runtime-lv3(10.10.10.20)] => (item=docker-runtime-lv3)
+ok: [nginx-lv3 -> docker-build-lv3(10.10.10.30)] => (item=docker-build-lv3)
+ok: [nginx-lv3 -> monitoring-lv3(10.10.10.40)] => (item=monitoring-lv3)
+ok: [nginx-lv3 -> postgres-lv3(10.10.10.50)] => (item=postgres-lv3)
+ok: [nginx-lv3 -> backup-lv3(10.10.10.60)] => (item=backup-lv3)
+ok: [nginx-lv3 -> coolify-lv3(10.10.10.70)] => (item=coolify-lv3)
+ok: [nginx-lv3 -> artifact-cache-lv3(10.10.10.80)] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:35.914Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:35.918Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:35.962Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.006Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.016Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.017Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.023Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.033Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.043Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.057Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:36.060Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.336Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:36.340Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook start audit event","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.642Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Derive guest log shipping role and lane] *********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Derive guest log shipping role and lane","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:36.645Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.695Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.726Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.738Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.738Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.742Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.754Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.769Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive guest log shipping role and lane","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.778Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:36.783Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.832Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.856Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.869Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.870Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.876Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.882Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.897Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validating arguments against arg spec 'main' - Converge Grafana Alloy log shipping for managed hosts and guests.","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.906Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Validate Loki log agent inputs] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:36.911Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.967Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.989Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:36.999Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:37.000Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:37.008Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:37.014Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:37.034Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Validate Loki log agent inputs","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:37.043Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:37.049Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:38.215Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:38.236Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:38.253Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:38.266Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:38.272Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:39.241Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:39.266Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent prerequisite packages are present","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:39.304Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:39.315Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.103Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.124Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.125Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.125Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.138Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.599Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.617Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Loki log agent APT keyring directory exists","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:40.619Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:40.623Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:41.484Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:41.650Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:41.658Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:41.659Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:41.659Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:42.119Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:42.300Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository key for Loki log agent","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:42.305Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:42.312Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:43.737Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:43.771Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:43.782Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:43.783Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:43.801Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:45.164Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:45.210Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Grafana repository definition for Loki log agent","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:45.211Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Install Loki log agent packages] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:26:45.216Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:46.979Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:47.050Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:47.084Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:47.113Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:48.369Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:48.463Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:26:48.470Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Install Loki log agent packages","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:10.885Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Ensure alloy can read required log sources] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:10.891Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:11.647Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:11.657Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:11.667Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:11.668Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:11.668Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:12.198Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:12.215Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure alloy can read required log sources","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:12.261Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:12.269Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:12.311Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+skipping: [docker-build-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"docker-build-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:12.334Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:12.343Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:12.354Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+skipping: [backup-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"backup-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:12.364Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+skipping: [coolify-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"coolify-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:12.364Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+skipping: [artifact-cache-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"artifact-cache-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:12.372Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=/var/log/platform)
+changed: [docker-runtime-lv3] => (item=/opt/openbao/logs)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure extra file-scrape parent directories exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:13.380Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:13.385Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:13.413Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+skipping: [docker-build-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"docker-build-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:13.438Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+skipping: [monitoring-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"monitoring-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:13.448Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:13.461Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+skipping: [backup-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"backup-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:13.470Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+skipping: [coolify-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"coolify-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:13.472Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+skipping: [artifact-cache-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"artifact-cache-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:13.482Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=/var/log/platform/mutation-audit.jsonl)
+changed: [docker-runtime-lv3] => (item=/opt/openbao/logs/audit.log)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure extra file-scrape targets exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:14.418Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Render Alloy environment file] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:14.425Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:15.935Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:15.947Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:15.985Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:16.019Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:17.015Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:17.410Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:17.410Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy environment file","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:17.478Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:17.484Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:18.932Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:18.984Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:18.994Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:18.995Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:19.017Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:20.420Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:20.420Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Render Alloy Loki log agent configuration","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:21.381Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.385Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.402Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.405Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.406Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.408Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.410Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.414Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Flush Loki log agent handlers] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Flush Loki log agent handlers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.416Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:21.418Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.195Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.208Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.223Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.297Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.833Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.836Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.843Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Ensure Alloy service is enabled and started","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:22.853Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.loki_log_agent : Verify Alloy service is active] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:22.858Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.383Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.392Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.423Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.556Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+ok: [docker-build-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"docker-build-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.767Z","vm":"docker-build-lv3","workflow_id":"ansible-playbook"}
+ok: [backup-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"backup-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.908Z","vm":"backup-lv3","workflow_id":"ansible-playbook"}
+ok: [coolify-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"coolify-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.908Z","vm":"coolify-lv3","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.loki_log_agent : Verify Alloy service is active","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.936Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Build the shared playbook notification payload] **************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Build the shared playbook notification payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:23.977Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Build the shared playbook notification payload","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:23.994Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort Mattermost completion notification] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:23.998Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort Mattermost completion notification","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:24.011Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort NATS completion notification command] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:24.014Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Publish a best-effort NATS completion notification command","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T19:27:24.028Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+PLAY [Verify PostgreSQL audit scrape after guest log shipping] *****************
+
+TASK [Verify Prometheus scrapes the PostgreSQL audit Alloy target after guest log shipping] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify Prometheus scrapes the PostgreSQL audit Alloy target after guest log shipping","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:24.035Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify Prometheus scrapes the PostgreSQL audit Alloy target after guest log shipping","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:25.222Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Seed deterministic PostgreSQL audit lines after guest log shipping] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: Seed deterministic PostgreSQL audit lines after guest log shipping","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:25.225Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> postgres-lv3(10.10.10.50)]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Seed deterministic PostgreSQL audit lines after guest log shipping","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:25.727Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T19:27:25.733Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [monitoring-lv3 -> postgres-lv3(10.10.10.50)]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T19:27:26.315Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+artifact-cache-lv3         : ok=15   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+backup-lv3                 : ok=15   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+coolify-lv3                : ok=15   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+docker-build-lv3           : ok=15   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+docker-runtime-lv3         : ok=17   changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+monitoring-lv3             : ok=18   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+nginx-lv3                  : ok=25   changed=0    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+postgres-lv3               : ok=15   changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by live-apply-service --live-apply-trigger
+{
+  "status": "ok",
+  "target": "docker-runtime-lv3",
+  "command": "sudo python3 /srv/proxmox_florin_server/scripts/restic_config_backup.py --repo-root /srv/proxmox_florin_server --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-service --print-report-json --live-apply-trigger",
+  "returncode": 0,
+  "stdout": "{\n  \"status\": \"ok\",\n  \"mode\": \"backup\",\n  \"summary\": {\n    \"governed_sources\": 5,\n    \"protected\": 4,\n    \"uncovered\": 0,\n    \"inactive\": 1,\n    \"uncovered_sources\": [],\n    \"inactive_sources\": [\n      \"falco_overrides\"\n    ]\n  },\n  \"receipt_path\": \"receipts/restic-backups/20260331T192735Z.json\",\n  \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n  \"report\": {\n    \"schema_version\": \"1.0.0\",\n    \"receipt_id\": \"restic-config-backup-20260331T192735Z\",\n    \"recorded_at\": \"2026-03-31T19:27:35Z\",\n    \"recorded_on\": \"2026-03-31\",\n    \"recorded_by\": \"codex\",\n    \"triggered_by\": \"live-apply-service\",\n    \"source_commit\": \"unknown\",\n    \"repository\": {\n      \"bucket\": \"restic-config-backup\",\n      \"endpoint\": \"http://10.200.18.2:9000\",\n      \"repository_url\": \"s3:http://10.200.18.2:9000/restic-config-backup\"\n    },\n    \"summary\": {\n      \"governed_sources\": 5,\n      \"protected\": 4,\n      \"uncovered\": 0,\n      \"inactive\": 1,\n      \"uncovered_sources\": [],\n      \"inactive_sources\": [\n        \"falco_overrides\"\n      ]\n    },\n    \"source_results\": [\n      {\n        \"source_id\": \"config\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 264,\n        \"paths\": [\n          \"/srv/proxmox_florin_server/config\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30,\n          \"keep_monthly\": 6\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":15,\\\"percent_done\\\":0.0012171171529027015,\\\"total_files\\\":264,\\\"files_done\\\":2,\\\"total_bytes\\\":4556669,\\\"bytes_done\\\":5546,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/agent-tool-registry.json\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.8814383928259876,\\\"total_files\\\":264,\\\"files_done\\\":186,\\\"total_bytes\\\":4556669,\\\"bytes_done\\\":4016423}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":263,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":51,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":52,\\\"data_added\\\":106817,\\\"data_added_packed\\\":31996,\\\"total_files_processed\\\":264,\\\"total_bytes_processed\\\":4556669,\\\"total_duration\\\":0.413590025,\\\"backup_start\\\":\\\"2026-03-31T19:27:35.574502141Z\\\",\\\"backup_end\\\":\\\"2026-03-31T19:27:35.988092166Z\\\",\\\"snapshot_id\\\":\\\"1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78\\\"}\",\n        \"snapshot_id\": \"1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78\"\n      },\n      {\n        \"source_id\": \"versions_stack\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 1,\n        \"paths\": [\n          \"/srv/proxmox_florin_server/versions/stack.yaml\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":0,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":4,\\\"data_added\\\":1394,\\\"data_added_packed\\\":1194,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":47179,\\\"total_duration\\\":0.388986966,\\\"backup_start\\\":\\\"2026-03-31T19:27:36.52415533Z\\\",\\\"backup_end\\\":\\\"2026-03-31T19:27:36.913142296Z\\\",\\\"snapshot_id\\\":\\\"68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c\\\"}\",\n        \"snapshot_id\": \"68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c\"\n      },\n      {\n        \"source_id\": \"falco_overrides\",\n        \"result\": \"skipped_optional_missing\",\n        \"paths\": [\n          \"/srv/proxmox_florin_server/config/falco\"\n        ],\n        \"reason\": \"optional source path is not present on the runtime host\"\n      }\n    ],\n    \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n    \"notifications\": []\n  }\n}\nREPORT_JSON={\"status\":\"ok\",\"mode\":\"backup\",\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"receipt_path\":\"receipts/restic-backups/20260331T192735Z.json\",\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"report\":{\"schema_version\":\"1.0.0\",\"receipt_id\":\"restic-config-backup-20260331T192735Z\",\"recorded_at\":\"2026-03-31T19:27:35Z\",\"recorded_on\":\"2026-03-31\",\"recorded_by\":\"codex\",\"triggered_by\":\"live-apply-service\",\"source_commit\":\"unknown\",\"repository\":{\"bucket\":\"restic-config-backup\",\"endpoint\":\"http://10.200.18.2:9000\",\"repository_url\":\"s3:http://10.200.18.2:9000/restic-config-backup\"},\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"source_results\":[{\"source_id\":\"config\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":264,\"paths\":[\"/srv/proxmox_florin_server/config\"],\"retention\":{\"keep_daily\":30,\"keep_monthly\":6},\"restic_stdout\":\"{\\\"message_type\\\":\\\"status\\\",\\\"seconds_remaining\\\":15,\\\"percent_done\\\":0.0012171171529027015,\\\"total_files\\\":264,\\\"files_done\\\":2,\\\"total_bytes\\\":4556669,\\\"bytes_done\\\":5546,\\\"current_files\\\":[\\\"/srv/proxmox_florin_server/config/agent-tool-registry.json\\\"]}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.8814383928259876,\\\"total_files\\\":264,\\\"files_done\\\":186,\\\"total_bytes\\\":4556669,\\\"bytes_done\\\":4016423}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":263,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":51,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":52,\\\"data_added\\\":106817,\\\"data_added_packed\\\":31996,\\\"total_files_processed\\\":264,\\\"total_bytes_processed\\\":4556669,\\\"total_duration\\\":0.413590025,\\\"backup_start\\\":\\\"2026-03-31T19:27:35.574502141Z\\\",\\\"backup_end\\\":\\\"2026-03-31T19:27:35.988092166Z\\\",\\\"snapshot_id\\\":\\\"1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78\\\"}\",\"snapshot_id\":\"1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78\"},{\"source_id\":\"versions_stack\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":1,\"paths\":[\"/srv/proxmox_florin_server/versions/stack.yaml\"],\"retention\":{\"keep_daily\":30},\"restic_stdout\":\"{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":0,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":0,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":4,\\\"data_added\\\":1394,\\\"data_added_packed\\\":1194,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":47179,\\\"total_duration\\\":0.388986966,\\\"backup_start\\\":\\\"2026-03-31T19:27:36.52415533Z\\\",\\\"backup_end\\\":\\\"2026-03-31T19:27:36.913142296Z\\\",\\\"snapshot_id\\\":\\\"68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c\\\"}\",\"snapshot_id\":\"68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c\"},{\"source_id\":\"falco_overrides\",\"result\":\"skipped_optional_missing\",\"paths\":[\"/srv/proxmox_florin_server/config/falco\"],\"reason\":\"optional source path is not present on the runtime host\"}],\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"notifications\":[]}}",
+  "stderr": "",
+  "report": {
+    "status": "ok",
+    "mode": "backup",
+    "summary": {
+      "governed_sources": 5,
+      "protected": 4,
+      "uncovered": 0,
+      "inactive": 1,
+      "uncovered_sources": [],
+      "inactive_sources": [
+        "falco_overrides"
+      ]
+    },
+    "receipt_path": "receipts/restic-backups/20260331T192735Z.json",
+    "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
+    "report": {
+      "schema_version": "1.0.0",
+      "receipt_id": "restic-config-backup-20260331T192735Z",
+      "recorded_at": "2026-03-31T19:27:35Z",
+      "recorded_on": "2026-03-31",
+      "recorded_by": "codex",
+      "triggered_by": "live-apply-service",
+      "source_commit": "unknown",
+      "repository": {
+        "bucket": "restic-config-backup",
+        "endpoint": "http://10.200.18.2:9000",
+        "repository_url": "s3:http://10.200.18.2:9000/restic-config-backup"
+      },
+      "summary": {
+        "governed_sources": 5,
+        "protected": 4,
+        "uncovered": 0,
+        "inactive": 1,
+        "uncovered_sources": [],
+        "inactive_sources": [
+          "falco_overrides"
+        ]
+      },
+      "source_results": [
+        {
+          "source_id": "config",
+          "result": "backed_up",
+          "host": "docker-runtime-lv3",
+          "files": 264,
+          "paths": [
+            "/srv/proxmox_florin_server/config"
+          ],
+          "retention": {
+            "keep_daily": 30,
+            "keep_monthly": 6
+          },
+          "restic_stdout": "{\"message_type\":\"status\",\"seconds_remaining\":15,\"percent_done\":0.0012171171529027015,\"total_files\":264,\"files_done\":2,\"total_bytes\":4556669,\"bytes_done\":5546,\"current_files\":[\"/srv/proxmox_florin_server/config/agent-tool-registry.json\"]}\n{\"message_type\":\"status\",\"percent_done\":0.8814383928259876,\"total_files\":264,\"files_done\":186,\"total_bytes\":4556669,\"bytes_done\":4016423}\n{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":263,\"files_unmodified\":1,\"dirs_new\":0,\"dirs_changed\":51,\"dirs_unmodified\":0,\"data_blobs\":0,\"tree_blobs\":52,\"data_added\":106817,\"data_added_packed\":31996,\"total_files_processed\":264,\"total_bytes_processed\":4556669,\"total_duration\":0.413590025,\"backup_start\":\"2026-03-31T19:27:35.574502141Z\",\"backup_end\":\"2026-03-31T19:27:35.988092166Z\",\"snapshot_id\":\"1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78\"}",
+          "snapshot_id": "1ad975dcc1b3be1be5b48d2ea3f7ae8b730571e840317f53498bb7467b099f78"
+        },
+        {
+          "source_id": "versions_stack",
+          "result": "backed_up",
+          "host": "docker-runtime-lv3",
+          "files": 1,
+          "paths": [
+            "/srv/proxmox_florin_server/versions/stack.yaml"
+          ],
+          "retention": {
+            "keep_daily": 30
+          },
+          "restic_stdout": "{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":1,\"files_unmodified\":0,\"dirs_new\":0,\"dirs_changed\":3,\"dirs_unmodified\":0,\"data_blobs\":0,\"tree_blobs\":4,\"data_added\":1394,\"data_added_packed\":1194,\"total_files_processed\":1,\"total_bytes_processed\":47179,\"total_duration\":0.388986966,\"backup_start\":\"2026-03-31T19:27:36.52415533Z\",\"backup_end\":\"2026-03-31T19:27:36.913142296Z\",\"snapshot_id\":\"68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c\"}",
+          "snapshot_id": "68960faae1f91e15d644b7d93adcd279953de9acb561f9e494968c37a726bc3c"
+        },
+        {
+          "source_id": "falco_overrides",
+          "result": "skipped_optional_missing",
+          "paths": [
+            "/srv/proxmox_florin_server/config/falco"
+          ],
+          "reason": "optional source path is not present on the runtime host"
+        }
+      ],
+      "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
+      "notifications": []
+    }
+  },
+  "summary": {
+    "governed_sources": 5,
+    "protected": 4,
+    "uncovered": 0,
+    "inactive": 1,
+    "uncovered_sources": [],
+    "inactive_sources": [
+      "falco_overrides"
+    ]
+  }
+}

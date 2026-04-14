@@ -4,19 +4,19 @@
 # Use case: Run during ADR 0293 rollout, recovery, or replay when livekit.{{ platform_domain }} and its media listeners must match repo truth.
 #
 # Inputs (required):
-#   - env (string, required): Target environment selector used to choose the docker-runtime and nginx guests.
+#   - env (string, required): Target environment selector used to choose the runtime-comms and nginx guests.
 #
 # Inputs (optional):
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - LiveKit is running on docker-runtime with repo-managed API credentials, the Proxmox host forwards public TCP/UDP media traffic, and livekit.{{ platform_domain }} is published through the shared NGINX edge.
+#   - LiveKit is running on runtime-comms with repo-managed API credentials, the Proxmox host forwards public TCP/UDP media traffic, and livekit.{{ platform_domain }} is published through the shared NGINX edge.
 #
 # Idempotency: Fully idempotent
 #
 # Dependencies:
 #   - ADR 0293: LiveKit as the real-time audio and voice channel for agents.
-#   - Requires: docker-runtime, OpenBao, the shared NGINX edge, and Hetzner DNS access for the public hostname.
+#   - Requires: runtime-comms, OpenBao, the shared NGINX edge, and Hetzner DNS access for the public hostname.
 #
 # Related ADRs: 0021, 0077, 0293
 # Related Runbooks: docs/runbooks/configure-livekit.md
@@ -104,8 +104,8 @@
   roles:
     - role: lv3.platform.proxmox_network
 
-- name: Converge LiveKit on the Docker runtime VM
-  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
+- name: Converge LiveKit on the runtime-comms VM
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-comms' }}"
   become: true
   gather_facts: true
 
@@ -117,7 +117,7 @@
         playbook_execution_audit_action: playbook.start.livekit.runtime
         playbook_execution_audit_target: livekit
         required_hosts:
-          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.runtime_comms[playbook_execution_env] }}"
 
   roles:
     - role: lv3.platform.docker_runtime

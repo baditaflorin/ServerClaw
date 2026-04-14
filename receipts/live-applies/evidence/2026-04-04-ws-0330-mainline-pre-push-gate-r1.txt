@@ -1,0 +1,36 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0330-main-closeout/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, atlas-lint, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: .config-locations.yaml, .repo-structure.yaml, README.md, build/onboarding/agent-core.yaml, build/onboarding/automation.yaml, build/onboarding/service-catalog.yaml, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 6.85
+alert-rule-validation passed 4.40
+ansible-lint          passed 441.63
+ansible-syntax        passed 273.32
+artifact-secret-scan  passed 12.00
+atlas-lint            passed 6.56
+dependency-direction  passed 6.26
+dependency-graph      passed 6.89
+documentation-index   passed 3.74
+generated-docs        passed 19.69
+generated-portals     passed 50.21
+iac-policy-scan       passed 78.14
+integration-tests     passed 3.84
+packer-validate       passed 10.54
+policy-validation     passed 3.66
+schema-validation     passed 27.51
+security-scan         passed 106.65
+semgrep-sast          passed 101.55
+service-completeness  passed 3.76
+tofu-validate         passed 3.15
+type-check            passed 14.79
+workstream-surfaces   passed 5.43
+yaml-lint             passed 4.52

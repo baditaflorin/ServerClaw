@@ -1,0 +1,6 @@
+{
+  "token_type": "Bearer",
+  "expires_in": 299,
+  "scope": "email profile",
+  "access_token_present": true
+}

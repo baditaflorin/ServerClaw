@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "mail_platform_stalwart_runtime",
+  "image_ref": "docker.io/stalwartlabs/stalwart:v0.15.5@sha256:b6c2a04a79695136d5e2c16e9da0254135d0c3f3b1f8147873e812916b0ae8c4",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-22",
+  "summary": {
+    "critical": 0,
+    "high": 2
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/stalwartlabs/stalwart:v0.15.5@sha256:b6c2a04a79695136d5e2c16e9da0254135d0c3f3b1f8147873e812916b0ae8c4 (debian 13.3)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 0,
+      "high": 2
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-22-mail-platform-stalwart-runtime.trivy.json"
+}

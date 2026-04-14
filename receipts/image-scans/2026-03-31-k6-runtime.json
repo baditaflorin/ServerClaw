@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "k6_runtime",
+  "image_ref": "docker.io/grafana/k6:1.7.1@sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-31",
+  "summary": {
+    "critical": 0,
+    "high": 1
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/grafana/k6:1.7.1@sha256:44bd1d66c2b019327991b95459d78402b0a7a0a055ab52ee088deea1a044e8d5 (alpine 3.23.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 0,
+      "high": 1
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-31-k6-runtime.trivy.json"
+}

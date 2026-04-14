@@ -1,0 +1,2 @@
+
+playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/playbooks/artifact-cache-vm.yml

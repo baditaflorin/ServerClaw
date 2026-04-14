@@ -17,10 +17,19 @@ def test_defaults_define_livekit_runtime_contract() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
     assert defaults["livekit_service_topology"] == "{{ platform_service_topology | service_topology_get('livekit') }}"
+    assert (
+        defaults["livekit_openbao_service_topology"]
+        == "{{ platform_service_topology | service_topology_get('openbao') }}"
+    )
     assert defaults["livekit_image"] == "{{ container_image_catalog.images.livekit_runtime.ref }}"
     assert defaults["livekit_compose_file"] == "{{ livekit_site_dir }}/docker-compose.yml"
     assert defaults["livekit_config_file"] == "{{ livekit_site_dir }}/livekit.yaml"
     assert defaults["livekit_env_file"] == "{{ compose_runtime_secret_root }}/livekit/runtime.env"
+    assert defaults["livekit_runtime_openbao_address"] == (
+        "http://{{ livekit_openbao_service_topology.private_ip }}:"
+        "{{ hostvars[platform_topology_host].platform_port_assignments.openbao_http_port }}"
+    )
+    assert defaults["livekit_runtime_openbao_local_address"] == "http://127.0.0.1:{{ openbao_http_port }}"
     assert defaults["livekit_repo_root"] == "{{ inventory_dir | dirname }}"
     assert "rev-parse --path-format=absolute --git-common-dir" in defaults["livekit_shared_local_root"]
     assert defaults["livekit_local_artifact_dir"] == "{{ livekit_shared_local_root }}/livekit"
@@ -52,6 +61,7 @@ def test_main_tasks_generate_keys_render_openbao_stack_and_verify_runtime() -> N
     names = [task["name"] for task in tasks]
 
     assert "Generate the LiveKit API key pair when it is missing locally" in names
+    assert "Probe whether the dedicated OpenBao API is reachable from the LiveKit runtime" in names
     assert "Prepare OpenBao agent runtime secret injection for LiveKit" in names
     assert "Install the LiveKit verification helper on the runtime host" in names
     assert "Render the LiveKit compose file" in names
@@ -65,6 +75,14 @@ def test_main_tasks_generate_keys_render_openbao_stack_and_verify_runtime() -> N
         task for task in tasks if task["name"] == "Generate the LiveKit API key pair when it is missing locally"
     )
     assert "docker run --rm {{ livekit_image | quote }} generate-keys" in generate_task["ansible.builtin.shell"]
+    openbao_probe_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Probe whether the dedicated OpenBao API is reachable from the LiveKit runtime"
+    )
+    assert (
+        openbao_probe_task["until"] == "livekit_runtime_remote_openbao_probe.status in [200, 429, 472, 473, 501, 503]"
+    )
     secret_payload_task = next(task for task in tasks if task["name"] == "Record the LiveKit runtime secrets")
     runtime_payload = secret_payload_task["ansible.builtin.set_fact"]["livekit_runtime_secret_payload"]
     assert (
@@ -79,12 +97,19 @@ def test_main_tasks_generate_keys_render_openbao_stack_and_verify_runtime() -> N
     )
     assert openbao_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert openbao_task["ansible.builtin.include_role"]["tasks_from"] == "openbao_compose_env"
+    assert openbao_task["vars"]["common_openbao_compose_env_openbao_address"] == "{{ livekit_runtime_openbao_address }}"
+    assert openbao_task["vars"]["common_openbao_compose_env_manage_local_openbao_runtime"] is False
     agent_task = next(task for task in tasks if task["name"] == "Start the LiveKit OpenBao agent")
     assert agent_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "openbao-agent"]
     env_wait_task = next(task for task in tasks if task["name"] == "Wait for the LiveKit runtime env file")
     assert "grep -Eq '^LIVEKIT_KEYS=.+:.+$'" in env_wait_task["ansible.builtin.shell"]
     up_task = next(task for task in tasks if task["name"] == "Converge the LiveKit runtime stack")
-    assert up_task["ansible.builtin.command"]["argv"][-3:] == ["-d", "--remove-orphans", "livekit"]
+    assert up_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert up_task["ansible.builtin.include_role"]["tasks_from"] == "docker_compose_converge"
+    assert up_task["vars"]["common_docker_compose_converge_compose_file"] == "{{ livekit_compose_file }}"
+    assert up_task["vars"]["common_docker_compose_converge_site_dir"] == "{{ livekit_site_dir }}"
+    assert up_task["vars"]["common_docker_compose_converge_service_name"] == "livekit"
+    assert up_task["vars"]["common_docker_compose_converge_force_recreate_entire_stack"] is True
     udp_wait_task = next(task for task in tasks if task["name"] == "Wait for the LiveKit UDP media listener")
     assert (
         "ss -lunH | awk '{print $4}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'"
@@ -98,10 +123,15 @@ def test_verify_tasks_probe_signal_media_and_room_lifecycle() -> None:
     tasks = yaml.safe_load(ROLE_VERIFY.read_text())
     names = [task["name"] for task in tasks]
 
-    assert "Verify the LiveKit signal listener is reachable locally" in names
+    assert "Verify the LiveKit runtime signal port" in names
     assert "Verify the LiveKit TCP media listener is reachable locally" in names
     assert "Verify the LiveKit UDP media listener is present locally" in names
     assert "Verify the LiveKit room lifecycle locally" in names
+    signal_task = next(task for task in tasks if task["name"] == "Verify the LiveKit runtime signal port")
+    assert signal_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert signal_task["ansible.builtin.include_role"]["tasks_from"] == "verify_service_health"
+    assert signal_task["vars"]["common_verify_service_name"] == "livekit"
+    assert signal_task["vars"]["common_verify_port"] == "{{ livekit_signal_port }}"
     udp_listener_task = next(
         task for task in tasks if task["name"] == "Verify the LiveKit UDP media listener is present locally"
     )

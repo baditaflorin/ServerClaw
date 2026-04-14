@@ -1,0 +1,5 @@
+Current version: 0.177.113
+Next version: 0.177.114
+Unreleased notes: 1
+Platform impact: platform version advances to 0.130.75 after the exact-main ADR 0290 replay verifies the private Redpanda Kafka-compatible streaming runtime, authenticated Admin API, HTTP Proxy, and Schema Registry path on docker-runtime-lv3
+Release notes index: docs/release-notes/README.md

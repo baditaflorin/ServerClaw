@@ -1,0 +1,10 @@
+LV3_RUN_ID=caeea5269df146bfa2f8222f91934391 COMMAND="curl -fsS http://10.10.10.40:9090/-/ready && curl -fsS http://10.10.10.40:9090/api/v1/status/buildinfo" /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply/scripts/remote_exec.sh remote-exec --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+curl: (28) Failed to connect to 10.10.10.40 port 9090 after 133561 ms: Could not connect to server
+remote_exec: remote command failed, falling back locally for remote-exec
+remote_exec: running local fallback for remote-exec
+curl: (28) Failed to connect to 10.10.10.40 port 9090 after 75001 ms: Couldn't connect to server
+make: *** [remote-exec] Error 28

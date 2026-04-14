@@ -1,0 +1,1 @@
+Written /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/docs/adr/.index.yaml (349 ADRs indexed)

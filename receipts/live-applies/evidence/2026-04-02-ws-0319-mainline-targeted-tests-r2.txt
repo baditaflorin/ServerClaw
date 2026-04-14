@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration
+configfile: pytest.ini
+collected 96 items
+
+tests/test_linux_guest_firewall_role.py .....                            [  5%]
+tests/test_runtime_ai_pool_playbook.py ..                                [  7%]
+tests/test_runtime_pool_substrate_role.py .....                          [ 12%]
+tests/test_nomad_playbook.py .....                                       [ 17%]
+tests/test_gotenberg_runtime_role.py ...........                         [ 29%]
+tests/test_tika_playbook.py .....                                        [ 34%]
+tests/test_tika_runtime_role.py .......                                  [ 41%]
+tests/test_tesseract_ocr_runtime_role.py ..........                      [ 52%]
+tests/test_generate_platform_vars.py ................................... [ 88%]
+...........                                                              [100%]
+
+============================= 96 passed in 19.24s ==============================

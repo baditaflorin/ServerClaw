@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T11:56:36Z",
+  "recorded_by": "codex",
+  "source_commit": "4f2cbb187e3745cf280eb1c52b4b014cf5414e9d",
+  "repo_version_context": "0.177.74",
+  "platform_version_context": "0.130.50",
+  "workflow_id": "configure-backup-vm",
+  "adr": "0271",
+  "summary": "Replayed ADR 0271 from the merged mainline integration worktree by converging the Proxmox backup VM workflow on top of the latest origin/main, confirming coolify-lv3 remains governed by the nightly PBS job, writing a fresh backup coverage receipt, and keeping the missing backup-lv3 off-site copy explicit in disaster recovery readiness.",
+  "targets": [
+    {
+      "kind": "hypervisor",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "backup-lv3",
+      "vmid": 160,
+      "address": "10.10.10.60"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "storage",
+      "name": "lv3-backup-pbs",
+      "address": "10.10.10.60:8007"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact-main configure-backup-vm replay",
+      "result": "pass",
+      "observed": "make configure-backup-vm succeeded from the merged main-integration worktree with backup-lv3 : ok=46 changed=2 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0 and proxmox_florin : ok=35 changed=6 unreachable=0 failed=0 skipped=30 rescued=0 ignored=0."
+    },
+    {
+      "check": "Nightly PBS job still governs coolify-lv3",
+      "result": "pass",
+      "observed": "sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty on proxmox_florin returned vmid : \"110,120,130,140,150,170\"."
+    },
+    {
+      "check": "Mainline backup coverage receipt",
+      "result": "pass",
+      "observed": "make backup-coverage-ledger wrote receipts/backup-coverage/20260329T115637Z.json and reported Protected: 6 Degraded: 0 Uncovered: 1 Governed assets: 7, with only backup-lv3 uncovered."
+    },
+    {
+      "check": "Mainline disaster recovery readiness report",
+      "result": "pass",
+      "observed": "make dr-status reported Backup coverage ledger warn 6/7 protected; uncovered backup-lv3 and Off-site backup warn proxmox-offsite-backup-of-backup-vm on lv3-backup-offsite; last success not recorded."
+    },
+    {
+      "check": "Remaining off-site gap visibility",
+      "result": "partial",
+      "observed": "ADR 0271 is live on main for backup coverage evidence and governance, but backup-lv3 remains uncovered until lv3-backup-offsite exists and carries fresh VM 160 evidence."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md",
+    "docs/workstreams/ws-0271-live-apply.md",
+    "docs/runbooks/backup-coverage-ledger.md",
+    "docs/runbooks/configure-backup-vm.md",
+    "docs/runbooks/disaster-recovery.md",
+    "Makefile",
+    "config/workflow-catalog.json",
+    "config/command-catalog.json",
+    "config/windmill/scripts/backup-coverage-ledger.py",
+    "scripts/backup_coverage_ledger.py",
+    "scripts/generate_dr_report.py",
+    "receipts/backup-coverage/20260329T115637Z.json",
+    "workstreams.yaml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "This receipt is the exact-main replay that justifies the platform version bump to 0.130.51 after the merged ADR 0271 workstream was applied from the mainline integration worktree.",
+    "The replay remains not perfectly idempotent on the Proxmox managed backup job block because the staged pmxcfs converge still rewrites the job section and restarts the scheduler even when the live job definition is already correct.",
+    "The policy intentionally remains honest about the unresolved off-site copy for backup-lv3 instead of collapsing the whole governed set into green."
+  ]
+}

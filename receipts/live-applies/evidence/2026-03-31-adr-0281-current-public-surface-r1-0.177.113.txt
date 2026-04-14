@@ -1,0 +1,44 @@
+DNS
+65.108.75.123
+
+CERT
+subject=CN=nginx.lv3.org
+issuer=C=US, O=Let's Encrypt, CN=E7
+notBefore=Mar 30 21:39:45 2026 GMT
+notAfter=Jun 28 21:39:44 2026 GMT
+X509v3 Subject Alternative Name:
+    DNS:*.apps.lv3.org, DNS:agents.lv3.org, DNS:analytics.lv3.org, DNS:api.lv3.org, DNS:apps.lv3.org, DNS:build.lv3.org, DNS:changelog.lv3.org, DNS:chat.lv3.org, DNS:cloud.lv3.org, DNS:coolify.lv3.org, DNS:data.lv3.org, DNS:docker.lv3.org, DNS:docs.lv3.org, DNS:draw.lv3.org, DNS:flags.lv3.org, DNS:grafana.lv3.org, DNS:headscale.lv3.org, DNS:home.lv3.org, DNS:langfuse.lv3.org, DNS:logs.lv3.org, DNS:lv3.org, DNS:mail.lv3.org, DNS:matrix.lv3.org, DNS:n8n.lv3.org, DNS:nginx.lv3.org, DNS:notebooks.lv3.org, DNS:ops.lv3.org, DNS:proxmox.lv3.org, DNS:realtime.lv3.org, DNS:registry.lv3.org, DNS:sso.lv3.org, DNS:status.lv3.org, DNS:tasks.lv3.org, DNS:uptime.lv3.org, DNS:wiki.lv3.org
+
+HEALTH
+HTTP/2 308
+server: nginx
+date: Tue, 31 Mar 2026 07:27:11 GMT
+content-type: text/html
+content-length: 164
+location: https://nginx.lv3.org/api/0/internal/health/
+x-robots-tag: noindex, nofollow
+
+<html>
+<head><title>308 Permanent Redirect</title></head>
+<body>
+<center><h1>308 Permanent Redirect</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+AUTH
+HTTP/2 308
+server: nginx
+date: Tue, 31 Mar 2026 07:27:11 GMT
+content-type: text/html
+content-length: 164
+location: https://nginx.lv3.org/_allauth/browser/v1/config
+x-robots-tag: noindex, nofollow
+
+<html>
+<head><title>308 Permanent Redirect</title></head>
+<body>
+<center><h1>308 Permanent Redirect</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>

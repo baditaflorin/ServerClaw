@@ -1,0 +1,44 @@
+Validation lane selection
+  mode: all_lanes
+  branch: codex/ws-0304-mainline
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, atlas-lint, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 48.45
+alert-rule-validation passed 23.18
+ansible-lint          passed 430.96
+ansible-syntax        passed 631.07
+artifact-secret-scan  passed 91.35
+atlas-lint            passed 110.32
+dependency-direction  passed 40.44
+dependency-graph      failed 29.32
+documentation-index   passed 39.61
+generated-docs        failed 69.11
+generated-portals     passed 338.57
+iac-policy-scan       passed 224.85
+integration-tests     passed 18.10
+packer-validate       passed 84.16
+policy-validation     passed 57.99
+schema-validation     passed 456.54
+security-scan         passed 351.98
+semgrep-sast          passed 427.25
+service-completeness  passed 36.94
+tofu-validate         passed 16.81
+type-check            passed 76.27
+workstream-surfaces   passed 285.42
+yaml-lint             passed 213.96
+
+[dependency-graph] docker command
+docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/.local/validation-gate/docker-cids/dependency-graph-7mfzaqdx.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+[dependency-graph] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+architecture diagrams error: /workspace/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.
+
+[generated-docs] docker command
+docker run --rm --cpus=4 --cidfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/.local/validation-gate/docker-cids/generated-docs-bqfpjlfj.cid -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-docs
+[generated-docs] stdout
+Generated status document validation
+[generated-docs] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+architecture diagrams error: /workspace/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "openbao_runtime",
+  "image_ref": "docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-22",
+  "summary": {
+    "critical": 1,
+    "high": 7
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b (alpine 3.23.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 0,
+      "high": 1
+    },
+    {
+      "target": "bin/bao",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 1,
+      "high": 6
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-22-openbao-runtime.trivy.json"
+}

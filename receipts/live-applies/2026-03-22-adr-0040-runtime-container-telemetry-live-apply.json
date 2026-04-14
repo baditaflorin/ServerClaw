@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0040-runtime-container-telemetry-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "aad25fe89499e82e3c0caea3a2963801186efc8a",
+  "repo_version_context": "0.42.0",
+  "workflow_id": "converge-monitoring",
+  "adr": "0040",
+  "summary": "Applied Docker runtime container telemetry live for docker-runtime-lv3 and verified the container metrics in InfluxDB and the expanded Grafana detail dashboard.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime-lv3",
+      "vmid": "120",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "dashboard",
+      "name": "LV3 docker-runtime-lv3 Detail"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Runtime guest Telegraf access",
+      "result": "pass",
+      "observed": "docker-runtime-lv3 reported telegraf active with group membership 'telegraf docker'."
+    },
+    {
+      "check": "Docker container metrics written to InfluxDB",
+      "result": "pass",
+      "observed": "InfluxDB returned docker_container_status, docker_container_cpu, docker_container_mem, docker_container_net, and docker_container_health rows for the uptime-kuma container on docker-runtime-lv3."
+    },
+    {
+      "check": "Grafana runtime detail dashboard expanded",
+      "result": "pass",
+      "observed": "The LV3 docker-runtime-lv3 Detail dashboard was provisioned with 16 panels including Running Containers, Container CPU Usage, Container Memory Usage, Container Network Throughput, and Container Snapshot."
+    }
+  ],
+  "evidence_refs": [
+    "docs/runbooks/monitoring-stack.md",
+    "docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The first live rerun exposed a handler-name mismatch in roles/monitoring_vm/tasks/main.yml; commit aad25fe fixed the notifications and the subsequent converge-monitoring run completed idempotently."
+  ]
+}

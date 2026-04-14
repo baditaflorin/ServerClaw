@@ -1,0 +1,7 @@
+before_favorites=1
+before_recents=0
+favorite_response_contains_favorites=1
+after_favorites=1
+after_recents=1
+after_keycloak_mentions=7
+redirect_code=303

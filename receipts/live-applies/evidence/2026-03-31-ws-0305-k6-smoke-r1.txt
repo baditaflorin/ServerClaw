@@ -1,0 +1,3 @@
+/bin/sh: line 0: test: too many arguments
+set COMMAND=<shell-command>
+make: *** [remote-exec] Error 1

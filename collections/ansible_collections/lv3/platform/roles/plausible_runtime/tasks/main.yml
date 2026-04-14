@@ -79,66 +79,49 @@
     - path: "{{ plausible_secret_dir }}"
       mode: "0700"
 
-- name: Generate the Plausible runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ plausible_database_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\n'"
-    - path: "{{ plausible_secret_key_base_remote_file }}"
-      command: "openssl rand -hex 64"
-    - path: "{{ plausible_bootstrap_user_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\n'"
-  register: plausible_secret_generation
-  changed_when: "'changed' in plausible_secret_generation.stdout"
-  no_log: true
-
-- name: Read the Plausible runtime secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  register: plausible_secret_reads
-  loop:
-    - "{{ plausible_database_password_remote_file }}"
-    - "{{ plausible_secret_key_base_remote_file }}"
-    - "{{ plausible_bootstrap_user_password_remote_file }}"
+- name: Manage the Plausible runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ plausible_database_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "plausible-database-password"
+      - path: "{{ plausible_secret_key_base_remote_file }}"
+        command: "openssl rand -hex 64"
+        label: "plausible-secret-key-base"
+      - path: "{{ plausible_bootstrap_user_password_remote_file }}"
+        command: "openssl rand -base64 24 | tr -d '\\n'"
+        label: "plausible-bootstrap-user-password"
+    common_manage_service_secrets_read:
+      - "{{ plausible_database_password_remote_file }}"
+      - "{{ plausible_secret_key_base_remote_file }}"
+      - "{{ plausible_bootstrap_user_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ plausible_database_password_local_file }}"
+        content_index: 0
+      - dest: "{{ plausible_secret_key_base_local_file }}"
+        content_index: 1
+      - dest: "{{ plausible_bootstrap_user_password_local_file }}"
+        content_index: 2
+    common_manage_service_secrets_local_artifact_dir: "{{ plausible_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "plausible_decoded_secrets"
   no_log: true
 
 - name: Record the Plausible runtime secrets
   ansible.builtin.set_fact:
-    plausible_database_password: "{{ plausible_secret_reads.results[0].content | b64decode | trim }}"
-    plausible_secret_key_base: "{{ plausible_secret_reads.results[1].content | b64decode | trim }}"
-    plausible_bootstrap_user_password: "{{ plausible_secret_reads.results[2].content | b64decode | trim }}"
+    plausible_database_password: "{{ plausible_decoded_secrets[0] }}"
+    plausible_secret_key_base: "{{ plausible_decoded_secrets[1] }}"
+    plausible_bootstrap_user_password: "{{ plausible_decoded_secrets[2] }}"
     plausible_mailbox_password: "{{ lookup('ansible.builtin.file', plausible_mailbox_password_local_file) | trim }}"
     plausible_runtime_secret_payload:
       DATABASE_URL: >-
         postgres://{{ plausible_database_user }}:{{
-          (plausible_secret_reads.results[0].content | b64decode | trim) | urlencode
+          plausible_decoded_secrets[0] | urlencode
         }}@plausible-db:5432/{{ plausible_database_name }}
-      SECRET_KEY_BASE: "{{ plausible_secret_reads.results[1].content | b64decode | trim }}"
+      SECRET_KEY_BASE: "{{ plausible_decoded_secrets[1] }}"
       SMTP_USER_PWD: "{{ lookup('ansible.builtin.file', plausible_mailbox_password_local_file) | trim }}"
-  no_log: true
-
-- name: Mirror the Plausible runtime secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ plausible_database_password_local_file }}"
-      content: "{{ plausible_database_password }}"
-    - dest: "{{ plausible_secret_key_base_local_file }}"
-      content: "{{ plausible_secret_key_base }}"
-    - dest: "{{ plausible_bootstrap_user_password_local_file }}"
-      content: "{{ plausible_bootstrap_user_password }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Plausible
@@ -184,6 +167,7 @@
     group: root
     mode: "0600"
   no_log: true
+  register: plausible_env_render
 
 - name: Render the Plausible ClickHouse config bundle
   ansible.builtin.template:
@@ -201,6 +185,7 @@
       dest: low-resources.xml
     - src: clickhouse/default-profile-low-resources-overrides.xml.j2
       dest: default-profile-low-resources-overrides.xml
+  register: plausible_clickhouse_config_render
 
 - name: Render the Plausible compose file
   ansible.builtin.template:
@@ -211,6 +196,7 @@
     mode: "0644"
   vars:
     ansible_search_path: "{{ [role_path + '/../common'] + (ansible_search_path | default([])) }}"
+  register: plausible_compose_render
 
 - name: Ensure Docker bridge networking chains are ready before Plausible startup
   ansible.builtin.include_role:
@@ -220,39 +206,21 @@
     common_docker_bridge_chains_service_name: docker
     common_docker_bridge_chains_require_nat_chain: true
 
-- name: Pull the Plausible images
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ plausible_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ plausible_site_dir }}"
-  register: plausible_pull
-  changed_when: >-
-    'Pulling' in plausible_pull.stdout
-    or 'Downloaded newer image' in plausible_pull.stdout
-    or 'Pull complete' in plausible_pull.stdout
-
-- name: Start the Plausible stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ plausible_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ plausible_site_dir }}"
-  register: plausible_up
-  changed_when: >-
-    'Creating' in plausible_up.stdout
-    or 'Recreating' in plausible_up.stdout
-    or 'Starting' in plausible_up.stdout
+- name: Converge the Plausible compose stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ plausible_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ plausible_site_dir }}"
+    common_docker_compose_converge_service_name: plausible
+    common_docker_compose_converge_template_results:
+      - "{{ plausible_env_render }}"
+      - "{{ plausible_clickhouse_config_render }}"
+      - "{{ plausible_compose_render }}"
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_health_port: "{{ plausible_internal_port }}"
+    common_docker_compose_converge_health_url: "{{ plausible_internal_base_url }}/api/health"
 
 - name: Check whether Plausible publishes the expected host port
   ansible.builtin.command:

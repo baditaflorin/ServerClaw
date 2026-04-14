@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0276-nats-jetstream-event-bus-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T08:05:00Z",
+  "recorded_by": "codex",
+  "source_commit": "959b10f382ff96e7a16db56a1283e83cca9fb8ea",
+  "repo_version_context": "0.177.96",
+  "platform_version_context": "0.130.63",
+  "workflow_id": "adr-0276-nats-jetstream-event-bus-live-apply",
+  "adr": "0276",
+  "summary": "Live-applied ADR 0276 from the latest rebased origin/main lineage by bringing the private NATS JetStream runtime and its preserved multi-principal auth catalog under repo-managed automation, recovering lv3-nats-jetstream after the latest server inspection found it exited during shared docker-runtime churn, reconciling PLATFORM_EVENTS, RAG_DOCUMENT, and SECRET_ROTATION to no drift, and re-verifying platform, secret-rotation, and RAG publishes end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "NATS client listener",
+      "address": "nats://10.10.10.20:4222"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "NATS monitor",
+      "address": "http://127.0.0.1:8222/healthz"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Targeted ADR 0276 regression coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest -m pytest -q tests/test_nats_jetstream_runtime_role.py tests/test_secret_rotation.py tests/test_service_id_resolver.py tests/unit/test_event_taxonomy.py tests/unit/test_ledger_writer.py tests/test_ansible_execution_scopes.py` returned `38 passed in 0.68s` on the rebased latest-main branch."
+    },
+    {
+      "check": "Rebased syntax and preflight validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276syntax-postrebase --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check` passed, and `make preflight WORKFLOW=live-apply-service` also passed on the synchronized worktree."
+    },
+    {
+      "check": "Governed rebased runtime recovery replay",
+      "result": "pass",
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276recover-r1 --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` succeeded with final recap `docker-runtime-lv3 : ok=79 changed=1 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0` after the latest server check found `lv3-nats-jetstream` had exited."
+    },
+    {
+      "check": "Guest-local runtime health after recovery",
+      "result": "pass",
+      "observed": "The refreshed guest-local status capture kept `lv3-nats-jetstream` `Up`, `curl -fsS http://127.0.0.1:8222/healthz` returned `{\"status\":\"ok\"}`, and the JetStream monitor listed the expected `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams alongside the preserved KV and workflow/alert/receipt/agent streams."
+    },
+    {
+      "check": "Controller-side stream reconciliation path",
+      "result": "pass",
+      "observed": "`make check-nats-streams` and `make apply-nats-streams` both returned `PLATFORM_EVENTS: none`, `RAG_DOCUMENT: none`, and `SECRET_ROTATION: none`, proving the controller-side stream contract now sees no drift after the replay."
+    },
+    {
+      "check": "Platform, secret-rotation, and RAG smoke publishes",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with nats-py python scripts/nats_streams.py --smoke-publish` published `platform.findings.observation` into `PLATFORM_EVENTS` with `seq=169`, and follow-up raw JSON publishes to `secret.rotation.completed` and `rag.document.staged` reached `SECRET_ROTATION` and `RAG_DOCUMENT` with stream-local sequence `2` and `stream_message_count=2`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md",
+    "docs/workstreams/ws-0276-live-apply.md",
+    "docs/runbooks/nats-jetstream-event-bus.md",
+    "playbooks/nats-jetstream.yml",
+    "playbooks/services/nats-jetstream.yml",
+    "collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/templates/nats-server.conf.j2",
+    "config/nats-streams.yaml",
+    "platform/ledger/writer.py",
+    "scripts/secret_rotation.py",
+    "tests/test_nats_jetstream_runtime_role.py",
+    "tests/test_secret_rotation.py",
+    "tests/test_service_id_resolver.py",
+    "tests/unit/test_event_taxonomy.py",
+    "tests/unit/test_ledger_writer.py",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-recover-after-main-advance.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-post-recover-status.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-check-nats-streams-post-recover.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-apply-nats-streams-post-recover.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-platform-smoke-post-recover.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0276-domain-smoke-post-recover.txt",
+    "receipts/live-applies/2026-03-30-adr-0276-nats-jetstream-event-bus-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt records the rebased branch-local latest-main proof before the protected release, README, and canonical platform-truth surfaces are updated.",
+    "The earlier pre-rebase ws-0276 evidence remains in the branch for audit history, but this receipt supersedes it after origin/main advanced to release 0.177.96 and the synchronized branch replay now points at a surviving commit in the current lineage.",
+    "Latest server inspection found `lv3-nats-jetstream` exited even though the earlier branch-local replay had passed; rerunning the governed playbook recovered the runtime and restored green controller-side stream automation.",
+    "VERSION, changelog release surfaces, docs/release-notes, versions/stack.yaml platform_version, build/platform-manifest.json, the integrated README summary, ADR 0276 metadata, and docs/adr/.index.yaml still wait for the exact-main integration step."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-30-adr-0276-nats-runtime-recovery",
+    "surface": "docker-runtime-lv3:/opt/nats-jetstream",
+    "repair_action": "Reran playbooks/nats-jetstream.yml from rebased commit 959b10f382ff96e7a16db56a1283e83cca9fb8ea after latest server inspection found lv3-nats-jetstream exited.",
+    "verification": "NATS health returned ok, make check-nats-streams and make apply-nats-streams both reported no drift, and platform plus cross-domain smoke publishes landed in the expected streams.",
+    "diagnosis": "transient_failure"
+  }
+}

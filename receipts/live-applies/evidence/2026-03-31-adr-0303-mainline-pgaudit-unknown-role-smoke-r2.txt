@@ -1,0 +1,40 @@
+nats: encountered error
+Traceback (most recent call last):
+  File "/Users/live/.cache/uv/archive-v0/NuiKTQWn27AXIXK0QKiv3/lib/python3.13/site-packages/nats/aio/client.py", line 553, in connect
+    await self._process_connect_init()
+  File "/Users/live/.cache/uv/archive-v0/NuiKTQWn27AXIXK0QKiv3/lib/python3.13/site-packages/nats/aio/client.py", line 2035, in _process_connect_init
+    raise errors.Error("nats: empty response from server when expecting INFO message")
+nats.errors.Error: nats: empty response from server when expecting INFO message
+{"role": "adr0303_smoke_56923b00", "stream": "PLATFORM_EVENTS", "subject": "platform.security.pgaudit_unknown_role"}
+## relay_health
+## guest=monitoring-lv3 rc=0
+{"status":"ok"}
+Traceback (most recent call last):
+  File "/tmp/adr0303_smoke.py", line 105, in <module>
+    before_msg = asyncio.run(last_subject_message())
+  File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/tmp/adr0303_smoke.py", line 71, in last_subject_message
+    nc = await connect_nats(f'nats://127.0.0.1:{local_port}', credentials)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/drift_lib.py", line 358, in connect_nats
+    await async_with_retry(
+    ...<3 lines>...
+    )
+  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/platform/retry/policy.py", line 179, in async_with_retry
+    return await fn()
+           ^^^^^^^^^^
+  File "/Users/live/.cache/uv/archive-v0/NuiKTQWn27AXIXK0QKiv3/lib/python3.13/site-packages/nats/aio/client.py", line 569, in connect
+    raise e
+  File "/Users/live/.cache/uv/archive-v0/NuiKTQWn27AXIXK0QKiv3/lib/python3.13/site-packages/nats/aio/client.py", line 553, in connect
+    await self._process_connect_init()
+  File "/Users/live/.cache/uv/archive-v0/NuiKTQWn27AXIXK0QKiv3/lib/python3.13/site-packages/nats/aio/client.py", line 2035, in _process_connect_init
+    raise errors.Error("nats: empty response from server when expecting INFO message")
+nats.errors.Error: nats: empty response from server when expecting INFO message

@@ -1,0 +1,23 @@
+[ERROR]: Task failed: Finalization of task args for 'ansible.builtin.shell' failed: Error while resolving value for '_raw_params': 'json' is undefined
+
+Task failed.
+Origin: <adhoc 'shell' task>
+
+{'action': 'shell', 'args': {'_raw_params': 'docker inspect windmill-windmill_worker_native-1 --format {{json [...]
+
+<<< caused by >>>
+
+Finalization of task args for 'ansible.builtin.shell' failed.
+Origin: <CLI option '-m'>
+
+shell
+
+<<< caused by >>>
+
+Error while resolving value for '_raw_params': 'json' is undefined
+Origin: <CLI option '-a'>
+
+docker inspect windmill-windmill_worker_native-1 --format {{json .Mounts}}
+
+docker-runtime-lv3 | FAILED | rc=-1 >>
+Task failed: Finalization of task args for 'ansible.builtin.shell' failed: Error while resolving value for '_raw_params': 'json' is undefined

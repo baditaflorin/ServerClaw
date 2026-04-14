@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "plausible_clickhouse_runtime",
+  "image_ref": "docker.io/clickhouse/clickhouse-server:24.12-alpine@sha256:58a8168a0a17a5694172cbe89b8d3f1f6c9a91182260c98e299e87da1b0d0d0b",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 2,
+    "high": 4
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/clickhouse/clickhouse-server:24.12-alpine@sha256:58a8168a0a17a5694172cbe89b8d3f1f6c9a91182260c98e299e87da1b0d0d0b (alpine 3.21.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 2,
+      "high": 4
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-plausible-clickhouse-runtime.trivy.json"
+}

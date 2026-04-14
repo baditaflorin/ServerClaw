@@ -1,0 +1,74 @@
+{
+  "after_counts": {
+    "/journeys/operator-access-admin/alert": 2,
+    "/journeys/operator-access-admin/checklist": 2,
+    "/journeys/operator-access-admin/help": 2,
+    "/journeys/operator-access-admin/help-success": 2,
+    "/journeys/operator-access-admin/resume": 2,
+    "/journeys/operator-access-admin/safe-task": 2,
+    "/journeys/operator-access-admin/search": 2,
+    "/journeys/operator-access-admin/search-result": 2,
+    "/journeys/operator-access-admin/start": 2
+  },
+  "before_counts": {
+    "/journeys/operator-access-admin/alert": 1,
+    "/journeys/operator-access-admin/checklist": 1,
+    "/journeys/operator-access-admin/help": 1,
+    "/journeys/operator-access-admin/help-success": 1,
+    "/journeys/operator-access-admin/resume": 1,
+    "/journeys/operator-access-admin/safe-task": 1,
+    "/journeys/operator-access-admin/search": 1,
+    "/journeys/operator-access-admin/search-result": 1,
+    "/journeys/operator-access-admin/start": 1
+  },
+  "deltas": {
+    "/journeys/operator-access-admin/alert": 1,
+    "/journeys/operator-access-admin/checklist": 1,
+    "/journeys/operator-access-admin/help": 1,
+    "/journeys/operator-access-admin/help-success": 1,
+    "/journeys/operator-access-admin/resume": 1,
+    "/journeys/operator-access-admin/safe-task": 1,
+    "/journeys/operator-access-admin/search": 1,
+    "/journeys/operator-access-admin/search-result": 1,
+    "/journeys/operator-access-admin/start": 1
+  },
+  "recorded_at": "2026-04-02T07:54:59.273870Z",
+  "route_posts": [
+    {
+      "route": "/journeys/operator-access-admin/start",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/checklist",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/search",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/search-result",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/help",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/help-success",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/alert",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/resume",
+      "status": 202
+    },
+    {
+      "route": "/journeys/operator-access-admin/safe-task",
+      "status": 202
+    }
+  ]
+}

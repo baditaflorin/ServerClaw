@@ -1,0 +1,4 @@
+Service: coolify
+Tier: n/a
+Standby enforcement: not required
+Decision: approved

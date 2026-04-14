@@ -1,0 +1,224 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-exact-main-verify/scripts/remote_exec.sh pre-push-gate --local-fallback
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+
+CHECK                STATUS             DURATION(s)
+agent-standards       passed             2.05
+alert-rule-validation passed             2.13
+ansible-lint          passed             193.67
+ansible-syntax        passed             119.78
+artifact-secret-scan  passed             4.10
+dependency-direction  passed             2.25
+dependency-graph      passed             3.29
+documentation-index   passed             1.94
+generated-docs        passed             9.16
+generated-portals     passed             32.08
+iac-policy-scan       passed             35.98
+integration-tests     passed             1.50
+packer-validate       runner_unavailable 0.17
+policy-validation     passed             1.83
+schema-validation     passed             17.35
+security-scan         passed             23.96
+semgrep-sast          passed             58.12
+service-completeness  passed             1.09
+tofu-validate         runner_unavailable 0.16
+type-check            passed             4.85
+workstream-surfaces   passed             3.97
+yaml-lint             passed             17.27
+
+[packer-validate] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0306-exact-main-verify-180750b7f4/repo/.lv3-runs/20260331T153354Z-08424361886b/repo:/workspace -v /opt/builds/.packer.d:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=08424361886b637337751c34ae70ec239a644a4177afa32c58a1f8e22e135e23 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T15:33:47.822381+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=56fd6422c43789a68660150baaf0e7d0b0376b99 -e LV3_SNAPSHOT_BRANCH=HEAD -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
+[packer-validate] stderr
+Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
+
+Run 'docker run --help' for more information
+
+[tofu-validate] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0306-exact-main-verify-180750b7f4/repo/.lv3-runs/20260331T153354Z-08424361886b/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=08424361886b637337751c34ae70ec239a644a4177afa32c58a1f8e22e135e23 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T15:33:47.822381+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=56fd6422c43789a68660150baaf0e7d0b0376b99 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi
+[tofu-validate] stderr
+Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
+
+Run 'docker run --help' for more information
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: .config-locations.yaml, .gitea/workflows/validate.yml, README.md, RELEASE.md, VERSION, build/platform-manifest.json, ...
+
+CHECK                STATUS    DURATION(s)
+agent-standards       passed    28.99
+alert-rule-validation passed    24.68
+ansible-lint          timed_out 600.02
+ansible-syntax        timed_out 600.02
+artifact-secret-scan  passed    55.58
+dependency-direction  passed    37.63
+dependency-graph      passed    38.81
+documentation-index   passed    39.06
+generated-docs        passed    68.69
+generated-portals     passed    164.58
+iac-policy-scan       passed    147.04
+integration-tests     passed    13.46
+packer-validate       passed    89.83
+policy-validation     passed    46.58
+schema-validation     passed    205.86
+security-scan         passed    153.17
+semgrep-sast          passed    175.77
+service-completeness  passed    27.87
+tofu-validate         passed    15.70
+type-check            passed    47.67
+workstream-surfaces   passed    44.18
+yaml-lint             passed    85.72
+
+[ansible-lint] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-exact-main-verify:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0306-exact-main-verify:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0306-exact-main-verify:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-exact-main-verify/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=08424361886b637337751c34ae70ec239a644a4177afa32c58a1f8e22e135e23 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T15:33:47.822381+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=56fd6422c43789a68660150baaf0e7d0b0376b99 -e LV3_SNAPSHOT_BRANCH=HEAD -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint
+[ansible-lint] stdout
+Ansible lint
+[ansible-lint] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[ansible-syntax] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-exact-main-verify:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0306-exact-main-verify:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0306-exact-main-verify:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-exact-main-verify/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=08424361886b637337751c34ae70ec239a644a4177afa32c58a1f8e22e135e23 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T15:33:47.822381+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=56fd6422c43789a68660150baaf0e7d0b0376b99 -e LV3_SNAPSHOT_BRANCH=HEAD -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
+[ansible-syntax] stdout
+Syntax check: playbooks/api-gateway.yml
+Syntax check: playbooks/artifact-cache-vm.yml
+Syntax check: playbooks/backup-vm.yml
+Syntax check: playbooks/browser-runner.yml
+Syntax check: playbooks/build-artifact-cache.yml
+Syntax check: playbooks/changedetection.yml
+Syntax check: playbooks/control-plane-recovery.yml
+Syntax check: playbooks/coolify.yml
+Syntax check: playbooks/crawl4ai.yml
+Syntax check: playbooks/data-retention.yml
+Syntax check: playbooks/database-dns.yml
+Syntax check: playbooks/dify.yml
+Syntax check: playbooks/directus.yml
+Syntax check: playbooks/docker-publication-assurance.yml
+Syntax check: playbooks/docker-runtime.yml
+Syntax check: playbooks/dozzle.yml
+Syntax check: playbooks/excalidraw.yml
+Syntax check: playbooks/flagsmith.yml
+Syntax check: playbooks/gitea.yml
+Syntax check: playbooks/gotenberg.yml
+Syntax check: playbooks/groups/access.yml
+Syntax check: playbooks/groups/automation.yml
+Syntax check: playbooks/groups/communication.yml
+Syntax check: playbooks/groups/data.yml
+Syntax check: playbooks/groups/observability.yml
+Syntax check: playbooks/groups/platform-apps.yml
+Syntax check: playbooks/groups/security.yml
+Syntax check: playbooks/guest-access.yml
+Syntax check: playbooks/guest-network-policy.yml
+Syntax check: playbooks/harbor.yml
+Syntax check: playbooks/headscale.yml
+Syntax check: playbooks/homepage.yml
+Syntax check: playbooks/jupyterhub.yml
+Syntax check: playbooks/keycloak.yml
+Syntax check: playbooks/langfuse.yml
+Syntax check: playbooks/mail-platform-diagnostics.yml
+Syntax check: playbooks/mail-platform-notification-profiles-verify.yml
+Syntax check: playbooks/mail-platform-send-gmail.yml
+Syntax check: playbooks/mail-platform-verify.yml
+Syntax check: playbooks/mail-platform.yml
+Syntax check: playbooks/mailpit.yml
+Syntax check: playbooks/matrix-synapse.yml
+Syntax check: playbooks/mattermost.yml
+Syntax check: playbooks/monitoring-stack.yml
+Syntax check: playbooks/n8n.yml
+Syntax check: playbooks/nats-jetstream.yml
+Syntax check: playbooks/netbox.yml
+Syntax check: playbooks/nextcloud.yml
+Syntax check: playbooks/nomad.yml
+Syntax check: playbooks/ntfy.yml
+Syntax check: playbooks/ntopng.yml
+Syntax check: playbooks/ollama.yml
+Syntax check: playbooks/open-webui.yml
+Syntax check: playbooks/openbao.yml
+Syntax check: playbooks/openfga.yml
+Syntax check: playbooks/ops-portal.yml
+Syntax check: playbooks/outline.yml
+Syntax check: playbooks/piper.yml
+Syntax check: playbooks/plane.yml
+Syntax check: playbooks/plausible.yml
+Syntax check: playbooks/portainer.yml
+Syntax check: playbooks/postgres-vm.yml
+Syntax check: playbooks/provision-subdomain.yml
+Syntax check: playbooks/proxmox-install.yml
+Syntax check: playbooks/proxmox-staging-bridge.yml
+Syntax check: playbooks/public-edge.yml
+Syntax check: playbooks/rag-context.yml
+Syntax check: playbooks/realtime.yml
+Syntax check: playbooks/redpanda.yml
+Syntax check: playbooks/restic-config-backup.yml
+Syntax check: playbooks/route-dns-assertion-ledger.yml
+Syntax check: playbooks/searxng.yml
+Syntax check: playbooks/secret-rotation.yml
+Syntax check: playbooks/semaphore-self.yml
+Syntax check: playbooks/semaphore.yml
+Syntax check: playbooks/server-resident-reconciliation.yml
+Syntax check: playbooks/serverclaw.yml
+Syntax check: playbooks/services/api-gateway.yml
+Syntax check: playbooks/services/backup-vm.yml
+Syntax check: playbooks/services/browser-runner.yml
+Syntax check: playbooks/services/build-artifact-cache.yml
+Syntax check: playbooks/services/changedetection.yml
+Syntax check: playbooks/services/coolify.yml
+Syntax check: playbooks/services/crawl4ai.yml
+Syntax check: playbooks/services/dify.yml
+Syntax check: playbooks/services/directus.yml
+Syntax check: playbooks/services/docker-build-observability.yml
+Syntax check: playbooks/services/docker-runtime-observability.yml
+Syntax check: playbooks/services/dozzle.yml
+Syntax check: playbooks/services/excalidraw.yml
+Syntax check: playbooks/services/flagsmith.yml
+Syntax check: playbooks/services/gitea.yml
+Syntax check: playbooks/services/gotenberg.yml
+Syntax check: playbooks/services/grafana.yml
+Syntax check: playbooks/services/guest-access.yml
+Syntax check: playbooks/services/guest-log-shipping.yml
+Syntax check: playbooks/services/harbor.yml
+Syntax check: playbooks/services/headscale.yml
+Syntax check: playbooks/services/homepage.yml
+Syntax check: playbooks/services/jupyterhub.yml
+Syntax check: playbooks/services/langfuse.yml
+Syntax check: playbooks/services/mail-platform.yml
+Syntax check: playbooks/services/mailpit.yml
+Syntax check: playbooks/services/matrix-synapse.yml
+Syntax check: playbooks/services/n8n.yml
+Syntax check: playbooks/services/nats-jetstream.yml
+Syntax check: playbooks/services/nextcloud.yml
+Syntax check: playbooks/services/nginx-observability.yml
+Syntax check: playbooks/services/nomad.yml
+Syntax check: playbooks/services/ollama.yml
+Syntax check: playbooks/services/openbao.yml
+Syntax check: playbooks/services/openfga.yml
+Syntax check: playbooks/services/ops-portal.yml
+Syntax check: playbooks/services/ops_portal.yml
+Syntax check: playbooks/services/outline.yml
+Syntax check: playbooks/services/piper.yml
+Syntax check: playbooks/services/plane.yml
+Syntax check: playbooks/services/plausible.yml
+Syntax check: playbooks/services/postgres-vm.yml
+Syntax check: playbooks/services/proxmox-host-log-shipping.yml
+Syntax check: playbooks/services/proxmox-metrics.yml
+Syntax check: playbooks/services/public-edge.yml
+Syntax check: playbooks/services/rag-context.yml
+Syntax check: playbooks/services/realtime.yml
+Syntax check: playbooks/services/redpanda.yml
+Syntax check: playbooks/services/semaphore.yml
+Syntax check: playbooks/services/step-ca.yml
+Syntax check: playbooks/services/temporal.yml
+Syntax check: playbooks/services/tesseract-ocr.yml
+Syntax check: playbooks/services/tika.yml
+Syntax check: playbooks/services/uptime-kuma.yml
+Syntax check: playbooks/services/vaultwarden.yml
+Syntax check: playbooks/services/windmill.yml
+Syntax check: playbooks/services/woodpecker.yml
+Syntax check: playbooks/site.yml
+[ansible-syntax] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested

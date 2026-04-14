@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-08-adr-0364-gate-tools-build-server-live-apply",
+  "applied_on": "2026-04-08",
+  "recorded_on": "2026-04-08",
+  "recorded_by": "claude",
+  "source_commit": "0980599ab328d811d5481560baca2a3cdd4f3185",
+  "repo_version_context": "0.178.58",
+  "workflow_id": "converge-docker-runtime",
+  "adr": "0364",
+  "summary": "Installed gate validation tools on docker-build-lv3 (10.10.10.30) per ADR 0364 pre-push gate architecture.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-build-lv3",
+      "address": "10.10.10.30"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Gate tools installed on build server",
+      "result": "pass",
+      "observed": "docker-build-lv3 running pre-push validation gate with required check-runner images."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0364-pre-push-validation-gate.md",
+    "versions/stack.yaml"
+  ],
+  "notes": []
+}

@@ -1,0 +1,118 @@
+---
+# Purpose: Declare the validated input contract for the repowise_runtime role.
+# Use case: Used by Ansible argument validation before the Repowise runtime converge tasks run.
+#
+# Inputs (required):
+#   - repowise_base_dir (path, required): Base directory for the Repowise deployment.
+#   - repowise_service_dir (path, required): Guest-side service source directory.
+#   - repowise_repo_dir (path, required): Guest-side mirrored repository directory.
+#   - repowise_port (int, required): Guest-local HTTP port exposed by Repowise.
+#   - repowise_ollama_url (str, required): Ollama endpoint used for embeddings.
+#   - repowise_model (str, required): Embedding model identifier used for indexing.
+#   - repowise_qdrant_network (str, required): Docker network used to reach Qdrant.
+#   - repowise_qdrant_host (str, required): Qdrant host name visible from the Repowise container.
+#   - repowise_qdrant_port (int, required): Qdrant TCP port used for indexing and query lookups.
+#   - repowise_collection (str, required): Qdrant collection name used by Repowise.
+#   - repowise_python_image (str, required): Container image used to run the Repowise service and rebuild jobs.
+#   - repowise_rebuild_cron_hour (str, required): Hour field for the nightly rebuild cron entry.
+#   - repowise_rebuild_cron_minute (str, required): Minute field for the nightly rebuild cron entry.
+#
+# Inputs (optional):
+#   - repowise_data_dir (path, optional): Derived persistent data directory created after service defaults are resolved.
+#   - repowise_api_token (str, optional): Bearer token required by the Repowise API when authentication is enabled.
+#
+# Outputs:
+#   - Argument-spec validation metadata for the repowise_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0165: Requires governed metadata for automation entrypoints.
+#   - ADR 0346: Defines the runtime-apps live-apply context where Repowise is replayed.
+#   - Role: repowise_runtime — validates inputs before converge tasks run.
+#
+# Related ADRs: 0165, 0346, 0371
+# Related Runbooks: docs/runbooks/configure-repowise.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
+argument_specs:
+  main:
+    short_description: Converge the Repowise semantic code search runtime.
+    options:
+      repowise_base_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Repowise deployment.
+      repowise_service_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the Repowise service sources on the guest.
+      repowise_repo_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the mirrored platform repository indexed by Repowise.
+      repowise_data_dir:
+        type: path
+        required: false
+        description:
+          - Persistent data directory used by the Repowise runtime.
+      repowise_port:
+        type: int
+        required: true
+        description:
+          - Local HTTP port exposed by the Repowise service.
+      repowise_ollama_url:
+        type: str
+        required: true
+        description:
+          - Base URL for the Ollama runtime used for embedding generation.
+      repowise_model:
+        type: str
+        required: true
+        description:
+          - Embedding model identifier used during indexing and queries.
+      repowise_qdrant_network:
+        type: str
+        required: true
+        description:
+          - Docker network used to reach the shared Qdrant service.
+      repowise_qdrant_host:
+        type: str
+        required: true
+        description:
+          - Hostname used by the Repowise runtime to reach Qdrant.
+      repowise_qdrant_port:
+        type: int
+        required: true
+        description:
+          - TCP port used by Qdrant.
+      repowise_collection:
+        type: str
+        required: true
+        description:
+          - Qdrant collection name used to store Repowise vectors.
+      repowise_api_token:
+        type: str
+        required: false
+        description:
+          - Optional bearer token required by the Repowise API.
+      repowise_python_image:
+        type: str
+        required: true
+        description:
+          - Container image used to run the Repowise service and rebuild jobs.
+      repowise_rebuild_cron_hour:
+        type: str
+        required: true
+        description:
+          - Cron hour used for the nightly Repowise index rebuild.
+      repowise_rebuild_cron_minute:
+        type: str
+        required: true
+        description:
+          - Cron minute used for the nightly Repowise index rebuild.

@@ -1,0 +1,14 @@
+timestamp=2026-04-01T11:32:37Z
+health=OK
+verify_public
+{"status": "ok", "redirect_host": "sso.lv3.org", "database_count": 31, "expected_database_count": 31, "dashboard": "LV3 Platform Database Inventory", "chart": "PostgreSQL Databases"}
+
+report_file
+{
+  "status": "ok",
+  "redirect_host": "sso.lv3.org",
+  "database_count": 31,
+  "expected_database_count": 31,
+  "dashboard": "LV3 Platform Database Inventory",
+  "chart": "PostgreSQL Databases"
+}

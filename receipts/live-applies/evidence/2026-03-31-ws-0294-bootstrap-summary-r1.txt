@@ -1,0 +1,17 @@
+verification_passed: True
+root_username: root
+root_display_name: LV3 Platform Root
+available_models: gpt-4.1-mini, gpt-4o-mini, text-embedding-3-small
+chat_response_excerpt: READY
+embedding_dimensions: 768
+channels:
+- ollama-primary-chat -> http://10.10.10.20:11434
+- ollama-fallback-chat -> http://10.10.10.20:11434
+- ollama-embedding -> http://10.10.10.20:11434
+tokens:
+- lv3-controller-verifier
+- open-webui
+- serverclaw
+provider_env_files:
+- open-webui: exists=True
+- serverclaw: exists=True

@@ -1,0 +1,5 @@
+# restic stale-lock cleanup for ws-0274
+# recorded_at=2026-03-31T22:43:01Z
+ENDPOINT=http://10.200.25.2:9000
+COMMAND=restic --option s3.region=eu-central-1 --option s3.bucket-lookup=path unlock
+successfully removed 2 locks

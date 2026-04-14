@@ -1,0 +1,44 @@
+# ADR 0305 OpenFGA reachability verification
+UTC 2026-03-31T09:05:43Z
+
+## runtime-local
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.20' (ED25519) to the list of known hosts.
+docker-runtime-lv3
+jupyterhub-openbao-agent Up About a minute (healthy)
+grist-openbao-agent Up About a minute (healthy)
+paperless-openbao-agent Up About a minute (healthy)
+lv3-openfga Up About a minute 0.0.0.0:8098->8098/tcp, [::]:8098->8098/tcp
+openfga-openbao-agent Up About a minute (healthy)
+keycloak-keycloak-1 Up 4 minutes 8443/tcp, 10.10.10.20:8091->8080/tcp, 127.0.0.1:18080->8080/tcp, 127.0.0.1:19000->9000/tcp
+keycloak-openbao-agent Up 5 minutes (healthy)
+lv3-openbao Up 6 minutes 0.0.0.0:8200->8200/tcp, 10.10.10.20:8201->8201/tcp, 127.0.0.1:8201->8201/tcp
+directus-openbao-agent Up 6 minutes (healthy)
+dify-openbao-agent Up 6 minutes (healthy)
+windmill-openbao-agent Up 5 minutes (healthy)
+{"status":"SERVING"}
+status=0
+
+## host-to-runtime
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Debian-trixie-latest-amd64-base
+{"status":"SERVING"}
+status=0
+
+## build-to-runtime-and-prometheus
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+docker-build-lv3
+{"status":"SERVING"}
+curl: (28) Connection timed out after 10002 milliseconds
+status=28
+
+## monitoring-to-runtime-and-blackbox
+Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.40' (ED25519) to the list of known hosts.
+monitoring-lv3
+{"status":"SERVING"}
+probe_success 1
+status=0
+
+overall_status=28

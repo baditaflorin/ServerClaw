@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0176-inventory-sharding-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "f076a89c",
+  "repo_version_context": "0.177.3",
+  "workflow_id": "converge-ollama",
+  "adr": "0176",
+  "summary": "Replayed ADR 0176 from the current origin/main release through `make live-apply-service service=ollama env=production`, proved the host-scoped shard plan and limit expression on docker-runtime-lv3, and fixed three synced-main regressions discovered during the replay path: a duplicated ADR 0172 workstream registry entry, overly long Ansible SSH control socket paths under ADR 0177 run namespaces, and Ollama runtime recovery for Docker nat-chain and host-port publication drift.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ollama",
+      "address": "10.10.10.20:11434"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Scoped execution plan",
+      "result": "pass",
+      "observed": "The final mainline plan for `playbooks/services/ollama.yml` used run id `e78ee2968d0140deba22cec891c50baf`, rendered `.ansible/shards/e78ee2968d0140deba22cec891c50baf/ollama-production.json`, and constrained execution with `limit_expression` `docker-runtime-lv3` and `mutation_scope` `host`."
+    },
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh data-models` passed after removing the duplicate ADR 0172 workstream entry, and `uv run --with pytest --with pyyaml python -m pytest tests/test_ollama_runtime_role.py tests/test_run_namespace.py tests/test_remote_exec.py tests/unit/test_diff_engine.py -q` returned `31 passed` after adding the run-namespace control-path shortening and Ollama runtime recovery coverage."
+    },
+    {
+      "check": "Mainline live apply",
+      "result": "pass",
+      "observed": "The synchronized replay from origin/main commit `f076a89c` completed with `docker-runtime-lv3 : ok=90 changed=1 unreachable=0 failed=0 skipped=19 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Post-apply Ollama health",
+      "result": "pass",
+      "observed": "A targeted post-check on `docker-runtime-lv3` returned `{\"version\":\"0.18.2\"}` from `curl -fsS http://127.0.0.1:11434/api/version`, and `docker ps --filter name=ollama` showed `0.0.0.0:11434->11434/tcp, [::]:11434->11434/tcp` published for `ollama/ollama:0.18.2`."
+    }
+  ],
+  "evidence_refs": [
+    "config/ansible-execution-scopes.yaml",
+    "platform/ansible/execution_scopes.py",
+    "scripts/ansible_scope_runner.py",
+    "scripts/run_namespace.py",
+    "collections/ansible_collections/lv3/platform/roles/ollama_runtime/tasks/main.yml",
+    "docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md",
+    "docs/runbooks/ansible-inventory-sharding.md",
+    "docs/workstreams/adr-0176-inventory-sharding.md",
+    "tests/test_ansible_execution_scopes.py",
+    "tests/test_ollama_runtime_role.py",
+    "tests/test_run_namespace.py",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt records the first fully synchronized `main` replay after ADR 0177 and the Keycloak reset-mail release both landed on `origin/main`.",
+    "Earlier same-day ADR 0176 replay attempts exposed the scoped-runner fixes already merged in `main`: deferred `PLATFORM_TRACE_ID` expansion, repo-relative compatibility links inside shard inventories, and preservation of full-inventory hostvars while still executing with `--limit`.",
+    "The final synced-main replay additionally required two follow-up fixes outside the scoped-runner core: shortening namespaced Ansible SSH control socket directories to `/tmp/lv3-acp/<hash>` and teaching the Ollama role to recover missing Docker nat-chain or host-port bindings before waiting on the service."
+  ]
+}

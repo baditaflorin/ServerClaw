@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0318-repeatable-operator-onboarding-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T15:59:07Z",
+  "recorded_by": "codex",
+  "source_commit": "539204fd5c9e011bea51f0c096400ac6ad034926",
+  "repo_version_context": "0.178.0",
+  "platform_version_context": "0.130.97",
+  "workflow_id": "adr-0318-repeatable-operator-onboarding-live-apply",
+  "adr": "0318",
+  "summary": "Applied ADR 0318 from the dedicated `ws-0318` worktree by making the direct onboarding fallback safe from linked git worktrees, aligning its role and group contract with `scripts/operator_manager.py`, adding ephemeral Keycloak and SMTP runtime secret overrides for recovery, and fully provisioning the temporary admin operator `florin-tmp-002` through the documented `docker-runtime-lv3` fallback lane while the public Keycloak edge still returned `502`.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control-lv3",
+      "vmid": 192,
+      "address": "10.10.10.92"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Keycloak public realm",
+      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Keycloak fallback admin lane",
+      "address": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Headscale API",
+      "address": "https://headscale.lv3.org/api/v1/user"
+    },
+    {
+      "kind": "identity",
+      "name": "Temporary admin operator",
+      "address": "florin.badita-tmp-002"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused fallback repo contract slice",
+      "result": "pass",
+      "observed": "`python3 -m pytest -q tests/test_provision_operator.py`, `python3 -m py_compile scripts/provision_operator.py`, `./scripts/validate_repo.sh agent-standards`, `./scripts/validate_repo.sh workstream-surfaces`, and `uv run --with jsonschema python3 scripts/validate_repository_data_models.py --validate` all passed after the worktree-local path resolution, runtime secret override, ADR metadata, and roster updates, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-pytest-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-py-compile-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-agent-standards-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-workstream-surfaces-r1.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0318-data-models-r1.txt`."
+    },
+    {
+      "check": "Governed operator roster validation",
+      "result": "pass",
+      "observed": "`python3 scripts/operator_manager.py validate` accepted the new `config/operators.yaml` record for `florin-tmp-002`, including the current admin bootstrap SSH placeholder required by the repo contract, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-operator-manager-validate-r1.txt`."
+    },
+    {
+      "check": "Dedicated-worktree full onboarding replay",
+      "result": "pass",
+      "observed": "The final replay used `LV3_KEYCLOAK_URL=http://127.0.0.1:28080` plus ephemeral `LV3_KEYCLOAK_BOOTSTRAP_PASSWORD` and `LV3_PLATFORM_SMTP_PASSWORD` overrides sourced from `docker-runtime-lv3`, reused the previously generated Keycloak password and Headscale authkey files, reverified Keycloak user `d1c1c5b5-f4c8-47de-8865-c529789ada77` with realm role `platform-admin` and groups `lv3-platform-admins` / `grafana-admins`, and successfully sent the requester-CC onboarding email to `baditaflorin+tmp002@gmail.com` and `baditaflorin@gmail.com`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt`."
+    },
+    {
+      "check": "Fallback lane discovery and drift diagnosis",
+      "result": "pass",
+      "observed": "The workstream preserved the real control-plane drift that made the fallback necessary: the public `sso.lv3.org` edge returned `502`, `runtime-control-lv3` OpenBao still reported `initialized:false`, and the healthy Keycloak plus mail secret path remained on `docker-runtime-lv3`; the prechecks and converge probes are preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-precheck-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-converge-r1.txt`, `receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-precheck-r1.txt`, and `receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-converge-r1.txt`."
+    },
+    {
+      "check": "Broader operator-onboard automation preflight",
+      "result": "partial",
+      "observed": "`make preflight WORKFLOW=operator-onboard` still fails on live platform-health checks outside this ADR-local fallback path because public Keycloak discovery returns `502` and the private Windmill API at `http://100.64.0.1:8005/api/version` resets the connection, even though the local secret-file prerequisites and OpenBao mTLS listener check passed; this remains preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-preflight-r1.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "config/operators.yaml",
+    "docs/adr/.index.yaml",
+    "docs/adr/0318-repeatable-operator-onboarding-with-cc-audit-trail.md",
+    "docs/runbooks/operator-onboarding.md",
+    "docs/workstreams/ws-0318-live-apply.md",
+    "scripts/provision_operator.py",
+    "tests/test_provision_operator.py",
+    "workstreams.yaml",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-agent-standards-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-data-models-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-converge-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-keycloak-precheck-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-converge-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-openbao-precheck-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-operator-manager-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-preflight-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r3.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r4.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r5.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r6.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-py-compile-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-pytest-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0318-workstream-surfaces-r1.txt",
+    "receipts/live-applies/2026-04-03-adr-0318-repeatable-operator-onboarding-live-apply.json"
+  ],
+  "notes": [
+    "This receipt intentionally captures the dedicated-worktree live apply before the exact-main release surfaces, repo-version stamp, and canonical mainline receipt are generated.",
+    "The earlier failed replays remain in evidence on purpose because they exposed real branch-local drift: a worktree-shadow `.local` directory, a stale controller-local Keycloak bootstrap password, and a stale controller-local transactional SMTP password.",
+    "The workstream did not try to repair the separate runtime-control migration drift after proving that the documented ADR 0317 fallback lane on `docker-runtime-lv3` was still the only healthy path for completing ADR 0318."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-03-ws-0318-worktree-secret-and-roster-repair",
+    "surface": "scripts/provision_operator.py and config/operators.yaml",
+    "diagnosis": "contract_drift",
+    "repair_action": "Taught the fallback script to resolve shared `.local/` state from linked worktrees, derive canonical Keycloak role and group mappings from `operator_manager.py`, and accept ephemeral live Keycloak and SMTP secret overrides; then aligned the new admin roster entry with the repo's current bootstrap SSH placeholder contract so `operator_manager.py validate` remained green.",
+    "verification": "receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt"
+  }
+}

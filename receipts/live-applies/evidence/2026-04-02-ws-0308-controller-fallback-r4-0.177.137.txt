@@ -1,0 +1,7 @@
+Access inventory for: florin-badita
+  Name: Florin Badita
+  Email: baditaflorin@gmail.com
+  Keycloak: active, username=florin.badita
+  step-ca SSH: principal=florin.badita, ttl=24h
+  OpenBao: active, entity=florin.badita
+  Tailscale: unavailable, login=baditaflorin@gmail.com

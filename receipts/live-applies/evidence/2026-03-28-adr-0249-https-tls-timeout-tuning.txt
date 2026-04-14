@@ -1,0 +1,23 @@
+ADR 0249 HTTPS/TLS timeout tuning evidence
+Recorded on: 2026-03-28
+
+Accepted default:
+- command: make https-tls-assurance ENV=production
+- timeout: 60 seconds
+- receipt: receipts/https-tls-assurance/20260328T231106Z.json
+- duration_seconds: 1563.47
+- timeout_count: 16
+- high_or_critical_findings: 0
+
+Rejected experiment:
+- command: make https-tls-assurance ENV=production
+- timeout: 120 seconds
+- receipt: receipts/https-tls-assurance/20260328T233840Z.json
+- duration_seconds: 3429.13
+- timeout_count: 26
+- high_or_critical_findings: 0
+
+Decision:
+- keep the repo default at 60 seconds
+- treat longer budgets as opt-in manual replays only
+- rationale: the 120-second budget increased timeout findings and almost doubled end-to-end runtime on the same 31-target production surface set

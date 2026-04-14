@@ -1,0 +1,5 @@
+docker-build-lv3 | CHANGED | rc=0 >>
+LISTEN 0      4096               *:5002             *:*    users:(("registry",pid=2535757,fd=7))
+LISTEN 0      4096               *:5003             *:*    users:(("registry",pid=2535744,fd=7))
+LISTEN 0      4096               *:5001             *:*    users:(("registry",pid=2535760,fd=7))
+LISTEN 0      4096               *:5004             *:*    users:(("registry",pid=2535746,fd=7))

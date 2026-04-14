@@ -1,0 +1,424 @@
+
+PLAY [Ensure Hetzner DNS publication for MinIO] ********************************
+skipping: no hosts matched
+
+PLAY [Converge MinIO on the Docker runtime VM] *********************************
+skipping: no hosts matched
+
+PLAY [Publish MinIO through the NGINX edge] ************************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:23.066Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:27.897Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:27.904Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:27.944Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:27.948Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:28.076Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:28.100Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:28.123Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:28.129Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => (item=nginx-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "nginx-lv3",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:28.161Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:28.169Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:28.293Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:28.353Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost] => (item=nginx-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:28.374Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:28.379Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item=nginx-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:31.588Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:31.598Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:31.675Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:31.679Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:32.970Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:32.978Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Emit a best-effort playbook start audit event","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:34:33.017Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the ntfy publish helper] ********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the ntfy publish helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:33.024Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the ntfy publish helper","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:34.204Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the controller-local ntfy Ansible token] ****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the controller-local ntfy Ansible token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:34.217Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the controller-local ntfy Ansible token","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:35.720Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort ntfy start notification] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort ntfy start notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:35.727Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Publish a best-effort ntfy start notification","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:37.733Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validating arguments against arg spec 'main' - Publish repo-managed public services through the NGINX edge VM.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validating arguments against arg spec 'main' - Publish repo-managed public services through the NGINX edge VM.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:37.746Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validating arguments against arg spec 'main' - Publish repo-managed public services through the NGINX edge VM.","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:38.336Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Resolve public edge site and certificate catalogs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Resolve public edge site and certificate catalogs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:38.343Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Resolve public edge site and certificate catalogs","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:38.450Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validate public edge publication inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validate public edge publication inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:38.454Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validate public edge publication inputs","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:38.540Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Ensure public edge packages are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Ensure public edge packages are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:38.544Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Ensure public edge packages are present","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:40.783Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Ensure public edge directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Ensure public edge directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:40.789Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item=/var/www/lv3-edge)
+ok: [nginx-lv3] => (item=/var/www/lv3-generated)
+ok: [nginx-lv3] => (item=/var/www/lv3-edge-acme)
+ok: [nginx-lv3] => (item=/etc/nginx/sites-available)
+ok: [nginx-lv3] => (item=/etc/nginx/sites-enabled)
+ok: [nginx-lv3] => (item=/etc/letsencrypt/renewal-hooks/deploy)
+ok: [nginx-lv3] => (item=/etc/letsencrypt)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Ensure public edge directories exist","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:45.996Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:46.004Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Record the Certbot plugin path for local Python packages","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:46.051Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Install the pinned Certbot Hetzner DNS plugin] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Install the pinned Certbot Hetzner DNS plugin","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:46.057Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Install the pinned Certbot Hetzner DNS plugin","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:34:46.072Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Write the Hetzner DNS credential file when a controller token is present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Write the Hetzner DNS credential file when a controller token is present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:46.076Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Write the Hetzner DNS credential file when a controller token is present","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:34:46.099Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Check the Hetzner DNS credential file] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Check the Hetzner DNS credential file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:46.106Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Check the Hetzner DNS credential file","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:34:46.130Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Assert the Hetzner DNS credential file is available when DNS-01 is enabled] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Assert the Hetzner DNS credential file is available when DNS-01 is enabled","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:46.137Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Assert the Hetzner DNS credential file is available when DNS-01 is enabled","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:34:46.154Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:46.159Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:55.577Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:55.591Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:34:57.657Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:34:57.661Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:14.853Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:14.860Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:15.533Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Read current public edge certificate SANs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Read current public edge certificate SANs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:15.541Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Read current public edge certificate SANs","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:16.178Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Derive current and missing public edge certificate domains] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive current and missing public edge certificate domains","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:16.186Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive current and missing public edge certificate domains","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:16.243Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Initialize the site-local certificate request catalog] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Initialize the site-local certificate request catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:16.253Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Initialize the site-local certificate request catalog","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:16.369Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:16.376Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item={'hostname': 'minio-console.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:9011', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False, 'preserve_upstream_security_headers': True})
+skipping: [nginx-lv3] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+skipping: [nginx-lv3] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+skipping: [nginx-lv3] => (item={'hostname': 'nginx.lv3.org', 'kind': 'static', 'slug': 'nginx'})
+skipping: [nginx-lv3] => (item={'hostname': 'grafana.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
+skipping: [nginx-lv3] => (item={'hostname': 'realtime.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:19999', 'server_sent_events': True})
+skipping: [nginx-lv3] => (item={'hostname': 'headscale.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
+skipping: [nginx-lv3] => (item={'hostname': 'proxmox.lv3.org', 'kind': 'static', 'slug': 'proxmox'})
+skipping: [nginx-lv3] => (item={'hostname': 'docker.lv3.org', 'kind': 'static', 'slug': 'docker'})
+skipping: [nginx-lv3] => (item={'hostname': 'build.lv3.org', 'kind': 'static', 'slug': 'build'})
+skipping: [nginx-lv3] => (item={'hostname': 'uptime.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001'})
+skipping: [nginx-lv3] => (item={'hostname': 'status.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001', 'root_proxy_path': '/status/lv3-platform'})
+skipping: [nginx-lv3] => (item={'hostname': 'mail.lv3.org', 'kind': 'static', 'slug': 'mail'})
+ok: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
+skipping: [nginx-lv3] => (item={'hostname': 'matrix.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
+skipping: [nginx-lv3] => (item={'hostname': 'langfuse.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
+skipping: [nginx-lv3] => (item={'hostname': 'flags.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
+skipping: [nginx-lv3] => (item={'hostname': 'analytics.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+ok: [nginx-lv3] => (item={'hostname': 'minio.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:9010', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'crawl_policy_enabled': False, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False})
+ok: [nginx-lv3] => (item={'hostname': 'errors.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3005'})
+ok: [nginx-lv3] => (item={'hostname': 'billing.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8100', 'prefix_proxy_routes': [{'path': '/api/', 'upstream': 'http://10.10.10.20:8099'}]})
+skipping: [nginx-lv3] => (item={'hostname': 'agents.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
+skipping: [nginx-lv3] => (item={'hostname': 'tasks.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
+ok: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
+skipping: [nginx-lv3] => (item={'hostname': 'wiki.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
+ok: [nginx-lv3] => (item={'hostname': 'grist.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8484'})
+ok: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx-lv3] => (item={'hostname': 'logs.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
+skipping: [nginx-lv3] => (item={'hostname': 'draw.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
+skipping: [nginx-lv3] => (item={'hostname': 'chat.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
+skipping: [nginx-lv3] => (item={'hostname': 'n8n.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
+skipping: [nginx-lv3] => (item={'hostname': 'cloud.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx-lv3] => (item={'hostname': 'coolify.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
+skipping: [nginx-lv3] => (item={'hostname': 'apps.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.71:443', 'aliases': ['*.apps.lv3.org'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx-lv3] => (item={'hostname': 'api.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8083'})
+skipping: [nginx-lv3] => (item={'hostname': 'sso.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8091'})
+skipping: [nginx-lv3] => (item={'hostname': 'registry.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8095', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx-lv3] => (item={'hostname': 'ops.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
+skipping: [nginx-lv3] => (item={'hostname': 'home.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3090'})
+ok: [nginx-lv3] => (item={'hostname': 'ntfy.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:2586', 'chunked_transfer_encoding': True, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx-lv3] => (item={'hostname': 'data.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
+skipping: [nginx-lv3] => (item={'hostname': 'notebooks.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8097', 'client_max_body_size': '2g', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
+ok: [nginx-lv3] => (item={'hostname': 'annotate.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8110'})
+ok: [nginx-lv3] => (item={'hostname': 'bi.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8105'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:18.287Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render NGINX public edge configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render NGINX public edge configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:18.294Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render NGINX public edge configuration","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:31.143Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Enable the public edge site] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Enable the public edge site","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:31.153Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Enable the public edge site","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:31.887Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Disable the default NGINX site] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Disable the default NGINX site","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:31.893Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Disable the default NGINX site","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:32.815Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validate NGINX configuration before issuing certificates] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validate NGINX configuration before issuing certificates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:32.827Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validate NGINX configuration before issuing certificates","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:34.105Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:34.111Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Reload NGINX before certificate issuance","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:36.301Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Obtain the public edge Let's Encrypt certificate] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Obtain the public edge Let's Encrypt certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:36.306Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Obtain the public edge Let's Encrypt certificate","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:35:36.332Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:36.361Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item={'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org']})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Check whether site-local certificates already exist for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:43.171Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:43.180Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/minio-console.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 50, 'inode': 524586, 'dev': 2049, 'nlink': 1, 'atime': 1775264667.5046294, 'mtime': 1774990710.1163633, 'ctime': 1774990710.1163633, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/minio-console.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/minio-console.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/minio-console.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524437, 'dev': 2049, 'nlink': 1, 'atime': 1775289260.2978432, 'mtime': 1774934605.4875712, 'ctime': 1774934605.4875712, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/livekit.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/livekit.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/minio.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 42, 'inode': 524597, 'dev': 2049, 'nlink': 1, 'atime': 1775264668.528641, 'mtime': 1774990714.3204145, 'ctime': 1774990714.3204145, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/minio.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/minio.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/minio.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/errors.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 43, 'inode': 524465, 'dev': 2049, 'nlink': 1, 'atime': 1775231305.6670666, 'mtime': 1774935606.903803, 'ctime': 1774935606.903803, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/errors.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/errors.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/errors.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/billing.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 44, 'inode': 524490, 'dev': 2049, 'nlink': 1, 'atime': 1775231306.2630737, 'mtime': 1774943944.6895537, 'ctime': 1774943944.6895537, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/billing.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/billing.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/billing.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ci.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524300, 'dev': 2049, 'nlink': 1, 'atime': 1775264670.016658, 'mtime': 1774903704.395339, 'ctime': 1774903704.395339, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ci.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/ci.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ci.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/grist.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 42, 'inode': 524384, 'dev': 2049, 'nlink': 1, 'atime': 1775289260.2978432, 'mtime': 1774934721.2289627, 'ctime': 1774934721.2289627, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/grist.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/grist.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/grist.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/paperless.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 46, 'inode': 524497, 'dev': 2049, 'nlink': 1, 'atime': 1775231308.0750952, 'mtime': 1774946480.580403, 'ctime': 1774946480.580403, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/paperless.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/paperless.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/paperless.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/ntfy.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 41, 'inode': 524725, 'dev': 2049, 'nlink': 1, 'atime': 1775284728.4395785, 'mtime': 1775197839.7778702, 'ctime': 1775197839.7778702, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/ntfy.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/ntfy.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/ntfy.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/annotate.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 45, 'inode': 524646, 'dev': 2049, 'nlink': 1, 'atime': 1775294093.1722026, 'mtime': 1775072493.345596, 'ctime': 1775072493.345596, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/annotate.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/annotate.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/annotate.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org']}, 'ansible_loop_var': 'item'})
+ok: [nginx-lv3] => (item={'changed': False, 'stat': {'exists': True, 'path': '/etc/letsencrypt/live/bi.lv3.org/fullchain.pem', 'mode': '0777', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': False, 'isfifo': False, 'islnk': True, 'issock': False, 'uid': 0, 'gid': 0, 'size': 39, 'inode': 524634, 'dev': 2049, 'nlink': 1, 'atime': 1775231308.6831021, 'mtime': 1775033601.8382256, 'ctime': 1775033601.8382256, 'wusr': True, 'rusr': True, 'xusr': True, 'wgrp': True, 'rgrp': True, 'xgrp': True, 'woth': True, 'roth': True, 'xoth': True, 'isuid': False, 'isgid': False, 'blocks': 0, 'block_size': 4096, 'device_type': 0, 'readable': True, 'writeable': True, 'executable': False, 'lnk_source': '/etc/letsencrypt/archive/bi.lv3.org/fullchain1.pem', 'lnk_target': '../../archive/bi.lv3.org/fullchain1.pem', 'pw_name': 'root', 'gr_name': 'root', 'mimetype': 'inode/symlink', 'charset': 'binary', 'version': None, 'attributes': [], 'attr_flags': ''}, 'invocation': {'module_args': {'path': '/etc/letsencrypt/live/bi.lv3.org/fullchain.pem', 'follow': False, 'get_checksum': True, 'get_mime': True, 'get_attributes': True, 'checksum_algorithm': 'sha1'}}, 'failed': False, 'item': {'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org']}, 'ansible_loop_var': 'item'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Read SANs from existing site-local certificates","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:49.881Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Build the site-local certificate SAN catalog] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Build the site-local certificate SAN catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:49.888Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Build the site-local certificate SAN catalog","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:50.013Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:50.021Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3] => (item={'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org']})
+ok: [nginx-lv3] => (item={'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org']})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Derive site-local certificate coverage requirements","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:50.738Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:50.742Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [nginx-lv3] => (item={'hostname': 'minio-console.lv3.org', 'cert_name': 'minio-console.lv3.org', 'domains': ['minio-console.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'livekit.lv3.org', 'cert_name': 'livekit.lv3.org', 'domains': ['livekit.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'minio.lv3.org', 'cert_name': 'minio.lv3.org', 'domains': ['minio.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'errors.lv3.org', 'cert_name': 'errors.lv3.org', 'domains': ['errors.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'billing.lv3.org', 'cert_name': 'billing.lv3.org', 'domains': ['billing.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'ci.lv3.org', 'cert_name': 'ci.lv3.org', 'domains': ['ci.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'grist.lv3.org', 'cert_name': 'grist.lv3.org', 'domains': ['grist.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'paperless.lv3.org', 'cert_name': 'paperless.lv3.org', 'domains': ['paperless.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'ntfy.lv3.org', 'cert_name': 'ntfy.lv3.org', 'domains': ['ntfy.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'annotate.lv3.org', 'cert_name': 'annotate.lv3.org', 'domains': ['annotate.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3] => (item={'hostname': 'bi.lv3.org', 'cert_name': 'bi.lv3.org', 'domains': ['bi.lv3.org'], 'missing_domains': []})
+skipping: [nginx-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-04T13:35:50.804Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Build the site-local TLS material map for the final NGINX render] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Build the site-local TLS material map for the final NGINX render","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:50.809Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Build the site-local TLS material map for the final NGINX render","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:51.129Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Install NGINX reload hook for certificate renewal] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Install NGINX reload hook for certificate renewal","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:51.137Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Install NGINX reload hook for certificate renewal","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:53.075Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Re-check whether the public edge certificate exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Re-check whether the public edge certificate exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:53.086Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Re-check whether the public edge certificate exists","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:35:53.967Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Render final NGINX public edge configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render final NGINX public edge configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:35:53.976Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render final NGINX public edge configuration","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:04.848Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Validate final NGINX configuration] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Validate final NGINX configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:04.857Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Validate final NGINX configuration","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:05.621Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Enable and reload NGINX] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Enable and reload NGINX","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:05.633Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [nginx-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Enable and reload NGINX","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:06.575Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the NGINX service is active] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the NGINX service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:06.578Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the NGINX service is active","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:07.367Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:07.383Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the HTTP edge entrypoint responds for the probe hostname","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:09.079Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the HTTPS edge entrypoint responds for the probe hostname] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the HTTPS edge entrypoint responds for the probe hostname","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:09.088Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the HTTPS edge entrypoint responds for the probe hostname","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:10.603Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the probe hostname response applies the crawl policy header] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the probe hostname response applies the crawl policy header","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:10.614Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the probe hostname response applies the crawl policy header","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:11.562Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the probe hostname robots.txt disallows crawling] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the probe hostname robots.txt disallows crawling","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:11.570Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the probe hostname robots.txt disallows crawling","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:12.420Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the probe hostname HTML includes the robots meta tag] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the probe hostname HTML includes the robots meta tag","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:12.426Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the probe hostname HTML includes the robots meta tag","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:13.230Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.nginx_edge_publication : Verify the apex hostname robots.txt is available over TLS] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Verify the apex hostname robots.txt is available over TLS","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:13.234Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [nginx-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Verify the apex hostname robots.txt is available over TLS","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:14.116Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
+
+PLAY [Verify MinIO public publication after edge convergence] ******************
+
+TASK [Verify the MinIO public health endpoint] *********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify the MinIO public health endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:14.129Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify the MinIO public health endpoint","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:15.622Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Verify the MinIO console redirects through oauth2-proxy] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify the MinIO console redirects through oauth2-proxy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:15.629Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify the MinIO console redirects through oauth2-proxy","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:16.919Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Assert the MinIO console stays behind oauth2-proxy] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the MinIO console stays behind oauth2-proxy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-04T13:36:16.925Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the MinIO console stays behind oauth2-proxy","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-04T13:36:16.942Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+nginx-lv3                  : ok=49   changed=5    unreachable=0    failed=0    skipped=7    rescued=0    ignored=0

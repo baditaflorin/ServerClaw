@@ -1,0 +1,12 @@
+HTTP/1.1 401 Unauthorized
+Server: nginx
+Date: Tue, 31 Mar 2026 21:22:28 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 76
+Connection: keep-alive
+Docker-Distribution-Api-Version: registry/2.0
+Set-Cookie: sid=0120a6f67799b48fb1c5c750ca7ff987; Path=/; HttpOnly
+Www-Authenticate: Bearer realm="https://10.10.10.20:8095/service/token",service="harbor-registry"
+X-Request-Id: 3d73ab44-5dbf-41e2-bc59-e8f579bfbcce
+
+{"errors":[{"code":"UNAUTHORIZED","message":"unauthorized: unauthorized"}]}

@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0232-nomad-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T20:09:11Z",
+  "recorded_by": "codex",
+  "source_commit": "396de0bf25aed18ec37d8c48f72eefef20df75f2",
+  "repo_version_context": "0.177.47",
+  "platform_version_context": "0.130.41",
+  "workflow_id": "adr-0232-nomad-live-apply",
+  "adr": "0232",
+  "summary": "Applied ADR 0232 from the isolated latest-main worktree by converging the private Nomad server on monitoring-lv3, the runtime and build clients, the Proxmox firewall and Tailscale proxy contract, and the repo-managed smoke jobs, then re-verifying controller access, service placement, and durable batch execution on the live platform.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Nomad private controller proxy",
+      "address": "https://100.64.0.1:8013"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Nomad regression and syntax slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest tests/test_nomad_cluster_roles.py tests/test_nomad_playbook.py -q` returned `14 passed in 0.11s`, and `ANSIBLE_CONFIG=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply/ansible.cfg ANSIBLE_COLLECTIONS_PATH=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply/collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/nomad.yml --syntax-check` passed."
+    },
+    {
+      "check": "Full Nomad converge from the isolated worktree",
+      "result": "pass",
+      "observed": "`make converge-nomad` completed successfully on 2026-03-28 with final recap `docker-build-lv3 ok=82 changed=5 failed=0`, `docker-runtime-lv3 ok=90 changed=1 failed=0`, `localhost ok=12 changed=0 failed=0`, `monitoring-lv3 ok=98 changed=6 failed=0`, and `proxmox_florin ok=50 changed=1 failed=0`."
+    },
+    {
+      "check": "Controller proxy and cluster readiness",
+      "result": "pass",
+      "observed": "`curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H \"X-Nomad-Token: ...\"` returned `\"10.10.10.40:4647\"`, and `/v1/nodes` through the same proxy reported `docker-runtime-lv3 ready runtime` plus `docker-build-lv3 ready build`."
+    },
+    {
+      "check": "Smoke service placement and content",
+      "result": "pass",
+      "observed": "`sudo /usr/local/bin/lv3-nomad job status lv3-nomad-smoke-service` on `monitoring-lv3` reported `Status = running` with deployment `successful`, `curl -fsS http://10.10.10.30:18180/` on `docker-build-lv3` returned `lv3 nomad smoke service`, and `systemctl is-active lv3-nomad` stayed `active` on the build client."
+    },
+    {
+      "check": "Smoke batch dispatch and durable runtime marker",
+      "result": "pass",
+      "observed": "The latest dispatched batch job `lv3-nomad-smoke-batch/dispatch-1774728409-4a71fa47` reached `Status = dead` with one `complete` allocation on `docker-runtime-lv3`, and `/var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log` on the runtime client recorded `adr-0232-live-apply batch verification` plus timestamp `2026-03-28T20:06:51+00:00` while `lv3-nomad` remained `active`."
+    },
+    {
+      "check": "Repo-wide validation and guarded live-apply wrapper on the workstream branch",
+      "result": "pass",
+      "observed": "`make validate` and `make live-apply-service service=nomad env=production` were both exercised after the successful converge. Each run stopped only at the expected protected canonical-truth gate, reporting `Canonical truth is stale` for main-only file `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply/versions/stack.yaml`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md",
+    "docs/runbooks/configure-nomad.md",
+    "docs/workstreams/ws-0232-live-apply.md",
+    "playbooks/nomad.yml",
+    "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/templates/lv3-nomad.sh.j2",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml",
+    "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl",
+    "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl",
+    "receipts/live-applies/2026-03-28-adr-0232-nomad-live-apply.json",
+    "tests/test_nomad_cluster_roles.py",
+    "tests/test_nomad_playbook.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The first branch-local converge attempts exposed three live integration gaps that are now codified in repo automation: the Nomad host play needed `proxmox_network` so the Proxmox VM firewall carried the client-to-server RPC rules, the local `lv3-nomad` wrapper had to use each node's advertised address rather than `127.0.0.1` for TLS, and the smoke service needed `provider = \"nomad\"` to avoid the implicit Consul constraint.",
+    "The original batch proof via `nomad alloc logs` was flaky because completed allocations could be garbage-collected before the server fetched client log state. The committed smoke batch job now writes a durable verification marker to `/var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log` on `docker-runtime-lv3`, and the bootstrap role reads that file back as the stable end-to-end proof.",
+    "Earlier during investigation, `make converge-guest-network-policy` applied the missing Proxmox-side Nomad firewall rules but ended non-zero on the unrelated pre-existing `postgres-replica-lv3` SSH reachability issue outside ADR 0232 scope.",
+    "Protected integration files still remain for the final merge-to-main step on top of this live-applied branch state: `VERSION`, `changelog.md`, the top-level integrated `README.md` summaries, `versions/stack.yaml`, `RELEASE.md`, and release notes. The guarded branch-local `make live-apply-service service=nomad env=production` path is expected to stay blocked until those main-only files are updated from the integration worktree."
+  ]
+}

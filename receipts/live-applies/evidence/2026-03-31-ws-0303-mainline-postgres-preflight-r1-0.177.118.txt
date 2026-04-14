@@ -1,0 +1,20 @@
+== postgres settings ==
+pgaudit
+ddl,role
+on
+on
+
+== alloy + listener ==
+active
+LISTEN 0      4096     10.10.10.50:12345      0.0.0.0:*
+
+== firewall snippets ==
+		ip saddr 10.10.10.51 tcp dport { 2379, 2380, 5432, 8008 } accept
+		ip saddr 10.10.10.40 tcp dport { 2379, 2380 } accept
+		ip saddr 10.10.10.51 tcp dport { 2379, 2380, 5432, 8008 } accept
+		ip saddr 10.10.10.40 tcp dport { 2379, 2380 } accept
+---
+26:    ip saddr 10.10.10.51/32 tcp dport { 5432, 8008, 2379, 2380 } accept
+30:    ip saddr 10.10.10.40/32 tcp dport { 2379, 2380 } accept
+51:    ip saddr 10.10.10.51/32 tcp dport { 5432, 8008, 2379, 2380 } accept
+55:    ip saddr 10.10.10.40/32 tcp dport { 2379, 2380 } accept

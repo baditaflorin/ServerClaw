@@ -1,0 +1,52 @@
+ADR 0291 exact-main direct verification
+Recorded on: 2026-03-30T21:04:49Z
+Worktree: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge
+Source commit context: 97e859427f8dbe2b3fad69b23c92e2b125684bff
+
+Public health probe
+- Command: curl -fsS https://notebooks.lv3.org/hub/health
+- Result: success (empty 200 response body)
+
+Public OIDC handoff probe
+- Command: curl -fsS -o /dev/null -D - https://notebooks.lv3.org/hub/oauth_login
+- Result:
+  HTTP/2 302
+  server: nginx
+  date: Mon, 30 Mar 2026 21:04:50 GMT
+  content-type: text/html
+  content-length: 0
+  x-jupyterhub-version: 5.4.4
+  access-control-allow-headers: accept, content-type, authorization
+  location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?response_type=code&redirect_uri=https%3A%2F%2Fnotebooks.lv3.org%2Fhub%2Foauth_callback&client_id=jupyterhub&code_challenge=MRRaBeGaF5rHJCrVPeIDo1DwQNXaZpbYBnjvHW5_we0&code_challenge_method=S256&state=eyJzdGF0ZV9pZCI6ICI4OGJjNGZlOGNkYTQ0NTdlOWY4NTEwMjE4NWZjN2ZmMyJ9&scope=openid+profile+email
+  set-cookie: oauthenticator-state="2|1:0|10:1774904690|20:oauthenticator-state|236:ZXlKemRHRjBaVjlwWkNJNklDSTRPR0pqTkdabE9HTmtZVFEwTlRkbE9XWTROVEV3TWpFNE5XWmpOMlptTXlJc0lDSnVaWGgwWDNWeWJDSTZJRzUxYkd3c0lDSmpiMlJsWDNabGNtbG1hV1Z5SWpvZ0lqQmtNWG8wVGpOWVVHOVNiemd4UjJsVmVIcDZjRWhSWDJOSVkzbEdkRXBmWnpscU5ERmphSEZaUjBFaWZRPT0=|016daf9d8de2458b4ed9053c73ec25f071f17d6fe7577b0ae6e53cdd0bee84f1"; expires=Tue, 31 Mar 2026 21:04:50 GMT; HttpOnly; Path=/
+  x-robots-tag: noindex, nofollow
+  strict-transport-security: max-age=63072000; includeSubDomains; preload
+  cross-origin-resource-policy: same-origin
+  x-content-type-options: nosniff
+  x-frame-options: DENY
+  referrer-policy: strict-origin-when-cross-origin
+  permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  content-security-policy: default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://notebooks.lv3.org wss://notebooks.lv3.org https://sso.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  x-robots-tag: noindex, nofollow
+
+
+Edge certificate probe
+- Command: openssl s_client -connect notebooks.lv3.org:443 -servername notebooks.lv3.org </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName
+- Result:
+  subject=CN=nginx.lv3.org
+  issuer=C=US, O=Let's Encrypt, CN=E7
+  X509v3 Subject Alternative Name:
+      DNS:*.apps.lv3.org, DNS:agents.lv3.org, DNS:analytics.lv3.org, DNS:api.lv3.org, DNS:apps.lv3.org, DNS:build.lv3.org, DNS:changelog.lv3.org, DNS:chat.lv3.org, DNS:cloud.lv3.org, DNS:coolify.lv3.org, DNS:docker.lv3.org, DNS:docs.lv3.org, DNS:draw.lv3.org, DNS:grafana.lv3.org, DNS:headscale.lv3.org, DNS:home.lv3.org, DNS:langfuse.lv3.org, DNS:logs.lv3.org, DNS:lv3.org, DNS:mail.lv3.org, DNS:matrix.lv3.org, DNS:n8n.lv3.org, DNS:nginx.lv3.org, DNS:notebooks.lv3.org, DNS:ops.lv3.org, DNS:proxmox.lv3.org, DNS:realtime.lv3.org, DNS:registry.lv3.org, DNS:sso.lv3.org, DNS:status.lv3.org, DNS:tasks.lv3.org, DNS:uptime.lv3.org, DNS:wiki.lv3.org
+
+Docker runtime dependency probes
+- Command: ansible docker-runtime-lv3 -i inventory/hosts.yml -m shell -a 'curl -fsS http://127.0.0.1:11434/api/version && printf "\n" && curl -fsS http://127.0.0.1:8010/healthz' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+- Result:
+  docker-runtime-lv3 | UNREACHABLE! => {
+      "changed": false,
+      "msg": "Failed to connect to the host via ssh: no such identity: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/.local/ssh/hetzner_llm_agents_ed25519: No such file or directory\r\nops@10.10.10.20: Permission denied (publickey).",
+      "unreachable": true
+  }
+
+Docker runtime JupyterHub local probe
+- Command: ansible docker-runtime-lv3 -i inventory/hosts.yml -m shell -a 'curl -fsS http://127.0.0.1:8097/hub/health' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+- Result: success (empty 200 response body)

@@ -1,0 +1,4 @@
+Agent standards validation (ADR 0163-0168)
+Workstream surface ownership validation
+Repository data model validation
+Generated status document validation

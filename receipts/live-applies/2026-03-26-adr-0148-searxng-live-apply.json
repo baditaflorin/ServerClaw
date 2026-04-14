@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0148-searxng-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "1d7ad367db7ed22fc3e997f1d21f3e405fa17dd4",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "converge-searxng",
+  "adr": "0148",
+  "summary": "Recorded the successful 2026-03-26 production live apply of the repo-managed SearXNG runtime on docker-runtime-lv3, the Proxmox-host Tailscale operator proxy, the Open WebUI web-search integration, and the final tailnet DNS publication for search.lv3.org after a brownout-delayed localhost DNS retry completed successfully.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "searxng-tailnet-hostname",
+      "address": "http://search.lv3.org/search?q=proxmox%20ve&format=json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repo-managed guest runtime and Open WebUI converge",
+      "result": "pass",
+      "observed": "The 2026-03-26 `make converge-searxng` run completed the guest runtime and Open WebUI portions successfully with `docker-runtime-lv3 : ok=118 changed=9 failed=0` and verified the local SearXNG JSON API before the localhost DNS step encountered a Hetzner brownout."
+    },
+    {
+      "check": "Internal and host-proxy SearXNG JSON endpoints",
+      "result": "pass",
+      "observed": "`http://10.10.10.20:8881/search?q=proxmox%20ve&format=json` and `http://100.64.0.1/search?q=proxmox%20ve&format=json` both returned `200` with JSON results on 2026-03-26 after the managed limiter configuration and forced recreate path were applied."
+    },
+    {
+      "check": "Post-brownout localhost DNS publication",
+      "result": "pass",
+      "observed": "After Hetzner's legacy DNS write API returned `503 Temporary Shutdown (Brownout)` at `12:53 UTC`, a localhost-only rerun at `13:01 UTC` using `ansible-playbook -i inventory/hosts.yml -i localhost, playbooks/searxng.yml --limit localhost` completed with `localhost : ok=11 changed=1 failed=0` and created the `search A 100.64.0.1` record."
+    },
+    {
+      "check": "Tailnet DNS resolution and hostname-backed JSON endpoint",
+      "result": "pass",
+      "observed": "`dig +short @1.1.1.1 search.lv3.org` returned `100.64.0.1`, and `curl -fsS 'http://search.lv3.org/search?q=proxmox%20ve&format=json'` returned a structured JSON payload with search results."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0148-searxng-for-agent-web-search.md",
+    "docs/runbooks/configure-searxng.md",
+    "docs/workstreams/adr-0148-searxng-web-search.md"
+  ],
+  "notes": [
+    "The first live rollout on 2026-03-25 was blocked by temporary loss of host reachability and the missing controller-side Hetzner DNS token.",
+    "The successful 2026-03-26 completion required two runtime corrections already committed in the workstream: passlisting private and tailnet ranges in `limiter.toml`, and forcing a SearXNG container recreate when managed config files change.",
+    "ADR 0148 is live on the platform from the workstream branch, but `Implemented In Repo Version` and `Implemented In Platform Version` remain unset in the ADR metadata until the change is merged through `main`."
+  ]
+}

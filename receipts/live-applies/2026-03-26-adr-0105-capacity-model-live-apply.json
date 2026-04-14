@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0105-capacity-model-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "851cf901b9bc22515591802fb2fcc5f7a95b6eee",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "converge-monitoring",
+  "adr": "0105",
+  "summary": "Completed the ADR 0105 production live apply from the latest origin/main worktree by extending the monitoring converge to import the capacity dashboard, fixing the weekly capacity wrapper for fresh worktrees, and verifying the capacity report and Grafana publication paths end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "grafana.lv3.org",
+      "address": "https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0105 repository validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest python -m pytest tests/test_monitoring_vm_role.py tests/test_capacity_report.py tests/test_lv3_cli.py tests/test_promotion_pipeline.py -q` and `uv run --with pytest python -m pytest tests/test_weekly_capacity_report_windmill.py -q` completed successfully with 60 passing tests, followed by `make syntax-check-monitoring`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `./scripts/validate_repo.sh alert-rules health-probes`."
+    },
+    {
+      "check": "Capacity report entry points and quota gate",
+      "result": "pass",
+      "observed": "`make capacity-report NO_LIVE_METRICS=true`, `make capacity-report`, `make weekly-capacity-report NO_LIVE_METRICS=true`, and `make weekly-capacity-report` all rendered successfully, and `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100` rejected the proposed change because projected RAM commitment would exceed the target ceiling."
+    },
+    {
+      "check": "First production monitoring replay from the live-apply worktree",
+      "result": "partial",
+      "observed": "`BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'` copied the capacity dashboard, imported it into Grafana, and passed the dashboard verification task before a later transient SSH reachability failure during blackbox verification (`ok=129 changed=3 unreachable=1 failed=0 skipped=17`)."
+    },
+    {
+      "check": "Immediate production replay and published dashboard verification",
+      "result": "pass",
+      "observed": "The immediate replay of the same live-apply command completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`. The public dashboard route `https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to `/login?redirectTo=%2Fd%2Flv3-capacity-overview%2Flv3-capacity-overview`, and the clean replay verified the live Grafana and blackbox checks end to end."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0105-platform-capacity-model.md",
+    "docs/runbooks/capacity-model.md",
+    "docs/workstreams/adr-0105-capacity-model.md",
+    "docs/workstreams/ws-0105-live-apply.md",
+    "config/grafana/dashboards/capacity-overview.json",
+    "config/alertmanager/rules/platform.yml",
+    "receipts/live-applies/2026-03-26-adr-0105-capacity-model-live-apply.json"
+  ],
+  "notes": [
+    "This workstream branch intentionally leaves `versions/stack.yaml`, `VERSION`, release sections in `changelog.md`, and the top-level `README.md` status summary untouched so merge-to-main can update shared integration truth in one place.",
+    "Fresh worktrees do not include untracked `.local/` controller secrets, so the live apply used an explicit absolute `BOOTSTRAP_KEY` path from the main checkout.",
+    "The weekly Windmill wrapper now prepends the repository `scripts/` directory to `sys.path`, which keeps the entry point working from a clean worktree checkout."
+  ]
+}

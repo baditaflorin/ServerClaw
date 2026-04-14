@@ -1,0 +1,23 @@
+make remote-validate
+remote_exec.sh remote-validate --local-fallback was retried on 2026-04-03 and stalled after the SSH handoff warning, so the exact configured local_fallback_command was executed from the worktree.
+
+$ mkdir -p .local/validation-gate .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/remote-validate-last-run.json --source local-validate ansible-syntax schema-validation atlas-lint policy-validation iac-policy-scan alert-rule-validation type-check dependency-graph
+run_gate_fallback: ignoring stale non-remote gate status and running the requested local checks.
+Validation lane selection
+  mode: explicit_checks
+  branch: codex/ws-0304-mainline
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, atlas-lint, policy-validation, iac-policy-scan, alert-rule-validation, type-check, dependency-graph
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 23.25
+alert-rule-validation passed 17.00
+ansible-syntax        passed 565.97
+atlas-lint            passed 59.66
+dependency-graph      passed 20.22
+iac-policy-scan       passed 152.26
+policy-validation     passed 26.71
+schema-validation     passed 314.29
+type-check            passed 42.21
+workstream-surfaces   passed 168.27

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "nextcloud_redis_runtime",
+  "image_ref": "docker.io/library/redis:7.4-alpine@sha256:4bfd9eca23339865dc14fe75f6d9ae643f714924623978dd2798f1a673b08f43",
+  "scanner": "trivy",
+  "scanner_version": "0.69.3",
+  "scanned_on": "2026-03-29",
+  "summary": {
+    "critical": 4,
+    "high": 37
+  },
+  "targets_with_findings": [
+    {
+      "target": "usr/local/bin/gosu",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 4,
+      "high": 37
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-29-nextcloud-redis-runtime.trivy.json"
+}

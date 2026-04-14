@@ -1,0 +1,34 @@
+[stage] dependency-direction
+Dependency direction validation
+[ok] dependency-direction
+
+[stage] health-probes
+Health probe contract validation
+[ok] health-probes
+
+[stage] alert-rules
+Alert rule validation
+[ok] alert-rules
+
+[stage] tofu
+OpenTofu validation
+[ok] tofu
+
+[stage] data-models
+Repository data model validation
+[ok] data-models
+
+[stage] policy
+ADR 0230 policy validation
+[ok] policy
+
+[stage] architecture-fitness
+Architecture fitness validation
+[ok] architecture-fitness
+
+[stage] workstream-surfaces
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- receipts/live-applies/2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply.json: outside declared owned surfaces for ws-0289-label-studio-live-apply
+- receipts/live-applies/evidence/2026-04-03-ws-0340-mainline-receipt-backfill-r1-0.177.153.txt: outside declared owned surfaces for ws-0289-label-studio-live-apply
+[fail:1] workstream-surfaces

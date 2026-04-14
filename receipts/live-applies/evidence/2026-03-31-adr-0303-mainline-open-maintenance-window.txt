@@ -1,0 +1,9 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=open-maintenance-window
+Preflight workflow: open-maintenance-window
+Description: Open one ADR 0080 maintenance window in the private NATS KV bucket before a planned live change.
+INFO no bootstrap manifest configured for this workflow
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+Result: PASS (open-maintenance-window)
+uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/maintenance_window_tool.py open --service "postgres" --reason "ADR 0303 pgaudit enablement from exact mainline" --duration-minutes 30
+Maintenance window error: nats: permissions violation for publish to "$kv.maintenance-windows.maintenance/postgres"
+make: *** [open-maintenance-window] Error 1

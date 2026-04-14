@@ -15,9 +15,9 @@ def test_homepage_playbook_targets_runtime_general_and_keeps_edge_publication() 
 
     assert (
         plays[0]["hosts"]
-        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-general' }}"
+        == "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
     )
-    assert plays[1]["hosts"] == "{{ 'nginx-edge' if (env | default('production')) == 'staging' else 'nginx-edge' }}"
+    assert plays[1]["hosts"] == "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
     preflight = next(task for task in plays[0]["pre_tasks"] if task["name"] == "Run shared preflight checks")
     assert preflight["vars"]["required_hosts"] == [
         "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
@@ -29,9 +29,9 @@ def test_uptime_kuma_playbook_targets_runtime_general_and_keeps_edge_publication
 
     assert (
         plays[1]["hosts"]
-        == "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-general' }}"
+        == "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
     )
-    assert plays[2]["hosts"] == "{{ 'nginx-edge' if (env | default('production')) == 'staging' else 'nginx-edge' }}"
+    assert plays[2]["hosts"] == "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
     preflight = next(task for task in plays[1]["pre_tasks"] if task["name"] == "Run shared preflight checks")
     assert preflight["vars"]["required_hosts"] == [
         "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"

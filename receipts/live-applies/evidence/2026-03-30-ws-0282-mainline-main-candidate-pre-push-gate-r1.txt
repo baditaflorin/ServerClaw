@@ -1,0 +1,32 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-final/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, integration-tests
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 1.76
+alert-rule-validation passed 2.11
+ansible-lint          passed 152.28
+ansible-syntax        passed 88.77
+artifact-secret-scan  passed 2.20
+dependency-direction  passed 2.32
+dependency-graph      passed 2.96
+documentation-index   passed 1.90
+generated-docs        passed 6.68
+generated-portals     passed 25.04
+integration-tests     passed 1.41
+packer-validate       passed 5.00
+policy-validation     passed 2.00
+schema-validation     passed 12.68
+security-scan         passed 9.59
+service-completeness  passed 1.61
+tofu-validate         passed 1.51
+type-check            passed 3.34
+workstream-surfaces   passed 3.40
+yaml-lint             passed 12.12

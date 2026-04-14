@@ -1,0 +1,31 @@
+ADR 0291 direct verification
+Recorded on: 2026-03-30T20:29:05Z
+Worktree: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-live-apply
+Source commit context: 4db8620f23de24ac5069fcc3868e7c9489b9327f
+
+Public health probe
+- Command: curl -fsS https://notebooks.lv3.org/hub/health
+- Result: success (empty 200 response body)
+
+Public OIDC handoff probe
+- Command: curl -fsS -o /dev/null -D - https://notebooks.lv3.org/hub/oauth_login
+- Result:
+  HTTP/2 302
+  location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?response_type=code&redirect_uri=https%3A%2F%2Fnotebooks.lv3.org%2Fhub%2Foauth_callback&client_id=jupyterhub&code_challenge=o9q2FHn8NKPZjBQh1pKuOe8q9kPBfAdpAc1o-7UtWGk&code_challenge_method=S256&state=eyJzdGF0ZV9pZCI6ICIwN2ExNGM3NzRjNTI0ZDAwYjkyZWM0OWE5MmE2NDdhNCJ9&scope=openid+profile+email
+
+Edge certificate probe
+- Command: openssl s_client -connect notebooks.lv3.org:443 -servername notebooks.lv3.org </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName
+- Result:
+  subject=CN=nginx.lv3.org
+  issuer=C=US, O=Let's Encrypt, CN=E8
+  SANs include DNS:notebooks.lv3.org
+
+Docker runtime dependency probes
+- Command: ansible docker-runtime-lv3 -i inventory/hosts.yml -m shell -a 'curl -fsS http://127.0.0.1:11434/api/version && printf "\n" && curl -fsS http://127.0.0.1:8010/healthz' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+- Result:
+  {"version":"0.18.2"}
+  {"status":"ok","collection":"platform_context","memory_collection":"serverclaw_memory","memory_enabled":true}
+
+Docker runtime JupyterHub local probe
+- Command: ansible docker-runtime-lv3 -i inventory/hosts.yml -m shell -a 'curl -fsS http://127.0.0.1:8097/hub/health' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+- Result: success (empty 200 response body)

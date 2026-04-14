@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply
+configfile: pytest.ini
+collected 25 items
+
+tests/test_falco_runtime_role.py ............                            [ 48%]
+tests/test_k6_load_testing.py .............                              [100%]
+
+============================== 25 passed in 2.77s ==============================

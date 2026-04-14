@@ -1,0 +1,18 @@
+HTTP/2 200
+server: nginx
+date: Wed, 01 Apr 2026 20:48:39 GMT
+content-type: text/html; charset=utf-8
+content-length: 7551
+accept-ranges: bytes
+last-modified: Sun, 08 Mar 2026 03:00:08 GMT
+etag: "9243346cfbc627f674061c118ae73e90"
+x-process-time: 0
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://chat.lv3.org ws://chat.lv3.org wss://chat.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+x-robots-tag: noindex, nofollow

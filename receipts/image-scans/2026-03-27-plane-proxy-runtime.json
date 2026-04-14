@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "plane_proxy_runtime",
+  "image_ref": "artifacts.plane.so/makeplane/plane-proxy:v1.2.3@sha256:f3199f7a2b35a6e46227210cf085c249bc7370f0770784321d3079b4080a178d",
+  "scanner": "trivy",
+  "scanner_image": "binary:trivy-0.69.3-macOS-ARM64",
+  "scanned_on": "2026-03-27",
+  "summary": {
+    "critical": 5,
+    "high": 17
+  },
+  "targets_with_findings": [
+    {
+      "target": "alpine 3.21.4",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 2,
+      "high": 4
+    },
+    {
+      "target": "usr/bin/caddy",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 3,
+      "high": 13
+    }
+  ]
+}

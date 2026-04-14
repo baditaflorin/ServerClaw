@@ -1,0 +1,2 @@
+OPENAI_API_BASE_URL=http://host.docker.internal:8101/v1
+OPENAI_API_BASE_URL=http://10.10.10.20:8101/v1

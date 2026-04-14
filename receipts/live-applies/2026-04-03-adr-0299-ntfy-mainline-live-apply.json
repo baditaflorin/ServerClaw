@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0299-ntfy-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T08:12:38Z",
+  "recorded_by": "codex",
+  "source_commit": "08576b337b0018de1f3f114acc9a51945fa0365e",
+  "repo_version_context": "0.177.152",
+  "platform_version_context": "0.130.95",
+  "workflow_id": "adr-0299-ntfy-mainline-live-apply",
+  "adr": "0299",
+  "summary": "Promoted ADR 0299 into canonical mainline truth as repository version `0.177.152` and platform version `0.130.95` after replaying ntfy from the latest realistic `origin/main` baseline at repository version `0.177.151` and platform version `0.130.94`, verifying the governed public health and publish paths, preserving the intentional immutable-guest guardrail and the first exact-main restic-hook failure as evidence, fixing the live-apply-trigger restic credential contract, and rerunning the exact-main `live-apply-service` wrapper to a full green result.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ntfy public health",
+      "address": "https://ntfy.lv3.org/v1/health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ntfy governed publish topic",
+      "address": "https://ntfy.lv3.org/platform-ansible-info"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Protected-surface cut to canonical mainline truth",
+      "result": "pass",
+      "observed": "The first exact-main `release_manager.py --bump patch` run wrote the protected repository surfaces for `0.177.152` and `0.130.95` successfully before the external Outline sync failed with `502`, preserved in `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-release-manager-r1-0.177.152.txt`; the follow-up rerun with `LV3_SKIP_OUTLINE_SYNC=1` confirmed there were no remaining `Unreleased` bullets to consume, preserved in `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-release-manager-r2-0.177.152.txt`."
+    },
+    {
+      "check": "Latest-main ntfy converge and governed publish path",
+      "result": "pass",
+      "observed": "The rebased latest-main worktree passed `make converge-ntfy env=production`, the live `/opt/ntfy/server.yml` auth contract matched the governed publisher and ACL expectations, `https://ntfy.lv3.org/v1/health` returned successfully, and the direct controller publish to `https://ntfy.lv3.org/platform-ansible-info` plus the normalized `scripts/ntfy_publish.py` helper proof are preserved in `receipts/live-applies/evidence/2026-04-03-ws-0299-branch-verification.txt`."
+    },
+    {
+      "check": "Exact-main immutable-guest gate and ntfy service replay",
+      "result": "pass",
+      "observed": "The first exact-main `make live-apply-service service=ntfy env=production` run correctly stopped at the immutable-guest replacement policy for the `edge_and_stateful` ntfy service, preserved in `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r1-0.177.152.txt`. The final rerun with `ALLOW_IN_PLACE_MUTATION=true` completed successfully with recap `docker-runtime-lv3 : ok=110 changed=2 failed=0`, `localhost : ok=19 changed=0 failed=0`, and `nginx-lv3 : ok=49 changed=5 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r3-0.177.152.txt`."
+    },
+    {
+      "check": "Exact-main restic post-hook correction loop",
+      "result": "pass",
+      "observed": "The first in-place exact-main replay reached the shared restic post-hook and failed because the runtime credential payload was missing `ntfy_token`, preserved in `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r2-0.177.152.txt`. This workstream narrowed `scripts/restic_config_backup.py` so `ntfy_token` remains required for scheduled backup notification flows but no longer blocks `--live-apply-trigger` runs that never send ntfy notifications; the focused regression tests live in `tests/test_restic_config_backup.py`, and the final exact-main replay synced `receipts/restic-backups/20260403T080214Z.json` plus `receipts/restic-snapshots-latest.json` with `status: ok`."
+    },
+    {
+      "check": "Exact-main repository automation and validation bundle",
+      "result": "pass",
+      "observed": "The exact-main tree passed the focused pytest replay with `195 passed`, repository data-model validation, live-apply receipt validation, generated-doc validation, workstream-surface and agent-standard validation, `git diff --check`, and `make pre-push-gate`. The pre-push gate preserved the shared remote-builder Atlas timeout in `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-pre-push-gate-r3.txt`, then reran the unresolved `atlas-lint` check locally and finished green; the direct local Atlas lint replay is preserved in `receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-atlas-lint-r1.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "build/platform-manifest.json",
+    "changelog.md",
+    "docs/adr/.index.yaml",
+    "docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md",
+    "docs/release-notes/0.177.152.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/configure-ntfy.md",
+    "docs/workstreams/ws-0299-live-apply.md",
+    "receipts/live-applies/evidence/2026-04-03-ws-0299-branch-verification.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-release-manager-r1-0.177.152.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-release-manager-r2-0.177.152.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r1-0.177.152.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r2-0.177.152.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r3-0.177.152.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-pytest-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-generated-docs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-workstream-and-agent-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-validate-data-models-r3.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-receipts-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-final-structural-validations-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-git-diff-check-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-pre-push-gate-r3.txt",
+    "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-atlas-lint-r1.txt",
+    "receipts/restic-backups/20260403T080214Z.json",
+    "receipts/restic-snapshots-latest.json",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This exact-main receipt is the canonical proof for ADR 0299 on repository version `0.177.152` and platform version `0.130.95`.",
+    "The evidence intentionally preserves the first blocked exact-main wrapper run and the first restic-hook failure because both exposed real platform controls instead of operator mistakes.",
+    "The first release-manager run still preserves the external Outline `502`, but the protected repository surfaces were already written correctly before that external dependency failed.",
+    "The pre-push gate also preserves a shared remote-builder Atlas timeout; the gate still exited green because the intended local fallback reran the unresolved `atlas-lint` check successfully on this exact-main tree."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-04-03-ws-0299-mainline-restic-live-apply-hook",
+    "surface": "exact-main ntfy live-apply wrapper post-run restic backup trigger",
+    "diagnosis": "contract_drift",
+    "repair_action": "Kept the immutable-guest guardrail intact, captured the first restic-hook failure, narrowed `scripts/restic_config_backup.py` so `ntfy_token` remains mandatory for scheduled notification flows but does not block `--live-apply-trigger` backups, added focused regression coverage, and reran the exact-main wrapper to a green result.",
+    "verification": "receipts/live-applies/evidence/2026-04-03-adr-0299-mainline-live-apply-r3-0.177.152.txt"
+  }
+}

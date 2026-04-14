@@ -1,0 +1,16 @@
+returncode= 124
+stdout=
+endpoint_host=10.200.25.2
+
+started_at=2026-04-01T10:49:08Z
+stderr=
+Save(<lock/920b06503d>) returned error, retrying after 909.788985ms: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+Save(<lock/920b06503d>) returned error, retrying after 2.446071624s: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+Save(<lock/920b06503d>) returned error, retrying after 5.323335298s: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+Save(<lock/920b06503d>) returned error, retrying after 5.340950222s: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+Save(<lock/920b06503d>) returned error, retrying after 18.933051356s: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+Save(<lock/920b06503d>) returned error, retrying after 47.432758793s: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+Save(<lock/920b06503d>) returned error, retrying after 1m27.510330117s: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+Save(<lock/920b06503d>) returned error, retrying after 1m20.593403505s: client.PutObject: Storage backend has reached its minimum free drive threshold. Please delete a few objects to proceed.
+[2Ksignal terminated received, cleaning up
+{"message_type":"exit_error","code":130,"message":"unable to create lock in backend: context canceled"}

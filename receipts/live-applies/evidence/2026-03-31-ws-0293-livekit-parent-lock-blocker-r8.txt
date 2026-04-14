@@ -1,0 +1,43 @@
+timestamp_utc: 2026-03-31T20:51:30Z
+branch: codex/ws-0293-live-apply-r2
+head: 0b14ca293e685df869acc7995686f300c6a68e08
+origin_main: bd9f92ea90ee07df43caaafcf979701d4a9ccb41
+origin_main_version: 0.177.123
+
+validation:
+- uv run --with pytest --with pyyaml python -m pytest -q tests/test_livekit_playbook.py tests/test_livekit_runtime_role.py tests/test_linux_guest_firewall_role.py tests/test_ansible_execution_scopes.py tests/test_dependency_wave_apply.py
+  result: 27 passed in 1.35s
+- make syntax-check-livekit
+  result: passed
+- scripts/validate_repo.sh agent-standards
+  result: passed
+- uv run --with pyyaml python scripts/ansible_scope_runner.py validate
+  result: passed
+- HETZNER_DNS_API_TOKEN=dummy make -n converge-livekit env=production EXTRA_ARGS='--limit localhost,nginx-lv3'
+  result: expands through scripts/ansible_scope_runner.py run with the widened LiveKit lock set
+- HETZNER_DNS_API_TOKEN=dummy make -n live-apply-service service=livekit env=production
+  result: expands through check-canonical-truth, live-apply interface contracts, redundancy, and ADR 0191 gates before playbook execution
+
+lock_registry_after_stale_release:
+- released: vm:120/service:tika
+  holder: agent:codex/ws-0275-main-closeout-r3
+  lock_id: c0d7ac424307d01ec5c1
+  reason: holder worktree idle, no visible process, no open file handles, completed closeout branch state
+- remaining_blockers:
+  - resource: vm:120/service:api_gateway
+    holder: agent:codex/ws-0277-live-apply
+    expires_at: 2026-04-01T00:15:42Z
+  - resource: vm:120/service:typesense
+    holder: agent:codex/ws-0277-live-apply
+    expires_at: 2026-04-01T00:15:42Z
+
+ws_0277_state:
+- branch_tip: 894bb6e3048a4f4d4e4e44d7f84a8628438c4f64
+- branch_tip_subject: "[typesense] Stabilize live replay recovery"
+- registered_worktree_head: bd9f92ea90ee07df43caaafcf979701d4a9ccb41
+- interpretation: treat ws-0277 locks as live; do not force release
+
+shared_host_window:
+- monitoring detected concurrent ansible-playbook runs for monitoring-stack, vaultwarden, windmill, openbao, and lago
+- affected shared surfaces included proxmox_florin, docker-runtime-lv3, nginx-lv3, and postgres-lv3
+- next safe step remains: wait for both vm:120 parent lock acquisition and a quiet shared-host replay window, then rerun full LiveKit branch replay

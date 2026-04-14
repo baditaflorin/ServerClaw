@@ -1,0 +1,16 @@
+{"role": "adr0303_smoke_49c82ecb", "stream": "PLATFORM_EVENTS", "subject": "platform.security.pgaudit_unknown_role"}
+relay_health={"status":"ok"}
+before_nats={"error": "nats: NotFoundError: code=404 err_code=10037 description='no message found'", "found": false}
+trigger_output=["adr0303_smoke_49c82ecb", "adr0303_smoke_49c82ecb", "adr0303_smoke_49c82ecb"]
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+poll={"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}
+cleanup=ok
+smoke verification incomplete: {"alertmanager_matches": 0, "guest_metric_lines": 0, "loki_results": 0, "metric_value": null, "nats_ok": false, "nats_seq": null, "prom_alert_firing": false, "source_log_lines": 12}

@@ -1,0 +1,56 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0333-mainline-integration-r2/scripts/remote_exec.sh pre-push-gate --local-fallback
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, atlas-lint, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 3.66
+alert-rule-validation passed 2.62
+ansible-lint          passed 282.24
+ansible-syntax        passed 185.43
+artifact-secret-scan  passed 4.92
+atlas-lint            failed 139.87
+dependency-direction  passed 2.76
+dependency-graph      passed 3.47
+documentation-index   passed 2.50
+generated-docs        passed 12.62
+generated-portals     passed 36.89
+iac-policy-scan       passed 45.46
+integration-tests     passed 2.85
+packer-validate       passed 6.96
+policy-validation     passed 2.41
+schema-validation     passed 20.32
+security-scan         passed 46.43
+semgrep-sast          passed 70.16
+service-completeness  passed 2.23
+tofu-validate         passed 1.73
+type-check            passed 11.32
+workstream-surfaces   passed 2.13
+yaml-lint             passed 0.99
+
+[atlas-lint] docker command
+docker run --rm --cpus=4 --cidfile /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0333-mainline-integration-r2-81be8d8470/repo/.lv3-runs/20260404T161435Z-pre-push-gate-196b7bf66eb9-46674/repo/.local/validation-gate/docker-cids/atlas-lint-q9cetj3b.cid -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0333-mainline-integration-r2-81be8d8470/repo/.lv3-runs/20260404T161435Z-pre-push-gate-196b7bf66eb9-46674/repo:/workspace -v /run/docker.sock:/run/docker.sock -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0333-mainline-integration-r2-81be8d8470/repo/.lv3-runs/20260404T161435Z-pre-push-gate-196b7bf66eb9-46674/repo:/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0333-mainline-integration-r2-81be8d8470/repo/.lv3-runs/20260404T161435Z-pre-push-gate-196b7bf66eb9-46674/repo -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=196b7bf66eb9831704ff894eaae87d1682cd5ac44b706372734068b45cd935de -e LV3_SNAPSHOT_GENERATED_AT=2026-04-04T16:14:12.123570+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=32b853f302f714e405f90c82c6c2d63331ca32de -e LV3_SNAPSHOT_BRANCH=HEAD -e DOCKER_HOST=unix:///run/docker.sock -e LV3_HOST_WORKSPACE=/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0333-mainline-integration-r2-81be8d8470/repo/.lv3-runs/20260404T161435Z-pre-push-gate-196b7bf66eb9-46674/repo -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py lint --repo-root ${LV3_HOST_WORKSPACE:-/workspace} >/dev/null
+[atlas-lint] stderr
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+Atlas schema automation error: Atlas command failed (migrate lint --dir file:///workspace/migrations --dev-url postgres://postgres:postgres@host.docker.internal:44873/atlas_lint?sslmode=disable --latest 1): Error: postgres: scanning system variables: dial tcp 10.200.1.1:44873: connect: connection timed out
+You're running the community build of Atlas, which may differ from the official version.
+If this error persists, try installing the official version as a troubleshooting step:
+
+  curl -sSf https://atlasgo.sh | sh
+
+More installation options: https://atlasgo.io/docs#installation
+run_gate_fallback: rerunning unresolved remote checks locally: atlas-lint
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema
+  blocking checks: workstream-surfaces, agent-standards, atlas-lint
+  changed files: Makefile, README.md, build/platform-manifest.json, changelog.md, collections/ansible_collections/lv3/platform/roles/control_plane_recovery_controller/defaults/main.yml, collections/ansible_collections/lv3/platform/roles/proxmox_api_access/defaults/main.yml, ...
+
+CHECK              STATUS DURATION(s)
+agent-standards     passed 24.77
+atlas-lint          passed 45.32
+workstream-surfaces passed 10.27
+run_gate_fallback: merged local rerun with synced remote gate status at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0333-mainline-integration-r2/.local/validation-gate/last-run.json

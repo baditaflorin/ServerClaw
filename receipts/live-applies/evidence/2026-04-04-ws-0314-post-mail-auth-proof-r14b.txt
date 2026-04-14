@@ -1,0 +1,13 @@
+secret_file=present
+discovery_status=200
+token_response_present=True
+access_token_length=2241
+realm_access.roles=["create-realm", "default-roles-master", "offline_access", "admin", "uma_authorization"]
+resource_access.master-realm.roles=["view-identity-providers", "view-realm", "manage-identity-providers", "impersonation", "create-client", "manage-users", "query-realms", "view-authorization", "query-clients", "query-users", "manage-events", "manage-realm", "view-events", "view-users", "view-clients", "manage-authorization", "manage-clients", "query-groups"]
+resource_access.lv3-realm.roles=["view-realm", "view-identity-providers", "manage-identity-providers", "impersonation", "create-client", "manage-users", "query-realms", "view-authorization", "query-clients", "query-users", "manage-events", "manage-realm", "view-events", "view-users", "view-clients", "manage-authorization", "manage-clients", "query-groups"]
+admin_query_status=200
+grafana_oauth_status=302
+10.200.3.3      STREAM lv3-mail-stalwart
+10.200.3.3      DGRAM
+10.200.3.3      RAW
+submission_reachable=true

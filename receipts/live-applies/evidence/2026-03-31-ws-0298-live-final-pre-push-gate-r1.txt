@@ -1,0 +1,133 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-make-validate-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-managed-image-gate-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-pre-push-gate-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-py-compile-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-targeted-pytest-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-targeted-pytest-r2.txt
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 2.78
+alert-rule-validation passed 3.15
+ansible-lint          passed 207.13
+ansible-syntax        passed 127.55
+artifact-secret-scan  passed 4.50
+dependency-direction  passed 3.78
+dependency-graph      passed 4.25
+documentation-index   passed 2.09
+generated-docs        failed 5.73
+generated-portals     passed 35.65
+integration-tests     passed 2.51
+packer-validate       passed 7.11
+policy-validation     passed 3.51
+schema-validation     passed 20.13
+security-scan         passed 23.97
+semgrep-sast          passed 59.40
+service-completeness  passed 1.75
+tofu-validate         passed 1.82
+type-check            passed 5.46
+workstream-surfaces   failed 4.90
+yaml-lint             passed 18.85
+
+[generated-docs] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0298-main-publish-r2-85c4f33e97/repo/.lv3-runs/20260331T075838Z-0aa60096bcfb/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-make-validate-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-managed-image-gate-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-pre-push-gate-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-py-compile-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-targeted-pytest-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-targeted-pytest-r2.txt"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-docs
+[generated-docs] stdout
+Generated status document validation
+[generated-docs] stderr
+Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.
+- /workspace/README.md
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0298-main-publish-r2-85c4f33e97/repo/.lv3-runs/20260331T075838Z-0aa60096bcfb/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-make-validate-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-managed-image-gate-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-pre-push-gate-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-py-compile-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-targeted-pytest-r1.txt", "receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-targeted-pytest-r2.txt"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+Workstream surface ownership validation failed: branch 'codex/ws-0298-live-final-r1' is not registered in workstreams.yaml
+remote_exec: remote command failed, falling back locally for pre-push-gate
+remote_exec: running local fallback for pre-push-gate
+Validation lane selection
+  mode: auto
+  branch: codex/ws-0298-live-final-r1
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
+  blocking checks: workstream-surfaces, agent-standards, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness
+  changed files: receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-host-ping-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-make-validate-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-make-validate-r2.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-managed-image-gate-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-pre-push-gate-r1.txt, receipts/live-applies/evidence/2026-03-31-ws-0298-live-final-py-compile-r1.txt, ...
+
+CHECK                STATUS    DURATION(s)
+agent-standards       passed    34.96
+alert-rule-validation passed    41.66
+ansible-lint          timed_out 600.02
+ansible-syntax        timed_out 600.02
+artifact-secret-scan  timed_out 120.02
+dependency-direction  passed    50.24
+dependency-graph      passed    72.51
+generated-docs        failed    129.94
+generated-portals     timed_out 300.03
+policy-validation     passed    96.98
+schema-validation     timed_out 360.06
+service-completeness  passed    31.98
+type-check            passed    119.59
+workstream-surfaces   failed    84.96
+yaml-lint             timed_out 240.05
+
+[ansible-lint] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint
+[ansible-lint] stdout
+Ansible lint
+[ansible-lint] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[ansible-syntax] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
+[ansible-syntax] stdout
+Syntax check: playbooks/api-gateway.yml
+Syntax check: playbooks/artifact-cache-vm.yml
+Syntax check: playbooks/backup-vm.yml
+Syntax check: playbooks/browser-runner.yml
+Syntax check: playbooks/build-artifact-cache.yml
+Syntax check: playbooks/changedetection.yml
+[ansible-syntax] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[artifact-secret-scan] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -w /workspace registry.lv3.org/check-runner/security:2026.03.23 sh -c python scripts/published_artifact_secret_scan.py --repo-root /workspace --enforce-gitleaks
+[artifact-secret-scan] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[generated-docs] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-docs
+[generated-docs] stdout
+Generated status document validation
+[generated-docs] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.
+- /workspace/README.md
+
+[generated-portals] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-portals
+[generated-portals] stdout
+Generated portal validation
+[generated-portals] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[schema-validation] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
+[schema-validation] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Workstream surface ownership validation failed: branch 'codex/ws-0298-live-final-r1' is not registered in workstreams.yaml
+
+[yaml-lint] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0298-main-publish-r2:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=0aa60096bcfb5a3299e52807a9dcba157e357ff26681a945a2b0e15526e812b0 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T07:58:31.530060+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=51fc3a47358da12a272fe559a13e120e63a351b1 -e LV3_SNAPSHOT_BRANCH=codex/ws-0298-live-final-r1 -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c find . -path ./.git -prune -o -type f \( -name '*.yml' -o -name '*.yaml' \) -print0 | xargs -0 yamllint -c .yamllint
+[yaml-lint] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+make: *** [pre-push-gate] Error 1

@@ -1,4 +1,30 @@
 ---
+# Purpose: Converge the Portainer runtime, bootstrap admin credentials, and managed endpoint registration.
+# Use case: Run during Portainer deploys, updates, and recovery when the controller access path and local endpoint registration must match repo truth.
+#
+# Inputs (required):
+#   - Runtime paths, pinned image, admin bootstrap inputs, and controller URLs for the Portainer deployment.
+#   - Controller-local artifact files used to persist the admin password and authenticated session state.
+#
+# Inputs (optional):
+#   - portainer_verify_ssl (bool, optional): Whether controller-side API bootstrapping should require TLS verification.
+#
+# Outputs:
+#   - A converged Portainer compose deployment plus controller-local admin bootstrap artifacts and endpoint registration state.
+#
+# Idempotency: Partially idempotent
+#              Bootstrap artifacts are preserved locally while the runtime and endpoint registration are reconciled to declared state.
+#
+# Dependencies:
+#   - ADR 0165: Requires role metadata for governed automation entrypoints.
+#   - ADR 0373: Conventional service defaults are derived from the service registry before task execution.
+#   - Requires: Docker runtime, controller-local artifact storage, and Portainer reachability from the control machine.
+#
+# Related ADRs: 0165, 0373
+# Related Runbooks: docs/runbooks/configure-portainer.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-14
 - name: Derive Portainer conventional defaults from the service registry
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -81,40 +107,18 @@
     owner: root
     group: root
     mode: "0644"
+  register: portainer_compose_template
 
-- name: Pull the Portainer image
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ portainer_compose_file }}"
-      - pull
-  args:
-    chdir: "{{ portainer_site_dir }}"
-  register: portainer_pull
-  changed_when: >-
-    'Pulling' in portainer_pull.stdout
-    or 'Downloaded newer image' in portainer_pull.stdout
-    or 'Pull complete' in portainer_pull.stdout
-
-- name: Start the Portainer stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ portainer_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ portainer_site_dir }}"
-  register: portainer_up
-  changed_when: >-
-    'Creating' in portainer_up.stdout
-    or 'Recreating' in portainer_up.stdout
-    or 'Starting' in portainer_up.stdout
+- name: Converge the Portainer stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ portainer_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ portainer_site_dir }}"
+    common_docker_compose_converge_service_name: portainer
+    common_docker_compose_converge_template_results:
+      - "{{ portainer_compose_template }}"
 
 - name: Wait for Portainer to listen on the private runtime IP
   ansible.builtin.wait_for:

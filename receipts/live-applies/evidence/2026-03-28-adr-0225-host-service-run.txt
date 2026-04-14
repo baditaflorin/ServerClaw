@@ -1,0 +1,5 @@
+service_active=inactive
+timer_active=active
+checkout_head=5b121f700d0f1cd372ef85f24288691fb8a88e0c
+checkout_status_begin
+checkout_status_end

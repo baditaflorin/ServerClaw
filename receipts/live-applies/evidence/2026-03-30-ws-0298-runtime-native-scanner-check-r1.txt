@@ -1,0 +1,11 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+/usr/local/bin/syft
+Application:   syft
+Version:       1.41.2
+BuildDate:     2026-02-03T18:06:08Z
+GitCommit:     add262944666021711374ab977fba837cff21ad6
+GitDescription: v1.41.2
+Platform:      linux/amd64
+GoVersion:     go1.25.6
+Compiler:      gc
+SchemaVersion: 16.1.2

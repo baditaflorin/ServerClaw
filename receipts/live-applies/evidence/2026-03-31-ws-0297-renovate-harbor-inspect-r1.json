@@ -1,0 +1,121 @@
+{
+    "Name": "registry.lv3.org/check-runner/renovate",
+    "Digest": "sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d",
+    "RepoTags": [
+        "42.76.4"
+    ],
+    "Created": "2026-01-10T00:41:01.767238715Z",
+    "DockerVersion": "",
+    "Labels": {
+        "maintainer": "Rhys Arkins \u003crhys@arkins.net\u003e",
+        "name": "renovate",
+        "org.label-schema.version": "42.76.4",
+        "org.opencontainers.image.licenses": "AGPL-3.0-only",
+        "org.opencontainers.image.ref.name": "ubuntu",
+        "org.opencontainers.image.source": "https://github.com/renovatebot/renovate",
+        "org.opencontainers.image.url": "https://renovatebot.com",
+        "org.opencontainers.image.version": "42.76.4"
+    },
+    "Architecture": "amd64",
+    "Os": "linux",
+    "Layers": [
+        "sha256:20043066d3d5c78b45520c5707319835ac7d1f3d7f0dded0138ea0897d6a3188",
+        "sha256:2c632d479d46939544e1ba3c68e126ee295a6c908a98c0513f61213bcd2aecae",
+        "sha256:d2fba9b595f4c7a0888be915b17f2990cdf29fecb9869a0d9dbc171ff0b75041",
+        "sha256:522602f1783972963fa7b1e8308d4ac1853ee36aa5dfa8e3fed1b7efe5426a79",
+        "sha256:de0ef2e8bd486fc3c5b72a3cb41a32e230cf308cf86efaa349335c44056bd64c",
+        "sha256:d51a41a30de0e2ceb48fc77ae22273714b2fedadb690687413b0c448f8cd3955",
+        "sha256:25608d70fea534f9fc7d842c32b1ad63e017ca232f65771400be5baa7b64daa3",
+        "sha256:ef88d60197169635e83ad12565c1d9eb8a9f6c2c10a5871ce079cc8c96022d73",
+        "sha256:32e512e223e52320130f44e5b45887e89f437d6819ddfe45c4000924fd122d8f",
+        "sha256:cf4eab7800bf4ddc903ffd77263bad7649ca45b2a2ca20c4cf25b2007d0cf9f7",
+        "sha256:0c5ad9e2e1af1494d958bf5215fc49d02bb9363422e9cf0b2ee174892f784494",
+        "sha256:7040a06fa8647d9a44cde021ae7adc9349a991f9c32773fef511f10061745118",
+        "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1"
+    ],
+    "LayersData": [
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:20043066d3d5c78b45520c5707319835ac7d1f3d7f0dded0138ea0897d6a3188",
+            "Size": 29724688,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:2c632d479d46939544e1ba3c68e126ee295a6c908a98c0513f61213bcd2aecae",
+            "Size": 16859,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:d2fba9b595f4c7a0888be915b17f2990cdf29fecb9869a0d9dbc171ff0b75041",
+            "Size": 28375347,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:522602f1783972963fa7b1e8308d4ac1853ee36aa5dfa8e3fed1b7efe5426a79",
+            "Size": 28956627,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:de0ef2e8bd486fc3c5b72a3cb41a32e230cf308cf86efaa349335c44056bd64c",
+            "Size": 24390841,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:d51a41a30de0e2ceb48fc77ae22273714b2fedadb690687413b0c448f8cd3955",
+            "Size": 193159261,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:25608d70fea534f9fc7d842c32b1ad63e017ca232f65771400be5baa7b64daa3",
+            "Size": 19673819,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:ef88d60197169635e83ad12565c1d9eb8a9f6c2c10a5871ce079cc8c96022d73",
+            "Size": 132,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:32e512e223e52320130f44e5b45887e89f437d6819ddfe45c4000924fd122d8f",
+            "Size": 586,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:cf4eab7800bf4ddc903ffd77263bad7649ca45b2a2ca20c4cf25b2007d0cf9f7",
+            "Size": 100931435,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:0c5ad9e2e1af1494d958bf5215fc49d02bb9363422e9cf0b2ee174892f784494",
+            "Size": 155,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:7040a06fa8647d9a44cde021ae7adc9349a991f9c32773fef511f10061745118",
+            "Size": 229,
+            "Annotations": null
+        },
+        {
+            "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+            "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "Size": 32,
+            "Annotations": null
+        }
+    ],
+    "Env": [
+        "PATH=/home/ubuntu/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "BASH_ENV=/usr/local/etc/env",
+        "ENV=/usr/local/etc/env"
+    ]
+}

@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0193-plane-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_by": "codex",
+  "source_commit": "d28b283e7c78feb2c630aef6fda593e35bdec6c2",
+  "repo_version_context": "0.177.30",
+  "platform_version_context": "0.130.35",
+  "workflow_id": "adr-0193-plane-mainline-live-apply",
+  "adr": "0193",
+  "summary": "Replayed ADR 0193 from the latest merged `origin/main`, preserved the topology-safe Plane controller defaults, reconverged the private controller lane and ADR-sync path, and then completed the authenticated public `tasks.lv3.org` publication after regenerating the shared edge artifacts required by NGINX.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "controller_artifacts",
+      "name": "plane-local-auth",
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Plane regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest pytest -q tests/test_plane_runtime_role.py tests/test_plane_client.py tests/test_nginx_edge_publication_role.py tests/test_generate_platform_vars.py tests/test_service_topology_filters.py` passed with `40 passed` on the merged-main candidate after hardening the Plane runtime defaults against host-topology lookup drift."
+    },
+    {
+      "check": "Merged-main Plane live apply",
+      "result": "pass",
+      "observed": "`make live-apply-service service=plane env=production ALLOW_IN_PLACE_MUTATION=true` reconverged the Proxmox proxy lane, PostgreSQL `plane_postgres`, the Docker runtime Plane stack, the Plane bootstrap, ADR sync, and the private health checks from merged-main commit `d28b283e`."
+    },
+    {
+      "check": "Shared edge publication replay",
+      "result": "pass",
+      "observed": "After regenerating the missing shared publication artifacts with `make generate-ops-portal`, `make generate-changelog-portal`, and `make docs`, `make configure-edge-publication env=production` completed successfully with `nginx-lv3 ok=62 changed=5 failed=0`."
+    },
+    {
+      "check": "Private controller lane and bootstrap identity",
+      "result": "pass",
+      "observed": "`make plane-manage ACTION=whoami` reported controller URL `http://100.64.0.1:8011`, display name `ops`, email `ops@lv3.org`, workspace `lv3-platform`, and project identifier `ADR`."
+    },
+    {
+      "check": "ADR synchronization state",
+      "result": "pass",
+      "observed": "The controller-local summary at `.local/plane/adr-sync-summary.json` recorded `count: 218` synchronized ADR issues in the live `lv3-platform` / `ADR` Plane project."
+    },
+    {
+      "check": "Public edge verification",
+      "result": "pass",
+      "observed": "`curl -k -I https://tasks.lv3.org/` returned `HTTP/2 302` with `location: https://tasks.lv3.org/oauth2/sign_in?rd=https://tasks.lv3.org/`, while `curl http://100.64.0.1:8011/api/instances/` returned `200` for the private controller lane."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0193-plane-kanban-task-board.md",
+    "docs/workstreams/adr-0193-plane-kanban-task-board.md",
+    "docs/workstreams/ws-0193-main-merge.md",
+    "docs/runbooks/configure-plane.md",
+    "playbooks/plane.yml",
+    "playbooks/services/plane.yml",
+    "collections/ansible_collections/lv3/platform/roles/plane_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/plane_runtime/tasks/main.yml",
+    "scripts/plane_tool.py",
+    "scripts/sync_adrs_to_plane.py",
+    "platform/ansible/plane.py",
+    "tests/test_plane_runtime_role.py",
+    "tests/test_plane_client.py",
+    "tests/test_nginx_edge_publication_role.py",
+    "tests/test_generate_platform_vars.py",
+    "tests/test_service_topology_filters.py",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-03-27-adr-0193-plane-live-apply.json"
+  ],
+  "notes": [
+    "This receipt supersedes the branch-local `2026-03-27-adr-0193-plane-live-apply` receipt as the canonical merged-main Plane replay evidence and will become the `versions/stack.yaml` receipt of record once the mainline platform version bump is written.",
+    "The shared Hetzner DNS lane was unblocked by repairing the provider-side `coolify.lv3.org` and `apps.lv3.org` A records to match the repo-declared topology before the final edge replay.",
+    "The first merged-main Plane replay surfaced a transient OpenBao sealed-state dependency during runtime secret injection; the final replay only proceeded after the local OpenBao API again reported `sealed: false`.",
+    "The Plane service itself was healthy before the shared edge replay finished; the last blocker was the missing `build/changelog-portal` and `build/docs-portal` publication artifacts needed by `nginx_edge_publication`."
+  ]
+}

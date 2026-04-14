@@ -1,0 +1,103 @@
+[
+  {
+    "adr": "0074",
+    "title": "Platform Operations Portal",
+    "status": "Accepted",
+    "implementation_status": "Implemented",
+    "date": "2026-03-22",
+    "concern": "documentation",
+    "keywords": [
+      "platform",
+      "operations",
+      "portal"
+    ],
+    "summary": "We will deploy a Platform Operations Portal (ops.lv3.org) as a lightweight static web application served from the NGINX edge.",
+    "filename": "0074-platform-operations-portal.md",
+    "path": "docs/adr/0074-platform-operations-portal.md",
+    "implemented_in_repo_version": "0.69.0",
+    "implemented_in_platform_version": "0.40.0",
+    "implemented_on": "2026-03-23"
+  },
+  {
+    "adr": "0081",
+    "title": "Platform Changelog And Deployment History Portal",
+    "status": "Accepted",
+    "implementation_status": "Implemented",
+    "date": "2026-03-22",
+    "concern": "documentation",
+    "keywords": [
+      "platform",
+      "changelog",
+      "deployment",
+      "history",
+      "portal"
+    ],
+    "summary": "We will generate a Deployment History Portal (changelog.lv3.org) as part of the operations portal suite (ADR 0074).",
+    "filename": "0081-platform-changelog-and-deployment-history.md",
+    "path": "docs/adr/0081-platform-changelog-and-deployment-history.md",
+    "implemented_in_repo_version": "0.81.0",
+    "implemented_in_platform_version": "0.40.0",
+    "implemented_on": "2026-03-23"
+  },
+  {
+    "adr": "0094",
+    "title": "Developer Portal and Service Documentation Site",
+    "status": "Accepted",
+    "implementation_status": "Implemented",
+    "date": "2026-03-23",
+    "concern": "documentation",
+    "keywords": [
+      "developer",
+      "portal",
+      "service",
+      "documentation",
+      "site"
+    ],
+    "summary": "We will generate a static documentation site using MkDocs with the Material theme, auto-populated from the canonical platform data sources, and published at doc",
+    "filename": "0094-developer-portal-and-documentation-site.md",
+    "path": "docs/adr/0094-developer-portal-and-documentation-site.md",
+    "implemented_in_repo_version": "0.97.0",
+    "implemented_in_platform_version": "0.105.0",
+    "implemented_on": "2026-03-23"
+  },
+  {
+    "adr": "0095",
+    "title": "Unified Search Across Platform Services",
+    "status": "Deprecated",
+    "implementation_status": "Deprecated",
+    "date": "2026-03-23",
+    "concern": "documentation",
+    "keywords": [
+      "unified",
+      "search",
+      "across",
+      "platform",
+      "services"
+    ],
+    "summary": "We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime-lv3 and build a search indexer that ingests the six primary ",
+    "filename": "0095-unified-platform-search.md",
+    "path": "docs/adr/0095-unified-platform-search.md",
+    "implemented_in_repo_version": "0.119.0",
+    "implemented_on": "2026-03-24"
+  },
+  {
+    "adr": "0097",
+    "title": "Alerting Routing and On-Call Runbook Model",
+    "status": "Accepted",
+    "implementation_status": "Implemented",
+    "date": "2026-03-23",
+    "concern": "documentation",
+    "keywords": [
+      "alerting",
+      "routing",
+      "on-call",
+      "runbook",
+      "model"
+    ],
+    "summary": "We will implement a two-tier alert routing model with Alertmanager as the routing engine, severity-based destination mapping, mandatory runbook links on every a",
+    "filename": "0097-alerting-routing-and-oncall-runbook-model.md",
+    "path": "docs/adr/0097-alerting-routing-and-oncall-runbook-model.md",
+    "implemented_in_repo_version": "0.114.0",
+    "implemented_on": "2026-03-24"
+  }
+]

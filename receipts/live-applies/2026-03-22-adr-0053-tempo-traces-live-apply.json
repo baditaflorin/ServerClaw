@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0053-tempo-traces-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "36516fac4b62a4b6670546f3dbc0567c97514670",
+  "repo_version_context": "0.55.0",
+  "workflow_id": "converge-monitoring",
+  "adr": "0053",
+  "summary": "Applied ADR 0053 live from main by converging the monitoring VM tracing stack and the mail gateway runtime so Tempo search, service-graph metrics, and span metrics are all verified for the first traced internal API surface.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring-lv3",
+      "vmid": "140",
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "vm",
+      "name": "docker-runtime-lv3",
+      "vmid": "120",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "tempo-http",
+      "address": "10.10.10.40:3200"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "otlp-http",
+      "address": "10.10.10.40:4318"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Monitoring converge from main",
+      "result": "pass",
+      "observed": "playbooks/monitoring-stack.yml limited to monitoring-lv3 completed from source commit 36516fa and rewrote the managed Prometheus unit with --enable-feature=exemplar-storage,native-histograms before confirming Prometheus, Tempo, and otelcol readiness."
+    },
+    {
+      "check": "Tempo search and service-graph metrics",
+      "result": "pass",
+      "observed": "monitoring-lv3 returned service.name values containing mail-gateway, traces_service_graph_request_total with client=user and server=mail-gateway, and traces_spanmetrics_calls_total series for gateway server, internal, and client spans."
+    },
+    {
+      "check": "Mail gateway runtime rollout from main",
+      "result": "pass",
+      "observed": "playbooks/mail-platform.yml limited to docker-runtime-lv3 completed from main, rebuilt the lv3-mail-gateway image, rendered OTEL_RESOURCE_ATTRIBUTES=deployment.environment=lv3,service.namespace=lv3, and deployed telemetry.py with parse_resource_attributes into /opt/mail-platform/gateway/app."
+    },
+    {
+      "check": "Collector export path live",
+      "result": "pass",
+      "observed": "monitoring-lv3 otelcol metrics reported accepted and sent spans after the rerun, and the queued tracing path no longer depends on the earlier manual Tempo port workaround."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md",
+    "docs/runbooks/monitoring-stack.md",
+    "docs/runbooks/configure-mail-platform.md",
+    "docs/workstreams/adr-0053-tempo-traces.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The first mail-platform converge attempt from main failed on intermittent guest transport before rendering changed runtime files; the immediate retry completed cleanly without requiring another manual guest-side patch.",
+    "The verified service-graph edge is currently the first traced API hop into mail-gateway, while outbound client spans to downstream systems are visible through span metrics and traces for follow-on instrumentation work."
+  ]
+}

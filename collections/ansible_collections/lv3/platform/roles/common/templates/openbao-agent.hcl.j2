@@ -1,7 +1,7 @@
 pid_file = "/tmp/openbao-agent.pid"
 
 vault {
-  address = "http://127.0.0.1:{{ openbao_http_port }}"
+  address = "{{ common_openbao_compose_env_openbao_address | default('http://127.0.0.1:' ~ (openbao_http_port | string), true) }}"
 }
 
 auto_auth {

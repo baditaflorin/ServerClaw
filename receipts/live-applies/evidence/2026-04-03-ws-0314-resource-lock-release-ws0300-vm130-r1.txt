@@ -1,0 +1,6 @@
+python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/scripts/resource_lock_tool.py release --resource "vm:130" --holder "agent:codex:ws-0300-live-apply"
+{
+  "released": 1,
+  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/lv3-concurrency/lock-registry.json",
+  "status": "released"
+}

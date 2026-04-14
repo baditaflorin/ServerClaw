@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T15:27:39Z",
+  "recorded_by": "codex",
+  "source_commit": "5d59c7aa08b00179bf8414f68c1bef650739c6e3",
+  "repo_version_context": "0.177.80",
+  "platform_version_context": "0.130.54",
+  "workflow_id": "adr-0249-https-tls-assurance-mainline-live-apply",
+  "adr": "0249",
+  "summary": "Re-verified ADR 0249 from the latest origin/main baseline by replaying the monitoring stack on monitoring-lv3, confirming 33 active https-tls-blackbox targets plus 99 loaded https_tls_assurance rules from the shared service catalogs, and recording the 60-second production testssl.sh receipt 20260329T151359Z with 11 medium timeout warnings and no high or critical findings.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Prometheus HTTPS/TLS targets API",
+      "address": "http://10.10.10.40:9090/api/v1/targets"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Prometheus HTTPS/TLS rules API",
+      "address": "http://10.10.10.40:9090/api/v1/rules"
+    }
+  ],
+  "verification": [
+    {
+      "check": "ADR 0249 regression suite",
+      "result": "pass",
+      "observed": "`python3 -m py_compile scripts/https_tls_assurance_targets.py scripts/generate_https_tls_assurance.py scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py` succeeded, and `uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_https_tls_assurance_windmill_wrapper.py tests/test_monitoring_vm_role.py tests/test_guest_observability_role.py tests/test_guest_log_shipping_playbook.py tests/test_loki_log_agent_role.py` returned `22 passed in 0.50s`."
+    },
+    {
+      "check": "Generated HTTPS/TLS artifacts and monitoring gates",
+      "result": "pass",
+      "observed": "`make validate-generated-https-tls-assurance`, `make syntax-check-monitoring`, `make preflight WORKFLOW=converge-monitoring`, and `./scripts/validate_repo.sh alert-rules agent-standards` all passed from the isolated latest-main worktree."
+    },
+    {
+      "check": "Monitoring live replay",
+      "result": "pass",
+      "observed": "`make converge-monitoring` completed successfully with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=14 changed=0 failed=0`, `docker-build-lv3 ok=46 changed=0 failed=0`, `docker-runtime-lv3 ok=72 changed=2 failed=0`, `monitoring-lv3 ok=396 changed=0 failed=0`, `nginx-lv3 ok=150 changed=4 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox_florin ok=100 changed=0 failed=0`."
+    },
+    {
+      "check": "Host and monitoring verification",
+      "result": "pass",
+      "observed": "SSH verification recorded `hostname=Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`; `monitoring-lv3` reported active `influxdb`, `grafana-server`, `loki`, `alloy`, `tempo`, `otelcol-contrib`, `lv3-prometheus`, `prometheus-alertmanager`, and `prometheus-blackbox-exporter`; `/etc/prometheus/file_sd/https-tls-targets.yml` and `/etc/prometheus/rules/https-tls-alerts.yml` were present; the Prometheus API reported 33 active `https-tls-blackbox` targets; and rule group `https_tls_assurance` loaded 99 rules."
+    },
+    {
+      "check": "Repo-side HTTPS/TLS discovery parity",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json` recorded clean receipt `20260329T151822Z` with 33 discovered targets, matching the live Prometheus job."
+    },
+    {
+      "check": "Production testssl.sh replay",
+      "result": "partial",
+      "observed": "`make https-tls-assurance ENV=production` recorded receipt `20260329T151359Z` for 33 targets in `677.4` seconds with status `warn` / status code `2`, 11 medium `tls.scan_timeout` findings on `api-gateway-public`, `backup-pbs-internal`, `changelog-portal-public`, `coolify-apps-public`, `coolify-public`, `dify-public`, `docker-build-public`, `docker-runtime-public`, `docs-portal-public`, `dozzle-public`, and `excalidraw-public`, and no high or critical findings."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md",
+    "docs/workstreams/ws-0249-live-apply.md",
+    "docs/runbooks/https-tls-assurance.md",
+    "docs/runbooks/monitoring-stack.md",
+    "config/prometheus/file_sd/https_tls_targets.yml",
+    "config/prometheus/rules/https_tls_alerts.yml",
+    "config/windmill/scripts/https-tls-assurance.py",
+    "scripts/https_tls_assurance.py",
+    "scripts/https_tls_assurance_targets.py",
+    "scripts/generate_https_tls_assurance.py",
+    "receipts/https-tls-assurance/20260329T151359Z.json",
+    "receipts/https-tls-assurance/20260329T151822Z.json",
+    "receipts/live-applies/evidence/2026-03-29-adr-0249-server-state.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0249-monitoring-services.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0249-prometheus-https-tls.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0249-https-tls-target-file.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0249-converge-monitoring-recap.txt",
+    "receipts/live-applies/2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The earlier 2026-03-28 branch-local receipt remains in the repo as historical comparison evidence, but this 2026-03-29 mainline replay is the canonical receipt carried into `main`.",
+    "After this receipt was first recorded, origin/main advanced through the ADR 0236 exact-main replay and release `0.177.81` / platform `0.130.55`; once ADR 0249 was rebased onto that latest mainline, a refreshed live server check still reported the same 33 active HTTPS/TLS targets and 99 rules on monitoring-lv3, so no second monitoring replay was required before merge.",
+    "This exact-main receipt is carried into `main` by release `0.177.82`, and platform version `0.130.56` is the first integrated platform version that records the merged ADR 0249 HTTPS/TLS assurance replay."
+  ]
+}

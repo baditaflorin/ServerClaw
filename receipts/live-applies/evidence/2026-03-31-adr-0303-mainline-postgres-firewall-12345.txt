@@ -1,0 +1,5 @@
+28:    ip saddr 10.10.10.40/32 tcp dport { 2379, 2380 } accept
+51:    ip saddr 10.10.10.40/32 tcp dport { 2379, 2380 } accept
+---
+14:		ip saddr 10.10.10.40 tcp dport { 2379, 2380 } accept
+28:		ip saddr 10.10.10.40 tcp dport { 2379, 2380 } accept

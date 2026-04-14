@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0283-plausible-analytics-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T09:47:41Z",
+  "recorded_by": "codex",
+  "source_commit": "f8bd6088817ecd676f9c59f17f52e9cf0dd20b56",
+  "repo_version_context": "0.177.99",
+  "platform_version_context": "0.130.66",
+  "workflow_id": "adr-0283-plausible-analytics-mainline-live-apply",
+  "adr": "0283",
+  "summary": "Replayed ADR 0283 from exact-main release 0.177.99 using committed source f8bd6088817ecd676f9c59f17f52e9cf0dd20b56 after confirming origin/main still remained at f5ca9ae417fc597be284e974b7186aa2ad4bcb68, re-verified the current Proxmox host baseline, the Plausible runtime on docker-runtime-lv3, the public analytics edge publication path, and a fresh public pageview that reached ClickHouse on poll attempt 2. This exact-main replay justifies the platform-version bump from 0.130.65 to 0.130.66.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Plausible public ready endpoint",
+      "address": "https://analytics.lv3.org/api/system/health/ready"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Plausible public event endpoint",
+      "address": "https://analytics.lv3.org/api/event"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Plausible regression coverage",
+      "result": "pass",
+      "observed": "The exact-main compatibility slice reran from committed source `f8bd6088817ecd676f9c59f17f52e9cf0dd20b56`; `uv run --with pytest pytest tests/test_plausible_playbook.py tests/test_edge_publication_makefile.py tests/test_plausible_runtime_role.py` passed with `13 passed`, captured in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-targeted-checks-r1-0.177.99.txt`."
+    },
+    {
+      "check": "Authoritative exact-main Plausible replay",
+      "result": "pass",
+      "observed": "`make converge-plausible` succeeded from committed source `f8bd6088817ecd676f9c59f17f52e9cf0dd20b56` with final recap `docker-runtime-lv3 : ok=145 changed=5 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`, `localhost : ok=18 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`, and `nginx-lv3 : ok=39 changed=5 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`, captured in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-live-apply-0.177.99.txt`."
+    },
+    {
+      "check": "Current Proxmox host state",
+      "result": "pass",
+      "observed": "A fresh host-state probe confirmed the server still reports hostname `Debian-trixie-latest-amd64-base`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and running VMs `110` plus `120`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-host-state-r1-0.177.99.txt`."
+    },
+    {
+      "check": "Current Plausible runtime state",
+      "result": "pass",
+      "observed": "A fresh runtime probe on `docker-runtime-lv3` confirmed the `plausible`, `plausible-db`, `plausible-events-db`, and `plausible-openbao-agent` containers remained up, the local ready endpoint still returned `{\"sessions\":\"ok\",\"postgres\":\"ok\",\"clickhouse\":\"ok\",\"sites_cache\":\"ok\"}`, and listeners remained present on `10.10.10.20:8016` and `127.0.0.1:8016`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-post-state-r1-0.177.99.txt`."
+    },
+    {
+      "check": "Current public analytics edge verification",
+      "result": "pass",
+      "observed": "A fresh public probe reconfirmed `https://analytics.lv3.org/api/system/health/ready`, the `https://analytics.lv3.org/js/script.js` tracker injection on `nginx.lv3.org`, the dashboard OIDC redirect with `x-robots-tag: noindex, nofollow`, and public DNS `analytics.lv3.org -> 65.108.75.123`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-verify-r1-0.177.99.txt`."
+    },
+    {
+      "check": "Current public analytics event ingestion",
+      "result": "pass",
+      "observed": "A fresh public pageview smoke posted `202 Accepted` to `https://analytics.lv3.org/api/event` and confirmed the synthetic path `/plausible-e2e-1774863976` reached ClickHouse on poll attempt `2`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-event-e2e-r1-0.177.99.txt`."
+    },
+    {
+      "check": "Branch-local receipt superseded",
+      "result": "pass",
+      "observed": "This receipt supersedes `2026-03-30-adr-0283-plausible-analytics-live-apply` as the canonical Plausible receipt because the successful replay now comes from the synchronized exact-main source instead of the workstream branch."
+    },
+    {
+      "check": "Local repository validation bundle",
+      "result": "pass",
+      "observed": "`git diff --check`, `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `uvx --from pyyaml python scripts/canonical_truth.py --check`, and `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check` all passed on the final integrated `0.177.99` tree, captured in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-git-diff-check-r3-0.177.99.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-live-apply-receipts-validate-r3-0.177.99.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-validate-data-models-r3-0.177.99.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-canonical-truth-check-r3-0.177.99.txt`, and `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-platform-manifest-check-r3-0.177.99.txt`."
+    },
+    {
+      "check": "Remote validation lanes",
+      "result": "pass",
+      "observed": "The first `make remote-validate` run correctly flagged a stale dependency graph artifact and pointed at `python scripts/generate_dependency_diagram.py --write`; after regenerating that artifact, the rerun passed with `agent-standards`, `alert-rule-validation`, `ansible-syntax`, `dependency-graph`, `policy-validation`, `schema-validation`, `type-check`, and `workstream-surfaces` all reported as `passed`, captured in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-remote-validate-r1-0.177.99.txt` and `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-remote-validate-r2-0.177.99.txt`."
+    },
+    {
+      "check": "Pre-push gate",
+      "result": "pass",
+      "observed": "`make pre-push-gate` passed with `agent-standards`, `documentation-index`, `yaml-lint`, `schema-validation`, `policy-validation`, `alert-rule-validation`, `dependency-direction`, `generated-docs`, `generated-portals`, `dependency-graph`, `artifact-secret-scan`, `ansible-syntax`, `ansible-lint`, `type-check`, `service-completeness`, `packer-validate`, `tofu-validate`, `security-scan`, `integration-tests`, and `workstream-surfaces` all reported as `passed`, captured in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-pre-push-gate-r2-0.177.99.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "docs/release-notes/0.177.99.md",
+    "docs/adr/0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md",
+    "docs/workstreams/ws-0283-live-apply.md",
+    "docs/runbooks/configure-plausible.md",
+    "workstreams.yaml",
+    "versions/stack.yaml",
+    "build/platform-manifest.json",
+    "receipts/live-applies/2026-03-30-adr-0283-plausible-analytics-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-start-r1-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-targeted-checks-r1-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-live-apply-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-host-state-r1-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-post-state-r1-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-verify-r1-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-event-e2e-r1-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-git-diff-check-r3-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-live-apply-receipts-validate-r3-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-validate-data-models-r3-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-canonical-truth-check-r3-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-platform-manifest-check-r3-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-remote-validate-r1-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-remote-validate-r2-0.177.99.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-pre-push-gate-r2-0.177.99.txt",
+    "receipts/live-applies/2026-03-30-adr-0283-plausible-analytics-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt is the canonical exact-main proof for ADR 0283 on top of repository release 0.177.99 and live platform version 0.130.66.",
+    "The first synchronized branch-local replay needed one provider-side bridge because the Hetzner DNS automation did not create the `analytics` A record; the record was created manually through the provider API and the later governed replays then observed the canonical provider state.",
+    "The earlier branch-local receipt remains part of the audit trail, but the canonical Plausible receipt for integrated main now points at this exact-main replay."
+  ]
+}
