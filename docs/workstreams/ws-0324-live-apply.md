@@ -3,13 +3,13 @@
 - ADR: [ADR 0324](../adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md)
 - Title: Implement ADR 0324 by moving service metadata into per-service bundles and verifying the generated-catalog automation end to end
 - Status: live_applied
-- Included In Repo Version: `0.178.139`
+- Included In Repo Version: `0.178.140`
 - Branch-Local Receipt: `receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply.json`
 - Mainline Receipt: `receipts/live-applies/2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply.json`
 - Implemented On: 2026-04-04
 - Live Applied On: 2026-04-04
 - Live Applied In Platform Version: 0.130.98
-- Latest Verified Base: `origin/main@c6f9564acb39c3927a805574a30da3e51833c1ad` (`repo 0.178.138`, `platform 0.178.138`)
+- Latest Verified Base: `origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4` (`VERSION 0.178.140`, `stack repo 0.178.139`, `platform 0.178.138`)
 - Branch: `codex/ws-0324-main-integration-r5`
 - Worktree: `.worktrees/ws-0324-main-integration-r5`
 - Owner: codex
@@ -94,10 +94,11 @@
 - A bounded manual live sync copied `.repo-structure.yaml`, `.config-locations.yaml`, and `build/onboarding/*.yaml` into `/srv/proxmox_florin_server` after the worker fallback exposed that mirror gap, and the repo automation now includes the permanent sync-path fix so later replays do not need that manual copy.
 - The latest worker `post-merge-gate` replay now reaches a healthy Docker attestation and falls back locally for the expected registry-runner outage, but the remaining failure is only stale canonical-truth on `/srv/proxmox_florin_server/changelog.md` and `/srv/proxmox_florin_server/versions/stack.yaml`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r3-0.178.3.txt`. Those protected surfaces are intentionally deferred to the final exact-main integration step.
 - The follow-up exact-main `make converge-windmill` replay no longer hangs in the controller verification block after switching to `windmill_base_url`; the remaining `sudo` timeout at `Create a remote manifest path for repo-managed Windmill scripts` is a later privilege-escalation flake rather than a regression in the ADR 0324 service-catalog path, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-mainline-converge-windmill-r10-0.178.3.txt`.
-- On the latest realistic `origin/main@c6f9564acb39c3927a805574a30da3e51833c1ad`, `uv run --with pyyaml --with jsonschema python3 scripts/service_definition_catalog.py --check` passed from the fresh exact-main integration worktree before the final release cut; the 2026-04-14 evidence file is recorded alongside the final mainline receipt.
+- On the latest realistic `origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4`, `uv run --with pyyaml --with jsonschema python3 scripts/service_definition_catalog.py --check` passed from the fresh exact-main integration worktree before the final release cut; the 2026-04-14 evidence file is recorded alongside the final mainline receipt.
 - The fresh exact-main validation replay also reproduced one current-main generated-artifact gap rather than an ADR 0324 regression: `config/prometheus/file_sd/slo_targets.yml` was missing from `origin/main` and had to be regenerated before the repository data-model gate could pass again. That repair is recorded in the 2026-04-14 exact-main evidence set and is now part of the integrated mainline closeout.
 
 ## Exact-Main Integration Status
 
-- ADR 0324 remains first-live-proven on platform version `0.130.98`, and this exact-main closeout carries that already-verified implementation into repo version `0.178.139` from the latest realistic `origin/main` base.
-- The final integration step updates the protected main-only surfaces from source, records the mainline receipt, and reruns the promotion-facing validation and worker post-merge verification from `main` so the archived workstream, ADR metadata, and canonical truth all describe the same integrated state.
+- ADR 0324 remains first-live-proven on platform version `0.130.98`, and this exact-main closeout carries that already-verified implementation into the current mainline repo version `0.178.140` from the latest realistic `origin/main` base.
+- The final integration step updates the protected main-only surfaces from source, records the mainline receipt, and reruns the promotion-facing validation and worker post-merge verification from `main`. A fresh numbered release cut remains intentionally deferred because unrelated active workstreams still trip the repository's `release_manager.py` blocker policy.
+- The clean latest-main verification workspace at `origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4` is already red in the broader promotion gate on `generated-docs`, `ansible-lint`, and `integration-tests`, so those failures remain inherited mainline debt rather than new ADR 0324 regressions. The ws-0324 exact-main replay repaired its own ADR index drift and image-scan receipt materialization gap, while the focused catalog, receipt, and remote-validate paths stayed green on the rebased tree.

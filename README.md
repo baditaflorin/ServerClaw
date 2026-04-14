@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.139` |
+| Repository version | `0.178.140` |
 | Platform version | `0.178.138` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -78,10 +78,6 @@ monitored, and recoverable from a single repository.
 | `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
 | `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
-| `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
-| `temporal` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 
 Showing 20 of 181 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -93,7 +89,7 @@ Showing 20 of 181 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.139` |
+| Repository version | `0.178.140` |
 | Platform version | `0.178.138` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -361,11 +357,12 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 310 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 311 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](docs/workstreams/ws-0374-status-repair.md) |
+| `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](docs/workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
@@ -389,7 +386,6 @@ Showing 25 of 310 merged or live-applied workstreams. Full history: [merged work
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
-| `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements

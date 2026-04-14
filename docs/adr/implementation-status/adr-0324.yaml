@@ -5,136 +5,148 @@ canonical_implementation_status: Implemented
 detected_markers:
 - marker_type: git-commit
   adr_number: '0324'
+  location: git:b869dd741
+  evidence: b869dd741 [ws-0324] Prepare exact-main closeout for latest-main replay
+  confidence: 0.6
+  detected_on: '2026-04-14T11:22:22.810533'
+- marker_type: git-commit
+  adr_number: '0324'
   location: git:b087032fa
   evidence: b087032fa [ws-0324] Converge latest-main validation repairs
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.762067'
+  detected_on: '2026-04-14T11:22:22.813572'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:e921802c3
   evidence: e921802c3 [ws-0324] Record live apply follow-through and worker gate fixes
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.762104'
+  detected_on: '2026-04-14T11:22:22.813595'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:c75299c1f
   evidence: c75299c1f [service-catalog] Repair ws-0324 live apply and Windmill sync
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.762110'
+  detected_on: '2026-04-14T11:22:22.813600'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:dd2d42622
   evidence: dd2d42622 [service-catalog] Reconcile ADR 0324 with mainline validation
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.762113'
+  detected_on: '2026-04-14T11:22:22.813603'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:ec83e80ca
   evidence: ec83e80ca [service-catalog] Implement ADR 0324 bundle assembly
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.762116'
+  detected_on: '2026-04-14T11:22:22.813611'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:aed6da133
   evidence: aed6da133 [ws-0324] Record live apply follow-through and worker gate fixes
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.766975'
+  detected_on: '2026-04-14T11:22:22.832585'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:01143254e
   evidence: 01143254e [service-catalog] Repair ws-0324 live apply and Windmill sync
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.766993'
+  detected_on: '2026-04-14T11:22:22.832600'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:0c6d0e0c5
   evidence: 0c6d0e0c5 [service-catalog] Reconcile ADR 0324 with mainline validation
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.767004'
+  detected_on: '2026-04-14T11:22:22.832611'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:39f8031e7
   evidence: 39f8031e7 [service-catalog] Implement ADR 0324 bundle assembly
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.767006'
+  detected_on: '2026-04-14T11:22:22.832614'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:fde4cc9e7
   evidence: fde4cc9e7 [ws-0324] Record live apply follow-through and worker gate fixes
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.768046'
+  detected_on: '2026-04-14T11:22:22.836037'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:9063d5594
   evidence: 9063d5594 [service-catalog] Repair ws-0324 live apply and Windmill sync
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.768051'
+  detected_on: '2026-04-14T11:22:22.836053'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:a4035d0f7
   evidence: a4035d0f7 [service-catalog] Reconcile ADR 0324 with mainline validation
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.768054'
+  detected_on: '2026-04-14T11:22:22.836056'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:0e87bbcd5
   evidence: 0e87bbcd5 [service-catalog] Implement ADR 0324 bundle assembly
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.768056'
+  detected_on: '2026-04-14T11:22:22.836059'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:514991a3e
   evidence: 514991a3e [ws-0324] Record live apply follow-through and worker gate fixes
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.768061'
+  detected_on: '2026-04-14T11:22:22.836064'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:c1a7850af
   evidence: c1a7850af [ws-0324] Record live apply follow-through and worker gate fixes
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.768065'
+  detected_on: '2026-04-14T11:22:22.836068'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:34d276fb7
   evidence: 34d276fb7 [service-catalog] Repair ws-0324 live apply and Windmill sync
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.768069'
+  detected_on: '2026-04-14T11:22:22.836072'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:c6b83065a
   evidence: c6b83065a [service-catalog] Reconcile ADR 0324 with mainline validation
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.768072'
+  detected_on: '2026-04-14T11:22:22.836075'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:bef71c663
   evidence: bef71c663 [service-catalog] Implement ADR 0324 bundle assembly
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:00.768074'
+  detected_on: '2026-04-14T11:22:22.836077'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:fba9428ec
   evidence: fba9428ec [merge] Integrate origin/main before ws-0324 release
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.769930'
+  detected_on: '2026-04-14T11:22:22.837136'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:94da73c13
   evidence: 94da73c13 [meta] Align ws-0324 ownership surfaces with release outputs
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.769948'
+  detected_on: '2026-04-14T11:22:22.837146'
 - marker_type: git-commit
   adr_number: '0324'
   location: git:6f72f70e5
   evidence: 6f72f70e5 Merge branch 'codex/ws-0324-programmatic-doc-shards' into codex/ws-0324-main-integration
   confidence: 0.6
-  detected_on: '2026-04-14T10:55:00.769969'
+  detected_on: '2026-04-14T11:22:22.837168'
+- marker_type: live-apply-receipt
+  adr_number: '0324'
+  location: receipts/live-applies/2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply.json
+  evidence: Committed live-apply evidence references the ADR
+  confidence: 1.0
+  detected_on: '2026-04-14T11:22:23.426235'
 - marker_type: live-apply-receipt
   adr_number: '0324'
   location: receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply.json
   evidence: Committed live-apply evidence references the ADR
   confidence: 1.0
-  detected_on: '2026-04-14T10:55:01.095767'
+  detected_on: '2026-04-14T11:22:23.426299'
 inferred_implementation_status: Likely Implemented
 status_match: true
 summary: 'Canonical Decision Status: Accepted
@@ -143,8 +155,8 @@ summary: 'Canonical Decision Status: Accepted
 
   Inferred Implementation Status: Likely Implemented
 
-  Markers Found: 22
+  Markers Found: 24
 
-  Breakdown: git-commit=21, live-apply-receipt=1
+  Breakdown: git-commit=22, live-apply-receipt=2
 
   Implemented On: 2026-04-04'

@@ -12,7 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- centralize shared Python validation helpers across catalog and registry scripts per ADR 0369
 - completes ADR 0324 exact-main closeout by recording the generated service-catalog assembly receipt on main and refreshing the canonical truth surfaces
 
 ## Latest Release

@@ -19,6 +19,8 @@ shared_surfaces:
 - docs/workstreams/ws-0324-live-apply.md
 - docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
 - docs/adr/.index.yaml
+- docs/adr/implementation-status/INDEX.yaml
+- docs/adr/implementation-status/adr-0324.yaml
 - docs/adr/index/by-range/*.yaml
 - docs/adr/index/by-concern/*.yaml
 - docs/adr/index/by-status/*.yaml
@@ -97,6 +99,8 @@ shared_surfaces:
 - changelog.md
 - docs/release-notes/README.md
 - docs/release-notes/*.md
+- docs/status/history/live-apply-evidence.md
+- docs/status/history/merged-workstreams.md
 - versions/stack.yaml
 - build/platform-manifest.json
 - docs/diagrams/agent-coordination-map.excalidraw
@@ -177,7 +181,14 @@ ownership_manifest:
     contract: repository-automation-v1
   - id: ws0324_generated_truth
     paths:
+    - README.md
+    - changelog.md
+    - versions/stack.yaml
     - docs/diagrams/agent-coordination-map.excalidraw
+    - docs/adr/implementation-status/INDEX.yaml
+    - docs/adr/implementation-status/adr-0324.yaml
+    - docs/status/history/live-apply-evidence.md
+    - docs/status/history/merged-workstreams.md
     - build/onboarding/agent-core.yaml
     - build/onboarding/automation.yaml
     - build/onboarding/fork-bootstrap.yaml
@@ -243,7 +254,15 @@ notes: |
   First live apply for ADR 0324 remains the 2026-04-04 service-catalog
   rollout recorded in platform version 0.130.98. This exact-main closeout
   replays the repository validation path from
-  origin/main@c6f9564acb39c3927a805574a30da3e51833c1ad (repo 0.178.138,
-  platform 0.178.138), records the mainline receipt, and repairs the fresh
-  mainline generated-SLO artifact gap that the repo gates surfaced during
-  final integration.
+  origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4 (VERSION 0.178.140,
+  stack repo 0.178.139, platform 0.178.138), records the mainline receipt,
+  repairs the fresh mainline generated-SLO artifact gap that the repo gates
+  surfaced during final integration. The exact-main closeout lands on the
+  current mainline VERSION 0.178.140 and leaves its changelog note in the
+  Unreleased section because `release_manager.py` is currently blocked by
+  unrelated active workstreams (`ws-0417`, `ws-0414`, `adr-0360`, and
+  `ws-realtime-dynamic-children`). The clean latest-main verification
+  workspace at the same origin/main tip is already red in the broader
+  promotion gate on `generated-docs`, `ansible-lint`, and
+  `integration-tests`, so those failures remain inherited mainline debt
+  rather than new ADR 0324 regressions.
