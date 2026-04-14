@@ -402,6 +402,263 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0324-live-apply
+  adr: '0324'
+  title: Implement ADR 0324 service bundles and verify the generated-catalog automation
+    end to end
+  status: live_applied
+  owner: codex
+  branch: codex/ws-0324-main-integration-r5
+  worktree_path: .worktrees/ws-0324-main-integration-r5
+  doc: docs/workstreams/ws-0324-live-apply.md
+  depends_on:
+  - adr-0075-service-capability-catalog
+  - adr-0107-platform-extension-model
+  - adr-0174-integration-only-canonical-truth-assembly
+  - adr-0179-service-redundancy-tier-matrix
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0324-live-apply.yaml
+  - docs/workstreams/ws-0324-live-apply.md
+  - docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/by-range/*.yaml
+  - docs/adr/index/by-concern/*.yaml
+  - docs/adr/index/by-status/*.yaml
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - build/onboarding/agent-core.yaml
+  - build/onboarding/automation.yaml
+  - build/onboarding/fork-bootstrap.yaml
+  - build/onboarding/service-catalog.yaml
+  - catalog/services/
+  - docs/discovery/config-locations/service-configuration.yaml
+  - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+  - docs/discovery/repo-structure/cross-cutting-concerns.yaml
+  - config/service-capability-catalog.json
+  - config/health-probe-catalog.json
+  - config/service-completeness.json
+  - config/service-redundancy-catalog.json
+  - config/dependency-graph.json
+  - config/data-catalog.json
+  - config/slo-catalog.json
+  - config/correction-loops.json
+  - config/prometheus/rules/slo_rules.yml
+  - config/prometheus/rules/slo_alerts.yml
+  - config/prometheus/file_sd/slo_targets.yml
+  - config/grafana/dashboards/slo-overview.json
+  - docs/schema/service-definition-bundle.schema.json
+  - docs/schema/service-definition-completeness-fragment.schema.json
+  - docs/schema/service-definition-data-fragment.schema.json
+  - docs/schema/service-definition-dependency-fragment.schema.json
+  - docs/schema/service-definition-health-fragment.schema.json
+  - docs/schema/service-definition-metadata.schema.json
+  - docs/schema/service-definition-redundancy-fragment.schema.json
+  - docs/schema/service-definition-slo-fragment.schema.json
+  - docs/schema/health-probe-catalog.schema.json
+  - docs/runbooks/service-capability-catalog.md
+  - docs/runbooks/add-a-new-service.md
+  - docs/runbooks/scaffold-new-service.md
+  - .yamllint
+  - Makefile
+  - scripts/service_definition_catalog.py
+  - scripts/service_catalog.py
+  - scripts/scaffold_service.py
+  - scripts/live_apply_receipts.py
+  - scripts/validate_repo.sh
+  - scripts/validate_repository_data_models.py
+  - scripts/sync_windmill_resources.py
+  - scripts/topology-snapshot.json
+  - tests/test_service_definition_catalog.py
+  - tests/test_scaffold_service.py
+  - tests/test_validate_service_catalog.py
+  - tests/test_sync_windmill_resources.py
+  - tests/test_windmill_operator_admin_app.py
+  - tests/test_common_docker_bridge_chains_helper.py
+  - tests/test_docker_runtime_role.py
+  - tests/test_linux_guest_firewall_role.py
+  - tests/test_postgres_vm_access_policy.py
+  - tests/test_windmill_default_operations_surface.py
+  - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+  - config/ntfy/topics.yaml
+  - inventory/group_vars/postgres_guests.yml
+  - inventory/host_vars/proxmox-host.yml
+  - publication/templates/proxmox-host.yml
+  - docs/runbooks/configure-windmill.md
+  - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+  - receipts/live-applies/
+  - receipts/live-applies/evidence/
+  - receipts/sbom/host-runtime-control-lv3-2026-04-04.cdx.json
+  - README.md
+  - VERSION
+  - changelog.md
+  - docs/release-notes/README.md
+  - docs/release-notes/*.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - receipts/live-applies/*0324*
+  - receipts/live-applies/evidence/2026-04-03-ws-0324-*
+  - receipts/live-applies/evidence/2026-04-04-ws-0324-*
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: adr_index_generation
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/by-range/*.yaml
+      - docs/adr/index/by-concern/*.yaml
+      - docs/adr/index/by-status/*.yaml
+      mode: shared_contract
+      contract: adr-index-generator-v2
+    - id: ws0324_service_bundle_source
+      paths:
+      - docs/workstreams/ws-0324-live-apply.md
+      - docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - docs/discovery/config-locations/service-configuration.yaml
+      - docs/discovery/repo-structure/automation-and-infrastructure.yaml
+      - docs/discovery/repo-structure/cross-cutting-concerns.yaml
+      - catalog/services/**
+      - docs/schema/service-definition-bundle.schema.json
+      - docs/schema/service-definition-completeness-fragment.schema.json
+      - docs/schema/service-definition-data-fragment.schema.json
+      - docs/schema/service-definition-dependency-fragment.schema.json
+      - docs/schema/service-definition-health-fragment.schema.json
+      - docs/schema/service-definition-metadata.schema.json
+      - docs/schema/service-definition-redundancy-fragment.schema.json
+      - docs/schema/service-definition-slo-fragment.schema.json
+      - docs/schema/health-probe-catalog.schema.json
+      - docs/runbooks/service-capability-catalog.md
+      - docs/runbooks/add-a-new-service.md
+      - docs/runbooks/scaffold-new-service.md
+      - scripts/service_definition_catalog.py
+      - scripts/scaffold_service.py
+      - tests/test_service_definition_catalog.py
+      - tests/test_scaffold_service.py
+      mode: exclusive
+    - id: service_catalogs_contract
+      paths:
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/dependency-graph.json
+      - config/data-catalog.json
+      - config/slo-catalog.json
+      - scripts/service_catalog.py
+      - tests/test_validate_service_catalog.py
+      mode: shared_contract
+      contract: service-catalogs-v1
+    - id: generated_slo_contract
+      paths:
+      - config/prometheus/rules/slo_rules.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/grafana/dashboards/slo-overview.json
+      mode: shared_contract
+      contract: generated-slo-v1
+    - id: repository_automation_contract
+      paths:
+      - .yamllint
+      - Makefile
+      - config/correction-loops.json
+      - scripts/validate_repo.sh
+      - scripts/validate_repository_data_models.py
+      mode: shared_contract
+      contract: repository-automation-v1
+    - id: ws0324_generated_truth
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/onboarding/agent-core.yaml
+      - build/onboarding/automation.yaml
+      - build/onboarding/fork-bootstrap.yaml
+      - build/onboarding/service-catalog.yaml
+      mode: shared_contract
+      contract: latest-main-generated-truth-v1
+    - id: ws0324_runtime_live_apply_contract
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+      - config/ntfy/topics.yaml
+      - inventory/group_vars/postgres_guests.yml
+      - inventory/host_vars/proxmox-host.yml
+      - publication/templates/proxmox-host.yml
+      - docs/runbooks/configure-windmill.md
+      - docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+      - scripts/sync_windmill_resources.py
+      - tests/test_sync_windmill_resources.py
+      - tests/test_windmill_operator_admin_app.py
+      - tests/test_common_docker_bridge_chains_helper.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_linux_guest_firewall_role.py
+      - tests/test_postgres_vm_access_policy.py
+      - tests/test_windmill_default_operations_surface.py
+      mode: shared_contract
+      contract: ws0324-runtime-live-apply-v1
+    - id: ws0324_topology_snapshot_contract
+      paths:
+      - scripts/topology-snapshot.json
+      mode: shared_contract
+      contract: topology-snapshot-v1
+    - id: ws0324_live_apply_receipts
+      paths:
+      - scripts/live_apply_receipts.py
+      - receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply.json
+      - receipts/live-applies/2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply.json
+      - receipts/live-applies/2026-04-11-adr-0361-semaphore-keycloak-oidc-live-apply.json
+      - receipts/live-applies/2026-04-12-adr-0361-semaphore-keycloak-oidc-live-apply.json
+      - receipts/live-applies/2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply.json
+      - receipts/live-applies/*0324*
+      - receipts/live-applies/evidence/2026-04-03-ws-0324-*
+      - receipts/live-applies/evidence/2026-04-04-ws-0324-*
+      - receipts/live-applies/evidence/2026-04-14-ws-0324-*
+      - receipts/sbom/host-runtime-control-lv3-2026-04-04.cdx.json
+      mode: shared_contract
+      contract: live-apply-receipts-v1
+  canonical_truth:
+    changelog_entry: completes ADR 0324 exact-main closeout by recording the generated
+      service-catalog assembly receipt on main and refreshing the canonical truth
+      surfaces
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      service_definition_catalog_assembly: 2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply
+  blockers: []
+  ready_to_merge: true
+  live_applied: true
+  notes: 'First live apply for ADR 0324 remains the 2026-04-04 service-catalog
+
+    rollout recorded in platform version 0.130.98. This exact-main closeout
+
+    replays the repository validation path from
+
+    origin/main@c6f9564acb39c3927a805574a30da3e51833c1ad (repo 0.178.138,
+
+    platform 0.178.138), records the mainline receipt, and repairs the fresh
+
+    mainline generated-SLO artifact gap that the repo gates surfaced during
+
+    final integration.
+
+    '
 - id: ws-0377-repo-intake-subdomain
   adr: '0224'
   title: Repo Intake as First-Class Subdomain

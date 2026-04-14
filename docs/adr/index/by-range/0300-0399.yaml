@@ -571,6 +571,7 @@ adrs:
     summary: We will move service-shaped repository truth toward per-service source
     filename: 0324-service-definition-shards-and-generated-service-catalog-assembly.md
     path: docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md
+    implemented_in_repo_version: 0.178.139
     implemented_in_platform_version: 0.130.98
     implemented_on: '2026-04-04'
   - adr: '0325'

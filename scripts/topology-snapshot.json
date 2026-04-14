@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-04-14T03:02:43Z",
+  "generated_at": "2026-04-14T08:03:01Z",
   "generated_from": [
     "inventory/hosts.yml",
     "inventory/host_vars/proxmox-host.yml",

@@ -182,7 +182,7 @@ live_apply_evidence:
     open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
-    service_definition_catalog_assembly: 2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply
+    service_definition_catalog_assembly: 2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply
     realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     stage_smoke_promotion_gates: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     education_wemeshup: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply

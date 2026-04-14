@@ -12,6 +12,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
+| `0324` | Implement ADR 0324 service bundles and verify the generated-catalog automation end to end | `live_applied` | [ws-0324-live-apply.md](../../workstreams/ws-0324-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |

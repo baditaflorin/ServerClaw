@@ -58,6 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
@@ -78,6 +79,9 @@ monitored, and recoverable from a single repository.
 | `platform` | `2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply` |
 | `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
 | `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `uptime_kuma` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
+| `temporal` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 
 Showing 20 of 181 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -365,6 +369,7 @@ Showing 25 of 310 merged or live-applied workstreams. Full history: [merged work
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](docs/adr/0362-agent-service-api-gateway-pattern.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
+| `0324` | Implement ADR 0324 service bundles and verify the generated-catalog automation end to end | `live_applied` | [ws-0324-live-apply.md](docs/workstreams/ws-0324-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
@@ -385,7 +390,6 @@ Showing 25 of 310 merged or live-applied workstreams. Full history: [merged work
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
-| `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](docs/workstreams/adr-0168-idempotency-ci.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements
