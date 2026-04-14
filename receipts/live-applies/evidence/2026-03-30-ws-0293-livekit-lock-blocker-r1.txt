@@ -1,0 +1,23 @@
+$ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-03-30T14:24:54Z
+
+$ git rev-parse HEAD
+dbc3e5eae3be775ab2920711f6e3ad087111b6fe
+
+$ python3 scripts/resource_lock_tool.py list
+{
+  "count": 1,
+  "locks": [
+    {
+      "acquired_at": "2026-03-30T14:22:24Z",
+      "context_id": "ws-0286-live-apply",
+      "expires_at": "2026-03-30T16:22:24Z",
+      "holder": "agent:codex/ws-0286-live-apply",
+      "lock_id": "84d04ff9c5cd971f4dd5",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "vm:120"
+    }
+  ],
+  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/lv3-concurrency/lock-registry.json"
+}

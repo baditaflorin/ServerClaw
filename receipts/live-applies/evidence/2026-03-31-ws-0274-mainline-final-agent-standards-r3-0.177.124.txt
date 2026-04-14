@@ -1,0 +1,3 @@
+Agent standards validation (ADR 0163-0168)
+WARNING: Config files changed but .config-locations.yaml not updated (ADR 0166)
+WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)

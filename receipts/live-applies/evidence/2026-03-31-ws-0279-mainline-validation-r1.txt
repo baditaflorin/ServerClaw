@@ -1,0 +1,10 @@
+# Validation
+captured_at=2026-03-31T06:58:45Z
+
+$ ansible-playbook -i inventory/hosts.yml playbooks/services/grist.yml --syntax-check
+
+playbook: playbooks/services/grist.yml
+
+$ uv run --with pytest --with pyyaml python -m pytest tests/test_keycloak_runtime_role.py tests/test_grist_runtime_role.py tests/test_grist_playbook.py tests/test_openbao_compose_env_helper.py tests/test_common_docker_bridge_chains_helper.py tests/test_mail_platform_runtime_role.py tests/test_docker_runtime_role.py -q
+......................................................                   [100%]
+54 passed in 3.70s

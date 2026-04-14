@@ -1,0 +1,35 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0319-main-integration/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, iac-policy-scan, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 1.07
+alert-rule-validation passed 2.62
+ansible-lint          passed 231.57
+ansible-syntax        passed 145.85
+artifact-secret-scan  passed 5.63
+dependency-direction  passed 2.69
+dependency-graph      passed 3.01
+documentation-index   passed 2.51
+generated-docs        passed 9.12
+generated-portals     passed 36.51
+iac-policy-scan       passed 41.05
+integration-tests     passed 2.27
+packer-validate       passed 5.90
+policy-validation     passed 1.40
+schema-validation     passed 17.83
+security-scan         passed 40.90
+semgrep-sast          passed 65.77
+service-completeness  passed 1.92
+tofu-validate         passed 1.10
+type-check            passed 4.95
+workstream-surfaces   passed 3.73
+yaml-lint             passed 19.46

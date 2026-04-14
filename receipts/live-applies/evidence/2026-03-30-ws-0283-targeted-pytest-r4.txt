@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-live-apply
+configfile: pytest.ini
+collected 8 items
+
+tests/test_plausible_runtime_role.py ....                                [ 50%]
+tests/test_plausible_playbook.py ....                                    [100%]
+
+============================== 8 passed in 0.08s ===============================

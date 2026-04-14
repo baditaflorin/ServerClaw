@@ -1,0 +1,1 @@
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-main-closeout-r8/scripts/generate_ops_portal.py --write

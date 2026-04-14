@@ -1,0 +1,1717 @@
+Using CPython 3.13.7 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
+Creating virtual environment at: .venv
+   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
+      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
+Installed 2 packages in 2ms
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
+configfile: pytest.ini
+collected 169 items
+
+tests/test_generate_platform_vars.py .FFFFFFFFFFFFFFFFFFFFFFFFF......... [ 20%]
+F.FF.FF..F                                                               [ 26%]
+tests/test_one_api_bootstrap.py .F.                                      [ 28%]
+tests/test_one_api_runtime_role.py .......                               [ 32%]
+tests/test_one_api_postgres_role.py ..                                   [ 33%]
+tests/test_open_webui_runtime_role.py .......                            [ 37%]
+tests/test_openbao_runtime_role.py .F..................                  [ 49%]
+tests/test_openbao_systemd_credentials_helper.py ...                     [ 51%]
+tests/test_openbao_compose_env_helper.py ...                             [ 53%]
+tests/test_ollama_runtime_role.py ........                               [ 57%]
+tests/test_jupyterhub_runtime_role.py ......                             [ 61%]
+tests/test_rag_context_runtime_role.py .....................             [ 73%]
+tests/test_rag_context_playbook.py .                                     [ 74%]
+tests/test_docker_runtime_role.py ...F..F.....                           [ 81%]
+tests/test_postgres_vm_role.py .F......F                                 [ 86%]
+tests/test_loki_log_agent_role.py .....                                  [ 89%]
+tests/test_guest_log_shipping_playbook.py ....                           [ 92%]
+tests/test_service_id_resolver.py .......                                [ 96%]
+tests/test_vulnerability_budget.py ......                                [100%]
+
+=================================== FAILURES ===================================
+_______ test_build_platform_vars_includes_langfuse_publication_topology ________
+
+    def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:33:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_________ test_build_platform_vars_includes_minio_publication_topology _________
+
+    def test_build_platform_vars_includes_minio_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:45:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+________ test_build_platform_vars_includes_livekit_publication_topology ________
+
+    def test_build_platform_vars_includes_livekit_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:67:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_________ test_build_platform_vars_includes_dify_publication_topology __________
+
+    def test_build_platform_vars_includes_dify_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:82:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+______ test_build_platform_vars_includes_changedetection_private_topology ______
+
+    def test_build_platform_vars_includes_changedetection_private_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:93:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_______ test_build_platform_vars_includes_directus_publication_topology ________
+
+    def test_build_platform_vars_includes_directus_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:103:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_________ test_build_platform_vars_includes_crawl4ai_private_topology __________
+
+    def test_build_platform_vars_includes_crawl4ai_private_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:116:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_______ test_build_platform_vars_includes_paperless_publication_topology _______
+
+    def test_build_platform_vars_includes_paperless_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:126:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+________ test_build_platform_vars_includes_harbor_publication_topology _________
+
+    def test_build_platform_vars_includes_harbor_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:141:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+____ test_build_platform_vars_includes_openfga_private_controller_topology _____
+
+    def test_build_platform_vars_includes_openfga_private_controller_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:152:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_____ test_build_platform_vars_includes_temporal_private_loopback_topology _____
+
+    def test_build_platform_vars_includes_temporal_private_loopback_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:163:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+________ test_build_platform_vars_includes_openbao_extra_bind_addresses ________
+
+    def test_build_platform_vars_includes_openbao_extra_bind_addresses() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:173:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+____ test_build_platform_vars_includes_one_api_private_controller_topology _____
+
+    def test_build_platform_vars_includes_one_api_private_controller_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:179:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_______ test_build_platform_vars_includes_plausible_publication_topology _______
+
+    def test_build_platform_vars_includes_plausible_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:194:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_______ test_build_platform_vars_includes_flagsmith_publication_topology _______
+
+    def test_build_platform_vars_includes_flagsmith_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_________ test_build_platform_vars_includes_lago_publication_topology __________
+
+    def test_build_platform_vars_includes_lago_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:219:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+___________ test_build_platform_vars_includes_tika_private_topology ____________
+
+    def test_build_platform_vars_includes_tika_private_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:235:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_______ test_build_platform_vars_includes_tesseract_ocr_private_topology _______
+
+    def test_build_platform_vars_includes_tesseract_ocr_private_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:244:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+______ test_build_platform_vars_includes_jupyterhub_publication_topology _______
+
+    def test_build_platform_vars_includes_jupyterhub_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:254:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_______ test_build_platform_vars_includes_superset_publication_topology ________
+
+    def test_build_platform_vars_includes_superset_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:266:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+___________ test_build_platform_vars_includes_piper_private_topology ___________
+
+    def test_build_platform_vars_includes_piper_private_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:279:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_________ test_build_platform_vars_includes_redpanda_private_topology __________
+
+    def test_build_platform_vars_includes_redpanda_private_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:288:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+___ test_build_platform_vars_includes_typesense_private_controller_topology ____
+
+    def test_build_platform_vars_includes_typesense_private_controller_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:304:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_______ test_build_platform_vars_includes_nextcloud_publication_topology _______
+
+    def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:315:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_____ test_build_platform_vars_includes_shared_session_authority_contract ______
+
+    def test_build_platform_vars_includes_shared_session_authority_contract() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:330:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_ test_build_platform_vars_renders_service_topology_without_unresolved_templates _
+
+    def test_build_platform_vars_renders_service_topology_without_unresolved_templates() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:553:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_________ test_build_platform_vars_includes_plane_publication_topology _________
+
+    def test_build_platform_vars_includes_plane_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:570:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+______ test_build_platform_vars_includes_woodpecker_publication_topology _______
+
+    def test_build_platform_vars_includes_woodpecker_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:582:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_ test_build_platform_vars_uses_loopback_for_guest_local_platform_context_verification _
+
+    def test_build_platform_vars_uses_loopback_for_guest_local_platform_context_verification() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:602:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+____ test_build_platform_vars_includes_matrix_synapse_publication_topology _____
+
+    def test_build_platform_vars_includes_matrix_synapse_publication_topology() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:608:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+________ test_build_platform_vars_includes_coolify_wildcard_dns_record _________
+
+    def test_build_platform_vars_includes_coolify_wildcard_dns_record() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generate_platform_vars.py:680:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+__________ test_http_json_wraps_permanent_http_failures_without_retry __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a4e8640>
+
+    def test_http_json_wraps_permanent_http_failures_without_retry(monkeypatch) -> None:
+        attempts = {"count": 0}
+
+        class FakeHttpError(urllib.error.HTTPError):
+            def __init__(self) -> None:
+                super().__init__(
+                    url="http://example.invalid/api/status",
+                    code=401,
+                    msg="Unauthorized",
+                    hdrs=None,
+                    fp=None,
+                )
+
+            def read(self) -> bytes:
+                return b'{"message":"unauthorized"}'
+
+        def fake_urlopen(request, timeout=None):
+            attempts["count"] += 1
+            raise FakeHttpError()
+
+        monkeypatch.setattr(one_api_bootstrap.urllib.request, "urlopen", fake_urlopen)
+        monkeypatch.setattr(one_api_bootstrap.time, "sleep", lambda *_args, **_kwargs: None)
+
+        with pytest.raises(one_api_bootstrap.BootstrapError, match="failed with status 401"):
+            one_api_bootstrap.http_json("GET", "http://example.invalid/api/status")
+
+>       assert attempts["count"] == 1
+E       assert 8 == 1
+
+tests/test_one_api_bootstrap.py:70: AssertionError
+_______ test_generated_platform_vars_pin_openbao_to_postgres_primary_ip ________
+
+    def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
+>       platform_vars = generate_platform_vars.build_platform_vars()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_openbao_runtime_role.py:87:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+
+    def build_platform_vars(
+        stack: dict[str, Any] | None = None,
+        host_vars: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if stack is None or host_vars is None:
+            stack, host_vars = load_sources()
+
+        ports = require_mapping(host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments")
+        resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
+        guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
+        service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+        session_authority = build_platform_session_authority(service_topology)
+        dns_records = build_dns_records(service_topology, host_vars)
+        tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
+        monitoring_service = service_topology["grafana"]
+        mail_service = service_topology["mail_platform"]
+        mattermost_service = service_topology["mattermost"]
+        matrix_synapse_service = service_topology["matrix_synapse"]
+        gitea_service = service_topology["gitea"]
+        minio_service = service_topology["minio"]
+        netbox_service = service_topology["netbox"]
+        open_webui_service = service_topology["open_webui"]
+        plane_service = service_topology["plane"]
+        woodpecker_service = service_topology["woodpecker"]
+        api_gateway_service = service_topology["api_gateway"]
+        headscale_service = service_topology["headscale"]
+        openbao_service = service_topology["openbao"]
+        openfga_service = service_topology["openfga"]
+>       one_api_service = service_topology["one_api"]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'one_api'
+
+scripts/generate_platform_vars.py:937: KeyError
+_____ test_docker_runtime_unseals_openbao_before_recovering_openbao_agent ______
+
+tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/pytest-of-live/pytest-678/test_docker_runtime_unseals_op0')
+
+    def test_docker_runtime_unseals_openbao_before_recovering_openbao_agent(tmp_path: Path) -> None:
+        tasks = load_tasks()
+        recover_containers = next(
+            task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts"
+        )
+        script = recover_containers["ansible.builtin.command"]["argv"][2]
+        script = script.replace("{{ docker_runtime_openbao_recovery_timeout_seconds | int }}", "5")
+        script = script.replace("{{ docker_runtime_openbao_recovery_delay_seconds | int }}", "0")
+        script = re.sub(
+            r"OPENBAO_UNSEAL_KEYS = \{\{.*?\n\s*OPENBAO_RECOVERY_TIMEOUT_SECONDS =",
+            'OPENBAO_UNSEAL_KEYS = ["key-1", "key-2", "key-3"]\nOPENBAO_RECOVERY_TIMEOUT_SECONDS =',
+            script,
+            flags=re.DOTALL,
+        )
+
+        class OpenBaoState:
+            sealed = True
+            unseal_attempts = 0
+
+        class Handler(BaseHTTPRequestHandler):
+            def _write_json(self, status: int, payload: dict) -> None:
+                body = json.dumps(payload).encode()
+                self.send_response(status)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_GET(self) -> None:  # noqa: N802
+                if self.path == "/v1/sys/seal-status":
+                    self._write_json(200, {"sealed": OpenBaoState.sealed})
+                    return
+                if self.path == "/v1/sys/health":
+                    if OpenBaoState.sealed:
+                        self._write_json(503, {"sealed": True})
+                        return
+                    self._write_json(200, {"sealed": False})
+                    return
+                self._write_json(404, {"error": "not found"})
+
+            def do_POST(self) -> None:  # noqa: N802
+                if self.path == "/v1/sys/unseal":
+                    OpenBaoState.unseal_attempts += 1
+                    if OpenBaoState.unseal_attempts >= 2:
+                        OpenBaoState.sealed = False
+                    self._write_json(200, {"sealed": OpenBaoState.sealed})
+                    return
+                self._write_json(404, {"error": "not found"})
+
+            def log_message(self, format: str, *args: object) -> None:
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        base_url = f"http://127.0.0.1:{server.server_port}"
+        script = script.replace(
+            'OPENBAO_HEALTH_URL = "http://127.0.0.1:8201/v1/sys/health"',
+            f'OPENBAO_HEALTH_URL = "{base_url}/v1/sys/health"',
+        )
+        script = script.replace(
+            'OPENBAO_SEAL_STATUS_URL = "http://127.0.0.1:8201/v1/sys/seal-status"',
+            f'OPENBAO_SEAL_STATUS_URL = "{base_url}/v1/sys/seal-status"',
+        )
+        script = script.replace(
+            'OPENBAO_UNSEAL_URL = "http://127.0.0.1:8201/v1/sys/unseal"',
+            f'OPENBAO_UNSEAL_URL = "{base_url}/v1/sys/unseal"',
+        )
+
+        fake_docker = tmp_path / "docker"
+        fake_docker.write_text(
+            """#!/bin/sh
+    if [ "$1" = "compose" ]; then
+      exit 0
+    fi
+    echo "unexpected command: $*" >&2
+    exit 1
+    """
+        )
+        fake_docker.chmod(0o755)
+
+        compose_file = tmp_path / "docker-compose.yml"
+        compose_file.write_text("services: {}\n")
+
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            input=json.dumps(
+                [
+                    {
+                        "Name": "/typesense-openbao-agent-1",
+                        "Config": {
+                            "Labels": {
+                                "com.docker.compose.project.working_dir": str(tmp_path),
+                                "com.docker.compose.project.config_files": str(compose_file),
+                                "com.docker.compose.service": "openbao-agent",
+                            }
+                        },
+                    }
+                ]
+            ),
+            text=True,
+            capture_output=True,
+            env={
+                **os.environ,
+                "PATH": f"{tmp_path}:{os.environ['PATH']}",
+            },
+            check=False,
+        )
+
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+>       assert result.returncode == 0, result.stderr or result.stdout
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 8, in <module>
+E             NONPERSISTENT_RESTART_POLICIES = set({{ docker_runtime_nonpersistent_restart_policies | to_json }})
+E                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E         NameError: name 'docker_runtime_nonpersistent_restart_policies' is not defined
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/live/.cache/uv/builds-v0/.tmpTZWogY/bin/python3', '-c', 'import json\nimport subprocess...^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nNameError: name \'docker_runtime_nonpersistent_restart_policies\' is not defined\n').returncode
+
+tests/test_docker_runtime_role.py:428: AssertionError
+_ test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs __
+
+    def test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs() -> None:
+        template = FIREWALL_TEMPLATE.read_text()
+        assert "docker_runtime_container_forward_source_cidrs" in template
+>       assert "172.16.0.0/12" in template
+E       AssertionError: assert '172.16.0.0/12' in '#!/usr/sbin/nft -f\n\nflush ruleset\n\n{% set policy = linux_guest_firewall_policy %}\n{% set guest_ip_map = linux_gu...endfor %}\n{% endif %}\n  }\n\n  chain output {\n    type filter hook output priority 0;\n    policy accept;\n  }\n}\n'
+
+tests/test_docker_runtime_role.py:526: AssertionError
+____ test_main_tasks_install_cluster_specific_pgaudit_package_and_extension ____
+
+    def test_main_tasks_install_cluster_specific_pgaudit_package_and_extension() -> None:
+        tasks = load_yaml(TASKS_PATH)
+        package_task = next(task for task in tasks if task.get("name") == "Ensure PostgreSQL pgaudit package is present")
+        extension_task = next(task for task in tasks if task.get("name") == "Create pgaudit extension in writable databases")
+
+        assert package_task["ansible.builtin.apt"]["name"] == "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit"
+>       assert package_task["when"] == [
+            "postgres_vm_pgaudit_enabled | bool",
+            "\"pgaudit\" in postgres_vm_shared_preload_libraries",
+        ]
+E       assert ['postgres_vm...ad_libraries"] == ['postgres_vm...ad_libraries']
+E
+E         At index 1 diff: "'pgaudit' in postgres_vm_shared_preload_libraries" != '"pgaudit" in postgres_vm_shared_preload_libraries'
+E         Use -v to get more diff
+
+tests/test_postgres_vm_role.py:40: AssertionError
+_______________ test_template_declares_each_pgaudit_setting_once _______________
+
+    def test_template_declares_each_pgaudit_setting_once() -> None:
+        template = TEMPLATE_PATH.read_text()
+
+        assert template.count("max_connections = {{ postgres_vm_max_connections }}") == 1
+        assert template.count("superuser_reserved_connections = {{ postgres_vm_superuser_reserved_connections }}") == 1
+        assert template.count("reserved_connections = {{ postgres_vm_reserved_connections }}") == 1
+        assert template.count("log_line_prefix = '{{ postgres_vm_log_line_prefix }}'") == 1
+        assert template.count("log_connections = {{ 'on' if postgres_vm_log_connections else 'off' }}") == 1
+        assert template.count("log_disconnections = {{ 'on' if postgres_vm_log_disconnections else 'off' }}") == 1
+>       assert template.count("shared_preload_libraries = '{{ postgres_vm_shared_preload_libraries | join(\",\") }}'") == 1
+E       assert 2 == 1
+E        +  where 2 = <built-in method count of str object at 0xa85e0e300>('shared_preload_libraries = \'{{ postgres_vm_shared_preload_libraries | join(",") }}\'')
+E        +    where <built-in method count of str object at 0xa85e0e300> = '# Managed by Ansible. Keep overrides explicit and small.\nlisten_addresses = \'{{ postgres_vm_listen_addresses | join...tgres_vm_pgaudit_log_parameter else \'off\' }}\npgaudit.role = \'{{ postgres_vm_pgaudit_audit_role }}\'\n{% endif %}\n'.count
+
+tests/test_postgres_vm_role.py:129: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_langfuse_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_minio_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_livekit_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_dify_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_changedetection_private_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_directus_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_crawl4ai_private_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_paperless_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_harbor_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_openfga_private_controller_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_temporal_private_loopback_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_openbao_extra_bind_addresses
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_one_api_private_controller_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_plausible_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_flagsmith_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_lago_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_tika_private_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_tesseract_ocr_private_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_jupyterhub_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_superset_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_piper_private_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_redpanda_private_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_typesense_private_controller_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_nextcloud_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_shared_session_authority_contract
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_renders_service_topology_without_unresolved_templates
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_plane_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_woodpecker_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_uses_loopback_for_guest_local_platform_context_verification
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_matrix_synapse_publication_topology
+FAILED tests/test_generate_platform_vars.py::test_build_platform_vars_includes_coolify_wildcard_dns_record
+FAILED tests/test_one_api_bootstrap.py::test_http_json_wraps_permanent_http_failures_without_retry
+FAILED tests/test_openbao_runtime_role.py::test_generated_platform_vars_pin_openbao_to_postgres_primary_ip
+FAILED tests/test_docker_runtime_role.py::test_docker_runtime_unseals_openbao_before_recovering_openbao_agent
+FAILED tests/test_docker_runtime_role.py::test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs
+FAILED tests/test_postgres_vm_role.py::test_main_tasks_install_cluster_specific_pgaudit_package_and_extension
+FAILED tests/test_postgres_vm_role.py::test_template_declares_each_pgaudit_setting_once
+======================== 37 failed, 132 passed in 9.33s ========================

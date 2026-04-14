@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "dify_api_runtime",
+  "image_ref": "docker.io/langgenius/dify-api:1.13.3@sha256:d1c73b3be4ba3212d4119c77e15230215e8bcf760ed64f80cfea121c277e1108",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-28",
+  "summary": {
+    "critical": 4,
+    "high": 59
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/langgenius/dify-api:1.13.3@sha256:d1c73b3be4ba3212d4119c77e15230215e8bcf760ed64f80cfea121c277e1108 (debian 12.13)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 2,
+      "high": 29
+    },
+    {
+      "target": "Node.js",
+      "class": "lang-pkgs",
+      "type": "node-pkg",
+      "critical": 0,
+      "high": 22
+    },
+    {
+      "target": "Python",
+      "class": "lang-pkgs",
+      "type": "python-pkg",
+      "critical": 0,
+      "high": 4
+    },
+    {
+      "target": "app/api/.venv/lib/python3.12/site-packages/wandb/bin/wandb-core",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 2,
+      "high": 4
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-28-dify-api-runtime.trivy.json"
+}

@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-01-adr-0294-one-api-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-01",
+  "recorded_on": "2026-04-01",
+  "recorded_at": "2026-04-01T21:03:38Z",
+  "recorded_by": "codex",
+  "source_commit": "fa5e9ead212cf7f16535e3787ee38f7693b6f78d",
+  "repo_version_context": "0.177.135",
+  "platform_version_context": "0.130.85",
+  "workflow_id": "adr-0294-one-api-mainline-live-apply",
+  "adr": "0294",
+  "summary": "Cut repository release 0.177.135 from the exact-main ADR 0294 replay source commit fa5e9ead212cf7f16535e3787ee38f7693b6f78d on top of origin/main commit b7dde631d290474de3200886846217e688e0c16e, re-converged the governed One-API lane across docker-runtime-lv3, postgres-lv3, proxmox_florin, coolify-lv3, and nginx-lv3, and re-verified the Open WebUI, ServerClaw, and platform-context consumer paths end to end. The canonical replay keeps One-API as the private unified OpenAI-compatible proxy in front of Ollama, moves the governed Open WebUI and ServerClaw runtimes onto repo-managed One-API provider contracts, documents the transient docker-runtime disk-pressure recovery that the synchronized ServerClaw replay surfaced, and advances the tracked platform baseline to 0.130.85.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 140,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "One-API controller proxy",
+      "address": "http://100.64.0.1:8018/v1"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Open WebUI controller proxy",
+      "address": "http://100.64.0.1:8008"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ServerClaw public edge",
+      "address": "https://chat.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Platform-context controller proxy",
+      "address": "http://100.64.0.1:8010"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Release automation status and dry-run",
+      "result": "pass",
+      "observed": "The managed release-status snapshot completed successfully on the exact-main integration branch, reported repository version 0.177.134 and platform version 0.130.85 with 0 blocking workstreams in progress, and the matching dry-run resolved the next protected release as 0.177.135 with exactly one unreleased changelog note for ADR 0294."
+    },
+    {
+      "check": "Protected release write",
+      "result": "pass",
+      "observed": "The managed release write completed successfully and prepared release 0.177.135 with 1 changelog note, updating VERSION, changelog.md, RELEASE.md, docs/release-notes/0.177.135.md, docs/release-notes/README.md, versions/stack.yaml, workstreams.yaml, README.md generated sections, build/platform-manifest.json, and the refreshed generated diagram state."
+    },
+    {
+      "check": "Final release-state repository automation and validation",
+      "result": "pass",
+      "observed": "The release-state tree passed ./scripts/validate_repo.sh all after the final platform-version and workstream-surface alignment, then passed scripts/live_apply_receipts.py --validate, scripts/canonical_truth.py --check, git diff --check, and make pre-push-gate after the last generated platform-manifest refresh cleared the schema-validation drift."
+    },
+    {
+      "check": "Exact-main targeted pytest and repository validation",
+      "result": "pass",
+      "observed": "The synchronized exact-main tree passed the targeted ADR 0294 pytest bundle with 174 passed in 14.59s, and ./scripts/validate_repo.sh all passed after the final grist_runtime idempotency ledger update and the Docker runtime assertion hardening landed."
+    },
+    {
+      "check": "Exact-main One-API converge and bootstrap verification",
+      "result": "pass",
+      "observed": "make converge-one-api env=production completed successfully with final recap docker-runtime-lv3 ok=223 changed=4 failed=0, localhost ok=3 changed=0 failed=0, postgres-lv3 ok=73 changed=5 failed=0, and proxmox_florin ok=41 changed=4 failed=0. The controller-side bootstrap verification reported verification_passed=true, exposed the governed chat and embedding aliases, returned chat probe excerpt READY, and kept both downstream provider env files present."
+    },
+    {
+      "check": "Exact-main Open WebUI and ServerClaw consumer verification",
+      "result": "pass",
+      "observed": "make converge-open-webui env=production completed successfully with final recap docker-runtime-lv3 ok=151 changed=2 failed=0 and proxmox_florin ok=41 changed=4 failed=0, including the admin sign-in verification path. The first make converge-serverclaw env=production replay failed because docker-runtime-lv3 exhausted free space during apt-get update; after the documented docker image prune -af plus docker builder prune -af recovery and a clean apt-get update, the second replay passed with coolify-lv3 ok=87 changed=4 failed=0, docker-runtime-lv3 ok=89 changed=0 failed=0, nginx-lv3 ok=45 changed=4 failed=0, and proxmox_florin ok=360 changed=0 failed=0. Post-replay probes returned HTTP 200 for the Open WebUI controller path and HTTP/2 200 with the expected hardening headers for https://chat.lv3.org, while the rendered runtime env files showed OPENAI_API_BASE_URL pointing at One-API and ENABLE_OLLAMA_API=False for both governed consumers."
+    },
+    {
+      "check": "Exact-main platform-context and ServerClaw memory verification",
+      "result": "pass",
+      "observed": "make converge-rag-context env=production completed successfully with final recap docker-runtime-lv3 ok=182 changed=21 failed=0 and proxmox_florin ok=41 changed=4 failed=0. The replay verified cited platform-context query results and the ServerClaw memory smoke round-tripped through both semantic and keyword recall."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "build/platform-manifest.json",
+    "docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md",
+    "docs/release-notes/0.177.135.md",
+    "docs/release-notes/README.md",
+    "docs/runbooks/configure-one-api.md",
+    "docs/runbooks/configure-open-webui.md",
+    "docs/runbooks/configure-serverclaw.md",
+    "docs/runbooks/configure-ollama.md",
+    "docs/workstreams/ws-0294-live-apply.md",
+    "workstreams.yaml",
+    "receipts/sbom/host-docker-runtime-lv3-2026-04-01.cdx.json",
+    "receipts/sbom/host-coolify-lv3-2026-04-01.cdx.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-release-status-r1-0.177.134.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-release-dry-run-r1-0.177.135.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-release-write-r1-0.177.135.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-validate-repo-all-r3-0.177.135.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-live-apply-receipts-validate-r2-0.177.135.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-canonical-truth-check-r2-0.177.135.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-git-diff-check-r2-0.177.135.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-pre-push-gate-r2-0.177.135.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-main-integration-targeted-pytest-r4-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-main-integration-validate-repo-all-r6-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-one-api-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-bootstrap-report-r2-0.177.134.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-one-api-status-r1-0.177.134.json",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-open-webui-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-open-webui-head-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-open-webui-runtime-env-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-serverclaw-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-docker-runtime-space-recovery-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-docker-runtime-apt-update-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-docker-runtime-apt-update-r2-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-serverclaw-r2-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-serverclaw-head-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-serverclaw-runtime-env-r1-0.177.134.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0294-mainline-converge-rag-context-r1-0.177.134.txt"
+  ],
+  "notes": [
+    "ADR 0294 is now recorded as implemented in repository version 0.177.135 and first verified live in platform version 0.130.85.",
+    "The canonical exact-main replay remained rooted in origin/main commit b7dde631d290474de3200886846217e688e0c16e, and this receipt points at the committed replay source fa5e9ead212cf7f16535e3787ee38f7693b6f78d before the final merge-to-main commit is created.",
+    "Raw provider-env captures were intentionally not retained in the committed evidence set because they contained active consumer tokens; the bootstrap report and downstream runtime env verification files are the canonical non-secret proofs for the generated One-API provider contracts.",
+    "The first synchronized ServerClaw replay surfaced docker-runtime-lv3 disk pressure during apt metadata refresh. The documented cache cleanup and successful rerun are intentionally preserved here as the truthful latest-main operational recovery trail.",
+    "The first release-state pre-push gate after the protected release write caught stale generated platform-manifest output. Regenerating build/platform-manifest.json and rerunning the gate produced the final all-green release-state validation bundle recorded here."
+  ]
+}

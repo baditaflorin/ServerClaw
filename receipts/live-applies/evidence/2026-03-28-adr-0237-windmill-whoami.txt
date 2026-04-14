@@ -1,0 +1,9 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+{
+  "email": "superadmin_secret@windmill.dev",
+  "username": "superadmin_secret",
+  "is_super_admin": true,
+  "groups": [
+    "all"
+  ]
+}

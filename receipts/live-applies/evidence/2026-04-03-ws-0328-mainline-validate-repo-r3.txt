@@ -1,0 +1,7 @@
+Agent standards validation (ADR 0163-0168)
+Workstream surface ownership validation
+Workstream surface ownership validation failed: workstream surface ownership validation failed:
+- build/onboarding/agent-core.yaml: outside declared owned surfaces for ws-0328-live-apply
+- build/onboarding/service-catalog.yaml: outside declared owned surfaces for ws-0328-live-apply
+- docs/discovery/config-locations/versioning.yaml: outside declared owned surfaces for ws-0328-live-apply
+- docs/discovery/repo-structure/documentation-and-history.yaml: outside declared owned surfaces for ws-0328-live-apply

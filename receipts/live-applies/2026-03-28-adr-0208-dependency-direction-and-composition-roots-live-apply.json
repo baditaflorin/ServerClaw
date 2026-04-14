@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_by": "codex/ws-0208-live-apply",
+  "source_commit": "734bef665716eb23aac2152528c84f1fb8d81ce5",
+  "repo_version_context": "0.177.31",
+  "workflow_id": "adr-0208-dependency-direction-live-apply",
+  "adr": "0208",
+  "summary": "Applied ADR 0208 as a repository-only rollout by moving shared helpers under platform/, removing outward platform imports into scripts/, wiring explicit composition roots at the CLI and Windmill edges, and adding dependency-direction enforcement to the local and remote validation gate surfaces.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Standalone dependency-direction validator",
+      "result": "pass",
+      "observed": "`python3 scripts/validate_dependency_direction.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-live-apply` returned `Dependency direction OK`."
+    },
+    {
+      "check": "Local validation entrypoints",
+      "result": "pass",
+      "observed": "`make validate-dependency-direction` passed, and `./scripts/validate_repo.sh dependency-direction data-models architecture-fitness workstream-surfaces agent-standards` passed on the latest `origin/main` replay after the workstream registry and dependency-direction surfaces were refreshed."
+    },
+    {
+      "check": "Focused ADR 0208 regression slice",
+      "result": "pass",
+      "observed": "`UV_CACHE_DIR=/tmp/uv-cache uv run --with pytest --with pyyaml --with jsonschema --with httpx --with cryptography --with fastapi --with pydantic python -m pytest ... -q` passed for 146 tests covering the validator, gate wiring, correction-loop and mutation-audit refactors, runbook/API gateway use-case wiring, session/run namespace wrappers, closure-loop composition-root wiring, diff engine adapters, goal compiler, CLI loop behavior, and interface contracts."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0208-dependency-direction-and-composition-roots.md",
+    "docs/workstreams/ws-0208-live-apply.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/adr/.index.yaml",
+    "config/validation-gate.json",
+    "Makefile",
+    "platform/correction_loops.py",
+    "platform/events/__init__.py",
+    "platform/mutation_audit.py",
+    "platform/use_cases/runbooks.py",
+    "scripts/validate_dependency_direction.py",
+    "scripts/validate_repo.sh",
+    "tests/test_validate_dependency_direction.py",
+    "tests/test_dependency_direction_gate.py"
+  ],
+  "notes": [
+    "This is a repository-only live rollout. No host or service converge and no platform_version update are required for ADR 0208.",
+    "The workstream branch intentionally leaves protected integration files for merge-to-main: VERSION, release sections in changelog.md, and any README.md integrated-status update if the final integrator decides one is warranted.",
+    "versions/stack.yaml should remain unchanged for ADR 0208 because the change enforces repository architecture and validation, not live platform state.",
+    "The latest-main replay also exercised the full validation entrypoint; remaining non-ADR-0208 failures before the main integration step were pre-existing ansible-lint warnings in untouched role files and stale/generated docs portal surfaces that require protected canonical-truth updates on main."
+  ]
+}

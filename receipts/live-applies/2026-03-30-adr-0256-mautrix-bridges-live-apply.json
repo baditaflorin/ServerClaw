@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0256-mautrix-bridges-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T08:52:39Z",
+  "recorded_by": "codex",
+  "source_commit": "c43d7602cd84cbb359a72bd53c71e21ed352655e",
+  "repo_version_context": "0.177.95",
+  "platform_version_context": "0.130.63",
+  "workflow_id": "converge-matrix-synapse",
+  "adr": "0256",
+  "summary": "Live-applied ADR 0256 from the workstream branch by converging Matrix Synapse plus repo-managed mautrix Discord and WhatsApp bridges on the shared Docker runtime, provisioning the bridge PostgreSQL databases, refreshing the controller proxy and public edge verification path, and proving both bridge management bots answer through https://matrix.lv3.org. This successful replay used source commit c43d7602cd84cbb359a72bd53c71e21ed352655e on the workstream branch; protected mainline truth surfaces and the exact-main replay still remain for the final merge-to-main step.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Matrix public client API",
+      "address": "https://matrix.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Matrix controller proxy",
+      "address": "http://100.64.0.1:8015"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Matrix bridge regression coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_matrix_synapse_playbook.py tests/test_matrix_synapse_postgres_role.py tests/test_matrix_synapse_runtime_role.py` passed, `make syntax-check-matrix-synapse` passed, and `python3 -m py_compile scripts/matrix_admin_register.py scripts/matrix_bridge_smoke.py` passed after the public verification helper fixes landed."
+    },
+    {
+      "check": "Catalog and repository validation",
+      "result": "pass",
+      "observed": "`python3 scripts/container_image_policy.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh agent-standards`, and `make preflight WORKFLOW=converge-matrix-synapse` all passed on the workstream tree."
+    },
+    {
+      "check": "Pinned bridge image contract",
+      "result": "pass",
+      "observed": "`config/image-catalog.json` now pins `dock.mau.dev/mautrix/discord:v0.7.6@sha256:e4946b0df6a2786c88ed490e0d2692e352f1b79b9ff0e821a33764bd8bd1fffd` and `dock.mau.dev/mautrix/whatsapp:v0.2603.0@sha256:b49009312361d9ea0d7090716fd09f2323f477b32bd119648c6ca2d558a3e236`, with matching scan receipts recorded under `receipts/image-scans/`."
+    },
+    {
+      "check": "Governed branch-local converge",
+      "result": "pass",
+      "observed": "`make converge-matrix-synapse` completed successfully from source commit `c43d7602cd84cbb359a72bd53c71e21ed352655e` with recap `docker-runtime-lv3 : ok=168 changed=13 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`, `localhost : ok=21 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`, `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`, `postgres-lv3 : ok=63 changed=0 unreachable=0 failed=0 skipped=20 rescued=0 ignored=0`, and `proxmox_florin : ok=34 changed=1 unreachable=0 failed=0 skipped=23 rescued=0 ignored=0`; the successful transcript is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r7.txt`."
+    },
+    {
+      "check": "Public and controller Matrix verification",
+      "result": "pass",
+      "observed": "`https://matrix.lv3.org/_matrix/client/versions` returned `HTTP/2 200`, `http://100.64.0.1:8015/_matrix/client/versions` returned `HTTP/1.1 200 OK`, and `python3 scripts/matrix_admin_register.py --base-url http://100.64.0.1:8015 ... --access-token-file ... --admin` returned `{\"status\": \"existing\", \"user_id\": \"@ops:matrix.lv3.org\"}`."
+    },
+    {
+      "check": "Bridge management-room smoke",
+      "result": "pass",
+      "observed": "`python3 scripts/matrix_bridge_smoke.py --base-url https://matrix.lv3.org --username ops --password-file ... --access-token-file ... --bot-user-id @discordbot:matrix.lv3.org --bot-user-id @whatsappbot:matrix.lv3.org` returned `{\"status\": \"ok\", \"bridges\": [{\"bot_user_id\": \"@discordbot:matrix.lv3.org\", \"reply\": \"Hello, I'm a Discord bridge bot.\"}, {\"bot_user_id\": \"@whatsappbot:matrix.lv3.org\", \"reply\": \"Hello, I'm a WhatsApp bridge bot.\\n\\nUse \\`help\\` for help or \\`login\\` to log in.\\n\\nThis room has been marked as your management room.\"}]}`."
+    },
+    {
+      "check": "Exact-main integration still pending",
+      "result": "partial",
+      "observed": "Protected mainline surfaces still intentionally wait on the final merge: `VERSION`, `changelog.md`, the top-level README status summary, and `versions/stack.yaml` were left untouched on the workstream branch, and the authoritative replay still needs to be repeated from the newest synchronized `origin/main` before pushing `origin/main`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0256-mautrix-bridges-for-external-chat-channel-adapters.md",
+    "docs/workstreams/ws-0256-live-apply.md",
+    "docs/runbooks/configure-matrix-synapse.md",
+    "playbooks/matrix-synapse.yml",
+    "collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/tasks/public_verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/templates/homeserver.yaml.j2",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/templates/mautrix-discord-config.yaml.j2",
+    "collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/templates/mautrix-whatsapp-config.yaml.j2",
+    "scripts/matrix_admin_register.py",
+    "scripts/matrix_bridge_smoke.py",
+    "tests/test_matrix_synapse_playbook.py",
+    "tests/test_matrix_synapse_postgres_role.py",
+    "tests/test_matrix_synapse_runtime_role.py",
+    "config/image-catalog.json",
+    "config/secret-catalog.json",
+    "config/controller-local-secrets.json",
+    "config/service-capability-catalog.json",
+    "config/workflow-catalog.json",
+    "config/command-catalog.json",
+    "receipts/image-scans/2026-03-30-matrix-mautrix-discord-runtime.json",
+    "receipts/image-scans/2026-03-30-matrix-mautrix-discord-runtime.trivy.json",
+    "receipts/image-scans/2026-03-30-matrix-mautrix-whatsapp-runtime.json",
+    "receipts/image-scans/2026-03-30-matrix-mautrix-whatsapp-runtime.trivy.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r3.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r4.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r5.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r6.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r7.txt",
+    "receipts/live-applies/2026-03-30-adr-0256-mautrix-bridges-live-apply.json"
+  ],
+  "notes": [
+    "The successful branch-local replay only happened after fixing four live defects: Docker network-recovery handling on the shared runtime guest, Synapse-readable bridge registration permissions, existing-admin bootstrap behavior, and public verifier handling for the Matrix versions endpoint plus login rate limits.",
+    "The smoke helper now reuses a cached verified access token so repeated public verification does not burn the login budget on `matrix.lv3.org` when Synapse returns `M_LIMIT_EXCEEDED`.",
+    "This receipt is intentionally branch-local. The exact-main replay and the canonical merged-main receipt still need to run from the newest synchronized `origin/main` before the platform version can advance."
+  ]
+}

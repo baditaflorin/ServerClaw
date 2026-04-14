@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2
+configfile: pytest.ini
+collected 109 items
+
+tests/test_await_ansible_quiet.py ...                                    [  2%]
+tests/test_generate_platform_vars.py ................................... [ 34%]
+....                                                                     [ 38%]
+tests/test_glitchtip_event.py .....                                      [ 43%]
+tests/test_glitchtip_playbook.py ......                                  [ 48%]
+tests/test_glitchtip_runtime_role.py .....                               [ 53%]
+tests/test_hetzner_dns_records_role.py ......                            [ 58%]
+tests/test_keycloak_runtime_role.py .....................                [ 77%]
+tests/test_mail_platform_runtime_role.py ..................              [ 94%]
+tests/test_matrix_retry_scripts.py ...                                   [ 97%]
+tests/test_openbao_compose_env_helper.py ...                             [100%]
+
+============================= 109 passed in 6.55s ==============================

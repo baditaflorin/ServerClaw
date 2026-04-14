@@ -1,0 +1,21 @@
+# ws-0279 grist mainline release status r2
+recorded_at=2026-04-01T16:18:39Z
+head=858accedf913e39c6949a2dde46e8b4ad5c64622
+origin_main=5e9cfe6e528a4261bddfb9430417daf80d5b3be0
+version=0.177.133
+
+Platform 1.0.0 readiness
+- Generated: 2026-04-01T16:18:42.411572+00:00
+- Repository version: 0.177.133
+- Platform version: 0.130.83
+- Release blockers: 0 workstreams in progress
+- Gate bypass waivers: 1 open, 0 warnings, 0 blockers
+- Criteria met: 1/7 (14.29%)
+- OPEN WAIVER controller_dependency_gap until 2026-04-02 (baditaflorin@gmail.com; ws-0286-live-apply)
+- PENDING ADR window 0001-0111: 99/111 implemented; first pending: 0014, 0020, 0024, 0025, 0028
+- PENDING SLO error budgets: pending (missing receipts/slo-reports/latest.json)
+- PENDING Backup restore verification: 0/2 consecutive passes from 4 receipt(s)
+- PENDING Ops portal: pending (HTTP 502)
+- PENDING Status page: pending (HTTP 502)
+- PENDING Docs site: pending (HTTP 502)
+- OK DR table-top review: latest receipt: 2026-03-23-adr-0100-disaster-recovery-review.json

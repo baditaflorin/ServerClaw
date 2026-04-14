@@ -1,0 +1,76 @@
+{
+  "count": 7,
+  "locks": [
+    {
+      "acquired_at": "2026-04-03T06:43:27Z",
+      "context_id": "ws-0314-mainline-r2",
+      "expires_at": "2026-04-03T08:43:27Z",
+      "holder": "agent:ws-0314-live-apply",
+      "lock_id": "9081a6e67ccbb0442146",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "service:api_gateway"
+    },
+    {
+      "acquired_at": "2026-04-03T06:43:27Z",
+      "context_id": "ws-0314-mainline-r2",
+      "expires_at": "2026-04-03T08:43:27Z",
+      "holder": "agent:ws-0314-live-apply",
+      "lock_id": "7b7c7218ed2d4d4f1781",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "service:ops_portal"
+    },
+    {
+      "acquired_at": "2026-04-03T06:57:59Z",
+      "context_id": "ws-0314-mainline-r3",
+      "expires_at": "2026-04-03T08:57:59Z",
+      "holder": "agent:ws-0314-live-apply",
+      "lock_id": "01fcf6771d7e4b4af571",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "service:runtime-control-pool"
+    },
+    {
+      "acquired_at": "2026-04-03T06:29:39Z",
+      "context_id": "ws-0275-main-closeout-r8",
+      "expires_at": "2026-04-03T08:58:06Z",
+      "holder": "agent:ws-0275-main-closeout-r8",
+      "lock_id": "67beb303a4b12ae7bd75",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "service:tika"
+    },
+    {
+      "acquired_at": "2026-04-03T06:44:52Z",
+      "context_id": "ws-0314-mainline-r2",
+      "expires_at": "2026-04-03T08:44:52Z",
+      "holder": "agent:ws-0314-live-apply",
+      "lock_id": "7ce264d1ba72de86dda0",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "vm:120/service:api_gateway"
+    },
+    {
+      "acquired_at": "2026-04-03T06:44:52Z",
+      "context_id": "ws-0314-mainline-r2",
+      "expires_at": "2026-04-03T08:44:52Z",
+      "holder": "agent:ws-0314-live-apply",
+      "lock_id": "60890e4bb4097a8d0310",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "vm:120/service:ops_portal"
+    },
+    {
+      "acquired_at": "2026-04-03T06:57:59Z",
+      "context_id": "ws-0314-mainline-r3",
+      "expires_at": "2026-04-03T08:57:59Z",
+      "holder": "agent:ws-0314-live-apply",
+      "lock_id": "9c9cf5b9a2fc7f43f23e",
+      "lock_type": "exclusive",
+      "metadata": {},
+      "resource_path": "vm:192"
+    }
+  ],
+  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/lv3-concurrency/lock-registry.json"
+}

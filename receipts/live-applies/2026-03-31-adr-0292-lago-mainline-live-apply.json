@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-31-adr-0292-lago-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-31",
+  "recorded_on": "2026-03-31",
+  "recorded_at": "2026-03-31T13:41:02Z",
+  "recorded_by": "codex",
+  "source_commit": "11d8bbb4ea1835b7c2c4995749381432d93c7d51",
+  "repo_version_context": "0.177.117",
+  "platform_version_context": "0.130.76",
+  "workflow_id": "adr-0292-lago-mainline-live-apply",
+  "adr": "0292",
+  "summary": "Verified ADR 0292 on the latest realistic `origin/main` baseline by replaying the repo-managed Lago stack from the merged tree, publishing and protecting `billing.lv3.org`, proving public event ingest through the API-gateway billing adapter, confirming seeded current-usage aggregation, and restoring the governed post-apply Restic backup trigger. The exact-main replay ran after synchronizing with `origin/main` commit `5c7e07235f7b0da1f756148e145397f0ac6ceb10`, used merged source commit `11d8bbb4ea1835b7c2c4995749381432d93c7d51`, and completed clean PostgreSQL, Docker runtime, NGINX edge, public smoke, and backup-wrapper verification on top of repository version context `0.177.117` and platform version context `0.130.76`.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service",
+      "name": "lago",
+      "address": "https://billing.lv3.org"
+    },
+    {
+      "kind": "service",
+      "name": "api-gateway-billing-adapter",
+      "address": "https://billing.lv3.org/api/v1/events"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation on the integrated tree",
+      "result": "pass",
+      "observed": "The merged-main branch passed the focused Lago validation slice with `99 passed` across `tests/test_lago_playbook.py`, `tests/test_lago_runtime_role.py`, `tests/test_api_gateway_runtime_role.py`, `tests/test_nginx_edge_publication_role.py`, `tests/test_docker_runtime_role.py`, `tests/test_common_docker_bridge_chains_helper.py`, `tests/test_generate_platform_vars.py`, and `tests/test_api_gateway.py`."
+    },
+    {
+      "check": "Syntax and repo automation gates",
+      "result": "pass",
+      "observed": "`make syntax-check-lago`, `make syntax-check-api-gateway`, `./scripts/validate_repo.sh agent-standards health-probes`, `python3 scripts/validate_service_completeness.py --service lago`, and `make pre-push-gate` all passed from the merged worktree, with the pre-push lane reporting every blocking check as passed."
+    },
+    {
+      "check": "Exact-main Lago live apply replay",
+      "result": "pass",
+      "observed": "`make live-apply-service service=lago env=production` completed from merged source commit `11d8bbb4ea1835b7c2c4995749381432d93c7d51` with final recap `docker-runtime-lv3 ok=437 changed=152 failed=0`, `nginx-lv3 ok=45 changed=4 failed=0`, `postgres-lv3 ok=60 changed=4 failed=0`, and `localhost ok=18 changed=0 failed=0`."
+    },
+    {
+      "check": "Public billing ingest and seeded current-usage smoke",
+      "result": "pass",
+      "observed": "The replay verified the public `billing.lv3.org` contract end to end: the smoke event submission through the API-gateway billing adapter succeeded after bounded retry, and the seeded current-usage query for the smoke customer/subscription pair succeeded against the local Lago API on the same run."
+    },
+    {
+      "check": "Governed post-apply Restic backup trigger",
+      "result": "pass",
+      "observed": "The final `uv run --with pyyaml python scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by live-apply-service --live-apply-trigger` step returned JSON `status: ok`, `returncode: 0`, `governed_sources: 5`, `protected: 4`, `uncovered: 0`, and `inactive_sources: [\"falco_overrides\"]`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md",
+    "docs/runbooks/configure-lago.md",
+    "docs/workstreams/ws-0292-live-apply.md",
+    "workstreams.yaml",
+    "Makefile",
+    "collections/ansible_collections/lv3/platform/playbooks/lago.yml",
+    "collections/ansible_collections/lv3/platform/roles/lago_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml",
+    "tests/test_lago_playbook.py",
+    "tests/test_lago_runtime_role.py",
+    "tests/test_api_gateway_runtime_role.py",
+    "tests/test_restic_config_backup.py",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-targeted-tests-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-syntax-check-lago-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-syntax-check-api-gateway-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-service-completeness-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-validate-agent-standards-r2.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-validate-health-probes-r1.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-pre-push-gate-r3.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-live-apply-r15.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0292-main-docker-runtime-refresh-r1.txt",
+    "receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json"
+  ],
+  "notes": [
+    "This receipt records the exact-main replay that was promoted during the 2026-03-31 ADR 0292 integration as repository version 0.177.118 and platform version 0.130.77.",
+    "Earlier branch-local Lago replays exposed a shared-surface concurrency overwrite in the API gateway tree; the merged-main `r15` replay is the durable source of truth and supersedes the branch-local divergence evidence.",
+    "The Makefile live-apply wrapper now invokes the Restic trigger through `uv run --with pyyaml`, which was required to convert the final post-apply backup step from a Python dependency failure into a governed successful backup trigger."
+  ]
+}

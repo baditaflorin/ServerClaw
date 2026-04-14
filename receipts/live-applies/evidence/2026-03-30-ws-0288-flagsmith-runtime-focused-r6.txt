@@ -1,0 +1,504 @@
+
+PLAY [Focused Flagsmith runtime converge on docker-runtime-lv3] ****************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:24.954Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:31.856Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Validating arguments against arg spec 'main' - Converge the Flagsmith runtime, bootstrap identity, and repo-managed feature seed state.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Validating arguments against arg spec 'main' - Converge the Flagsmith runtime, bootstrap identity, and repo-managed feature seed state.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:31.876Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Validating arguments against arg spec 'main' - Converge the Flagsmith runtime, bootstrap identity, and repo-managed feature seed state.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:32.009Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Validate Flagsmith runtime inputs] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Validate Flagsmith runtime inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:32.030Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Validate Flagsmith runtime inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:32.178Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Check whether the Flagsmith database password exists on the control machine] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Check whether the Flagsmith database password exists on the control machine","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:32.198Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Check whether the Flagsmith database password exists on the control machine","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:32.460Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Fail if the Flagsmith database password is missing locally] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Fail if the Flagsmith database password is missing locally","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:32.483Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.flagsmith_runtime : Fail if the Flagsmith database password is missing locally","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:32.493Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Ensure the Flagsmith runtime packages are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Ensure the Flagsmith runtime packages are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:32.514Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Ensure the Flagsmith runtime packages are present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:34.713Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Ensure the local Flagsmith artifact directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Ensure the local Flagsmith artifact directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:34.735Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Ensure the local Flagsmith artifact directory exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:35.001Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Ensure the Flagsmith runtime directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Ensure the Flagsmith runtime directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:35.021Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item={'path': '/opt/flagsmith', 'mode': '0755'})
+ok: [docker-runtime-lv3] => (item={'path': '/etc/lv3/flagsmith', 'mode': '0700'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Ensure the Flagsmith runtime directories exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:36.238Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Generate the Flagsmith runtime secrets] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Generate the Flagsmith runtime secrets","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:36.259Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=None)
+ok: [docker-runtime-lv3] => (item=None)
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Generate the Flagsmith runtime secrets","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:37.469Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Read the Flagsmith runtime secrets] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Read the Flagsmith runtime secrets","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:37.490Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=None)
+ok: [docker-runtime-lv3] => (item=None)
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Read the Flagsmith runtime secrets","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:38.711Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Record the Flagsmith runtime secrets] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Record the Flagsmith runtime secrets","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:38.737Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Record the Flagsmith runtime secrets","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:38.796Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Mirror the Flagsmith runtime secrets to the control machine] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Mirror the Flagsmith runtime secrets to the control machine","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:38.817Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => (item=None)
+ok: [docker-runtime-lv3 -> localhost] => (item=None)
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Mirror the Flagsmith runtime secrets to the control machine","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:39.556Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Check whether the Flagsmith OpenBao agent runtime env template already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Check whether the Flagsmith OpenBao agent runtime env template already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:39.577Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Check whether the Flagsmith OpenBao agent runtime env template already exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.157Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Prepare OpenBao agent runtime secret injection for Flagsmith] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Prepare OpenBao agent runtime secret injection for Flagsmith","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.180Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Prepare OpenBao agent runtime secret injection for Flagsmith","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.189Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3 => (item=(censored due to no_log))
+
+TASK [lv3.platform.common : Validate OpenBao compose env helper inputs] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate OpenBao compose env helper inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.252Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate OpenBao compose env helper inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.323Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the controller-local OpenBao init payload exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the controller-local OpenBao init payload exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.344Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether the controller-local OpenBao init payload exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.549Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Fail when the controller-local OpenBao init payload is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Fail when the controller-local OpenBao init payload is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.569Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Fail when the controller-local OpenBao init payload is missing","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:40.580Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Record the controller-local OpenBao init payload] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the controller-local OpenBao init payload","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.601Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Record the controller-local OpenBao init payload","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.650Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.671Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.681Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+
+TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.736Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.781Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Probe whether the local OpenBao API already answers] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Probe whether the local OpenBao API already answers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.801Z","vm":"controller","workflow_id":"ansible-playbook"}
+[WARNING]: reset_connection task does not support when conditional
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Probe whether the local OpenBao API already answers","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:42.087Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Reset SSH connection before recovering the local OpenBao runtime] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Reset SSH connection before recovering the local OpenBao runtime","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.110Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Inspect current OpenBao container networks before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Inspect current OpenBao container networks before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.198Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Inspect current OpenBao container networks before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.211Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Inspect current OpenBao published ports before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Inspect current OpenBao published ports before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.231Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Inspect current OpenBao published ports before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.243Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Record whether the local OpenBao runtime lost its Docker publication state] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record whether the local OpenBao runtime lost its Docker publication state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.264Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Record whether the local OpenBao runtime lost its Docker publication state","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.276Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker nat chain exists before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker nat chain exists before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.296Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker nat chain exists before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.308Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker forward chain exists before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker forward chain exists before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.328Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker forward chain exists before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.341Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Restart Docker when required chains are missing before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Restart Docker when required chains are missing before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.363Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Restart Docker when required chains are missing before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.375Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker nat chain before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker nat chain before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.396Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker nat chain before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.409Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker forward chain before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker forward chain before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.430Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker forward chain before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.442Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker bridge chains are present before local OpenBao recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker bridge chains are present before local OpenBao recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.466Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker bridge chains are present before local OpenBao recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.478Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the local OpenBao Compose file exists before recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the local OpenBao Compose file exists before recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.498Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether the local OpenBao Compose file exists before recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.509Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Fail when the local OpenBao Compose file is missing during recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Fail when the local OpenBao Compose file is missing during recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.531Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Fail when the local OpenBao Compose file is missing during recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.543Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the OpenBao compose network exists before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the OpenBao compose network exists before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.563Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether the OpenBao compose network exists before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.574Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Remove the detached OpenBao container before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Remove the detached OpenBao container before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.594Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Remove the detached OpenBao container before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.607Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Remove the stale OpenBao compose network before local recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Remove the stale OpenBao compose network before local recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.628Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Remove the stale OpenBao compose network before local recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.640Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recover the local OpenBao stack when the API is unavailable] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao stack when the API is unavailable","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.664Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recover the local OpenBao stack when the API is unavailable","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.677Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao loopback port after recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao loopback port after recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.697Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait for the local OpenBao loopback port after recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.710Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao API to answer after recovery] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao API to answer after recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.730Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait for the local OpenBao API to answer after recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:42.743Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao API to answer] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao API to answer","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:42.763Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Wait for the local OpenBao API to answer","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:45.463Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the local OpenBao seal status] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the local OpenBao seal status","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:45.485Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the local OpenBao seal status","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:46.650Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Unseal the local OpenBao API when runtime secret injection finds it sealed] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Unseal the local OpenBao API when runtime secret injection finds it sealed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:46.670Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3] => (item=None)
+skipping: [docker-runtime-lv3] => (item=None)
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Unseal the local OpenBao API when runtime secret injection finds it sealed","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:46.686Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Confirm the local OpenBao API is unsealed] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Confirm the local OpenBao API is unsealed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:46.740Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Confirm the local OpenBao API is unsealed","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:47.801Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert the local OpenBao API is unsealed before runtime secret injection] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:47.821Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Assert the local OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:47.842Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for the local OpenBao API to become active] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for the local OpenBao API to become active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:47.863Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Wait for the local OpenBao API to become active","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:49.092Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Ensure the OpenBao agent and runtime env directories exist] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the OpenBao agent and runtime env directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:49.113Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item={'path': '/opt/flagsmith/openbao', 'mode': '0700'})
+ok: [docker-runtime-lv3] => (item={'path': '/run/lv3-secrets/flagsmith', 'mode': '0700'})
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the OpenBao agent and runtime env directories exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:50.241Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the current runtime secret payload from OpenBao] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the current runtime secret payload from OpenBao","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:50.263Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the current runtime secret payload from OpenBao","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:51.355Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Store the runtime secret payload in OpenBao] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Store the runtime secret payload in OpenBao","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:51.378Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Store the runtime secret payload in OpenBao","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:51.391Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the current OpenBao policy for the runtime AppRole] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the current OpenBao policy for the runtime AppRole","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:51.415Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the current OpenBao policy for the runtime AppRole","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:52.501Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Upsert the OpenBao policy for the runtime AppRole] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Upsert the OpenBao policy for the runtime AppRole","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:52.523Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Upsert the OpenBao policy for the runtime AppRole","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:52.535Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Upsert the OpenBao AppRole for the runtime agent] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Upsert the OpenBao AppRole for the runtime agent","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:52.556Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Upsert the OpenBao AppRole for the runtime agent","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:53.667Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Read the OpenBao AppRole role ID] ******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read the OpenBao AppRole role ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:53.688Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Read the OpenBao AppRole role ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:54.776Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Persist the OpenBao AppRole role ID] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Persist the OpenBao AppRole role ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:54.797Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Persist the OpenBao AppRole role ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:56.545Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether the OpenBao AppRole secret ID already exists on disk] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether the OpenBao AppRole secret ID already exists on disk","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:56.565Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether the OpenBao AppRole secret ID already exists on disk","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:57.140Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Generate a durable OpenBao AppRole secret ID] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Generate a durable OpenBao AppRole secret ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:57.168Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Generate a durable OpenBao AppRole secret ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:57.191Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Persist the durable OpenBao AppRole secret ID] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Persist the durable OpenBao AppRole secret ID","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:57.213Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Persist the durable OpenBao AppRole secret ID","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:57.226Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent configuration] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:57.260Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Render the OpenBao agent configuration","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:58.866Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent runtime env template] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:58.887Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:58.900Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent runtime env template] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:58.920Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:26:58.934Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Render the OpenBao agent runtime env template] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:58.954Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Render the OpenBao agent runtime env template","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:00.612Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Remove legacy compose-directory env files] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Remove legacy compose-directory env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:00.640Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=/opt/flagsmith/flagsmith.env)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Remove legacy compose-directory env files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:01.119Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Check the rendered Flagsmith OpenBao agent runtime env template after helper convergence] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Check the rendered Flagsmith OpenBao agent runtime env template after helper convergence","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:01.159Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Check the rendered Flagsmith OpenBao agent runtime env template after helper convergence","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:01.706Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Record whether the Flagsmith OpenBao agent runtime env template changed] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Record whether the Flagsmith OpenBao agent runtime env template changed","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:01.729Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Record whether the Flagsmith OpenBao agent runtime env template changed","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:01.749Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Render the Flagsmith environment file] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Render the Flagsmith environment file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:01.769Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Render the Flagsmith environment file","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:03.506Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Render the Flagsmith compose file] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Render the Flagsmith compose file","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:03.529Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Render the Flagsmith compose file","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:05.155Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Copy the Flagsmith seed helper to the runtime host] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Copy the Flagsmith seed helper to the runtime host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:05.180Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Copy the Flagsmith seed helper to the runtime host","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:06.711Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Decide whether the Flagsmith compose services require forced recreation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Decide whether the Flagsmith compose services require forced recreation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:06.732Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Decide whether the Flagsmith compose services require forced recreation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:06.753Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Build the Flagsmith compose startup command] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Build the Flagsmith compose startup command","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:06.774Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Build the Flagsmith compose startup command","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:06.794Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure Docker bridge networking chains are ready before Flagsmith startup] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure Docker bridge networking chains are ready before Flagsmith startup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:06.814Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Docker bridge networking chains are ready before Flagsmith startup","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:06.824Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:06.889Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:06.908Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:06.929Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:06.952Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Detect whether the Docker service is active] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:06.973Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:07.449Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Warm the Docker control socket before chain health checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:07.469Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:08.146Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker nat chain exists] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:08.167Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:08.748Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker forward chain exists] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:08.769Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:09.302Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has running containers] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:09.329Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:09.894Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:09.915Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:10.486Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Decide whether Docker forward-chain enforcement is required] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:10.508Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:10.533Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:10.554Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:27:10.568Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Restart Docker when required bridge chains are missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:10.588Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:27:10.602Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker nat chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:10.622Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:11.100Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker forward chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:11.126Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:11.689Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker nat chain after retry loop] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:11.710Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:12.249Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker forward chain after retry loop] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:12.273Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:12.854Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker nat chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:12.875Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:12.897Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker forward chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:12.917Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:12.940Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Pull the Flagsmith images] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Pull the Flagsmith images","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:12.984Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Pull the Flagsmith images","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:14.221Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Start the Flagsmith stack] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Start the Flagsmith stack","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:14.243Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Start the Flagsmith stack","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:15.989Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Check whether Flagsmith publishes the expected host port] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Check whether Flagsmith publishes the expected host port","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:16.011Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Check whether Flagsmith publishes the expected host port","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:16.634Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Force-recreate Flagsmith when the host port binding is missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Force-recreate Flagsmith when the host port binding is missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:16.657Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.flagsmith_runtime : Force-recreate Flagsmith when the host port binding is missing","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T18:27:16.671Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Wait for Flagsmith to listen locally] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Wait for Flagsmith to listen locally","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:16.694Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Wait for Flagsmith to listen locally","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:17.324Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Wait for the Flagsmith health endpoint] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Wait for the Flagsmith health endpoint","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:17.348Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Wait for the Flagsmith health endpoint","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:19.105Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Ensure the Flagsmith bootstrap admin password matches the managed secret] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Ensure the Flagsmith bootstrap admin password matches the managed secret","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:19.132Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Ensure the Flagsmith bootstrap admin password matches the managed secret","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:25.789Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Assert the Flagsmith bootstrap identity remained a superuser] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Assert the Flagsmith bootstrap identity remained a superuser","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:25.810Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.flagsmith_runtime : Assert the Flagsmith bootstrap identity remained a superuser","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:27:25.836Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.flagsmith_runtime : Reconcile the Flagsmith org, project, environments, features, and environment keys] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.flagsmith_runtime : Reconcile the Flagsmith org, project, environments, features, and environment keys","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:27:25.856Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [docker-runtime-lv3]: FAILED! => {"censored": "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.flagsmith_runtime : Reconcile the Flagsmith org, project, environments, features, and environment keys","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-30T18:27:26.999Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-lv3         : ok=64   changed=1    unreachable=0    failed=1    skipped=29   rescued=0    ignored=0

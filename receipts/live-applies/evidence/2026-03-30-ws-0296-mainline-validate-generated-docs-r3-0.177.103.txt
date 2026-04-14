@@ -1,0 +1,2 @@
+Generated status document validation
+architecture diagrams error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.

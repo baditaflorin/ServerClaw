@@ -1,0 +1,3 @@
+origin_main_has_directus_postgres=0
+origin_main_has_directus_runtime=0
+role_dirs=directus_postgres,directus_runtime

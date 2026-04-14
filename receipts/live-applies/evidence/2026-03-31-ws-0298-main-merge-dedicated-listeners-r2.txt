@@ -1,0 +1,10 @@
+artifact-cache-lv3 | CHANGED | rc=0 >>
+OK:5001
+OK:5002
+OK:5003
+OK:5004
+---
+LISTEN 0      4096               *:5001             *:*
+LISTEN 0      4096               *:5002             *:*
+LISTEN 0      4096               *:5003             *:*
+LISTEN 0      4096               *:5004             *:*

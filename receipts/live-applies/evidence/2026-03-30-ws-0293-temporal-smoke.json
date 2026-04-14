@@ -1,0 +1,12 @@
+{
+  "address": "127.0.0.1:17233",
+  "namespace": "lv3",
+  "task_queue": "temporal-smoke-liveapply-queue-083c2ae47b",
+  "workflow_id": "temporal-smoke-liveapply-bf3a91d92f314fffbaf3a8cd8af13a36",
+  "run_id": "019d4008-f276-76f6-8341-1a43c7396cd9",
+  "elapsed_ms": 1194,
+  "result": {
+    "activity": "build_smoke_result",
+    "message": "temporal-smoke:lv3"
+  }
+}

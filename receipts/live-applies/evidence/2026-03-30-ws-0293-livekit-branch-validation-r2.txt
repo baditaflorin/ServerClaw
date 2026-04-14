@@ -1,0 +1,96 @@
+$ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-03-30T14:24:54Z
+
+$ git rev-parse HEAD
+dbc3e5eae3be775ab2920711f6e3ad087111b6fe
+
+$ cat VERSION
+0.177.104
+
+$ git diff --check
+
+$ uv run --with pytest python -m pytest -q tests/test_livekit_runtime_role.py tests/test_livekit_playbook.py tests/test_livekit_tool.py tests/test_proxmox_network_role.py tests/test_generate_platform_vars.py
+........................................                                 [100%]
+40 passed in 2.44s
+
+$ scripts/validate_repo.sh agent-standards data-models health-probes workstream-surfaces
+Agent standards validation (ADR 0163-0168)
+Repository data model validation
+Health probe contract validation
+Workstream surface ownership validation
+
+$ make syntax-check-livekit
+ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/playbooks/livekit.yml --syntax-check
+
+playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/playbooks/livekit.yml
+
+$ ANSIBLE_HOST_KEY_CHECKING=False uv run --with ansible --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0293syntax3 --playbook playbooks/services/livekit.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check
+
+playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-live-apply-r2/playbooks/services/livekit.yml
+
+$ make immutable-guest-replacement-plan service=livekit
+Service: livekit
+Name: LiveKit
+Guest: docker-runtime-lv3
+Tier: R1
+Exposure: edge-published
+Immutable Guest Replacement: yes
+Reason: guest docker-runtime-lv3 is governed by ADR 0191 immutable guest replacement
+VMID: 120
+Role: docker-runtime
+Template Key: lv3-docker-host
+Classification: edge_and_stateful
+Validation Mode: preview_guest
+Rollback Window: 180m
+Cutover Method: Provision a replacement runtime guest from the managed Docker-host template, replay the targeted service converges, validate private control-plane paths first, then repoint shared edge publication and host-side proxies to the replacement guest service by service.
+Rollback Method: Retain the previous runtime guest for the rollback window so public edge publication, tailnet proxies, and runtime workloads can be switched back if the replacement misses smoke checks.
+Exception Rule: Only allow in-place mutation for emergency security fixes or narrow reversible changes, and record the exception in the live-apply receipt plus workstream notes.
+Hosted Services On The Guest:
+  - api_gateway [Platform API Gateway] tier=R1 exposure=edge-published
+  - browser_runner [Browser Runner] tier=R1 exposure=private-only
+  - changedetection [Changedetection.io] tier=R1 exposure=private-only
+  - dify [Dify] tier=R1 exposure=edge-published
+  - docker_runtime [Docker Runtime VM] tier=R1 exposure=informational-only
+  - dozzle [Dozzle] tier=R1 exposure=edge-published
+  - excalidraw [Excalidraw] tier=R1 exposure=edge-published
+  - gitea [Gitea] tier=R1 exposure=private-only
+  - gotenberg [Gotenberg] tier=R1 exposure=private-only
+  - harbor [Harbor] tier=R1 exposure=edge-published
+  - homepage [Homepage] tier=R1 exposure=edge-published
+  - keycloak [Keycloak] tier=R1 exposure=edge-published
+  - langfuse [Langfuse] tier=R1 exposure=edge-published
+  - livekit [LiveKit] tier=R1 exposure=edge-published
+  - mail_platform [Mail Platform] tier=R1 exposure=informational-only
+  - mailpit [Mailpit] tier=R1 exposure=private-only
+  - matrix_synapse [Matrix Synapse] tier=R1 exposure=edge-published
+  - mattermost [Mattermost] tier=R1 exposure=private-only
+  - n8n [n8n] tier=R1 exposure=edge-published
+  - nats_jetstream [NATS JetStream] tier=R1 exposure=private-only
+  - netbox [NetBox] tier=R1 exposure=private-only
+  - nextcloud [Nextcloud] tier=R1 exposure=edge-published
+  - ntfy [ntfy] tier=R1 exposure=private-only
+  - ollama [Ollama] tier=R1 exposure=private-only
+  - open_webui [Open WebUI] tier=R1 exposure=private-only
+  - openbao [OpenBao] tier=R1 exposure=private-only
+  - openfga [OpenFGA] tier=R1 exposure=private-only
+  - ops_portal [Platform Operations Portal] tier=R1 exposure=edge-published
+  - outline [Outline] tier=R1 exposure=edge-published
+  - plane [Plane] tier=R1 exposure=edge-published
+  - platform_context_api [Platform Context API] tier=R1 exposure=private-only
+  - plausible [Plausible Analytics] tier=R1 exposure=edge-published
+  - portainer [Portainer] tier=R1 exposure=private-only
+  - searxng [SearXNG] tier=R1 exposure=private-only
+  - semaphore [Semaphore] tier=R1 exposure=private-only
+  - status_page [Public Status Page] tier=R1 exposure=edge-published
+  - step_ca [step-ca] tier=R1 exposure=private-only
+  - tika [Apache Tika] tier=R1 exposure=private-only
+  - uptime_kuma [Uptime Kuma] tier=R1 exposure=edge-published
+  - vaultwarden [Vaultwarden] tier=R1 exposure=private-only
+  - windmill [Windmill] tier=R1 exposure=private-only
+
+$ uv run --with pyyaml python scripts/interface_contracts.py --check-live-apply service:livekit
+Live apply contract OK: service:livekit -> playbooks/services/livekit.yml
+
+$ uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service livekit
+livekit: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime-lv3
+  rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.

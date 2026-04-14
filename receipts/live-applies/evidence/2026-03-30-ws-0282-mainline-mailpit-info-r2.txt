@@ -1,0 +1,2 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+{"Version":"v1.29.5","LatestVersion":"disabled","Database":"/tmp/mailpit-1774830816618212984.db","DatabaseSize":90112,"Messages":1,"Unread":1,"Tags":{},"RuntimeStats":{"Uptime":8965,"Memory":13039880,"MessagesDeleted":9,"SMTPAccepted":10,"SMTPAcceptedSize":4983,"SMTPRejected":0,"SMTPIgnored":0}}

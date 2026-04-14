@@ -1,0 +1,4 @@
+docker-build-lv3 | CHANGED | rc=0 >>
+CONTAINER ID   IMAGE                     COMMAND                  CREATED              STATUS              PORTS     NAMES
+dc01c7e6f77f   gitea/act_runner:0.2.12   "/sbin/tini -- run.sh"   About a minute ago   Up About a minute             lv3-gitea-runner
+bundle_present

@@ -1,0 +1,864 @@
+
+PLAY [Converge PostgreSQL VM baseline] *****************************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:18.844Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:22.681Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:22.684Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:22.708Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:22.717Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:22.825Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:22.827Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:22.875Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:22.883Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => (item=postgres-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "postgres-lv3",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:22.919Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:22.922Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:22.946Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:22.948Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => (item=postgres-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:22.967Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:22.973Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=postgres-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:25.455Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:25.457Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:25.495Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:25.499Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:25.806Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:25.809Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Emit a best-effort playbook start audit event","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:25.819Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the ntfy publish helper] ********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the ntfy publish helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:25.823Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the ntfy publish helper","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:26.203Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the controller-local ntfy Ansible token] ****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the controller-local ntfy Ansible token","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:26.211Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the controller-local ntfy Ansible token","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:26.605Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Publish a best-effort ntfy start notification] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Publish a best-effort ntfy start notification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:26.613Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Publish a best-effort ntfy start notification","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:27.314Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:27.332Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:27.375Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Wait for the target connection to become ready] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:27.378Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:29.703Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the target distribution is supported] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:29.706Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:29.745Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert required preflight variables are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:29.748Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:29.755Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Find controller-side .env files in the repository workspace] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:29.758Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:30.418Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:30.421Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:30.440Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:30.446Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:30.496Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validate guest network policy inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:30.499Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:30.560Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:30.566Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:31.730Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:31.734Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:31.798Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Render guest nftables policy] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Render guest nftables policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:31.806Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [postgres-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Render guest nftables policy","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:34.320Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:34.323Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:35.167Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reload guest nftables policy] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reload guest nftables policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:35.170Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [postgres-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Reload guest nftables policy","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:35.694Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:35.698Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:35.767Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:38.262Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert Docker bridge chains remain available after guest firewall evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert Docker bridge chains remain available after guest firewall evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:38.265Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert Docker bridge chains remain available after guest firewall evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:38.277Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for postgres-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:38.323Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:38.366Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:38.370Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:38.399Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Detect whether the Docker service is active] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:38.401Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:39.054Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Warm the Docker control socket before chain health checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.057Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.070Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker nat chain exists] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.072Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.111Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker forward chain exists] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.121Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.134Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has running containers] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.138Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.161Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.169Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.197Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Decide whether Docker forward-chain enforcement is required] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.207Z","vm":"controller","workflow_id":"ansible-playbook"}
+[WARNING]: reset_connection task does not support when conditional
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.228Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.234Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait for SSH before Docker bridge-chain recovery checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait for SSH before Docker bridge-chain recovery checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.405Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait for SSH before Docker bridge-chain recovery checks","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.424Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.427Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.443Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker nat chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.448Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.471Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker forward chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.473Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.494Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker nat chain after retry loop] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.501Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.527Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker forward chain after retry loop] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.539Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.560Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Capture final Docker nat chain state after retry loop] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Capture final Docker nat chain state after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.566Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Capture final Docker nat chain state after retry loop","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.602Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Capture final Docker forward chain state after retry loop] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Capture final Docker forward chain state after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.605Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Capture final Docker forward chain state after retry loop","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.626Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker nat chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.629Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.651Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker forward chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.654Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:39.674Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Re-render guest nftables policy after Docker bridge chain evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Re-render guest nftables policy after Docker bridge chain evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:39.683Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Re-render guest nftables policy after Docker bridge chain evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:43.714Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reload guest nftables policy after Docker bridge chain evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reload guest nftables policy after Docker bridge chain evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:43.717Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.linux_guest_firewall : Reload guest nftables policy after Docker bridge chain evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:43.746Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reset SSH connection after post-bridge guest nftables policy evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset SSH connection after post-bridge guest nftables policy evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:43.754Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Wait for guest SSH after post-bridge nftables changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Wait for guest SSH after post-bridge nftables changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:43.839Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.linux_guest_firewall : Wait for guest SSH after post-bridge nftables changes","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:43.855Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:43.860Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:43.891Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Wait for the target connection to become ready] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:43.899Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:46.479Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the target distribution is supported] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:46.483Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:46.523Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert required preflight variables are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:46.527Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=linux_access_admin_user) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "linux_access_admin_user",
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=linux_access_sudo_group) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "linux_access_sudo_group",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:46.676Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Find controller-side .env files in the repository workspace] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:46.683Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:47.829Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:47.855Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:47.900Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Validating arguments against arg spec 'main' - Linux access baseline role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Validating arguments against arg spec 'main' - Linux access baseline role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:47.905Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_access : Validating arguments against arg spec 'main' - Linux access baseline role inputs.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:47.940Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Validate Linux access inputs] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Validate Linux access inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:47.943Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_access : Validate Linux access inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:47.988Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Ensure non-root admin user exists] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Ensure non-root admin user exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:47.999Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_access : Ensure non-root admin user exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:48.861Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Install authorized key for non-root admin user] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Install authorized key for non-root admin user","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:48.866Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_access : Install authorized key for non-root admin user","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:49.651Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Allow passwordless sudo for non-root admin user] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Allow passwordless sudo for non-root admin user","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:49.654Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_access : Allow passwordless sudo for non-root admin user","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:51.228Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Render SSH hardening drop-in] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Render SSH hardening drop-in","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:51.248Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_access : Render SSH hardening drop-in","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:52.930Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Validate full SSH daemon configuration] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Validate full SSH daemon configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:52.934Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_access : Validate full SSH daemon configuration","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:53.440Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_access : Reload ssh service after hardening change] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_access : Reload ssh service after hardening change","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:53.443Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.linux_access : Reload ssh service after hardening change","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:08:53.456Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Validating arguments against arg spec 'main' - Install and harden the PostgreSQL guest used by platform services.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Validating arguments against arg spec 'main' - Install and harden the PostgreSQL guest used by platform services.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:53.461Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Validating arguments against arg spec 'main' - Install and harden the PostgreSQL guest used by platform services.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:53.492Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Validate PostgreSQL role inputs] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Validate PostgreSQL role inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:53.498Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Validate PostgreSQL role inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:53.528Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Install PostgreSQL guest packages] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Install PostgreSQL guest packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:53.532Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Install PostgreSQL guest packages","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:55.567Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Install PostgreSQL guest packages] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Install PostgreSQL guest packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:55.569Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Install PostgreSQL guest packages","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:56.687Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Ensure PostgreSQL service is enabled and started] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Ensure PostgreSQL service is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:56.690Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Ensure PostgreSQL service is enabled and started","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:57.434Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Discover PostgreSQL cluster configuration] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Discover PostgreSQL cluster configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:57.437Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Discover PostgreSQL cluster configuration","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:57.922Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Assert that exactly one PostgreSQL cluster exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Assert that exactly one PostgreSQL cluster exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:57.924Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Assert that exactly one PostgreSQL cluster exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:57.948Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Record PostgreSQL cluster paths] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Record PostgreSQL cluster paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:57.950Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Record PostgreSQL cluster paths","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:57.975Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Ensure PostgreSQL pgaudit package is present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Ensure PostgreSQL pgaudit package is present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:57.978Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Ensure PostgreSQL pgaudit package is present","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:58.966Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Ensure PostgreSQL conf.d directory exists] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Ensure PostgreSQL conf.d directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:58.969Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Ensure PostgreSQL conf.d directory exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:08:59.451Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Ensure PostgreSQL includes the managed conf.d directory] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Ensure PostgreSQL includes the managed conf.d directory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:08:59.454Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Ensure PostgreSQL includes the managed conf.d directory","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:00.045Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Render managed PostgreSQL settings] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Render managed PostgreSQL settings","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:00.048Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Render managed PostgreSQL settings","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:01.672Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Render PostgreSQL host-based authentication policy] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Render PostgreSQL host-based authentication policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:01.675Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [postgres-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Render PostgreSQL host-based authentication policy","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:04.317Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Flush PostgreSQL handlers before database audit provisioning] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Flush PostgreSQL handlers before database audit provisioning","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:04.325Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+RUNNING HANDLER [lv3.platform.postgres_vm : Restart PostgreSQL] ****************
+changed: [postgres-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Restart PostgreSQL","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:07.387Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Check active PostgreSQL preload libraries before verify] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Check active PostgreSQL preload libraries before verify","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:07.395Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Check active PostgreSQL preload libraries before verify","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:08.017Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Restart PostgreSQL when configured preload libraries are not yet active] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Restart PostgreSQL when configured preload libraries are not yet active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:08.019Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.postgres_vm : Restart PostgreSQL when configured preload libraries are not yet active","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:09:08.050Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Check whether PostgreSQL admin role already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Check whether PostgreSQL admin role already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:08.053Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Check whether PostgreSQL admin role already exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:08.696Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Create PostgreSQL admin role for local peer access] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Create PostgreSQL admin role for local peer access","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:08.700Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.postgres_vm : Create PostgreSQL admin role for local peer access","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:09:08.715Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Load controller-local pgaudit sensitive-table catalog] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Load controller-local pgaudit sensitive-table catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:08.718Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Load controller-local pgaudit sensitive-table catalog","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:09.507Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Decode pgaudit sensitive-table catalog] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Decode pgaudit sensitive-table catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:09.516Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Decode pgaudit sensitive-table catalog","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:09.547Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Assert pgaudit catalog matches the configured audit role] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Assert pgaudit catalog matches the configured audit role","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:09.550Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Assert pgaudit catalog matches the configured audit role","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:09.596Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Check whether the pgaudit audit role already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Check whether the pgaudit audit role already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:09.605Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Check whether the pgaudit audit role already exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:10.167Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Create the pgaudit audit role] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Create the pgaudit audit role","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:10.172Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.postgres_vm : Create the pgaudit audit role","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:09:10.190Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Discover writable PostgreSQL databases for pgaudit extension management] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Discover writable PostgreSQL databases for pgaudit extension management","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:10.192Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Discover writable PostgreSQL databases for pgaudit extension management","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:10.778Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Record pgaudit extension databases] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Record pgaudit extension databases","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:10.784Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Record pgaudit extension databases","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:10.833Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Check whether pgaudit extension already exists in each writable database] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Check whether pgaudit extension already exists in each writable database","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:10.840Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=dify)
+ok: [postgres-lv3] => (item=directus)
+ok: [postgres-lv3] => (item=flagsmith)
+ok: [postgres-lv3] => (item=gitea)
+ok: [postgres-lv3] => (item=glitchtip)
+ok: [postgres-lv3] => (item=keycloak)
+ok: [postgres-lv3] => (item=label_studio)
+ok: [postgres-lv3] => (item=lago)
+ok: [postgres-lv3] => (item=langfuse)
+ok: [postgres-lv3] => (item=matrix_synapse)
+ok: [postgres-lv3] => (item=mattermost)
+ok: [postgres-lv3] => (item=mautrix_discord)
+ok: [postgres-lv3] => (item=mautrix_whatsapp)
+ok: [postgres-lv3] => (item=n8n)
+ok: [postgres-lv3] => (item=netbox)
+ok: [postgres-lv3] => (item=nextcloud)
+ok: [postgres-lv3] => (item=oneapi)
+ok: [postgres-lv3] => (item=openfga)
+ok: [postgres-lv3] => (item=outline)
+ok: [postgres-lv3] => (item=outline_production)
+ok: [postgres-lv3] => (item=outline_staging)
+ok: [postgres-lv3] => (item=paperless)
+ok: [postgres-lv3] => (item=plane)
+ok: [postgres-lv3] => (item=postgres)
+ok: [postgres-lv3] => (item=semaphore)
+ok: [postgres-lv3] => (item=temporal)
+ok: [postgres-lv3] => (item=temporal_visibility)
+ok: [postgres-lv3] => (item=vaultwarden)
+ok: [postgres-lv3] => (item=vikunja)
+ok: [postgres-lv3] => (item=windmill)
+ok: [postgres-lv3] => (item=woodpecker)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Check whether pgaudit extension already exists in each writable database","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:28.793Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Create pgaudit extension in writable databases] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Create pgaudit extension in writable databases","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:28.807Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3] => (item=dify)
+skipping: [postgres-lv3] => (item=directus)
+skipping: [postgres-lv3] => (item=flagsmith)
+skipping: [postgres-lv3] => (item=gitea)
+skipping: [postgres-lv3] => (item=glitchtip)
+skipping: [postgres-lv3] => (item=keycloak)
+skipping: [postgres-lv3] => (item=label_studio)
+skipping: [postgres-lv3] => (item=lago)
+skipping: [postgres-lv3] => (item=langfuse)
+skipping: [postgres-lv3] => (item=matrix_synapse)
+skipping: [postgres-lv3] => (item=mattermost)
+skipping: [postgres-lv3] => (item=mautrix_discord)
+skipping: [postgres-lv3] => (item=mautrix_whatsapp)
+skipping: [postgres-lv3] => (item=n8n)
+skipping: [postgres-lv3] => (item=netbox)
+skipping: [postgres-lv3] => (item=nextcloud)
+skipping: [postgres-lv3] => (item=oneapi)
+skipping: [postgres-lv3] => (item=openfga)
+skipping: [postgres-lv3] => (item=outline)
+skipping: [postgres-lv3] => (item=outline_production)
+skipping: [postgres-lv3] => (item=outline_staging)
+skipping: [postgres-lv3] => (item=paperless)
+skipping: [postgres-lv3] => (item=plane)
+skipping: [postgres-lv3] => (item=postgres)
+skipping: [postgres-lv3] => (item=semaphore)
+skipping: [postgres-lv3] => (item=temporal)
+skipping: [postgres-lv3] => (item=temporal_visibility)
+skipping: [postgres-lv3] => (item=vaultwarden)
+skipping: [postgres-lv3] => (item=vikunja)
+skipping: [postgres-lv3] => (item=windmill)
+skipping: [postgres-lv3] => (item=woodpecker)
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.postgres_vm : Create pgaudit extension in writable databases","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-04-03T17:09:28.900Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Assert pgaudit sensitive-table grants point at existing databases] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Assert pgaudit sensitive-table grants point at existing databases","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:28.905Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=windmill.public.audit_partitioned) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "windmill",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "windmill",
+            "windmill_admin"
+        ],
+        "table": "audit_partitioned"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=windmill.public.password) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "windmill",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "windmill",
+            "windmill_admin"
+        ],
+        "table": "password"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=windmill.public.resource) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "windmill",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "windmill",
+            "windmill_admin"
+        ],
+        "table": "resource"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=windmill.public.token) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "windmill",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "windmill",
+            "windmill_admin"
+        ],
+        "table": "token"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=windmill.public.variable) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "windmill",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "windmill",
+            "windmill_admin"
+        ],
+        "table": "variable"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=n8n.public.credentials_entity) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "n8n",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "n8n"
+        ],
+        "table": "credentials_entity"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=n8n.public.oauth_access_tokens) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "n8n",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "n8n"
+        ],
+        "table": "oauth_access_tokens"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=n8n.public.oauth_refresh_tokens) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "n8n",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "n8n"
+        ],
+        "table": "oauth_refresh_tokens"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=n8n.public.user_api_keys) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "n8n",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "n8n"
+        ],
+        "table": "user_api_keys"
+    },
+    "msg": "All assertions passed"
+}
+ok: [postgres-lv3] => (item=n8n.public.variables) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "database": "n8n",
+        "privileges": [
+            "select",
+            "insert",
+            "update",
+            "delete"
+        ],
+        "schema": "public",
+        "service_roles": [
+            "n8n"
+        ],
+        "table": "variables"
+    },
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Assert pgaudit sensitive-table grants point at existing databases","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:29.097Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Assert pgaudit sensitive tables exist before grants are applied] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Assert pgaudit sensitive tables exist before grants are applied","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:29.100Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=windmill.public.audit_partitioned)
+ok: [postgres-lv3] => (item=windmill.public.password)
+ok: [postgres-lv3] => (item=windmill.public.resource)
+ok: [postgres-lv3] => (item=windmill.public.token)
+ok: [postgres-lv3] => (item=windmill.public.variable)
+ok: [postgres-lv3] => (item=n8n.public.credentials_entity)
+ok: [postgres-lv3] => (item=n8n.public.oauth_access_tokens)
+ok: [postgres-lv3] => (item=n8n.public.oauth_refresh_tokens)
+ok: [postgres-lv3] => (item=n8n.public.user_api_keys)
+ok: [postgres-lv3] => (item=n8n.public.variables)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Assert pgaudit sensitive tables exist before grants are applied","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:34.638Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Grant schema usage to the pgaudit audit role] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Grant schema usage to the pgaudit audit role","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:34.642Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=windmill.public)
+ok: [postgres-lv3] => (item=windmill.public)
+ok: [postgres-lv3] => (item=windmill.public)
+ok: [postgres-lv3] => (item=windmill.public)
+ok: [postgres-lv3] => (item=windmill.public)
+ok: [postgres-lv3] => (item=n8n.public)
+ok: [postgres-lv3] => (item=n8n.public)
+ok: [postgres-lv3] => (item=n8n.public)
+ok: [postgres-lv3] => (item=n8n.public)
+ok: [postgres-lv3] => (item=n8n.public)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Grant schema usage to the pgaudit audit role","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:40.356Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Grant sensitive-table privileges to the pgaudit audit role] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Grant sensitive-table privileges to the pgaudit audit role","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:40.359Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=windmill.public.audit_partitioned)
+ok: [postgres-lv3] => (item=windmill.public.password)
+ok: [postgres-lv3] => (item=windmill.public.resource)
+ok: [postgres-lv3] => (item=windmill.public.token)
+ok: [postgres-lv3] => (item=windmill.public.variable)
+ok: [postgres-lv3] => (item=n8n.public.credentials_entity)
+ok: [postgres-lv3] => (item=n8n.public.oauth_access_tokens)
+ok: [postgres-lv3] => (item=n8n.public.oauth_refresh_tokens)
+ok: [postgres-lv3] => (item=n8n.public.user_api_keys)
+ok: [postgres-lv3] => (item=n8n.public.variables)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Grant sensitive-table privileges to the pgaudit audit role","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:46.061Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Verify PostgreSQL is listening on the managed TCP port] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Verify PostgreSQL is listening on the managed TCP port","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:46.065Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Verify PostgreSQL is listening on the managed TCP port","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:46.593Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Verify PostgreSQL accepts a local SQL readiness probe] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Verify PostgreSQL accepts a local SQL readiness probe","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:46.596Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Verify PostgreSQL accepts a local SQL readiness probe","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:47.086Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Verify configured PostgreSQL preload libraries are active] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Verify configured PostgreSQL preload libraries are active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:47.092Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Verify configured PostgreSQL preload libraries are active","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:47.578Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Assert configured PostgreSQL preload libraries are active] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Assert configured PostgreSQL preload libraries are active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:47.582Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Assert configured PostgreSQL preload libraries are active","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:47.609Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Verify PostgreSQL pgaudit session classes are configured] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Verify PostgreSQL pgaudit session classes are configured","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:47.612Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Verify PostgreSQL pgaudit session classes are configured","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:48.090Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Verify PostgreSQL connection logging is enabled] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Verify PostgreSQL connection logging is enabled","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T17:09:48.093Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Verify PostgreSQL connection logging is enabled","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T17:09:48.619Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+postgres-lv3               : ok=77   changed=4    unreachable=0    failed=0    skipped=25   rescued=0    ignored=0

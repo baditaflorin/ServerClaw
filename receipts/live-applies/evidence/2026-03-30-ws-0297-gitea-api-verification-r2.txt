@@ -1,0 +1,7 @@
+{
+  "login": "renovate-bot",
+  "email": "renovate-bot@lv3.org",
+  "active": true,
+  "restricted": false,
+  "visibility": "public"
+}

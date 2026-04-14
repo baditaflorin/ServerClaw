@@ -1,0 +1,5 @@
+docker-build-lv3 | CHANGED | rc=0 >>
+port-5001=ok
+port-5002=ok
+port-5003=ok
+port-5004=ok

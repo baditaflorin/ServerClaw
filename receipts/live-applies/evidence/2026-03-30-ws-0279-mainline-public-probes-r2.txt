@@ -1,0 +1,55 @@
+<html>
+<head><title>308 Permanent Redirect</title></head>
+<body>
+<center><h1>308 Permanent Redirect</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+
+HTTP/2 308
+server: nginx
+date: Mon, 30 Mar 2026 15:12:16 GMT
+content-type: text/html
+content-length: 164
+location: https://nginx.lv3.org/o/docs/
+x-robots-tag: noindex, nofollow
+
+
+HTTP/2 302
+server: nginx
+date: Mon, 30 Mar 2026 15:12:16 GMT
+content-type: text/html
+content-length: 138
+location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+
+HTTP/2 302
+server: nginx
+date: Mon, 30 Mar 2026 15:12:17 GMT
+content-type: text/html
+content-length: 138
+location: https://changelog.lv3.org/oauth2/sign_in?rd=https://changelog.lv3.org/
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+
+SAN count: 33
+Has grist: True
+Selected SANs: changelog.lv3.org, docs.lv3.org, grist.lv3.org, ops.lv3.org

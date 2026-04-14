@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0026-postgres-vm-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "824019a90a560ed9e5b321412699cf96af83aa6e",
+  "repo_version_context": "0.27.0",
+  "workflow_id": "converge-postgres-vm",
+  "adr": "0026",
+  "summary": "Applied the dedicated PostgreSQL VM baseline live and verified the private tailnet publication path.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "postgres-lv3",
+      "vmid": "150",
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "private_hostname",
+      "name": "database.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "PostgreSQL guest active",
+      "result": "pass",
+      "observed": "postgres-lv3 was provisioned and running at 10.10.10.50."
+    },
+    {
+      "check": "Tailnet-only publication",
+      "result": "pass",
+      "observed": "database.lv3.org resolved to the Proxmox host Tailscale IP and public IPv4 port 5432 remained closed."
+    },
+    {
+      "check": "Host-side proxy path",
+      "result": "pass",
+      "observed": "The Proxmox host exposed PostgreSQL only through the Tailscale-bound proxy on port 5432."
+    }
+  ],
+  "evidence_refs": [
+    "docs/runbooks/configure-postgres-vm.md",
+    "docs/adr/0026-dedicated-postgresql-vm-baseline.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "This receipt was backfilled from repository history and the current recorded platform state."
+  ]
+}

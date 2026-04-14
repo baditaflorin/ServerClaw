@@ -1,0 +1,74 @@
+* Host paperless.lv3.org:443 was resolved.
+* IPv6: (none)
+* IPv4: 65.108.75.123
+*   Trying 65.108.75.123:443...
+* Connected to paperless.lv3.org (65.108.75.123) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+} [322 bytes data]
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* (304) (IN), TLS handshake, Unknown (8):
+{ [41 bytes data]
+* (304) (IN), TLS handshake, Certificate (11):
+{ [2042 bytes data]
+* (304) (IN), TLS handshake, CERT verify (15):
+{ [80 bytes data]
+* (304) (IN), TLS handshake, Finished (20):
+{ [36 bytes data]
+* (304) (OUT), TLS handshake, Finished (20):
+} [36 bytes data]
+* SSL connection using TLSv1.3 / AEAD-CHACHA20-POLY1305-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=paperless.lv3.org
+*  start date: Mar 31 07:42:48 2026 GMT
+*  expire date: Jun 29 07:42:47 2026 GMT
+*  subjectAltName: host "paperless.lv3.org" matched cert's "paperless.lv3.org"
+*  issuer: C=US; O=Let's Encrypt; CN=E8
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://paperless.lv3.org/
+* [HTTP/2] [1] [:method: HEAD]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: paperless.lv3.org]
+* [HTTP/2] [1] [:path: /]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+> HEAD / HTTP/2
+> Host: paperless.lv3.org
+> User-Agent: curl/8.7.1
+> Accept: */*
+>
+* Request completely sent off
+< HTTP/2 302
+< server: nginx
+< date: Tue, 31 Mar 2026 09:36:43 GMT
+< content-type: text/html; charset=utf-8
+< content-length: 0
+< location: /accounts/login/?next=/
+< x-frame-options: SAMEORIGIN
+< vary: Accept-Language, origin, Cookie
+< content-language: en-us
+< x-content-type-options: nosniff
+< referrer-policy: same-origin
+< cross-origin-opener-policy: same-origin
+< x-robots-tag: noindex, nofollow
+<
+{ [0 bytes data]
+* Connection #0 to host paperless.lv3.org left intact
+HTTP/2 302
+server: nginx
+date: Tue, 31 Mar 2026 09:36:43 GMT
+content-type: text/html; charset=utf-8
+content-length: 0
+location: /accounts/login/?next=/
+x-frame-options: SAMEORIGIN
+vary: Accept-Language, origin, Cookie
+content-language: en-us
+x-content-type-options: nosniff
+referrer-policy: same-origin
+cross-origin-opener-policy: same-origin
+x-robots-tag: noindex, nofollow

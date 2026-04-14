@@ -1,0 +1,10 @@
+[ERROR]: Task failed: Module failed: non-zero return code
+Origin: <adhoc 'shell' task>
+
+{'action': 'shell', 'args': {'_raw_params': 'ping -c 1 -W 2 10.10.10.80 && ip route get 10.10.10.80'}, 'timeout': [...]
+
+docker-runtime-lv3 | FAILED | rc=1 >>
+PING 10.10.10.80 (10.10.10.80) 56(84) bytes of data.
+
+--- 10.10.10.80 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0msnon-zero return code

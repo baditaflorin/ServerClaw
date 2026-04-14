@@ -1,0 +1,22 @@
+# ws-0303 postgres runtime r2
+captured_at=2026-03-31T10:33:22Z
+returncode=0
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ALTER SYSTEM
+ pg_reload_conf
+----------------
+ t
+(1 row)
+
+pgaudit
+ddl,role
+off
+off
+pgaudit_auditor
+on
+on

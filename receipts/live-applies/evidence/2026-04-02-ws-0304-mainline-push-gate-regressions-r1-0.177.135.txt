@@ -1,0 +1,128 @@
+...........FF.....                                                       [100%]
+=================================== FAILURES ===================================
+_______________ test_gate_status_reports_latest_bypass_and_runs ________________
+
+tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/pytest-of-live/pytest-693/test_gate_status_reports_lates0')
+capsys = <_pytest.capture.CaptureFixture object at 0x106342850>
+
+    def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> None:
+        gate_status = load_module("gate_status", "scripts/gate_status.py")
+        manifest_path = tmp_path / "validation-gate.json"
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "ansible-lint": {
+                        "description": "lint",
+                        "severity": "error",
+                        "image": "example",
+                        "command": "true",
+                        "working_dir": "/workspace",
+                        "timeout_seconds": 10,
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        last_run = tmp_path / "last-run.json"
+        last_run.write_text(
+            json.dumps({"status": "passed", "executed_at": "2026-03-23T12:00:00+00:00", "source": "manual"}),
+            encoding="utf-8",
+        )
+        post_merge = tmp_path / "post-merge-last-run.json"
+        post_merge.write_text(
+            json.dumps({"status": "failed", "executed_at": "2026-03-23T13:00:00+00:00", "source": "windmill"}),
+            encoding="utf-8",
+        )
+        bypass_dir = tmp_path / "gate-bypasses"
+        bypass_dir.mkdir()
+        (bypass_dir / "20260323T140000Z-main-deadbee-skip.json").write_text(
+            json.dumps({"bypass": "skip_remote_gate", "created_at": "2026-03-23T14:00:00+00:00"}),
+            encoding="utf-8",
+        )
+
+        old_argv = sys.argv[:]
+        try:
+            sys.argv = [
+                "gate_status.py",
+                "--manifest",
+                str(manifest_path),
+                "--last-run",
+                str(last_run),
+                "--post-merge-run",
+                str(post_merge),
+                "--bypass-dir",
+                str(bypass_dir),
+            ]
+            exit_code = gate_status.main()
+        finally:
+            sys.argv = old_argv
+
+        captured = capsys.readouterr()
+        assert exit_code == 0
+        assert "Last gate run: passed" in captured.out
+        assert "Last post-merge gate run: failed" in captured.out
+        assert "Latest bypass receipt:" in captured.out
+>       assert "Waiver summary:" in captured.out
+E       AssertionError: assert 'Waiver summary:' in 'Validation gate manifest: /private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/pytest-of-live/pytest-693/test_gat...reports_lates0/gate-bypasses/20260323T140000Z-main-deadbee-skip.json (skip_remote_gate at 2026-03-23T14:00:00+00:00)\n'
+E        +  where 'Validation gate manifest: /private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/pytest-of-live/pytest-693/test_gat...reports_lates0/gate-bypasses/20260323T140000Z-main-deadbee-skip.json (skip_remote_gate at 2026-03-23T14:00:00+00:00)\n' = CaptureResult(out='Validation gate manifest: /private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/pytest-of-live/p...ates0/gate-bypasses/20260323T140000Z-main-deadbee-skip.json (skip_remote_gate at 2026-03-23T14:00:00+00:00)\n', err='').out
+
+tests/test_validation_gate.py:462: AssertionError
+____________________ test_gate_status_supports_json_output _____________________
+
+tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/pytest-of-live/pytest-693/test_gate_status_supports_json0')
+capsys = <_pytest.capture.CaptureFixture object at 0x106248fc0>
+
+    def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
+        gate_status = load_module("gate_status_json", "scripts/gate_status.py")
+        manifest_path = tmp_path / "validation-gate.json"
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "yaml-lint": {
+                        "description": "lint yaml",
+                        "severity": "warning",
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        old_argv = sys.argv[:]
+        try:
+            sys.argv = [
+                "gate_status.py",
+                "--manifest",
+                str(manifest_path),
+                "--last-run",
+                str(tmp_path / "missing-last-run.json"),
+                "--post-merge-run",
+                str(tmp_path / "missing-post-merge.json"),
+                "--bypass-dir",
+                str(tmp_path / "missing-bypasses"),
+                "--format",
+                "json",
+            ]
+            exit_code = gate_status.main()
+        finally:
+            sys.argv = old_argv
+
+        payload = json.loads(capsys.readouterr().out)
+        assert exit_code == 0
+        assert payload["enabled_checks"] == [
+            {
+                "description": "lint yaml",
+                "id": "yaml-lint",
+                "severity": "warning",
+            }
+        ]
+        assert payload["last_run"] is None
+        assert payload["post_merge_run"] is None
+        assert payload["latest_bypass"] is None
+>       assert payload["waiver_summary"]["totals"]["all_receipts"] == 0
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'waiver_summary'
+
+tests/test_validation_gate.py:510: KeyError
+=========================== short test summary info ============================
+FAILED tests/test_validation_gate.py::test_gate_status_reports_latest_bypass_and_runs
+FAILED tests/test_validation_gate.py::test_gate_status_supports_json_output
+2 failed, 16 passed in 2.18s

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "litellm_runtime",
+  "image_ref": "ghcr.io/berriai/litellm-database:main-v1.26.9@sha256:cbeba3f1b93ba518f1ee3d687ca14bf00dc4ebbd78a827e6cdc4bf1251104fe6",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-04-12",
+  "sbom_receipt": "receipts/sbom/cbeba3f1b93b.cdx.json",
+  "cve_receipt": "receipts/cve/cbeba3f1b93b-20260412T121000Z.grype.json",
+  "summary": {
+    "critical": 16,
+    "high": 145,
+    "medium": 158,
+    "low": 52,
+    "unknown": 76,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 447
+  }
+}

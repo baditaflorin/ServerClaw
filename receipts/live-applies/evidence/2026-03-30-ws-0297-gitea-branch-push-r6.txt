@@ -1,0 +1,31 @@
+validation gate: validating canonical NATS topics
+NATS topic taxonomy and routing OK
+validation gate: running remote pre-push gate
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, integration-tests
+  changed files: .ansible-lint-ignore, .gitea/workflows/release-bundle.yml, .gitea/workflows/renovate.yml, .gitea/workflows/validate.yml, README.md, build/platform-manifest.json, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.99
+alert-rule-validation passed 1.86
+ansible-lint          passed 168.40
+ansible-syntax        passed 100.86
+artifact-secret-scan  passed 2.49
+dependency-direction  passed 1.97
+dependency-graph      passed 3.41
+documentation-index   passed 1.38
+generated-docs        passed 7.29
+generated-portals     passed 29.51
+integration-tests     passed 1.00
+packer-validate       passed 5.69
+policy-validation     passed 2.04
+schema-validation     passed 14.03
+security-scan         passed 12.72
+service-completeness  passed 1.10
+tofu-validate         passed 2.11
+type-check            passed 4.19
+workstream-surfaces   passed 3.39
+yaml-lint             passed 13.51

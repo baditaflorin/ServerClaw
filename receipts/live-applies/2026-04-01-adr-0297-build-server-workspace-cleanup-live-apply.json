@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-01-adr-0297-build-server-workspace-cleanup-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-01",
+  "recorded_on": "2026-04-01",
+  "recorded_at": "2026-04-01T01:00:59Z",
+  "recorded_by": "codex",
+  "source_commit": "0eeca2e26248330ae66faee3e1adef9a5536791f",
+  "repo_version_context": "0.177.125",
+  "platform_version_context": "0.130.80",
+  "workflow_id": "adr-0297-build-server-workspace-cleanup-live-apply",
+  "adr": "0297",
+  "summary": "Cleared stale build-server validation workspaces to recover disk capacity after the remote pre-push gate reported snapshot upload failures due to attachment storage exhaustion.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Build server workspace storage recovered",
+      "result": "pass",
+      "observed": "`df -h /home/ops/builds/proxmox_florin_server` reports 119G available after cleanup."
+    }
+  ],
+  "notes": [
+    "Build-server cleanup addressed the remote gate storage exhaustion reported during ADR 0297 closeout."
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/evidence/2026-04-01-ws-0297-build-server-workspace-cleanup-r1.txt",
+    "receipts/live-applies/evidence/2026-04-01-ws-0297-validate-generated-artifacts-r1.txt"
+  ]
+}

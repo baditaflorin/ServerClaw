@@ -1,0 +1,24 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+HEALTH
+{"status":"ok"}
+---ENTRY---
+  <title>Journey-Aware Start Surface</title>
+          <p class="section-kicker">Journey-Aware Start Surface</p>
+              <button class="action-button secondary" type="submit">Skip for now</button>
+                <span class="muted">Finish or skip activation before pinning.</span>
+                <span class="muted">Finish or skip activation before pinning.</span>
+                <span class="muted">Finish or skip activation before pinning.</span>
+                <span class="muted">Finish or skip activation before pinning.</span>
+
+---ACTIVATION---
+      <p class="section-kicker">First-Run Activation</p>
+      <h2>Checklist progress and progressive capability reveal</h2>
+        Reveal advanced tools for this session
+
+---ATTENTION---
+        <p class="section-kicker">Notification Center</p>
+        <h3>Actionable items routed into one shared queue</h3>
+
+---LAUNCHER---
+      <p class="section-kicker">Application Launcher</p>
+      <p class="muted">Search destinations, pin favorites, and reopen recent paths from one shared masthead control.</p>

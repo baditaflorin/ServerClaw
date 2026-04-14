@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-04-adr-0330-public-github-readiness-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-04",
+  "recorded_on": "2026-04-04",
+  "recorded_at": "2026-04-04T18:15:03Z",
+  "recorded_by": "codex",
+  "source_commit": "aa771b5cbc044aaacc7606b427ea7adc9679f1a4",
+  "repo_version_context": "0.178.4",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0330-public-github-readiness-mainline-live-apply",
+  "adr": "0330",
+  "summary": "Integrated ADR 0330 onto the then-latest realistic exact-main tree by replaying the repo-relative controller-secret contract, fork-first example inventory/provider/publication surfaces, and public reference documentation across repeated `origin/main` advances until the final base `8cdffd437a638083393556cd2618e68ad505aa73`, preserving the newer ADR 0339 exact-main `0.178.4` release closeout, refreshing canonical truth and generated surfaces plus the topology snapshot on the merged tree, rerunning the focused regression slice plus the full pre-push gate successfully, and carrying that verified repo-only closeout forward into the protected `0.178.5` integration while the live platform version remains `0.130.98`.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "README.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "changelog.md"
+    },
+    {
+      "kind": "artifact",
+      "name": "versions/stack.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "build/platform-manifest.json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Branch-local exact-main proof",
+      "result": "pass",
+      "observed": "The branch-local ADR 0330 receipt already proved the repo-relative controller-secret contract, fork-first sample surfaces, discovery refresh, focused regression slice, ownership validation, and receipt validation on the isolated worktree, preserved in `receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-live-apply.json`."
+    },
+    {
+      "check": "Exact-main canonical truth and generated surfaces",
+      "result": "pass",
+      "observed": "`python3 scripts/workstream_registry.py --write`, `uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write`, `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/canonical_truth.py --write`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/generate_release_notes.py --write-root-summaries`, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/generate_status_docs.py --write`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --write`, `python3 scripts/generate_diagrams.py --write`, and `uv run --with pyyaml python3 scripts/generate_topology_snapshot.py --output scripts/topology-snapshot.json` refreshed the exact-main registry, discovery entrypoints, ADR shards, changelog, root status summaries, manifest, coordination diagram, and topology snapshot after the ADR 0339 `0.178.4` release closeout landed on `origin/main`; a final `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/canonical_truth.py --write` and `--check` then rewrote the stale `README.md` on the committed merge before the final gate replay, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-registry-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-discovery-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-adr-index-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-canonical-truth-write-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-release-notes-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-status-docs-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-platform-manifest-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-diagrams-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-topology-snapshot-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-canonical-truth-write-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-canonical-truth-check-r1.txt`."
+    },
+    {
+      "check": "Exact-main focused regression suite",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_controller_automation_toolkit.py tests/test_config_merge_windmill.py tests/test_ntfy_publish.py tests/test_public_reference_samples.py` returned `65 passed in 4.64s` on the final committed `0.178.4` merge, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-targeted-tests-r1.txt`."
+    },
+    {
+      "check": "Exact-main release readiness snapshot",
+      "result": "partial",
+      "observed": "`python3 scripts/release_manager.py status --json` captured the exact-main replay state at repository version `0.178.4` and platform version `0.130.98`, with unrelated `controller_dependency_gap` waivers still blocking an immediate release cut; `python3 scripts/release_manager.py --bump patch --dry-run` showed `0.178.5` as the next candidate, and this protected integration is the first repo version that now includes ADR 0330, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-status-r1.json` and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-dry-run-r1.txt`."
+    },
+    {
+      "check": "Exact-main receipt and repository validation",
+      "result": "pass",
+      "observed": "`python3 scripts/live_apply_receipts.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs generated-portals`, and `git diff --check` all passed on the final exact-main tree after the `0.178.4` metadata refresh, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-live-apply-receipts-r1.txt`, `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-validate-repo-r1.txt`, and `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-git-diff-check-r1.txt`."
+    },
+    {
+      "check": "Exact-main broad automation and push-gate replay",
+      "result": "pass",
+      "observed": "`make pre-push-gate` passed on the final committed `0.178.4` merge after one intermediate rerun refreshed `README.md` through canonical truth; the gate reached the remote builder first, then exercised the governed local fallback, and the final replay passed every blocking lane including `workstream-surfaces`, `generated-docs`, `ansible-syntax`, `ansible-lint`, `iac-policy-scan`, `schema-validation`, `dependency-graph`, `security-scan`, and `integration-tests`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-pre-push-gate-r2.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "changelog.md",
+    "versions/stack.yaml",
+    "build/platform-manifest.json",
+    "docs/status/history/live-apply-evidence.md",
+    "docs/status/history/merged-workstreams.md",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "docs/adr/0330-public-github-readiness-as-a-first-class-repository-lifecycle.md",
+    "docs/adr/0333-private-overlay-files-for-deployment-specific-secrets-and-identities.md",
+    "docs/adr/0334-example-first-inventory-and-service-identity-catalogs.md",
+    "docs/adr/0338-public-documentation-tiers-and-private-history-boundaries.md",
+    "docs/adr/0339-reference-deployment-samples-and-replaceable-provider-profiles.md",
+    "docs/workstreams/ws-0330-main-closeout.md",
+    "workstreams.yaml",
+    "workstreams/archive/2026/ws-0330-main-closeout.yaml",
+    "receipts/live-applies/2026-04-04-adr-0330-public-github-readiness-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-registry-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-discovery-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-adr-index-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-canonical-truth-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-release-notes-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-status-docs-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-platform-manifest-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-diagrams-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge7-topology-snapshot-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-targeted-tests-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-status-r1.json",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge8-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-canonical-truth-write-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-canonical-truth-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-live-apply-receipts-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-validate-repo-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-04-ws-0330-postmerge9-pre-push-gate-r2.txt"
+  ],
+  "notes": [
+    "This exact-main receipt captures the protected-surface integration separately from the earlier branch-local live-apply proof so the fork-first implementation work and the canonical mainline refresh remain independently auditable.",
+    "On 2026-04-04, `origin/main` advanced repeatedly while this closeout was in flight; after the earlier ADR 0333 replay, the final exact-main base advanced again through the ADR 0339 `0.178.4` release closeout and ended at `origin/main@8cdffd437a638083393556cd2618e68ad505aa73`.",
+    "The exact-main validation base for this closeout was `0.178.4`, and the first repository version that now includes ADR 0330 after the protected integration refresh is `0.178.5`.",
+    "The final exact-main verification passed with the governed remote-builder fallback: the first post-merge `make pre-push-gate` rerun exposed one stale `README.md`, `canonical_truth.py --write` refreshed it, and the second full gate replay then passed every blocking lane on the committed merge.",
+    "Because ADR 0330 is a repo-only control-plane change, the live platform version remains `0.130.98` and no platform version bump should accompany this integration."
+  ]
+}

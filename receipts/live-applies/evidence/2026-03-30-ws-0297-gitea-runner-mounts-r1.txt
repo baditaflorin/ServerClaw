@@ -1,0 +1,4 @@
+/opt/gitea-runner/data -> /data
+/var/run/docker.sock -> /var/run/docker.sock
+/opt/gitea-runner/config.yaml -> /config.yaml
+/opt/gitea-runner/credentials/renovate -> /var/run/lv3/renovate

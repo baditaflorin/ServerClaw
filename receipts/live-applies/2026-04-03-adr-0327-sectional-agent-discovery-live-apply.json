@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-03-adr-0327-sectional-agent-discovery-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-03",
+  "recorded_on": "2026-04-03",
+  "recorded_at": "2026-04-03T19:52:00Z",
+  "recorded_by": "codex",
+  "source_commit": "23bd53202bc2599fb60f16de108679316b3cbe09",
+  "repo_version_context": "0.178.3",
+  "platform_version_context": "0.130.98",
+  "workflow_id": "adr-0327-sectional-agent-discovery-live-apply",
+  "adr": "0327",
+  "summary": "Live-applied ADR 0327 on the rebased `codex/ws-0327-live-apply` exact-main worktree by splitting the root agent-discovery registries into sectional source files under `docs/discovery/`, generating compact public-safe root entrypoints plus tracked onboarding packs, tightening the public-entrypoint and retry-guard automation paths, and re-verifying the discovery surfaces through focused tests, repository validation, remote validation, and the full pre-push gate while the global release cut remains blocked by unrelated waiver receipts.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": ".repo-structure.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": ".config-locations.yaml"
+    },
+    {
+      "kind": "artifact",
+      "name": "build/onboarding"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused discovery regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python3 -m pytest -q tests/test_generate_discovery_artifacts.py tests/test_validate_public_entrypoints.py tests/test_validate_repo_cache.py tests/test_label_studio_sync.py` returned `31 passed in 1.65s`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0327-targeted-tests-r1.txt`."
+    },
+    {
+      "check": "Discovery artifact and agent-standards validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --check` reported `Discovery artifacts OK`, and `./scripts/validate_repo.sh agent-standards generated-docs` passed after quoting the workstream shard ADR id, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0327-generate-discovery-check-r1.txt` and `receipts/live-applies/evidence/2026-04-03-ws-0327-agent-standards-generated-docs-r2.txt`."
+    },
+    {
+      "check": "Remote validation on the recovered build-server path",
+      "result": "pass",
+      "observed": "`make remote-validate` passed on the build server with `workstream-surfaces`, `agent-standards`, `ansible-syntax`, `schema-validation`, `atlas-lint`, `policy-validation`, `iac-policy-scan`, `alert-rule-validation`, `type-check`, and `dependency-graph` all green, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-remote-validate-r1.txt`."
+    },
+    {
+      "check": "Promotion-facing pre-push gate",
+      "result": "pass",
+      "observed": "`make pre-push-gate` passed on the exact-main worktree with `documentation-index`, `yaml-lint`, `generated-docs`, `generated-portals`, `ansible-syntax`, `ansible-lint`, `semgrep-sast`, `security-scan`, `integration-tests`, and the other blocking checks all green, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-pre-push-gate-r2.txt`."
+    },
+    {
+      "check": "Controller-local full validate sweep",
+      "result": "partial",
+      "observed": "`make validate` still fails on the current controller-local tree because the shard-backed `workstreams/` files inherited from latest `origin/main` trip the local `yamllint` indentation profile; that upstream baseline issue is preserved in `receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-validate-r1.txt` and is not specific to the ADR 0327 discovery changes."
+    },
+    {
+      "check": "Release readiness snapshot",
+      "result": "partial",
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py status --json` reported repo version `0.178.3`, platform version `0.130.98`, and a blocked release cut because three unrelated `controller_dependency_gap` waiver receipts remain open through `2026-04-06`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-release-status-r1.json`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0327-sectional-agent-discovery-registries-and-generated-onboarding-packs.md",
+    "docs/workstreams/ws-0327-live-apply.md",
+    "docs/runbooks/discovery-registry-maintenance.md",
+    ".repo-structure.yaml",
+    ".config-locations.yaml",
+    "build/onboarding/agent-core.yaml",
+    "build/onboarding/automation.yaml",
+    "build/onboarding/service-catalog.yaml",
+    "scripts/generate_discovery_artifacts.py",
+    "scripts/label_studio_sync.py",
+    "scripts/validate_public_entrypoints.py",
+    "scripts/validate_repo.sh",
+    "tests/test_generate_discovery_artifacts.py",
+    "tests/test_validate_public_entrypoints.py",
+    "tests/test_validate_repo_cache.py",
+    "workstreams.yaml",
+    "workstreams/archive/2026/ws-0327-live-apply.yaml",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-rebased-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-generate-discovery-check-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-targeted-tests-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-agent-standards-generated-docs-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-git-diff-check-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-live-apply-receipts-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-validate-repo-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-remote-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-pre-push-gate-r2.txt",
+    "receipts/live-applies/evidence/2026-04-03-ws-0327-mainline-release-status-r1.json"
+  ],
+  "notes": [
+    "This branch-local receipt preserves the exact-main proof from the dedicated worktree before a later numbered repo release is cut.",
+    "The generated onboarding packs are intentionally committed artifacts now; `.gitignore` was updated so `build/onboarding/*.yaml` no longer disappears silently from branch diffs.",
+    "Because ADR 0327 changes repository coordination rather than live platform infrastructure, `Implemented In Platform Version` remains `N/A` and `platform_version` stays `0.130.98`."
+  ]
+}

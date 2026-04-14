@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-23-adr-0066-mutation-audit-live-apply",
+  "applied_on": "2026-03-23",
+  "recorded_on": "2026-03-23",
+  "recorded_by": "codex",
+  "source_commit": "6925cb1cd0816bfd164806d77281c6972a046ae1",
+  "repo_version_context": "0.78.0",
+  "workflow_id": "converge-monitoring",
+  "adr": "0066",
+  "summary": "Applied ADR 0066 live on current main by validating host-side mutation audit sinks on proxmox_florin and docker-runtime-lv3, seeding and exercising the Windmill mutation-audit helper, shipping both the structured host file and OpenBao native audit file through the ADR 0052 Alloy-to-Loki path, and repairing current-main execution-gate regressions that blocked the verified monitoring and Windmill converges.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.118.189.95"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "address": "10.10.10.50"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repository validation",
+      "result": "pass",
+      "observed": "`uvx --from pyyaml python scripts/validate_repository_data_models.py --validate`, `python3 scripts/live_apply_receipts.py --validate`, and `python3 scripts/mutation_audit.py --validate-schema` completed successfully on the integrated current-main branch."
+    },
+    {
+      "check": "Monitoring convergence",
+      "result": "pass",
+      "observed": "`make converge-monitoring` completed successfully after wiring the ADR 0079 service playbooks to pass the mutation-audit and OpenBao file scrape definitions and after fixing the shared preflight selector expansion plus the generic Grafana readiness probe."
+    },
+    {
+      "check": "Windmill convergence",
+      "result": "pass",
+      "observed": "`make converge-windmill` completed successfully after fixing the generic Windmill readiness probe and making `linux_guest_firewall` package installation cache-neutral so unrelated stale observability repositories do not block firewall convergence."
+    },
+    {
+      "check": "Host mutation audit sinks",
+      "result": "pass",
+      "observed": "Ad-hoc Ansible checks on `proxmox_florin` and `docker-runtime-lv3` confirmed `/var/log/platform/mutation-audit.jsonl` exists, `/etc/alloy/config.alloy` references the expected mutation-audit paths, and `systemctl is-active alloy` returned `active`."
+    },
+    {
+      "check": "Windmill helper emission",
+      "result": "pass",
+      "observed": "Posting a live verification payload to `http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fmutation_audit_emit` returned a success event and appended correlation id `windmill:emit.mutation_audit_event:20260323T084527Z` to `docker-runtime-lv3:/var/log/platform/mutation-audit.jsonl`."
+    },
+    {
+      "check": "OpenBao audit scrape path",
+      "result": "pass",
+      "observed": "The `docker-runtime-lv3` Alloy configuration references `/opt/openbao/logs/audit.log` in the same mutation-audit scrape path used for the structured JSONL sink."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0066-structured-mutation-audit-log.md",
+    "docs/runbooks/mutation-audit-log.md",
+    "docs/workstreams/adr-0066-mutation-audit-log.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The controller-side emitter still defaults to `.local/state/mutation-audit/mutation-audit.jsonl`; this receipt covers the live host-side sinks and Loki shipping path.",
+    "Current-main integration also required execution-layer repairs in `ansible.cfg`, `playbooks/tasks/preflight.yml`, and `config/health-probe-catalog.json` so the shared ADR 0079 verification path no longer blocks valid production converges."
+  ]
+}

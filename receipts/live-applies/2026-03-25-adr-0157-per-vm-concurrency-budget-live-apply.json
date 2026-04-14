@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0157-per-vm-concurrency-budget-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_by": "codex",
+  "source_commit": "99f47d648bb86a90aba36a9efb263f85cfbe8931",
+  "repo_version_context": "0.157.4",
+  "workflow_id": "converge-windmill",
+  "adr": "0157",
+  "summary": "Verified ADR 0157 live on the production Windmill worker checkout after converging current main onto docker-runtime-lv3, confirming the execution-lane catalog and scheduler lane module were deployed byte-for-byte, and validating the live lane catalog in place.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Windmill live apply from main",
+      "result": "partial",
+      "observed": "Repeated `make live-apply-service service=windmill env=production` runs from current main deployed the worker checkout and converged proxmox_florin plus postgres-lv3, but both recaps ended with a late docker-runtime-lv3 SSH disconnect during the Windmill reseed path after the runtime had already been updated."
+    },
+    {
+      "check": "ADR 0157 worker checkout files",
+      "result": "pass",
+      "observed": "Direct probes on docker-runtime-lv3 confirmed `/srv/proxmox_florin_server/config/execution-lanes.yaml`, `/srv/proxmox_florin_server/platform/scheduler/lanes.py`, and `/srv/proxmox_florin_server/scripts/execution_lanes.py` matched the current main checksums `8d4e2da0...`, `af08231c...`, and `1e2c2490...`."
+    },
+    {
+      "check": "Live execution lane validation",
+      "result": "pass",
+      "observed": "A direct guest-local run of `python3 /srv/proxmox_florin_server/scripts/execution_lanes.py --validate` on docker-runtime-lv3 returned `Execution lanes OK: /srv/proxmox_florin_server/config/execution-lanes.yaml (9 lane(s))`."
+    },
+    {
+      "check": "Windmill runtime health",
+      "result": "pass",
+      "observed": "A direct guest-local probe on docker-runtime-lv3 returned `CE v1.662.0` from `curl -fsS http://127.0.0.1:8000/api/version` on 2026-03-25."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0157-per-vm-concurrency-budget-and-resource-reservation.md",
+    "docs/runbooks/budgeted-workflow-scheduler.md",
+    "docs/runbooks/per-vm-concurrency-budgets.md",
+    "docs/workstreams/adr-0157-per-vm-concurrency-budget.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Earlier on 2026-03-25 the same live apply was blocked before guest convergence because proxmox_florin was unreachable on the Tailscale SSH path; that transport issue was resolved before the successful deployment verification recorded here.",
+    "The current Windmill seed catalog still contains two repo-managed entries for `f/lv3/scheduler_watchdog_loop`, which produces a path-conflict response during manual create replay and likely contributes noise during the late reseed step even though the ADR 0157 deployment itself is present and validated."
+  ]
+}

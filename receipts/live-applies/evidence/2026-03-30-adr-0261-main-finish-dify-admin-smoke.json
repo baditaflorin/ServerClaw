@@ -1,0 +1,9 @@
+{
+  "setup_step": "finished",
+  "login_result": "success",
+  "app_id": "9f93cf78-3320-4bdb-8299-30b7b39b873e",
+  "tool_provider": "updated",
+  "tool_count": 12,
+  "trace_configured": true,
+  "export_path": "platform/dify-workflows/lv3-dify-smoke.yml"
+}

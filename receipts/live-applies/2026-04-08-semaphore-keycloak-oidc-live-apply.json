@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-08-semaphore-keycloak-oidc-live-apply",
+  "applied_on": "2026-04-08",
+  "recorded_on": "2026-04-08",
+  "recorded_by": "claude",
+  "source_commit": "7714ed0f62e11c67bf5b0951d5341bed23ea1fd8",
+  "repo_version_context": "0.178.56",
+  "workflow_id": "converge-semaphore",
+  "summary": "Deployed Semaphore with Keycloak OIDC integration — fixes inlined docker-compose template and OpenBao variable definitions.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "runtime-control-lv3",
+      "address": "10.10.10.92"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Semaphore OIDC login functional",
+      "result": "pass",
+      "observed": "Semaphore container running with Keycloak OIDC; 230/230 tasks passing."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0381-semaphore-keycloak-oidc.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Root cause: vars is undefined in inlined docker-compose template; fixed by pre-computing compose file before include_role."
+  ]
+}

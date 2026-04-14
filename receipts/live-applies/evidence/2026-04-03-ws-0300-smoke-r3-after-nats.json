@@ -1,0 +1,619 @@
+{
+  "baseline_seq": 41,
+  "bridge_journal": {
+    "raw": {
+      "command": "sudo journalctl -u lv3-falco-event-bridge --since '@1775207640' --no-pager",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Apr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:12 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"GET /healthz HTTP/1.1\" 200 -\nApr 03 09:14:14 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"GET /healthz HTTP/1.1\" 200 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"GET /healthz HTTP/1.1\" 200 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"GET /healthz HTTP/1.1\" 200 -\nApr 03 09:14:20 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:20 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:23 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:23 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:26 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:26 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:28 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:14:29 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\nApr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -\n",
+      "target": "docker-runtime-lv3"
+    },
+    "rows": [
+      {
+        "line": "Apr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.30"
+      },
+      {
+        "line": "Apr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:02 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:12 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"GET /healthz HTTP/1.1\" 200 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:14:14 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"GET /healthz HTTP/1.1\" 200 -",
+        "source_ip": "10.10.10.30"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:16 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"GET /healthz HTTP/1.1\" 200 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:18 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"GET /healthz HTTP/1.1\" 200 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:20 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:14:20 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:14:23 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.30"
+      },
+      {
+        "line": "Apr 03 09:14:23 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.30 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.30"
+      },
+      {
+        "line": "Apr 03 09:14:26 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:26 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:14:28 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:14:29 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.50 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.50"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:00 docker-runtime-lv3 python3[531252]: falco-event-bridge 127.0.0.1 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "127.0.0.1"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      },
+      {
+        "line": "Apr 03 09:15:04 docker-runtime-lv3 python3[531252]: falco-event-bridge 10.10.10.40 \"POST /events HTTP/1.1\" 202 -",
+        "source_ip": "10.10.10.40"
+      }
+    ]
+  },
+  "captured_at_epoch": 1775207706,
+  "health_checks": [
+    {
+      "command": "curl -fsS --max-time 5 http://127.0.0.1:18084/healthz",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"ok\"}",
+      "target": "docker-runtime-lv3"
+    },
+    {
+      "command": "curl -fsS --max-time 5 http://10.10.10.20:18084/healthz",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"ok\"}",
+      "target": "docker-build-lv3"
+    },
+    {
+      "command": "curl -fsS --max-time 5 http://10.10.10.20:18084/healthz",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"ok\"}",
+      "target": "monitoring-lv3"
+    },
+    {
+      "command": "curl -fsS --max-time 5 http://10.10.10.20:18084/healthz",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\": \"ok\"}",
+      "target": "postgres-lv3"
+    }
+  ],
+  "loki": {
+    "raw": {
+      "command": "python3 - <<'INNER'\nimport json\nimport urllib.parse\nimport urllib.request\nparams = urllib.parse.urlencode({\n    'query': '{job=\"falco\"} |= \"LV3 Falco smoke marker executed\"',\n    'limit': '200',\n    'start': str((1775207650 - 10) * 1000000000),\n    'end': str((1775207650 + 60) * 1000000000),\n    'direction': 'forward',\n})\nurl = 'http://127.0.0.1:3100/loki/api/v1/query_range?' + params\nwith urllib.request.urlopen(url, timeout=30) as response:\n    print(response.read().decode())\nINNER",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"status\":\"success\",\"data\":{\"resultType\":\"streams\",\"result\":[{\"stream\":{\"detected_level\":\"info\",\"environment\":\"lv3\",\"host\":\"docker-build-lv3\",\"job\":\"falco\",\"lane\":\"build\",\"level\":\"info\",\"node_role\":\"docker-build\",\"service\":\"falco\",\"service_name\":\"falco\",\"source\":\"journal\",\"syslog_identifier\":\"falco\",\"unit\":\"falco-modern-bpf.service\"},\"values\":[[\"1775207663353713000\",\"{\\\"hostname\\\":\\\"docker-build-lv3\\\",\\\"output\\\":\\\"09:14:01.756396984: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=222773) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"docker-build-lv3\\\",\\\"evt.time\\\":1775207641756396984,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\\\",\\\"proc.name\\\":\\\"grep\\\",\\\"proc.pid\\\":222773,\\\"user.name\\\":\\\"root\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:01.756396984Z\\\"}\"],[\"1775207663353713000\",\"{\\\"hostname\\\":\\\"docker-build-lv3\\\",\\\"output\\\":\\\"09:14:22.353010703: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"docker-build-lv3\\\",\\\"evt.time\\\":1775207662353010703,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\\\",\\\"proc.name\\\":\\\"bash\\\",\\\"proc.pid\\\":222919,\\\"user.name\\\":\\\"ops\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:22.353010703Z\\\"}\"]]},{\"stream\":{\"detected_level\":\"info\",\"environment\":\"lv3\",\"host\":\"docker-runtime-lv3\",\"job\":\"falco\",\"lane\":\"control-plane\",\"level\":\"info\",\"node_role\":\"docker-runtime\",\"service\":\"falco\",\"service_name\":\"falco\",\"source\":\"journal\",\"syslog_identifier\":\"falco\",\"unit\":\"falco-modern-bpf.service\"},\"values\":[[\"1775207700490782000\",\"{\\\"hostname\\\":\\\"docker-runtime-lv3\\\",\\\"output\\\":\\\"09:14:01.664832569: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=534733) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"docker-runtime-lv3\\\",\\\"evt.time\\\":1775207641664832569,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\\\",\\\"proc.name\\\":\\\"grep\\\",\\\"proc.pid\\\":534733,\\\"user.name\\\":\\\"root\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:01.664832569Z\\\"}\"],[\"1775207700490782000\",\"{\\\"hostname\\\":\\\"docker-runtime-lv3\\\",\\\"output\\\":\\\"09:14:19.457539874: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"docker-runtime-lv3\\\",\\\"evt.time\\\":1775207659457539874,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\\\",\\\"proc.name\\\":\\\"bash\\\",\\\"proc.pid\\\":535085,\\\"user.name\\\":\\\"ops\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:19.457539874Z\\\"}\"],[\"1775207700490782000\",\"{\\\"hostname\\\":\\\"docker-runtime-lv3\\\",\\\"output\\\":\\\"09:14:19.458548297: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"docker-runtime-lv3\\\",\\\"evt.time\\\":1775207659458548297,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__\\\",\\\"proc.name\\\":\\\"python3\\\",\\\"proc.pid\\\":535085,\\\"user.name\\\":\\\"ops\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:19.458548297Z\\\"}\"]]},{\"stream\":{\"detected_level\":\"info\",\"environment\":\"lv3\",\"host\":\"monitoring-lv3\",\"job\":\"falco\",\"lane\":\"monitoring\",\"level\":\"info\",\"node_role\":\"monitoring\",\"service\":\"falco\",\"service_name\":\"falco\",\"source\":\"journal\",\"syslog_identifier\":\"falco\",\"unit\":\"falco-modern-bpf.service\"},\"values\":[[\"1775207656192029000\",\"{\\\"hostname\\\":\\\"monitoring-lv3\\\",\\\"output\\\":\\\"09:14:02.542192694: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=2042711) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"monitoring-lv3\\\",\\\"evt.time\\\":1775207642542192694,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\\\",\\\"proc.name\\\":\\\"grep\\\",\\\"proc.pid\\\":2042711,\\\"user.name\\\":\\\"root\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:02.542192694Z\\\"}\"],[\"1775207704416192000\",\"{\\\"hostname\\\":\\\"monitoring-lv3\\\",\\\"output\\\":\\\"09:14:25.922480147: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"monitoring-lv3\\\",\\\"evt.time\\\":1775207665922480147,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\\\",\\\"proc.name\\\":\\\"bash\\\",\\\"proc.pid\\\":2042937,\\\"user.name\\\":\\\"ops\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:25.922480147Z\\\"}\"],[\"1775207704416192000\",\"{\\\"hostname\\\":\\\"monitoring-lv3\\\",\\\"output\\\":\\\"09:14:25.923818163: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"monitoring-lv3\\\",\\\"evt.time\\\":1775207665923818163,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__\\\",\\\"proc.name\\\":\\\"python3\\\",\\\"proc.pid\\\":2042937,\\\"user.name\\\":\\\"ops\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:25.923818163Z\\\"}\"]]},{\"stream\":{\"detected_level\":\"info\",\"environment\":\"lv3\",\"host\":\"postgres-lv3\",\"job\":\"falco\",\"lane\":\"data\",\"level\":\"info\",\"node_role\":\"postgres\",\"service\":\"falco\",\"service_name\":\"falco\",\"source\":\"journal\",\"syslog_identifier\":\"falco\",\"unit\":\"falco-modern-bpf.service\"},\"values\":[[\"1775207658128727000\",\"{\\\"hostname\\\":\\\"postgres-lv3\\\",\\\"output\\\":\\\"09:14:02.553354399: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=1818310) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"postgres-lv3\\\",\\\"evt.time\\\":1775207642553354399,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\\\",\\\"proc.name\\\":\\\"grep\\\",\\\"proc.pid\\\":1818310,\\\"user.name\\\":\\\"root\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:02.553354399Z\\\"}\"],[\"1775207668869753000\",\"{\\\"hostname\\\":\\\"postgres-lv3\\\",\\\"output\\\":\\\"09:14:28.639357769: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=\\u003cNA\\u003e k8s_ns_name=\\u003cNA\\u003e\\\",\\\"output_fields\\\":{\\\"container.id\\\":\\\"host\\\",\\\"container.image.repository\\\":\\\"\\\",\\\"container.image.tag\\\":\\\"\\\",\\\"container.name\\\":\\\"host\\\",\\\"evt.hostname\\\":\\\"postgres-lv3\\\",\\\"evt.time\\\":1775207668639357769,\\\"k8s.ns.name\\\":null,\\\"k8s.pod.name\\\":null,\\\"proc.cmdline\\\":\\\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\\\",\\\"proc.name\\\":\\\"bash\\\",\\\"proc.pid\\\":1818387,\\\"user.name\\\":\\\"ops\\\"},\\\"priority\\\":\\\"Critical\\\",\\\"rule\\\":\\\"LV3 Falco smoke marker execution\\\",\\\"source\\\":\\\"syscall\\\",\\\"tags\\\":[\\\"lv3\\\",\\\"process\\\",\\\"smoke\\\"],\\\"time\\\":\\\"2026-04-03T09:14:28.639357769Z\\\"}\"]]}],\"stats\":{\"summary\":{\"bytesProcessedPerSecond\":22915997,\"linesProcessedPerSecond\":28447,\"totalBytesProcessed\":63638,\"totalLinesProcessed\":79,\"execTime\":0.002777,\"queueTime\":0.000082,\"subqueries\":0,\"totalEntriesReturned\":10,\"splits\":0,\"shards\":1,\"totalPostFilterLines\":10,\"totalStructuredMetadataBytesProcessed\":632},\"querier\":{\"store\":{\"totalChunksRef\":0,\"totalChunksDownloaded\":0,\"chunksDownloadTime\":0,\"queryReferencedStructuredMetadata\":false,\"queryUsedV2Engine\":false,\"chunk\":{\"headChunkBytes\":0,\"headChunkLines\":0,\"decompressedBytes\":0,\"decompressedLines\":0,\"compressedBytes\":0,\"totalDuplicates\":0,\"postFilterLines\":0,\"headChunkStructuredMetadataBytes\":0,\"decompressedStructuredMetadataBytes\":0},\"chunkRefsFetchTime\":0,\"congestionControlLatency\":0,\"pipelineWrapperFilteredLines\":0,\"dataobj\":{\"prePredicateDecompressedRows\":0,\"prePredicateDecompressedBytes\":0,\"prePredicateDecompressedStructuredMetadataBytes\":0,\"postPredicateRows\":0,\"postPredicateDecompressedBytes\":0,\"postPredicateStructuredMetadataBytes\":0,\"postFilterRows\":0,\"pagesScanned\":0,\"pagesDownloaded\":0,\"pagesDownloadedBytes\":0,\"pageBatches\":0,\"totalRowsAvailable\":0,\"totalPageDownloadTime\":0}}},\"ingester\":{\"totalReached\":1,\"totalChunksMatched\":12,\"totalBatches\":2,\"totalLinesSent\":10,\"store\":{\"totalChunksRef\":0,\"totalChunksDownloaded\":0,\"chunksDownloadTime\":0,\"queryReferencedStructuredMetadata\":false,\"queryUsedV2Engine\":false,\"chunk\":{\"headChunkBytes\":63638,\"headChunkLines\":79,\"decompressedBytes\":0,\"decompressedLines\":0,\"compressedBytes\":0,\"totalDuplicates\":0,\"postFilterLines\":10,\"headChunkStructuredMetadataBytes\":632,\"decompressedStructuredMetadataBytes\":0},\"chunkRefsFetchTime\":74631,\"congestionControlLatency\":0,\"pipelineWrapperFilteredLines\":0,\"dataobj\":{\"prePredicateDecompressedRows\":0,\"prePredicateDecompressedBytes\":0,\"prePredicateDecompressedStructuredMetadataBytes\":0,\"postPredicateRows\":0,\"postPredicateDecompressedBytes\":0,\"postPredicateStructuredMetadataBytes\":0,\"postFilterRows\":0,\"pagesScanned\":0,\"pagesDownloaded\":0,\"pagesDownloadedBytes\":0,\"pageBatches\":0,\"totalRowsAvailable\":0,\"totalPageDownloadTime\":0}}},\"cache\":{\"chunk\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0},\"index\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0},\"result\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0},\"statsResult\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0},\"volumeResult\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0},\"seriesResult\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0},\"labelResult\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0},\"instantMetricResult\":{\"entriesFound\":0,\"entriesRequested\":0,\"entriesStored\":0,\"bytesReceived\":0,\"bytesSent\":0,\"requests\":0,\"downloadTime\":0,\"queryLengthServed\":0}},\"index\":{\"totalChunks\":0,\"postFilterChunks\":0,\"shardsDuration\":0,\"usedBloomFilters\":false}}}}\n\n",
+      "target": "monitoring-lv3"
+    },
+    "rows": [
+      {
+        "host": "docker-build-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"docker-build-lv3\",\"output\":\"09:14:01.756396984: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=222773) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"docker-build-lv3\",\"evt.time\":1775207641756396984,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\",\"proc.name\":\"grep\",\"proc.pid\":222773,\"user.name\":\"root\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:01.756396984Z\"}",
+        "ts": "1775207663353713000"
+      },
+      {
+        "host": "docker-build-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"docker-build-lv3\",\"output\":\"09:14:22.353010703: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"docker-build-lv3\",\"evt.time\":1775207662353010703,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\",\"proc.name\":\"bash\",\"proc.pid\":222919,\"user.name\":\"ops\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:22.353010703Z\"}",
+        "ts": "1775207663353713000"
+      },
+      {
+        "host": "docker-runtime-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"docker-runtime-lv3\",\"output\":\"09:14:01.664832569: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=534733) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"docker-runtime-lv3\",\"evt.time\":1775207641664832569,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\",\"proc.name\":\"grep\",\"proc.pid\":534733,\"user.name\":\"root\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:01.664832569Z\"}",
+        "ts": "1775207700490782000"
+      },
+      {
+        "host": "docker-runtime-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"docker-runtime-lv3\",\"output\":\"09:14:19.457539874: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"docker-runtime-lv3\",\"evt.time\":1775207659457539874,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\",\"proc.name\":\"bash\",\"proc.pid\":535085,\"user.name\":\"ops\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:19.457539874Z\"}",
+        "ts": "1775207700490782000"
+      },
+      {
+        "host": "docker-runtime-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"docker-runtime-lv3\",\"output\":\"09:14:19.458548297: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"docker-runtime-lv3\",\"evt.time\":1775207659458548297,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__\",\"proc.name\":\"python3\",\"proc.pid\":535085,\"user.name\":\"ops\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:19.458548297Z\"}",
+        "ts": "1775207700490782000"
+      },
+      {
+        "host": "monitoring-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"monitoring-lv3\",\"output\":\"09:14:02.542192694: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=2042711) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"monitoring-lv3\",\"evt.time\":1775207642542192694,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\",\"proc.name\":\"grep\",\"proc.pid\":2042711,\"user.name\":\"root\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:02.542192694Z\"}",
+        "ts": "1775207656192029000"
+      },
+      {
+        "host": "monitoring-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"monitoring-lv3\",\"output\":\"09:14:25.922480147: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"monitoring-lv3\",\"evt.time\":1775207665922480147,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\",\"proc.name\":\"bash\",\"proc.pid\":2042937,\"user.name\":\"ops\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:25.922480147Z\"}",
+        "ts": "1775207704416192000"
+      },
+      {
+        "host": "monitoring-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"monitoring-lv3\",\"output\":\"09:14:25.923818163: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"monitoring-lv3\",\"evt.time\":1775207665923818163,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__\",\"proc.name\":\"python3\",\"proc.pid\":2042937,\"user.name\":\"ops\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:25.923818163Z\"}",
+        "ts": "1775207704416192000"
+      },
+      {
+        "host": "postgres-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"postgres-lv3\",\"output\":\"09:14:02.553354399: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=root proc=grep cmdline=grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml pid=1818310) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"postgres-lv3\",\"evt.time\":1775207642553354399,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"grep -F __lv3_falco_smoke__ /etc/falco/rules.d/50-lv3-platform-overrides.yaml\",\"proc.name\":\"grep\",\"proc.pid\":1818310,\"user.name\":\"root\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:02.553354399Z\"}",
+        "ts": "1775207658128727000"
+      },
+      {
+        "host": "postgres-lv3",
+        "job": "falco",
+        "line": "{\"hostname\":\"postgres-lv3\",\"output\":\"09:14:28.639357769: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\",\"output_fields\":{\"container.id\":\"host\",\"container.image.repository\":\"\",\"container.image.tag\":\"\",\"container.name\":\"host\",\"evt.hostname\":\"postgres-lv3\",\"evt.time\":1775207668639357769,\"k8s.ns.name\":null,\"k8s.pod.name\":null,\"proc.cmdline\":\"bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__\",\"proc.name\":\"bash\",\"proc.pid\":1818387,\"user.name\":\"ops\"},\"priority\":\"Critical\",\"rule\":\"LV3 Falco smoke marker execution\",\"source\":\"syscall\",\"tags\":[\"lv3\",\"process\",\"smoke\"],\"time\":\"2026-04-03T09:14:28.639357769Z\"}",
+        "ts": "1775207668869753000"
+      }
+    ]
+  },
+  "mutation_audit": {
+    "raw": {
+      "command": "sudo python3 - <<'INNER'\nimport json\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nrows = []\npath = Path('/var/log/platform/mutation-audit.jsonl')\nif path.exists():\n    for line in path.read_text().splitlines():\n        try:\n            item = json.loads(line)\n        except json.JSONDecodeError:\n            continue\n        if item.get('surface') != 'falco':\n            continue\n        if 'LV3 Falco smoke marker execution' not in str(item.get('target')):\n            continue\n        ts_epoch = None\n        ts_value = item.get('ts')\n        if isinstance(ts_value, str):\n            ts_epoch = int(datetime.fromisoformat(ts_value.replace('Z', '+00:00')).astimezone(timezone.utc).timestamp())\n        if ts_epoch is not None and ts_epoch < 1775207650:\n            continue\n        rows.append(item)\nprint(json.dumps(rows[-50:], sort_keys=True))\nINNER",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "[{\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:docker-runtime-lv3:LV3 Falco smoke marker execution:20260403T091419.457539874Z\", \"evidence_ref\": \"falco://docker-runtime-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"docker-runtime-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:20Z\"}, {\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:docker-runtime-lv3:LV3 Falco smoke marker execution:20260403T091419.458548297Z\", \"evidence_ref\": \"falco://docker-runtime-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"docker-runtime-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:20Z\"}, {\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:docker-build-lv3:LV3 Falco smoke marker execution:20260403T091422.353010703Z\", \"evidence_ref\": \"falco://docker-build-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"docker-build-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:23Z\"}, {\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:docker-build-lv3:LV3 Falco smoke marker execution:20260403T091422.354455410Z\", \"evidence_ref\": \"falco://docker-build-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"docker-build-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:23Z\"}, {\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:monitoring-lv3:LV3 Falco smoke marker execution:20260403T091425.922480147Z\", \"evidence_ref\": \"falco://monitoring-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"monitoring-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:25Z\"}, {\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:monitoring-lv3:LV3 Falco smoke marker execution:20260403T091425.923818163Z\", \"evidence_ref\": \"falco://monitoring-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"monitoring-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:26Z\"}, {\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:postgres-lv3:LV3 Falco smoke marker execution:20260403T091428.639357769Z\", \"evidence_ref\": \"falco://postgres-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"postgres-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:28Z\"}, {\"action\": \"security_anomaly_detected\", \"actor\": {\"class\": \"service\", \"id\": \"falco-event-bridge\"}, \"correlation_id\": \"falco:postgres-lv3:LV3 Falco smoke marker execution:20260403T091428.640168660Z\", \"evidence_ref\": \"falco://postgres-lv3/LV3 Falco smoke marker execution\", \"outcome\": \"success\", \"surface\": \"falco\", \"target\": \"postgres-lv3:LV3 Falco smoke marker execution\", \"ts\": \"2026-04-03T09:14:28Z\"}]\n",
+      "target": "docker-runtime-lv3"
+    },
+    "rows": [
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:docker-runtime-lv3:LV3 Falco smoke marker execution:20260403T091419.457539874Z",
+        "evidence_ref": "falco://docker-runtime-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "docker-runtime-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:20Z"
+      },
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:docker-runtime-lv3:LV3 Falco smoke marker execution:20260403T091419.458548297Z",
+        "evidence_ref": "falco://docker-runtime-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "docker-runtime-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:20Z"
+      },
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:docker-build-lv3:LV3 Falco smoke marker execution:20260403T091422.353010703Z",
+        "evidence_ref": "falco://docker-build-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "docker-build-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:23Z"
+      },
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:docker-build-lv3:LV3 Falco smoke marker execution:20260403T091422.354455410Z",
+        "evidence_ref": "falco://docker-build-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "docker-build-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:23Z"
+      },
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:monitoring-lv3:LV3 Falco smoke marker execution:20260403T091425.922480147Z",
+        "evidence_ref": "falco://monitoring-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "monitoring-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:25Z"
+      },
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:monitoring-lv3:LV3 Falco smoke marker execution:20260403T091425.923818163Z",
+        "evidence_ref": "falco://monitoring-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "monitoring-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:26Z"
+      },
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:postgres-lv3:LV3 Falco smoke marker execution:20260403T091428.639357769Z",
+        "evidence_ref": "falco://postgres-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "postgres-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:28Z"
+      },
+      {
+        "action": "security_anomaly_detected",
+        "actor": {
+          "class": "service",
+          "id": "falco-event-bridge"
+        },
+        "correlation_id": "falco:postgres-lv3:LV3 Falco smoke marker execution:20260403T091428.640168660Z",
+        "evidence_ref": "falco://postgres-lv3/LV3 Falco smoke marker execution",
+        "outcome": "success",
+        "surface": "falco",
+        "target": "postgres-lv3:LV3 Falco smoke marker execution",
+        "ts": "2026-04-03T09:14:28Z"
+      }
+    ]
+  },
+  "nats": {
+    "baseline_seq": 41,
+    "last_seq": 65,
+    "rows": [
+      {
+        "host": "docker-runtime-lv3",
+        "output": "09:14:19.457539874: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 58,
+        "subject": "platform.security.falco",
+        "time": null
+      },
+      {
+        "host": "docker-runtime-lv3",
+        "output": "09:14:19.458548297: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 59,
+        "subject": "platform.security.falco",
+        "time": null
+      },
+      {
+        "host": "docker-build-lv3",
+        "output": "09:14:22.353010703: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 60,
+        "subject": "platform.security.falco",
+        "time": null
+      },
+      {
+        "host": "docker-build-lv3",
+        "output": "09:14:22.354455410: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 61,
+        "subject": "platform.security.falco",
+        "time": null
+      },
+      {
+        "host": "monitoring-lv3",
+        "output": "09:14:25.922480147: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 62,
+        "subject": "platform.security.falco",
+        "time": null
+      },
+      {
+        "host": "monitoring-lv3",
+        "output": "09:14:25.923818163: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 63,
+        "subject": "platform.security.falco",
+        "time": null
+      },
+      {
+        "host": "postgres-lv3",
+        "output": "09:14:28.639357769: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 64,
+        "subject": "platform.security.falco",
+        "time": null
+      },
+      {
+        "host": "postgres-lv3",
+        "output": "09:14:28.640168660: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "seq": 65,
+        "subject": "platform.security.falco",
+        "time": null
+      }
+    ]
+  },
+  "ntfy": {
+    "raw": {
+      "command": "python3 - <<'INNER'\nimport json\nimport sqlite3\nconn = sqlite3.connect('/var/lib/ntfy/cache.db')\nconn.row_factory = sqlite3.Row\nrows = conn.execute(\n    \"SELECT topic, title, message, time FROM messages WHERE topic=? AND time >= ? ORDER BY time ASC\",\n    ('platform-security-critical', 1775207650),\n).fetchall()\nprint(json.dumps([dict(r) for r in rows], sort_keys=True))\nINNER",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "[{\"message\": \"[CRITICAL] docker-runtime-lv3: 09:14:19.457539874: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207660, \"title\": \"Falco critical alert on docker-runtime-lv3\", \"topic\": \"platform-security-critical\"}, {\"message\": \"[CRITICAL] docker-runtime-lv3: 09:14:19.458548297: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207660, \"title\": \"Falco critical alert on docker-runtime-lv3\", \"topic\": \"platform-security-critical\"}, {\"message\": \"[CRITICAL] docker-build-lv3: 09:14:22.353010703: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207663, \"title\": \"Falco critical alert on docker-build-lv3\", \"topic\": \"platform-security-critical\"}, {\"message\": \"[CRITICAL] docker-build-lv3: 09:14:22.354455410: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207663, \"title\": \"Falco critical alert on docker-build-lv3\", \"topic\": \"platform-security-critical\"}, {\"message\": \"[CRITICAL] monitoring-lv3: 09:14:25.922480147: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207666, \"title\": \"Falco critical alert on monitoring-lv3\", \"topic\": \"platform-security-critical\"}, {\"message\": \"[CRITICAL] monitoring-lv3: 09:14:25.923818163: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207666, \"title\": \"Falco critical alert on monitoring-lv3\", \"topic\": \"platform-security-critical\"}, {\"message\": \"[CRITICAL] postgres-lv3: 09:14:28.639357769: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207668, \"title\": \"Falco critical alert on postgres-lv3\", \"topic\": \"platform-security-critical\"}, {\"message\": \"[CRITICAL] postgres-lv3: 09:14:28.640168660: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>\", \"time\": 1775207669, \"title\": \"Falco critical alert on postgres-lv3\", \"topic\": \"platform-security-critical\"}]\n",
+      "target": "docker-runtime-lv3"
+    },
+    "rows": [
+      {
+        "message": "[CRITICAL] docker-runtime-lv3: 09:14:19.457539874: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207660,
+        "title": "Falco critical alert on docker-runtime-lv3",
+        "topic": "platform-security-critical"
+      },
+      {
+        "message": "[CRITICAL] docker-runtime-lv3: 09:14:19.458548297: Critical LV3 Falco smoke marker executed (host=docker-runtime-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=535085) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207660,
+        "title": "Falco critical alert on docker-runtime-lv3",
+        "topic": "platform-security-critical"
+      },
+      {
+        "message": "[CRITICAL] docker-build-lv3: 09:14:22.353010703: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207663,
+        "title": "Falco critical alert on docker-build-lv3",
+        "topic": "platform-security-critical"
+      },
+      {
+        "message": "[CRITICAL] docker-build-lv3: 09:14:22.354455410: Critical LV3 Falco smoke marker executed (host=docker-build-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=222919) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207663,
+        "title": "Falco critical alert on docker-build-lv3",
+        "topic": "platform-security-critical"
+      },
+      {
+        "message": "[CRITICAL] monitoring-lv3: 09:14:25.922480147: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207666,
+        "title": "Falco critical alert on monitoring-lv3",
+        "topic": "platform-security-critical"
+      },
+      {
+        "message": "[CRITICAL] monitoring-lv3: 09:14:25.923818163: Critical LV3 Falco smoke marker executed (host=monitoring-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=2042937) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207666,
+        "title": "Falco critical alert on monitoring-lv3",
+        "topic": "platform-security-critical"
+      },
+      {
+        "message": "[CRITICAL] postgres-lv3: 09:14:28.639357769: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=bash cmdline=bash -c python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207668,
+        "title": "Falco critical alert on postgres-lv3",
+        "topic": "platform-security-critical"
+      },
+      {
+        "message": "[CRITICAL] postgres-lv3: 09:14:28.640168660: Critical LV3 Falco smoke marker executed (host=postgres-lv3 user=ops proc=python3 cmdline=python3 -c import time; time.sleep(1.0) __lv3_falco_smoke__ pid=1818387) container_id=host container_name=host container_image_repository= container_image_tag= k8s_pod_name=<NA> k8s_ns_name=<NA>",
+        "time": 1775207669,
+        "title": "Falco critical alert on postgres-lv3",
+        "topic": "platform-security-critical"
+      }
+    ]
+  },
+  "start_epoch": 1775207650,
+  "summary": {
+    "bridge_source_ips": [
+      "10.10.10.30",
+      "10.10.10.40",
+      "10.10.10.50",
+      "127.0.0.1"
+    ],
+    "health_hosts": [
+      "docker-build-lv3",
+      "docker-runtime-lv3",
+      "monitoring-lv3",
+      "postgres-lv3"
+    ],
+    "loki_hosts": [
+      "docker-build-lv3",
+      "docker-runtime-lv3",
+      "monitoring-lv3",
+      "postgres-lv3"
+    ],
+    "mutation_hosts": [
+      "docker-build-lv3",
+      "docker-runtime-lv3",
+      "monitoring-lv3",
+      "postgres-lv3"
+    ],
+    "nats_hosts": [
+      "docker-build-lv3",
+      "docker-runtime-lv3",
+      "monitoring-lv3",
+      "postgres-lv3"
+    ],
+    "ntfy_hosts": [
+      "docker-build-lv3",
+      "docker-runtime-lv3",
+      "monitoring-lv3",
+      "postgres-lv3"
+    ],
+    "trigger_hosts": [
+      "docker-build-lv3",
+      "docker-runtime-lv3",
+      "monitoring-lv3",
+      "postgres-lv3"
+    ]
+  },
+  "trigger_results": [
+    {
+      "command": "python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "",
+      "target": "docker-runtime-lv3"
+    },
+    {
+      "command": "python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "",
+      "target": "docker-build-lv3"
+    },
+    {
+      "command": "python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "",
+      "target": "monitoring-lv3"
+    },
+    {
+      "command": "python3 -c 'import time; time.sleep(1.0)' __lv3_falco_smoke__",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "",
+      "target": "postgres-lv3"
+    }
+  ]
+}

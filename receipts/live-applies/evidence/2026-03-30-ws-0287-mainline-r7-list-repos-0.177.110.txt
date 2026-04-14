@@ -1,0 +1,44 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=woodpecker-manage
+Preflight workflow: woodpecker-manage
+Description: Run governed Woodpecker API actions such as checking identity, activating the seed repository, listing repository secrets, or triggering the repo validation pipeline.
+INFO no bootstrap manifest configured for this workflow
+PASS file woodpecker_admin_auth: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/admin-auth.json
+Result: PASS (woodpecker-manage)
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-mainline-final/scripts/woodpecker_tool.py --auth-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker/admin-auth.json list-repos
+[
+  {
+    "active": true,
+    "allow_deploy": false,
+    "allow_pr": true,
+    "approval_allowed_users": null,
+    "avatar_url": "http://git.lv3.org:3009/avatars/e847897826ceb8346eb5141f8c23436a",
+    "cancel_previous_pipeline_events": [
+      "push",
+      "pull_request"
+    ],
+    "clone_url": "http://git.lv3.org:3009/ops/proxmox_florin_server.git",
+    "clone_url_ssh": "ssh://git@localhost:2222/ops/proxmox_florin_server.git",
+    "config_extension_endpoint": "",
+    "config_file": "",
+    "default_branch": "main",
+    "forge_id": 1,
+    "forge_remote_id": "1",
+    "forge_url": "http://git.lv3.org:3009/ops/proxmox_florin_server",
+    "full_name": "ops/proxmox_florin_server",
+    "id": 1,
+    "name": "proxmox_florin_server",
+    "netrc_trusted": null,
+    "org_id": 2,
+    "owner": "ops",
+    "pr_enabled": true,
+    "private": true,
+    "require_approval": "forks",
+    "timeout": 60,
+    "trusted": {
+      "network": false,
+      "security": false,
+      "volumes": false
+    },
+    "visibility": "private"
+  }
+]

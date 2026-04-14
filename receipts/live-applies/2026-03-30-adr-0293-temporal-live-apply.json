@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0293-temporal-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T18:59:22Z",
+  "recorded_by": "codex",
+  "source_commit": "4db2d1f4dc788fa391f3cf1bf39facfcac00c218",
+  "repo_version_context": "0.177.106",
+  "platform_version_context": "0.130.71",
+  "workflow_id": "converge-temporal",
+  "adr": "0293",
+  "summary": "Implemented ADR 0293 from a latest-origin/main worktree by converging the private Temporal runtime on docker-runtime-lv3, bootstrapping the Temporal PostgreSQL history and visibility stores on postgres-lv3, wiring the OpenBao-backed runtime secrets and repo-managed `lv3` namespace, and live-verifying the service after fixing the rollout-path failures around broadcast addressing, schema bootstrap connectivity, and shared PostgreSQL connection saturation.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 130,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Temporal frontend loopback",
+      "address": "127.0.0.1:7233 on docker-runtime-lv3"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Temporal UI loopback",
+      "address": "http://127.0.0.1:8099 on docker-runtime-lv3"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Targeted Temporal repo validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_temporal_runtime_role.py tests/test_temporal_playbook.py tests/test_temporal_postgres_role.py` passed with `8 passed`; `make syntax-check-temporal` passed after the final schema-migration recovery and connection-pool tuning changes."
+    },
+    {
+      "check": "Latest-origin/main live apply",
+      "result": "pass",
+      "observed": "`make converge-temporal env=production` succeeded on the final replay recorded in `receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r14.txt` with final recap `docker-runtime-lv3 ok=168 changed=1 failed=0 skipped=53` and `postgres-lv3 ok=59 changed=3 failed=0 skipped=24`."
+    },
+    {
+      "check": "Shared PostgreSQL saturation recovery",
+      "result": "pass",
+      "observed": "The rollout path now survives the previously saturated shared PostgreSQL state. Before the fixes, `pg_stat_activity` reported `100|103` total sessions with `temporal|30`; after the final converge, the same check reported `100|60` total sessions with `temporal|4`, leaving normal connection headroom on postgres-lv3."
+    },
+    {
+      "check": "Temporal runtime health after final converge",
+      "result": "pass",
+      "observed": "`docker compose -f /opt/temporal/docker-compose.yml ps` showed `temporal-frontend`, `temporal-history`, `temporal-matching`, `temporal-worker`, `temporal-openbao-agent`, and `temporal-ui` all healthy or running, with the frontend published on `127.0.0.1:7233` and `127.0.0.1:7243` and the UI published on `127.0.0.1:8099`. Frontend logs showed healthy membership for history, matching, and worker and recorded `Frontend is now healthy`."
+    },
+    {
+      "check": "Namespace and workflow smoke verification",
+      "result": "pass",
+      "observed": "The repo-managed `lv3` namespace remained present with `168h` retention, the controller-local namespace and schema-bootstrap reports were refreshed, and an on-guest `uv run --with temporalio` smoke workflow against `127.0.0.1:7233` completed successfully in `197 ms` with result `temporal-smoke:lv3`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0293-temporal-smoke-r14-remote.json`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md",
+    "docs/adr/.index.yaml",
+    "docs/runbooks/configure-temporal.md",
+    "docs/workstreams/ws-0293-live-apply.md",
+    "playbooks/temporal.yml",
+    "playbooks/services/temporal.yml",
+    "collections/ansible_collections/lv3/platform/roles/temporal_postgres/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/temporal_postgres/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/temporal_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/temporal_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/server-config.yml.j2",
+    "scripts/temporal_smoke.py",
+    "tests/test_temporal_playbook.py",
+    "tests/test_temporal_postgres_role.py",
+    "tests/test_temporal_runtime_role.py",
+    "receipts/image-scans/2026-03-30-temporal-server-runtime.json",
+    "receipts/image-scans/2026-03-30-temporal-server-runtime.trivy.json",
+    "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.json",
+    "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.trivy.json",
+    "receipts/image-scans/2026-03-30-temporal-ui-runtime.json",
+    "receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r10.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r14.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-temporal-smoke.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-temporal-smoke-r14-remote.json",
+    "receipts/live-applies/2026-03-30-adr-0293-temporal-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The rollout path now avoids controller-local PostgreSQL schema probes that failed under saturation by checking schema tables locally on postgres-lv3 as `postgres` and by reducing the Temporal PostgreSQL pool sizes to a steady-state footprint of four Temporal sessions after convergence.",
+    "Controller-local SDK smoke over an SSH tunnel can return a transient gRPC connection reset immediately after a forced Temporal stack recreation even though the on-platform admin-tools health checks pass; the recorded on-guest smoke receipt is the authoritative end-to-end proof for this branch.",
+    "Main-only follow-through still remains after this branch-local live apply: merge onto the latest origin/main, update `VERSION`, `changelog.md`, top-level `README.md`, and `versions/stack.yaml` on main only, then replay the Temporal converge from merged main before replacing the pending ADR/workstream version placeholders."
+  ]
+}

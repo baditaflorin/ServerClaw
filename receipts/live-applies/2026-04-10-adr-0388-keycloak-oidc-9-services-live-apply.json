@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply",
+  "applied_on": "2026-04-10",
+  "recorded_on": "2026-04-10",
+  "recorded_by": "claude",
+  "source_commit": "139cc0517bdd619c7e8192f0f83c0715e99fd201",
+  "repo_version_context": "0.178.77",
+  "workflow_id": "converge-keycloak",
+  "adr": "0388",
+  "summary": "ADR 0388 Keycloak OIDC centralization: 9 services converged with unified realm URL and OIDC client configuration.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "runtime-control-lv3",
+      "address": "10.10.10.92"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Keycloak OIDC centralization complete",
+      "result": "pass",
+      "observed": "9 services (Harbor, Semaphore, Woodpecker, Gitea, Grist, Outline, etc.) using centralized Keycloak realm URL and OIDC configuration."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0388-keycloak-oidc-centralization.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Harbor OIDC fix included — client secret fallback added when Keycloak bootstrap unavailable."
+  ]
+}

@@ -1,0 +1,10 @@
+health_status=200
+root_status=200
+overview_status=200
+launcher_status=200
+health_body={"status":"ok"}
+launcher_has_application_launcher=yes
+launcher_has_switch_tools_copy=yes
+launcher_has_shared_shell_copy=yes
+launcher_has_operate=yes
+launcher_has_administer=yes

@@ -1,0 +1,1 @@
+Wrote generated platform vars to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0308-live-apply-r2/inventory/group_vars/platform.yml

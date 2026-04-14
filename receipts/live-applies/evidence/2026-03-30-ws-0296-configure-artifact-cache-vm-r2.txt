@@ -1,0 +1,201 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=configure-artifact-cache-vm
+Preflight workflow: configure-artifact-cache-vm
+Description: Provision the dedicated artifact-cache VM, converge the private cache-plane runtime on it, and leave build-host consumer adoption to the governed service replay.
+INFO no bootstrap manifest configured for this workflow
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+Result: PASS (configure-artifact-cache-vm)
+ANSIBLE_HOST_KEY_CHECKING=False LV3_RUN_ID=08b3e9aeab2543bab31cc82b616afa54 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/inventory/hosts.yml --run-id 86cef1d2ad02412b906f81527fb06d4e --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/playbooks/artifact-cache-vm.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+
+PLAY [Ensure the artifact cache VM is provisioned on the Proxmox host] *********
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:17.543Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:20.494Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:20.502Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:20.530Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:20.537Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:20.573Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Ensure snippets directory exists] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:20.580Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:21.016Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Validate each guest references a declared template] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:21.023Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=artifact-cache-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": {
+        "cidr": 24,
+        "cores": 4,
+        "disk_gb": 160,
+        "gateway4": "10.10.10.1",
+        "ipv4": "10.10.10.80",
+        "macaddr": "BC:24:11:18:AC:80",
+        "memory_mb": 8192,
+        "name": "artifact-cache-lv3",
+        "packages": [
+            "docker.io"
+        ],
+        "placement": {
+            "anti_affinity_group": "artifact-cache-plane",
+            "co_location_exceptions": [],
+            "failure_domain": "host:proxmox_florin",
+            "placement_class": "primary"
+        },
+        "role": "artifact-cache",
+        "tags": [
+            "artifact-cache",
+            "cache",
+            "docker",
+            "lv3"
+        ],
+        "template_key": "lv3-debian-base",
+        "vmid": 180
+    },
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:21.061Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Build failure-domain live label map] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:21.068Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:21.099Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:21.105Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:22.252Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Check which guest VMs already exist] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:22.259Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:23.320Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Read current guest configurations] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:23.329Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:24.330Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Clone guest VMs from template] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:24.338Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:26.206Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Resize guest disks on first clone] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:26.214Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:27.993Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:28.011Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:29.098Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Attach additional guest disks when declared] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:29.106Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [proxmox_florin]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T12:19:29.137Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:29.144Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:30.258Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.proxmox_guests : Start guest VMs] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:30.265Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:32.254Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [Stop the artifact cache VM from Proxmox after qm set changes] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stop the artifact cache VM from Proxmox after qm set changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:32.272Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Stop the artifact cache VM from Proxmox after qm set changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:33.516Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+TASK [Start the artifact cache VM from Proxmox after the forced stop] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: Start the artifact cache VM from Proxmox after the forced stop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:33.529Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [proxmox_florin]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Start the artifact cache VM from Proxmox after the forced stop","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:35.583Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+
+PLAY [Converge the dedicated artifact cache guest] *****************************
+
+TASK [Wait for the artifact cache VM SSH service to be reachable] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Wait for the artifact cache VM SSH service to be reachable","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:35.600Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Wait for the artifact cache VM SSH service to be reachable","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:47.574Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Gather facts after SSH is ready] *****************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gather facts after SSH is ready","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:47.576Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gather facts after SSH is ready","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:49.376Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:49.381Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:49.443Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Wait for the target connection to become ready] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:49.447Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:51.587Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the target distribution is supported] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:51.591Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:51.636Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert required preflight variables are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:51.639Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [artifact-cache-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"artifact-cache-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-30T12:19:51.650Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Find controller-side .env files in the repository workspace] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:51.653Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:52.084Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:52.088Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:52.114Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:52.119Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:52.158Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validate guest network policy inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:52.161Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [artifact-cache-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T12:19:52.230Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T12:19:52.233Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [artifact-cache-lv3]: FAILED! => {"cache_update_time": 1774873186, "cache_updated": false, "changed": false, "msg": "'/usr/bin/apt-get -y -o \"Dpkg::Options::=--force-confdef\" -o \"Dpkg::Options::=--force-confold\"       install 'nftables=1.1.3-1'' failed: E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 903 (apt-get)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?\n", "rc": 100, "stderr": "E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 903 (apt-get)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?\n", "stderr_lines": ["E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 903 (apt-get)", "E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?"], "stdout": "", "stdout_lines": []}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"'/usr/bin/apt-get -y -o \"Dpkg::Options::=--force-confdef\" -o \"Dpkg::Options::=--force-confold\"       install 'nftables=1.1.3-1'' failed: E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 903 (apt-get)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"artifact-cache-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-30T12:19:53.344Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+artifact-cache-lv3         : ok=9    changed=0    unreachable=0    failed=1    skipped=1    rescued=0    ignored=0
+proxmox_florin             : ok=16   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+
+make: *** [configure-artifact-cache-vm] Error 2

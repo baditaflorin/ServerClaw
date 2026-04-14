@@ -1,0 +1,5 @@
+$ uv run --with pytest --with pyyaml --with jsonschema --with fastapi --with httpx --with jinja2 --with itsdangerous --with python-multipart python -m pytest -q tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_validation_gate.py tests/test_validation_gate_windmill.py tests/test_validation_runner_contracts.py tests/test_run_gate_fallback.py tests/test_openbao_compose_env_helper.py tests/test_openbao_runtime_role.py tests/test_openbao_systemd_credentials_helper.py tests/test_config_merge_windmill.py tests/test_compose_runtime_secret_injection.py tests/test_postgres_vm_role.py tests/test_linux_guest_firewall_role.py
+........................................................................ [ 43%]
+........................................................................ [ 86%]
+......................                                                   [100%]
+166 passed in 9.79s

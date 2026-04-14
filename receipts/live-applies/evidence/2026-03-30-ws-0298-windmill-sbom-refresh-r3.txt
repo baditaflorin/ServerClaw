@@ -1,0 +1,4 @@
+docker-runtime-lv3 | FAILED | rc=2 >>
+python3: can't open file '/srv/proxmox_florin_server/config/windmill/scripts/sbom-refresh.py': [Errno 2] No such file or directory
+Shared connection to 10.10.10.20 closed.
+non-zero return code

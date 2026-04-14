@@ -1,0 +1,4 @@
+GITEA_RUNNER_HOST_DATA_DIR=/opt/gitea-runner/data
+GITEA_RUNNER_LABELS=self-hosted:host,linux:host,amd64:host,docker:docker
+GITEA_RUNNER_NAME=docker-build-lv3
+GITEA_RUNNER_REGISTRATION_TOKEN=iKtnsRteNAUkpkJSTunjTKHsEAUkXdT1RHxUFf6n

@@ -1,0 +1,12 @@
+
+PLAY [Converge Proxmox guest network policy enforcement] ***********************
+skipping: no hosts matched
+
+PLAY [Converge guest nftables network policy] **********************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T16:56:48.672Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [postgres-lv3]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ops@10.10.10.50: Permission denied (publickey).", "unreachable": true}
+
+PLAY RECAP *********************************************************************
+postgres-lv3               : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0

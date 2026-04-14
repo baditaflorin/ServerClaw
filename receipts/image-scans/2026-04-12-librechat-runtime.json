@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "librechat_runtime",
+  "image_ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanner_version": "0.63.0",
+  "scanned_on": "2026-04-12",
+  "summary": {
+    "critical": 3,
+    "high": 23
+  },
+  "targets_with_findings": [
+    {
+      "target": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b (alpine 3.23.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 0,
+      "high": 2
+    },
+    {
+      "target": "Node.js",
+      "class": "lang-pkgs",
+      "type": "node-pkg",
+      "critical": 3,
+      "high": 21
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-04-12-librechat-runtime.trivy.json"
+}

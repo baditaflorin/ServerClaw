@@ -1,0 +1,71 @@
+# ws-0314 keycloak public and admin probes r12
+
+recorded_at=2026-04-04T09:16:27Z
+
+## well-known
+
+## admin client token and realm query
+{
+  "token_type": "Bearer",
+  "expires_in": 60,
+  "client_id": "lv3-admin-runtime",
+  "realm_access": {
+    "roles": [
+      "create-realm",
+      "default-roles-master",
+      "offline_access",
+      "admin",
+      "uma_authorization"
+    ]
+  },
+  "master_realm_roles": {
+    "roles": [
+      "view-identity-providers",
+      "view-realm",
+      "manage-identity-providers",
+      "impersonation",
+      "create-client",
+      "manage-users",
+      "query-realms",
+      "view-authorization",
+      "query-clients",
+      "query-users",
+      "manage-events",
+      "manage-realm",
+      "view-events",
+      "view-users",
+      "view-clients",
+      "manage-authorization",
+      "manage-clients",
+      "query-groups"
+    ]
+  },
+  "lv3_realm_roles": {
+    "roles": [
+      "view-realm",
+      "view-identity-providers",
+      "manage-identity-providers",
+      "impersonation",
+      "create-client",
+      "manage-users",
+      "query-realms",
+      "view-authorization",
+      "query-clients",
+      "query-users",
+      "manage-events",
+      "manage-realm",
+      "view-events",
+      "view-users",
+      "view-clients",
+      "manage-authorization",
+      "manage-clients",
+      "query-groups"
+    ]
+  }
+}
+admin_query_status=200
+{
+  "realm": "lv3",
+  "displayName": "LV3 Control Plane",
+  "enabled": true
+}

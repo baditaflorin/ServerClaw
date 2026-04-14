@@ -1,0 +1,2 @@
+runtime-control-lv3 | CHANGED | rc=0 >>
+grep: /opt/keycloak/.env: No such file or directory
