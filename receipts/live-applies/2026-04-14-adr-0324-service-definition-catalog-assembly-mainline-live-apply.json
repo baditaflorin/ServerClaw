@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-14T09:23:50Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0324-service-definition-catalog-assembly-mainline-live-apply",
+  "adr": "0324",
+  "workstream": "ws-0324-live-apply",
+  "source_branch": "codex/ws-0324-main-integration-r5",
+  "source_commit": "daeeeb96bf7fc7acdd736b772250ed9162c1c9e9",
+  "repo_version_context": "0.178.140",
+  "platform_version_context": "0.178.138",
+  "integrated_repo_version": "0.178.140",
+  "integrated_platform_version": "0.178.138",
+  "summary": "Record the exact-main ADR 0324 closeout from the latest realistic origin/main tip 4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4, refresh canonical truth to point at the mainline service-definition-catalog receipt, repair the missing generated SLO target artifact surfaced by the fresh mainline repo gates, reconcile the upstream VERSION 0.178.140 versus stack repo_version 0.178.139 drift, and carry the already-live-applied service-catalog assembly into the current mainline repo version 0.178.140.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "artifact",
+      "name": "catalog/services"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/service-capability-catalog.json"
+    },
+    {
+      "kind": "artifact",
+      "name": "config/prometheus/file_sd/slo_targets.yml"
+    },
+    {
+      "kind": "artifact",
+      "name": "versions/stack.yaml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Service definition catalog validation",
+      "result": "pass",
+      "observed": "The exact-main integration tree preserves a valid ADR 0324 bundle source and generated catalog assembly contract."
+    },
+    {
+      "check": "Focused ADR 0324 regression slice",
+      "result": "pass",
+      "observed": "The focused pytest slice covering service-definition bundles, Windmill follow-through, docker bridge chains, firewall guards, and PostgreSQL access policy passed on the integrated main tree."
+    },
+    {
+      "check": "Mainline generated-artifact repair",
+      "result": "pass",
+      "observed": "The fresh exact-main validation replay reproduced a current-main gap rather than a ws-0324 regression: config/prometheus/file_sd/slo_targets.yml was missing and had to be regenerated before the repository data-model gate could pass again."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0324-service-definition-shards-and-generated-service-catalog-assembly.md",
+    "docs/workstreams/ws-0324-live-apply.md",
+    "workstreams/active/ws-0324-live-apply.yaml",
+    "docs/adr/implementation-status/adr-0324.yaml",
+    "receipts/live-applies/2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply.json",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-service-definition-catalog-check-r2-0.178.140.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-pytest-r2-0.178.140.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-remote-validate-r3-0.178.140.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-remote-validate-summary-r3-0.178.140.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-git-diff-check-r1-0.178.140.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-generate-adr-index-check-r1-0.178.140.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-data-models-r2-0.178.140.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0324-mainline-materialize-image-scan-receipts-r1-0.178.140.txt"
+  ],
+  "notes": [
+    "The earlier branch receipt 2026-04-04-adr-0324-service-definition-catalog-assembly-live-apply remains the first-live proof for ADR 0324 on platform version 0.130.98.",
+    "This mainline receipt records the exact-main closeout from origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4 and captures the final 0.178.140 targeted validation evidence set from commit daeeeb96bf7fc7acdd736b772250ed9162c1c9e9.",
+    "The clean latest-main verification workspace at the same origin/main tip is already red in the broader promotion gate on generated-docs, ansible-lint, and integration-tests, so those failures remain inherited mainline debt rather than new ADR 0324 regressions.",
+    "A fresh numbered release cut is intentionally deferred because the repository's release blocker policy still sees unrelated in-progress workstreams on latest main."
+  ]
+}

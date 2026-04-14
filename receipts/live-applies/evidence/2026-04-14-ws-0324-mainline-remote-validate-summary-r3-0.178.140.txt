@@ -1,0 +1,11 @@
+passed
+workstream-surfaces passed 2.56
+agent-standards passed 3.16
+ansible-syntax passed 253.03
+schema-validation passed 34.49
+atlas-lint passed 0.4
+policy-validation passed 1.05
+iac-policy-scan passed 26.74
+alert-rule-validation passed 1.88
+type-check passed 0.69
+dependency-graph passed 2.82
