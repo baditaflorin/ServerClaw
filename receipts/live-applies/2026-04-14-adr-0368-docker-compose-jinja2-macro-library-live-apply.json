@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0368-docker-compose-jinja2-macro-library-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-14T05:13:19Z",
+  "recorded_by": "codex",
+  "workflow_id": "live-apply-service",
+  "adr": "0368",
+  "workstream": "ws-0368-live-apply",
+  "source_branch": "codex/ws-0368-main-integration-r3",
+  "source_commit": "90004bc486852ed737a12a3dc204137df798adaf",
+  "repo_version_context": "0.178.137",
+  "platform_version_context": "0.178.137",
+  "summary": "Replay ADR 0368 from the latest realistic 0.178.137 origin/main base, repair the exact-main Redpanda readiness bug and shared-worktree scan-receipt path handling uncovered during the governed replay, and verify MinIO, Gitea, Redpanda, check-build-server, and remote-validate end to end before the final mainline merge.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "runtime-control",
+      "address": "10.10.10.92"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused latest-main regression slice",
+      "result": "pass",
+      "observed": "The ws-0368 focused pytest slice passed with 46 tests across the Gitea, MinIO, Redpanda, service-definition-catalog, SBOM, and image-upgrade surfaces."
+    },
+    {
+      "check": "Repository gates",
+      "result": "pass",
+      "observed": "agent-standards, service-definitions, health-probes, data-models, and workstream-surfaces all passed on the ws-0368 worktree."
+    },
+    {
+      "check": "MinIO live apply",
+      "result": "pass",
+      "observed": "The governed MinIO replay completed on docker-runtime with ALLOW_IN_PLACE_MUTATION=true, and direct MinIO live and ready probes passed afterwards."
+    },
+    {
+      "check": "Gitea live apply",
+      "result": "pass",
+      "observed": "The governed Gitea replay completed on runtime-control with ALLOW_IN_PLACE_MUTATION=true, and the private version endpoint, swagger document, and release-bundle signature validation all succeeded afterwards."
+    },
+    {
+      "check": "Redpanda live apply",
+      "result": "pass",
+      "observed": "The first replay exposed a stale readiness probe that always read offset=0. After repairing the service catalog and generated health-probe bundle to read back from the produced offset, the governed Redpanda replay completed successfully and direct Kafka plus schema-registry verification passed."
+    },
+    {
+      "check": "Build-server automation path",
+      "result": "pass",
+      "observed": "check-build-server confirmed SSH connectivity, the remote workspace path, and immutable snapshot dry-run upload from the ws-0368 worktree."
+    },
+    {
+      "check": "remote-validate automation path",
+      "result": "pass",
+      "observed": "The remote builder leg failed to resolve registry.example.com for the validation runner images, but the governed local fallback reran every unresolved blocking check locally and all ten blocking checks passed."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0368-live-apply.md",
+    "docs/adr/0368-docker-compose-jinja2-macro-library.md",
+    "workstreams/active/ws-0368-live-apply.yaml",
+    "catalog/services/redpanda/service.yaml",
+    "config/health-probe-catalog.json",
+    "config/image-catalog.json",
+    "scripts/managed_image_gate.py",
+    "scripts/sbom_scanner.py",
+    "scripts/upgrade_container_image.py",
+    "tests/test_sbom_scanner.py",
+    "tests/test_service_definition_catalog.py",
+    "tests/test_upgrade_container_image.py",
+    "receipts/image-scans/2026-04-14-redpanda-runtime.json",
+    "receipts/sbom/c61d4eb37091.cdx.json",
+    "receipts/cve/c61d4eb37091-20260414T044015Z.grype.json",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-pytest-r1-0.178.137.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-repo-gates-r1-0.178.137.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-git-diff-check-r1-0.178.137.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-check-build-server-r1-0.178.137.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-remote-validate-r1-0.178.137.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-gitea-verify-r1-0.178.137.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-minio-verify-r1-0.178.137.txt",
+    "receipts/live-applies/evidence/2026-04-14-ws-0368-redpanda-verify-r1-0.178.137.txt"
+  ],
+  "notes": [
+    "The replay started from origin/main@6aeb26434724680c6da2162cd3544031b5a93f03, the latest realistic 0.178.137 mainline base visible from this controller at apply time.",
+    "Immutable guest mutation was acknowledged explicitly for the MinIO, Gitea, and Redpanda service replays via ALLOW_IN_PLACE_MUTATION=true.",
+    "This receipt records the first truthful platform application of ADR 0368. Protected integration files still wait for the final merge-to-main replay."
+  ]
+}

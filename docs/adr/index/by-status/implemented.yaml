@@ -6237,7 +6237,8 @@ adrs:
     filename: 0368-docker-compose-jinja2-macro-library.md
     path: docs/adr/0368-docker-compose-jinja2-macro-library.md
     implemented_in_repo_version: 0.178.116
-    implemented_on: '2026-04-11'
+    implemented_in_platform_version: 0.178.137
+    implemented_on: '2026-04-14'
   - adr: '0373'
     title: Service Registry and Derived Defaults
     status: Accepted

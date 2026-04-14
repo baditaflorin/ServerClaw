@@ -1,0 +1,32 @@
+workstream_id: ws-0368-live-apply
+state: completed
+schema_version: 1.1.0
+started_at: '2026-04-14T00:02:00Z'
+completed_at: '2026-04-14T05:13:19Z'
+applied_by: codex
+repo_version: 90004bc486852ed737a12a3dc204137df798adaf
+adr: 0368
+summary: Live-apply ADR 0368 compose-macro adoption from the latest realistic
+  origin/main base and repair the exact-main replay gaps surfaced by the governed
+  MinIO, Gitea, and Redpanda replays.
+targets:
+- target: docker-runtime
+  role: redpanda_runtime
+- target: docker-runtime
+  role: minio_runtime
+- target: runtime-control
+  role: gitea_runtime
+errors: []
+notes:
+- MinIO replay completed via ALLOW_IN_PLACE_MUTATION=true make live-apply-service
+  service=minio env=production and post-apply health probes passed.
+- Gitea replay completed via ALLOW_IN_PLACE_MUTATION=true make live-apply-service
+  service=gitea env=production and the private API plus release-bundle validation
+  passed.
+- Redpanda replay initially failed because the readiness probe always read
+  offset=0; the catalog and generated health-probe bundle were repaired to read
+  back from the produced offset, after which the replay and direct smoke
+  verification passed.
+- check-build-server passed from this worktree, and make remote-validate
+  completed through the governed local fallback after the remote builder failed
+  to resolve registry.example.com for runner images.

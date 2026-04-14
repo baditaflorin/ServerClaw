@@ -2,10 +2,10 @@
 
 - Date: 2026-04-06
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Live applied
 - Implemented In Repo Version: 0.178.116
-- Implemented In Platform Version: not yet applied
-- Implemented On: 2026-04-11
+- Implemented In Platform Version: 0.178.137
+- Implemented On: 2026-04-14
 - Deciders: platform team
 - Concern: platform, dry
 - Tags: docker, jinja2, templates, dry, macros

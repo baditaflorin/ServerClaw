@@ -1,98 +1,80 @@
-# ws-0368-live-apply — ADR 0368 live apply and completion
+# Workstream ws-0368-live-apply
 
-## Goal
+- ADR: [ADR 0368](../adr/0368-docker-compose-jinja2-macro-library.md)
+- Status: ready
+- Branch: `codex/ws-0368-main-integration-r3`
+- Worktree: `.worktrees/ws-0368-main-integration-r3`
+- Base: `origin/main@6aeb26434724680c6da2162cd3544031b5a93f03` (`VERSION` `0.178.137`)
 
-Close ADR 0368 from its current partial state on `origin/main` by:
+## Purpose
 
-- finishing the remaining compose-macro adoption work needed for safe reuse
-- reconciling the later hairpin automation path with the original macro design
-- live-applying the resulting runtime changes from a fresh `origin/main` base
-- recording verification evidence and ADR metadata so a later reader can see
-  both the repo state and the live platform state without hidden chat context
+Close the remaining ADR 0368 gap from the latest realistic `origin/main` base:
+finish the exact-main replay repairs, re-run the governed live-apply path for
+the services that still surfaced runtime drift, verify the repo automation path
+end to end, and leave merge-safe evidence in git-visible state.
 
-## Repo Completion
+## What Changed
 
-The branch-local completion work finished the remaining ADR 0368 migration:
+- Repaired the Redpanda readiness probe source in
+  `catalog/services/redpanda/service.yaml` so it reads back from the produced
+  Kafka offset instead of hard-coding `offset=0`, then regenerated
+  `config/health-probe-catalog.json`.
+- Hardened the shared-worktree receipt path handling in
+  `scripts/sbom_scanner.py`, `scripts/managed_image_gate.py`, and
+  `scripts/upgrade_container_image.py`, with focused coverage in
+  `tests/test_sbom_scanner.py` and `tests/test_upgrade_container_image.py`.
+- Refreshed `config/image-catalog.json` plus the Redpanda scan receipts so the
+  current catalog points at branch-carried evidence instead of the dirty shared
+  root checkout.
+- Updated the ws-0368 ownership manifest so the new Redpanda catalog source,
+  scan receipts, and live-apply evidence paths are explicitly claimed.
 
-- extended the shared `openbao_sidecar()` macro so the remaining service-specific
-  sidecars can use it directly
-- extended `redis_service()` so the remaining simple Redis consumers can drop
-  inline boilerplate
-- migrated the outstanding compose templates for Dify, Flagsmith, Gitea,
-  GlitchTip, Keycloak, Lago, Label Studio, Langfuse, LibreChat, LiteLLM, Mail
-  Platform, MinIO, NetBox, Outline, Paperless, Redpanda, Semaphore, and
-  Windmill
-- removed stale role-local `compose_macros.j2` shadow copies from
-  `keycloak_runtime`, `netbox_runtime`, `plane_runtime`, and `semaphore_runtime`
-- fixed fresh-worktree `generate_platform_vars.py` execution by avoiding the
-  stdlib `platform` import collision
+## Verification
 
-## Validation Evidence
+- Focused pytest slice passed with `46 passed in 1.05s`:
+  - `tests/test_gitea_runtime_role.py`
+  - `tests/test_minio_runtime_role.py`
+  - `tests/test_redpanda_runtime_role.py`
+  - `tests/test_service_definition_catalog.py`
+  - `tests/test_sbom_scanner.py`
+  - `tests/test_upgrade_container_image.py`
+- `./scripts/validate_repo.sh agent-standards service-definitions health-probes data-models workstream-surfaces`
+  passed; see
+  `receipts/live-applies/evidence/2026-04-14-ws-0368-repo-gates-r1-0.178.137.txt`.
+- `git diff --check` passed; see
+  `receipts/live-applies/evidence/2026-04-14-ws-0368-git-diff-check-r1-0.178.137.txt`.
+- `make check-build-server` passed and confirmed immutable snapshot dry-run
+  upload; see
+  `receipts/live-applies/evidence/2026-04-14-ws-0368-check-build-server-r1-0.178.137.txt`.
+- `make remote-validate` first failed on the remote builder because runner
+  images under `registry.example.com` could not be resolved there, then
+  completed through the governed local fallback with all blocking checks passed:
+  `workstream-surfaces`, `agent-standards`, `ansible-syntax`,
+  `schema-validation`, `atlas-lint`, `policy-validation`, `iac-policy-scan`,
+  `alert-rule-validation`, `type-check`, and `dependency-graph`. Evidence:
+  `receipts/live-applies/evidence/2026-04-14-ws-0368-remote-validate-r1-0.178.137.txt`.
 
-Branch-local evidence was written under the ignored
-`receipts/live-applies/evidence/2026-04-11-ws-0368-*` prefix. The key outcomes:
+## Live Apply Outcome
 
-- `uvx --from pyyaml python scripts/generate_platform_vars.py --check` passed
-  after the fresh-worktree import fix.
-- `uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --check --only hairpin`
-  passed and confirmed `platform_hairpin.yml` matches 10 derived entries.
-- Focused pytest coverage for the migrated Flagsmith, Gitea, Label Studio, and
-  MinIO templates passed (`4 passed`).
-- A broader role/defaults pytest sweep across `generate_platform_vars` plus the
-  affected runtime role suites finished with `100 passed / 47 failed`; the
-  failing assertions were recorded as baseline drift candidates instead of being
-  treated as ws-0368 regressions.
-- A representative control run of 11 of those failing assertions on a detached
-  clean `origin/main` checkout failed in the same way, confirming that the
-  wider suite drift predates this workstream branch.
-- `./scripts/validate_repo.sh workstream-surfaces` passed after refreshing the
-  ws-0368 ownership manifest.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=minio env=production`
+  completed successfully, and direct MinIO live/ready probes passed; see
+  `receipts/live-applies/evidence/2026-04-14-ws-0368-minio-verify-r1-0.178.137.txt`.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=gitea env=production`
+  completed successfully, and the private Gitea API plus release-bundle
+  validation passed; see
+  `receipts/live-applies/evidence/2026-04-14-ws-0368-gitea-verify-r1-0.178.137.txt`.
+- The first Redpanda replay exposed the stale readiness probe bug. After the
+  catalog fix, `ALLOW_IN_PLACE_MUTATION=true make live-apply-service
+  service=redpanda env=production` completed successfully, and direct Kafka plus
+  schema-registry smoke verification passed; see
+  `receipts/live-applies/evidence/2026-04-14-ws-0368-redpanda-verify-r1-0.178.137.txt`.
+- ADR 0368 can now truthfully claim `Implementation Status: Live applied`,
+  `Implemented In Platform Version: 0.178.137`, and `Implemented On:
+  2026-04-14`.
 
-Additional automation truth captured during replay:
+## Remaining Mainline Work
 
-- `./scripts/validate_repo.sh agent-standards` still fails on unrelated baseline
-  public-mode checks in `README.md` plus the expected topology-snapshot drift
-  after generating the gitignored `inventory/group_vars/platform.yml`.
-- `make converge-site` is stale on `origin/main`: it calls
-  `preflight WORKFLOW=converge-site`, but that workflow id is not present in
-  `config/workflow-catalog.json`.
-- `make live-apply-site` cannot reach the governed Ansible stage from this branch
-  because `check-canonical-truth` currently fails on the unrelated active shard
-  `workstreams/active/ws-0377-repo-intake-subdomain.yaml` (`adr: ""`).
-- `make remote-validate` with local fallback still fails from this controller
-  because the validation lanes attempt to pull runner images from
-  `registry.example.com`, which is not reachable/resolvable here.
-- `python3 scripts/uptime_contract.py --write` currently fails on unrelated
-  baseline catalog drift because `librechat` enables `uptime_kuma` without a
-  `monitor` payload.
-
-## Live-Apply Attempt And Blocker
-
-No truthful live-apply receipt was created because no platform mutation could be
-completed from this controller.
-
-The replay reached the real apply path:
-
-- `make converge-redpanda env=production` passed preflight and entered Ansible,
-  then failed with `runtime-comms` unreachable during SSH banner exchange.
-- Direct controller-side TCP probes to `100.64.0.1:22`, `10.10.10.21:22`, and
-  `10.10.10.92:22` all timed out.
-- `ssh ops@100.64.0.1` timed out from this controller.
-- `make check-build-server` also failed because the remote builder
-  `ops@10.10.10.30` is unreachable from the same network path.
-
-This means the remaining blocker is platform access from the current controller,
-not ADR 0368 repository logic.
-
-## Merge-To-Main Follow-Up
-
-When controller or build-server connectivity is restored, the next agent should:
-
-1. Start from the latest `origin/main` again.
-2. Re-run the governed wrapper if `ws-0377-repo-intake-subdomain.yaml` has been
-   repaired; otherwise use the service-scoped `converge-*` entrypoints for the
-   ADR 0368 service set.
-3. Record the real live-apply receipt and post-apply verification evidence.
-4. Only on the final `main` integration step, update protected truth surfaces
-   such as `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml` as
-   appropriate for the verified live state.
+- Fast-forward onto the latest `origin/main` again immediately before merge.
+- Replay the merged main tree so `VERSION`, `changelog.md`, `README.md`, and
+  `versions/stack.yaml` can be updated from truthful mainline state.
+- Push the resulting `main` commit to `origin/main` and remove this worktree.

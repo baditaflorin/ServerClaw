@@ -274,9 +274,9 @@ workstreams:
 - id: ws-0368-live-apply
   adr: 0368
   title: ADR 0368 Live Apply and Completion
-  status: in_progress
-  ready_to_merge: false
-  live_applied: false
+  status: ready
+  ready_to_merge: true
+  live_applied: true
   owner: codex
   branch: codex/ws-0368-main-integration-r3
   worktree_path: .worktrees/ws-0368-main-integration-r3
@@ -345,6 +345,8 @@ workstreams:
   - config/workflow-catalog.json
   - docs/adr/.index.yaml
   - docs/adr/0368-docker-compose-jinja2-macro-library.md
+  - docs/adr/implementation-status/INDEX.yaml
+  - docs/adr/implementation-status/adr-0368.md
   - docs/adr/implementation-status/adr-0368.yaml
   - docs/adr/index/by-concern/platform.yaml
   - docs/adr/index/by-concern/vm-topology.yaml
@@ -371,6 +373,16 @@ workstreams:
   - playbooks/verify-bootstrap-guests.yml
   - receipts/live-applies/2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply.json
   - receipts/live-applies/
+  - receipts/live-applies/ws-0368-live-apply-apply-receipt.yaml
+  - receipts/live-applies/2026-04-14-adr-0368-docker-compose-jinja2-macro-library-live-apply.json
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-check-build-server-r1-0.178.137.txt
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-git-diff-check-r1-0.178.137.txt
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-gitea-verify-r1-0.178.137.txt
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-minio-verify-r1-0.178.137.txt
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-pytest-r1-0.178.137.txt
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-redpanda-verify-r1-0.178.137.txt
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-remote-validate-r1-0.178.137.txt
+  - receipts/live-applies/evidence/2026-04-14-ws-0368-repo-gates-r1-0.178.137.txt
   - receipts/image-scans/2026-04-14-redpanda-runtime.json
   - receipts/sbom/c61d4eb37091.cdx.json
   - receipts/cve/c61d4eb37091-20260414T044015Z.grype.json
@@ -522,6 +534,8 @@ workstreams:
       paths:
       - docs/adr/.index.yaml
       - docs/adr/0368-docker-compose-jinja2-macro-library.md
+      - docs/adr/implementation-status/INDEX.yaml
+      - docs/adr/implementation-status/adr-0368.md
       - docs/adr/implementation-status/adr-0368.yaml
       - docs/adr/index/by-concern/platform.yaml
       - docs/adr/index/by-concern/vm-topology.yaml
@@ -539,6 +553,14 @@ workstreams:
     - id: adr_0368_live_apply_evidence
       paths:
       - receipts/live-applies/
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-check-build-server-r1-0.178.137.txt
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-git-diff-check-r1-0.178.137.txt
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-gitea-verify-r1-0.178.137.txt
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-minio-verify-r1-0.178.137.txt
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-pytest-r1-0.178.137.txt
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-redpanda-verify-r1-0.178.137.txt
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-remote-validate-r1-0.178.137.txt
+      - receipts/live-applies/evidence/2026-04-14-ws-0368-repo-gates-r1-0.178.137.txt
       mode: shared_contract
       contract: live-apply-evidence-v1
     - id: workstream_registry
@@ -558,6 +580,16 @@ workstreams:
     evidence plus final ADR metadata without touching protected release files
 
     until the final integration step.
+
+    Latest realistic origin/main replay is complete at 6aeb26434724680c6da2162cd3544031b5a93f03
+    (VERSION 0.178.137). MinIO, Gitea, and Redpanda were replayed successfully on
+    2026-04-14, with Redpanda requiring a readiness-probe repair to read back from
+    the produced Kafka offset instead of hard-coding offset=0. check-build-server
+    passed, and make remote-validate completed through the governed local fallback
+    after the remote builder could not resolve registry.example.com for runner images.
+    Remaining work is integration-only: merge onto the latest main tip, replay from
+    merged main, update protected release truth, push origin/main, and retire this
+    worktree.
 
     '
   blockers: []
