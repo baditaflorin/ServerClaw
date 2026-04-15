@@ -135,6 +135,7 @@ workstreams:
     worktree_path: ../homepage
     doc: /tmp/repo/docs/workstreams/adr-0152-homepage.md
     canonical_truth:
+      included_in_repo_version: 0.9.9
       latest_receipts:
         homepage: 2026-03-26-adr-0152-homepage-live-apply
   - id: adr-0163-retry-taxonomy
@@ -145,6 +146,7 @@ workstreams:
     worktree_path: ../retry
     doc: /tmp/repo/docs/workstreams/adr-0163-retry-taxonomy.md
     canonical_truth:
+      included_in_repo_version: 0.10.0
       latest_receipts:
         api_gateway: 2026-03-26-adr-0163-retry-taxonomy-live-apply
 """.strip()
@@ -224,7 +226,7 @@ def test_assemble_latest_receipts_prefers_newer_repo_version_over_higher_adr(can
     assert latest["public_edge_publication"] == "newer-edge-receipt"
 
 
-def test_assemble_latest_receipts_prefers_unreleased_live_apply_over_older_versioned_receipt(
+def test_assemble_latest_receipts_keeps_integrated_receipt_over_unreleased_live_apply(
     canonical_repo: Path,
 ) -> None:
     items = [
@@ -257,7 +259,7 @@ def test_assemble_latest_receipts_prefers_unreleased_live_apply_over_older_versi
         stack_path=canonical_repo / "versions" / "stack.yaml",
     )
 
-    assert latest["keycloak"] == "2026-04-12-adr-0381-login-service-contracts-mainline-live-apply"
+    assert latest["keycloak"] == "2026-04-05-ws-0331-runtime-pool-mainline-live-apply"
 
 
 def test_assemble_latest_receipts_keeps_merged_live_applied_workstreams(canonical_repo: Path) -> None:

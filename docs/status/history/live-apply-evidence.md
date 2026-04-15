@@ -9,12 +9,13 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | Capability | Receipt |
 | --- | --- |
 | `public_edge_publication` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
+| `platform` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `keycloak` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
+| `directus` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
 | `repowise` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
-| `platform` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `livekit` | `2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply` |
 | `litellm` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
@@ -56,7 +57,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `grist` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `fork_first_workstream_metadata` | `2026-04-04-adr-0337-fork-first-workstream-metadata-mainline-live-apply` |
 | `dozzle` | `2026-04-04-adr-0346-compose-dependency-health-gates-live-apply` |
-| `directus` | `2026-04-04-ws-0335-service-recovery-followup-live-apply` |
 | `adr_discovery` | `2026-04-04-adr-0325-adr-discovery-mainline-live-apply` |
 | `workstream_registry_shards` | `2026-04-03-adr-0326-workstream-registry-shards-mainline-live-apply` |
 | `sectional_agent_discovery` | `2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply` |

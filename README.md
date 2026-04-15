@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.144` |
-| Platform version | `0.178.144` |
+| Repository version | `0.178.145` |
+| Platform version | `0.178.145` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -59,12 +59,13 @@ monitored, and recoverable from a single repository.
 | Capability | Receipt |
 | --- | --- |
 | `public_edge_publication` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
+| `platform` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `keycloak` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
+| `directus` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
 | `repowise` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
-| `platform` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `livekit` | `2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply` |
 | `litellm` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
@@ -77,7 +78,6 @@ monitored, and recoverable from a single repository.
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `identity_core_watchdog` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
-| `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 
 Showing 20 of 183 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -89,8 +89,8 @@ Showing 20 of 183 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.144` |
-| Platform version | `0.178.144` |
+| Repository version | `0.178.145` |
+| Platform version | `0.178.145` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

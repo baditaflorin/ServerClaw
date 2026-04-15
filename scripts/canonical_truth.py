@@ -244,6 +244,8 @@ def assemble_latest_receipts(
     ):
         if not item.live_applied and item.status != LIVE_APPLIED_STATUS:
             continue
+        if item.included_in_repo_version is None:
+            continue
         for capability, receipt_id in item.latest_receipts.items():
             assembled[capability] = receipt_id
     return assembled

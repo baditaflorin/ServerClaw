@@ -10,12 +10,12 @@
   "adr": "0372",
   "workstream": "ws-0372-live-apply",
   "source_branch": "codex/ws-0372-exact-main-r2",
-  "source_commit": "abaec5be14d5407cb41753a01ac8681593ccaf72",
-  "repo_version_context": "0.178.143",
-  "platform_version_context": "0.178.143",
-  "integrated_repo_version": "0.178.144",
-  "integrated_platform_version": "0.178.144",
-  "summary": "Close ADR 0372 on the latest realistic 0.178.143 origin/main base, carry the fresh-worktree Directus and Keycloak replay fixes into main, and promote the governed Directus live apply into integrated repo and platform version 0.178.144.",
+  "source_commit": "0627fb4e00bbcada7eaa4a965a94619f07d723f5",
+  "repo_version_context": "0.178.144",
+  "platform_version_context": "0.178.144",
+  "integrated_repo_version": "0.178.145",
+  "integrated_platform_version": "0.178.145",
+  "summary": "Close ADR 0372 on the latest realistic 0.178.144 origin/main base, carry the fresh-worktree Directus and Keycloak replay fixes onto the ws-0382-integrated mainline tree, and promote the governed Directus live apply into integrated repo and platform version 0.178.145.",
   "targets": [
     {
       "kind": "guest",
@@ -46,27 +46,27 @@
     {
       "check": "Focused ADR 0372 regression slice on the integrated candidate",
       "result": "pass",
-      "observed": "The latest exact-main pytest slice passed with `54 passed in 3.14s`; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-pytest-r1-0.178.143.txt`."
+      "observed": "The rebased exact-main pytest slice passed with `54 passed in 3.13s`; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-pytest-r2-0.178.144.txt`."
     },
     {
       "check": "Governed Directus replay on the latest realistic mainline base",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=directus env=production` completed successfully from origin/main@d86bd43709f5319338def284988a907559ff9f9c, including the local health checks, schema bootstrap, public publication verification, and a successful post-apply restic trigger; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-directus-live-apply-r1-0.178.143.txt`, `receipts/restic-backups/20260415T071036Z.json`, and `receipts/restic-snapshots-latest.json`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=directus env=production` completed successfully from origin/main@1c3efc9bf37e16526a6185615fca0a0ddc29fd73, including the local health checks, schema bootstrap, public publication verification, and a successful post-apply restic trigger; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-directus-live-apply-r3-0.178.144.txt`, `receipts/restic-backups/20260415T074137Z.json`, and `receipts/restic-snapshots-latest.json`."
     },
     {
       "check": "Direct repository gate bundle on the integrated candidate",
       "result": "pass",
-      "observed": "`./scripts/validate_repo.sh agent-standards data-models` passed; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-repo-gates-r1-0.178.144.txt`."
+      "observed": "`./scripts/validate_repo.sh agent-standards data-models` passed; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-repo-gates-r1-0.178.145.txt`."
     },
     {
       "check": "Live-apply receipt validation and whitespace diff check",
       "result": "pass",
-      "observed": "`python3 scripts/live_apply_receipts.py --validate` and `git diff --check` passed; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-live-apply-receipts-r1-0.178.144.txt` and `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-git-diff-check-r1-0.178.144.txt`."
+      "observed": "`python3 scripts/live_apply_receipts.py --validate` and `git diff --check` passed; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-live-apply-receipts-r1-0.178.145.txt` and `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-git-diff-check-r1-0.178.145.txt`."
     },
     {
       "check": "Build-server reachability and remote validation path",
       "result": "pass",
-      "observed": "`./scripts/remote_exec.sh check-build-server` and `make remote-validate` passed from the integrated candidate; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-check-build-server-r1-0.178.144.txt` and `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-remote-validate-r1-0.178.144.txt`."
+      "observed": "`./scripts/remote_exec.sh check-build-server` and `make remote-validate` passed from the integrated candidate; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-check-build-server-r1-0.178.145.txt` and `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-remote-validate-r1-0.178.145.txt`."
     }
   ],
   "evidence_refs": [
@@ -86,19 +86,19 @@
     "receipts/image-scans/2026-04-14-directus-runtime.json",
     "receipts/cve/072dcba19d51-20260414T152635Z.grype.json",
     "receipts/sbom/072dcba19d51.cdx.json",
-    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-pytest-r1-0.178.143.txt",
-    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-directus-live-apply-r1-0.178.143.txt",
-    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-repo-gates-r1-0.178.144.txt",
-    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-live-apply-receipts-r1-0.178.144.txt",
-    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-git-diff-check-r1-0.178.144.txt",
-    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-check-build-server-r1-0.178.144.txt",
-    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-remote-validate-r1-0.178.144.txt",
-    "receipts/restic-backups/20260415T071036Z.json",
+    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-pytest-r2-0.178.144.txt",
+    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-directus-live-apply-r3-0.178.144.txt",
+    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-repo-gates-r1-0.178.145.txt",
+    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-live-apply-receipts-r1-0.178.145.txt",
+    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-git-diff-check-r1-0.178.145.txt",
+    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-check-build-server-r1-0.178.145.txt",
+    "receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-final-remote-validate-r1-0.178.145.txt",
+    "receipts/restic-backups/20260415T074137Z.json",
     "receipts/restic-snapshots-latest.json"
   ],
   "notes": [
-    "The final promotion replay started from origin/main@d86bd43709f5319338def284988a907559ff9f9c, the latest realistic mainline base available at merge time, with repo and platform version 0.178.143.",
-    "ADR 0372 first became true in repo version 0.178.136; this integrated receipt records the first verified platform truth for that ADR on current mainline, which is now repo and platform version 0.178.144.",
-    "The integrated closeout updates VERSION, changelog.md, RELEASE.md, docs/release-notes/0.178.144.md, README.md, versions/stack.yaml, the archived ws-0372 registry shard, and these receipts so the merged repository and platform truth describe the same verified state."
+    "The final promotion replay started from origin/main@1c3efc9bf37e16526a6185615fca0a0ddc29fd73, the latest realistic mainline base available at merge time after ws-0382, with repo and platform version 0.178.144.",
+    "ADR 0372 first became true in repo version 0.178.136; this integrated receipt records the first verified platform truth for that ADR on current mainline after ws-0382, which is now repo and platform version 0.178.145.",
+    "The integrated closeout updates VERSION, changelog.md, RELEASE.md, docs/release-notes/0.178.145.md, README.md, versions/stack.yaml, the archived ws-0372 registry shard, and these receipts so the merged repository and platform truth describe the same verified state."
   ]
 }

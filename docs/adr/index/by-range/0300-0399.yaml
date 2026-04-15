@@ -1639,7 +1639,7 @@ adrs:
     filename: 0372-data-driven-playbook-composition.md
     path: docs/adr/0372-data-driven-playbook-composition.md
     implemented_in_repo_version: 0.178.136
-    implemented_in_platform_version: 0.178.144
+    implemented_in_platform_version: 0.178.145
     implemented_on: '2026-04-15'
   - adr: '0373'
     title: Service Registry and Derived Defaults

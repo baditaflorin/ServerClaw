@@ -4358,8 +4358,8 @@ platform_nginx_upstreams:
     extra_fqdns:
       - sso.staging.lv3.org
     port: 8091
-    host: docker-runtime
-    ip: 10.10.10.20
+    host: runtime-control
+    ip: 10.10.10.92
     auth_proxy: false
     websocket: false
     max_body_size: 10m

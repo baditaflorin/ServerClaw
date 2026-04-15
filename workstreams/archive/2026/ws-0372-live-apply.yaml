@@ -117,7 +117,7 @@ canonical_truth:
     fresh-worktree Directus defaults, aligning the Keycloak runtime-control topology,
     and promoting the governed Directus live apply
   release_bump: patch
-  included_in_repo_version: 0.178.144
+  included_in_repo_version: 0.178.145
   latest_receipts:
     platform: 2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply
     directus: 2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply
