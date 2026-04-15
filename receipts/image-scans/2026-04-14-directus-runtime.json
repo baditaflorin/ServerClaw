@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "directus_runtime",
+  "image_ref": "docker.io/directus/directus:11.17.0@sha256:072dcba19d51b588b9e9495450d9f9789f2a5a1fefdc5729870954f28ec1c500",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-04-14",
+  "sbom_receipt": "receipts/sbom/072dcba19d51.cdx.json",
+  "cve_receipt": "receipts/cve/072dcba19d51-20260414T152635Z.grype.json",
+  "summary": {
+    "critical": 4,
+    "high": 82,
+    "medium": 60,
+    "low": 12,
+    "unknown": 4,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 162
+  }
+}

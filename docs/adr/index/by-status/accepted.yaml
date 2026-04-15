@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-14'
+generated: '2026-04-15'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 28
+total_adrs: 27
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -414,24 +414,6 @@ adrs:
     summary: Plane becomes the primary human-visible and agent-visible surface for
     filename: 0360-plane-as-agent-task-hq.md
     path: docs/adr/0360-plane-as-agent-task-hq.md
-  - adr: '0372'
-    title: Data-Driven Playbook Composition
-    status: Accepted
-    implementation_status: Accepted
-    date: '2026-04-06'
-    concern: networking
-    keywords:
-      - ansible
-      - playbooks
-      - dry
-      - composition
-      - dns
-      - data-driven
-      - playbook
-    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
-      that drives playbook composition.
-    filename: 0372-data-driven-playbook-composition.md
-    path: docs/adr/0372-data-driven-playbook-composition.md
   - adr: 0387
     title: Platform DRY Consolidation
     status: Accepted

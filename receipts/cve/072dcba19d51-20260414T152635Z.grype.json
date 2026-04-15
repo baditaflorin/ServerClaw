@@ -1,0 +1,3269 @@
+{
+  "schema_version": "1.0.0",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "generated_at": "2026-04-14T15:26:35Z",
+  "scanned_on": "2026-04-14",
+  "image_id": "directus_runtime",
+  "image_ref": "docker.io/directus/directus:11.17.0@sha256:072dcba19d51b588b9e9495450d9f9789f2a5a1fefdc5729870954f28ec1c500",
+  "runtime_host": "docker-runtime",
+  "sbom_receipt": "receipts/sbom/072dcba19d51.cdx.json",
+  "summary": {
+    "critical": 4,
+    "high": 82,
+    "medium": 60,
+    "low": 12,
+    "unknown": 4,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 162
+  },
+  "matches": [
+    {
+      "vulnerability_id": "GHSA-4w7w-66w2-5vf9",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Vite Vulnerable to Path Traversal in Optimized Deps `.map` Handling",
+      "package": {
+        "name": "vite",
+        "version": "8.0.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/vite@8.0.0_@types+node@24.9.1_esbuild@0.26.0_jiti@2.6.1_tsx@4.20.6/node_modules/vite/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-v2wj-q39q-566r",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Vite: `server.fs.deny` bypassed with queries",
+      "package": {
+        "name": "vite",
+        "version": "8.0.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/vite@8.0.0_@types+node@24.9.1_esbuild@0.26.0_jiti@2.6.1_tsx@4.20.6/node_modules/vite/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-chqc-8p9q-pq6q",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "basic-ftp has FTP Command Injection via CRLF",
+      "package": {
+        "name": "basic-ftp",
+        "version": "5.2.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/pm2/node_modules/basic-ftp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-chqc-8p9q-pq6q",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "basic-ftp has FTP Command Injection via CRLF",
+      "package": {
+        "name": "basic-ftp",
+        "version": "5.2.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/basic-ftp@5.2.0/node_modules/basic-ftp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-fvcv-3m26-pcqx",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:javascript",
+      "description": "Axios has Unrestricted Cloud Metadata Exfiltration via Header Injection Chain",
+      "package": {
+        "name": "axios",
+        "version": "1.13.5",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/axios@1.13.5/node_modules/axios/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-x5gf-qvw8-r2rm",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "pm2 Regular Expression Denial of Service vulnerability",
+      "package": {
+        "name": "pm2",
+        "version": "5.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/pm2/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-x5gf-qvw8-r2rm",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "pm2 Regular Expression Denial of Service vulnerability",
+      "package": {
+        "name": "pm2",
+        "version": "6.0.14",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/pm2@6.0.14/node_modules/pm2/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3v7f-55p6-f55p",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching",
+      "package": {
+        "name": "picomatch",
+        "version": "2.3.1",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3v7f-55p6-f55p",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching",
+      "package": {
+        "name": "picomatch",
+        "version": "4.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3v7f-55p6-f55p",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching",
+      "package": {
+        "name": "picomatch",
+        "version": "4.0.3",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/picomatch@4.0.3/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-p9ff-h696-f583",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Vite Vulnerable to Arbitrary File Read via Vite Dev Server WebSocket",
+      "package": {
+        "name": "vite",
+        "version": "8.0.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/vite@8.0.0_@types+node@24.9.1_esbuild@0.26.0_jiti@2.6.1_tsx@4.20.6/node_modules/vite/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r5fr-rjxr-66jc",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "lodash vulnerable to Code Injection via `_.template` imports key names",
+      "package": {
+        "name": "lodash",
+        "version": "4.17.23",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/lodash@4.17.23/node_modules/lodash/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r5fr-rjxr-66jc",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "lodash vulnerable to Code Injection via `_.template` imports key names",
+      "package": {
+        "name": "lodash",
+        "version": "4.17.23",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/pm2/node_modules/lodash/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r5fr-rjxr-66jc",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "lodash vulnerable to Code Injection via `_.template` imports key names",
+      "package": {
+        "name": "lodash-es",
+        "version": "4.17.23",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/lodash-es@4.17.23/node_modules/lodash-es/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28389",
+      "aliases": [
+        "CVE-2026-28389"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28390",
+      "aliases": [
+        "CVE-2026-28390"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28389",
+      "aliases": [
+        "CVE-2026-28389"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28390",
+      "aliases": [
+        "CVE-2026-28390"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-c2c7-rcm5-vvqj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch has a ReDoS vulnerability via extglob quantifiers",
+      "package": {
+        "name": "picomatch",
+        "version": "2.3.1",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/picomatch@2.3.1/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-c2c7-rcm5-vvqj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch has a ReDoS vulnerability via extglob quantifiers",
+      "package": {
+        "name": "picomatch",
+        "version": "4.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-c2c7-rcm5-vvqj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch has a ReDoS vulnerability via extglob quantifiers",
+      "package": {
+        "name": "picomatch",
+        "version": "4.0.3",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/picomatch@4.0.3/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f23m-r3pf-42rh",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+      "package": {
+        "name": "lodash",
+        "version": "4.17.23",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/pm2/node_modules/lodash/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f23m-r3pf-42rh",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+      "package": {
+        "name": "lodash",
+        "version": "4.17.23",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/lodash@4.17.23/node_modules/lodash/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f23m-r3pf-42rh",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+      "package": {
+        "name": "lodash-es",
+        "version": "4.17.23",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/lodash-es@4.17.23/node_modules/lodash-es/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-wh4c-j3r5-mjhp",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "xmldom: XML injection via unsafe CDATA serialization allows attacker-controlled markup insertion",
+      "package": {
+        "name": "@xmldom/xmldom",
+        "version": "0.8.11",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/@xmldom+xmldom@0.8.11/node_modules/@xmldom/xmldom/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-j3q9-mxjg-w52f",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "path-to-regexp vulnerable to Denial of Service via sequential optional groups",
+      "package": {
+        "name": "path-to-regexp",
+        "version": "8.3.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-5m6q-g25r-mvwx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Forge has Denial of Service via Infinite Loop in BigInteger.modInverse() with Zero Input",
+      "package": {
+        "name": "node-forge",
+        "version": "1.3.2",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/node-forge@1.3.2/node_modules/node-forge/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-37ch-88jc-xwx2",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "path-to-regexp vulnerable to Regular Expression Denial of Service via multiple route parameters",
+      "package": {
+        "name": "path-to-regexp",
+        "version": "0.1.12",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/path-to-regexp@0.1.12/node_modules/path-to-regexp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2673",
+      "aliases": [
+        "CVE-2026-2673"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2673",
+      "aliases": [
+        "CVE-2026-2673"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f886-m6hf-6m8v",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+      "package": {
+        "name": "brace-expansion",
+        "version": "1.1.12",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/brace-expansion@1.1.12/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f886-m6hf-6m8v",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+      "package": {
+        "name": "brace-expansion",
+        "version": "2.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f886-m6hf-6m8v",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+      "package": {
+        "name": "brace-expansion",
+        "version": "2.0.2",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/brace-expansion@2.0.2/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f886-m6hf-6m8v",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+      "package": {
+        "name": "brace-expansion",
+        "version": "5.0.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/brace-expansion@5.0.4/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-5j98-mcp5-4vw2",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "glob CLI: Command injection via -c/--cmd executes matches with shell:true",
+      "package": {
+        "name": "glob",
+        "version": "10.4.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/glob/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-737v-mqg7-c878",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "defu: Prototype pollution via `__proto__` key in defaults argument",
+      "package": {
+        "name": "defu",
+        "version": "6.1.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/defu@6.1.4/node_modules/defu/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61725",
+      "aliases": [
+        "CVE-2025-61725"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The ParseAddress function constructs domain-literal address components through repeated string concatenation. When parsing large domain-literal components, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61725",
+      "aliases": [
+        "CVE-2025-61725"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The ParseAddress function constructs domain-literal address components through repeated string concatenation. When parsing large domain-literal components, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61723",
+      "aliases": [
+        "CVE-2025-61723"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The processing time for parsing some invalid inputs scales non-linearly with respect to the size of the input. This affects programs which parse untrusted PEM inputs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61723",
+      "aliases": [
+        "CVE-2025-61723"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The processing time for parsing some invalid inputs scales non-linearly with respect to the size of the input. This affects programs which parse untrusted PEM inputs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-56p5-8mhr-2fph",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "LiquidJS: Root restriction bypass for partial and layout loading through symlinked templates",
+      "package": {
+        "name": "liquidjs",
+        "version": "10.25.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/liquidjs@10.25.0/node_modules/liquidjs/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-27v5-c462-wpq7",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "path-to-regexp vulnerable to Regular Expression Denial of Service via multiple wildcards",
+      "package": {
+        "name": "path-to-regexp",
+        "version": "8.3.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qj8w-gfj5-8c6v",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Serialize JavaScript has CPU Exhaustion Denial of Service via crafted array-like objects",
+      "package": {
+        "name": "serialize-javascript",
+        "version": "7.0.3",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/serialize-javascript@7.0.3/node_modules/serialize-javascript/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-wmmm-f939-6g9c",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Hono: Middleware bypass via repeated slashes in serveStatic",
+      "package": {
+        "name": "hono",
+        "version": "4.12.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/hono@4.12.4/node_modules/hono/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-v273-448j-v4qj",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "LiquidJS: `renderFile()` / `parseFile()` bypass configured `root` and allow arbitrary file read",
+      "package": {
+        "name": "liquidjs",
+        "version": "10.25.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/liquidjs@10.25.0/node_modules/liquidjs/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61726",
+      "aliases": [
+        "CVE-2025-61726"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The net/url package does not set a limit on the number of query parameters in a query. While the maximum size of query parameters in URLs is generally limited by the maximum request header size, the net/http.Request.ParseForm method can parse large URL-encoded forms. Parsing a large form containing many unique query parameters can cause excessive memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61726",
+      "aliases": [
+        "CVE-2025-61726"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The net/url package does not set a limit on the number of query parameters in a query. While the maximum size of query parameters in URLs is generally limited by the maximum request header size, the net/http.Request.ParseForm method can parse large URL-encoded forms. Parsing a large form containing many unique query parameters can cause excessive memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-25679",
+      "aliases": [
+        "CVE-2026-25679"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-25679",
+      "aliases": [
+        "CVE-2026-25679"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox-binsh",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "ssl_client",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-48c2-rrv3-qjmp",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "yaml is vulnerable to Stack Overflow via deeply nested YAML collections",
+      "package": {
+        "name": "yaml",
+        "version": "2.8.1",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-xpcf-pg52-r92g",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Hono has incorrect IP matching in ipRestriction() for IPv4-mapped IPv6 addresses",
+      "package": {
+        "name": "hono",
+        "version": "4.12.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/hono@4.12.4/node_modules/hono/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28388",
+      "aliases": [
+        "CVE-2026-28388"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28388",
+      "aliases": [
+        "CVE-2026-28388"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-p36q-q72m-gchr",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "srvx is vulnerable to middleware bypass via absolute URI in request line",
+      "package": {
+        "name": "srvx",
+        "version": "0.8.16",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/srvx@0.8.16/node_modules/srvx/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-7r86-cg39-jmmj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
+      "package": {
+        "name": "minimatch",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/minimatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3ppc-4f35-3m26",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern",
+      "package": {
+        "name": "minimatch",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/minimatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r5rp-j6wh-rvv4",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Hono: Non-breaking space prefix bypass in cookie name handling in getCookie()",
+      "package": {
+        "name": "hono",
+        "version": "4.12.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/hono@4.12.4/node_modules/hono/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-92pp-h63x-v22m",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "@hono/node-server: Middleware bypass via repeated slashes in serveStatic",
+      "package": {
+        "name": "@hono/node-server",
+        "version": "1.19.10",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/@hono+node-server@1.19.10_hono@4.12.4/node_modules/@hono/node-server/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58186",
+      "aliases": [
+        "CVE-2025-58186"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Despite HTTP headers having a default limit of 1MB, the number of cookies that can be parsed does not have a limit. By sending a lot of very small cookies such as \"a=;\", an attacker can make an HTTP server allocate a large amount of structs, causing large memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58186",
+      "aliases": [
+        "CVE-2025-58186"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Despite HTTP headers having a default limit of 1MB, the number of cookies that can be parsed does not have a limit. By sending a lot of very small cookies such as \"a=;\", an attacker can make an HTTP server allocate a large amount of structs, causing large memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-q67f-28xg-22rw",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Forge has signature forgery in Ed25519 due to missing S > L check",
+      "package": {
+        "name": "node-forge",
+        "version": "1.3.2",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/node-forge@1.3.2/node_modules/node-forge/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-23c5-xmqv-rm74",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions",
+      "package": {
+        "name": "minimatch",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/minimatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31790",
+      "aliases": [
+        "CVE-2026-31790"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31790",
+      "aliases": [
+        "CVE-2026-31790"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61729",
+      "aliases": [
+        "CVE-2025-61729"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Within HostnameError.Error(), when constructing an error string, there is no limit to the number of hosts that will be printed out. Furthermore, the error string is constructed by repeated string concatenation, leading to quadratic runtime. Therefore, a certificate provided by a malicious actor can result in excessive resource consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61729",
+      "aliases": [
+        "CVE-2025-61729"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Within HostnameError.Error(), when constructing an error string, there is no limit to the number of hosts that will be printed out. Furthermore, the error string is constructed by repeated string concatenation, leading to quadratic runtime. Therefore, a certificate provided by a malicious actor can result in excessive resource consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-34x7-hfp2-rc4v",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-34x7-hfp2-rc4v",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-34x7-hfp2-rc4v",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-2328-f5f3-gj25",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Forge has a basicConstraints bypass in its certificate chain verification (RFC 5280 violation)",
+      "package": {
+        "name": "node-forge",
+        "version": "1.3.2",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/node-forge@1.3.2/node_modules/node-forge/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58185",
+      "aliases": [
+        "CVE-2025-58185"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Parsing a maliciously crafted DER payload could allocate large amounts of memory, causing memory exhaustion.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58185",
+      "aliases": [
+        "CVE-2025-58185"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Parsing a maliciously crafted DER payload could allocate large amounts of memory, causing memory exhaustion.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-xf4j-xp2r-rqqx",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Hono: Path traversal in toSSG() allows writing files outside the output directory",
+      "package": {
+        "name": "hono",
+        "version": "4.12.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/hono@4.12.4/node_modules/hono/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21710",
+      "aliases": [
+        "CVE-2026-21710"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP request handling causes an uncaught `TypeError` when a request is received with a header named `__proto__` and the application accesses `req.headersDistinct`.\r\n\r\nWhen this occurs, `dest[\"__proto__\"]` resolves to `Object.prototype` rather than `undefined`, causing `.push()` to be called on a non-array. This exception is thrown synchronously inside a property getter and cannot be intercepted by `error` event listeners, meaning it cannot be handled without wrapping every `req.headersDistinct` access in a `try/catch`.\r\n\r\n* This vulnerability affects all Node.js HTTP servers on **20.x, 22.x, 24.x, and v25.x**",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-ppp5-5v6c-4jwp",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Forge has signature forgery in RSA-PKCS due to ASN.1 extra field",
+      "package": {
+        "name": "node-forge",
+        "version": "1.3.2",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/node-forge@1.3.2/node_modules/node-forge/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-68121",
+      "aliases": [
+        "CVE-2025-68121"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "nvd:cpe",
+      "description": "During session resumption in crypto/tls, if the underlying Config has its ClientCAs or RootCAs fields mutated between the initial handshake and the resumed handshake, the resumed handshake may succeed when it should have failed. This may happen when a user calls Config.Clone and mutates the returned Config, or uses Config.GetConfigForClient. This can cause a client to resume a session with a server that it would not have resumed with during the initial handshake, or cause a server to resume a session with a client that it would not have resumed with during the initial handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-68121",
+      "aliases": [
+        "CVE-2025-68121"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "nvd:cpe",
+      "description": "During session resumption in crypto/tls, if the underlying Config has its ClientCAs or RootCAs fields mutated between the initial handshake and the resumed handshake, the resumed handshake may succeed when it should have failed. This may happen when a user calls Config.Clone and mutates the returned Config, or uses Config.GetConfigForClient. This can cause a client to resume a session with a server that it would not have resumed with during the initial handshake, or cause a server to resume a session with a client that it would not have resumed with during the initial handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-rv5g-f82m-qrvv",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "LiquidJS: ownPropertyOnly bypass via sort_natural filter \u2014 prototype property information disclosure through sorting side-channel",
+      "package": {
+        "name": "liquidjs",
+        "version": "10.25.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/liquidjs@10.25.0/node_modules/liquidjs/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21717",
+      "aliases": [
+        "CVE-2026-21717"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in V8's string hashing mechanism causes integer-like strings to be hashed to their numeric value, making hash collisions trivially predictable. By crafting a request that causes many such collisions in V8's internal string table, an attacker can significantly degrade performance of the Node.js process.\r\n\r\nThe most common trigger is any endpoint that calls `JSON.parse()` on attacker-controlled input, as JSON parsing automatically internalizes short strings into the affected hash table.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3p68-rc4w-qgx5",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:javascript",
+      "description": "Axios has a NO_PROXY Hostname Normalization Bypass Leads to SSRF",
+      "package": {
+        "name": "axios",
+        "version": "1.13.5",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/axios@1.13.5/node_modules/axios/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58187",
+      "aliases": [
+        "CVE-2025-58187"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Due to the design of the name constraint checking algorithm, the processing time of some inputs scale non-linearly with respect to the size of the certificate. This affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58187",
+      "aliases": [
+        "CVE-2025-58187"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Due to the design of the name constraint checking algorithm, the processing time of some inputs scale non-linearly with respect to the size of the certificate. This affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-mmg9-6m6j-jqqx",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "LiquidJS Has Memory Limit Bypass via Quadratic Amplification in `replace` Filter",
+      "package": {
+        "name": "liquidjs",
+        "version": "10.25.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/liquidjs@10.25.0/node_modules/liquidjs/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32280",
+      "aliases": [
+        "CVE-2026-32280"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "During chain building, the amount of work that is done is not correctly limited when a large number of intermediate certificates are passed in VerifyOptions.Intermediates, which can lead to a denial of service. This affects both direct users of crypto/x509 and users of crypto/tls.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32280",
+      "aliases": [
+        "CVE-2026-32280"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "During chain building, the amount of work that is done is not correctly limited when a large number of intermediate certificates are passed in VerifyOptions.Intermediates, which can lead to a denial of service. This affects both direct users of crypto/x509 and users of crypto/tls.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21713",
+      "aliases": [
+        "CVE-2026-21713"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HMAC verification uses a non-constant-time comparison when validating user-provided signatures, potentially leaking timing information proportional to the number of matching bytes. Under certain threat models where high-resolution timing measurements are possible, this behavior could be exploited as a timing oracle to infer HMAC values.\r\n\r\nNode.js already provides timing-safe comparison primitives used elsewhere in the codebase, indicating this is an oversight rather than an intentional design decision.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-47912",
+      "aliases": [
+        "CVE-2025-47912"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The Parse function permits values other than IPv6 addresses to be included in square brackets within the host component of a URL. RFC 3986 permits IPv6 addresses to be included within the host component, enclosed within square brackets. For example: \"http://[::1]/\". IPv4 addresses and hostnames must not appear within square brackets. Parse did not enforce this requirement.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-47912",
+      "aliases": [
+        "CVE-2025-47912"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The Parse function permits values other than IPv6 addresses to be included in square brackets within the host component of a URL. RFC 3986 permits IPv6 addresses to be included within the host component, enclosed within square brackets. For example: \"http://[::1]/\". IPv4 addresses and hostnames must not appear within square brackets. Parse did not enforce this requirement.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61728",
+      "aliases": [
+        "CVE-2025-61728"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "archive/zip uses a super-linear file name indexing algorithm that is invoked the first time a file in an archive is opened. This can lead to a denial of service when consuming a maliciously constructed ZIP archive.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61728",
+      "aliases": [
+        "CVE-2025-61728"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "archive/zip uses a super-linear file name indexing algorithm that is invoked the first time a file in an archive is opened. This can lead to a denial of service when consuming a maliciously constructed ZIP archive.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-40200",
+      "aliases": [
+        "CVE-2026-40200"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-40200",
+      "aliases": [
+        "CVE-2026-40200"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl-utils",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61724",
+      "aliases": [
+        "CVE-2025-61724"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The Reader.ReadResponse function constructs a response string through repeated string concatenation of lines. When the number of lines in a response is large, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61724",
+      "aliases": [
+        "CVE-2025-61724"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The Reader.ReadResponse function constructs a response string through repeated string concatenation of lines. When the number of lines in a response is large, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28387",
+      "aliases": [
+        "CVE-2026-28387"
+      ],
+      "severity": "UNKNOWN",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28387",
+      "aliases": [
+        "CVE-2026-28387"
+      ],
+      "severity": "UNKNOWN",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58183",
+      "aliases": [
+        "CVE-2025-58183"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "tar.Reader does not set a maximum size on the number of sparse region data blocks in GNU tar pax 1.0 sparse files. A maliciously-crafted archive containing a large number of sparse regions can cause a Reader to read an unbounded amount of data from the archive into memory. When reading from a compressed source, a small compressed input can result in large allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58183",
+      "aliases": [
+        "CVE-2025-58183"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "tar.Reader does not set a maximum size on the number of sparse region data blocks in GNU tar pax 1.0 sparse files. A maliciously-crafted archive containing a large number of sparse regions can cause a Reader to read an unbounded amount of data from the archive into memory. When reading from a compressed source, a small compressed input can result in large allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61731",
+      "aliases": [
+        "CVE-2025-61731"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Building a malicious file with cmd/go can cause can cause a write to an attacker-controlled file with partial control of the file content. The \"#cgo pkg-config:\" directive in a Go source file provides command-line arguments to provide to the Go pkg-config command. An attacker can provide a \"--log-file\" argument to this directive, causing pkg-config to write to an attacker-controlled location.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61731",
+      "aliases": [
+        "CVE-2025-61731"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Building a malicious file with cmd/go can cause can cause a write to an attacker-controlled file with partial control of the file content. The \"#cgo pkg-config:\" directive in a Go source file provides command-line arguments to provide to the Go pkg-config command. An attacker can provide a \"--log-file\" argument to this directive, causing pkg-config to write to an attacker-controlled location.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21714",
+      "aliases": [
+        "CVE-2026-21714"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A memory leak occurs in Node.js HTTP/2 servers when a client sends WINDOW_UPDATE frames on stream 0 (connection-level) that cause the flow control window to exceed the maximum value of 2\u00b3\u00b9-1. The server correctly sends a GOAWAY frame, but the Http2Session object is never cleaned up.\r\n\r\nThis vulnerability affects HTTP2 users on Node.js 20, 22, 24 and 25.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58188",
+      "aliases": [
+        "CVE-2025-58188"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Validating certificate chains which contain DSA public keys can cause programs to panic, due to a interface cast that assumes they implement the Equal method. This affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58188",
+      "aliases": [
+        "CVE-2025-58188"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Validating certificate chains which contain DSA public keys can cause programs to panic, due to a interface cast that assumes they implement the Equal method. This affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27142",
+      "aliases": [
+        "CVE-2026-27142"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Actions which insert URLs into the content attribute of HTML meta tags are not escaped. This can allow XSS if the meta tag also has an http-equiv attribute with the value \"refresh\". A new GODEBUG setting has been added, htmlmetacontenturlescape, which can be used to disable escaping URLs in actions in the meta content attribute which follow \"url=\" by setting htmlmetacontenturlescape=0.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27142",
+      "aliases": [
+        "CVE-2026-27142"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Actions which insert URLs into the content attribute of HTML meta tags are not escaped. This can allow XSS if the meta tag also has an http-equiv attribute with the value \"refresh\". A new GODEBUG setting has been added, htmlmetacontenturlescape, which can be used to disable escaping URLs in actions in the meta content attribute which follow \"url=\" by setting htmlmetacontenturlescape=0.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r6q2-hw4h-h46w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r6q2-hw4h-h46w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r6q2-hw4h-h46w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27140",
+      "aliases": [
+        "CVE-2026-27140"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "SWIG file names containing 'cgo' and well-crafted payloads could lead to code smuggling and arbitrary code execution at build time due to trust layer bypass.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27140",
+      "aliases": [
+        "CVE-2026-27140"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "SWIG file names containing 'cgo' and well-crafted payloads could lead to code smuggling and arbitrary code execution at build time due to trust layer bypass.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6042",
+      "aliases": [
+        "CVE-2026-6042"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6042",
+      "aliases": [
+        "CVE-2026-6042"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl-utils",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61727",
+      "aliases": [
+        "CVE-2025-61727"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "An excluded subdomain constraint in a certificate chain does not restrict the usage of wildcard SANs in the leaf certificate. For example a constraint that excludes the subdomain test.example.com does not prevent a leaf certificate from claiming the SAN *.example.com.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61727",
+      "aliases": [
+        "CVE-2025-61727"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "An excluded subdomain constraint in a certificate chain does not restrict the usage of wildcard SANs in the leaf certificate. For example a constraint that excludes the subdomain test.example.com does not prevent a leaf certificate from claiming the SAN *.example.com.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-9ppj-qmqm-q256",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-9ppj-qmqm-q256",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-9ppj-qmqm-q256",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58189",
+      "aliases": [
+        "CVE-2025-58189"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "When Conn.Handshake fails during ALPN negotiation the error contains attacker controlled information (the ALPN protocols sent by the client) which is not escaped.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58189",
+      "aliases": [
+        "CVE-2025-58189"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "When Conn.Handshake fails during ALPN negotiation the error contains attacker controlled information (the ALPN protocols sent by the client) which is not escaped.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32289",
+      "aliases": [
+        "CVE-2026-32289"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Context was not properly tracked across template branches for JS template literals, leading to possibly incorrect escaping of content when branches were used. Additionally template actions within JS template literals did not properly track the brace depth, leading to incorrect escaping being applied. These issues could cause actions within JS template literals to be incorrectly or improperly escaped, leading to XSS vulnerabilities.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32289",
+      "aliases": [
+        "CVE-2026-32289"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Context was not properly tracked across template branches for JS template literals, leading to possibly incorrect escaping of content when branches were used. Additionally template actions within JS template literals did not properly track the brace depth, leading to incorrect escaping being applied. These issues could cause actions within JS template literals to be incorrectly or improperly escaped, leading to XSS vulnerabilities.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31789",
+      "aliases": [
+        "CVE-2026-31789"
+      ],
+      "severity": "UNKNOWN",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31789",
+      "aliases": [
+        "CVE-2026-31789"
+      ],
+      "severity": "UNKNOWN",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32282",
+      "aliases": [
+        "CVE-2026-32282"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "On Linux, if the target of Root.Chmod is replaced with a symlink while the chmod operation is in progress, Chmod can operate on the target of the symlink, even when the target lies outside the root. The Linux fchmodat syscall silently ignores the AT_SYMLINK_NOFOLLOW flag, which Root.Chmod uses to avoid symlink traversal. Root.Chmod checks its target before acting and returns an error if the target is a symlink lying outside the root, so the impact is limited to cases where the target is replaced with a symlink between the check and operation.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32282",
+      "aliases": [
+        "CVE-2026-32282"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "On Linux, if the target of Root.Chmod is replaced with a symlink while the chmod operation is in progress, Chmod can operate on the target of the symlink, even when the target lies outside the root. The Linux fchmodat syscall silently ignores the AT_SYMLINK_NOFOLLOW flag, which Root.Chmod uses to avoid symlink traversal. Root.Chmod checks its target before acting and returns an error if the target is a symlink lying outside the root, so the impact is limited to cases where the target is replaced with a symlink between the check and operation.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-73rr-hh4g-fpgx",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch",
+      "package": {
+        "name": "diff",
+        "version": "5.2.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/diff/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-73rr-hh4g-fpgx",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch",
+      "package": {
+        "name": "diff",
+        "version": "8.0.2",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/diff@8.0.2/node_modules/diff/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8qq5-rm4j-mr97",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8qq5-rm4j-mr97",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8qq5-rm4j-mr97",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32283",
+      "aliases": [
+        "CVE-2026-32283"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "If one side of the TLS connection sends multiple key update messages post-handshake in a single record, the connection can deadlock, causing uncontrolled consumption of resources. This can lead to a denial of service. This only affects TLS 1.3.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32283",
+      "aliases": [
+        "CVE-2026-32283"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "If one side of the TLS connection sends multiple key update messages post-handshake in a single record, the connection can deadlock, causing uncontrolled consumption of resources. This can lead to a denial of service. This only affects TLS 1.3.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32281",
+      "aliases": [
+        "CVE-2026-32281"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Validating certificate chains which use policies is unexpectedly inefficient when certificates in the chain contain a very large number of policy mappings, possibly causing denial of service. This only affects validation of otherwise trusted certificate chains, issued by a root CA in the VerifyOptions.Roots CertPool, or in the system certificate pool.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32281",
+      "aliases": [
+        "CVE-2026-32281"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Validating certificate chains which use policies is unexpectedly inefficient when certificates in the chain contain a very large number of policy mappings, possibly causing denial of service. This only affects validation of otherwise trusted certificate chains, issued by a root CA in the VerifyOptions.Roots CertPool, or in the system certificate pool.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-83g3-92jg-28cx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-83g3-92jg-28cx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-83g3-92jg-28cx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61732",
+      "aliases": [
+        "CVE-2025-61732"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A discrepancy between how Go and C/C++ comments were parsed allowed for code smuggling into the resulting cgo binary.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61732",
+      "aliases": [
+        "CVE-2025-61732"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A discrepancy between how Go and C/C++ comments were parsed allowed for code smuggling into the resulting cgo binary.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61730",
+      "aliases": [
+        "CVE-2025-61730"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "During the TLS 1.3 handshake if multiple messages are sent in records that span encryption level boundaries (for instance the Client Hello and Encrypted Extensions messages), the subsequent messages may be processed before the encryption level changes. This can cause some minor information disclosure if a network-local attacker can inject messages during the handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61730",
+      "aliases": [
+        "CVE-2025-61730"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "During the TLS 1.3 handshake if multiple messages are sent in records that span encryption level boundaries (for instance the Client Hello and Encrypted Extensions messages), the subsequent messages may be processed before the encryption level changes. This can cause some minor information disclosure if a network-local attacker can inject messages during the handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vpq2-c234-7xj6",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "@tootallnate/once vulnerable to Incorrect Control Flow Scoping",
+      "package": {
+        "name": "@tootallnate/once",
+        "version": "1.1.2",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/@tootallnate+once@1.1.2/node_modules/@tootallnate/once/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vpq2-c234-7xj6",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "@tootallnate/once vulnerable to Incorrect Control Flow Scoping",
+      "package": {
+        "name": "@tootallnate/once",
+        "version": "2.0.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/@tootallnate+once@2.0.0/node_modules/@tootallnate/once/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qffp-2rhf-9h96",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "tar has Hardlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qffp-2rhf-9h96",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "tar has Hardlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qffp-2rhf-9h96",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "tar has Hardlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32288",
+      "aliases": [
+        "CVE-2026-32288"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "tar.Reader can allocate an unbounded amount of memory when reading a maliciously-crafted archive containing a large number of sparse regions encoded in the \"old GNU sparse map\" format.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32288",
+      "aliases": [
+        "CVE-2026-32288"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "tar.Reader can allocate an unbounded amount of memory when reading a maliciously-crafted archive containing a large number of sparse regions encoded in the \"old GNU sparse map\" format.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27171",
+      "aliases": [
+        "CVE-2026-27171"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "zlib",
+        "version": "1.3.1-r2",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21715",
+      "aliases": [
+        "CVE-2026-21715"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js Permission Model filesystem enforcement leaves `fs.realpathSync.native()` without the required read permission checks, while all comparable filesystem functions correctly enforce them.\r\n\r\nAs a result, code running under `--permission` with restricted `--allow-fs-read` can still use `fs.realpathSync.native()` to check file existence, resolve symlink targets, and enumerate filesystem paths outside of permitted directories.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x** processes using the Permission Model where `--allow-fs-read` is intentionally restricted.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27139",
+      "aliases": [
+        "CVE-2026-27139"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "On Unix platforms, when listing the contents of a directory using File.ReadDir or File.Readdir the returned FileInfo could reference a file outside of the Root in which the File was opened. The impact of this escape is limited to reading metadata provided by lstat from arbitrary locations on the filesystem without permitting reading or writing files outside the root.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27139",
+      "aliases": [
+        "CVE-2026-27139"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "On Unix platforms, when listing the contents of a directory using File.ReadDir or File.Readdir the returned FileInfo could reference a file outside of the Root in which the File was opened. The impact of this escape is limited to reading metadata provided by lstat from arbitrary locations on the filesystem without permitting reading or writing files outside the root.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.23.12",
+        "type": "go-module",
+        "locations": [
+          "/directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21716",
+      "aliases": [
+        "CVE-2026-21716"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "An incomplete fix for CVE-2024-36137 leaves `FileHandle.chmod()` and `FileHandle.chown()` in the promises API without the required permission checks, while their callback-based equivalents (`fs.fchmod()`, `fs.fchown()`) were correctly patched.\r\n\r\nAs a result, code running under `--permission` with restricted `--allow-fs-write` can still use promise-based `FileHandle` methods to modify file permissions and ownership on already-open file descriptors, bypassing the intended write restrictions.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x** processes using the Permission Model where `--allow-fs-write` is intentionally restricted.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-6v7q-wjvx-w8wg",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "basic-ftp: Incomplete CRLF Injection Protection Allows Arbitrary FTP Command Execution via Credentials and MKD Commands",
+      "package": {
+        "name": "basic-ftp",
+        "version": "5.2.0",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/basic-ftp@5.2.0/node_modules/basic-ftp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-6v7q-wjvx-w8wg",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "basic-ftp: Incomplete CRLF Injection Protection Allows Arbitrary FTP Command Execution via Credentials and MKD Commands",
+      "package": {
+        "name": "basic-ftp",
+        "version": "5.2.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/pm2/node_modules/basic-ftp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-26pp-8wgv-hjvm",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Hono missing validation of cookie name on write path in setCookie()",
+      "package": {
+        "name": "hono",
+        "version": "4.12.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/hono@4.12.4/node_modules/hono/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-v8w9-8mx6-g223",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Hono vulnerable to Prototype Pollution possible through __proto__ key allowed in parseBody({ dot: true })",
+      "package": {
+        "name": "hono",
+        "version": "4.12.4",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/hono@4.12.4/node_modules/hono/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vvjj-xcjg-gr5g",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Nodemailer Vulnerable to SMTP Command Injection via CRLF in Transport name Option (EHLO/HELO)",
+      "package": {
+        "name": "nodemailer",
+        "version": "7.0.11",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/nodemailer@7.0.11/node_modules/nodemailer/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-c7w3-x93f-qmm8",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "Nodemailer has SMTP command injection due to unsanitized `envelope.size` parameter",
+      "package": {
+        "name": "nodemailer",
+        "version": "7.0.11",
+        "type": "npm",
+        "locations": [
+          "/directus/node_modules/.pnpm/nodemailer@7.0.11/node_modules/nodemailer/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    }
+  ]
+}

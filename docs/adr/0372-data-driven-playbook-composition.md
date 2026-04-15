@@ -3,9 +3,9 @@
 - **Date**: 2026-04-06
 - **Status**: Accepted
 - **Implementation Status**: Live applied
-- **Implemented In Repo Version**: 0.178.142
-- **Implemented In Platform Version**: 0.178.142
-- **Implemented On**: 2026-04-14
+- **Implemented In Repo Version**: 0.178.136
+- **Implemented In Platform Version**: 0.178.144
+- **Implemented On**: 2026-04-15
 - **Deciders**: platform team
 - **Concern**: platform, dry
 - **Tags**: ansible, playbooks, dry, composition, dns

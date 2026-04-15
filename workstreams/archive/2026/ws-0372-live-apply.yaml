@@ -4,7 +4,7 @@ title: ADR 0372 Live Apply and Automation Verification
 status: merged
 ready_to_merge: true
 live_applied: true
-owner: platform-infrastructure
+owner: codex
 branch: codex/ws-0372-exact-main-r2
 worktree_path: .worktrees/ws-0372-exact-main-r2
 doc: docs/workstreams/ws-0372-live-apply.md
@@ -12,6 +12,27 @@ depends_on:
 - adr-0372-data-driven-playbook-composition
 conflicts_with: []
 shared_surfaces:
+- README.md
+- VERSION
+- RELEASE.md
+- changelog.md
+- docs/release-notes/README.md
+- docs/release-notes/*.md
+- versions/stack.yaml
+- workstreams.yaml
+- receipts/live-applies/*adr-0372*
+- receipts/live-applies/evidence/*ws-0372*
+- receipts/restic-backups/20260415T071036Z.json
+- receipts/restic-snapshots-latest.json
+- config/image-catalog.json
+- inventory/group_vars/all/platform_services.yml
+- playbooks/vars/directus.yml
+- collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/directus_runtime/tasks/main.yml
+- collections/ansible_collections/lv3/platform/roles/directus_runtime/templates/docker-compose.yml.j2
+- collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+- tests/test_directus_runtime_role.py
+- tests/test_keycloak_runtime_role.py
 - Makefile
 - playbooks/services/keycloak.yml
 - playbooks/services/searxng.yml
@@ -39,6 +60,18 @@ shared_surfaces:
 - tests/test_superset_playbook.py
 ownership_manifest:
   owned_surfaces:
+  - id: ws_0372_runtime_replay_fixes
+    paths:
+    - playbooks/vars/directus.yml
+    - inventory/group_vars/all/platform_services.yml
+    - config/image-catalog.json
+    - collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/directus_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/directus_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+    - tests/test_directus_runtime_role.py
+    - tests/test_keycloak_runtime_role.py
+    mode: exclusive
   - id: ws_0372_live_apply_runner
     paths:
     - Makefile
@@ -80,23 +113,19 @@ ownership_manifest:
     mode: shared_contract
     contract: workstream-registry-v1
 canonical_truth:
-  changelog_entry: align live-apply-service descriptor loading with ADR 0372 playbook
-    composition, add missing keycloak/searxng service wrappers, and verify the include-based
-    playbook tests
+  changelog_entry: close ADR 0372 on the latest realistic origin/main by repairing
+    fresh-worktree Directus defaults, aligning the Keycloak runtime-control topology,
+    and promoting the governed Directus live apply
   release_bump: patch
-  included_in_repo_version: 0.178.142
+  included_in_repo_version: 0.178.144
   latest_receipts:
-    directus: 2026-04-14-adr-0372-data-driven-playbook-composition-live-apply
+    platform: 2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply
+    directus: 2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply
 description: 'Finalize ADR 0372 on the governed live-apply path. The branch verifies
-  that
-
-  service-scoped live applies load playbook descriptor vars correctly, restores
-
-  any missing service wrappers needed by the shared apply runner, aligns the
-
-  playbook tests with the shared-include model now present on origin/main, and
-
-  records end-to-end live-apply evidence for the ADR.
+  that service-scoped live applies still work from fresh exact-main worktrees,
+  repairs the Directus and Keycloak defaults needed by the governed Directus
+  replay, refreshes the Directus image-policy evidence, and records both branch-local
+  plus integrated mainline receipts for the final ADR 0372 closeout.
 
   '
 blockers: []

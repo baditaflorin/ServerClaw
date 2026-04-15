@@ -118,6 +118,8 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     )
     assert defaults["keycloak_compose_project_name"] == "keycloak"
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
+    assert defaults["keycloak_local_artifact_dir"] == "{{ repo_shared_local_root }}/keycloak"
+    assert defaults["keycloak_secret_dir"] == "/etc/lv3/keycloak"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert (
         defaults["keycloak_langfuse_client_secret_local_file"]

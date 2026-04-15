@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-14'
+generated: '2026-04-15'
 facet: status
 implementation_status: Implemented
 slug: implemented
@@ -6302,6 +6302,27 @@ adrs:
     implemented_in_repo_version: 0.178.143
     implemented_in_platform_version: 0.178.143
     implemented_on: '2026-04-14'
+  - adr: '0372'
+    title: Data-Driven Playbook Composition
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-06'
+    concern: networking
+    keywords:
+      - ansible
+      - playbooks
+      - dry
+      - composition
+      - dns
+      - data-driven
+      - playbook
+    summary: Extract the four repeated play patterns into shared playbook includes and create a service descriptor format
+      that drives playbook composition.
+    filename: 0372-data-driven-playbook-composition.md
+    path: docs/adr/0372-data-driven-playbook-composition.md
+    implemented_in_repo_version: 0.178.136
+    implemented_in_platform_version: 0.178.144
+    implemented_on: '2026-04-15'
   - adr: '0373'
     title: Service Registry and Derived Defaults
     status: Accepted

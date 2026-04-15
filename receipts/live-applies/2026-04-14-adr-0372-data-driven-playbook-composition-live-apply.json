@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-14-adr-0372-data-driven-playbook-composition-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-14",
+  "recorded_on": "2026-04-15",
+  "recorded_at": "2026-04-15T07:25:00Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0372-data-driven-playbook-composition-live-apply",
+  "adr": "0372",
+  "workstream": "ws-0372-live-apply",
+  "source_branch": "codex/ws-0372-exact-main-r2",
+  "source_commit": "abaec5be14d5407cb41753a01ac8681593ccaf72",
+  "repo_version_context": "0.178.141",
+  "platform_version_context": "0.178.141",
+  "summary": "Replay the governed Directus live-apply lane from the latest realistic exact-main base for ADR 0372, repair fresh-worktree Directus and Keycloak default assumptions, and re-verify the Keycloak-backed public publication path end to end.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Directus internal health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Directus public health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Directus OIDC publication"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Branch-local ADR 0372 regression slice on the exact-main replay tree",
+      "result": "pass",
+      "observed": "Branch-local validation covered `tests/test_makefile_playbook_targets.py`, `tests/test_directus_playbook.py`, and `tests/test_keycloak_playbook.py` before the replay, returning `9 passed in 0.74s`, followed by a narrower sanity rerun returning `7 passed in 0.30s`."
+    },
+    {
+      "check": "Directus image-policy inputs were refreshed before replay",
+      "result": "pass",
+      "observed": "The Directus image scan and governed exception window were refreshed in `receipts/image-scans/2026-04-14-directus-runtime.json`, with matching CVE and SBOM artifacts recorded under `receipts/cve/072dcba19d51-20260414T152635Z.grype.json` and `receipts/sbom/072dcba19d51.cdx.json`."
+    },
+    {
+      "check": "Governed Directus exact-main replay",
+      "result": "pass",
+      "observed": "The exact-main `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=directus env=production` replay completed successfully after the Directus and Keycloak fallback defaults were repaired, with zero Ansible host failures across `docker-runtime`, `postgres`, `nginx`, and `localhost`."
+    },
+    {
+      "check": "Directus public verification and post-apply backup path",
+      "result": "pass",
+      "observed": "The replay verified the internal Directus health, ping, and OpenAPI endpoints, the schema bootstrap path, the public `https://data.<platform-domain>/server/health` endpoint, and the token-backed publication flow; the live-apply wrapper also updated `receipts/restic-snapshots-latest.json`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0372-data-driven-playbook-composition.md",
+    "docs/workstreams/ws-0372-live-apply.md",
+    "workstreams/archive/2026/ws-0372-live-apply.yaml",
+    "config/image-catalog.json",
+    "inventory/group_vars/all/platform_services.yml",
+    "playbooks/vars/directus.yml",
+    "collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/directus_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/directus_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml",
+    "tests/test_directus_playbook.py",
+    "tests/test_keycloak_playbook.py",
+    "receipts/image-scans/2026-04-14-directus-runtime.json",
+    "receipts/cve/072dcba19d51-20260414T152635Z.grype.json",
+    "receipts/sbom/072dcba19d51.cdx.json",
+    "receipts/restic-snapshots-latest.json"
+  ],
+  "notes": [
+    "The first exact-main replay for this closeout started from origin/main@2d240e156d6407252d9178d4a0607395154831eb, the latest realistic runtime-affecting base available when ws-0372 entered live-apply verification, with repo and platform version 0.178.141.",
+    "Later origin/main advances before the final merge were docs-only or unrelated to the Directus and Keycloak runtime surfaces exercised by this replay until the 2026-04-15 mainline promotion rerun was performed.",
+    "Protected integration files were intentionally left for the final merge-to-main step; the integrated promotion in repo and platform version 0.178.144 is recorded separately in the matching mainline receipt."
+  ]
+}
