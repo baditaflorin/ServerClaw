@@ -2,14 +2,18 @@
 
 - ADR: [ADR 0382](../adr/0382-keycloak-sign-in-button-stuck-postmortem.md)
 - Title: Keycloak Sign-In Button Stuck
-- Status: ready
-- Latest Verified Base: `origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4` (`repo 0.178.140`, `platform 0.178.138`)
-- Branch: `codex/ws-0382-main-integration-r2`
+- Status: live_applied
+- Included In Repo Version: `0.178.144`
+- Included In Platform Version: `0.178.144`
+- Branch-Local Receipt: `receipts/live-applies/ws-0382-live-apply-apply-receipt.yaml`
+- Mainline Receipt: `receipts/live-applies/2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply.json`
+- Latest Verified Base: `origin/main@d86bd43709f5319338def284988a907559ff9f9c` (`repo 0.178.143`, `platform 0.178.143`)
+- Branch: `codex/ws-0382-main-integration-r3`
 - Worktree: `.worktrees/ws-0382-main`
 - Owner: `codex`
 - Depends On: `adr-0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps`, `adr-0381-login-service-contracts-and-session-recovery-automation`
 - Conflicts With: none
-- Shared Surfaces: `playbooks/keycloak.yml`, `playbooks/services/keycloak.yml`, `inventory/group_vars/all/platform_services.yml`, `inventory/host_vars/proxmox-host.yml`, `scripts/session_logout_verify.py`, `scripts/restic_config_backup.py`, `roles/nginx_edge_publication/tasks/main.yml`, `roles/nginx_edge_publication/templates/lv3-edge.conf.j2`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2`, `tests/test_keycloak_playbook.py`, `tests/test_session_logout_verify.py`, `tests/test_nginx_edge_publication_role.py`, `tests/test_restic_config_backup.py`, `docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md`, `docs/runbooks/configure-keycloak.md`, `docs/runbooks/keycloak-down.md`, `workstreams.yaml`, `receipts/live-applies/`
+- Shared Surfaces: `playbooks/keycloak.yml`, `playbooks/services/keycloak.yml`, `inventory/group_vars/all/platform_services.yml`, `inventory/host_vars/proxmox-host.yml`, `scripts/session_logout_verify.py`, `scripts/restic_config_backup.py`, `roles/nginx_edge_publication/tasks/main.yml`, `roles/nginx_edge_publication/templates/lv3-edge.conf.j2`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2`, `tests/test_keycloak_playbook.py`, `tests/test_session_logout_verify.py`, `tests/test_nginx_edge_publication_role.py`, `tests/test_restic_config_backup.py`, `docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md`, `docs/runbooks/configure-keycloak.md`, `docs/runbooks/keycloak-down.md`, `workstreams.yaml`, `receipts/live-applies/`, `receipts/restic-backups/`, `receipts/restic-restore-verifications/`, `receipts/restic-snapshots-latest.json`
 
 ## Scope
 
@@ -50,54 +54,50 @@
 ## Verification
 
 - Generated topology refresh stayed current:
-  `python3 scripts/generate_platform_vars.py --check`
-- Validation gates passed:
-  - `./scripts/validate_repo.sh agent-standards`
-  - `./scripts/validate_repo.sh workstream-surfaces`
+  - `python3 scripts/generate_platform_vars.py --check`
+  - `uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --check`
 - Targeted regression slices passed:
-  - `uv run --with pytest --with pyyaml pytest tests/test_keycloak_playbook.py tests/test_session_logout_verify.py tests/test_nginx_edge_publication_role.py -q`
-  - `uv run --with pytest --with pyyaml pytest tests/test_restic_config_backup.py -q`
-- Governed production replay passed:
-  - `make live-apply-service service=keycloak env=production ALLOW_IN_PLACE_MUTATION=true`
+  - `uv run --with pytest --with pyyaml pytest tests/test_keycloak_playbook.py tests/test_session_logout_verify.py tests/test_nginx_edge_publication_role.py tests/test_restic_config_backup.py -q`
+- Governed latest-main production replay passed:
+  - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=keycloak env=production`
+  - play recap: `monitoring ok=20 changed=0`, `nginx ok=49 changed=4`,
+    `postgres ok=81 changed=0`, `proxmox-host ok=373 changed=0`,
+    `runtime-control ok=267 changed=8`
 - Public-path verification passed:
-  - the OIDC discovery endpoint returned `HTTP 200`
-  - the shared-edge home redirect chain completed back to the Keycloak login page
-  - `uv run --with playwright python scripts/session_logout_verify.py ...` returned:
-    - `verified shared edge logout via https://home.lv3.org/`
-    - `verified Outline logout via https://wiki.lv3.org/auth/oidc`
+  - OIDC discovery returned `HTTP 200`
+  - `uv run --with playwright python scripts/session_logout_verify.py ...`
+    returned `verified shared edge logout via https://home.lv3.org/` and
+    `verified Outline logout via https://wiki.lv3.org/auth/oidc`
 - Governed restic automation passed:
-  - `python scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0382-post-verify --live-apply-trigger`
-    returned `status=ok` and synced
-    `receipts/restic-backups/20260414T084809Z.json` plus
-    `receipts/restic-snapshots-latest.json`
-  - `python scripts/trigger_restic_live_apply.py --env production --mode restore-verify --triggered-by ws-0382-post-verify-restore-rerun`
-    returned `status=ok`, synced
-    `receipts/restic-restore-verifications/20260414T085430Z.json`, and restored
-    `4642` receipt files from the historical receipts snapshot
+  - the live-apply wrapper synced `receipts/restic-backups/20260415T070357Z.json`
+    plus `receipts/restic-snapshots-latest.json`
+  - `python scripts/trigger_restic_live_apply.py --env production --mode restore-verify --triggered-by ws-0382-mainline-restore-verify`
+    synced `receipts/restic-restore-verifications/20260415T070524Z.json` and
+    restored `4652` receipt files from the historical
+    `/srv/proxmox_florin_server/receipts` snapshot root
 
 ## Live Evidence
 
-- Keycloak live apply:
-  - `receipts/live-applies/evidence/2026-04-14-ws-0382-keycloak-live-apply-0.178.140.txt`
-- Session/logout verification:
-  - `receipts/live-applies/evidence/2026-04-14-ws-0382-session-logout-verify-0.178.140.txt`
-- Restic backup trigger:
-  - `receipts/live-applies/evidence/2026-04-14-ws-0382-restic-live-apply-trigger-0.178.140.txt`
-  - `receipts/restic-backups/20260414T084809Z.json`
+- Latest-main replay on `origin/main@d86bd43709f5319338def284988a907559ff9f9c`
+  (`repo/platform 0.178.143`):
+  - `receipts/live-applies/evidence/2026-04-15-ws-0382-mainline-keycloak-live-apply-r1-0.178.143.txt`
+  - `receipts/live-applies/evidence/2026-04-15-ws-0382-mainline-oidc-discovery-r1-0.178.143.txt`
+  - `receipts/live-applies/evidence/2026-04-15-ws-0382-mainline-session-logout-verify-r1-0.178.143.txt`
+  - `receipts/live-applies/evidence/2026-04-15-ws-0382-mainline-restic-restore-verify-r1-0.178.143.txt`
+  - `receipts/restic-backups/20260415T070357Z.json`
+  - `receipts/restic-restore-verifications/20260415T070524Z.json`
   - `receipts/restic-snapshots-latest.json`
-- Restore verification:
-  - first failing proof before the fix:
-    `receipts/live-applies/evidence/2026-04-14-ws-0382-restic-restore-verify-0.178.140.txt`
-  - successful rerun after the snapshot-path fix:
-    `receipts/live-applies/evidence/2026-04-14-ws-0382-restic-restore-verify-rerun-0.178.140.txt`
-    and `receipts/restic-restore-verifications/20260414T085430Z.json`
+- Historical `0.178.140` branch-local evidence retained for provenance:
+  - `receipts/live-applies/evidence/2026-04-14-ws-0382-keycloak-live-apply-0.178.140.txt`
+  - `receipts/live-applies/evidence/2026-04-14-ws-0382-session-logout-verify-0.178.140.txt`
+  - `receipts/live-applies/evidence/2026-04-14-ws-0382-restic-live-apply-trigger-0.178.140.txt`
+  - `receipts/live-applies/evidence/2026-04-14-ws-0382-restic-restore-verify-0.178.140.txt`
+  - `receipts/live-applies/evidence/2026-04-14-ws-0382-restic-restore-verify-rerun-0.178.140.txt`
 
 ## Mainline Integration Notes
 
-- Protected integration files still intentionally wait for the final `main`
-  closeout step: `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`,
-  release-note indexes, ADR 0382 implementation-version metadata, and the
-  archived workstream registry entry.
-- The merge-to-main step must archive the active workstream YAML, regenerate
-  `workstreams.yaml`, cut the next release version, and stamp the verified live
-  apply into `versions/stack.yaml` and the ADR metadata from the merged tree.
+- This workstream is integrated into repo and platform version `0.178.144`.
+- The merged closeout archives the active workstream entry, regenerates the
+  workstream and ADR discovery surfaces, updates the ADR implementation
+  metadata, and records the latest-main live-apply evidence in the canonical
+  release and stack state.

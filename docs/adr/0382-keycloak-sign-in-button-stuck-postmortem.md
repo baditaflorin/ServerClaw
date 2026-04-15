@@ -1,10 +1,35 @@
-# ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem
+# ADR 0382: Keycloak Sign-In Button Stuck Incident Postmortem
 
-- **Status:** ACTIVE BUG — not fully resolved
-- **Date:** 2026-04-08
-- **Related:** ADR-0381 (login service contracts)
+- Status: Accepted
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.178.144
+- Implemented In Platform Version: 0.178.144
+- Implemented On: 2026-04-15
+- Date: 2026-04-08
+- Related: ADR 0381 (login service contracts)
 
 ---
+
+## Resolution Status (2026-04-15)
+
+ADR 0382 is now closed on the latest realistic `origin/main` base:
+`origin/main@d86bd43709f5319338def284988a907559ff9f9c` with repo and platform
+version `0.178.143` at replay time.
+
+- The shared-edge certificate publication path now follows the effective live
+  Certbot lineage, so `home.lv3.org` and `sso.lv3.org` stay published after
+  suffix rotation from `lv3-edge` to `lv3-edge-0001`.
+- The governed production replay of
+  `make live-apply-service service=keycloak env=production ALLOW_IN_PLACE_MUTATION=true`
+  passed on 2026-04-15, refreshed the Keycloak and NGINX edge state, and
+  triggered governed restic backup receipt `20260415T070357Z.json`.
+- The public OIDC discovery endpoint returned `HTTP 200`, and
+  `scripts/session_logout_verify.py` passed for both the shared edge and
+  Outline using the latest-main replayed state.
+- A fresh governed restore verification receipt
+  `20260415T070524Z.json` passed and restored `4652` files from the historical
+  `/srv/proxmox_florin_server/receipts` snapshot path, confirming the
+  snapshot-root resolution fix still holds on mainline truth.
 
 ## Symptom
 

@@ -12,15 +12,17 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- close ADR 0382 on the latest realistic origin/main base by replaying the Keycloak live apply, preserving shared-edge TLS publication after Certbot lineage rotation, and proving governed restic backup plus restore verification end to end
 - completes ADR 0324 exact-main closeout by recording the generated service-catalog assembly receipt on main and refreshing the canonical truth surfaces
 - fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge
 
 ## Latest Release
 
-- [0.178.143 release notes](docs/release-notes/0.178.143.md)
+- [0.178.144 release notes](docs/release-notes/0.178.144.md)
 
 ## Previous Releases
 
+- [0.178.143 release notes](docs/release-notes/0.178.143.md)
 - [0.178.141 release notes](docs/release-notes/0.178.141.md)
 - [0.178.140 release notes](docs/release-notes/0.178.140.md)
 - [0.178.138 release notes](docs/release-notes/0.178.138.md)
@@ -32,9 +34,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.131 release notes](docs/release-notes/0.178.131.md)
 - [0.178.129 release notes](docs/release-notes/0.178.129.md)
 - [0.178.126 release notes](docs/release-notes/0.178.126.md)
-- [0.178.123 release notes](docs/release-notes/0.178.123.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (468 releases)](docs/release-notes/index/2026.md)
+- [2026 (469 releases)](docs/release-notes/index/2026.md)

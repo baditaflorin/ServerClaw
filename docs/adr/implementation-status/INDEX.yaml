@@ -1,9 +1,9 @@
 scanner_version: '1.0'
-generated: '2026-04-14T11:22:24.343525'
+generated: '2026-04-15T10:11:42.200317'
 total_adrs: 1
 scan_summary:
-  fully_matching: 1
+  fully_matching: 0
   partial_matching: 1
   no_evidence: 0
 reports:
-- '0324'
+- 0382

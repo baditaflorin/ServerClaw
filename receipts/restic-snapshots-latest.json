@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-04-14T08:48:09Z",
-  "recorded_on": "2026-04-14",
+  "recorded_at": "2026-04-15T07:03:57Z",
+  "recorded_on": "2026-04-15",
   "recorded_by": "codex",
   "repository": {
     "bucket": "restic-config-backup",
-    "endpoint": "http://10.200.18.3:9000"
+    "endpoint": "http://10.200.3.3:9000"
   },
   "summary": {
     "governed_sources": 5,
@@ -56,8 +56,8 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "8ff6e3d56027d60d6291987a3b35b1137837c838d2cbdb44fd21bbfede9972b1",
-        "recorded_at": "2026-04-14T08:48:09Z",
+        "snapshot_id": "7497d6853ea63fb8d3d133df7ce28dfb77363970c5e9d3625d9da9a58a9a522a",
+        "recorded_at": "2026-04-15T07:03:57Z",
         "host": "docker-runtime",
         "paths": [
           "config"
@@ -83,8 +83,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "e807352ab78803eba53478038d02621999178cd3e45fbdcd91a1acb79dd542d8",
-        "recorded_at": "2026-04-14T08:48:09Z",
+        "snapshot_id": "279903aa559e83ba214e470ab06d0ecdc1c4fd5f0f19b7243c860fb514ec12f3",
+        "recorded_at": "2026-04-15T07:03:57Z",
         "host": "docker-runtime",
         "paths": [
           "versions/stack.yaml"

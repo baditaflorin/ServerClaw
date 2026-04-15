@@ -170,6 +170,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0382` | Latest-main Keycloak interactive login incident closure | `merged` | [ws-0382-live-apply.md](../../workstreams/ws-0382-live-apply.md) |
 | `0371` | Re-verify parameterized service verification tasks from the latest origin/main | `merged` | [ws-0371-live-apply.md](../../workstreams/ws-0371-live-apply.md) |
 | `0369` | ADR 0369 live apply — Python validation toolkit completion | `merged` | [ws-0369-live-apply.md](../../workstreams/ws-0369-live-apply.md) |
 | `0370` | Complete ADR 0370 shared lifecycle adoption and live-apply it from latest origin/main | `live_applied` | [ws-0370-live-apply.md](../../workstreams/ws-0370-live-apply.md) |

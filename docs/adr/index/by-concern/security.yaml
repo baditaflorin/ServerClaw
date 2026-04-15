@@ -625,23 +625,24 @@ adrs:
     path: docs/adr/0376-credential-isolation-and-agent-safety.md
     implemented_on: '2026-04-06'
   - adr: 0382
-    title: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
-    status: Proposed
-    implementation_status: Proposed
-    date: '2026-03-21'
+    title: Keycloak Sign-In Button Stuck Incident Postmortem
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-08'
     concern: security
     keywords:
-      - adr-0382
       - keycloak
       - sign-in
       - button
       - stuck
-      - active
       - incident
       - postmortem
-    summary: 'ADR-0382: Keycloak Sign-In Button Stuck — Active Incident Postmortem'
+    summary: Keycloak Sign-In Button Stuck Incident Postmortem
     filename: 0382-keycloak-sign-in-button-stuck-postmortem.md
     path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md
+    implemented_in_repo_version: 0.178.144
+    implemented_in_platform_version: 0.178.144
+    implemented_on: '2026-04-15'
   - adr: 0388
     title: Centralize Keycloak Realm Name and OIDC Issuer URL
     status: Proposed

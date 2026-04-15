@@ -10,7 +10,7 @@ generated: '2026-04-14'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 356
+total_adrs: 357
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -6438,6 +6438,25 @@ adrs:
     implemented_in_repo_version: 0.178.126
     implemented_in_platform_version: 0.178.78
     implemented_on: '2026-04-12'
+  - adr: 0382
+    title: Keycloak Sign-In Button Stuck Incident Postmortem
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-08'
+    concern: security
+    keywords:
+      - keycloak
+      - sign-in
+      - button
+      - stuck
+      - incident
+      - postmortem
+    summary: Keycloak Sign-In Button Stuck Incident Postmortem
+    filename: 0382-keycloak-sign-in-button-stuck-postmortem.md
+    path: docs/adr/0382-keycloak-sign-in-button-stuck-postmortem.md
+    implemented_in_repo_version: 0.178.144
+    implemented_in_platform_version: 0.178.144
+    implemented_on: '2026-04-15'
   - adr: 0389
     title: Standard Procedure for Decommissioning a Platform Service
     status: Accepted

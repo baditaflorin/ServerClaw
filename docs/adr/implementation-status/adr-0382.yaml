@@ -1,0 +1,127 @@
+adr_number: 0382
+title: "ADR-0382: Keycloak Sign-In Button Stuck \u2014 Active Incident Postmortem"
+canonical_status: Proposed
+canonical_implementation_status: Proposed
+detected_markers:
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:480fb0fba
+  evidence: 480fb0fba [ws-0382] Close latest-main live-apply proof
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205205'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:e2649c163
+  evidence: e2649c163 [ws-0382] Recover shared edge TLS lineage fallback
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205243'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:a6b991685
+  evidence: 'a6b991685 On codex/ws-0382-main-integration-r3: ws-0382-r3-pre-rebase-closeout'
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205249'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:b9efd43db
+  evidence: 'b9efd43db index on codex/ws-0382-main-integration-r3: 3dc520669 [ws-0382]
+    Close latest-main live-apply proof'
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205255'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:b9b71daa3
+  evidence: 'b9b71daa3 untracked files on codex/ws-0382-main-integration-r3: 3dc520669
+    [ws-0382] Close latest-main live-apply proof'
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205261'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:3dc520669
+  evidence: 3dc520669 [ws-0382] Close latest-main live-apply proof
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205297'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:d0147d1fe
+  evidence: d0147d1fe [ws-0382] Recover shared edge TLS lineage fallback
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205301'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:d77012a08
+  evidence: d77012a08 [ws-0382] Close latest-main live-apply proof
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205350'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:90a38ba8b
+  evidence: 90a38ba8b [ws-0382] Recover shared edge TLS lineage fallback
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.205359'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:635388734
+  evidence: 635388734 [ws-0382] Capture restic mismatch and logout failure evidence
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.206493'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:9ab992376
+  evidence: 9ab992376 Merge branch 'codex/ws-0382-live-apply' into codex/ws-0382-main-integration
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.206517'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:38afc4f8e
+  evidence: 38afc4f8e [validation] Unblock portal + catalog preflight for ws-0382
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.206532'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:660df25bd
+  evidence: 660df25bd [workstreams] Record ws-0382 push blockers
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.206536'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:55bd47695
+  evidence: 55bd47695 [keycloak] Close repo-side ADR 0382 follow-up
+  confidence: 1.0
+  detected_on: '2026-04-15T10:11:32.206539'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:e0bb9dae0
+  evidence: 'e0bb9dae0 chore: regenerate ADR index with 0392 (renamed from duplicate
+    0382)'
+  confidence: 0.6
+  detected_on: '2026-04-15T10:11:32.207474'
+- marker_type: git-commit
+  adr_number: 0382
+  location: git:263945f66
+  evidence: '263945f66 docs: postmortem for Keycloak Sign-In button stuck (ADR-0382)'
+  confidence: 0.8
+  detected_on: '2026-04-15T10:11:32.208381'
+- marker_type: live-apply-receipt
+  adr_number: 0382
+  location: receipts/live-applies/2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply.json
+  evidence: Committed live-apply evidence references the ADR
+  confidence: 1.0
+  detected_on: '2026-04-15T10:11:32.332759'
+- marker_type: live-apply-receipt
+  adr_number: 0382
+  location: receipts/live-applies/2026-04-14-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply.json
+  evidence: Committed live-apply evidence references the ADR
+  confidence: 1.0
+  detected_on: '2026-04-15T10:11:32.394556'
+inferred_implementation_status: Likely Implemented
+status_match: false
+summary: 'Canonical Decision Status: Proposed
+
+  Canonical Implementation Status: Proposed
+
+  Inferred Implementation Status: Likely Implemented
+
+  Markers Found: 18
+
+  Breakdown: git-commit=16, live-apply-receipt=2'
