@@ -300,7 +300,7 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-30",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-directus-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-04-14-directus-runtime.json",
       "consumers": [
         "roles/directus_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -312,8 +312,8 @@
       "exception": {
         "reason": "The pinned upstream Directus image currently reports critical and high Trivy findings across Alpine, bundled Node.js packages, and embedded esbuild binaries; keep it digest-pinned and review at the next image rotation window.",
         "owner": "Platform operations",
-        "approved_on": "2026-03-30",
-        "review_by": "2026-04-13"
+        "approved_on": "2026-04-14",
+        "review_by": "2026-04-28"
       }
     },
     "dozzle_runtime": {

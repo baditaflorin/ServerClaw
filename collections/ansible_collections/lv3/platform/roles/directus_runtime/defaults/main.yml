@@ -22,9 +22,13 @@ directus_public_hostname_overrides:
 directus_compose_project_name: directus
 directus_compose_network_name: "{{ directus_compose_project_name }}_default"
 directus_container_port: "{{ directus_internal_port }}"
+directus_health_path: /server/health
+directus_ping_path: /server/ping
+directus_openapi_path: /server/specs/oas
 directus_database_name: directus
 directus_database_user: directus
 directus_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
+directus_local_artifact_dir: "{{ repo_shared_local_root }}/directus"
 directus_database_password_local_file: "{{ directus_local_artifact_dir }}/database-password.txt"
 directus_key_local_file: "{{ directus_local_artifact_dir }}/key.txt"
 directus_secret_local_file: "{{ directus_local_artifact_dir }}/secret.txt"

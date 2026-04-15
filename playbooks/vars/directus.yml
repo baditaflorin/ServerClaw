@@ -4,7 +4,6 @@ service_dns_fqdn: data.{{ platform_domain }}
 service_postgres_role: lv3.platform.directus_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
-  - lv3.platform.keycloak_runtime
   - lv3.platform.directus_runtime
 service_needs_dns: true
 service_needs_postgres: true

@@ -20,6 +20,8 @@ keycloak_realm_name: lv3
 keycloak_realm_display_name: LV3 Control Plane
 keycloak_compose_project_name: keycloak
 keycloak_compose_network_name: "{{ keycloak_compose_project_name }}_default"
+keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
+keycloak_secret_dir: /etc/lv3/keycloak
 keycloak_database_name: keycloak
 keycloak_database_user: keycloak
 keycloak_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

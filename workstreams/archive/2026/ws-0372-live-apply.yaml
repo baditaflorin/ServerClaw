@@ -3,10 +3,10 @@ adr: '0372'
 title: ADR 0372 Live Apply and Automation Verification
 status: merged
 ready_to_merge: true
-live_applied: false
+live_applied: true
 owner: platform-infrastructure
-branch: codex/ws-0372-live-apply
-worktree_path: .worktrees/ws-0372-live-apply
+branch: codex/ws-0372-exact-main-r2
+worktree_path: .worktrees/ws-0372-exact-main-r2
 doc: docs/workstreams/ws-0372-live-apply.md
 depends_on:
 - adr-0372-data-driven-playbook-composition
@@ -84,8 +84,9 @@ canonical_truth:
     composition, add missing keycloak/searxng service wrappers, and verify the include-based
     playbook tests
   release_bump: patch
-  included_in_repo_version: 0.178.136
-  latest_receipts: {}
+  included_in_repo_version: 0.178.142
+  latest_receipts:
+    directus: 2026-04-14-adr-0372-data-driven-playbook-composition-live-apply
 description: 'Finalize ADR 0372 on the governed live-apply path. The branch verifies
   that
 
@@ -98,12 +99,5 @@ description: 'Finalize ADR 0372 on the governed live-apply path. The branch veri
   records end-to-end live-apply evidence for the ADR.
 
   '
-blockers:
-- 'Live-apply-service fails the vulnerability budget gate because the image scan receipts
-  for edge-published services (ex: directus_runtime dated 2026-03-30) are older than
-  the 7-day policy window.'
-- 'Attempted to refresh scans on docker-runtime, but trivy remote scans fail because
-  tagged images (ex: minio/minio:RELEASE.2025-07-23T15-54-02Z) are no longer present
-  locally and the host cannot resolve docker.io to pull; artifact-cache scans also
-  time out at 10.10.10.80:5001.'
+blockers: []
 plane_issue_id: 86a2487d-67a2-40d6-974a-5da04320db13

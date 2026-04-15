@@ -1,67 +1,60 @@
-# WS-0372: ADR 0372 Live Apply and Automation Verification
+# Workstream ws-0372-live-apply: ADR 0372 Data-Driven Playbook Composition
 
-## Goal
-
-Close ADR 0372 from "code landed" to "governed live apply verified" on the
-latest `origin/main` baseline.
+- ADR: [ADR 0372](../adr/0372-data-driven-playbook-composition.md)
+- Title: verify ADR 0372 on the governed live-apply path from the latest realistic `origin/main` base
+- Status: live_applied
+- Included In Repo Version: `0.178.142`
+- Included In Platform Version: `0.178.142`
+- Branch-Local Receipt: `receipts/live-applies/2026-04-14-adr-0372-data-driven-playbook-composition-live-apply.json`
+- Implemented On: 2026-04-14
+- Latest Verified Base: `origin/main@2d240e156d6407252d9178d4a0607395154831eb` (`repo 0.178.141`, `platform 0.178.141`)
+- Branch: `codex/ws-0372-exact-main-r2`
+- Worktree: `.worktrees/ws-0372-exact-main-r2`
+- Owner: codex
+- Depends On: `ADR 0021`, `ADR 0165`, `ADR 0269`, `ADR 0372`, `ADR 0373`
+- Conflicts With: none
 
 ## Scope
 
-- verify the root `playbooks/` composition model that already exists on
-  `origin/main`
-- fix the governed `make live-apply-service` path so it loads
-  `playbooks/vars/<service>.yml` when a descriptor exists
-- restore any missing `playbooks/services/<service>.yml` wrappers required by
-  the shared live-apply entrypoint
-- align the affected playbook tests with the shared `_includes/` structure
-- record branch-local validation and live-apply evidence for ADR 0372
+- finish ADR 0372 on the governed service lane by proving that `make live-apply-service service=<service>` still works with the thin playbook composition model already merged on `origin/main`
+- remove fresh-worktree failures that only appear when conventional runtime defaults are evaluated before `derive_service_defaults` runs
+- verify the Directus live-apply path end to end, including public health checks, schema bootstrap, Keycloak-backed publication, and post-apply backup automation
+- record merge-safe evidence so the latest realistic replay can be carried into integrated `main`
 
-## Findings
+## Outcome
 
-- `make converge-<service>` already passes `-e @playbooks/vars/<service>.yml`,
-  but `make live-apply-service service=<service>` does not.
-- Many root playbooks on `origin/main` already depend on shared `_includes/`
-  and descriptor vars, so the governed service lane could drift from the
-  operator-facing converge lane.
-- `playbooks/services/keycloak.yml` and `playbooks/services/searxng.yml` are
-  missing even though the root playbooks and related vars files exist.
-- Several playbook tests still assert the pre-ADR inline boilerplate structure
-  instead of the shared-import model now committed on `origin/main`.
-- `make live-apply-service` preflight surfaced missing generated artifacts,
-  schema drift in health probe data, and inconsistent service/subdomain
-  bindings that required repo-side fixes before the live-apply path could
-  proceed.
+- `playbooks/vars/directus.yml` no longer re-converges `lv3.platform.keycloak_runtime` on `docker-runtime`, so the Directus live-apply lane now relies on the already-published Keycloak service on `runtime-control` instead of trying to move that runtime back onto the wrong VM.
+- `collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml` now declares the fallback controller-local artifact root plus the conventional health, ping, and OpenAPI paths that the role needs when publication verification runs from `localhost` in a fresh worktree.
+- `collections/ansible_collections/lv3/platform/roles/directus_runtime/templates/docker-compose.yml.j2` now renders explicit `extra_hosts` entries when hostname overrides are provided, which restores stable `sso.<platform-domain>` resolution during Directus OIDC discovery inside the Docker runtime.
+- `collections/ansible_collections/lv3/platform/roles/directus_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml`, `inventory/group_vars/all/platform_services.yml`, and `tests/test_keycloak_playbook.py` now align the bootstrap path and Keycloak topology metadata with the actual `runtime-control` service placement that the platform is already running.
+- `config/image-catalog.json` now points Directus at a fresh `2026-04-14` vulnerability scan receipt and a renewed exception review window, which allows the governed vulnerability budget gate to approve the replay without weakening the policy.
 
-## Evidence
+## Verification
 
-- `pytest -q tests/test_makefile_playbook_targets.py tests/test_directus_playbook.py tests/test_flagsmith_playbook.py tests/test_glitchtip_playbook.py tests/test_keycloak_playbook.py tests/test_label_studio_playbook.py tests/test_livekit_playbook.py tests/test_matrix_synapse_playbook.py tests/test_nextcloud_playbook.py tests/test_ntfy_playbook.py tests/test_plausible_playbook.py tests/test_sftpgo_playbook.py tests/test_superset_playbook.py` (pass after updates).
-- `make syntax-check-directus syntax-check-flagsmith syntax-check-glitchtip syntax-check-label-studio syntax-check-livekit syntax-check-matrix-synapse syntax-check-nextcloud syntax-check-ntfy syntax-check-plausible syntax-check-sftpgo syntax-check-superset syntax-check-keycloak syntax-check-searxng` (pass after adding descriptor vars to syntax checks).
-- `make generate-ops-portal` (now passes after loading host vars with identity substitution; earlier failures exposed catalog drift).
-- `make generate-changelog-portal` (passes after aligning the Neko uptime monitor name with the health probe catalog).
-- `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service directus` (passes after normalizing `config/service-redundancy-catalog.json`).
-- `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service directus --allow-in-place-mutation`
-  (passes with explicit in-place override; default gate rejects in-place mutation).
-- `scripts/validate_repo.sh agent-standards` (fails because `inventory/group_vars/platform.yml` is newer than `scripts/topology-snapshot.json`, and public entrypoint validation flags deployment-specific references in `README.md`/`AGENTS.md`; both are outside this workstream’s allowed surfaces).
-- `make live-apply-service service=directus env=production EXTRA_ARGS=--syntax-check`
-  passes preflight and artifact bootstraps, then stops at `check-canonical-truth`
-  because `changelog.md` and `versions/stack.yaml` are stale (protected files
-  deferred to mainline integration).
-- `make live-apply-service service=directus env=production` reaches the vulnerability
-  budget gate and fails because `receipts/image-scans/2026-03-30-directus-runtime.json`
-  is older than the 7-day policy window.
-- `uv run --with pyyaml python scripts/security_posture_report.py --skip-lynis` fails
-  with `docker-runtime: remote scan failed` because several running container tags
-  (ex: `minio/minio:RELEASE.2025-07-23T15-54-02Z`) are not available locally and the
-  host cannot resolve `auth.docker.io` to pull missing images.
-- `python3 scripts/upgrade_container_image.py --image-id directus_runtime --write --skip-db-update`
-  fails while attempting to fetch the artifact-cache mirror (`10.10.10.80:5001`);
-  running with `--skip-artifact-cache` remains pending due to the same scan constraints.
+- Focused regression coverage passed:
+  `pytest -q tests/test_makefile_playbook_targets.py tests/test_directus_playbook.py tests/test_keycloak_playbook.py`
+  returned `9 passed in 0.74s`, and
+  `pytest -q tests/test_directus_playbook.py tests/test_keycloak_playbook.py`
+  returned `7 passed in 0.30s`.
+- The Directus image-scan receipt was refreshed in place with
+  `python3 scripts/upgrade_container_image.py --image-id directus_runtime --refresh-scan-only --renew-existing-exception --write --skip-db-update --skip-artifact-cache`,
+  which produced `receipts/image-scans/2026-04-14-directus-runtime.json`,
+  `receipts/cve/072dcba19d51-20260414T152635Z.grype.json`, and
+  `receipts/sbom/072dcba19d51.cdx.json`.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=directus env=production`
+  completed successfully from the exact-main worktree after the Directus publication defaults were repaired, with zero Ansible host failures across `docker-runtime`, `postgres`, `nginx`, and `localhost`.
+- The governed replay verified the internal Directus health endpoint, `server/ping`, `server/specs/oas`, the schema bootstrap path, the public `https://data.<platform-domain>/server/health` endpoint, and the service-token-backed publication verification flow.
+- The live-apply wrapper completed its post-apply restic trigger and updated `receipts/restic-snapshots-latest.json` at `2026-04-14T15:43:39Z`.
 
-## Blockers
+## Live Apply
 
-- Vulnerability budget gates block production live applies until image scan receipts
-  are refreshed or policy limits are adjusted; current receipts for the ADR 0372
-  services are older than the 7-day edge-published window.
-- The container image scan refresh workflow is currently blocked by missing image
-  tags on docker-runtime and registry/DNS reachability for docker.io and the
-  artifact-cache mirror.
+- The latest realistic runtime-affecting base at apply time was `origin/main@2d240e156d6407252d9178d4a0607395154831eb` (`0.178.141`). While the replay was running, `origin/main` advanced to `e0134a1fe12af73f6d5efbd547a9efef5b820433` with docs-only AGENTS/CLAUDE/workstream archive updates; those later commits did not change the Directus or Keycloak runtime surfaces exercised by the replay.
+- The governed Directus replay now succeeds without branch-local bypasses beyond the explicit `ALLOW_IN_PLACE_MUTATION=true` override already required by the immutable guest replacement policy for this service.
+- ADR 0372 now truthfully records `Implementation Status: Live applied`,
+  `Implemented In Repo Version: 0.178.142`, `Implemented In Platform Version:
+  0.178.142`, and `Implemented On: 2026-04-14`.
+
+## Integration Notes
+
+- The remaining merge work is repository truth only: carry these verified changes onto the latest `origin/main`, bump `VERSION` and release notes to `0.178.142`, update `versions/stack.yaml` so the integrated platform truth points at the new ADR 0372 receipt, and push the integrated result to `origin/main`.
+- The exact-main replay exposed two fresh-worktree gaps that were invisible on the already-converged runtime hosts: missing conventional fallback defaults in `directus_runtime`/`keycloak_runtime`, and a Directus publication verification path that assumed `directus_health_path` was always derived before `publish.yml` ran on `localhost`.

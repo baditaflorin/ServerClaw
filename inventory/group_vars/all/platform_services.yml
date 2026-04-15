@@ -593,7 +593,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8091
-      upstream_host: docker-runtime
+      upstream_host: runtime-control
       public_fqdn: sso.{{ platform_domain }}
       auth_proxy: false             # Keycloak IS the SSO provider; cannot front itself
       extra_fqdns:

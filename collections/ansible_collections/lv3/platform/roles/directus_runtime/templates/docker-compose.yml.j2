@@ -9,7 +9,14 @@ services:
     depends_on:
       openbao-agent:
         condition: service_healthy
+{% if directus_public_hostname_overrides | default([]) | length > 0 %}
+    extra_hosts:
+{% for entry in directus_public_hostname_overrides %}
+      - "{{ entry.hostname }}:{{ entry.address }}"
+{% endfor %}
+{% else %}
 {{ hairpin_hosts() }}
+{% endif %}
     env_file:
       - {{ directus_env_file }}
     ports:

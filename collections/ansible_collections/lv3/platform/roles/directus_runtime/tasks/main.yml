@@ -192,7 +192,7 @@
 
 - name: Bootstrap the Directus governed schema against the local runtime
   ansible.builtin.script: >-
-    {{ playbook_dir }}/../scripts/directus_bootstrap.py bootstrap
+    {{ playbook_dir | dirname }}/../scripts/directus_bootstrap.py bootstrap
     --base-url {{ directus_internal_base_url }}
     --admin-email {{ directus_admin_email }}
     --admin-password-file {{ directus_admin_password_remote_file }}
