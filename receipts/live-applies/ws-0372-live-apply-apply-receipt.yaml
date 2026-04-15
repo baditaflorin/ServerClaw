@@ -17,5 +17,5 @@ targets:
 errors: []
 notes:
 - The first exact-main replay started from origin/main@2d240e156d6407252d9178d4a0607395154831eb with repo and platform version 0.178.141 and proved the Directus lane after the fresh-worktree default fixes landed.
-- The final promotion replay succeeded from origin/main@1c3efc9bf37e16526a6185615fca0a0ddc29fd73 with repo and platform version 0.178.144, then promoted the verified Directus receipt into integrated repo and platform version 0.178.145.
+- The final promotion replay succeeded from origin/main@1c3efc9bf47ba3eebaf993fb855adcfd344b2a40 with repo and platform version 0.178.144, then promoted the verified Directus receipt into integrated repo and platform version 0.178.145.
 - Final verification evidence is recorded under the matching 2026-04-15-ws-0372-mainline-final-*.txt transcripts plus the rebased directus replay transcript and restic backup receipts.

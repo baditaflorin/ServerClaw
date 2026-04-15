@@ -1,0 +1,26 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-15T08:44:16Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "main",
+  "commit": "25ec1db149b58655430ca02aa890a01628ca8289",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "The primary-branch pre-push gate on main@25ec1db149b58655430ca02aa890a01628ca8289 still reduces to pre-existing untouched whole-repo ansible-lint failures outside ws-0372 after the final ws-0372 mainline validation bundle passed locally.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "./scripts/validate_repo.sh agent-standards data-models",
+      "python3 scripts/live_apply_receipts.py --validate",
+      "git diff --check",
+      "./scripts/remote_exec.sh check-build-server",
+      "make remote-validate"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-16",
+    "remediation_ref": "ws-0372-live-apply"
+  }
+}

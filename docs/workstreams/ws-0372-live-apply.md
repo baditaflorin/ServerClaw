@@ -10,7 +10,7 @@
 - Implemented On: 2026-04-15
 - Live Applied On: 2026-04-15
 - Live Applied In Platform Version: `0.178.145`
-- Latest Verified Base: `origin/main@1c3efc9bf37e16526a6185615fca0a0ddc29fd73` (`repo 0.178.144`, `platform 0.178.144`)
+- Latest Verified Base: `origin/main@1c3efc9bf47ba3eebaf993fb855adcfd344b2a40` (`repo 0.178.144`, `platform 0.178.144`)
 - Branch: `codex/ws-0372-exact-main-r2`
 - Worktree: removed after merge-to-main
 - Owner: codex
@@ -47,11 +47,12 @@
 ## Live Apply
 
 - The first exact-main replay for this closeout ran from `origin/main@2d240e156d6407252d9178d4a0607395154831eb` with repo and platform version `0.178.141`, proving the Directus lane on the latest realistic runtime-affecting base that existed when ws-0372 entered live-apply verification.
-- The final promotion replay was re-run from `origin/main@1c3efc9bf37e16526a6185615fca0a0ddc29fd73`, the latest realistic base at merge time after ws-0382, with repo and platform version `0.178.144`. That replay is what promoted the Directus receipt into integrated platform version `0.178.145`.
+- The final promotion replay was re-run from `origin/main@1c3efc9bf47ba3eebaf993fb855adcfd344b2a40`, the latest realistic base at merge time after ws-0382, with repo and platform version `0.178.144`. That replay is what promoted the Directus receipt into integrated platform version `0.178.145`.
 - The only apply-time override remained the governed `ALLOW_IN_PLACE_MUTATION=true` switch already required by the immutable guest replacement policy for Directus. No branch-local bypasses or manual server edits were needed.
 
 ## Integration Notes
 
 - ADR 0372 first became true in repo version `0.178.136`; this closeout does not change that history. What it adds is the verified platform truth: Directus now has a governed exact-main replay and an integrated mainline replay recorded in repo and platform version `0.178.145`.
 - The exact-main replay exposed two gaps that were invisible on already-converged hosts: missing conventional fallback defaults in `directus_runtime` and `keycloak_runtime`, and a Directus publication verification path that needed explicit hostname override rendering for stable SSO discovery inside the container.
+- The final `origin/main` promotion uses the governed `skip_remote_gate` waiver recorded in `receipts/gate-bypasses/20260415T084416Z-main-25ec1db-skip-remote-gate.json` because clean `main@25ec1db149b58655430ca02aa890a01628ca8289` still reduces to the untouched whole-repo `ansible-lint` fatal baseline after the ws-0372-specific and final mainline validation bundles passed locally.
 - The verified feature branch was promoted to `main` and `origin/main`, after which the temporary ws-0372 worktrees were removed.

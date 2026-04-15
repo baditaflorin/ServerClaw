@@ -22,6 +22,7 @@ shared_surfaces:
 - workstreams.yaml
 - receipts/live-applies/*adr-0372*
 - receipts/live-applies/evidence/*ws-0372*
+- receipts/gate-bypasses/20260415T084416Z-main-25ec1db-skip-remote-gate.json
 - receipts/restic-backups/20260415T071036Z.json
 - receipts/restic-snapshots-latest.json
 - config/image-catalog.json
@@ -128,5 +129,17 @@ description: 'Finalize ADR 0372 on the governed live-apply path. The branch veri
   plus integrated mainline receipts for the final ADR 0372 closeout.
 
   '
+notes: |
+  Final closeout rebased onto origin/main@1c3efc9bf47ba3eebaf993fb855adcfd344b2a40
+  with VERSION=0.178.144 and carried the governed Directus replay into repo and
+  platform version 0.178.145. Focused pytest, agent-standards/data-models,
+  live-apply receipt validation, git diff check, check-build-server, and
+  remote-validate all passed on the integrated main candidate.
+
+  The final origin/main promotion records the governed skip_remote_gate waiver
+  in receipts/gate-bypasses/20260415T084416Z-main-25ec1db-skip-remote-gate.json
+  because clean main@25ec1db149b58655430ca02aa890a01628ca8289 still reproduced
+  the untouched whole-repo ansible-lint fatal baseline after the ws-0372
+  validation bundle cleared locally.
 blockers: []
 plane_issue_id: 86a2487d-67a2-40d6-974a-5da04320db13

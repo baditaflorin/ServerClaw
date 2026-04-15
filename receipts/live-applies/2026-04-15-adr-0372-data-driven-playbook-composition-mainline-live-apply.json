@@ -51,7 +51,7 @@
     {
       "check": "Governed Directus replay on the latest realistic mainline base",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=directus env=production` completed successfully from origin/main@1c3efc9bf37e16526a6185615fca0a0ddc29fd73, including the local health checks, schema bootstrap, public publication verification, and a successful post-apply restic trigger; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-directus-live-apply-r3-0.178.144.txt`, `receipts/restic-backups/20260415T074137Z.json`, and `receipts/restic-snapshots-latest.json`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=directus env=production` completed successfully from origin/main@1c3efc9bf47ba3eebaf993fb855adcfd344b2a40, including the local health checks, schema bootstrap, public publication verification, and a successful post-apply restic trigger; evidence: `receipts/live-applies/evidence/2026-04-15-ws-0372-mainline-directus-live-apply-r3-0.178.144.txt`, `receipts/restic-backups/20260415T074137Z.json`, and `receipts/restic-snapshots-latest.json`."
     },
     {
       "check": "Direct repository gate bundle on the integrated candidate",
@@ -97,7 +97,7 @@
     "receipts/restic-snapshots-latest.json"
   ],
   "notes": [
-    "The final promotion replay started from origin/main@1c3efc9bf37e16526a6185615fca0a0ddc29fd73, the latest realistic mainline base available at merge time after ws-0382, with repo and platform version 0.178.144.",
+    "The final promotion replay started from origin/main@1c3efc9bf47ba3eebaf993fb855adcfd344b2a40, the latest realistic mainline base available at merge time after ws-0382, with repo and platform version 0.178.144.",
     "ADR 0372 first became true in repo version 0.178.136; this integrated receipt records the first verified platform truth for that ADR on current mainline after ws-0382, which is now repo and platform version 0.178.145.",
     "The integrated closeout updates VERSION, changelog.md, RELEASE.md, docs/release-notes/0.178.145.md, README.md, versions/stack.yaml, the archived ws-0372 registry shard, and these receipts so the merged repository and platform truth describe the same verified state."
   ]
