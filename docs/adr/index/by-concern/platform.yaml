@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-15'
 facet: concern
 concern: platform
-total_adrs: 141
+total_adrs: 142
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2533,3 +2533,20 @@ adrs:
     summary: 'Invert the publication model: committed code uses generic placeholder values'
     filename: 0409-zero-sanitization-publication.md
     path: docs/adr/0409-zero-sanitization-publication.md
+  - adr: 0418
+    title: Automatic Receipt-to-Outline Publishing — Shared Utility and Coverage Gaps
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - automatic
+      - receipt-to-outline
+      - publishing
+      - shared
+      - utility
+      - coverage
+      - gaps
+    summary: 'Add a module-level function to scripts/outlineclient.py:'
+    filename: 0418-receipt-to-outline-auto-publish.md
+    path: docs/adr/0418-receipt-to-outline-auto-publish.md

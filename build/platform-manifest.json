@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.145",
+  "repo_version": "0.178.146",
   "platform_version": "0.178.145",
-  "generated_at": "2026-04-15T07:59:50Z",
-  "next_refresh_at": "2026-04-15T08:59:50Z",
+  "generated_at": "2026-04-15T18:42:35Z",
+  "next_refresh_at": "2026-04-15T19:42:35Z",
   "environment": "production",
   "identity": {
-    "platform_name": "lv3.org",
-    "operator": "Florin Badita-Nistor",
+    "platform_name": "example.com",
+    "operator": "Platform Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.144",
+    "last_version": "0.178.145",
     "deployed_at": "2026-04-15",
-    "summary": "close ADR 0372 on the latest realistic `origin/main` by replaying the governed Directus live apply on top of the ws-0382 mainline TLS and Keycloak fixes, preserving fresh-worktree runtime defaults, and promoting the verified Directus receipt into this release",
-    "release_notes_url": "docs/release-notes/0.178.145.md"
+    "summary": "completes ADR 0324 exact-main closeout by recording the generated service-catalog assembly receipt on main and refreshing the canonical truth surfaces fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge",
+    "release_notes_url": "docs/release-notes/0.178.146.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6310,17 +6310,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.lv3.org",
+        "endpoint": "https://ops.example.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.lv3.org",
+        "endpoint": "https://windmill.example.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.lv3.org",
+        "endpoint": "https://api.example.com",
         "adr": "0092"
       }
     ],

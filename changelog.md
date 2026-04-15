@@ -14,13 +14,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 - completes ADR 0324 exact-main closeout by recording the generated service-catalog assembly receipt on main and refreshing the canonical truth surfaces
 - fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge
+- ADR 0418: plan automatic receipt-to-Outline publishing (shared utility, coverage gap scripts, backfill targets); postmortem on agent orientation overhead
 
 ## Latest Release
 
-- [0.178.145 release notes](docs/release-notes/0.178.145.md)
+- [0.178.146 release notes](docs/release-notes/0.178.146.md)
 
 ## Previous Releases
 
+- [0.178.145 release notes](docs/release-notes/0.178.145.md)
 - [0.178.144 release notes](docs/release-notes/0.178.144.md)
 - [0.178.143 release notes](docs/release-notes/0.178.143.md)
 - [0.178.141 release notes](docs/release-notes/0.178.141.md)
@@ -32,9 +34,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.134 release notes](docs/release-notes/0.178.134.md)
 - [0.178.133 release notes](docs/release-notes/0.178.133.md)
 - [0.178.131 release notes](docs/release-notes/0.178.131.md)
-- [0.178.129 release notes](docs/release-notes/0.178.129.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (470 releases)](docs/release-notes/index/2026.md)
+- [2026 (471 releases)](docs/release-notes/index/2026.md)
