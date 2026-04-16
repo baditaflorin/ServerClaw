@@ -314,8 +314,6 @@ canonical_truth:
     litellm: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
     repowise: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
 blockers: []
-ready_to_merge: true
-live_applied: true
 notes: |
   Final closeout re-fetched the latest realistic origin/main base
   `7b72694975ef8aae83e59d96c08dd27181595b2e` (repo 0.178.142, platform
