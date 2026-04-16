@@ -24,6 +24,7 @@ ensure_repo_root_on_path(__file__)
 from platform.datetime_compat import UTC, datetime
 from platform.repo import TOPOLOGY_HOST_VARS_PATH
 from controller_automation_toolkit import emit_cli_error, repo_path, write_json
+from outline_client import publish_receipt_to_outline
 from publication_contract import (
     publication_access_model,
     publication_audience,
@@ -1108,7 +1109,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.write_receipt:
             receipt_path = RECEIPTS_DIR / f"{compact_timestamp(utc_now())}.json"
             write_json(receipt_path, report, indent=2, sort_keys=True)
-            _publish_receipt_to_outline(receipt_path)
+            publish_receipt_to_outline(receipt_path)
 
         if args.print_registry:
             print(json.dumps(registry, indent=2))
@@ -1129,31 +1130,6 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except Exception as exc:
         return emit_cli_error("subdomain exposure audit", exc)
-
-
-def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import subprocess
-    import sys as _sys
-
-    token = os.environ.get("OUTLINE_API_TOKEN", "")
-    if not token:
-        token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
-        if token_file.exists():
-            token = token_file.read_text(encoding="utf-8").strip()
-    if not token:
-        return
-    outline_tool = Path(__file__).resolve().parent / "outline_tool.py"
-    if not outline_tool.exists() or not receipt_path.exists():
-        return
-    try:
-        subprocess.run(
-            [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True,
-            check=False,
-            env={**os.environ, "OUTLINE_API_TOKEN": token},
-        )
-    except OSError:
-        pass
 
 
 if __name__ == "__main__":

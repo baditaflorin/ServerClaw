@@ -24,6 +24,7 @@ if _SCRIPTS_DIR not in sys.path:
 from validation_toolkit import require_int, require_list, require_mapping, require_str, require_string_list
 
 from controller_automation_toolkit import load_yaml
+from outline_client import publish_receipt_to_outline
 from platform.ledger import LedgerWriter
 
 
@@ -454,6 +455,7 @@ def run_audit(
         "receipt_path": display_path(receipt_path),
     }
     write_json(receipt_path, report)
+    publish_receipt_to_outline(receipt_path)
     maybe_write_audit_event(report)
     return report
 

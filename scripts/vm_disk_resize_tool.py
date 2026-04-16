@@ -76,6 +76,7 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
+from outline_client import publish_receipt_to_outline
 from platform.locking import LockType, ResourceLockRegistry
 from platform.repo import TOPOLOGY_HOST_VARS_PATH
 
@@ -769,6 +770,7 @@ def _write_receipt(receipt: dict) -> None:
     ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     path = RECEIPTS_DIR / f"{ts}-vmid-{receipt['vmid']}.json"
     path.write_text(json.dumps(receipt, indent=2, sort_keys=True), encoding="utf-8")
+    publish_receipt_to_outline(path)
     print(f"[receipt] Written to {path.relative_to(REPO_ROOT)}", file=sys.stderr)
 
 

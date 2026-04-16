@@ -1,7 +1,7 @@
 # ADR 0418: Automatic Receipt-to-Outline Publishing — Shared Utility and Coverage Gaps
 
 **Date:** 2026-04-15
-**Status:** Proposed
+**Status:** Implemented
 **Related:** ADR 0036 (Live Apply Receipts), ADR 0199 (Outline Living Wiki), ADR 0346 (Outline Programmatic API), ADR 0364 (Outline Agent Tools)
 
 ---

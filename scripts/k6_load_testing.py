@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import load_json
+from outline_client import publish_receipt_to_outline
 
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -689,6 +690,7 @@ def build_receipts(
             "failure_reasons": failure_reasons,
         }
         write_json(receipt_path, receipt)
+        publish_receipt_to_outline(receipt_path)
         receipts.append(receipt_path)
     return receipts
 

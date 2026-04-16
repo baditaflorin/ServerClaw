@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, repo_path, write_json
+from outline_client import publish_receipt_to_outline
 from drift_lib import isoformat, utc_now
 from https_tls_assurance_targets import DEFAULT_ENVIRONMENT, discover_https_tls_targets
 from public_surface_scan import (
@@ -198,33 +199,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Status: {report['summary']['status']}")
     if args.print_report_json:
         print(f"REPORT_JSON={json.dumps(report, separators=(',', ':'))}")
-    _publish_receipt_to_outline(Path(report["receipt_path"]))
+    publish_receipt_to_outline(Path(report["receipt_path"]))
     return report["summary"]["status_code"]
-
-
-def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import subprocess
-    import sys as _sys
-
-    token = os.environ.get("OUTLINE_API_TOKEN", "")
-    if not token:
-        token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
-        if token_file.exists():
-            token = token_file.read_text(encoding="utf-8").strip()
-    if not token:
-        return
-    outline_tool = Path(__file__).resolve().parent / "outline_tool.py"
-    if not outline_tool.exists() or not receipt_path.exists():
-        return
-    try:
-        subprocess.run(
-            [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True,
-            check=False,
-            env={**os.environ, "OUTLINE_API_TOKEN": token},
-        )
-    except OSError:
-        pass
 
 
 if __name__ == "__main__":

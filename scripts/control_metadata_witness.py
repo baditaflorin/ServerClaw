@@ -15,6 +15,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 from platform.repo import TOPOLOGY_HOST
+from outline_client import publish_receipt_to_outline
 
 
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -367,6 +368,7 @@ def sync_control_metadata_witness(
     receipt = build_receipt(manifest, generation_dir)
     receipt_path = receipt_dir / f"{receipt['receipt_id']}.json"
     write_json(receipt_path, receipt)
+    publish_receipt_to_outline(receipt_path)
     return generation_dir, receipt_path, receipt
 
 

@@ -37,16 +37,21 @@ import sys
 import time
 import uuid
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from statistics import median, stdev
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts")) if str(REPO_ROOT / "scripts") not in sys.path else None  # noqa: E501
+from outline_client import publish_receipt_to_outline  # noqa: E402
+
 TIMING_RECEIPTS_DIR = REPO_ROOT / "receipts" / "convergence-timing"
 SCHEMA_VERSION = "1.0.0"
 
@@ -245,6 +250,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     TIMING_RECEIPTS_DIR.mkdir(parents=True, exist_ok=True)
     receipt_path = TIMING_RECEIPTS_DIR / f"{receipt['receipt_id']}.json"
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    publish_receipt_to_outline(receipt_path)
     print(f"[convergence-timer] Receipt written: {receipt_path.name}")
 
     return result.returncode

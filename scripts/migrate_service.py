@@ -35,6 +35,8 @@ from typing import Any
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts")) if str(REPO_ROOT / "scripts") not in sys.path else None
+from outline_client import publish_receipt_to_outline  # noqa: E402
 
 SERVICES_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
 POSTGRES_CLIENTS_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_postgres.yml"
@@ -354,6 +356,7 @@ def write_receipt(
         "adr": "ADR 0417",
     }
     receipt_path.write_text(yaml.dump(receipt, default_flow_style=False, allow_unicode=True))
+    publish_receipt_to_outline(receipt_path)
     return receipt_path
 
 

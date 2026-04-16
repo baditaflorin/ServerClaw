@@ -71,6 +71,48 @@ class OutlineClient:
         raise OutlineError(f"{endpoint} failed: exhausted retries")
 
 
+# ---------------------------------------------------------------------------
+# Best-effort receipt publishing (ADR 0418)
+# ---------------------------------------------------------------------------
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_OUTLINE_TOOL = Path(__file__).resolve().parent / "outline_tool.py"
+_TOKEN_FILE = _REPO_ROOT / ".local" / "outline" / "api-token.txt"
+
+
+def publish_receipt_to_outline(receipt_path: Path) -> None:
+    """Best-effort: convert a receipt JSON to markdown and push to Outline.
+
+    Reads ``OUTLINE_API_TOKEN`` from the environment, falling back to
+    ``.local/outline/api-token.txt``.  Silent on any failure — never blocks
+    the caller.
+    """
+    import os
+    import subprocess
+    import sys as _sys
+
+    token = os.environ.get("OUTLINE_API_TOKEN", "")
+    if not token and _TOKEN_FILE.exists():
+        token = _TOKEN_FILE.read_text(encoding="utf-8").strip()
+    if not token or not receipt_path.exists():
+        return
+    if not _OUTLINE_TOOL.exists():
+        return
+    try:
+        subprocess.run(
+            [_sys.executable, str(_OUTLINE_TOOL), "receipt.publish", "--file", str(receipt_path)],
+            capture_output=True,
+            check=False,
+            timeout=30,
+            env={**os.environ, "OUTLINE_API_TOKEN": token},
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+
+# ---------------------------------------------------------------------------
+
+
 def deterministic_id(prefix: str, value: str) -> str:
     return str(uuid.uuid5(UUID_NAMESPACE, f"{prefix}:{value}"))
 

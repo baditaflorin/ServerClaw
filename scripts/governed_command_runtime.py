@@ -16,6 +16,7 @@ from typing import Any
 from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
+from outline_client import publish_receipt_to_outline  # noqa: E402
 
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -172,6 +173,7 @@ def submit(payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
         "stderr": completed.stderr.strip(),
     }
     write_receipt(receipt_path, result)
+    publish_receipt_to_outline(receipt_path)
     return result, completed.returncode
 
 

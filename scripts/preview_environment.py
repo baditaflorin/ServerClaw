@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import load_json, repo_path, write_json
+from outline_client import publish_receipt_to_outline
 from fixture_manager import (
     DEFAULT_EPHEMERAL_POLICY,
     apply_fixture,
@@ -541,6 +542,8 @@ def finalize_preview_evidence(state: dict[str, Any]) -> tuple[Path, Path]:
     write_json(evidence_path, state, indent=2, sort_keys=True)
     live_receipt = build_live_apply_receipt(state, evidence_path)
     write_json(live_receipt_path, live_receipt, indent=2, sort_keys=True)
+    publish_receipt_to_outline(evidence_path)
+    publish_receipt_to_outline(live_receipt_path)
     return evidence_path, live_receipt_path
 
 

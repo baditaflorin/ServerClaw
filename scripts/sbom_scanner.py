@@ -20,6 +20,7 @@ from typing import Any
 
 from artifact_cache_seed import normalize_registry_host, strip_registry_host
 from controller_automation_toolkit import load_json, repo_path, shared_repo_root, write_json
+from outline_client import publish_receipt_to_outline
 
 
 REPO_ROOT = repo_path()
@@ -457,6 +458,7 @@ def grype_scan_sbom(
         "matches": normalized_matches,
     }
     write_json(cve_path, receipt)
+    publish_receipt_to_outline(cve_path)
     return receipt
 
 

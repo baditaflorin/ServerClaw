@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, repo_path
+from outline_client import publish_receipt_to_outline
 from drift_lib import load_controller_context, nats_tunnel, publish_nats_events, resolve_nats_credentials
 from sbom_scanner import (
     CVE_RECEIPTS_DIR,
@@ -218,36 +219,10 @@ def main(argv: list[str] | None = None) -> int:
             for key in ("sbom_receipt", "cve_receipt"):
                 rp = img.get(key)
                 if rp:
-                    _publish_receipt_to_outline(Path(rp))
+                    publish_receipt_to_outline(Path(rp))
         return 0
     except Exception as exc:
         return emit_cli_error("SBOM refresh", exc)
-
-
-def _publish_receipt_to_outline(receipt_path: Path) -> None:
-    import os
-    import subprocess
-    import sys as _sys
-
-    token = os.environ.get("OUTLINE_API_TOKEN", "")
-    if not token:
-        token_file = Path(__file__).resolve().parents[1] / ".local" / "outline" / "api-token.txt"
-        if token_file.exists():
-            token = token_file.read_text(encoding="utf-8").strip()
-    if not token:
-        return
-    outline_tool = Path(__file__).resolve().parent / "outline_tool.py"
-    if not outline_tool.exists() or not receipt_path.exists():
-        return
-    try:
-        subprocess.run(
-            [_sys.executable, str(outline_tool), "receipt.publish", "--file", str(receipt_path)],
-            capture_output=True,
-            check=False,
-            env={**os.environ, "OUTLINE_API_TOKEN": token},
-        )
-    except OSError:
-        pass
 
 
 if __name__ == "__main__":

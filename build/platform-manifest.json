@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.146",
+  "repo_version": "0.178.147",
   "platform_version": "0.178.145",
-  "generated_at": "2026-04-15T18:42:35Z",
-  "next_refresh_at": "2026-04-15T19:42:35Z",
+  "generated_at": "2026-04-16T01:50:45Z",
+  "next_refresh_at": "2026-04-16T02:50:45Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.145",
-    "deployed_at": "2026-04-15",
-    "summary": "completes ADR 0324 exact-main closeout by recording the generated service-catalog assembly receipt on main and refreshing the canonical truth surfaces fix Keycloak service topology: upstream now correctly points to runtime-control (10.10.10.92) instead of docker-runtime, preventing nginx edge from reverting sso.lv3.org to the wrong host on next converge",
-    "release_notes_url": "docs/release-notes/0.178.146.md"
+    "last_version": "0.178.146",
+    "deployed_at": "2026-04-16",
+    "summary": "ADR 0418 implemented: extract publish_receipt_to_outline() as shared utility in outline_client.py; replace 8 inline copies; add auto-publish to 12 gap scripts (20 scripts total); add Makefile backfill-receipts-* targets; document convention in AGENTS.md",
+    "release_notes_url": "docs/release-notes/0.178.147.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

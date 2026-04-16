@@ -359,6 +359,43 @@ Follow this before ending any session:
 | Merging to main | Bump VERSION, update changelog, clear commit |
 | Work blocked | Mark status: blocked, document blocker, push branch, sync to Plane |
 
+## Programmatic Wiki Tools (ADR 0346 / ADR 0418)
+
+The platform wiki at `wiki.example.com` (Outline) is managed programmatically.
+
+### Key scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/outline_tool.py` | CLI for document, collection, and receipt management. Subcommands: `document.publish`, `receipt.publish`, `receipt.backfill`, `bypass.publish`, `changelog.push` |
+| `scripts/outline_client.py` | Shared API client + `publish_receipt_to_outline()` utility |
+| `scripts/sync_docs_to_outline.py` | Bootstraps and syncs 12 managed collections (ADRs, Runbooks, etc.) |
+
+### Convention: auto-publish receipts
+
+Every script that writes a JSON file to `receipts/` **must** call
+`publish_receipt_to_outline(receipt_path)` immediately after writing.
+Import it from the shared module:
+
+```python
+from outline_client import publish_receipt_to_outline
+
+# ... after writing the receipt:
+publish_receipt_to_outline(receipt_path)
+```
+
+The function is best-effort and silent on failure (no token, no Outline API, timeout).
+It reads credentials from `OUTLINE_API_TOKEN` env var or `.local/outline/api-token.txt`.
+
+### Backfilling historical receipts
+
+```bash
+make backfill-receipts-all          # all categories
+make backfill-receipts-security     # Security & Compliance
+make backfill-receipts-dr           # DR & Backup Status
+make backfill-receipts-automation   # Automation Runs
+```
+
 ## Playbook / Role Metadata Standard (ADR 0165)
 
 Every new playbook and role must include a metadata comment block at the top.

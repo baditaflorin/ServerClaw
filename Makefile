@@ -567,6 +567,26 @@ reconcile-portals: ## Regenerate all portal artifacts from canonical catalogs
 check-portal-drift: ## Check if any portal artifacts are stale
 	python3 -m scripts.reconciliation.cli check-drift
 
+backfill-receipts-security: ## Backfill security-related receipts to Outline wiki
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Security & Compliance" --receipt-dir receipts/subdomain-exposure-audit
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Security & Compliance" --receipt-dir receipts/https-tls-assurance
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Security & Compliance" --receipt-dir receipts/cve
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Security & Compliance" --receipt-dir receipts/sbom
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Security & Compliance" --receipt-dir receipts/security-reports
+
+backfill-receipts-dr: ## Backfill DR & backup receipts to Outline wiki
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "DR & Backup Status" --receipt-dir receipts/restore-verifications
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "DR & Backup Status" --receipt-dir receipts/backup-coverage
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "DR & Backup Status" --receipt-dir receipts/restic-backups
+
+backfill-receipts-automation: ## Backfill automation run receipts to Outline wiki
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Automation Runs" --receipt-dir receipts/convergence-timing
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Automation Runs" --receipt-dir receipts/k6
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Automation Runs" --receipt-dir receipts/promotions
+	python3 $(REPO_ROOT)/scripts/outline_tool.py receipt.backfill --collection "Automation Runs" --receipt-dir receipts/live-applies
+
+backfill-receipts-all: backfill-receipts-security backfill-receipts-dr backfill-receipts-automation ## Backfill ALL receipt categories to Outline
+
 receipts:
 	$(REPO_ROOT)/scripts/live_apply_receipts.py --list
 

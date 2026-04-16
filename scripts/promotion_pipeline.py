@@ -33,6 +33,7 @@ from controller_automation_toolkit import (
     run_command,
     write_json,
 )
+from outline_client import publish_receipt_to_outline
 from live_apply_receipts import (
     RECEIPTS_DIR,
     load_receipt,
@@ -817,6 +818,7 @@ def promote_service(
     )
     prod_receipt_path = RECEIPTS_DIR / f"{prod_receipt_id}.json"
     write_json(prod_receipt_path, prod_receipt, indent=2)
+    publish_receipt_to_outline(prod_receipt_path)
 
     promotion_receipt = build_promotion_receipt(
         promotion_id=promotion_id,

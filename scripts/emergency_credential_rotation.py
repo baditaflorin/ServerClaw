@@ -35,6 +35,9 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(os.environ.get("ROTATION_REPO_ROOT", Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(REPO_ROOT / "scripts")) if str(REPO_ROOT / "scripts") not in sys.path else None
+from outline_client import publish_receipt_to_outline  # noqa: E402
+
 SECRETS_MANIFEST = REPO_ROOT / "config" / "controller-local-secrets.json"
 RECEIPT_DIR = REPO_ROOT / "receipts" / "credential-rotations"
 
@@ -459,6 +462,7 @@ def main() -> None:
         }
         with open(receipt_path, "w") as f:
             json.dump(receipt_data, f, indent=2)
+        publish_receipt_to_outline(receipt_path)
         print(f"\nReceipt written to: {receipt_path}")
 
     # Print convergence instructions
