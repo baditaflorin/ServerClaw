@@ -964,6 +964,7 @@ def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_
 def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: Path, monkeypatch) -> None:
     support_file_contents = {
         "scripts/restic_config_backup.py": "#!/usr/bin/env python3\nprint('restic')\n",
+        "scripts/outline_client.py": "def publish_receipt_to_outline(path):\n    return None\n",
         "scripts/script_bootstrap.py": "print('bootstrap')\n",
         "scripts/controller_automation_toolkit.py": "print('toolkit')\n",
         "scripts/ntfy_publish.py": "print('ntfy')\n",
@@ -1012,6 +1013,7 @@ def test_ensure_remote_runtime_support_files_uploads_required_bundle(tmp_path: P
     assert len(remote_commands) == len(trigger.REMOTE_RUNTIME_SUPPORT_FILES)
     assert len(stdin_payloads) == len(trigger.REMOTE_RUNTIME_SUPPORT_FILES)
     assert any("/srv/proxmox-host_server/scripts/restic_config_backup.py" in command for _, command in remote_commands)
+    assert any("/srv/proxmox-host_server/scripts/outline_client.py" in command for _, command in remote_commands)
     assert any("/srv/proxmox-host_server/scripts/script_bootstrap.py" in command for _, command in remote_commands)
     assert any(
         "/srv/proxmox-host_server/scripts/controller_automation_toolkit.py" in command for _, command in remote_commands

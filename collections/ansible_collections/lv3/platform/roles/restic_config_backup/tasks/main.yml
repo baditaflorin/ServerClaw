@@ -361,6 +361,9 @@
     - src: "{{ playbook_dir | dirname }}/scripts/restic_config_backup.py"
       dest: scripts/restic_config_backup.py
       mode: "0755"
+    - src: "{{ playbook_dir | dirname }}/scripts/outline_client.py"
+      dest: scripts/outline_client.py
+      mode: "0644"
     - src: "{{ playbook_dir | dirname }}/scripts/script_bootstrap.py"
       dest: scripts/script_bootstrap.py
       mode: "0644"

@@ -30,6 +30,7 @@ DEFAULT_FALLBACK_REMOTE_SCRIPT_PATH = "/opt/api-gateway/service/scripts/restic_c
 DEFAULT_FALLBACK_REMOTE_CATALOG_PATH = "/etc/lv3/restic-config-backup/restic-file-backup-catalog.json"
 REMOTE_RUNTIME_SUPPORT_FILES = (
     ("scripts/restic_config_backup.py", 0o755),
+    ("scripts/outline_client.py", 0o644),
     ("scripts/script_bootstrap.py", 0o644),
     ("scripts/controller_automation_toolkit.py", 0o644),
     ("scripts/ntfy_publish.py", 0o644),
