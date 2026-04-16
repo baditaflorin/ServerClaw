@@ -23,6 +23,7 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 12. Bump `platform_version` in `versions/stack.yaml` only when merged work is actually applied live from `main`.
 13. Update `changelog.md` whenever `VERSION` changes, and use the `Unreleased` section for merged notes that have not yet been cut into a numbered release.
 14. When a live change is actually applied, finish the turn by committing it, pushing it to GitHub, and updating the relevant release/workstream state unless explicitly blocked.
+15. **All changes to main go through pull requests** (ADR 0419). Push your branch, create a PR via `gh pr create`, wait for CI, then merge via `gh pr merge --squash --delete-branch`. Direct push to main is reserved for emergencies with admin bypass only.
 15. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
 16. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
 17. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
@@ -414,6 +415,50 @@ The pre-push gate (`scripts/validate_repo.sh agent-standards`) enforces:
 - Branch must appear in `workstreams.yaml`
 - `docs/adr/.index.yaml` must be current when ADR files change
   - Regenerate: `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
+
+## Pull Request Workflow (ADR 0419 / ADR 0420)
+
+**All changes to main go through pull requests.** This replaces the previous
+direct-push-to-main flow and gives every change a reviewable diff, CI
+status checks before merge, and a permanent audit trail.
+
+### Standard flow (agents and operators)
+
+```bash
+# 1. Work on a branch
+git push origin claude/my-branch -u
+
+# 2. Create PR (use [release] prefix for release PRs)
+gh pr create --base main --title "[release] Bump to X.Y.Z — summary" --body "..."
+
+# 3. Wait for CI, then merge
+gh pr merge <number> --squash --delete-branch
+```
+
+### Release PRs vs. feature PRs
+
+- **`[release]` in title**: CI enforces all release-readiness checks
+  (VERSION bump, changelog, release notes, manifest, discovery artifacts)
+- **No `[release]`**: checks run as advisory only — use for WIP or feature PRs
+
+### Emergency direct push
+
+Admins can bypass branch protection for genuine emergencies:
+```bash
+SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=emergency_hotfix \
+  GATE_BYPASS_DETAIL="<describe>" git push origin main
+```
+Follow up with a retroactive PR or incident note.
+
+### Release-readiness checker
+
+```bash
+# Check locally before creating a PR:
+python3 scripts/check_release_readiness.py
+
+# Enforce (exit non-zero on failure):
+python3 scripts/check_release_readiness.py --enforce
+```
 
 ## Agent Coordination Patterns (ADR 0347, 0350, 0353, 0355, 0357)
 

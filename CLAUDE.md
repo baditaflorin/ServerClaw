@@ -53,63 +53,101 @@ This is how other agents (and future-you) find what is in flight.
 
 ---
 
-## 4. Merge-to-Main Checklist
+## 4. Merge-to-Main via Pull Request (ADR 0419)
 
-Run this **every time** work lands on `main`. Do not skip steps.
+All changes to `main` go through **pull requests**, not direct push.
+This gives a reviewable diff, CI status checks before merge, and an audit trail.
 
-### 4a. Bump VERSION
+### 4a. Prepare the release commit on your branch
+
+Run these steps **before** creating the PR:
+
 ```bash
-# Read current version
+# Bump VERSION
 cat VERSION   # e.g. 0.178.7
-
-# Bump patch (or minor for breaking changes per config/version-semantics.json)
 echo "0.178.8" > VERSION
-```
 
-### 4b. Add a changelog entry
-Edit `changelog.md` — add a bullet under `## Unreleased`:
-```markdown
-## Unreleased
+# Add changelog entry
+# Edit changelog.md — add a bullet under ## Unreleased
 
-- <one-line summary of what merged>
-```
-
-### 4c. Write release notes
-```bash
-# The Unreleased section becomes the release notes body.
-# Run after editing changelog.md:
+# Generate release notes
 uv run --with pyyaml \
   python scripts/generate_release_notes.py \
   --version 0.178.8 \
   --released-on $(date +%Y-%m-%d) \
   --write
 
-# This creates docs/release-notes/0.178.8.md and updates RELEASE.md.
-# Then refresh the index and changelog release sections:
+# Refresh root summaries
 uv run --with pyyaml \
   python scripts/generate_release_notes.py --write-root-summaries
-```
 
-### 4d. Regenerate platform manifest and discovery artifacts
-```bash
+# Regenerate platform manifest and discovery artifacts
 uvx --python 3.12 \
   --with pyyaml --with jsonschema --with requests --with jinja2 \
   python scripts/platform_manifest.py --write
 
 python scripts/generate_discovery_artifacts.py --write
+
+# Regenerate ADR index (if ADRs changed)
+python scripts/generate_adr_index.py --write
 ```
 
-### 4e. Commit everything together
+### 4b. Commit and push the branch
 ```bash
 git add VERSION changelog.md RELEASE.md docs/release-notes/ \
-        build/platform-manifest.json build/onboarding/
+        build/platform-manifest.json build/onboarding/ \
+        docs/adr/.index.yaml docs/adr/index/
 git commit -m "[release] Bump to 0.178.8 — <one-line summary>"
+git push origin claude/my-branch -u
 ```
 
-### 4f. Push
+### 4c. Create a pull request
 ```bash
-git push origin main
+gh pr create --base main \
+  --title "[release] Bump to 0.178.8 — <one-line summary>" \
+  --body "$(cat <<'EOF'
+## Summary
+- <bullet points describing what this release contains>
+
+## Release checklist
+- [x] VERSION bumped
+- [x] changelog.md updated
+- [x] Release notes generated
+- [x] Platform manifest regenerated
+- [x] Discovery artifacts regenerated
+
+## Test plan
+- CI validation passes
+EOF
+)"
 ```
+
+> **Note:** The `[release]` prefix in the PR title activates enforced
+> release-readiness checks in CI (ADR 0420). Non-release PRs run these
+> checks as advisory only.
+
+### 4d. Wait for CI and merge
+```bash
+# Watch CI status
+gh pr checks <number> --watch
+
+# Merge when CI passes (squash for clean history)
+gh pr merge <number> --squash --delete-branch
+```
+
+### 4e. Emergency direct push (admin only)
+
+For genuine emergencies (production outage, security patch), admins can
+bypass branch protection and push directly:
+
+```bash
+SKIP_REMOTE_GATE=1 \
+  GATE_BYPASS_REASON_CODE=emergency_hotfix \
+  GATE_BYPASS_DETAIL="<describe the emergency>" \
+  git push origin main
+```
+
+Follow up with a retroactive PR or incident note explaining the bypass.
 
 ---
 
@@ -130,11 +168,15 @@ live_apply_evidence:
     api_gateway: 2026-04-05-portainer-tools-live-apply   # descriptive slug
 ```
 
-### 5c. Commit
+### 5c. Commit and merge via PR
 ```bash
 git add versions/stack.yaml
 git commit -m "[live-apply] <service> deployed — <brief description>"
-git push origin main
+git push origin claude/my-branch -u
+gh pr create --base main \
+  --title "[live-apply] <service> deployed — <brief description>" \
+  --body "Live-apply evidence update for <service>."
+gh pr merge --squash --delete-branch
 ```
 
 ---
@@ -155,7 +197,10 @@ git push origin main
 | Regenerate workstreams.yaml | `python3 scripts/workstream_registry.py --write` |
 | Generate release notes | `uv run --with pyyaml python scripts/generate_release_notes.py --version X.Y.Z --released-on YYYY-MM-DD --write` |
 | Refresh changelog/index | `uv run --with pyyaml python scripts/generate_release_notes.py --write-root-summaries` |
-| Skip remote gate (with reason) | `SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=<code> git push origin main` |
+| Create a PR | `gh pr create --base main --title "[release] Bump to X.Y.Z — summary"` |
+| Merge a PR | `gh pr merge <number> --squash --delete-branch` |
+| Watch CI status | `gh pr checks <number> --watch` |
+| Skip remote gate (emergency) | `SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=<code> git push origin main` |
 | Publish to ServerClaw (dry-run) | `make publish-serverclaw` |
 | Publish to ServerClaw (push) | `make publish-serverclaw-push` |
 | Audit sanitization coverage | `make audit-sanitization` |

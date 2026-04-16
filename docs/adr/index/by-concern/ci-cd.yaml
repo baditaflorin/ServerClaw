@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-15'
+generated: '2026-04-16'
 facet: concern
 concern: ci-cd
-total_adrs: 44
+total_adrs: 45
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -833,3 +833,16 @@ adrs:
     summary: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
     filename: 0415-postmortem-cert-mismatch-gate-forced-no-verify.md
     path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md
+  - adr: '0420'
+    title: CI Release-Readiness Checks
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - ci
+      - release-readiness
+      - checks
+    summary: Add a new GitHub Actions job that runs alongside the existing validate
+    filename: 0420-ci-release-readiness-checks.md
+    path: docs/adr/0420-ci-release-readiness-checks.md

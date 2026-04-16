@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-15'
+generated: '2026-04-16'
 facet: concern
 concern: platform
-total_adrs: 142
+total_adrs: 143
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2550,3 +2550,17 @@ adrs:
     summary: 'Add a module-level function to scripts/outlineclient.py:'
     filename: 0418-receipt-to-outline-auto-publish.md
     path: docs/adr/0418-receipt-to-outline-auto-publish.md
+  - adr: 0419
+    title: Pull Request-Based Integration Flow
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - pull
+      - request-based
+      - integration
+      - flow
+    summary: 'The default integration path becomes:'
+    filename: 0419-pr-based-integration-flow.md
+    path: docs/adr/0419-pr-based-integration-flow.md

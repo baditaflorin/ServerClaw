@@ -52,3 +52,54 @@ jobs:
             .local/validation-gate/*.json
           if-no-files-found: ignore
           retention-days: 90
+
+  release-readiness:
+    # ADR 0420: Release-readiness checks for PRs targeting main.
+    # Enforced when PR title contains [release]; advisory otherwise.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Fetch base branch
+        run: git fetch origin main --depth=1
+
+      - name: Run release-readiness checks
+        id: readiness
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if echo "$PR_TITLE" | grep -qi '\[release\]'; then
+            echo "Release PR detected — enforcing all checks"
+            python3 scripts/check_release_readiness.py --enforce --base-ref origin/main
+          else
+            echo "Non-release PR — running checks as advisory"
+            python3 scripts/check_release_readiness.py --base-ref origin/main || true
+          fi
+
+      - name: Post readiness summary
+        if: always()
+        run: |
+          python3 scripts/check_release_readiness.py --json --base-ref origin/main > /tmp/readiness.json 2>/dev/null || true
+          echo "### Release Readiness (ADR 0420)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          python3 -c "
+          import json
+          data = json.load(open('/tmp/readiness.json'))
+          for c in data['checks']:
+              icon = ':white_check_mark:' if c['passed'] else ':x:'
+              print(f\"- {icon} **{c['id']}**: {c['message']}\")
+              if not c['passed']:
+                  print(f\"  - Fix: \`{c['fix']}\`\")
+          " >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true

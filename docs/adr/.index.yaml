@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-15'
+generated: '2026-04-16'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 452
+total_adrs: 454
 adr_number_range:
   first: '0001'
-  last: 0418
-  next_available: 0419
+  last: '0420'
+  next_available: '0421'
 implementation_status_summary:
   Implemented: 358
   Partial: 3
   Not Implemented: 32
   Deprecated: 5
   Accepted: 27
-  Proposed: 27
+  Proposed: 29
 decision_status_summary:
   Accepted: 356
-  Proposed: 33
+  Proposed: 35
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 20
+      count: 22
       first_adr: '0400'
-      last_adr: 0418
+      last_adr: '0420'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -70,7 +70,7 @@ facets:
       count: 7
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 44
+      count: 45
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 21
@@ -88,7 +88,7 @@ facets:
       count: 30
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 142
+      count: 143
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -131,14 +131,24 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 27
+      count: 29
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0419
+  next_available_adr: '0421'
 latest_adrs:
+  - adr: '0420'
+    title: CI Release-Readiness Checks
+    implementation_status: Proposed
+    concern: ci-cd
+    path: docs/adr/0420-ci-release-readiness-checks.md
+  - adr: 0419
+    title: Pull Request-Based Integration Flow
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0419-pr-based-integration-flow.md
   - adr: 0418
     title: Automatic Receipt-to-Outline Publishing — Shared Utility and Coverage Gaps
     implementation_status: Proposed
@@ -179,16 +189,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: networking
     path: docs/adr/0412-keycloak-native-account-expiry.md
-  - adr: '0411'
-    title: Unified Account Provisioning API
-    implementation_status: Proposed
-    concern: vm-topology
-    path: docs/adr/0411-unified-account-provisioning-api.md
-  - adr: '0410'
-    title: — Docker Isolation Testing and IoC Completion
-    implementation_status: Proposed
-    concern: testing
-    path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

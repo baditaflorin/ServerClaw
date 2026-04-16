@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.147",
+  "repo_version": "0.178.148",
   "platform_version": "0.178.145",
-  "generated_at": "2026-04-16T01:50:45Z",
-  "next_refresh_at": "2026-04-16T02:50:45Z",
+  "generated_at": "2026-04-16T02:27:41Z",
+  "next_refresh_at": "2026-04-16T03:27:41Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.146",
+    "last_version": "0.178.147",
     "deployed_at": "2026-04-16",
-    "summary": "ADR 0418 implemented: extract publish_receipt_to_outline() as shared utility in outline_client.py; replace 8 inline copies; add auto-publish to 12 gap scripts (20 scripts total); add Makefile backfill-receipts-* targets; document convention in AGENTS.md",
-    "release_notes_url": "docs/release-notes/0.178.147.md"
+    "summary": "ADR 0419: PR-based integration flow \u2014 all changes to main now go through pull requests with CI checks before merge, replacing direct push-to-main ADR 0420: CI release-readiness checks \u2014 new GitHub Actions job validates VERSION bump, changelog, release notes, and generated artifacts on PRs with `[release]` in the title",
+    "release_notes_url": "docs/release-notes/0.178.148.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
