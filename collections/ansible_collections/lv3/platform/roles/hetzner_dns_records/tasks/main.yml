@@ -70,8 +70,43 @@
       {%- endfor -%}
       {{ items }}
 
+- name: Announce the active Hetzner DNS brownout manual-fallback mode
+  ansible.builtin.debug:
+    msg: >-
+      Hetzner DNS brownout manual-fallback is ACTIVE. API writes will be
+      skipped for this zone. A summary of records requiring manual
+      publication via https://dns.hetzner.com will be printed at the end
+      of this role. Drift detection (reads) still runs normally.
+  when: hetzner_dns_brownout_manual_fallback | bool
+
+- name: Reset the Hetzner DNS brownout pending-record accumulator
+  ansible.builtin.set_fact:
+    hetzner_dns_brownout_pending_records: []
+  when: hetzner_dns_brownout_manual_fallback | bool
+
 - name: Ensure desired Hetzner DNS records are present
   ansible.builtin.include_tasks: record.yml
   loop: "{{ hetzner_dns_records }}"
   loop_control:
     loop_var: hetzner_dns_record
+
+- name: Summarise Hetzner DNS records awaiting manual publication
+  ansible.builtin.debug:
+    msg: |-
+      Hetzner DNS brownout manual-fallback summary for zone {{ hetzner_dns_zone_name }}:
+
+      {% set pending = (hetzner_dns_brownout_pending_records | default([]))
+         | rejectattr('action', 'equalto', 'noop') | list %}
+      {% if pending | length == 0 %}
+      All declared records already match the provider state; nothing to
+      publish manually.
+      {% else %}
+      {{ pending | length }} record(s) require manual publication via
+      https://dns.hetzner.com/zones. The brownout ends with the full
+      DNS-Console API shutdown on 2026-05-20:
+
+      {% for r in pending %}
+      - [{{ r.action | upper }}] {{ r.name }} {{ r.type }} "{{ r.value }}" (TTL {{ r.ttl }})
+      {% endfor %}
+      {% endif %}
+  when: hetzner_dns_brownout_manual_fallback | bool

@@ -92,6 +92,7 @@
       - 504
   register: hetzner_dns_record_delete_response
   when:
+    - not (hetzner_dns_brownout_manual_fallback | bool)
     - (hetzner_dns_record.state | default('present')) == 'absent'
     - dns_provider_boundary_matching_records | length == 1
   retries: 5
@@ -130,6 +131,7 @@
       - 504
   register: hetzner_dns_record_create_response
   when:
+    - not (hetzner_dns_brownout_manual_fallback | bool)
     - (hetzner_dns_record.state | default('present')) == 'present'
     - dns_provider_boundary_matching_records | length == 0
   retries: 5
@@ -168,6 +170,7 @@
       - 504
   register: hetzner_dns_record_update_response
   when:
+    - not (hetzner_dns_brownout_manual_fallback | bool)
     - (hetzner_dns_record.state | default('present')) == 'present'
     - dns_provider_boundary_matching_records | length == 1
     - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record.value
@@ -191,3 +194,33 @@
     ) not in [200, 201]
   changed_when: true
   no_log: true
+
+# ADR 0430 PR 3 — when brownout fallback is active, record what the writes
+# would have been so main.yml can emit a single consolidated operator summary.
+- name: Collect the record change for the brownout manual-fallback summary
+  ansible.builtin.set_fact:
+    hetzner_dns_brownout_pending_records: >-
+      {{
+        (hetzner_dns_brownout_pending_records | default([])) +
+        [{
+          'action': (
+            'delete' if (hetzner_dns_record.state | default('present')) == 'absent'
+              and dns_provider_boundary_matching_records | length == 1
+            else 'create' if (hetzner_dns_record.state | default('present')) == 'present'
+              and dns_provider_boundary_matching_records | length == 0
+            else 'update' if (hetzner_dns_record.state | default('present')) == 'present'
+              and dns_provider_boundary_matching_records | length == 1
+              and (
+                dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record.value
+                or (dns_provider_boundary_matching_records[0].record_ttl | int)
+                   != (hetzner_dns_record.ttl | default(60) | int)
+              )
+            else 'noop'
+          ),
+          'name': hetzner_dns_record.name,
+          'type': hetzner_dns_record.type,
+          'value': hetzner_dns_record.value,
+          'ttl': hetzner_dns_record.ttl | default(60) | int,
+        }]
+      }}
+  when: hetzner_dns_brownout_manual_fallback | bool

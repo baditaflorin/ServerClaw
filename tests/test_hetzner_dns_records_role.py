@@ -71,3 +71,49 @@ def test_multi_record_role_builds_native_json_payload_for_create_and_update() ->
     assert "Build the canonical DNS record provider payload" in record_tasks
     assert "'ttl': (hetzner_dns_record.ttl | default(60) | int)" in record_tasks
     assert record_tasks.count('body: "{{ dns_provider_boundary_desired_record_payload }}"') == 2
+
+
+def test_brownout_manual_fallback_gates_all_write_operations() -> None:
+    """ADR 0430 PR 3 — when hetzner_dns_brownout_manual_fallback is true,
+    every create/update/delete task must be gated off so the role makes no
+    write API calls during the Hetzner DNS-Console brownout.
+    """
+    record_tasks = yaml.safe_load(ROLE_TASKS.read_text())
+
+    for action_name in (
+        "Delete the canonical DNS record when it is retired",
+        "Create the canonical DNS record when it does not exist",
+        "Update the canonical DNS record when drift is detected",
+    ):
+        task = next(t for t in record_tasks if t["name"] == action_name)
+        conditions = [str(c) for c in task["when"]]
+        assert any("hetzner_dns_brownout_manual_fallback" in c for c in conditions), (
+            f"{action_name!r} must be gated by hetzner_dns_brownout_manual_fallback"
+        )
+
+
+def test_brownout_manual_fallback_emits_summary_and_collector() -> None:
+    """The role must collect pending record changes (per-record) and emit a
+    consolidated summary (in main.yml) when brownout fallback is active.
+    """
+    main_tasks = MAIN_TASKS.read_text(encoding="utf-8")
+    record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    # per-record collector accumulates pending writes
+    assert "hetzner_dns_brownout_pending_records" in record_tasks
+    # main.yml resets the accumulator and emits the summary
+    assert "Reset the Hetzner DNS brownout pending-record accumulator" in main_tasks
+    assert "Summarise Hetzner DNS records awaiting manual publication" in main_tasks
+    # operator guidance mentions the manual console and the shutdown date
+    assert "https://dns.hetzner.com" in main_tasks
+    assert "2026-05-20" in main_tasks
+
+
+def test_brownout_manual_fallback_default_is_off() -> None:
+    """The role must default to normal API-write behaviour so existing
+    deployments are unaffected.
+    """
+    defaults = yaml.safe_load(
+        Path("collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/defaults/main.yml").read_text()
+    )
+    assert defaults["hetzner_dns_brownout_manual_fallback"] is False

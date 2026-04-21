@@ -2,3 +2,19 @@
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
 hetzner_dns_zone_name: ""
 hetzner_dns_records: []
+
+# ADR 0430 PR 3 — brownout-aware manual fallback.
+#
+# Hetzner announced the DNS-Console write API brownout leading to full
+# shutdown on 2026-05-20. During the brownout, writes silently no-op
+# (HTTP 200 with an embedded 5xx in the body, or successful-looking
+# responses that never actually land the record).
+#
+# Setting this to `true` skips all create/update/delete API calls, prints
+# a human-readable summary of what would have been written, and exits the
+# role successfully. The operator is expected to publish the listed
+# records manually via https://dns.hetzner.com.
+#
+# Reads (zone and record listing) continue to execute so drift detection
+# and the summary are accurate.
+hetzner_dns_brownout_manual_fallback: false
