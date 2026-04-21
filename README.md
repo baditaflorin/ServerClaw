@@ -357,10 +357,11 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 316 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 317 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0391` | CPU-only operational automation live apply | `live_applied` | [ws-0391-live-apply.md](docs/workstreams/ws-0391-live-apply.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](docs/workstreams/ws-0374-status-repair.md) |
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](docs/workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
@@ -385,7 +386,6 @@ Showing 25 of 316 merged or live-applied workstreams. Full history: [merged work
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](docs/workstreams/adr-0170-timeout-hierarchy.md) |
-| `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](docs/workstreams/adr-0169-structured-log-field-contract.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements

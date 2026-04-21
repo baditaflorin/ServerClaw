@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.149",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-21T12:00:17Z",
-  "next_refresh_at": "2026-04-21T13:00:17Z",
+  "generated_at": "2026-04-21T12:02:38Z",
+  "next_refresh_at": "2026-04-21T13:02:38Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -94,7 +94,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://coolify.example.com",
-        "last_live_apply": "2026-04-15T00:00:00Z"
+        "last_live_apply": "2026-04-21T00:00:00Z"
       },
       "coolify_apps": {
         "service_name": "Coolify Apps Ingress",
@@ -361,7 +361,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://chat.example.com",
-        "last_live_apply": "2026-04-15T00:00:00Z"
+        "last_live_apply": "2026-04-21T00:00:00Z"
       },
       "litellm": {
         "service_name": "LiteLLM",
@@ -841,7 +841,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:9998",
-        "last_live_apply": "2026-04-14T00:00:00Z",
+        "last_live_apply": "2026-04-21T00:00:00Z",
         "slo_status": "unknown"
       },
       "typesense": {
@@ -6297,7 +6297,7 @@
   "recent_changes": {
     "last_version": "0.178.148",
     "deployed_at": "2026-04-21",
-    "summary": "close ADR 0373 on the latest realistic origin/main by replaying governed restic backup plus repo_intake from the 0.178.148 base, refreshing the repo_intake host security posture gate, and fixing the repo_intake readiness compatibility and restic Outline helper sync regressions exposed by that replay",
+    "summary": "close ADR 0373 on the latest realistic origin/main by replaying governed restic backup plus repo_intake from the 0.178.148 base, refreshing the repo_intake host security posture gate, and fixing the repo_intake readiness compatibility and restic Outline helper sync regressions exposed by that replay include the concurrently merged ADR 0391 CPU-only operational automation planning surfaces that landed on origin/main before this release closeout",
     "release_notes_url": "docs/release-notes/0.178.149.md"
   },
   "agentic_architecture": {

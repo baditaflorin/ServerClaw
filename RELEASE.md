@@ -4,6 +4,7 @@
 
 ## Summary
 - close ADR 0373 on the latest realistic origin/main by replaying governed restic backup plus repo_intake from the 0.178.148 base, refreshing the repo_intake host security posture gate, and fixing the repo_intake readiness compatibility and restic Outline helper sync regressions exposed by that replay
+- include the concurrently merged ADR 0391 CPU-only operational automation planning surfaces that landed on origin/main before this release closeout
 
 ## Platform Impact
 - repo and platform version 0.178.149 now reflect the latest realistic origin/main replay of ADR 0373 after fixing repo_intake readiness polling, restic Outline helper runtime sync, and the stale host security posture gate for repo_intake

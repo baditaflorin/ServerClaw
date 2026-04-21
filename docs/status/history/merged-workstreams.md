@@ -8,6 +8,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0391` | CPU-only operational automation live apply | `live_applied` | [ws-0391-live-apply.md](../../workstreams/ws-0391-live-apply.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](../../workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
