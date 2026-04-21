@@ -1,0 +1,74 @@
+ADR 0391 CPU-only operational automation live-apply evidence
+Recorded: 2026-04-21T11:06:50Z
+Branch: codex/ws-0391-main-integration
+Source branch: codex/ws-0391-live-apply
+Source commit: a660ea551539e848dfb91e44d07f5e43b8347c89
+Repo version context: 0.178.148
+Platform version context: 0.178.145
+
+Summary:
+- Completed the missing deterministic validation-plan subcommand.
+- Added the documented Make targets: ops-impact, ops-converge-plan,
+  ops-completeness, ops-validation-plan, ops-references, and ops-changelog.
+- Verified the CLI from the isolated worktree without host or guest converge.
+
+Verification commands and outcomes:
+- uv run --with pytest python -m pytest tests/test_platform_ops.py -q
+  Result: pass, 5 passed after adding evidence-file planner coverage.
+- for cmd in references impact converge-plan completeness validation-plan changelog decommission-preview; do python3 scripts/platform_ops.py "$cmd" --help >/dev/null || exit 1; done
+  Result: pass.
+- python3 scripts/platform_ops.py impact --service directus | python3 -m json.tool >/dev/null
+  Result: pass.
+- python3 scripts/platform_ops.py references --service directus | python3 -m json.tool >/dev/null
+  Result: pass.
+- python3 scripts/platform_ops.py validation-plan --changed-files collections/ansible_collections/lv3/platform/roles/directus_runtime/defaults/main.yml docs/adr/0391-cpu-only-operational-automation.md workstreams/active/ws-0391-live-apply.yaml | python3 -m json.tool
+  Result: pass; returned 9 deterministic gates and no unmapped files.
+- python3 scripts/platform_ops.py converge-plan --changed-files inventory/group_vars/all/identity.yml | python3 -m json.tool
+  Result: pass; returned platform_wide=true and command make converge-site env=production.
+- python3 scripts/platform_ops.py completeness --service directus | python3 -m json.tool
+  Result: pass; Directus had 1 passing service and 0 failing services.
+- python3 scripts/platform_ops.py decommission-preview --service one_api | python3 -m json.tool >/dev/null
+  Result: pass.
+- python3 scripts/platform_ops.py changelog --since origin/main | python3 -m json.tool
+  Result: pass; returned one ADR-category commit from this branch at verification time.
+- make ops-validation-plan
+  Result: pass; branch diff against origin/main returned 11 gates and no unmapped files.
+- make ops-converge-plan
+  Result: pass; branch diff against origin/main returned no service convergence requirement.
+- python3 scripts/workstream_registry.py --check
+  Result: pass; workstreams.yaml is current.
+- uv run --with pyyaml python3 scripts/generate_adr_index.py --check
+  Result: pass; ADR index and 29 shard files are current.
+- python3 scripts/live_apply_receipts.py --validate
+  Result: pass; live-apply receipts validate.
+- ./scripts/validate_repo.sh agent-standards
+  Result: pass.
+- ./scripts/validate_repo.sh workstream-surfaces
+  Result: pass after declaring the generated ADR index shards in the workstream ownership manifest.
+- ./scripts/validate_repo.sh data-models
+  Result: pass after materializing ignored ADR 0374 generated inputs with:
+  uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --write --only dns
+  uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --write --only proxy
+  uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --write --only sso
+  uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --write --only hairpin
+- ./scripts/validate_repo.sh json yaml
+  Result: pass.
+- ./scripts/validate_repo.sh python-type-safety
+  Result: pass with existing warnings for missing optional Ansible/z3 imports and unrecognized pyright settings.
+- ./scripts/validate_repo.sh semgrep
+  Result: pass; 0 errors, 8 warnings.
+- python3 -m py_compile scripts/platform_ops.py
+  Result: pass.
+- git diff --check
+  Result: pass.
+- ./scripts/validate_repo.sh generated-docs
+  Result: deferred; canonical truth requires changelog.md. The release-manager
+  path for cutting 0.178.149 is blocked by unrelated global release blockers,
+  so protected release sections remain deferred.
+
+Live-apply boundary:
+- ADR 0391 is repo/controller automation only. No production host, guest, or
+  service converge was required.
+- Protected integration files remain for the final merge-to-main step:
+  VERSION, changelog.md release sections, README.md generated status, and
+  versions/stack.yaml.

@@ -67,6 +67,10 @@ def load_workflow_catalog() -> dict[str, Any]:
     return load_json(repo_path("config", "workflow-catalog.json"), {})
 
 
+def load_validation_runner_contracts() -> dict[str, Any]:
+    return load_json(repo_path("config", "validation-runner-contracts.json"), {})
+
+
 def load_platform_services() -> dict[str, Any]:
     """Load platform_services.yml via the repo's YAML loader."""
     try:
@@ -377,6 +381,373 @@ def cmd_converge_plan(args: argparse.Namespace) -> dict[str, Any]:
 
 
 # ============================================================================
+# Subcommand: validation-plan
+# ============================================================================
+
+
+VALIDATION_GATE_ORDER = [
+    "yaml",
+    "json",
+    "agent-standards",
+    "workstream-surfaces",
+    "documentation-index",
+    "generated-docs",
+    "generated-portals",
+    "generated-vars",
+    "ansible-syntax",
+    "ansible-lint",
+    "role-argument-specs",
+    "compose-runtime-envs",
+    "service-definitions",
+    "service-completeness",
+    "health-probes",
+    "alert-rules",
+    "dependency-direction",
+    "data-models",
+    "cross-catalog",
+    "policy",
+    "architecture-fitness",
+    "tofu",
+    "validate-packer",
+    "python-type-safety",
+    "waiver-escalation-proofs",
+    "semgrep",
+    "live-apply-receipts",
+    "integration-tests",
+]
+
+VALIDATION_GATE_SPECS: dict[str, dict[str, str | None]] = {
+    "yaml": {
+        "runner_lane": "yaml-lint",
+        "command": "./scripts/validate_repo.sh yaml",
+        "description": "Validate YAML syntax and style.",
+    },
+    "json": {
+        "runner_lane": "schema-validation",
+        "command": "./scripts/validate_repo.sh json",
+        "description": "Validate tracked JSON files.",
+    },
+    "agent-standards": {
+        "runner_lane": "agent-standards",
+        "command": "./scripts/validate_repo.sh agent-standards",
+        "description": "Validate ADR, playbook, branch, and agent-standard contracts.",
+    },
+    "workstream-surfaces": {
+        "runner_lane": "workstream-surfaces",
+        "command": "./scripts/validate_repo.sh workstream-surfaces",
+        "description": "Validate workstream ownership and shared-surface contracts.",
+    },
+    "documentation-index": {
+        "runner_lane": "documentation-index",
+        "command": "uv run --with pyyaml python3 scripts/generate_adr_index.py --check",
+        "description": "Check generated ADR discovery indexes.",
+    },
+    "generated-docs": {
+        "runner_lane": "generated-docs",
+        "command": "./scripts/validate_repo.sh generated-docs",
+        "description": "Check generated documentation surfaces.",
+    },
+    "generated-portals": {
+        "runner_lane": "generated-portals",
+        "command": "./scripts/validate_repo.sh generated-portals",
+        "description": "Check generated portal artifacts.",
+    },
+    "generated-vars": {
+        "runner_lane": "schema-validation",
+        "command": "./scripts/validate_repo.sh generated-vars",
+        "description": "Check generated platform variable outputs.",
+    },
+    "ansible-syntax": {
+        "runner_lane": "ansible-syntax",
+        "command": "./scripts/validate_repo.sh ansible-syntax",
+        "description": "Run Ansible playbook syntax checks.",
+    },
+    "ansible-lint": {
+        "runner_lane": "ansible-lint",
+        "command": "./scripts/validate_repo.sh ansible-lint",
+        "description": "Run Ansible lint checks.",
+    },
+    "role-argument-specs": {
+        "runner_lane": "ansible-lint",
+        "command": "./scripts/validate_repo.sh role-argument-specs",
+        "description": "Validate role argument specs.",
+    },
+    "compose-runtime-envs": {
+        "runner_lane": "schema-validation",
+        "command": "./scripts/validate_repo.sh compose-runtime-envs",
+        "description": "Validate compose runtime environment contracts.",
+    },
+    "service-definitions": {
+        "runner_lane": "service-completeness",
+        "command": "./scripts/validate_repo.sh service-definitions",
+        "description": "Validate generated service definitions.",
+    },
+    "service-completeness": {
+        "runner_lane": "service-completeness",
+        "command": "python3 scripts/validate_service_completeness.py --validate",
+        "description": "Validate service completeness contracts.",
+    },
+    "health-probes": {
+        "runner_lane": "schema-validation",
+        "command": "./scripts/validate_repo.sh health-probes",
+        "description": "Validate health probe contracts.",
+    },
+    "alert-rules": {
+        "runner_lane": "alert-rule-validation",
+        "command": "./scripts/validate_repo.sh alert-rules",
+        "description": "Validate alert and SLO rule files.",
+    },
+    "dependency-direction": {
+        "runner_lane": "dependency-direction",
+        "command": "./scripts/validate_repo.sh dependency-direction",
+        "description": "Validate dependency graph direction rules.",
+    },
+    "data-models": {
+        "runner_lane": "schema-validation",
+        "command": "./scripts/validate_repo.sh data-models",
+        "description": "Validate repository data models and schemas.",
+    },
+    "cross-catalog": {
+        "runner_lane": "cross-catalog-integrity",
+        "command": "./scripts/validate_repo.sh cross-catalog",
+        "description": "Validate cross-catalog referential integrity.",
+    },
+    "policy": {
+        "runner_lane": "policy-validation",
+        "command": "./scripts/validate_repo.sh policy",
+        "description": "Validate policy bundles.",
+    },
+    "architecture-fitness": {
+        "runner_lane": "policy-validation",
+        "command": "./scripts/validate_repo.sh architecture-fitness",
+        "description": "Validate architecture fitness rules.",
+    },
+    "tofu": {
+        "runner_lane": "tofu-validate",
+        "command": "./scripts/validate_repo.sh tofu",
+        "description": "Validate OpenTofu surfaces.",
+    },
+    "validate-packer": {
+        "runner_lane": "packer-validate",
+        "command": "make validate-packer",
+        "description": "Validate Packer templates.",
+    },
+    "python-type-safety": {
+        "runner_lane": "python-type-safety",
+        "command": "./scripts/validate_repo.sh python-type-safety",
+        "description": "Run Python type-safety and proof checks.",
+    },
+    "waiver-escalation-proofs": {
+        "runner_lane": "waiver-escalation-proofs",
+        "command": "./scripts/validate_repo.sh waiver-escalation-proofs",
+        "description": "Run waiver escalation proof checks.",
+    },
+    "semgrep": {
+        "runner_lane": "semgrep-sast",
+        "command": "./scripts/validate_repo.sh semgrep",
+        "description": "Run SAST and secret-pattern checks.",
+    },
+    "live-apply-receipts": {
+        "runner_lane": None,
+        "command": "python3 scripts/live_apply_receipts.py --validate",
+        "description": "Validate structured live-apply receipts.",
+    },
+    "integration-tests": {
+        "runner_lane": "integration-tests",
+        "command": "uv run --with pytest python -m pytest -q",
+        "description": "Run the relevant pytest/integration-test slice.",
+    },
+}
+
+
+def _validation_changed_files(args: argparse.Namespace) -> list[str] | None:
+    if args.since:
+        return _changed_files_from_git(args.since)
+    if args.changed_files:
+        return args.changed_files
+    return None
+
+
+def _normalize_repo_path(path: str) -> str:
+    return path.strip().replace("\\", "/").lstrip("./")
+
+
+def _add_gate(
+    gates: dict[str, dict[str, Any]],
+    gate_id: str,
+    *,
+    path: str,
+    reason: str,
+) -> None:
+    spec = VALIDATION_GATE_SPECS[gate_id]
+    gate = gates.setdefault(
+        gate_id,
+        {
+            "gate": gate_id,
+            "runner_lane": spec["runner_lane"],
+            "command": spec["command"],
+            "description": spec["description"],
+            "reasons": [],
+            "trigger_files": [],
+        },
+    )
+    if reason not in gate["reasons"]:
+        gate["reasons"].append(reason)
+    if path not in gate["trigger_files"]:
+        gate["trigger_files"].append(path)
+
+
+def _classify_validation_file(path: str, gates: dict[str, dict[str, Any]]) -> None:
+    suffix = Path(path).suffix.lower()
+
+    if suffix in {".yml", ".yaml"}:
+        _add_gate(gates, "yaml", path=path, reason="YAML file changed")
+    if suffix == ".json":
+        _add_gate(gates, "json", path=path, reason="JSON file changed")
+    if suffix == ".py":
+        _add_gate(gates, "python-type-safety", path=path, reason="Python code changed")
+        _add_gate(gates, "semgrep", path=path, reason="Executable Python surface changed")
+    if suffix in {".sh", ".bash"}:
+        _add_gate(gates, "semgrep", path=path, reason="Shell automation surface changed")
+
+    if path == "Makefile" or path.startswith(".githooks/") or path in {"AGENTS.md", "CLAUDE.md"}:
+        _add_gate(gates, "agent-standards", path=path, reason="Agent or repository workflow surface changed")
+        _add_gate(gates, "semgrep", path=path, reason="Repository workflow executable surface changed")
+
+    if path.startswith("workstreams/") or path == "workstreams.yaml":
+        _add_gate(gates, "workstream-surfaces", path=path, reason="Workstream registry surface changed")
+        _add_gate(gates, "agent-standards", path=path, reason="Agent workstream contract changed")
+
+    if path.startswith("docs/adr/"):
+        _add_gate(gates, "agent-standards", path=path, reason="ADR metadata or body changed")
+        _add_gate(gates, "documentation-index", path=path, reason="ADR index may need regeneration")
+        _add_gate(gates, "generated-docs", path=path, reason="Generated documentation may include ADR metadata")
+
+    if path.startswith("docs/workstreams/") or path.startswith("docs/runbooks/"):
+        _add_gate(gates, "agent-standards", path=path, reason="Agent-facing documentation changed")
+        _add_gate(gates, "generated-docs", path=path, reason="Generated documentation may include this surface")
+
+    if (
+        path == "README.md"
+        or path.startswith("docs/templates/")
+        or path.startswith("docs/discovery/")
+        or path.startswith("build/onboarding/")
+        or path in {".repo-structure.yaml", ".config-locations.yaml"}
+    ):
+        _add_gate(gates, "generated-docs", path=path, reason="Generated documentation or discovery surface changed")
+        _add_gate(gates, "agent-standards", path=path, reason="Agent onboarding surface changed")
+
+    if path.startswith("receipts/live-applies/evidence/"):
+        _add_gate(gates, "live-apply-receipts", path=path, reason="Live-apply evidence changed")
+
+    if path.startswith("receipts/live-applies/") and not path.startswith("receipts/live-applies/evidence/"):
+        _add_gate(gates, "live-apply-receipts", path=path, reason="Structured live-apply receipt changed")
+        _add_gate(gates, "data-models", path=path, reason="Receipt data model changed")
+
+    if path in {"VERSION", "changelog.md"} or path.startswith("docs/release-notes/"):
+        _add_gate(gates, "agent-standards", path=path, reason="Release bookkeeping changed")
+        _add_gate(gates, "generated-docs", path=path, reason="Generated status or release docs may change")
+
+    if path.startswith("versions/"):
+        _add_gate(gates, "data-models", path=path, reason="Canonical version state changed")
+        _add_gate(gates, "generated-docs", path=path, reason="Generated status docs may change")
+
+    if path.startswith("inventory/"):
+        _add_gate(gates, "generated-vars", path=path, reason="Inventory input changed")
+        _add_gate(gates, "ansible-syntax", path=path, reason="Ansible inventory surface changed")
+        _add_gate(gates, "data-models", path=path, reason="Inventory data model changed")
+        _add_gate(gates, "cross-catalog", path=path, reason="Inventory may affect catalog references")
+
+    if path.startswith("collections/ansible_collections/") or path.startswith("playbooks/"):
+        _add_gate(gates, "ansible-syntax", path=path, reason="Ansible automation changed")
+        _add_gate(gates, "ansible-lint", path=path, reason="Ansible automation changed")
+        if "/roles/" in path:
+            _add_gate(gates, "role-argument-specs", path=path, reason="Role surface changed")
+            _add_gate(gates, "service-completeness", path=path, reason="Service role surface changed")
+        if "docker-compose" in path or "/templates/" in path:
+            _add_gate(gates, "compose-runtime-envs", path=path, reason="Runtime template surface changed")
+
+    if path.startswith("config/"):
+        _add_gate(gates, "data-models", path=path, reason="Configuration contract changed")
+        if path.startswith("config/integrations/") or "catalog" in path:
+            _add_gate(gates, "cross-catalog", path=path, reason="Cross-catalog surface changed")
+        if "dependency-graph" in path:
+            _add_gate(gates, "dependency-direction", path=path, reason="Dependency graph changed")
+        if path.startswith(("config/prometheus/rules/", "config/alertmanager/rules/")) or "slo_" in path:
+            _add_gate(gates, "alert-rules", path=path, reason="Alert or SLO rule surface changed")
+        if "health" in path:
+            _add_gate(gates, "health-probes", path=path, reason="Health probe surface changed")
+        if "policy" in path or path.startswith(("config/opa/", "config/conftest/")):
+            _add_gate(gates, "policy", path=path, reason="Policy surface changed")
+        if "service" in path or path.startswith("config/generated/"):
+            _add_gate(gates, "service-definitions", path=path, reason="Service definition surface changed")
+
+    if path.startswith("docs/schema/"):
+        _add_gate(gates, "data-models", path=path, reason="Schema file changed")
+
+    if path.startswith("tofu/") or path.startswith("terraform/") or suffix == ".tf":
+        _add_gate(gates, "tofu", path=path, reason="OpenTofu surface changed")
+        _add_gate(gates, "policy", path=path, reason="IaC policy surface changed")
+
+    if path.startswith("packer/") or suffix in {".pkr.hcl", ".pkr.json"}:
+        _add_gate(gates, "validate-packer", path=path, reason="Packer template surface changed")
+
+    if path.startswith(("policies/", "policy/")) or suffix == ".rego":
+        _add_gate(gates, "policy", path=path, reason="Policy source changed")
+
+    if path.startswith("tests/"):
+        _add_gate(gates, "integration-tests", path=path, reason="Test surface changed")
+
+    if path.endswith("verify_waiver_escalation.py") or "waiver" in path:
+        _add_gate(gates, "waiver-escalation-proofs", path=path, reason="Waiver proof surface changed")
+
+    if path.startswith("scripts/") and (
+        "validate" in Path(path).name
+        or Path(path).name in {"platform_ops.py", "validation_toolkit.py", "live_apply_receipts.py"}
+    ):
+        _add_gate(gates, "data-models", path=path, reason="Validation or data-model automation changed")
+        _add_gate(gates, "agent-standards", path=path, reason="Repository automation contract changed")
+
+
+def cmd_validation_plan(args: argparse.Namespace) -> dict[str, Any]:
+    """Select validation gates from changed files without AI or network calls."""
+    changed = _validation_changed_files(args)
+    if changed is None:
+        return {"error": "Provide --since <ref> or --changed-files <file1> <file2> ..."}
+
+    normalized_changed = sorted({_normalize_repo_path(path) for path in changed if path.strip()})
+    gates: dict[str, dict[str, Any]] = {}
+    for path in normalized_changed:
+        _classify_validation_file(path, gates)
+
+    contracts = load_validation_runner_contracts()
+    lanes = contracts.get("lanes", {})
+    ordered_gate_ids = [gate_id for gate_id in VALIDATION_GATE_ORDER if gate_id in gates]
+    ordered_gate_ids.extend(sorted(gate_id for gate_id in gates if gate_id not in ordered_gate_ids))
+
+    ordered_gates: list[dict[str, Any]] = []
+    for gate_id in ordered_gate_ids:
+        gate = gates[gate_id]
+        runner_lane = gate.get("runner_lane")
+        lane_contract = lanes.get(runner_lane, {}) if runner_lane else {}
+        gate["requires_container_runtime"] = lane_contract.get("requires_container_runtime")
+        gate["required_tools"] = lane_contract.get("required_tools", [])
+        gate["trigger_files"] = sorted(gate["trigger_files"])
+        gate["reasons"] = sorted(gate["reasons"])
+        ordered_gates.append(gate)
+
+    return {
+        "changed_files": normalized_changed,
+        "gate_count": len(ordered_gates),
+        "validation_gates": ordered_gates,
+        "commands": [gate["command"] for gate in ordered_gates],
+        "unmapped_files": [
+            path for path in normalized_changed if not any(path in gate["trigger_files"] for gate in ordered_gates)
+        ],
+    }
+
+
+# ============================================================================
 # Subcommand: completeness
 # ============================================================================
 
@@ -680,6 +1051,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--service", help="Check a specific service (default: all)")
     p.add_argument("--failing", action="store_true", help="Show only failing services")
 
+    # validation-plan
+    p = sub.add_parser("validation-plan", help="Which validation gates matter for these changes?")
+    p.add_argument("--since", help="Git ref to diff against (e.g. origin/main, v0.178.77)")
+    p.add_argument("--changed-files", nargs="+", help="Explicit list of changed files")
+
     # changelog
     p = sub.add_parser("changelog", help="Generate changelog from git commits.")
     p.add_argument("--since", required=True, help="Git ref to start from")
@@ -695,6 +1071,7 @@ def main(argv: list[str] | None = None) -> int:
         "impact": cmd_impact,
         "converge-plan": cmd_converge_plan,
         "completeness": cmd_completeness,
+        "validation-plan": cmd_validation_plan,
         "changelog": cmd_changelog,
         "decommission-preview": cmd_decommission_preview,
     }

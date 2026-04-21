@@ -121,6 +121,77 @@ workstreams:
     Related postmortem: ADR 0415.
 
     '
+- id: ws-0391-live-apply
+  adr: 0391
+  title: CPU-only operational automation live apply
+  status: live_applied
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/ws-0391-main-integration
+  worktree_path: .worktrees/ws-0391-main-integration
+  doc: docs/workstreams/ws-0391-live-apply.md
+  depends_on:
+  - adr-0373-service-registry-and-derived-defaults
+  - adr-0389-service-decommissioning-procedure
+  conflicts_with: []
+  shared_surfaces:
+  - Makefile
+  - scripts/platform_ops.py
+  - tests/test_platform_ops.py
+  - docs/adr/0391-cpu-only-operational-automation.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/runbooks/cpu-only-platform-ops.md
+  - docs/workstreams/ws-0391-live-apply.md
+  - workstreams/active/ws-0391-live-apply.yaml
+  - workstreams.yaml
+  - receipts/live-applies/**
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0391_platform_ops_cli
+      paths:
+      - scripts/platform_ops.py
+      - tests/test_platform_ops.py
+      - Makefile
+      mode: exclusive
+    - id: ws_0391_docs_and_tracking
+      paths:
+      - docs/adr/0391-cpu-only-operational-automation.md
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - docs/runbooks/cpu-only-platform-ops.md
+      - docs/workstreams/ws-0391-live-apply.md
+      - workstreams/active/ws-0391-live-apply.yaml
+      mode: exclusive
+    - id: ws_0391_workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0391_live_apply_evidence
+      paths:
+      - receipts/live-applies/**
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+  canonical_truth:
+    changelog_entry: complete ADR 0391 CPU-only operational automation with deterministic
+      validation planning and documented ops Make targets
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      platform_ops: 2026-04-21-adr-0391-cpu-only-operational-automation-live-apply
+  blockers: []
+  notes: 'Branch-local live apply completed from origin/main@04638e669 with source
+
+    commit a660ea551539e848dfb91e44d07f5e43b8347c89 on codex/ws-0391-live-apply. Final
+    PR integration continues on codex/ws-0391-main-integration. Protected release
+    and
+
+    platform-version files remain for the final main integration step.
+
+    '
+  plane_issue_id: 82943d49-b7a3-4aea-8aca-12913987ea47
 - id: ws-0375-certificate-validation
   adr: '0375'
   title: Certificate Validation and Concordance Enforcement

@@ -1,10 +1,10 @@
 # ADR 0391: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.178.79
-- Implemented In Platform Version: not yet applied
-- Implemented On: 2026-04-10
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.178.148
+- Implemented In Platform Version: 0.178.145
+- Implemented On: 2026-04-21
 - Date: 2026-04-10
 - Concern: Operational Efficiency, Cost Reduction, Determinism, Reliability
 - Depends on: ADR 0373 (Service Registry), ADR 0389 (Decommissioning Procedure)
@@ -214,7 +214,7 @@ Not everything can be CPU-only. Be explicit about the boundary:
 
 ```bash
 # platform_ops.py responds to all subcommands without errors
-for cmd in impact converge-plan completeness validation-plan references changelog; do
+for cmd in impact converge-plan completeness validation-plan references changelog decommission-preview; do
   python3 scripts/platform_ops.py $cmd --help
 done
 
@@ -224,8 +224,30 @@ python3 scripts/platform_ops.py impact --service directus | python3 -m json.tool
 # Converge plan returns ordered playbook list
 python3 scripts/platform_ops.py converge-plan --since main | python3 -m json.tool
 
+# Validation plan returns deterministic gate targeting
+python3 scripts/platform_ops.py validation-plan --since origin/main | python3 -m json.tool
+
 # No AI/network calls in any subcommand (verify with strace/dtruss if needed)
 ```
+
+## Live Apply Notes
+
+ADR 0391 was live-applied as a repo/controller automation capability from
+`codex/ws-0391-live-apply` on 2026-04-21. The live apply completed the missing
+`validation-plan` subcommand, added the documented `ops-*` Make targets, and
+verified all `platform_ops.py` subcommands with JSON parsing plus focused pytest
+coverage.
+
+Evidence is recorded in
+`receipts/live-applies/2026-04-21-adr-0391-cpu-only-operational-automation-live-apply.json`
+and
+`receipts/live-applies/evidence/2026-04-21-ws-0391-live-apply-cli-and-validation-r1-0.178.148.txt`.
+No host or guest converge was required because the ADR changes repository-local
+deterministic tooling only.
+
+Protected integration files (`VERSION`, release sections in `changelog.md`,
+top-level generated `README.md` status, and `versions/stack.yaml`) remain for
+the final merge-to-main integration step.
 
 ---
 

@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-21-adr-0391-cpu-only-operational-automation-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-21",
+  "recorded_on": "2026-04-21",
+  "recorded_at": "2026-04-21T11:06:50Z",
+  "recorded_by": "codex",
+  "workflow_id": "validate",
+  "adr": "0391",
+  "workstream": "ws-0391-live-apply",
+  "source_branch": "codex/ws-0391-main-integration",
+  "source_commit": "a660ea551539e848dfb91e44d07f5e43b8347c89",
+  "repo_version_context": "0.178.148",
+  "platform_version_context": "0.178.145",
+  "result": "pass",
+  "summary": "Live-applied ADR 0391 as a repo/controller automation capability by completing the missing deterministic validation-plan command, adding the documented ops Make targets, and verifying the CPU-only operational CLI end to end from the isolated latest-origin/main worktree.",
+  "targets": [
+    {
+      "kind": "repository",
+      "name": "proxmox_florin_server"
+    },
+    {
+      "kind": "controller_local_tool",
+      "name": "scripts/platform_ops.py"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused platform_ops regression tests",
+      "result": "pass",
+      "observed": "`uv run --with pytest python -m pytest tests/test_platform_ops.py -q` passed with 5 tests after adding evidence-file planner coverage."
+    },
+    {
+      "check": "Subcommand surface coverage",
+      "result": "pass",
+      "observed": "Help paths returned zero for references, impact, converge-plan, completeness, validation-plan, changelog, and decommission-preview."
+    },
+    {
+      "check": "JSON-producing operational queries",
+      "result": "pass",
+      "observed": "Impact, references, validation-plan, converge-plan, completeness, changelog, and decommission-preview outputs parsed with `python3 -m json.tool`; Directus completeness reported 1 passing service and 0 failures."
+    },
+    {
+      "check": "Make target integration",
+      "result": "pass",
+      "observed": "`make ops-validation-plan` returned 11 validation gates with no unmapped files for the branch diff, and `make ops-converge-plan` returned no service convergence requirement for the repo-only change."
+    },
+    {
+      "check": "Branch-local repo validation",
+      "result": "pass",
+      "observed": "Workstream registry, ADR index, live-apply receipts, agent-standards, workstream-surfaces, data-models, JSON/YAML lint, python-type-safety, Semgrep, py_compile, focused pytest, and git diff hygiene checks passed."
+    },
+    {
+      "check": "Generated docs integration gate",
+      "result": "partial",
+      "observed": "`./scripts/validate_repo.sh generated-docs` requires `changelog.md` canonical truth; the release-manager path for cutting 0.178.149 is blocked by unrelated global release blockers, so protected release sections remain deferred."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0391-cpu-only-operational-automation.md",
+    "docs/runbooks/cpu-only-platform-ops.md",
+    "docs/workstreams/ws-0391-live-apply.md",
+    "workstreams/active/ws-0391-live-apply.yaml",
+    "Makefile",
+    "scripts/platform_ops.py",
+    "tests/test_platform_ops.py",
+    "receipts/live-applies/evidence/2026-04-21-ws-0391-live-apply-cli-and-validation-r1-0.178.148.txt"
+  ],
+  "notes": [
+    "This ADR is repo/controller automation only; no production host, guest, or service converge was required.",
+    "Data-model validation in a fresh worktree required materializing ignored ADR 0374 generated inputs under config/generated/ plus inventory/group_vars/platform_hairpin.yml; no ignored generated artifact is committed.",
+    "The source branch started from origin/main@04638e669de921ce818b0625147d6421902ca669 and final PR integration continues on codex/ws-0391-main-integration.",
+    "Final release-ready main integration must decide and apply the protected release bookkeeping: VERSION, changelog.md release sections, generated README status, and versions/stack.yaml."
+  ]
+}

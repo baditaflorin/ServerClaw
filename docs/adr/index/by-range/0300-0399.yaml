@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-16'
+generated: '2026-04-21'
 facet: range
 label: 0300-0399
 range:
@@ -2050,8 +2050,9 @@ adrs:
     summary: A single entry point that answers operational questions by querying existing
     filename: 0391-cpu-only-operational-automation.md
     path: docs/adr/0391-cpu-only-operational-automation.md
-    implemented_in_repo_version: 0.178.79
-    implemented_on: '2026-04-10'
+    implemented_in_repo_version: 0.178.148
+    implemented_in_platform_version: 0.178.145
+    implemented_on: '2026-04-21'
   - adr: 0392
     title: Convergence Speed and Incremental Apply
     status: Proposed

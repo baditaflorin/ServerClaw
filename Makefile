@@ -17,6 +17,7 @@ RECEIPT ?=
 COMMAND ?=
 CONTRACT ?=
 SERVICE ?=
+SINCE ?= origin/main
 DURATION_MINUTES ?= 30
 TTL_SECONDS ?= 300
 REASON ?=
@@ -110,9 +111,28 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: syntax-check-nextcloud converge-nextcloud
 .PHONY: syntax-check-nomad converge-nomad
 .PHONY: init-local bootstrap bootstrap-minimal verify-bootstrap-proxmox verify-bootstrap-guests verify-platform docker-dev-up docker-dev-up-full docker-dev-down docker-dev-verify docker-dev-converge docker-dev-reset generate-local-example
+.PHONY: ops-impact ops-converge-plan ops-completeness ops-validation-plan ops-references ops-changelog
 
 prepare-run-namespace:
 	@$(RUN_ID_ENV) python3 $(REPO_ROOT)/scripts/run_namespace.py --repo-root "$(REPO_ROOT)" --ensure >/dev/null
+
+ops-impact:
+	python3 $(REPO_ROOT)/scripts/platform_ops.py impact --service $(SERVICE)
+
+ops-converge-plan:
+	python3 $(REPO_ROOT)/scripts/platform_ops.py converge-plan --since $(SINCE)
+
+ops-completeness:
+	python3 $(REPO_ROOT)/scripts/platform_ops.py completeness --failing
+
+ops-validation-plan:
+	python3 $(REPO_ROOT)/scripts/platform_ops.py validation-plan --since $(SINCE)
+
+ops-references:
+	python3 $(REPO_ROOT)/scripts/platform_ops.py references --service $(SERVICE)
+
+ops-changelog:
+	python3 $(REPO_ROOT)/scripts/platform_ops.py changelog --since $(SINCE)
 
 validate-local:
 	@echo "validation gate: running local-only checks (no Docker required)"
