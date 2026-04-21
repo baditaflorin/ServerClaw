@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.149",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-21T11:22:45Z",
-  "next_refresh_at": "2026-04-21T12:22:45Z",
+  "generated_at": "2026-04-21T11:29:18Z",
+  "next_refresh_at": "2026-04-21T12:29:18Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -760,7 +760,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://chat.example.com",
-        "last_live_apply": "2026-04-16T00:00:00Z",
+        "last_live_apply": "2026-04-15T00:00:00Z",
         "slo_status": "unknown"
       },
       "sftpgo": {
