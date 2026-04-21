@@ -48,7 +48,7 @@ from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_recei
 from platform.circuit import load_circuit_policies
 from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, validate_repo_relative_path
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars, validate_repo_relative_path
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from gate_bypass_waivers import load_catalog as load_gate_bypass_waiver_catalog
 from gate_bypass_waivers import summarize_receipts as summarize_gate_bypass_waivers
@@ -366,7 +366,9 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "slo-catalog.json"): load_json(repo_path("config", "slo-catalog.json")),
         repo_path("config", "data-catalog.json"): load_json(repo_path("config", "data-catalog.json")),
         repo_path("config", "service-completeness.json"): load_json(repo_path("config", "service-completeness.json")),
-        TOPOLOGY_HOST_VARS_PATH: load_yaml(TOPOLOGY_HOST_VARS_PATH),
+        # ADR 0430 — validate the effective (overlay-applied) host_vars so
+        # fork deployments surface placeholder violations in their own data.
+        TOPOLOGY_HOST_VARS_PATH: load_topology_host_vars(),
     }
     for path, payload in structured_paths.items():
         validate_placeholder_free(payload, str(path))
@@ -644,7 +646,9 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
 
 
 def validate_host_vars() -> dict[str, Any]:
-    host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
+    # ADR 0430 — validate the effective host_vars (overlay-applied). Ensures
+    # forks validate the topology they will actually deploy.
+    host_vars = require_mapping(load_topology_host_vars(), str(TOPOLOGY_HOST_VARS_PATH))
     global_vars_path = next((path for path in GLOBAL_VARS_PATH_CANDIDATES if path.is_file()), None)
     if global_vars_path is None:
         searched = ", ".join(str(path) for path in GLOBAL_VARS_PATH_CANDIDATES)

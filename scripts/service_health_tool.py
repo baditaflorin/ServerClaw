@@ -51,7 +51,7 @@ except ImportError:  # Python < 3.11
 
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -71,15 +71,19 @@ def _load_catalog() -> dict[str, Any]:
 
 
 def _load_vm_ip_map() -> dict[str, str]:
-    """Build {vm_name: ipv4} from inventory."""
-    try:
-        import yaml  # type: ignore[import]
+    """Build {vm_name: ipv4} from inventory.
 
-        data = yaml.safe_load(TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8"))
+    ADR 0430 — primary path goes through load_topology_host_vars() so forks
+    see their own guest IPs from the .local/host_vars/proxmox-host.yml
+    overlay. The regex fallback below only fires in degraded environments
+    without PyYAML and continues to read the committed file verbatim.
+    """
+    try:
+        data = load_topology_host_vars()
         return {v["name"]: v.get("ipv4", "") for v in data.get("proxmox_vms", [])}
     except ImportError:
         pass
-    # Fallback regex
+    # Fallback regex — overlay-blind; only runs when PyYAML is unavailable.
     text = TOPOLOGY_HOST_VARS_PATH.read_text(encoding="utf-8")
     vms: dict[str, str] = {}
     current_name = ""

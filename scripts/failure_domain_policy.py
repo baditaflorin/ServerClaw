@@ -23,7 +23,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 from validation_toolkit import require_list, require_mapping, require_str
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
@@ -63,7 +63,9 @@ def normalize_tag_token(value: str) -> str:
 
 
 def load_host_vars() -> dict[str, Any]:
-    return require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
+    # ADR 0430 — overlay-aware; fork operators see their own topology when
+    # failure-domain policy checks run.
+    return require_mapping(load_topology_host_vars(), str(TOPOLOGY_HOST_VARS_PATH))
 
 
 def load_environment_topology() -> dict[str, Any]:

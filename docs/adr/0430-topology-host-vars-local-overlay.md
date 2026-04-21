@@ -101,9 +101,9 @@ Follow-up PRs (each one independently reviewable) migrate direct readers:
 |----------|--------------|-------|
 | `scripts/environment_topology.py` | PR 4 (merged) | Used by live-apply preflight |
 | `scripts/agent_tool_registry.py` | PR 4 (merged) | Agent-tool IP resolution |
-| `scripts/validate_repository_data_models.py` | PR 5 | Schema drift checks |
-| `scripts/failure_domain_policy.py` | PR 5 | Failure-domain reasoning |
-| `scripts/service_health_tool.py` | PR 5 | Health-probe targets |
+| `scripts/validate_repository_data_models.py` | PR 5 (merged) | Schema drift checks |
+| `scripts/failure_domain_policy.py` | PR 5 (merged) | Failure-domain reasoning |
+| `scripts/service_health_tool.py` | PR 5 (merged) | Health-probe targets |
 | `scripts/fixture_manager.py` | PR 6 | Test fixtures (may deliberately stay committed-only) |
 | `scripts/generate_cross_cutting_artifacts.py` | PR 6 | Hairpin/TLS/SSO publication |
 | `scripts/control_plane_lanes.py` | PR 7 | Lane ownership |
