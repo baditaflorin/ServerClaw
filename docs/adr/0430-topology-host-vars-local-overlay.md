@@ -104,8 +104,8 @@ Follow-up PRs (each one independently reviewable) migrate direct readers:
 | `scripts/validate_repository_data_models.py` | PR 5 (merged) | Schema drift checks |
 | `scripts/failure_domain_policy.py` | PR 5 (merged) | Failure-domain reasoning |
 | `scripts/service_health_tool.py` | PR 5 (merged) | Health-probe targets |
-| `scripts/fixture_manager.py` | PR 6 | Test fixtures (may deliberately stay committed-only) |
-| `scripts/generate_cross_cutting_artifacts.py` | PR 6 | Hairpin/TLS/SSO publication |
+| `scripts/fixture_manager.py` | PR 6 (deferred) | Test fixtures stay committed-only so generated fixtures remain deterministic across forks (per ADR allowance) |
+| `scripts/generate_cross_cutting_artifacts.py` | PR 6 (merged) | Hairpin/TLS/SSO publication |
 | `scripts/control_plane_lanes.py` | PR 7 | Lane ownership |
 | `scripts/validate_ephemeral_vmid.py` | PR 7 | VMID uniqueness |
 | `scripts/generate_ops_portal.py` | PR 7 | Portal rendering |

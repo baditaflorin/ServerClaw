@@ -43,6 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml
 from identity_yaml import load_yaml_with_identity
+from platform.repo import load_topology_host_vars
 from validation_toolkit import (
     require_bool,
     require_int,
@@ -623,7 +624,11 @@ def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
         if by_name:
             return by_name
 
-    host_vars = load_yaml_with_identity(repo_root / "inventory" / "host_vars" / "proxmox-host.yml")
+    # ADR 0430 — overlay-aware; the `proxmox_guests` list the hairpin catalog
+    # falls back to must reflect the operator's fork topology when set.
+    # Identity-resolution isn't needed here because only `name` and `ipv4`
+    # (literal scalars) are read from each guest entry.
+    host_vars = load_topology_host_vars(repo_root)
     host_vars = require_mapping(host_vars, str(TOPOLOGY_HOST_VARS_PATH))
     guests_raw = require_list(host_vars.get("proxmox_guests", []), "host_vars.proxmox_guests", min_length=1)
 
