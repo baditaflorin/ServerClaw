@@ -350,6 +350,7 @@ playbook_execution_env: "{{ env | default('production') }}"
 playbook_execution_allowed_envs:
   - production
   - staging
+  - clone  # ADR 0430 — fork deployments (0fork.com etc.); same service names, different IPs via .local/host_vars overlay
 platform_trace_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_TRACE_ID') | default('', true) }}"
 platform_intent_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_INTENT_ID') | default('', true) }}"
 playbook_execution_preflight_connection_timeout: 30
@@ -375,94 +376,127 @@ playbook_execution_ntfy_failure_topic: platform-ansible-critical
 playbook_execution_mattermost_webhook_url: "{{ lookup('ansible.builtin.env', 'LV3_MATTERMOST_WEBHOOK') | default('', true) }}"
 playbook_execution_nats_notify_command: "{{ lookup('ansible.builtin.env', 'LV3_NATS_NOTIFY_COMMAND') | default('', true) }}"
 playbook_execution_host_patterns:
+  # ADR 0430 — `clone` entries mirror `production` because fork deployments use
+  # identical service names (different IPs come from the .local/host_vars overlay).
   proxmox_hosts:
     production: "proxmox_hosts:&production"
     staging: "proxmox_hosts:&staging"
+    clone: "proxmox_hosts:&production"
   lv3_guests:
     production: "lv3_guests:&production"
     staging: "lv3_guests:&staging"
+    clone: "lv3_guests:&production"
   postgres_guests:
     production: "postgres_guests:&production"
     staging: "postgres_guests:&staging"
+    clone: "postgres_guests:&production"
   backup_guests:
     production: "backup_guests:&production"
     staging: "backup_guests:&staging"
+    clone: "backup_guests:&production"
   coolify:
     production: coolify
     staging: coolify-staging
+    clone: coolify
   coolify_apps:
     production: coolify-apps
     staging: coolify-apps-staging
+    clone: coolify-apps
   nginx_edge:
     production: nginx
     staging: nginx-staging
+    clone: nginx
   docker_runtime:
     production: docker-runtime
     staging: docker-runtime-staging
+    clone: docker-runtime
   runtime_ai:
     production: runtime-ai
     staging: docker-runtime-staging
+    clone: runtime-ai
   runtime_control:
     production: runtime-control
     staging: docker-runtime-staging
+    clone: runtime-control
   runtime_general:
     production: runtime-general
     staging: docker-runtime-staging
+    clone: runtime-general
   runtime_comms:
     production: runtime-comms
     staging: docker-runtime-staging
+    clone: runtime-comms
   docker_build:
     production: docker-build
     staging: docker-build-staging
+    clone: docker-build
   monitoring:
     production: monitoring
     staging: monitoring-staging
+    clone: monitoring
   postgres:
     production: postgres
     staging: postgres-staging
+    clone: postgres
   backup:
     production: backup
     staging: backup-staging
+    clone: backup
 playbook_execution_required_hosts:
+  # ADR 0430 — `clone` entries mirror `production` (fork deployments share service names).
   proxmox_hosts:
     production: proxmox-host
     staging: proxmox-host
+    clone: proxmox-host
   lv3_guests:
     production: "lv3_guests:&production"
     staging: "lv3_guests:&staging"
+    clone: "lv3_guests:&production"
   nginx_edge:
     production: nginx
     staging: nginx-staging
+    clone: nginx
   docker_runtime:
     production: docker-runtime
     staging: docker-runtime-staging
+    clone: docker-runtime
   runtime_control:
     production: runtime-control
     staging: docker-runtime-staging
+    clone: runtime-control
   docker_build:
     production: docker-build
     staging: docker-build-staging
+    clone: docker-build
   runtime_ai:
     production: runtime-ai
     staging: docker-runtime-staging
+    clone: runtime-ai
   runtime_general:
     production: runtime-general
     staging: docker-runtime-staging
+    clone: runtime-general
   runtime_comms:
     production: runtime-comms
     staging: docker-runtime-staging
+    clone: runtime-comms
   monitoring:
     production: monitoring
     staging: monitoring-staging
+    clone: monitoring
   postgres:
     production: postgres
     staging: postgres-staging
+    clone: postgres
   backup:
     production: backup
     staging: backup-staging
+    clone: backup
   coolify:
     production: coolify
     staging: coolify-staging
+    clone: coolify
   coolify_apps:
     production: coolify-apps
     staging: coolify-apps-staging
+    clone: coolify-apps

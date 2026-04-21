@@ -56,40 +56,86 @@ GENERATED_HEADER = """\
 # Maps logical group name → {environment → Ansible host/group pattern}.
 # No IPs — purely symbolic references. Staging entries that share a single
 # staging VM (e.g. runtime-ai → docker-runtime-staging) are encoded here.
+# ADR 0430 — `clone` mirrors `production` because forks use identical service
+# names; differentiation comes from the .local/host_vars overlay (IPs only).
 _EXECUTION_HOST_PATTERNS: dict[str, dict[str, str]] = {
     "proxmox_hosts": {
         "production": "proxmox_hosts:&production",
         "staging": "proxmox_hosts:&staging",
+        "clone": "proxmox_hosts:&production",
     },
     "lv3_guests": {
         "production": "lv3_guests:&production",
         "staging": "lv3_guests:&staging",
+        "clone": "lv3_guests:&production",
     },
     "postgres_guests": {
         "production": "postgres_guests:&production",
         "staging": "postgres_guests:&staging",
+        "clone": "postgres_guests:&production",
     },
     "backup_guests": {
         "production": "backup_guests:&production",
         "staging": "backup_guests:&staging",
+        "clone": "backup_guests:&production",
     },
     # Hosts with dedicated staging VMs
-    "coolify": {"production": "coolify", "staging": "coolify-staging"},
-    "coolify_apps": {"production": "coolify-apps", "staging": "coolify-apps-staging"},
-    "nginx_edge": {"production": "nginx", "staging": "nginx-staging"},
-    "docker_runtime": {"production": "docker-runtime", "staging": "docker-runtime-staging"},
-    "docker_build": {"production": "docker-build", "staging": "docker-build-staging"},
-    "monitoring": {"production": "monitoring", "staging": "monitoring-staging"},
-    "postgres": {"production": "postgres", "staging": "postgres-staging"},
-    "backup": {"production": "backup", "staging": "backup-staging"},
+    "coolify": {"production": "coolify", "staging": "coolify-staging", "clone": "coolify"},
+    "coolify_apps": {
+        "production": "coolify-apps",
+        "staging": "coolify-apps-staging",
+        "clone": "coolify-apps",
+    },
+    "nginx_edge": {"production": "nginx", "staging": "nginx-staging", "clone": "nginx"},
+    "docker_runtime": {
+        "production": "docker-runtime",
+        "staging": "docker-runtime-staging",
+        "clone": "docker-runtime",
+    },
+    "docker_build": {
+        "production": "docker-build",
+        "staging": "docker-build-staging",
+        "clone": "docker-build",
+    },
+    "monitoring": {"production": "monitoring", "staging": "monitoring-staging", "clone": "monitoring"},
+    "postgres": {"production": "postgres", "staging": "postgres-staging", "clone": "postgres"},
+    "backup": {"production": "backup", "staging": "backup-staging", "clone": "backup"},
     # Hosts without dedicated staging VMs — fall back to shared staging VM
-    "runtime_ai": {"production": "runtime-ai", "staging": "docker-runtime-staging"},
-    "runtime_control": {"production": "runtime-control", "staging": "docker-runtime-staging"},
-    "runtime_general": {"production": "runtime-general", "staging": "docker-runtime-staging"},
-    "runtime_comms": {"production": "runtime-comms", "staging": "docker-runtime-staging"},
-    "runtime_apps": {"production": "runtime-apps", "staging": "docker-runtime-staging"},
-    "postgres_apps": {"production": "postgres-apps", "staging": "postgres-staging"},
-    "postgres_data": {"production": "postgres-data", "staging": "postgres-staging"},
+    "runtime_ai": {
+        "production": "runtime-ai",
+        "staging": "docker-runtime-staging",
+        "clone": "runtime-ai",
+    },
+    "runtime_control": {
+        "production": "runtime-control",
+        "staging": "docker-runtime-staging",
+        "clone": "runtime-control",
+    },
+    "runtime_general": {
+        "production": "runtime-general",
+        "staging": "docker-runtime-staging",
+        "clone": "runtime-general",
+    },
+    "runtime_comms": {
+        "production": "runtime-comms",
+        "staging": "docker-runtime-staging",
+        "clone": "runtime-comms",
+    },
+    "runtime_apps": {
+        "production": "runtime-apps",
+        "staging": "docker-runtime-staging",
+        "clone": "runtime-apps",
+    },
+    "postgres_apps": {
+        "production": "postgres-apps",
+        "staging": "postgres-staging",
+        "clone": "postgres-apps",
+    },
+    "postgres_data": {
+        "production": "postgres-data",
+        "staging": "postgres-staging",
+        "clone": "postgres-data",
+    },
 }
 
 
@@ -220,7 +266,7 @@ def build_inventory(host_vars: dict) -> dict:
         "all": {
             "vars": {
                 "playbook_execution_env": "{{ env | default('production') }}",
-                "playbook_execution_allowed_envs": ["production", "staging"],
+                "playbook_execution_allowed_envs": ["production", "staging", "clone"],
                 "playbook_execution_host_patterns": _EXECUTION_HOST_PATTERNS,
             },
             "children": {
