@@ -1,7 +1,7 @@
 # ADR 0373 Service Registry Adoption — 100% Platform Completion
 
 **Date:** 2026-04-09
-**Status:** COMPLETE (Code merged and live-applied; latest-main replay re-verified on 2026-04-13)
+**Status:** COMPLETE (Code merged and live-applied; latest-main replay re-verified and integrated on 2026-04-21)
 **Involved Teams:** Platform Infrastructure, AI Agent Systems
 **Impact:** All 73 platform services unified under single DRY IoC pattern; zero conventional variable duplication; programmatic infrastructure configuration enabled
 
@@ -9,13 +9,13 @@
 
 ## Executive Summary
 
-ADR 0373 implementation across all planned phases (1-6) is **code-complete and live-applied**. The initial 100% adoption receipt was recorded on 2026-04-09, and the latest-main replay was re-verified on 2026-04-13 with successful governed restic backups plus a successful `repo_intake` production replay.
+ADR 0373 implementation across all planned phases (1-6) is **code-complete and live-applied**. The initial 100% adoption receipt was recorded on 2026-04-09, and the latest-main replay was re-verified and integrated on 2026-04-21 after rebasing onto `origin/main` `04638e669` (`VERSION` `0.178.148`), fixing the restic support-bundle regression exposed by ADR 0418, fixing the `repo_intake` readiness compatibility regression, refreshing the `docker-runtime` host security posture gate, and replaying both governed restic backups plus the `repo_intake` production entrypoint end to end.
 
 **Current State:**
 - ✅ **Phase 4:** Live-applied 2026-04-09 (v0.178.66, alertmanager_runtime reference implementation)
-- ✅ **Phase 5:** Live-applied 2026-04-09 (receipt context `0.178.72`), re-verified from latest-main on 2026-04-13
-- ✅ **Phase 6:** Live-applied 2026-04-09, re-verified from latest-main on 2026-04-13
-- ✅ **Latest-main verification:** `repo_intake` and governed restic replay both succeeded on 2026-04-13
+- ✅ **Phase 5:** Live-applied 2026-04-09 (receipt context `0.178.72`), re-verified from latest-main on 2026-04-21
+- ✅ **Phase 6:** Live-applied 2026-04-09, re-verified from latest-main on 2026-04-21
+- ✅ **Latest-main verification:** `repo_intake`, governed restic replay, and the host security posture freshness gate all succeeded on 2026-04-21
 
 ---
 
@@ -117,11 +117,12 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and l
 |-------|--------|----------|------------|
 | **Phase 4** | ✅ LIVE-APPLIED | Monitoring receipt 2026-04-09 | None (running in production) |
 | **Phase 5** | ✅ LIVE-APPLIED | `receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json` | None |
-| **Phase 6** | ✅ LIVE-APPLIED | `receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json` + 2026-04-13 latest-main replay | None |
+| **Phase 6** | ✅ LIVE-APPLIED | `receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json` + 2026-04-21 latest-main replay | None |
 
 **Platform Version:**
 - First full-adoption receipt context: `0.178.72`
-- Latest exact-main-compatible base replayed on 2026-04-13: `origin/main` `bbdb0f700` (`VERSION` `0.178.129`)
+- Latest exact-main-compatible base replayed on 2026-04-21: `origin/main` `04638e669` (`VERSION` `0.178.148`)
+- Integrated repo/platform version after the final closeout: `0.178.149`
 
 ---
 
@@ -130,14 +131,18 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and l
 - Governed repo validators passed from the isolated worktree:
   - `python3 scripts/validate_service_registry.py --check`
   - `python3 scripts/interface_contracts.py --list`
-  - `./scripts/validate_repo.sh agent-standards`
-- Targeted regression coverage passed after the runtime helper fixes:
-  - `uv run --with pytest --with pyyaml --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_openbao_systemd_credentials_helper.py tests/test_restic_config_backup.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_linux_guest_firewall_role.py`
-- Governed backup path passed:
+- Targeted regression coverage passed after the latest-main replay fixes:
+  - `uv run --with pytest --with pyyaml --with jsonschema --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_restic_config_backup.py tests/test_repo_intake_runtime_role.py tests/test_environment_topology.py tests/test_interface_contracts.py tests/test_validate_service_registry.py tests/test_validate_service_completeness.py tests/test_ansible_execution_scopes.py`
+- Governed backup path passed after syncing `outline_client.py` into the restic runtime support bundle:
+  - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
   - `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
-  - receipts: `receipts/restic-backups/20260413T105157Z.json`, `receipts/restic-backups/20260413T110651Z.json`, `receipts/restic-snapshots-latest.json`
-- Representative service replay passed:
-  - `make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+  - receipts: `receipts/restic-backups/20260421T105958Z.json`, `receipts/restic-backups/20260421T111230Z.json`, `receipts/restic-snapshots-latest.json`
+- Host security posture freshness passed after refreshing the production Lynis receipt:
+  - `uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_posture_report.py --env production --skip-trivy --audit-surface manual --print-report-json`
+  - `python3 scripts/vulnerability_budget.py --service repo_intake`
+  - receipt: `receipts/security-reports/20260421T110457Z.json`
+- Representative service replay passed after the readiness compatibility fix:
+  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
   - runtime health: `curl http://127.0.0.1:8101/health` returned `{"status":"ok"}`
   - edge verification from `nginx` returned the expected OAuth redirect for `repo-intake.lv3.org`
 
@@ -209,7 +214,7 @@ re-verification.
 - [x] Validate the service registry and governed entrypoints from the latest-main worktree
 - [x] Replay a representative production service (`repo_intake`)
 - [x] Refresh governed restic receipts after the replay
-- [ ] Re-run the exact-main replay from merged `main` whenever future ADR 0373-adjacent changes land
+- [x] Re-run the exact-main replay from the latest realistic `origin/main` `0.178.148` base and integrate the resulting `0.178.149` closeout
 
 ---
 
@@ -217,7 +222,7 @@ re-verification.
 
 **ADR 0373 implementation is feature-complete and live-applied.** All platform services use the single IoC/service-registry pattern, and the latest-main replay has been re-verified against current production entrypoints.
 
-**Next Step:** Keep using the latest-main replay recipe whenever ADR 0373-adjacent changes touch governed service wrappers, restic backup plumbing, or service-registry validation surfaces.
+**Next Step:** No additional ADR 0373-specific work is required until future changes touch governed service wrappers, restic backup plumbing, or service-registry validation surfaces; when they do, reuse the latest-main replay recipe captured here.
 
 **AI Agent Impact:** Future agents can now add new services following 8-step runbook with zero manual variable setup. Platform topology is fully programmatic and extensible.
 

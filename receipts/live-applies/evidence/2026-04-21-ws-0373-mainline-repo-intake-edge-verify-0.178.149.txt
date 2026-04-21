@@ -1,0 +1,23 @@
+nginx | CHANGED | rc=0 >>
+## edge health
+<html>
+<head><title>302 Found</title></head>
+<body>
+<center><h1>302 Found</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+## edge root headers
+HTTP/2 302
+server: nginx
+date: Tue, 21 Apr 2026 11:13:43 GMT
+content-type: text/html
+content-length: 138
+location: https://repo-intake.lv3.org/oauth2/sign_in?rd=https://repo-intake.lv3.org/
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin

@@ -1,0 +1,99 @@
+id: ws-0373-live-apply
+adr: '0373'
+title: Live apply service registry and derived defaults from latest origin/main
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/ws-0373-main-closeout-r3
+worktree_path: .worktrees/ws-0373-main-closeout-r3
+doc: docs/workstreams/ws-0373-live-apply.md
+depends_on:
+- adr-0344-single-source-environment-topology
+- adr-0359-declarative-postgresql-client-registry
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/archive/2026/ws-0373-live-apply.yaml
+- docs/workstreams/ws-0373-live-apply.md
+- docs/adr/0373-service-registry-and-derived-defaults.md
+- docs/adr/implementation-status/adr-0373.yaml
+- docs/postmortems/adr-0373-service-registry-adoption-completion.md
+- docs/runbooks/add-new-service-to-platform.md
+- inventory/group_vars/all/platform_services.yml
+- collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+- scripts/validate_service_registry.py
+- scripts/validate_repo.sh
+- tests/test_validate_service_completeness.py
+- tests/test_ansible_execution_scopes.py
+- receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0373_live_apply_tracking
+    paths:
+    - workstreams/archive/2026/ws-0373-live-apply.yaml
+    - docs/workstreams/ws-0373-live-apply.md
+    - docs/adr/0373-service-registry-and-derived-defaults.md
+    - docs/adr/implementation-status/adr-0373.yaml
+    - docs/postmortems/adr-0373-service-registry-adoption-completion.md
+    - docs/runbooks/add-new-service-to-platform.md
+    mode: exclusive
+  - id: ws_0373_service_registry_contract
+    paths:
+    - inventory/group_vars/all/platform_services.yml
+    - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+    - scripts/validate_service_registry.py
+    - scripts/validate_repo.sh
+    - tests/test_validate_service_completeness.py
+    - tests/test_ansible_execution_scopes.py
+    mode: shared_contract
+    contract: adr-0373-service-registry-v1
+  - id: ws_0373_live_apply_evidence
+    paths:
+    - receipts/live-applies/
+    mode: shared_contract
+    contract: live-apply-evidence-v1
+canonical_truth:
+  changelog_entry: close ADR 0373 on the latest realistic origin/main by replaying
+    governed restic backup plus repo_intake from the 0.178.148 base, refreshing the
+    repo_intake host security posture gate, and fixing the repo_intake readiness
+    compatibility and restic Outline helper sync regressions exposed by that replay
+  release_bump: patch
+  included_in_repo_version: 0.178.149
+  latest_receipts:
+    platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
+    repo_intake: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
+    restic_config_backup: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
+notes: "Replay ADR 0373 from the latest realistic origin/main baseline after main\n\
+  advanced to 0.178.148 at 04638e669de921ce818b0625147d6421902ca669.\n\nLatest\
+  \ verified base:\n- origin/main head: 04638e669de921ce818b0625147d6421902ca669\n\
+  - repo VERSION on origin/main: 0.178.148\n- integrated repo/platform VERSION for\
+  \ this closeout: 0.178.149\n\nVerified on 2026-04-21:\n- python3 scripts/validate_service_registry.py\
+  \ --check\n- python3 scripts/interface_contracts.py --list\n- uv run --with pytest\
+  \ --with pyyaml --with jsonschema --with fastapi --with\n  jinja2 --with python-multipart\
+  \ --with itsdangerous --with httpx python -m\n  pytest -q tests/test_restic_config_backup.py\
+  \ tests/test_repo_intake_runtime_role.py\n  tests/test_environment_topology.py tests/test_interface_contracts.py\n\
+  \  tests/test_validate_service_registry.py\n  tests/test_validate_service_completeness.py\n\
+  \  tests/test_ansible_execution_scopes.py\n- make preflight WORKFLOW=live-apply-service\n\
+  - LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make\n  converge-restic-config-backup\
+  \ env=production\n- python3 scripts/trigger_restic_live_apply.py --env production\
+  \ --mode backup\n  --triggered-by ws-0373-live-apply --live-apply-trigger\n- refreshed\
+  \ the repo_intake host security posture gate with receipts/security-reports/20260421T110457Z.json\n\
+  - ANSIBLE_COLLECTIONS_PATH=\"$PWD/collections:$PWD/.ansible/validation/collections\"\
+  \n  LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make\n  live-apply-service\
+  \ service=repo_intake env=production\n  ALLOW_IN_PLACE_MUTATION=true\n- runtime\
+  \ and edge curl verification for repo-intake\n\nReplay fixes carried by this branch:\n\
+  - repo_intake_runtime now uses ansible.builtin.uri timeout instead of the\n  unsupported\
+  \ connect_timeout parameter during readiness polling.\n- restic_config_backup and\
+  \ trigger_restic_live_apply now sync\n  scripts/outline_client.py so ADR 0418 receipt\
+  \ auto-publish imports do not\n  crash the runtime worker.\n- tests/test_restic_config_backup.py\
+  \ covers the trigger support bundle update.\n\nIntegrated main closeout promotes\
+  \ this replay into repo/platform version\n0.178.149 with receipts, ADR notes, release\
+  \ notes, and canonical truth\nupdated in the merged tree.\n"
+blockers: []
+plane_issue_id: 42ea1e56-38e5-4a5d-a25d-392abad9e3e8

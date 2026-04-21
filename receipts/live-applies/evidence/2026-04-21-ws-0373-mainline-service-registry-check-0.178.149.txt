@@ -1,0 +1,2 @@
+platform_service_registry: 70 service(s) registered
+  OK  service registry is valid

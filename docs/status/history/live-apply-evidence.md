@@ -8,8 +8,10 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
+| `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
+| `platform` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `public_edge_publication` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
-| `platform` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `keycloak` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
 | `directus` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
@@ -85,7 +87,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `typesense` | `2026-03-31-adr-0277-typesense-mainline-live-apply` |
 | `serverclaw_skills` | `2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply` |
 | `sbom_cve_scanning` | `2026-03-31-adr-0298-sbom-cve-scanning-mainline-live-apply` |
-| `restic_config_backup` | `2026-03-31-adr-0302-restic-config-backup-mainline-live-apply` |
 | `renovate` | `2026-03-31-adr-0297-renovate-mainline-live-apply` |
 | `postgres_audit` | `2026-03-31-adr-0303-pgaudit-mainline-live-apply` |
 | `piper` | `2026-03-31-adr-0284-piper-mainline-live-apply` |

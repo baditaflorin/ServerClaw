@@ -1,0 +1,5 @@
+Downloading ansible-core (2.3MiB)
+ Downloading ansible-core
+Installed 10 packages in 30ms
+WARN: skipping mattermost webhook notification due to invalid URL
+security posture error: mutation audit event.surface must be one of: ansible, command-catalog, manual, nats, openbao, windmill

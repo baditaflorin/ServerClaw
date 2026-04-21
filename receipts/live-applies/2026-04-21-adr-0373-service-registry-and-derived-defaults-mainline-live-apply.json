@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-21",
+  "recorded_on": "2026-04-21",
+  "recorded_at": "2026-04-21T11:14:24Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0373-service-registry-and-derived-defaults-mainline-live-apply",
+  "adr": "0373",
+  "workstream": "ws-0373-live-apply",
+  "source_branch": "codex/ws-0373-main-closeout-r3",
+  "source_base_commit": "04638e669de921ce818b0625147d6421902ca669",
+  "source_base_repo_version": "0.178.148",
+  "source_commit": "f658862b0a222aefd0a0152d3cb72a28fd4c4bcb",
+  "repo_version_context": "0.178.149",
+  "platform_version_context": "0.178.149",
+  "integrated_repo_version": "0.178.149",
+  "integrated_platform_version": "0.178.149",
+  "summary": "Close ADR 0373 on the latest realistic origin/main base by replaying governed restic backup plus repo_intake from origin/main@04638e669 (repo VERSION 0.178.148), fixing the repo_intake readiness compatibility and restic Outline helper sync regressions exposed by that replay, refreshing the host security posture gate, and promoting integrated repo/platform truth to 0.178.149.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "repo-intake internal health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "repo-intake protected edge"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "restic config backup runtime"
+    },
+    {
+      "kind": "gate",
+      "name": "vulnerability budget host freshness"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0373 validation slice on the latest realistic origin/main candidate",
+      "result": "pass",
+      "observed": "The latest-main regression slice passed with `86 passed in 1.80s`; evidence: `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-pytest-0.178.149.txt`."
+    },
+    {
+      "check": "Service registry, interface contract, and live-apply preflight validation",
+      "result": "pass",
+      "observed": "`python3 scripts/validate_service_registry.py --check`, `python3 scripts/interface_contracts.py --list`, and `make preflight WORKFLOW=live-apply-service` all passed; evidence: `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-service-registry-check-0.178.149.txt`, `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-interface-contracts-0.178.149.txt`, and `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-preflight-0.178.149.txt`."
+    },
+    {
+      "check": "Governed restic converge plus explicit trigger on the 0.178.148 base",
+      "result": "pass",
+      "observed": "`make converge-restic-config-backup env=production` succeeded after the restic runtime role synced `scripts/outline_client.py`, and `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger` returned `status=ok`; evidence: `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-restic-converge-0.178.149.txt`, `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-restic-trigger-0.178.149.txt`, `receipts/restic-backups/20260421T105958Z.json`, and `receipts/restic-snapshots-latest.json`."
+    },
+    {
+      "check": "Host security posture freshness gate for repo_intake",
+      "result": "pass",
+      "observed": "The production host security posture scan was refreshed on 2026-04-21 and the clean cached receipt `receipts/security-reports/20260421T110457Z.json` made `python3 scripts/vulnerability_budget.py --service repo_intake` approve; evidence: `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-security-posture-refresh-0.178.149.txt`, `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-security-posture-receipt-0.178.149.txt`, and `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-vulnerability-budget-repo-intake-0.178.149.txt`."
+    },
+    {
+      "check": "Governed repo_intake replay on the latest realistic origin/main candidate",
+      "result": "pass",
+      "observed": "`ANSIBLE_COLLECTIONS_PATH=\"$PWD/collections:$PWD/.ansible/validation/collections\" make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true` completed with `failed=0`, then the wrapper's automatic restic trigger returned `status=ok`; evidence: `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-repo-intake-live-apply-0.178.149.txt` and `receipts/restic-backups/20260421T111230Z.json`."
+    },
+    {
+      "check": "Runtime and edge verification for repo_intake after the replay",
+      "result": "pass",
+      "observed": "Local health on `http://127.0.0.1:8101/health` returned `{\"status\":\"ok\"}`, the root page rendered `Repo Intake — LV3`, the `repo-intake` container was healthy and publishing `0.0.0.0:8101->8101/tcp`, and the protected edge returned the expected OAuth redirect plus hardening headers; evidence: `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-repo-intake-runtime-verify-0.178.149.txt` and `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-repo-intake-edge-verify-0.178.149.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0373-service-registry-and-derived-defaults.md",
+    "docs/workstreams/ws-0373-live-apply.md",
+    "docs/postmortems/adr-0373-service-registry-adoption-completion.md",
+    "workstreams/archive/2026/ws-0373-live-apply.yaml",
+    "receipts/live-applies/ws-0373-live-apply-apply-receipt.yaml",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-service-registry-check-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-interface-contracts-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-pytest-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-preflight-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-restic-converge-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-restic-trigger-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-security-posture-refresh-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-security-posture-receipt-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-vulnerability-budget-repo-intake-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-repo-intake-live-apply-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-repo-intake-runtime-verify-0.178.149.txt",
+    "receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-repo-intake-edge-verify-0.178.149.txt",
+    "receipts/restic-backups/20260421T105958Z.json",
+    "receipts/restic-backups/20260421T111230Z.json",
+    "receipts/restic-snapshots-latest.json",
+    "receipts/security-reports/20260421T110457Z.json",
+    "receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json"
+  ],
+  "notes": [
+    "The final replay started from origin/main@04638e669de921ce818b0625147d6421902ca669, the latest realistic mainline base available during the 2026-04-21 closeout, with repo VERSION 0.178.148.",
+    "ADR 0373 first became true in repo version 0.178.67 and platform version 0.178.72; this integrated receipt records the exact-main replay after origin/main advanced with ADR 0419/0420 PR-based integration flow.",
+    "The closeout promotes both repo and platform truth to 0.178.149 because the merged mainline commit adds the final release, receipt, workstream, and canonical-truth state on top of the replayed source commit f658862b0a222aefd0a0152d3cb72a28fd4c4bcb."
+  ]
+}

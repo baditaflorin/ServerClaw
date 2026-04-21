@@ -50,6 +50,35 @@ def _read_version() -> str:
     return ""
 
 
+def _release_notes_preserve_changelog_entry(version: str) -> bool:
+    """Return true when the current release notes already contain real summary text.
+
+    Canonical release generation clears changelog.md's Unreleased scratchpad after
+    cutting docs/release-notes/<VERSION>.md. Accept that released state so this
+    checker works both before and after the release artifact generation step.
+    """
+    if not version:
+        return False
+    release_notes = REPO_ROOT / "docs" / "release-notes" / f"{version}.md"
+    if not release_notes.exists():
+        return False
+
+    in_summary = False
+    for line in release_notes.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped == "## Summary":
+            in_summary = True
+            continue
+        if in_summary and stripped.startswith("## "):
+            break
+        if not in_summary or not stripped.startswith("- "):
+            continue
+        note = stripped[2:].strip()
+        if note and not note.startswith("No changelog notes were present"):
+            return True
+    return False
+
+
 def check_version_bumped(changed_files: list[str]) -> dict:
     """Check if VERSION file was changed."""
     bumped = "VERSION" in changed_files
@@ -62,7 +91,7 @@ def check_version_bumped(changed_files: list[str]) -> dict:
 
 
 def check_changelog_entry() -> dict:
-    """Check if changelog.md has content under ## Unreleased."""
+    """Check if changelog.md has content under ## Unreleased or release notes."""
     changelog = REPO_ROOT / "changelog.md"
     if not changelog.exists():
         return {
@@ -88,12 +117,27 @@ def check_changelog_entry() -> dict:
                 has_content = True
                 break
 
+    if has_content:
+        return {
+            "id": "changelog-entry",
+            "passed": True,
+            "message": "changelog.md has entry under ## Unreleased",
+            "fix": "Add a bullet under '## Unreleased' in changelog.md (see CLAUDE.md section 4b)",
+        }
+
+    version = _read_version()
+    if _release_notes_preserve_changelog_entry(version):
+        return {
+            "id": "changelog-entry",
+            "passed": True,
+            "message": f"release notes for {version} preserve the changelog entry",
+            "fix": "Add a bullet under '## Unreleased' in changelog.md (see CLAUDE.md section 4b)",
+        }
+
     return {
         "id": "changelog-entry",
-        "passed": has_content,
-        "message": "changelog.md has entry under ## Unreleased"
-        if has_content
-        else "No entry under ## Unreleased in changelog.md",
+        "passed": False,
+        "message": "No entry under ## Unreleased in changelog.md",
         "fix": "Add a bullet under '## Unreleased' in changelog.md (see CLAUDE.md section 4b)",
     }
 

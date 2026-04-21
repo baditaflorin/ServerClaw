@@ -9,12 +9,10 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
-| `0373` | Live apply service registry and derived defaults from latest origin/main | `live_applied` | [ws-0373-live-apply.md](../../workstreams/ws-0373-live-apply.md) |
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](../../workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
-| `0324` | Implement ADR 0324 service bundles and verify the generated-catalog automation end to end | `live_applied` | [ws-0324-live-apply.md](../../workstreams/ws-0324-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
@@ -170,11 +168,13 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0373` | Live apply service registry and derived defaults from latest origin/main | `merged` | [ws-0373-live-apply.md](../../workstreams/ws-0373-live-apply.md) |
 | `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](../../workstreams/ws-0372-live-apply.md) |
 | `0382` | Latest-main Keycloak interactive login incident closure | `merged` | [ws-0382-live-apply.md](../../workstreams/ws-0382-live-apply.md) |
 | `0371` | Re-verify parameterized service verification tasks from the latest origin/main | `merged` | [ws-0371-live-apply.md](../../workstreams/ws-0371-live-apply.md) |
 | `0369` | ADR 0369 live apply — Python validation toolkit completion | `merged` | [ws-0369-live-apply.md](../../workstreams/ws-0369-live-apply.md) |
 | `0370` | Complete ADR 0370 shared lifecycle adoption and live-apply it from latest origin/main | `live_applied` | [ws-0370-live-apply.md](../../workstreams/ws-0370-live-apply.md) |
+| `0324` | Implement ADR 0324 service bundles and verify the generated-catalog automation end to end | `live_applied` | [ws-0324-live-apply.md](../../workstreams/ws-0324-live-apply.md) |
 | `0368` | ADR 0368 Live Apply and Completion | `live_applied` | [ws-0368-live-apply.md](../../workstreams/ws-0368-live-apply.md) |
 | `0375` | Latest-main integration: edge certificate recovery and validation gate repairs | `merged` | [ws-0417-main-merge-edge-cert-and-sftpgo.md](../../workstreams/ws-0417-main-merge-edge-cert-and-sftpgo.md) |
 | `0364` | ADR 0364 post-merge validation closure on latest origin/main | `merged` | [ws-0364-post-merge-validation.md](../../workstreams/ws-0364-post-merge-validation.md) |

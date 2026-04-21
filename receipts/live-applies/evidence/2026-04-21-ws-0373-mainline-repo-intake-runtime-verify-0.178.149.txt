@@ -1,0 +1,8 @@
+docker-runtime | CHANGED | rc=0 >>
+## health
+{"status":"ok"}
+## root
+Repo Intake — LV3
+## container
+CONTAINER ID                                                       IMAGE                COMMAND                                                                             CREATED         STATUS                   PORTS                                         NAMES
+a954cda00b1f1a1eacae70c654a4d07868b1f1bdb41813573b7af45e99bad4fc   repo-intake:latest   "uvicorn scripts.repo_intake.app:create_app --factory --host 0.0.0.0 --port 8101"   4 minutes ago   Up 4 minutes (healthy)   0.0.0.0:8101->8101/tcp, [::]:8101->8101/tcp   repo-intake

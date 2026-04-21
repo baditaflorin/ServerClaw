@@ -54,7 +54,7 @@ job on PRs targeting `main`. This job performs fast, targeted checks:
 | Check | What it validates | Fix hint |
 |-------|-------------------|----------|
 | `version-bump` | `VERSION` file changed vs. base branch | "Bump VERSION before merging to main" |
-| `changelog-entry` | `changelog.md` has content under `## Unreleased` | "Add a changelog entry under ## Unreleased" |
+| `changelog-entry` | `changelog.md` has content under `## Unreleased`, or current release notes already preserve a non-placeholder summary after the release cut | "Add a changelog entry under ## Unreleased" |
 | `release-notes` | `docs/release-notes/{VERSION}.md` exists | "Run `generate_release_notes.py --write`" |
 | `adr-index` | `docs/adr/.index.yaml` is current | "Run `generate_adr_index.py --write`" |
 | `platform-manifest` | `build/platform-manifest.json` is current | "Run `platform_manifest.py --write`" |
@@ -82,6 +82,12 @@ to the PR title when they're ready to merge with the full checklist.
 A new script `scripts/check_release_readiness.py` performs all checks
 and outputs structured results. The GitHub Actions workflow calls it
 as a separate job.
+
+The changelog check accepts two adjacent release states:
+before `generate_release_notes.py --write`, it requires the human-authored
+`## Unreleased` bullet; after release generation and canonical-truth cleanup,
+it accepts `docs/release-notes/{VERSION}.md` when the `## Summary` section
+contains a real, non-placeholder bullet.
 
 ---
 

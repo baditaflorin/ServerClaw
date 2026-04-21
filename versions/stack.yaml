@@ -1,11 +1,11 @@
 schema_version: 1.0.0
-repo_version: 0.178.148
-platform_version: 0.178.145
+repo_version: 0.178.149
+platform_version: 0.178.149
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    platform: 2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply
+    platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
@@ -38,7 +38,7 @@ live_apply_evidence:
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     backup_coverage: 2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply
-    restic_config_backup: 2026-03-31-adr-0302-restic-config-backup-mainline-live-apply
+    restic_config_backup: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     minio: 2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply
     guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
@@ -188,6 +188,7 @@ live_apply_evidence:
     education_wemeshup: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
     validation_toolkit: 2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply
     repowise: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
+    repo_intake: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -1185,8 +1186,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.148
+    current: 0.178.149
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.145
+    current: 0.178.149
     meaning: intended platform release for the actual server configuration

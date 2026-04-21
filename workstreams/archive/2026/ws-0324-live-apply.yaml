@@ -244,25 +244,40 @@ canonical_truth:
   changelog_entry: completes ADR 0324 exact-main closeout by recording the generated
     service-catalog assembly receipt on main and refreshing the canonical truth surfaces
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.140
   latest_receipts:
     service_definition_catalog_assembly: 2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply
 blockers: []
 ready_to_merge: true
 live_applied: true
-notes: |
-  First live apply for ADR 0324 remains the 2026-04-04 service-catalog
+notes: 'First live apply for ADR 0324 remains the 2026-04-04 service-catalog
+
   rollout recorded in platform version 0.130.98. This exact-main closeout
+
   replays the repository validation path from
+
   origin/main@4bb9c2fd7c8a3296e33a8dc7e77ee06bd5adf0a4 (VERSION 0.178.140,
+
   stack repo 0.178.139, platform 0.178.138), records the mainline receipt,
+
   repairs the fresh mainline generated-SLO artifact gap that the repo gates
+
   surfaced during final integration. The exact-main closeout lands on the
+
   current mainline VERSION 0.178.140 and leaves its changelog note in the
+
   Unreleased section because `release_manager.py` is currently blocked by
+
   unrelated active workstreams (`ws-0417`, `ws-0414`, `adr-0360`, and
+
   `ws-realtime-dynamic-children`). The clean latest-main verification
+
   workspace at the same origin/main tip is already red in the broader
+
   promotion gate on `generated-docs`, `ansible-lint`, and
+
   `integration-tests`, so those failures remain inherited mainline debt
+
   rather than new ADR 0324 regressions.
+
+  '

@@ -1,0 +1,7 @@
+WARN Broken interpreter cache entry at /Users/live/.cache/uv/interpreter-v4/690e8bc5fc3a5e7e/db96087e7e6677f4.msgpack, removing: array had incorrect length, expected 16
+Downloading pydantic-core (1.9MiB)
+ Downloading pydantic-core
+Installed 29 packages in 45ms
+........................................................................ [ 83%]
+..............                                                           [100%]
+86 passed in 1.80s

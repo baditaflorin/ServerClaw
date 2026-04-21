@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0373](../adr/0373-service-registry-and-derived-defaults.md)
 - Title: Service Registry and Derived Defaults
-- Status: ready
-- Branch: `codex/ws-0373-live-apply`
-- Worktree: `.worktrees/ws-0373-live-apply`
+- Status: merged
+- Branch: `codex/ws-0373-main-closeout-r3`
+- Worktree: `.worktrees/ws-0373-main-closeout-r3`
 - Owner: `codex`
 - Depends On: `adr-0344-single-source-environment-topology`, `adr-0359-declarative-postgresql-client-registry`
 - Conflicts With: none
@@ -25,7 +25,7 @@
 
 ## Expected Repo Surfaces
 
-- `workstreams/active/ws-0373-live-apply.yaml`
+- `workstreams/archive/2026/ws-0373-live-apply.yaml`
 - `docs/workstreams/ws-0373-live-apply.md`
 - `docs/adr/0373-service-registry-and-derived-defaults.md`
 - `docs/adr/implementation-status/adr-0373.yaml`
@@ -48,73 +48,81 @@
 
 ## Verification
 
-- Repo preparation and refresh completed from latest `origin/main` (`bbdb0f700`).
+- Repo preparation and refresh completed from latest realistic `origin/main`
+  (`04638e669`, `VERSION` `0.178.148`).
 - Passed:
   - `python3 scripts/validate_service_registry.py --check`
   - `python3 scripts/interface_contracts.py --list`
-  - `./scripts/validate_repo.sh agent-standards`
-  - `uv run --with pytest --with pyyaml --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_openbao_systemd_credentials_helper.py tests/test_restic_config_backup.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_linux_guest_firewall_role.py`
-  - earlier targeted latest-main regression sweep:
-    - `tests/test_security_posture_report.py`
-    - `tests/test_maintenance_window_tool.py`
-    - `tests/test_governed_command.py`
-    - `tests/test_platform_observation_tool.py`
-    - `tests/test_restore_verification.py`
-    - `tests/test_generate_platform_vars.py::test_build_platform_vars_resolves_guest_ip_templates_in_platform_host_network`
+  - `uv run --with pytest --with pyyaml --with jsonschema --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_restic_config_backup.py tests/test_repo_intake_runtime_role.py tests/test_environment_topology.py tests/test_interface_contracts.py tests/test_validate_service_registry.py tests/test_validate_service_completeness.py tests/test_ansible_execution_scopes.py`
+    with `86 passed`
   - `make preflight WORKFLOW=live-apply-service`
+  - `python3 scripts/vulnerability_budget.py --service repo_intake`
 
 ## Live Apply Outcome
 
-- completed on 2026-04-13 after the controller-to-runtime access path recovered
-- representative ADR 0373 latest-main replay succeeded for both the governed
-  backup path and the production `repo_intake` service entrypoint
-- remaining work for merge-to-main is integration-only:
-  - merge the branch onto `main`
-  - replay the same service from the merged `main` tree
-  - update protected integration files (`VERSION`, `changelog.md`,
-    `versions/stack.yaml`, `README.md`, generated release docs)
+- completed on 2026-04-21 after rebasing to the latest realistic
+  `origin/main` base at `0.178.148`
+- latest-main replay exposed and repaired two live regressions before the final
+  rerun:
+  - `repo_intake_runtime` readiness polling used the unsupported
+    `connect_timeout` parameter on `ansible.builtin.uri`
+  - `restic_config_backup.py` started importing `outline_client` after
+    ADR 0418, but the restic runtime support bundle did not sync
+    `scripts/outline_client.py` onto `docker-runtime`
+- latest-main replay also refreshed the stale `docker-runtime` host security
+  posture receipt before rerunning `repo_intake`, because the vulnerability
+  budget gate rejected the first attempt with an 8.7-day-old host scan
+- the final integrated closeout promotes this verified replay into repo and
+  platform version `0.178.149`
 
 ## Live Evidence
 
-- Latest-main repair surface kept on this branch:
-  - `platform/interface_contracts.py`
-  - `config/workflow-catalog.json`
-  - `playbooks/services/repo_intake.yml`
+- Latest-main replay fixes kept on this branch:
+  - `collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/tasks/main.yml`
+  - `collections/ansible_collections/lv3/platform/roles/restic_config_backup/tasks/main.yml`
   - `scripts/trigger_restic_live_apply.py`
-  - `scripts/drift_lib.py`
-  - `scripts/governed_command.py`
-  - `scripts/platform_observation_tool.py`
-  - `scripts/maintenance_window_tool.py`
-  - `scripts/restore_verification.py`
-  - Docker/OpenBao helper fixes under
-    `collections/ansible_collections/lv3/platform/roles/`
+  - `tests/test_restic_config_backup.py`
 - Restic replay:
   - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
-    completed successfully and refreshed the runtime password state
-  - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
+    completed successfully on the rebased base after syncing `outline_client.py`
+  - `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
     returned `status=ok`
   - receipts refreshed:
-    - `receipts/restic-backups/20260413T105157Z.json`
-    - `receipts/restic-backups/20260413T110651Z.json`
+    - `receipts/restic-backups/20260421T105958Z.json`
+    - `receipts/restic-backups/20260421T111230Z.json`
     - `receipts/restic-snapshots-latest.json`
+- Security posture gate refresh:
+  - `uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_posture_report.py --env production --skip-trivy --audit-surface manual --print-report-json`
+    re-emitted the fresh host report as
+    `receipts/security-reports/20260421T110457Z.json`
+  - `python3 scripts/vulnerability_budget.py --service repo_intake` returned
+    `approved`
+  - evidence:
+    `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-vulnerability-budget-repo-intake-0.178.149.txt`
 - `repo_intake` replay:
-  - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
     completed with `failed=0`
+  - the live-apply wrapper's automatic post-apply restic trigger also returned
+    `status=ok`
   - `docker-runtime` verification:
     - `docker ps` shows `repo-intake` healthy and publishing `0.0.0.0:8101->8101/tcp`
     - `curl http://127.0.0.1:8101/health` returned `{"status":"ok"}`
     - the root page served the expected `Repo Intake — LV3` HTML
   - edge verification from `nginx`:
-    - `curl -kfsS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/health`
+    - `curl -ksS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/health`
       returned the expected `HTTP/2 302` OAuth redirect
-    - `curl -kfsS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/`
+    - `curl -ksS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/`
       returned the same authenticated edge behavior
-- Supporting historical evidence remains in
-  `receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json`,
-  which is the first platform receipt claiming 100% ADR 0373 adoption.
+- Integrated closeout receipt:
+  - `receipts/live-applies/2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply.json`
+- Historical first-true evidence remains in
+  `receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json`
+  as the first platform receipt claiming 100% ADR 0373 adoption.
 
 ## Mainline Integration Notes
 
-- protected integration files remain intentionally uncommitted on this branch
-- the merge-to-main step must regenerate canonical truth from the merged tree
-  before cutting the next release and updating `versions/stack.yaml`
+- the archived shard records the merged state for ws-0373 and points canonical
+  truth at the integrated `0.178.149` release
+- the closeout refreshes `VERSION`, `RELEASE.md`, `docs/release-notes/0.178.149.md`,
+  `versions/stack.yaml`, `README.md`, and the live-apply receipts so merged
+  repository truth and verified platform truth describe the same state

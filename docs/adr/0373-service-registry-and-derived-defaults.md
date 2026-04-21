@@ -349,23 +349,42 @@ If a role's migration breaks, the fix is to temporarily re-add the removed defau
   `receipts/live-applies/2026-04-09-adr-0373-phases5-6-100pct-adoption-live-apply.json`,
   which marks the first live platform state where all services used
   `derive_service_defaults`.
-- Latest-main replay was re-verified on 2026-04-13 from a worktree based on
-  `origin/main` `bbdb0f700` plus ADR 0373 follow-through fixes:
+- Latest realistic mainline replay was re-verified on 2026-04-21 from a
+  worktree rebased onto `origin/main` `04638e669` (`VERSION` `0.178.148`)
+  and then integrated as repo/platform version `0.178.149`:
   - `python3 scripts/validate_service_registry.py --check`
   - `python3 scripts/interface_contracts.py --list`
-  - `./scripts/validate_repo.sh agent-standards`
-  - `uv run --with pytest --with pyyaml --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_openbao_systemd_credentials_helper.py tests/test_restic_config_backup.py tests/test_docker_runtime_role.py tests/test_common_docker_bridge_chains_helper.py tests/test_linux_guest_firewall_role.py`
-  - `make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+  - `uv run --with pytest --with pyyaml --with jsonschema --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_restic_config_backup.py tests/test_repo_intake_runtime_role.py tests/test_environment_topology.py tests/test_interface_contracts.py tests/test_validate_service_registry.py tests/test_validate_service_completeness.py tests/test_ansible_execution_scopes.py`
+  - `make preflight WORKFLOW=live-apply-service`
+  - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
   - `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
-- The 2026-04-13 replay confirmed:
-  - `repo_intake` converged successfully on `docker-runtime`
+  - `uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_posture_report.py --env production --skip-trivy --audit-surface manual --print-report-json`
+  - `python3 scripts/vulnerability_budget.py --service repo_intake`
+  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+- The 2026-04-21 replay exposed and repaired two latest-main regressions before
+  the final rerun:
+  - `repo_intake_runtime` readiness used the unsupported `connect_timeout`
+    parameter on `ansible.builtin.uri`; the latest-main closeout switched this
+    to `timeout`
+  - `restic_config_backup.py` started importing `outline_client` after
+    ADR 0418, but the restic runtime support bundle did not sync that helper to
+    `docker-runtime`; the role plus governed trigger bundle now upload
+    `scripts/outline_client.py`
+- The final 2026-04-21 replay confirmed:
+  - `repo_intake` converged successfully on `docker-runtime` from the rebased
+    `0.178.148` base and the integrated `0.178.149` tree
   - direct health checks on `http://127.0.0.1:8101/health` returned `{"status":"ok"}`
   - edge verification from the `nginx` guest returned the expected OAuth redirect
     for `https://repo-intake.lv3.org/`
-  - governed restic backup receipts were refreshed at
-    `receipts/restic-backups/20260413T105157Z.json`,
-    `receipts/restic-backups/20260413T110651Z.json`, and
+  - the systemd-backed restic runtime converged successfully after syncing
+    `outline_client.py`, and the governed trigger refreshed
+    `receipts/restic-backups/20260421T105958Z.json`,
+    `receipts/restic-backups/20260421T111230Z.json`, plus
     `receipts/restic-snapshots-latest.json`
+  - the repo_intake vulnerability budget gate approved after refreshing
+    `receipts/security-reports/20260421T110457Z.json`
+  - the integrated closeout receipt is
+    `receipts/live-applies/2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply.json`
 
 ## Depends on
 

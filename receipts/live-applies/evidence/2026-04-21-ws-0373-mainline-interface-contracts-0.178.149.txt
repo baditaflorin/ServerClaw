@@ -1,0 +1,3 @@
+Interface contracts:
+  - converge-workflow-live-apply-v1 [1.0.0, backward_compatible_minor] owner=adr-0175-cross-workstream-interface-contracts
+  - workstream-registry-v1 [1.0.0, backward_compatible_minor] owner=adr-0175-cross-workstream-interface-contracts
