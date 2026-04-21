@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-21'
 facet: concern
 concern: identity
-total_adrs: 7
+total_adrs: 8
 adrs:
   - adr: '0007'
     title: Agent-Oriented Access Model
@@ -137,3 +137,23 @@ adrs:
     summary: Fix the four patterns using Ansible's own variable system — no custom lookup
     filename: 0385-ioc-library-refactor.md
     path: docs/adr/0385-ioc-library-refactor.md
+  - adr: '0425'
+    title: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-21'
+    concern: identity
+    keywords:
+      - retrospective
+      - postmortem
+      - adr-culture
+      - forkability
+      - lessons-learned
+      - adr
+      - agent-built
+      - platform
+      - what
+      - breaks
+    summary: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
+    filename: 0425-retrospective-420-adr-platform-build.md
+    path: docs/adr/0425-retrospective-420-adr-platform-build.md

@@ -10,7 +10,7 @@ generated: '2026-04-21'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 28
+total_adrs: 29
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -491,3 +491,23 @@ adrs:
     filename: 0422-evaluate-lsp-ai-editor-side-ai-language-server.md
     path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
     implemented_on: '2026-04-21'
+  - adr: '0425'
+    title: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-21'
+    concern: identity
+    keywords:
+      - retrospective
+      - postmortem
+      - adr-culture
+      - forkability
+      - lessons-learned
+      - adr
+      - agent-built
+      - platform
+      - what
+      - breaks
+    summary: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
+    filename: 0425-retrospective-420-adr-platform-build.md
+    path: docs/adr/0425-retrospective-420-adr-platform-build.md

@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-21'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 457
+total_adrs: 459
 adr_number_range:
   first: '0001'
-  last: '0423'
-  next_available: '0424'
+  last: '0425'
+  next_available: '0426'
 implementation_status_summary:
-  Implemented: 358
+  Implemented: 359
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
-  Accepted: 28
+  Accepted: 29
   Proposed: 29
 decision_status_summary:
-  Accepted: 358
-  Proposed: 36
+  Accepted: 359
+  Proposed: 37
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 25
+      count: 27
       first_adr: '0400'
-      last_adr: '0423'
+      last_adr: '0425'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -67,7 +67,7 @@ facets:
       count: 33
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
-      count: 7
+      count: 8
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
       count: 45
@@ -79,7 +79,7 @@ facets:
       count: 9
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
-      count: 7
+      count: 8
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
       count: 11
@@ -111,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 358
+      count: 359
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -127,7 +127,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 28
+      count: 29
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
@@ -137,8 +137,18 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0424'
+  next_available_adr: '0426'
 latest_adrs:
+  - adr: '0425'
+    title: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
+    implementation_status: Accepted
+    concern: identity
+    path: docs/adr/0425-retrospective-420-adr-platform-build.md
+  - adr: '0424'
+    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
+    implementation_status: Implemented
+    concern: bootstrap
+    path: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - adr: '0423'
     title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
     implementation_status: Not Implemented
@@ -180,16 +190,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: security
     path: docs/adr/0417-external-attack-surface-hardening.md
-  - adr: '0416'
-    title: Topology Consistency Enforcement
-    implementation_status: Proposed
-    concern: vm-topology
-    path: docs/adr/0416-topology-consistency-enforcement.md
-  - adr: '0415'
-    title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
-    implementation_status: Accepted
-    concern: ci-cd
-    path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

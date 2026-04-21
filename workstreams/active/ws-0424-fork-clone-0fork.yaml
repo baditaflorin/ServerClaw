@@ -1,0 +1,100 @@
+id: ws-0424-fork-clone-0fork
+adr: '0424'
+title: 'ADR 0424 — 0fork.com Clone onto Hetzner AX41-NVMe'
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/xenodochial-borg
+worktree_path: .claude/worktrees/xenodochial-borg
+doc: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+related_adrs:
+  - docs/adr/0425-retrospective-420-adr-platform-build.md
+depends_on:
+  - adr-0385-operator-identity-core
+  - adr-0407-generic-by-default
+  - adr-0409-host-specific-overrides
+  - adr-0376-local-is-sacred
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0424-fork-clone-0fork.yaml
+  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  - docs/adr/0425-retrospective-420-adr-platform-build.md
+  - docs/runbooks/hetzner-bare-metal-bootstrap.md
+started: '2026-04-21'
+priority: p1
+surfaces:
+  - 0fork.com (full apex scope, apex wiped and repointed 2026-04-21)
+  - Hetzner AX41-NVMe #2952989 (65.109.84.223, 2a01:4f9:3051:52d5::2)
+  - .local/identity.yml.0fork (new, not committed)
+  - .local/hetzner/dns.env (new, not committed)
+summary: >
+  First real fork-viability test. Stands up a collapsed nested-Proxmox topology
+  on a Hetzner AX41-NVMe using 0fork.com (full apex) as the identity. Drives
+  ADR 0385 (identity core) and ADR 0407 (generic-by-default) to their limits.
+  Also produces ADR 0425 — a retrospective on the 420-ADR build process and
+  what the clone attempt revealed about gaps in the platform's forkability
+  claim. ADR numbers collided with a parallel LSP-AI evaluation workstream
+  (0422/0423) that landed on main while this one was in progress; renumbered
+  to 0424/0425.
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0424_tracking
+      paths:
+        - workstreams/active/ws-0424-fork-clone-0fork.yaml
+        - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+        - docs/adr/0425-retrospective-420-adr-platform-build.md
+        - docs/runbooks/hetzner-bare-metal-bootstrap.md
+      mode: exclusive
+    - id: ws_0424_generated_indices
+      paths:
+        - workstreams.yaml
+        - docs/adr/.index.yaml
+        - docs/adr/index/by-concern/bootstrap.yaml
+        - docs/adr/index/by-concern/identity.yaml
+        - docs/adr/index/by-range/0400-0499.yaml
+        - docs/adr/index/by-status/accepted.yaml
+        - docs/adr/index/by-status/implemented.yaml
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared
+progress:
+  completed_2026_04_21:
+    - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)
+    - SSH access to 65.109.84.223 confirmed with llm-agents@proxmox_florin_server key
+    - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
+    - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
+    - ADR 0424 drafted
+    - ADR 0425 retrospective drafted
+    - Bootstrap runbook drafted
+    - Identity overlay .local/identity.yml.0fork written (apex scope confirmed)
+    - 0fork.com apex DNS wiped and repointed at 65.109.84.223 (backup saved)
+    - Hostname set to fork-pve-01.0fork.com on box
+    - PVE repo + GPG key installed (pve-no-subscription trixie)
+    - proxmox-default-kernel installed, reboot into 6.17.13-3-pve successful
+    - proxmox-ve userland installed (pve-manager/9.1.8/a8e257e1ad64dd92)
+    - Debian kernel + os-prober removed, grub regenerated
+    - RAID1 near-miss recovered via sfdisk --no-tell-kernel (ADR 0425 postmortem)
+    - Bootstrap runbook updated to forbid `lsblk -d` and document Hetzner default RAID1
+  blocked_pending_operator:
+    - Configure Hetzner WAN bridge vmbr0 (risk of lockout; needs Robot KVM standby)
+    - Deploy Headscale inside clone and enroll workstation
+    - Set rDNS on 65.109.84.223 via Hetzner Robot (no API path)
+    - Rotate the DNS token shared in chat on 2026-04-21
+    - Verify Hetzner account name "Mr. Raabe" (non-blocking)
+  remaining_execution:
+    - Configure vmbr0 Hetzner WAN bridge
+    - Provision 8 VMs per collapsed topology (nginx-edge, runtime-control, runtime-apps, postgres, docker-build, monitoring, backup, mail-platform)
+    - Converge runtime-control (Keycloak + step-ca + OpenBao + Headscale)
+    - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
+    - Create DNS records on 0fork.com (wildcard already covers them)
+    - Provision operator@0fork.com mailbox
+    - Send confirmation email from operator@0fork.com to baditaflorin@gmail.com
+    - Capture live-apply evidence and close workstream
+notes: >
+  This workstream was started while the operator was AFK. Destructive actions
+  performed with explicit operator authorization (apex wipe). A RAID1 near-miss
+  occurred during disk inventory — see ADR 0425 live postmortem. Recovery was
+  clean. The DNS token shared in chat should be rotated regardless of clone
+  outcome. See ADR 0424 open questions for the full list of decisions awaiting
+  operator confirmation on return.
