@@ -27,7 +27,7 @@ from platform.root_summary import (
     relative_markdown_link,
 )
 from platform.workstream_registry import load_workstreams
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 
 
 REPO_ROOT = repo_path()
@@ -89,7 +89,8 @@ def render_table(headers: list[str], rows: list[list[str]]) -> str:
 def render_platform_status() -> str:
     budgets = load_root_summary_budgets()
     stack = load_yaml(STACK_PATH)
-    host_vars = load_yaml(HOST_VARS_PATH)
+    # ADR 0430 — overlay-aware so status pages reflect the operator's topology.
+    host_vars = load_topology_host_vars()
 
     version_rows = [
         ["Repository version", f"`{stack['repo_version']}`"],
@@ -210,7 +211,8 @@ def render_document_index() -> str:
 
 def render_version_summary() -> str:
     stack = load_yaml(STACK_PATH)
-    host_vars = load_yaml(HOST_VARS_PATH)
+    # ADR 0430 — overlay-aware for fork status summaries.
+    host_vars = load_topology_host_vars()
     version_rows = [
         ["Repository version", f"`{stack['repo_version']}`"],
         ["Platform version", f"`{stack['platform_version']}`"],

@@ -56,8 +56,13 @@ def validation_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     )
 
     monkeypatch.setattr(validate_ephemeral_vmid, "CAPACITY_MODEL_PATH", tmp_path / "config" / "capacity-model.json")
+    # ADR 0430 — host_vars reads go through load_topology_host_vars (overlay-aware).
+    # Point the test fixture through that loader instead of a path constant.
+    fixture_path = tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
     monkeypatch.setattr(
-        validate_ephemeral_vmid, "HOST_VARS_PATH", tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
+        validate_ephemeral_vmid,
+        "load_topology_host_vars",
+        lambda: __import__("yaml").safe_load(fixture_path.read_text()),
     )
     monkeypatch.setattr(validate_ephemeral_vmid, "STACK_PATH", tmp_path / "versions" / "stack.yaml")
     return tmp_path

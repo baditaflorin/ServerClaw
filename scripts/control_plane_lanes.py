@@ -18,7 +18,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 
@@ -69,7 +69,9 @@ def load_workflow_ids() -> set[str]:
 
 
 def load_service_and_owner_refs() -> tuple[set[str], set[str]]:
-    host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
+    # ADR 0430 — overlay-aware so lane validation sees the fork's actual guests
+    # and service topology rather than the committed prod reference.
+    host_vars = require_mapping(load_topology_host_vars(), str(TOPOLOGY_HOST_VARS_PATH))
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     service_refs = {
         require_lane_identifier(service_id, f"host_vars.lv3_service_topology.{service_id}") for service_id in topology

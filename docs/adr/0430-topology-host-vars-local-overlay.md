@@ -106,10 +106,12 @@ Follow-up PRs (each one independently reviewable) migrate direct readers:
 | `scripts/service_health_tool.py` | PR 5 (merged) | Health-probe targets |
 | `scripts/fixture_manager.py` | PR 6 (deferred) | Test fixtures stay committed-only so generated fixtures remain deterministic across forks (per ADR allowance) |
 | `scripts/generate_cross_cutting_artifacts.py` | PR 6 (merged) | Hairpin/TLS/SSO publication |
-| `scripts/control_plane_lanes.py` | PR 7 | Lane ownership |
-| `scripts/validate_ephemeral_vmid.py` | PR 7 | VMID uniqueness |
-| `scripts/generate_ops_portal.py` | PR 7 | Portal rendering |
-| `scripts/generate_status_docs.py` | PR 7 | Status page rendering |
+| `scripts/control_plane_lanes.py` | PR 7 (merged) | Lane ownership |
+| `scripts/validate_ephemeral_vmid.py` | PR 7 (merged) | VMID uniqueness |
+| `scripts/generate_ops_portal.py` | PR 7 (merged) | Portal rendering (via `subdomain_catalog.load_host_vars`) |
+| `scripts/generate_status_docs.py` | PR 7 (merged) | Status page rendering |
+| `scripts/subdomain_catalog.py` | PR 7 (merged) | Shared `load_host_vars` helper — cascades to ops portal + audit |
+| `scripts/subdomain_exposure_audit.py` | PR 7 (merged) | Cascaded via `subdomain_catalog.load_host_vars` |
 | `scripts/immutable_guest_replacement.py` | PR 8 | Guest replacement tooling |
 | `scripts/live_apply_preflight_tool.py` | PR 8 | Live-apply preflight |
 

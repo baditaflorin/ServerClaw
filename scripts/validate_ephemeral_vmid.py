@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -49,7 +49,9 @@ def append_violation(violations: list[str], vmid: int, label: str, vmid_range: t
 
 def validate_ephemeral_vmid_ranges() -> list[str]:
     vmid_range = load_ephemeral_range()
-    host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+    # ADR 0430 — overlay-aware so fork VMID assignments are checked for
+    # collisions against the ephemeral pool too.
+    host_vars = load_topology_host_vars()
     stack = load_yaml(STACK_PATH)
     violations: list[str] = []
 

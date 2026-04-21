@@ -21,9 +21,9 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 
-from identity_yaml import load_yaml_with_identity
+from identity_yaml import load_yaml_with_identity, resolve_jinja2_vars
 from validation_toolkit import (
     resolve_public_domain_placeholders,
     require_bool,
@@ -154,8 +154,29 @@ def load_subdomain_catalog() -> dict[str, Any]:
     return resolve_public_domain_placeholders(load_json(SUBDOMAIN_CATALOG_PATH))
 
 
+def _resolve_identity_placeholders(value: Any) -> Any:
+    """Recursively resolve ``{{ platform_domain }}``-style placeholders in
+    string values of *value*. Operators' overlay values are typically literal,
+    but the committed host_vars file uses identity placeholders in
+    ``lv3_service_topology[*].public_hostname`` — so the resolved form is what
+    subdomain validation needs."""
+    if isinstance(value, str):
+        return resolve_jinja2_vars(value)
+    if isinstance(value, list):
+        return [_resolve_identity_placeholders(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _resolve_identity_placeholders(item) for key, item in value.items()}
+    return value
+
+
 def load_host_vars() -> dict[str, Any]:
-    return load_yaml_with_identity(TOPOLOGY_HOST_VARS_PATH)
+    # ADR 0430 — overlay-aware so subdomain validation and portal rendering
+    # see fork-specific `proxmox_guests` and `lv3_service_topology`. Identity
+    # placeholders in the committed base (e.g. ``public_hostname:
+    # nginx.{{ platform_domain }}``) are resolved post-merge so downstream
+    # hostname validation matches the operator's real domain.
+    merged = load_topology_host_vars()
+    return _resolve_identity_placeholders(merged)
 
 
 def load_public_edge_defaults() -> dict[str, Any]:
