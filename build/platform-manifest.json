@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.150",
+  "repo_version": "0.178.151",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-21T12:06:52Z",
-  "next_refresh_at": "2026-04-21T13:06:52Z",
+  "generated_at": "2026-04-21T12:27:04Z",
+  "next_refresh_at": "2026-04-21T13:27:04Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.149",
+    "last_version": "0.178.150",
     "deployed_at": "2026-04-21",
-    "summary": "No changelog notes were present in `## Unreleased` at release time.",
-    "release_notes_url": "docs/release-notes/0.178.150.md"
+    "summary": "ADR 0422: Evaluate lsp-ai as editor-side AI language server \u2014 **Accepted (decision only, no deployment)** ADR 0423: Operator-local lsp-ai against LiteLLM \u2014 **Rejected** (kept as historical design record)",
+    "release_notes_url": "docs/release-notes/0.178.151.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -12,12 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- complete ADR 0391 CPU-only operational automation with deterministic validation planning and documented ops Make targets
+
 ## Latest Release
 
-- [0.178.150 release notes](docs/release-notes/0.178.150.md)
+- [0.178.151 release notes](docs/release-notes/0.178.151.md)
 
 ## Previous Releases
 
+- [0.178.150 release notes](docs/release-notes/0.178.150.md)
 - [0.178.149 release notes](docs/release-notes/0.178.149.md)
 - [0.178.148 release notes](docs/release-notes/0.178.148.md)
 - [0.178.147 release notes](docs/release-notes/0.178.147.md)
@@ -29,9 +32,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.140 release notes](docs/release-notes/0.178.140.md)
 - [0.178.138 release notes](docs/release-notes/0.178.138.md)
 - [0.178.137 release notes](docs/release-notes/0.178.137.md)
-- [0.178.136 release notes](docs/release-notes/0.178.136.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (475 releases)](docs/release-notes/index/2026.md)
+- [2026 (476 releases)](docs/release-notes/index/2026.md)

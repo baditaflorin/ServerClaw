@@ -10,7 +10,7 @@ generated: '2026-04-21'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 27
+total_adrs: 28
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -470,3 +470,24 @@ adrs:
     summary: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
     filename: 0415-postmortem-cert-mismatch-gate-forced-no-verify.md
     path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md
+  - adr: '0422'
+    title: Evaluate lsp-ai as an Editor-Side AI Language Server
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-21'
+    concern: platform
+    keywords:
+      - lsp-ai
+      - lsp
+      - ide
+      - editor
+      - coding-assistant
+      - fim
+      - evaluation
+      - do-not-deploy
+      - evaluate
+      - as
+    summary: Evaluate lsp-ai as an Editor-Side AI Language Server
+    filename: 0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+    path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+    implemented_on: '2026-04-21'

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-21'
 facet: concern
 concern: platform
-total_adrs: 143
+total_adrs: 144
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2564,3 +2564,24 @@ adrs:
     summary: 'The default integration path becomes:'
     filename: 0419-pr-based-integration-flow.md
     path: docs/adr/0419-pr-based-integration-flow.md
+  - adr: '0422'
+    title: Evaluate lsp-ai as an Editor-Side AI Language Server
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-21'
+    concern: platform
+    keywords:
+      - lsp-ai
+      - lsp
+      - ide
+      - editor
+      - coding-assistant
+      - fim
+      - evaluation
+      - do-not-deploy
+      - evaluate
+      - as
+    summary: Evaluate lsp-ai as an Editor-Side AI Language Server
+    filename: 0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+    path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+    implemented_on: '2026-04-21'

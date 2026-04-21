@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 23
+total_adrs: 25
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -398,3 +398,44 @@ adrs:
     summary: Deploy a platformservicewatchdog role to every VM that runs application
     filename: 0421-platform-wide-service-watchdog.md
     path: docs/adr/0421-platform-wide-service-watchdog.md
+  - adr: '0422'
+    title: Evaluate lsp-ai as an Editor-Side AI Language Server
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-21'
+    concern: platform
+    keywords:
+      - lsp-ai
+      - lsp
+      - ide
+      - editor
+      - coding-assistant
+      - fim
+      - evaluation
+      - do-not-deploy
+      - evaluate
+      - as
+    summary: Evaluate lsp-ai as an Editor-Side AI Language Server
+    filename: 0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+    path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+    implemented_on: '2026-04-21'
+  - adr: '0423'
+    title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-21'
+    concern: documentation
+    keywords:
+      - lsp-ai
+      - runbook
+      - operator
+      - fim
+      - ollama
+      - litellm
+      - documentation
+      - rejected
+      - operator-local
+      - against
+    summary: Add the three artefacts below to the repo.
+    filename: 0423-operator-local-lsp-ai-runbook-against-litellm.md
+    path: docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md

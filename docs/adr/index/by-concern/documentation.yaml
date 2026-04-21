@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-21'
 facet: concern
 concern: documentation
-total_adrs: 21
+total_adrs: 22
 adrs:
   - adr: '0074'
     title: Platform Operations Portal
@@ -418,3 +418,23 @@ adrs:
     implemented_in_repo_version: 0.178.125
     implemented_in_platform_version: 0.178.77
     implemented_on: '2026-04-12'
+  - adr: '0423'
+    title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-21'
+    concern: documentation
+    keywords:
+      - lsp-ai
+      - runbook
+      - operator
+      - fim
+      - ollama
+      - litellm
+      - documentation
+      - rejected
+      - operator-local
+      - against
+    summary: Add the three artefacts below to the repo.
+    filename: 0423-operator-local-lsp-ai-runbook-against-litellm.md
+    path: docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md

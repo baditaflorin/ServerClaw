@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-21'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 455
+total_adrs: 457
 adr_number_range:
   first: '0001'
-  last: '0421'
-  next_available: '0422'
+  last: '0423'
+  next_available: '0424'
 implementation_status_summary:
   Implemented: 358
   Partial: 4
-  Not Implemented: 32
+  Not Implemented: 33
   Deprecated: 5
-  Accepted: 27
+  Accepted: 28
   Proposed: 29
 decision_status_summary:
-  Accepted: 357
-  Proposed: 35
+  Accepted: 358
+  Proposed: 36
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 23
+      count: 25
       first_adr: '0400'
-      last_adr: '0421'
+      last_adr: '0423'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -73,7 +73,7 @@ facets:
       count: 45
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
-      count: 21
+      count: 22
     - concern: host-os
       path: docs/adr/index/by-concern/host-os.yaml
       count: 9
@@ -88,7 +88,7 @@ facets:
       count: 30
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 143
+      count: 144
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -119,7 +119,7 @@ facets:
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 32
+      count: 33
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -127,7 +127,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 27
+      count: 28
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
@@ -137,8 +137,19 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0422'
+  next_available_adr: '0424'
 latest_adrs:
+  - adr: '0423'
+    title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
+    implementation_status: Not Implemented
+    concern: documentation
+    path: docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md
+  - adr: '0422'
+    title: Evaluate lsp-ai as an Editor-Side AI Language Server
+    implementation_status: Accepted
+    concern: platform
+    path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+    implemented_on: '2026-04-21'
   - adr: '0421'
     title: Platform-Wide Service Watchdog
     implementation_status: Partial
@@ -179,16 +190,6 @@ latest_adrs:
     implementation_status: Accepted
     concern: ci-cd
     path: docs/adr/0415-postmortem-cert-mismatch-gate-forced-no-verify.md
-  - adr: '0414'
-    title: Certificate Lifecycle Agent Tools and Cron Sync
-    implementation_status: Implemented
-    concern: security
-    path: docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
-  - adr: '0413'
-    title: SSO Redirect URI Mismatch and Service Topology Variable Drift
-    implementation_status: Proposed
-    concern: vm-topology
-    path: docs/adr/0413-sso-redirect-uri-and-service-topology-variable-drift.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

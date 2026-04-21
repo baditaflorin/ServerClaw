@@ -10,7 +10,7 @@ generated: '2026-04-21'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 32
+total_adrs: 33
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -580,3 +580,23 @@ adrs:
     summary: 'Introduce an Agent Interface Abstraction Layer consisting of:'
     filename: 0395-agent-interface-abstraction-layer.md
     path: docs/adr/0395-agent-interface-abstraction-layer.md
+  - adr: '0423'
+    title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-04-21'
+    concern: documentation
+    keywords:
+      - lsp-ai
+      - runbook
+      - operator
+      - fim
+      - ollama
+      - litellm
+      - documentation
+      - rejected
+      - operator-local
+      - against
+    summary: Add the three artefacts below to the repo.
+    filename: 0423-operator-local-lsp-ai-runbook-against-litellm.md
+    path: docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md

@@ -1,0 +1,88 @@
+id: ws-0422-lsp-ai-decision
+title: "ADR 0422/0423 — lsp-ai editor-side AI language server decision (do not deploy)"
+adr: "0422"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+branch: claude/adr-0422-lsp-ai-decision
+owner: claude
+worktree_path: .claude/worktrees/serene-euclid
+doc: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - VERSION
+  - RELEASE.md
+  - README.md
+  - changelog.md
+  - build/platform-manifest.json
+  - versions/stack.yaml
+  - workstreams.yaml
+  - workstreams/active/ws-0422-lsp-ai-decision.yaml
+  - docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+  - docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/release-notes/0.178.151.md
+  - docs/release-notes/README.md
+  - docs/release-notes/index/**
+started: "2026-04-21"
+priority: p3
+surfaces:
+  - docs/adr
+  - docs/release-notes
+summary: >
+  Evaluation of SilasMarvin/lsp-ai as an LSP-based editor-side AI coding
+  assistant. ADR 0422 (Accepted, decision-only): do not deploy lsp-ai in
+  any form — Claude Code remains the primary developer-AI interface, and
+  editor-native plugins (Continue.dev, avante.nvim, Zed AI) can point at
+  the existing LiteLLM endpoint directly. ADR 0423 (Rejected): kept as a
+  historical design record so a future reviewer has the full scope
+  (FIM model, LiteLLM alias, runbook, rollback) in one place if the
+  decision is ever reopened.
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0422_adr_docs
+      paths:
+        - docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+        - docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md
+        - workstreams/active/ws-0422-lsp-ai-decision.yaml
+      mode: exclusive
+    - id: ws_0422_adr_index
+      paths:
+        - docs/adr/.index.yaml
+        - docs/adr/index/**
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: ws_0422_release_notes
+      paths:
+        - docs/release-notes/0.178.151.md
+        - docs/release-notes/README.md
+        - docs/release-notes/index/**
+      mode: shared_contract
+      contract: release-notes-v1
+    - id: ws_0422_version_and_manifest
+      paths:
+        - VERSION
+        - RELEASE.md
+        - README.md
+        - changelog.md
+        - build/platform-manifest.json
+        - versions/stack.yaml
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0422_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "record lsp-ai evaluation and decision not to deploy (ADRs 0422 + 0423)"
+  release_bump: patch
+  included_in_repo_version: null
+blockers: []
+notes: |
+  Zero deployable artefacts. No role, playbook, catalog entry, DNS record,
+  Keycloak client, Nginx fragment, Ollama model, or LiteLLM alias added.
+  Decision-only ADR pair intended to short-circuit future re-evaluation
+  unless new evidence arrives. See release notes 0.178.151 for summary.
