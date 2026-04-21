@@ -174,7 +174,7 @@ adrs:
   - adr: '0430'
     title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Accepted
     date: '2026-04-21'
     concern: host-os
     keywords:

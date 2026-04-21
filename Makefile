@@ -1953,3 +1953,66 @@ audit-sanitization: ## Check publication sanitization coverage for drift
 
 audit-sanitization-strict: ## Same as audit-sanitization but exit 1 on any gap
 	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/audit_sanitization_coverage.py --strict
+
+# =============================================================================
+# 0fork full-day deployment (ADR 0431)
+# =============================================================================
+# One-command fork-clone deploy. Chains ADR 0424 execution order under
+# env=clone, reading .local/identity.yml.0fork + .local/host_vars/proxmox-host.yml
+# (ADR 0430) overlays. See docs/runbooks/0fork-full-day-deploy.md.
+
+.PHONY: preflight-0fork deploy-0fork converge-0fork-chain smoke-0fork-mail rotate-hetzner-dns-token
+
+ZERO_FORK_IDENTITY_OVERLAY ?= $(LOCAL_OVERLAY_ROOT)/identity.yml.0fork
+ZERO_FORK_HOST_OVERLAY ?= $(LOCAL_OVERLAY_ROOT)/host_vars/proxmox-host.yml
+ZERO_FORK_DNS_ENV ?= $(LOCAL_OVERLAY_ROOT)/hetzner/dns.env
+ZERO_FORK_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed25519
+
+preflight-0fork: ## Validate 0fork overlay, DNS token, SSH key, and host readiness
+	@echo "==> 0fork preflight (ADR 0431)"
+	@test -f "$(ZERO_FORK_IDENTITY_OVERLAY)" || (echo "MISSING: $(ZERO_FORK_IDENTITY_OVERLAY) (see ADR 0424 §4)"; exit 1)
+	@test -f "$(ZERO_FORK_HOST_OVERLAY)" || (echo "MISSING: $(ZERO_FORK_HOST_OVERLAY) (see ADR 0430)"; exit 1)
+	@test -f "$(ZERO_FORK_DNS_ENV)" || (echo "MISSING: $(ZERO_FORK_DNS_ENV) (HETZNER_DNS_TOKEN)"; exit 1)
+	@test -f "$(ZERO_FORK_SSH_KEY)" || (echo "MISSING: $(ZERO_FORK_SSH_KEY) (Hetzner bootstrap key)"; exit 1)
+	@PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	 uv run --with pyyaml python -c "import sys; sys.path.insert(0, '$(REPO_ROOT)'); from platform.repo import load_topology_host_vars; d = load_topology_host_vars(); assert isinstance(d, dict) and d.get('proxmox_guests'), 'overlay missing proxmox_guests'" \
+	 || (echo "host_vars overlay failed to load via load_topology_host_vars() (ADR 0430)"; exit 1)
+	@echo "==> 0fork preflight passed"
+
+deploy-0fork: preflight-0fork ## ADR 0431 one-command fork deploy (bare metal -> confirmation email)
+	@echo "==> 0fork full-day deploy starting (ADR 0431)"
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	HETZNER_DNS_API_TOKEN=$$(grep -E '^HETZNER_DNS_TOKEN=' $(ZERO_FORK_DNS_ENV) | cut -d= -f2-) \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/0fork-full-day.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	@echo "==> 0fork deploy complete"
+
+converge-0fork-chain: preflight-0fork ## Re-run service converge chain (skip host install) under env=clone
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	HETZNER_DNS_API_TOKEN=$$(grep -E '^HETZNER_DNS_TOKEN=' $(ZERO_FORK_DNS_ENV) | cut -d= -f2-) \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/site.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+smoke-0fork-mail: ## Send the acceptance-test email from the 0fork mail platform to the operator
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/mail-platform-send-gmail.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+rotate-hetzner-dns-token: ## ADR 0424 item 7 — rotate the Hetzner DNS API token used by the fork
+	@test -f "$(ZERO_FORK_DNS_ENV)" || (echo "MISSING: $(ZERO_FORK_DNS_ENV)"; exit 1)
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	HETZNER_DNS_API_TOKEN=$$(grep -E '^HETZNER_DNS_TOKEN=' $(ZERO_FORK_DNS_ENV) | cut -d= -f2-) \
+	HETZNER_DNS_API_TOKEN_NEW=$${HETZNER_DNS_API_TOKEN_NEW:?set HETZNER_DNS_API_TOKEN_NEW to the replacement token} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/rotate-hetzner-dns-token.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)

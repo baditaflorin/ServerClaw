@@ -1,0 +1,24 @@
+---
+# ADR 0431 — 0fork full-day deployment orchestrator.
+#
+# This meta-playbook pins the ADR 0424 execution order for a bare-metal
+# fork-clone deploy. Each imported playbook already respects env=clone and
+# reads .local/identity.yml.<name> + .local/host_vars/proxmox-host.yml
+# overlays, so nothing new is required at the role level.
+#
+# One-command entry point:   make deploy-0fork
+# Idempotent replay:         make converge-0fork-chain
+# Acceptance test:           make smoke-0fork-mail
+#
+# Preconditions (validated by `make preflight-0fork`):
+#   - .local/identity.yml.0fork            (platform_domain, IPs, operator)
+#   - .local/host_vars/proxmox-host.yml    (proxmox_guests overlay, ADR 0430)
+#   - .local/hetzner/dns.env               (HETZNER_DNS_TOKEN, zone)
+#   - .local/ssh/hetzner_llm_agents_ed25519 (bootstrap SSH key)
+#   - Target host reachable and `/dev/kvm` present (nested virt)
+
+- import_playbook: proxmox-install.yml
+
+- import_playbook: site.yml
+
+- import_playbook: mail-platform-send-gmail.yml

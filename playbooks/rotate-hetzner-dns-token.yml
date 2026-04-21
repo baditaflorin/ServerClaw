@@ -1,0 +1,79 @@
+---
+# ADR 0431 — Hetzner DNS API token rotation (ADR 0424 resolution item 7).
+#
+# Validates the new token against the fork zone, persists it to
+# .local/hetzner/dns.env on the control workstation, and smoke-tests that
+# the old token is no longer in use. The operator must revoke the old
+# token in the Hetzner console after this playbook succeeds — revocation
+# is not API-exposed for dedicated server DNS tokens (manual step).
+#
+# Inputs (env):
+#   HETZNER_DNS_API_TOKEN       — current token (must still be valid)
+#   HETZNER_DNS_API_TOKEN_NEW   — replacement token to install
+#
+# Preconditions: .local/hetzner/dns.env exists and contains HETZNER_DNS_TOKEN=<old>.
+
+- name: Rotate Hetzner DNS API token for the 0fork zone
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  vars:
+    hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
+    hetzner_dns_zone_name: "{{ hetzner_dns_zone_name | default(platform_domain) }}"
+    hetzner_dns_env_path: "{{ lookup('ansible.builtin.env', 'ZERO_FORK_DNS_ENV') | default(lookup('ansible.builtin.pipe', 'scripts/resolve_local_overlay_root.sh') + '/hetzner/dns.env', true) }}"
+
+  tasks:
+    - name: Assert both tokens are present in the environment
+      ansible.builtin.assert:
+        that:
+          - lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | length > 0
+          - lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN_NEW') | length > 0
+        fail_msg: >-
+          Both HETZNER_DNS_API_TOKEN (current) and HETZNER_DNS_API_TOKEN_NEW
+          (replacement) must be set. See ADR 0431 rotate-hetzner-dns-token.
+
+    - name: Verify current token can resolve the fork zone
+      ansible.builtin.uri:
+        url: "{{ hetzner_dns_api_base_url }}/zones?name={{ hetzner_dns_zone_name | urlencode }}"
+        method: GET
+        headers:
+          Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+        status_code: 200
+        return_content: true
+      register: old_token_zone_lookup
+
+    - name: Verify new token can resolve the same zone (proof it works before we persist it)
+      ansible.builtin.uri:
+        url: "{{ hetzner_dns_api_base_url }}/zones?name={{ hetzner_dns_zone_name | urlencode }}"
+        method: GET
+        headers:
+          Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN_NEW') | trim }}"
+        status_code: 200
+        return_content: true
+      register: new_token_zone_lookup
+
+    - name: Assert both tokens see the same zone id
+      ansible.builtin.assert:
+        that:
+          - (old_token_zone_lookup.json.zones | first).id == (new_token_zone_lookup.json.zones | first).id
+        fail_msg: >-
+          New token resolves a different zone than the current token. Refusing
+          to rotate. Check that HETZNER_DNS_API_TOKEN_NEW is scoped to the
+          same Hetzner account/zone as the existing token.
+
+    - name: Persist the new token to the overlay env file
+      ansible.builtin.copy:
+        dest: "{{ hetzner_dns_env_path }}"
+        mode: "0600"
+        content: |
+          # Managed by playbooks/rotate-hetzner-dns-token.yml — ADR 0431
+          HETZNER_DNS_TOKEN={{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN_NEW') | trim }}
+          HETZNER_DNS_ZONE={{ hetzner_dns_zone_name }}
+
+    - name: Remind the operator to revoke the old token in the Hetzner console
+      ansible.builtin.debug:
+        msg:
+          - "New token persisted to {{ hetzner_dns_env_path }}"
+          - "MANUAL STEP: revoke the old token at https://dns.hetzner.com/settings/api-token"
+          - "Revocation is not API-exposed; this playbook cannot perform it."

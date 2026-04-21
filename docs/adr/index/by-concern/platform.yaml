@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-21'
 facet: concern
 concern: platform
-total_adrs: 144
+total_adrs: 145
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2585,3 +2585,23 @@ adrs:
     filename: 0422-evaluate-lsp-ai-editor-side-ai-language-server.md
     path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
     implemented_on: '2026-04-21'
+  - adr: '0431'
+    title: 0fork Full-Day Deployment — Single-Command IaC Entry Point
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-21'
+    concern: platform
+    keywords:
+      - 0fork
+      - fork-clone
+      - full-day-deploy
+      - iac
+      - orchestrator
+      - adr-0424-extension
+      - fork
+      - full-day
+      - deployment
+      - single-command
+    summary: Ship a single orchestrator target — make deploy-0fork — that chains the
+    filename: 0431-0fork-full-day-deployment.md
+    path: docs/adr/0431-0fork-full-day-deployment.md

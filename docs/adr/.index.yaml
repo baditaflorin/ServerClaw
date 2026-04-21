@@ -8,20 +8,20 @@
 schema_version: 2
 generated: '2026-04-21'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 460
+total_adrs: 461
 adr_number_range:
   first: '0001'
-  last: '0430'
-  next_available: '0431'
+  last: '0431'
+  next_available: '0432'
 implementation_status_summary:
   Implemented: 359
-  Partial: 5
+  Partial: 4
   Not Implemented: 33
   Deprecated: 5
-  Accepted: 29
+  Accepted: 31
   Proposed: 29
 decision_status_summary:
-  Accepted: 360
+  Accepted: 361
   Proposed: 37
   Deprecated: 14
   Implemented: 49
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 28
+      count: 29
       first_adr: '0400'
-      last_adr: '0430'
+      last_adr: '0431'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -88,7 +88,7 @@ facets:
       count: 30
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 144
+      count: 145
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -115,7 +115,7 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 5
+      count: 4
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -127,7 +127,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 29
+      count: 31
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
@@ -137,11 +137,16 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0431'
+  next_available_adr: '0432'
 latest_adrs:
+  - adr: '0431'
+    title: 0fork Full-Day Deployment — Single-Command IaC Entry Point
+    implementation_status: Accepted
+    concern: platform
+    path: docs/adr/0431-0fork-full-day-deployment.md
   - adr: '0430'
     title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
-    implementation_status: Partial
+    implementation_status: Accepted
     concern: host-os
     path: docs/adr/0430-topology-host-vars-local-overlay.md
   - adr: '0425'
@@ -185,11 +190,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0418-receipt-to-outline-auto-publish.md
-  - adr: '0417'
-    title: Service VM Migration IaC — Single Canonical Procedure
-    implementation_status: Proposed
-    concern: vm-topology
-    path: docs/adr/0417-service-vm-migration-iac.md
 discovery_queries:
   how do we bootstrap:
     - '0001'
