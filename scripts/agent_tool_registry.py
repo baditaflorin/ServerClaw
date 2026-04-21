@@ -29,7 +29,7 @@ from governed_command import execute_governed_command
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
 from maintenance_window_tool import list_active_windows_best_effort
 from platform.use_cases.serverclaw_skills import list_serverclaw_skill_packs
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -392,7 +392,9 @@ def resolve_service_base_url(service_id: str, *, env_var: str | None = None) -> 
 
 def tool_get_platform_status(_tool: dict[str, Any], _args: dict[str, Any]) -> dict[str, Any]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
-    host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
+    # ADR 0430 — apply .local/host_vars/proxmox-host.yml overlay so the
+    # agent tool registry resolves to fork-specific service topology.
+    host_vars = require_mapping(load_topology_host_vars(), str(TOPOLOGY_HOST_VARS_PATH))
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     public_services = sorted(
         service["public_hostname"]

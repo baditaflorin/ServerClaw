@@ -137,6 +137,10 @@ def test_main_validate_resolves_placeholder_domains_for_private_overlay(monkeypa
 
     monkeypatch.setattr(environment_topology, "load_environment_topology", lambda: environment_catalog)
     monkeypatch.setattr(environment_topology, "load_yaml", lambda _path: build_host_vars())
+    # ADR 0430 — production code now reads host_vars via load_topology_host_vars
+    # (overlay-aware). Patch the overlay-aware loader too so the test sees the
+    # fake host_vars instead of the real file on disk.
+    monkeypatch.setattr(environment_topology, "load_topology_host_vars", lambda: build_host_vars())
 
     def fake_load_json(path):
         if path == environment_topology.SERVICE_CATALOG_PATH:

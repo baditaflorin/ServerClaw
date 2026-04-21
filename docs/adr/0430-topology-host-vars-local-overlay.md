@@ -99,19 +99,19 @@ Follow-up PRs (each one independently reviewable) migrate direct readers:
 
 | Consumer | Follow-up PR | Notes |
 |----------|--------------|-------|
-| `scripts/environment_topology.py` | PR 2 | Used by live-apply preflight |
-| `scripts/agent_tool_registry.py` | PR 2 | Agent-tool IP resolution |
-| `scripts/validate_repository_data_models.py` | PR 3 | Schema drift checks |
-| `scripts/failure_domain_policy.py` | PR 3 | Failure-domain reasoning |
-| `scripts/service_health_tool.py` | PR 3 | Health-probe targets |
-| `scripts/fixture_manager.py` | PR 4 | Test fixtures (may deliberately stay committed-only) |
-| `scripts/generate_cross_cutting_artifacts.py` | PR 4 | Hairpin/TLS/SSO publication |
-| `scripts/control_plane_lanes.py` | PR 5 | Lane ownership |
-| `scripts/validate_ephemeral_vmid.py` | PR 5 | VMID uniqueness |
-| `scripts/generate_ops_portal.py` | PR 5 | Portal rendering |
-| `scripts/generate_status_docs.py` | PR 5 | Status page rendering |
-| `scripts/immutable_guest_replacement.py` | PR 6 | Guest replacement tooling |
-| `scripts/live_apply_preflight_tool.py` | PR 6 | Live-apply preflight |
+| `scripts/environment_topology.py` | PR 4 (merged) | Used by live-apply preflight |
+| `scripts/agent_tool_registry.py` | PR 4 (merged) | Agent-tool IP resolution |
+| `scripts/validate_repository_data_models.py` | PR 5 | Schema drift checks |
+| `scripts/failure_domain_policy.py` | PR 5 | Failure-domain reasoning |
+| `scripts/service_health_tool.py` | PR 5 | Health-probe targets |
+| `scripts/fixture_manager.py` | PR 6 | Test fixtures (may deliberately stay committed-only) |
+| `scripts/generate_cross_cutting_artifacts.py` | PR 6 | Hairpin/TLS/SSO publication |
+| `scripts/control_plane_lanes.py` | PR 7 | Lane ownership |
+| `scripts/validate_ephemeral_vmid.py` | PR 7 | VMID uniqueness |
+| `scripts/generate_ops_portal.py` | PR 7 | Portal rendering |
+| `scripts/generate_status_docs.py` | PR 7 | Status page rendering |
+| `scripts/immutable_guest_replacement.py` | PR 8 | Guest replacement tooling |
+| `scripts/live_apply_preflight_tool.py` | PR 8 | Live-apply preflight |
 
 Each migration is mechanical: `load_yaml(TOPOLOGY_HOST_VARS_PATH)` becomes
 `load_topology_host_vars()`. Tests verify overlay behaviour per call site.

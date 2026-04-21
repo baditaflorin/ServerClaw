@@ -21,7 +21,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 
 from validation_toolkit import require_list, require_mapping, require_str, resolve_public_domain_placeholders
 
@@ -380,7 +380,9 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         catalog = load_environment_topology()
-        host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+        # ADR 0430 — apply .local/host_vars/proxmox-host.yml overlay so fork
+        # operators see their own topology during environment validation.
+        host_vars = load_topology_host_vars()
         validate_environment_topology(catalog, host_vars)
         if args.validate:
             service_catalog = resolve_public_domain_placeholders(load_json(SERVICE_CATALOG_PATH))
