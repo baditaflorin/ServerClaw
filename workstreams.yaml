@@ -99,19 +99,34 @@ workstreams:
     - RAID1 near-miss recovered via sfdisk --no-tell-kernel (ADR 0425 postmortem)
     - Bootstrap runbook updated to forbid `lsblk -d` and document Hetzner default
       RAID1
+    - Internal-only bridge vmbr10 (10.20.10.1/24) configured with NAT masquerade to
+      enp41s0 (zero-WAN-risk alternative to vmbr0 swap)
+    - iptables-persistent installed, ip_forward persisted via /etc/sysctl.d/99-proxmox-forward.conf
+    - Debian 13 cloud-init template built as VMID 9000 (libguestfs-blocked; qemu-guest-agent
+      injected via cloud-init user-data instead)
+    - 8 service VMs cloned and cloud-init-complete on 10.20.10.X (nginx-edge 110,
+      runtime-apps 122, docker-build 130, monitoring 140, postgres 150, backup 160,
+      mail-platform 181, runtime-control 192)
+    - Runbook section 11 appended with verbatim live-apply commands + provisioning
+      receipt table
+    - Direct-SMTP Gmail deliverability tested and documented as blocked on rDNS+SPF/DKIM
+      (550-5.7.1 IPv6, 550-5.7.26 IPv4)
+    - "Hetzner DNS write API brownout observed (HTTP 200 + embedded 503) \u2014 read\
+      \ API still functional"
     blocked_pending_operator:
     - Configure Hetzner WAN bridge vmbr0 (risk of lockout; needs Robot KVM standby)
     - Deploy Headscale inside clone and enroll workstation
     - Set rDNS on 65.109.84.223 via Hetzner Robot (no API path)
     - Rotate the DNS token shared in chat on 2026-04-21
     - Verify Hetzner account name "Mr. Raabe" (non-blocking)
+    - Retry Hetzner DNS writes once brownout lifts (or migrate zone pre-2026-05-20
+      shutdown)
     remaining_execution:
-    - Configure vmbr0 Hetzner WAN bridge
-    - Provision 8 VMs per collapsed topology (nginx-edge, runtime-control, runtime-apps,
-      postgres, docker-build, monitoring, backup, mail-platform)
+    - Configure vmbr0 Hetzner WAN bridge (after operator KVM standby)
     - Converge runtime-control (Keycloak + step-ca + OpenBao + Headscale)
     - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
-    - Create DNS records on 0fork.com (wildcard already covers them)
+    - Create DNS records on 0fork.com (wildcard already covers them; blocked on API
+      brownout)
     - Provision operator@0fork.com mailbox
     - Send confirmation email from operator@0fork.com to baditaflorin@gmail.com
     - Capture live-apply evidence and close workstream

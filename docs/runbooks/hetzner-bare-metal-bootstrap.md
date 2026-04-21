@@ -281,3 +281,136 @@ If mail to external recipients lands in spam, check (in order):
 
 These checks are implicit in the Stalwart role; the runbook lists them
 here because every fork will get bit by at least one of them.
+
+---
+
+## 11. Live-apply notes from the 0fork.com clone (2026-04-21)
+
+The 0fork clone was bootstrapped without running the `env=clone` Ansible
+targets (they don't exist yet in the Makefile/inventory). What *did* work,
+captured here so the next fork can copy it verbatim:
+
+### 11a. Internal-only bridge (zero-WAN-risk alternative to `vmbr0` swap)
+
+Instead of converting `enp41s0` → `vmbr0` (the lockout-risk step), add a
+private bridge + NAT masquerade as an **additive** change. WAN is untouched:
+
+```bash
+# /etc/network/interfaces.d/vmbr10.cfg
+cat > /etc/network/interfaces.d/vmbr10.cfg <<'EOF'
+auto vmbr10
+iface vmbr10 inet static
+    address 10.20.10.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+    post-up   sysctl -w net.ipv4.ip_forward=1
+    post-up   iptables -t nat -C POSTROUTING -s 10.20.10.0/24 -o enp41s0 -j MASQUERADE 2>/dev/null \
+              || iptables -t nat -A POSTROUTING -s 10.20.10.0/24 -o enp41s0 -j MASQUERADE
+    post-down iptables -t nat -D POSTROUTING -s 10.20.10.0/24 -o enp41s0 -j MASQUERADE || true
+EOF
+# Persist ip_forward across reboots
+printf 'net.ipv4.ip_forward = 1\nnet.ipv4.conf.all.forwarding = 1\n' > /etc/sysctl.d/99-proxmox-forward.conf
+sysctl -p /etc/sysctl.d/99-proxmox-forward.conf
+
+# Save NAT rule persistently (post-up re-adds on boot; this is belt-and-braces)
+apt-get install -y iptables-persistent
+# Bring ONLY vmbr10 up (does not touch enp41s0)
+ifup vmbr10
+netfilter-persistent save
+```
+
+Consequences: VMs get outbound internet via NAT. **Public inbound requires
+explicit DNAT** (iptables) OR nginx-edge-on-host OR the full `vmbr0` swap.
+For a fork that just needs internal services + operator-reachable SSH via
+Headscale mesh, NAT-only is sufficient indefinitely.
+
+### 11b. Cloud-init template (vmid 9000)
+
+libguestfs-tools **cannot** be installed on a PVE host (it conflicts with
+the `proxmox-ve` meta-package via the `pve-apt-hook`). Do not attempt
+`virt-customize`. Inject everything via cloud-init user-data at first boot:
+
+```bash
+# Download upstream Debian 13 cloud image (no customization)
+mkdir -p /var/lib/vz/template/qcow
+curl -fsSL -o /var/lib/vz/template/qcow/debian-13-genericcloud-amd64.qcow2 \
+  https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2
+
+# Generate a fork-host bootstrap key (used for host→VM SSH)
+ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N "" -C "fork-pve-01-bootstrap"
+
+# Write template user-data that installs qemu-guest-agent on first boot +
+# pins the operator's external SSH pubkeys and the fork-host pubkey
+cat > /var/lib/vz/snippets/template-user-data.yml <<EOF
+#cloud-config
+hostname: debian13-cloud-template
+package_update: true
+packages: [qemu-guest-agent, python3, sudo, curl, ca-certificates]
+runcmd: [systemctl enable --now qemu-guest-agent]
+users:
+  - name: root
+    ssh_authorized_keys:
+      - <operator workstation pubkey>
+      - <bootstrap pubkey>
+      - $(cat /root/.ssh/id_ed25519.pub)
+    lock_passwd: true
+ssh_pwauth: false
+EOF
+
+# Build the template
+qm create 9000 --name debian13-cloud-template \
+  --memory 1024 --cores 1 --cpu host \
+  --net0 virtio,bridge=vmbr10 --ostype l26 \
+  --agent enabled=1,fstrim_cloned_disks=1 \
+  --scsihw virtio-scsi-pci --serial0 socket --vga serial0
+qm importdisk 9000 /var/lib/vz/template/qcow/debian-13-genericcloud-amd64.qcow2 local --format qcow2
+qm set 9000 --scsi0 local:9000/vm-9000-disk-0.qcow2 --boot order=scsi0
+qm set 9000 --ide2 local:cloudinit
+qm set 9000 --cicustom "user=local:snippets/template-user-data.yml"
+qm template 9000
+```
+
+### 11c. Clone-and-configure per-VM (inline loop, no Packer)
+
+Collapsed topology provisioned via a simple shell loop that clones VMID
+9000, resizes disk, sets cores/memory, attaches per-VM cloud-init snippet,
+and starts the VM. See ADR 0424 for the 8-VM plan. Typical runtime: ~45
+seconds total for all 8 VMs on the AX41-NVMe.
+
+### 11d. What didn't work and remains pending operator
+
+- **Direct SMTP to Gmail rejected (550-5.7.1 / 550-5.7.26)** — no PTR on
+  either the IPv4 or IPv6 address, and no SPF/DKIM for `0fork.com`. Both
+  IPv6 and IPv4 paths reject. Operator must set rDNS via Hetzner Robot UI,
+  then publish SPF/DKIM records, then mail-platform converge becomes viable.
+- **Hetzner DNS API brownout** — on 2026-04-21 the write API returned HTTP
+  200 with empty record fields and an embedded `503 Temporary Shutdown`
+  error. Read API worked fine. Scheduled full shutdown: 2026-05-20. Any
+  fork between now and then needs a retry loop on writes and must verify
+  the record exists after create.
+- **WAN bridge (`vmbr0`) swap** — deferred. The internal-only bridge in
+  §11a covers all bootstrap needs. The swap should happen during a window
+  where the operator has Hetzner Robot KVM access to recover from a bad
+  ifreload.
+
+### 11e. Actual provisioning receipt (fork-pve-01, 2026-04-21)
+
+| vmid | name            | ipv4         | cores | mem_mb | disk_gb |
+|------|-----------------|--------------|-------|--------|---------|
+| 110  | nginx-edge      | 10.20.10.11  | 2     | 2048   | 10      |
+| 122  | runtime-apps    | 10.20.10.12  | 6     | 12288  | 40      |
+| 130  | docker-build    | 10.20.10.14  | 4     | 4096   | 40      |
+| 140  | monitoring      | 10.20.10.15  | 2     | 4096   | 30      |
+| 150  | postgres        | 10.20.10.13  | 4     | 8192   | 60      |
+| 160  | backup          | 10.20.10.16  | 2     | 4096   | 40      |
+| 181  | mail-platform   | 10.20.10.17  | 2     | 4096   | 20      |
+| 192  | runtime-control | 10.20.10.10  | 6     | 16384  | 60      |
+| 9000 | debian13-cloud-template | 10.20.10.254 | 1 | 1024 | 3 (qcow) |
+
+Total allocation: 28 cores (on 12 threads = 2.33× oversub, matches ADR
+0424 plan), 54 GiB RAM (+ ~8 GiB for host), 303 GiB disk.
+
+All 8 service VMs are reachable from the fork host at `root@10.20.10.X`
+using `/root/.ssh/id_ed25519`. Cloud-init completed cleanly on all of
+them (qemu-guest-agent active, python3 present → Ansible-ready).
