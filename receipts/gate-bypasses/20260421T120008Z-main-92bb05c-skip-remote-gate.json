@@ -1,0 +1,32 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-21T12:00:08Z",
+  "bypass": "skip_remote_gate",
+  "source": "manual-main-push",
+  "branch": "main",
+  "commit": "92bb05c681906623ba9f571b2966e63e6262ce32",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "Primary-branch pre-push gate was executed for ws-0373 mainline closeout and failed on pre-existing whole-repo validation debt unrelated to the ws-0373 diff. Branch-local generated-artifact failures exposed by the hook were repaired in 92bb05c68; remaining blockers reduce to untouched baseline ansible-lint findings in Neko/nginx/common-role surfaces. The ws-0373 live apply, focused tests, release-readiness, canonical truth, data models, generated docs/portals, alert rules, dependency graph, runtime verification, and edge verification passed.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "uvx --python 3.12 --with pyyaml --with jsonschema --with requests --with jinja2 python scripts/check_release_readiness.py --base-ref origin/main --enforce passed on main@92bb05c68",
+      "python3 scripts/canonical_truth.py --check passed on main@92bb05c68",
+      "./scripts/validate_repo.sh data-models",
+      "generated-docs",
+      "generated-portals",
+      "alert-rules",
+      "and dependency-graph checks passed after generated refresh",
+      "ws-0373 restic converge",
+      "repo_intake live apply",
+      "runtime health check",
+      "and edge OAuth/header verification evidence committed under receipts/live-applies/evidence/2026-04-21-ws-0373-*"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-22",
+    "remediation_ref": "docs/runbooks/validation-gate.md"
+  }
+}
