@@ -1,0 +1,35 @@
+---
+# Purpose: Verify the platform service watchdog is correctly installed and active.
+# Use case: Post-converge verification step.
+# Idempotency: Read-only.
+
+- name: Check the service watchdog timer is active
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ service_watchdog_timer_name }}"
+  changed_when: false
+  register: _svc_watchdog_timer_check
+  failed_when: false
+
+- name: Assert service watchdog timer is running
+  ansible.builtin.assert:
+    that:
+      - _svc_watchdog_timer_check.stdout == 'active'
+    fail_msg: >
+      Service watchdog timer {{ service_watchdog_timer_name }} is not active.
+      Check: journalctl -u {{ service_watchdog_service_name }} --no-pager -n 50
+
+- name: Check status file exists (produced by first probe run)
+  ansible.builtin.stat:
+    path: "{{ service_watchdog_status_file }}"
+  register: _svc_watchdog_status
+  failed_when: false
+
+- name: Log status file presence
+  ansible.builtin.debug:
+    msg: >
+      Service watchdog status file: {{ service_watchdog_status_file }}
+      exists={{ _svc_watchdog_status.stat.exists | default(false) }}.
+      If this is a fresh install the file will appear after the first timer trigger (within {{ service_watchdog_probe_interval_sec }}s).

@@ -1,0 +1,56 @@
+---
+# Purpose: Declare defaults for the platform-wide service health watchdog (ADR 0421).
+# Use case: Installs a systemd timer on any application VM that probes configured
+#   Docker Compose services every N seconds and auto-restarts them on failure.
+# Inputs:
+#   - service_watchdog_name (string): Logical name for this watchdog instance.
+#   - service_watchdog_services (list): Services to monitor.
+#   - service_watchdog_probe_interval_sec (int): Probe frequency.
+#   - service_watchdog_failure_threshold (int): Consecutive failures before restart.
+#   - service_watchdog_max_restarts_per_hour (int): Rate limit per service.
+# Outputs:
+#   - Systemd timer + service + health script on the target VM.
+#   - Machine-readable status file at service_watchdog_status_file.
+# Idempotency: Fully idempotent.
+# Dependencies:
+#   - ADR 0421: Platform-wide service watchdog.
+#   - ADR 0226: Systemd as host-resident supervisor.
+# Related ADRs: 0421, 0376, 0226, 0064, 0123
+
+service_watchdog_name: platform
+
+service_watchdog_root: "/var/lib/lv3-{{ service_watchdog_name }}-watchdog"
+service_watchdog_status_file: "{{ service_watchdog_root }}/status.json"
+service_watchdog_state_dir: "{{ service_watchdog_root }}/state"
+service_watchdog_script_path: "/usr/local/libexec/lv3-{{ service_watchdog_name }}-watchdog.sh"
+service_watchdog_service_name: "lv3-{{ service_watchdog_name }}-watchdog.service"
+service_watchdog_timer_name: "lv3-{{ service_watchdog_name }}-watchdog.timer"
+service_watchdog_syslog_identifier: "lv3-{{ service_watchdog_name }}-watchdog"
+service_watchdog_description: "LV3 {{ service_watchdog_name }} service health watchdog (ADR 0421)"
+
+service_watchdog_probe_interval_sec: 30
+service_watchdog_probe_timeout_sec: 5
+service_watchdog_failure_threshold: 2
+service_watchdog_max_restarts_per_hour: 6
+service_watchdog_timer_accuracy_sec: 1
+
+# ntfy notification settings
+service_watchdog_ntfy_enabled: true
+service_watchdog_ntfy_url: "http://127.0.0.1:2586"
+service_watchdog_ntfy_topic: "platform-service-watchdog"
+service_watchdog_ntfy_priority: "4"
+service_watchdog_ntfy_title: "LV3 Service Watchdog"
+
+# Services to monitor — each entry must have:
+#   name: human-readable service identifier (used in ntfy messages and state file keys)
+#   compose_dir: path to the docker-compose project directory on the target VM
+#   compose_service: service name within the compose file to restart (empty = whole stack)
+#   restart_args: docker compose subcommand + args
+#     - "" (empty): "restart <compose_service> --timeout 30" — running container
+#     - "up -d": brings up a stopped/OOM-killed container
+#   health_url: HTTP(S) URL to probe (must be reachable from localhost on the target VM)
+#   health_method: extra curl flags (e.g. "-k" to ignore TLS cert)
+#   expected_status: HTTP status code string(s) that mean healthy (e.g. "200")
+#   exclude_from_auto_restart: bool — probe and alert but never restart (default: false)
+#     Use for services where restart requires manual intervention (e.g. openbao, postgres)
+service_watchdog_services: []

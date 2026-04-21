@@ -1,0 +1,48 @@
+id: ws-0421-platform-service-watchdog
+adr: '0421'
+title: 'ADR 0421 — Platform-Wide Service Watchdog'
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/sharp-jemison
+worktree_path: .claude/worktrees/sharp-jemison
+doc: docs/adr/0421-platform-wide-service-watchdog.md
+depends_on:
+  - adr-0376-identity-core-watchdog
+  - adr-0226-systemd-timers
+  - adr-0064-health-probe-catalog
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0421-platform-service-watchdog.yaml
+  - docs/adr/0421-platform-wide-service-watchdog.md
+  - docs/postmortems/2026-04-21-whack-a-mole-service-outages.md
+started: '2026-04-21'
+priority: p0
+surfaces:
+  - platform_service_watchdog
+  - identity_core_watchdog
+  - all_application_vms
+summary: >
+  Extends the ADR 0376 identity-core watchdog pattern to ALL application VMs and
+  ALL HTTP-probed services (57 services across 6 VMs). Deploys a platform_service_watchdog
+  Ansible role that installs a 30-second systemd timer per VM, auto-restarts services on
+  2 consecutive failures (6/hour/service rate limit), and sends ntfy alerts.
+  Also publishes a postmortem on the "whack-a-mole" service outage pattern.
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0421_tracking
+      paths:
+        - workstreams/active/ws-0421-platform-service-watchdog.yaml
+        - docs/adr/0421-platform-wide-service-watchdog.md
+        - docs/postmortems/2026-04-21-whack-a-mole-service-outages.md
+        - roles/platform_service_watchdog/
+        - playbooks/platform-service-watchdog.yml
+      mode: exclusive
+notes: >
+  Service health audit: 73 services, 5 VMs without watchdog coverage.
+  SSH to servers unavailable at time of audit (connection timeout to 65.108.75.123).
+  All service probe URLs derived from config/health-probe-catalog.json.
+  Deploy with: make converge-platform-watchdog env=production
+  Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml -e env=production -e watchdog_vm=docker-runtime

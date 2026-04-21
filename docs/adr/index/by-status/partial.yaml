@@ -10,7 +10,7 @@ generated: '2026-04-21'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 3
+total_adrs: 4
 adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
@@ -67,3 +67,21 @@ adrs:
     filename: 0403-safe-password-alphabet-standard.md
     path: docs/adr/0403-safe-password-alphabet-standard.md
     implemented_on: '2026-04-10'
+  - adr: '0421'
+    title: Platform-Wide Service Watchdog
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-21'
+    concern: resilience
+    keywords:
+      - watchdog
+      - health
+      - service-recovery
+      - systemd
+      - docker-compose
+      - uptime
+      - platform-wide
+      - service
+    summary: Deploy a platformservicewatchdog role to every VM that runs application
+    filename: 0421-platform-wide-service-watchdog.md
+    path: docs/adr/0421-platform-wide-service-watchdog.md

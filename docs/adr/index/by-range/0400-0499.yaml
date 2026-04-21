@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 22
+total_adrs: 23
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -380,3 +380,21 @@ adrs:
     summary: Add a new GitHub Actions job that runs alongside the existing validate
     filename: 0420-ci-release-readiness-checks.md
     path: docs/adr/0420-ci-release-readiness-checks.md
+  - adr: '0421'
+    title: Platform-Wide Service Watchdog
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-21'
+    concern: resilience
+    keywords:
+      - watchdog
+      - health
+      - service-recovery
+      - systemd
+      - docker-compose
+      - uptime
+      - platform-wide
+      - service
+    summary: Deploy a platformservicewatchdog role to every VM that runs application
+    filename: 0421-platform-wide-service-watchdog.md
+    path: docs/adr/0421-platform-wide-service-watchdog.md

@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.149",
+  "repo_version": "0.178.150",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-21T12:02:38Z",
-  "next_refresh_at": "2026-04-21T13:02:38Z",
+  "generated_at": "2026-04-21T12:06:52Z",
+  "next_refresh_at": "2026-04-21T13:06:52Z",
   "environment": "production",
   "identity": {
-    "platform_name": "lv3.org",
-    "operator": "Florin Badita-Nistor",
+    "platform_name": "example.com",
+    "operator": "Platform Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.148",
+    "last_version": "0.178.149",
     "deployed_at": "2026-04-21",
-    "summary": "close ADR 0373 on the latest realistic origin/main by replaying governed restic backup plus repo_intake from the 0.178.148 base, refreshing the repo_intake host security posture gate, and fixing the repo_intake readiness compatibility and restic Outline helper sync regressions exposed by that replay include the concurrently merged ADR 0391 CPU-only operational automation planning surfaces that landed on origin/main before this release closeout",
-    "release_notes_url": "docs/release-notes/0.178.149.md"
+    "summary": "No changelog notes were present in `## Unreleased` at release time.",
+    "release_notes_url": "docs/release-notes/0.178.150.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6310,17 +6310,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.lv3.org",
+        "endpoint": "https://ops.example.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.lv3.org",
+        "endpoint": "https://windmill.example.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.lv3.org",
+        "endpoint": "https://api.example.com",
         "adr": "0092"
       }
     ],

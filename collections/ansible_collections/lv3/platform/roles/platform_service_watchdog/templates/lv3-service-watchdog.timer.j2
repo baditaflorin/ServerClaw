@@ -1,0 +1,11 @@
+[Unit]
+Description={{ service_watchdog_description }} timer
+
+[Timer]
+OnActiveSec=0
+OnUnitActiveSec={{ service_watchdog_probe_interval_sec }}
+AccuracySec={{ service_watchdog_timer_accuracy_sec }}s
+Unit={{ service_watchdog_service_name }}
+
+[Install]
+WantedBy=timers.target

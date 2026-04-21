@@ -1,0 +1,54 @@
+---
+argument_specs:
+  main:
+    short_description: "Platform-wide service health watchdog (ADR 0421)"
+    description: >
+      Installs a systemd timer that probes Docker Compose services every N seconds
+      and auto-restarts them on consecutive health failures. Extends the
+      identity_core_watchdog pattern (ADR 0376) to all application VMs.
+    options:
+      service_watchdog_name:
+        type: str
+        required: false
+        default: platform
+        description: "Logical name for this watchdog instance (used in systemd unit names and state paths)."
+      service_watchdog_services:
+        type: list
+        required: false
+        default: []
+        description: "List of service probe definitions. Each entry must have name, compose_dir, compose_service, health_url, health_method, expected_status, and optionally exclude_from_auto_restart."
+      service_watchdog_probe_interval_sec:
+        type: int
+        required: false
+        default: 30
+        description: "Seconds between probe cycles."
+      service_watchdog_probe_timeout_sec:
+        type: int
+        required: false
+        default: 5
+        description: "Per-probe HTTP timeout in seconds."
+      service_watchdog_failure_threshold:
+        type: int
+        required: false
+        default: 2
+        description: "Consecutive failures before auto-restart is attempted."
+      service_watchdog_max_restarts_per_hour:
+        type: int
+        required: false
+        default: 6
+        description: "Maximum restart attempts per service per hour (rate limit)."
+      service_watchdog_ntfy_enabled:
+        type: bool
+        required: false
+        default: true
+        description: "Send ntfy notifications on failure, restart, and recovery."
+      service_watchdog_ntfy_url:
+        type: str
+        required: false
+        default: "http://127.0.0.1:2586"
+        description: "ntfy server base URL."
+      service_watchdog_ntfy_topic:
+        type: str
+        required: false
+        default: "platform-service-watchdog"
+        description: "ntfy topic name."

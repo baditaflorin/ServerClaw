@@ -1,0 +1,11 @@
+[Unit]
+Description={{ service_watchdog_description }}
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart={{ service_watchdog_script_path }}
+TimeoutStartSec=60
+Restart=no
+SyslogIdentifier={{ service_watchdog_syslog_identifier }}

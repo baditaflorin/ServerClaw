@@ -1,0 +1,494 @@
+---
+# Playbook: platform-service-watchdog.yml
+# Purpose: Deploy the platform-wide service health watchdog to all application VMs (ADR 0421).
+# Use case: Run to install or update the systemd timers that probe Docker Compose services
+#   every 30 seconds and auto-restart them on consecutive health failures.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector (production or staging).
+#
+# Inputs (optional):
+#   - Use --tags <vm-name> to restrict deployment to a single VM:
+#       ansible-playbook ... --tags runtime-control
+#       ansible-playbook ... --tags docker-runtime
+#     Omit --tags to deploy to all VMs.
+#
+# Outputs:
+#   - systemd timer lv3-<vm>-watchdog.timer active on each target VM.
+#   - Status file /var/lib/lv3-<vm>-watchdog/status.json updated every probe cycle.
+#
+# Idempotency: Fully idempotent.
+#
+# Dependencies:
+#   - ADR 0421: Platform-wide service watchdog.
+#   - ADR 0376: Identity core watchdog (predecessor, runtime-control only).
+#   - Requires: target VMs provisioned and reachable via Ansible.
+#   - Role: lv3.platform.platform_service_watchdog
+#
+# Related ADRs: 0421, 0376, 0064, 0123, 0226
+#
+# Author: LV3 Platform
+# Last Updated: 2026-04-21
+
+# ---------------------------------------------------------------------------
+# runtime-control (P0 — identity-critical + app services)
+# Extends ADR 0376: adds non-identity services to the existing watchdog
+# ---------------------------------------------------------------------------
+- name: Deploy service watchdog on runtime-control
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - platform-service-watchdog
+    - watchdog
+    - runtime-control
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.platform-service-watchdog
+        playbook_execution_audit_target: platform_service_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.platform_service_watchdog
+      vars:
+        service_watchdog_name: runtime-control
+        service_watchdog_ntfy_topic: platform-service-watchdog-runtime-control
+        service_watchdog_services:
+          # Identity-core (P0 — also covered by identity_core_watchdog for redundancy)
+          - name: keycloak
+            compose_dir: /opt/keycloak
+            compose_service: keycloak
+            health_url: "http://127.0.0.1:19000/health/live"
+            expected_status: "200"
+          - name: step-ca
+            compose_dir: /opt/step-ca
+            compose_service: step-ca
+            health_url: "https://127.0.0.1:9000/health"
+            health_method: "-k"
+            expected_status: "200"
+          - name: openbao
+            compose_dir: /opt/openbao
+            compose_service: openbao
+            health_url: "http://127.0.0.1:8201/v1/sys/seal-status"
+            expected_status: "200"
+            exclude_from_auto_restart: true   # unsealing requires operator key shares
+          - name: api-gateway
+            compose_dir: /opt/api-gateway
+            compose_service: api-gateway
+            health_url: "http://127.0.0.1:8083/healthz"
+            expected_status: "200"
+          # App services on runtime-control
+          - name: gitea
+            compose_dir: /opt/gitea
+            compose_service: gitea
+            health_url: "http://127.0.0.1:3003/api/healthz"
+            expected_status: "200"
+          - name: harbor
+            compose_dir: /opt/harbor/installer/harbor
+            compose_service: ""
+            restart_args: "up -d"
+            health_url: "http://127.0.0.1:8095/api/v2.0/ping"
+            expected_status: "200"
+          - name: mail-platform
+            compose_dir: /opt/mail-platform
+            compose_service: stalwart
+            health_url: "http://127.0.0.1:8081/healthz"
+            expected_status: "200"
+          - name: openfga
+            compose_dir: /opt/openfga
+            compose_service: openfga
+            health_url: "http://127.0.0.1:8098/healthz"
+            expected_status: "200"
+          - name: semaphore
+            compose_dir: /opt/semaphore
+            compose_service: semaphore
+            health_url: "http://127.0.0.1:3004/api/ping"
+            expected_status: "200"
+          - name: temporal
+            compose_dir: /opt/temporal
+            compose_service: temporal
+            health_url: "http://127.0.0.1:8099"
+            expected_status: "200"
+          - name: windmill
+            compose_dir: /opt/windmill
+            compose_service: windmill_server
+            health_url: "http://127.0.0.1:8000/api/version"
+            expected_status: "200"
+
+  post_tasks:
+    - name: Verify runtime-control service watchdog
+      ansible.builtin.include_role:
+        name: lv3.platform.platform_service_watchdog
+        tasks_from: verify.yml
+      vars:
+        service_watchdog_name: runtime-control
+        service_watchdog_timer_name: lv3-runtime-control-watchdog.timer
+        service_watchdog_service_name: lv3-runtime-control-watchdog.service
+        service_watchdog_status_file: /var/lib/lv3-runtime-control-watchdog/status.json
+        service_watchdog_probe_interval_sec: 30
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: platform_service_watchdog
+
+# ---------------------------------------------------------------------------
+# docker-runtime (P1 — highest density application VM, 35 HTTP services)
+# ---------------------------------------------------------------------------
+- name: Deploy service watchdog on docker-runtime
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - platform-service-watchdog
+    - watchdog
+    - docker-runtime
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.platform-service-watchdog
+        playbook_execution_audit_target: platform_service_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.platform_service_watchdog
+      vars:
+        service_watchdog_name: docker-runtime
+        service_watchdog_ntfy_topic: platform-service-watchdog-docker-runtime
+        service_watchdog_services:
+          - name: browser-runner
+            compose_dir: /opt/browser-runner
+            compose_service: browser-runner
+            health_url: "http://127.0.0.1:8096/healthz"
+            expected_status: "200"
+          - name: changedetection
+            compose_dir: /opt/changedetection
+            compose_service: changedetection
+            health_url: "http://127.0.0.1:5000/"
+            expected_status: "200"
+          - name: crawl4ai
+            compose_dir: /opt/crawl4ai
+            compose_service: crawl4ai
+            health_url: "http://127.0.0.1:11235/health"
+            expected_status: "200"
+          - name: dify
+            compose_dir: /opt/dify
+            compose_service: api
+            health_url: "http://127.0.0.1:8094/healthz"
+            expected_status: "200"
+          - name: directus
+            compose_dir: /opt/directus
+            compose_service: directus
+            health_url: "http://127.0.0.1:8055/server/health"
+            expected_status: "200"
+          - name: dozzle
+            compose_dir: /opt/dozzle
+            compose_service: dozzle
+            health_url: "http://127.0.0.1:8089/healthcheck"
+            expected_status: "200"
+          - name: flagsmith
+            compose_dir: /opt/flagsmith
+            compose_service: flagsmith
+            health_url: "http://127.0.0.1:8017/health"
+            expected_status: "200"
+          - name: glitchtip
+            compose_dir: /opt/glitchtip
+            compose_service: web
+            health_url: "http://127.0.0.1:3005/api/0/internal/health/"
+            expected_status: "200"
+          - name: grist
+            compose_dir: /opt/grist
+            compose_service: grist
+            health_url: "http://127.0.0.1:8484/status"
+            expected_status: "200"
+          - name: label-studio
+            compose_dir: /opt/label-studio
+            compose_service: label-studio
+            health_url: "http://127.0.0.1:8110/api/version"
+            expected_status: "200"
+          - name: lago
+            compose_dir: /opt/lago
+            compose_service: front
+            health_url: "http://127.0.0.1:8099/health"
+            expected_status: "200"
+          - name: langfuse
+            compose_dir: /opt/langfuse
+            compose_service: langfuse-web
+            health_url: "http://127.0.0.1:3002/api/public/health"
+            expected_status: "200"
+          - name: litellm
+            compose_dir: /opt/litellm
+            compose_service: litellm
+            health_url: "http://127.0.0.1:4000/health/liveliness"
+            expected_status: "200"
+          - name: matrix-synapse
+            compose_dir: /opt/matrix-synapse
+            compose_service: synapse
+            health_url: "http://127.0.0.1:8008/health"
+            expected_status: "200"
+          - name: mattermost
+            compose_dir: /opt/mattermost
+            compose_service: mattermost
+            health_url: "http://127.0.0.1:8065/api/v4/system/ping"
+            expected_status: "200"
+          - name: minio
+            compose_dir: /opt/minio
+            compose_service: minio
+            health_url: "http://127.0.0.1:9010/minio/health/live"
+            expected_status: "200"
+          - name: n8n
+            compose_dir: /opt/n8n
+            compose_service: n8n
+            health_url: "http://127.0.0.1:5678/healthz"
+            expected_status: "200"
+          - name: netbox
+            compose_dir: /opt/netbox
+            compose_service: netbox
+            health_url: "http://127.0.0.1:8082/login/"
+            expected_status: "200"
+          - name: nextcloud
+            compose_dir: /opt/nextcloud
+            compose_service: nextcloud
+            health_url: "http://127.0.0.1:8084/status.php"
+            expected_status: "200"
+          - name: ntfy
+            compose_dir: /opt/ntfy
+            compose_service: ntfy
+            health_url: "http://127.0.0.1:2586/v1/health"
+            expected_status: "200"
+          - name: ollama
+            compose_dir: /opt/ollama
+            compose_service: ollama
+            health_url: "http://127.0.0.1:11434/api/version"
+            expected_status: "200"
+          - name: ops-portal
+            compose_dir: /opt/ops-portal
+            compose_service: ops-portal
+            health_url: "http://127.0.0.1:8092/health"
+            expected_status: "200"
+          - name: outline
+            compose_dir: /opt/outline
+            compose_service: outline
+            health_url: "http://127.0.0.1:3006/_health"
+            expected_status: "200"
+          - name: paperless
+            compose_dir: /opt/paperless
+            compose_service: paperless
+            health_url: "http://127.0.0.1:8018/"
+            expected_status: "200"
+          - name: piper
+            compose_dir: /opt/piper
+            compose_service: piper
+            health_url: "http://127.0.0.1:8100/healthz"
+            expected_status: "200"
+          - name: plane
+            compose_dir: /opt/plane
+            compose_service: web
+            health_url: "http://127.0.0.1:8093/"
+            expected_status: "200"
+          - name: plausible
+            compose_dir: /opt/plausible
+            compose_service: plausible
+            health_url: "http://127.0.0.1:8016/api/system/health/live"
+            expected_status: "200"
+          - name: repo-intake
+            compose_dir: /opt/repo-intake
+            compose_service: repo-intake
+            health_url: "http://127.0.0.1:8101/health"
+            expected_status: "200"
+          - name: repowise
+            compose_dir: /opt/repowise
+            compose_service: repowise
+            health_url: "http://127.0.0.1:7070/health"
+            expected_status: "200"
+          - name: searxng
+            compose_dir: /opt/searxng
+            compose_service: searxng
+            health_url: "http://127.0.0.1:8881/"
+            expected_status: "200"
+          - name: superset
+            compose_dir: /opt/superset
+            compose_service: superset
+            health_url: "http://127.0.0.1:8105/health"
+            expected_status: "200"
+          - name: typesense
+            compose_dir: /opt/typesense
+            compose_service: typesense
+            health_url: "http://127.0.0.1:8108/health"
+            expected_status: "200"
+          - name: woodpecker
+            compose_dir: /opt/woodpecker
+            compose_service: woodpecker-server
+            health_url: "http://127.0.0.1:8102/healthz"
+            expected_status: "200"
+
+  post_tasks:
+    - name: Verify docker-runtime service watchdog
+      ansible.builtin.include_role:
+        name: lv3.platform.platform_service_watchdog
+        tasks_from: verify.yml
+      vars:
+        service_watchdog_name: docker-runtime
+        service_watchdog_timer_name: lv3-docker-runtime-watchdog.timer
+        service_watchdog_service_name: lv3-docker-runtime-watchdog.service
+        service_watchdog_status_file: /var/lib/lv3-docker-runtime-watchdog/status.json
+        service_watchdog_probe_interval_sec: 30
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: platform_service_watchdog
+
+# ---------------------------------------------------------------------------
+# runtime-general (P1 — homepage, mailpit, uptime_kuma)
+# ---------------------------------------------------------------------------
+- name: Deploy service watchdog on runtime-general
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - platform-service-watchdog
+    - watchdog
+    - runtime-general
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.platform-service-watchdog
+        playbook_execution_audit_target: platform_service_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.platform_service_watchdog
+      vars:
+        service_watchdog_name: runtime-general
+        service_watchdog_ntfy_topic: platform-service-watchdog-runtime-general
+        service_watchdog_services:
+          - name: homepage
+            compose_dir: /opt/homepage
+            compose_service: homepage
+            health_url: "http://127.0.0.1:3090/"
+            expected_status: "200"
+          - name: mailpit
+            compose_dir: /opt/mailpit
+            compose_service: mailpit
+            health_url: "http://127.0.0.1:8025/api/v1/info"
+            expected_status: "200"
+          - name: uptime-kuma
+            compose_dir: /opt/uptime-kuma
+            compose_service: uptime-kuma
+            health_url: "http://127.0.0.1:3001/"
+            expected_status: "200"
+
+  post_tasks:
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: platform_service_watchdog
+
+# ---------------------------------------------------------------------------
+# monitoring (P1 — alertmanager, grafana)
+# ---------------------------------------------------------------------------
+- name: Deploy service watchdog on monitoring
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - platform-service-watchdog
+    - watchdog
+    - monitoring
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.platform-service-watchdog
+        playbook_execution_audit_target: platform_service_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.platform_service_watchdog
+      vars:
+        service_watchdog_name: monitoring
+        service_watchdog_ntfy_topic: platform-service-watchdog-monitoring
+        service_watchdog_services:
+          - name: alertmanager
+            compose_dir: /opt/alertmanager
+            compose_service: alertmanager
+            health_url: "http://127.0.0.1:9093/-/healthy"
+            expected_status: "200"
+          - name: grafana
+            compose_dir: /opt/grafana
+            compose_service: grafana
+            health_url: "http://127.0.0.1:3000/api/health"
+            expected_status: "200"
+
+  post_tasks:
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: platform_service_watchdog
+
+# ---------------------------------------------------------------------------
+# runtime-ai (P2 — gotenberg, tesseract_ocr, tika)
+# ---------------------------------------------------------------------------
+- name: Deploy service watchdog on runtime-ai
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-ai' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - platform-service-watchdog
+    - watchdog
+    - runtime-ai
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.platform-service-watchdog
+        playbook_execution_audit_target: platform_service_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_ai[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.platform_service_watchdog
+      vars:
+        service_watchdog_name: runtime-ai
+        service_watchdog_ntfy_topic: platform-service-watchdog-runtime-ai
+        service_watchdog_services:
+          - name: gotenberg
+            compose_dir: /opt/gotenberg
+            compose_service: gotenberg
+            health_url: "http://127.0.0.1:3007/health"
+            expected_status: "200"
+          - name: tesseract-ocr
+            compose_dir: /opt/tesseract-ocr
+            compose_service: tesseract-ocr
+            health_url: "http://127.0.0.1:3008/healthz"
+            expected_status: "200"
+          - name: tika
+            compose_dir: /opt/tika
+            compose_service: tika
+            health_url: "http://127.0.0.1:9998/version"
+            expected_status: "200"
+
+  post_tasks:
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: platform_service_watchdog

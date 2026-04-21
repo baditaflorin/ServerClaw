@@ -1,0 +1,89 @@
+---
+# Purpose: Install the platform service health watchdog on an application VM (ADR 0421).
+# Use case: Probes configured Docker Compose services at a fixed interval, auto-restarts
+#   on consecutive failures with rate limiting and ntfy alerts.
+# Inputs:
+#   - service_watchdog_* variables from defaults/main.yml
+#   - service_watchdog_services: list of service probe definitions (required, non-empty)
+# Outputs:
+#   - Health check script, systemd timer+service, and state directories on the target VM.
+# Idempotency: Fully idempotent.
+# Dependencies:
+#   - ADR 0421: Platform-wide service watchdog.
+#   - ADR 0376: Identity core watchdog (predecessor pattern).
+#   - Role: lv3.platform.common — reused for systemd unit activation.
+# Related ADRs: 0421, 0376, 0226
+
+- name: Validate platform service watchdog inputs
+  ansible.builtin.assert:
+    that:
+      - service_watchdog_services | length > 0
+      - service_watchdog_probe_interval_sec | int > 0
+      - service_watchdog_failure_threshold | int > 0
+      - service_watchdog_max_restarts_per_hour | int > 0
+      - service_watchdog_script_path | length > 0
+    fail_msg: "platform_service_watchdog requires a non-empty service list and valid probe configuration."
+
+- name: Ensure the service watchdog root and state directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  loop:
+    - "{{ service_watchdog_root }}"
+    - "{{ service_watchdog_state_dir }}"
+
+- name: Ensure the service watchdog script directory exists
+  ansible.builtin.file:
+    path: "{{ service_watchdog_script_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the service watchdog health check script
+  ansible.builtin.template:
+    src: lv3-service-watchdog.sh.j2
+    dest: "{{ service_watchdog_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart service watchdog timer
+
+- name: Render the service watchdog systemd service unit
+  ansible.builtin.template:
+    src: lv3-service-watchdog.service.j2
+    dest: "/etc/systemd/system/{{ service_watchdog_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart service watchdog timer
+
+- name: Render the service watchdog systemd timer unit
+  ansible.builtin.template:
+    src: lv3-service-watchdog.timer.j2
+    dest: "/etc/systemd/system/{{ service_watchdog_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart service watchdog timer
+
+- name: Clear any stale failed state for the service watchdog service
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - reset-failed
+      - "{{ service_watchdog_service_name }}"
+  changed_when: false
+  failed_when: false
+
+- name: Ensure the service watchdog timer is enabled and active
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ service_watchdog_timer_name }}"
+    common_systemd_unit_daemon_reload: true
+    common_systemd_unit_verify_active: true

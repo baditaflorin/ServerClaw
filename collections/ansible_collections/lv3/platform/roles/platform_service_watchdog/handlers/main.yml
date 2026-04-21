@@ -1,0 +1,7 @@
+---
+- name: Restart service watchdog timer
+  ansible.builtin.systemd:
+    name: "{{ service_watchdog_timer_name }}"
+    state: restarted
+    daemon_reload: true
+  listen: Restart service watchdog timer
