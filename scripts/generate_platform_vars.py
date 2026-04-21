@@ -21,7 +21,7 @@ existing_platform = sys.modules.get("platform")
 if existing_platform is not None and not hasattr(existing_platform, "__path__"):
     del sys.modules["platform"]
 
-from platform.repo import TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, repo_path
 
@@ -322,7 +322,10 @@ def service_url(scheme: str, host: str, port: int, suffix: str = "") -> str:
 
 def load_sources() -> tuple[dict[str, Any], dict[str, Any]]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
-    host_vars = require_mapping(load_yaml(TOPOLOGY_HOST_VARS_PATH), str(TOPOLOGY_HOST_VARS_PATH))
+    # ADR 0430: apply `.local/host_vars/proxmox-host.yml` overlay if present
+    # so forks can substitute their own proxmox_guests list + network scalars
+    # without editing the committed (generic-by-default) host_vars.
+    host_vars = require_mapping(load_topology_host_vars(), str(TOPOLOGY_HOST_VARS_PATH))
     # Merge identity vars (platform_domain, operator email/name, etc.) into host_vars
     # so HOST_VAR_TEMPLATE_RE can resolve {{ platform_domain }} in strings like
     # "nginx.{{ platform_domain }}". Identity vars are loaded second so host_vars

@@ -331,6 +331,74 @@ def load_yaml(path: Path) -> Any:
     return yaml.safe_load(path.read_text())
 
 
+def _topology_host_vars_overlay_path(repo_root: Path | None = None) -> Path | None:
+    """Return the resolved local overlay path for proxmox-host.yml, or None.
+
+    ADR 0430: forks and per-deployment topology customizations live in
+    `.local/host_vars/proxmox-host.yml`. The file is NEVER committed. If
+    present, it fully replaces any top-level keys it defines in the committed
+    `inventory/host_vars/proxmox-host.yml` (proxmox_guests, network scalars,
+    port_assignments, etc.). Absent overlay = unchanged committed behaviour.
+
+    Worktree-aware: reads from shared `.local/` when invoked inside a git
+    worktree directory (.worktrees/* or .claude/worktrees/*) so agents in
+    worktrees see the operator's deployment overlay from the main checkout.
+    """
+
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    shared = shared_repo_root(root)
+
+    candidate = shared / ".local" / "host_vars" / "proxmox-host.yml"
+    if _path_exists(candidate):
+        return candidate
+
+    # Also check `.claude/worktrees/<name>/` style, where parent.name is
+    # "worktrees" but grandparent is ".claude" rather than the repo root.
+    if root.parent.name == "worktrees" and root.parent.parent.name == ".claude":
+        shared_alt = root.parent.parent.parent
+        candidate_alt = shared_alt / ".local" / "host_vars" / "proxmox-host.yml"
+        if _path_exists(candidate_alt):
+            return candidate_alt
+
+    return None
+
+
+def load_topology_host_vars(repo_root: Path | None = None) -> dict[str, Any]:
+    """Load `inventory/host_vars/proxmox-host.yml` with the local overlay applied.
+
+    ADR 0430: committed host_vars remain generic (prod-style placeholders).
+    The operator's `.local/host_vars/proxmox-host.yml` overlay, if present,
+    replaces matching top-level keys verbatim — including structured keys
+    like `proxmox_guests` (list) and `platform_port_assignments` (dict).
+
+    Callers who need to know the *original* committed file path still use
+    `TOPOLOGY_HOST_VARS_PATH`; callers who need the *effective* topology
+    (which is the right value 99% of the time) should use this loader.
+    """
+
+    base_path = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
+    if repo_root is not None:
+        base_path = Path(repo_root) / "inventory" / "host_vars" / "proxmox-host.yml"
+
+    base_raw = load_yaml(base_path)
+    if not isinstance(base_raw, dict):
+        raise TypeError(f"{base_path}: expected top-level mapping, got {type(base_raw).__name__}")
+    merged: dict[str, Any] = dict(base_raw)
+
+    overlay_path = _topology_host_vars_overlay_path(repo_root)
+    if overlay_path is None:
+        return merged
+
+    overlay_raw = load_yaml(overlay_path)
+    if not isinstance(overlay_raw, dict):
+        raise TypeError(
+            f"{overlay_path}: expected top-level mapping, got {type(overlay_raw).__name__}"
+        )
+    for key, value in overlay_raw.items():
+        merged[key] = value
+    return merged
+
+
 def run_command(
     command: list[str],
     *,

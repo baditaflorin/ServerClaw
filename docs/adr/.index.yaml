@@ -8,20 +8,20 @@
 schema_version: 2
 generated: '2026-04-21'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 459
+total_adrs: 460
 adr_number_range:
   first: '0001'
-  last: '0425'
-  next_available: '0426'
+  last: '0430'
+  next_available: '0431'
 implementation_status_summary:
   Implemented: 359
-  Partial: 4
+  Partial: 5
   Not Implemented: 33
   Deprecated: 5
   Accepted: 29
   Proposed: 29
 decision_status_summary:
-  Accepted: 359
+  Accepted: 360
   Proposed: 37
   Deprecated: 14
   Implemented: 49
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 27
+      count: 28
       first_adr: '0400'
-      last_adr: '0425'
+      last_adr: '0430'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -76,7 +76,7 @@ facets:
       count: 22
     - concern: host-os
       path: docs/adr/index/by-concern/host-os.yaml
-      count: 9
+      count: 10
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
       count: 8
@@ -115,7 +115,7 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 4
+      count: 5
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -137,8 +137,13 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0426'
+  next_available_adr: '0431'
 latest_adrs:
+  - adr: '0430'
+    title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
+    implementation_status: Partial
+    concern: host-os
+    path: docs/adr/0430-topology-host-vars-local-overlay.md
   - adr: '0425'
     title: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
     implementation_status: Accepted
@@ -185,11 +190,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: vm-topology
     path: docs/adr/0417-service-vm-migration-iac.md
-  - adr: '0417'
-    title: External Attack Surface Hardening
-    implementation_status: Proposed
-    concern: security
-    path: docs/adr/0417-external-attack-surface-hardening.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

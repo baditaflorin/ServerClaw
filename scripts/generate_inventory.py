@@ -302,6 +302,19 @@ def ansible_host(host_vars: dict, hostname: str) -> dict:
 
 
 def load_host_vars(path: Path = HOST_VARS_PATH) -> dict:
+    # ADR 0430: when the caller uses the default HOST_VARS_PATH, apply the
+    # `.local/host_vars/proxmox-host.yml` overlay (if present) so forks see
+    # their own proxmox_guests list. An explicit --host-vars argument
+    # bypasses the overlay (tests, cross-env comparisons).
+    if path == HOST_VARS_PATH:
+        # Import here to avoid circular-import risk during test collection.
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        existing_platform = sys.modules.get("platform")
+        if existing_platform is not None and not hasattr(existing_platform, "__path__"):
+            del sys.modules["platform"]
+        from platform.repo import load_topology_host_vars  # noqa: PLC0415
+
+        return load_topology_host_vars()
     with path.open() as fh:
         return yaml.safe_load(fh)
 

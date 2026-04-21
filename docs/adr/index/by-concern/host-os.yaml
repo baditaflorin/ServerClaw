@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-21'
 facet: concern
 concern: host-os
-total_adrs: 9
+total_adrs: 10
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -171,3 +171,23 @@ adrs:
     implemented_in_repo_version: 0.178.5
     implemented_in_platform_version: 0.130.97
     implemented_on: '2026-04-04'
+  - adr: '0430'
+    title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-21'
+    concern: host-os
+    keywords:
+      - forkability
+      - overlay
+      - iac
+      - adr-0407-extension
+      - adr-0424-unblock
+      - local
+      - inventory
+      - host
+      - vars
+      - proxmox-host
+    summary: Introduce a local overlay file at .local/hostvars/proxmox-host.yml. When
+    filename: 0430-topology-host-vars-local-overlay.md
+    path: docs/adr/0430-topology-host-vars-local-overlay.md

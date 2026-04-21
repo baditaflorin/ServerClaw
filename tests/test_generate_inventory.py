@@ -395,3 +395,73 @@ def test_real_hosts_yml_not_drifted() -> None:
     assert check_drift(host_vars, current_path=hosts_yml), (
         "inventory/hosts.yml is out of sync with proxmox_guests. Run: make generate-inventory"
     )
+
+
+# ---------------------------------------------------------------------------
+# ADR 0430: .local/host_vars/proxmox-host.yml overlay
+# ---------------------------------------------------------------------------
+
+
+def _reset_platform_module() -> None:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    existing_platform = sys.modules.get("platform")
+    if existing_platform is not None and not hasattr(existing_platform, "__path__"):
+        del sys.modules["platform"]
+
+
+def test_load_topology_host_vars_returns_committed_when_no_overlay(tmp_path: Path) -> None:
+    """Without an overlay, load_topology_host_vars returns committed data verbatim."""
+    _reset_platform_module()
+    from platform.repo import load_topology_host_vars
+
+    (tmp_path / "inventory" / "host_vars").mkdir(parents=True)
+    (tmp_path / "inventory" / "host_vars" / "proxmox-host.yml").write_text(
+        yaml.safe_dump({"proxmox_guests": [{"name": "a", "ipv4": "10.0.0.1"}], "x": 1})
+    )
+    merged = load_topology_host_vars(repo_root=tmp_path)
+    assert merged["proxmox_guests"] == [{"name": "a", "ipv4": "10.0.0.1"}]
+    assert merged["x"] == 1
+
+
+def test_load_topology_host_vars_replaces_keys_from_overlay(tmp_path: Path) -> None:
+    """An overlay file wholesale-replaces any top-level key it defines."""
+    _reset_platform_module()
+    from platform.repo import load_topology_host_vars
+
+    (tmp_path / "inventory" / "host_vars").mkdir(parents=True)
+    (tmp_path / "inventory" / "host_vars" / "proxmox-host.yml").write_text(
+        yaml.safe_dump(
+            {
+                "proxmox_guests": [{"name": "prod", "ipv4": "10.10.10.10"}],
+                "preserve_me": "kept",
+                "also_overridden": "before",
+            }
+        )
+    )
+    overlay_dir = tmp_path / ".local" / "host_vars"
+    overlay_dir.mkdir(parents=True)
+    (overlay_dir / "proxmox-host.yml").write_text(
+        yaml.safe_dump(
+            {
+                "proxmox_guests": [{"name": "fork", "ipv4": "10.20.10.10"}],
+                "also_overridden": "after",
+            }
+        )
+    )
+    merged = load_topology_host_vars(repo_root=tmp_path)
+    assert merged["proxmox_guests"] == [{"name": "fork", "ipv4": "10.20.10.10"}]
+    assert merged["preserve_me"] == "kept"  # base key preserved when overlay omits it
+    assert merged["also_overridden"] == "after"  # overlay wins
+
+
+def test_load_topology_host_vars_rejects_non_mapping_overlay(tmp_path: Path) -> None:
+    _reset_platform_module()
+    from platform.repo import load_topology_host_vars
+
+    (tmp_path / "inventory" / "host_vars").mkdir(parents=True)
+    (tmp_path / "inventory" / "host_vars" / "proxmox-host.yml").write_text(yaml.safe_dump({"proxmox_guests": []}))
+    overlay_dir = tmp_path / ".local" / "host_vars"
+    overlay_dir.mkdir(parents=True)
+    (overlay_dir / "proxmox-host.yml").write_text("- a\n- b\n")
+    with pytest.raises(TypeError, match="expected top-level mapping"):
+        load_topology_host_vars(repo_root=tmp_path)

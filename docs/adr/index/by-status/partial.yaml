@@ -10,7 +10,7 @@ generated: '2026-04-21'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 4
+total_adrs: 5
 adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
@@ -85,3 +85,23 @@ adrs:
     summary: Deploy a platformservicewatchdog role to every VM that runs application
     filename: 0421-platform-wide-service-watchdog.md
     path: docs/adr/0421-platform-wide-service-watchdog.md
+  - adr: '0430'
+    title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-04-21'
+    concern: host-os
+    keywords:
+      - forkability
+      - overlay
+      - iac
+      - adr-0407-extension
+      - adr-0424-unblock
+      - local
+      - inventory
+      - host
+      - vars
+      - proxmox-host
+    summary: Introduce a local overlay file at .local/hostvars/proxmox-host.yml. When
+    filename: 0430-topology-host-vars-local-overlay.md
+    path: docs/adr/0430-topology-host-vars-local-overlay.md
