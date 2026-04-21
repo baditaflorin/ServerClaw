@@ -20,7 +20,7 @@ existing_platform = sys.modules.get("platform")
 if existing_platform is not None and not hasattr(existing_platform, "__path__"):
     del sys.modules["platform"]
 
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH
+from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
 
 from validation_toolkit import require_enum, require_int, require_list, require_mapping, require_str
 
@@ -73,7 +73,9 @@ def load_guest_replacement_catalog() -> dict[str, Any]:
 
 
 def load_inventory_guest_index() -> dict[str, dict[str, Any]]:
-    payload = load_yaml(TOPOLOGY_HOST_VARS_PATH)
+    # ADR 0430 — overlay-aware so immutable-guest-replacement reasoning
+    # targets the fork operator's actual guests rather than the committed ref.
+    payload = load_topology_host_vars()
     guests = require_list(payload.get("proxmox_guests"), f"inventory/host_vars/{TOPOLOGY_HOST}.yml.proxmox_guests")
     index: dict[str, dict[str, Any]] = {}
     for guest_index, guest in enumerate(guests):

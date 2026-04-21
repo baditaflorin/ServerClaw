@@ -1,7 +1,7 @@
 # ADR 0430: Local Overlay for `inventory/host_vars/proxmox-host.yml`
 
 - Status: Accepted
-- Implementation Status: Partial (PR 1 of N — generators only; see §Roadmap)
+- Implementation Status: Complete (PRs 1–8 merged; roadmap table below for audit)
 - Date: 2026-04-21
 - Concern: forkability, deployment-specific values, generic-by-default
 - Tags: forkability, overlay, iac, adr-0407-extension, adr-0424-unblock
@@ -112,11 +112,16 @@ Follow-up PRs (each one independently reviewable) migrate direct readers:
 | `scripts/generate_status_docs.py` | PR 7 (merged) | Status page rendering |
 | `scripts/subdomain_catalog.py` | PR 7 (merged) | Shared `load_host_vars` helper — cascades to ops portal + audit |
 | `scripts/subdomain_exposure_audit.py` | PR 7 (merged) | Cascaded via `subdomain_catalog.load_host_vars` |
-| `scripts/immutable_guest_replacement.py` | PR 8 | Guest replacement tooling |
-| `scripts/live_apply_preflight_tool.py` | PR 8 | Live-apply preflight |
+| `scripts/immutable_guest_replacement.py` | PR 8 (merged) | Guest replacement tooling |
+| `scripts/live_apply_preflight_tool.py` | PR 8 (merged) | Vestigial import — removed (script never read host_vars); no behavioural change |
 
 Each migration is mechanical: `load_yaml(TOPOLOGY_HOST_VARS_PATH)` becomes
 `load_topology_host_vars()`. Tests verify overlay behaviour per call site.
+
+**Roadmap complete as of PR 8.** All committed direct readers of
+`TOPOLOGY_HOST_VARS_PATH` that should be overlay-aware have been migrated.
+`scripts/fixture_manager.py` is the only consumer that deliberately remains
+on the committed file (test fixtures stay deterministic across forks).
 
 ## Alternatives considered
 
