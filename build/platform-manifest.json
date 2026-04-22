@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.154",
+  "repo_version": "0.178.155",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-22T17:13:13Z",
-  "next_refresh_at": "2026-04-22T18:13:13Z",
+  "generated_at": "2026-04-22T21:31:21Z",
+  "next_refresh_at": "2026-04-22T22:31:21Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.153",
+    "last_version": "0.178.154",
     "deployed_at": "2026-04-22",
-    "summary": "ADR 0385 follow-up \u2014 IoC: introduce `platform_config_prefix` (defaults to first segment of `platform_domain`) and parameterize `lv3-` literals in `inventory/group_vars/all/main.yml` and role defaults (linux_access, step_ca_ssh_trust, falco_runtime, proxmox_ntopng, proxmox_security, proxmox_network, postgres_vm, postgres_ha). Strips hardcoded `*-staging-lv3` host names in coolify/librechat/serverclaw/neko playbooks to align with `playbook_execution_host_patterns` source of truth. Zero behavior change on the `lv3.org` deployment; fork deployments auto-derive prefix from their own domain.",
-    "release_notes_url": "docs/release-notes/0.178.154.md"
+    "summary": "No changelog notes were present in `## Unreleased` at release time.",
+    "release_notes_url": "docs/release-notes/0.178.155.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -320,7 +320,7 @@ def service_url(scheme: str, host: str, port: int, suffix: str = "") -> str:
     return f"{scheme}://{host}:{port}{suffix}"
 
 
-def load_sources() -> tuple[dict[str, Any], dict[str, Any]]:
+def load_sources(skip_local_override: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
     # ADR 0430: apply `.local/host_vars/proxmox-host.yml` overlay if present
     # so forks can substitute their own proxmox_guests list + network scalars
@@ -349,14 +349,15 @@ def load_sources() -> tuple[dict[str, Any], dict[str, Any]]:
     #
     # Result: the private repo's platform.yml contains real deployment values; the
     # publish pipeline (make publish-serverclaw) sanitises them for the public mirror.
-    local_identity_path = resolve_local_identity_override_path()
-    if local_identity_path is not None:
-        local_identity = require_mapping(load_yaml(local_identity_path), str(local_identity_path))
-        for key, val in local_identity.items():
-            # Local overlay WINS — override any committed placeholder with real value.
-            # Skip Jinja2 templates (e.g. derived URLs that reference other vars).
-            if isinstance(val, (str, int, bool)) and "{{" not in str(val):
-                host_vars[key] = val
+    if not skip_local_override:
+        local_identity_path = resolve_local_identity_override_path()
+        if local_identity_path is not None:
+            local_identity = require_mapping(load_yaml(local_identity_path), str(local_identity_path))
+            for key, val in local_identity.items():
+                # Local overlay WINS — override any committed placeholder with real value.
+                # Skip Jinja2 templates (e.g. derived URLs that reference other vars).
+                if isinstance(val, (str, int, bool)) and "{{" not in str(val):
+                    host_vars[key] = val
     return stack, host_vars
 
 
@@ -1329,13 +1330,15 @@ def write_platform_vars(output_path: Path = PLATFORM_VARS_PATH) -> int:
 
 
 def check_platform_vars(output_path: Path = PLATFORM_VARS_PATH) -> int:
-    rendered = render_platform_vars(build_platform_vars())
+    # Use committed inputs only (skip .local/ overlay) so the gate passes on any
+    # operator machine regardless of which identity overlay is in .local/.
+    stack, host_vars = load_sources(skip_local_override=True)
+    rendered = render_platform_vars(build_platform_vars(stack=stack, host_vars=host_vars))
     current = output_path.read_text() if output_path.exists() else ""
     if rendered != current:
         print(
-            "Generated platform vars are stale. Run "
-            "'uvx --from pyyaml python scripts/generate_platform_vars.py --write' "
-            "or 'make generate-platform-vars'.",
+            "Repository data model error: inventory/group_vars/platform.yml must match "
+            "scripts/generate_platform_vars.py output",
             file=sys.stderr,
         )
         return 2

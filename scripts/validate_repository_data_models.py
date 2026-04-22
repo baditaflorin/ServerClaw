@@ -49,7 +49,7 @@ from platform.circuit import load_circuit_policies
 from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars, validate_repo_relative_path
-from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
+from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars, load_sources
 from gate_bypass_waivers import load_catalog as load_gate_bypass_waiver_catalog
 from gate_bypass_waivers import summarize_receipts as summarize_gate_bypass_waivers
 from gate_bypass_waivers import validate_catalog as validate_gate_bypass_waiver_catalog
@@ -865,7 +865,10 @@ def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
 
 def validate_platform_vars() -> None:
     platform_vars = require_mapping(load_yaml(PLATFORM_VARS_PATH), str(PLATFORM_VARS_PATH))
-    expected_platform_vars = build_platform_vars()
+    # Skip the .local/ overlay so the check passes on any machine regardless of
+    # which identity overlay the operator has in .local/identity.yml (ADR 0407).
+    stack, host_vars = load_sources(skip_local_override=True)
+    expected_platform_vars = build_platform_vars(stack=stack, host_vars=host_vars)
     if platform_vars != expected_platform_vars:
         raise ValueError("inventory/group_vars/platform.yml must match scripts/generate_platform_vars.py output")
 

@@ -102,6 +102,7 @@ ownership_manifest:
         - collections/ansible_collections/lv3/platform/roles/proxmox_base_template/meta/argument_specs.yml
         - collections/ansible_collections/lv3/platform/roles/proxmox_base_template/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/proxmox_base_template/templates/template-user-data.yml.j2
+        - collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/proxmox_platform/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/defaults/main.yml
@@ -111,6 +112,7 @@ ownership_manifest:
       mode: exclusive
     - id: ws_0424_ioc_prefix_parameterization
       paths:
+        - .ansible-lint
         - inventory/group_vars/all/identity.yml
         - inventory/group_vars/all/main.yml
         - collections/ansible_collections/lv3/platform/roles/linux_access/defaults/main.yml
@@ -123,11 +125,21 @@ ownership_manifest:
         - collections/ansible_collections/lv3/platform/roles/postgres_vm/tasks/main.yml
         - collections/ansible_collections/lv3/platform/roles/postgres_ha/tasks/main.yml
         - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+        - collections/ansible_collections/lv3/platform/playbooks/_includes/neko_kc_provision_user.yml
+        - collections/ansible_collections/lv3/platform/playbooks/neko.yml
         - playbooks/tasks/docker-publication-assert.yml
         - playbooks/coolify.yml
         - playbooks/librechat.yml
         - playbooks/serverclaw.yml
         - playbooks/neko.yml
+      mode: exclusive
+    - id: ws_0424_schema_catalog_fixes
+      paths:
+        - config/command-catalog.json
+        - config/workflow-catalog.json
+        - inventory/group_vars/platform.yml
+        - scripts/generate_platform_vars.py
+        - scripts/validate_repository_data_models.py
       mode: exclusive
 progress:
   completed_2026_04_21:

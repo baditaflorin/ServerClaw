@@ -3017,6 +3017,44 @@
         "timeout_seconds": 1800
       }
     },
+    "converge-site": {
+      "description": "Stage 5 bootstrap converge: run the full site playbook against freshly provisioned guests (ADR 0386, ADR 0437).",
+      "workflow_id": "converge-site",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Bootstrap SSH key for reaching newly provisioned guest VMs via ProxyCommand."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-site passes",
+        "make validate passes before the apply",
+        "Proxmox guests provisioned and SSH-reachable at expected IPs (Stage 4 complete)"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the converge run outcome plus verification that all services started and passed health checks."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if guest SSH is unreachable before playbook starts.",
+          "Stop if more than 20% of tasks fail across the site playbook run."
+        ],
+        "rollback_guidance": [
+          "Re-run make provision-guests to reset guest state before retrying.",
+          "Investigate service-specific failures via make converge-<service> before running the full site again."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 7200
+      }
+    },
     "converge-step-ca": {
       "description": "Converge the private step-ca runtime and the SSH trust distribution for the host and managed guests.",
       "workflow_id": "converge-step-ca",

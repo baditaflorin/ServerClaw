@@ -1,0 +1,48 @@
+---
+- name: "{{ _item.key }} | Provision Keycloak user (search, create, tag)"
+  block:
+    - name: "{{ _item.key }} | Search for existing Keycloak user by email"
+      ansible.builtin.uri:
+        url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users?email={{ _item.value.email | urlencode }}&exact=true"
+        method: GET
+        headers: "{{ _neko_kc_headers }}"
+        status_code: 200
+        return_content: true
+      register: _neko_kc_user_search
+      changed_when: false
+
+    - name: "{{ _item.key }} | Create Keycloak user (user not found)"
+      ansible.builtin.uri:
+        url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users"
+        method: POST
+        headers: "{{ _neko_kc_headers }}"
+        body_format: json
+        body:
+          username: "{{ _item.value.email }}"
+          email: "{{ _item.value.email }}"
+          enabled: true
+          emailVerified: true
+          attributes:
+            neko_managed: ["true"]
+        status_code: [201, 409]
+        return_content: true
+      register: _neko_kc_user_create
+      when: (_neko_kc_user_search.json | length) == 0
+      changed_when: _neko_kc_user_create.status == 201
+
+    - name: "{{ _item.key }} | Ensure neko_managed attribute on existing user"
+      vars:
+        _existing_user: "{{ _neko_kc_user_search.json | first }}"
+      ansible.builtin.uri:
+        url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users/{{ _existing_user.id }}"
+        method: PUT
+        headers: "{{ _neko_kc_headers }}"
+        body_format: json
+        body: "{{ _existing_user | combine({'attributes': (_existing_user.attributes | default({})) | combine({'neko_managed': ['true']})}) }}"
+        status_code: 204
+      when:
+        - (_neko_kc_user_search.json | length) > 0
+        - (_neko_kc_user_search.json | first).attributes.neko_managed | default([]) != ['true']
+      changed_when: true
+
+  ignore_errors: true

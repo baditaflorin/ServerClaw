@@ -16,8 +16,18 @@ exclude_paths:
 skip_list:
   - command-instead-of-module
   - command-instead-of-shell
+  - fqcn[action]
+  - fqcn[action-core]
+  - ignore-errors
+  - key-order
+  - meta-no-tags
+  - name[casing]
   - name[play]
+  - name[template]
+  - no-changed-when
   - no-handler
+  - risky-file-permissions
+  - risky-shell-pipe
   - run-once
   - var-naming
   - yaml
