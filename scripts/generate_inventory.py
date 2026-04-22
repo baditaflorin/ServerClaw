@@ -43,7 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 HOSTS_YML_PATH = REPO_ROOT / "inventory" / "hosts.yml"
 
-GENERATED_HEADER = """\
+GENERATED_HEADER_BASE = """\
 # =============================================================================
 # GENERATED — do not edit manually.
 # Run: make generate-inventory
@@ -52,90 +52,55 @@ GENERATED_HEADER = """\
 # =============================================================================
 """
 
+GENERATED_HEADER_OVERLAY = """\
+# =============================================================================
+# GENERATED (overlay mode) — do not edit manually.
+# Run: PLATFORM_IDENTITY_OVERLAY=<path> make generate-inventory
+# Sources:
+#   base:    inventory/host_vars/proxmox-host.yml
+#   overlay: {overlay}
+# ADR 0437 — overlay-aware bootstrap.
+# =============================================================================
+"""
+
 # Group execution-scope pattern selectors.
 # Maps logical group name → {environment → Ansible host/group pattern}.
 # No IPs — purely symbolic references. Staging entries that share a single
 # staging VM (e.g. runtime-ai → docker-runtime-staging) are encoded here.
-# ADR 0430 — `clone` mirrors `production` because forks use identical service
-# names; differentiation comes from the .local/host_vars overlay (IPs only).
 _EXECUTION_HOST_PATTERNS: dict[str, dict[str, str]] = {
     "proxmox_hosts": {
         "production": "proxmox_hosts:&production",
         "staging": "proxmox_hosts:&staging",
-        "clone": "proxmox_hosts:&production",
     },
     "lv3_guests": {
         "production": "lv3_guests:&production",
         "staging": "lv3_guests:&staging",
-        "clone": "lv3_guests:&production",
     },
     "postgres_guests": {
         "production": "postgres_guests:&production",
         "staging": "postgres_guests:&staging",
-        "clone": "postgres_guests:&production",
     },
     "backup_guests": {
         "production": "backup_guests:&production",
         "staging": "backup_guests:&staging",
-        "clone": "backup_guests:&production",
     },
     # Hosts with dedicated staging VMs
-    "coolify": {"production": "coolify", "staging": "coolify-staging", "clone": "coolify"},
-    "coolify_apps": {
-        "production": "coolify-apps",
-        "staging": "coolify-apps-staging",
-        "clone": "coolify-apps",
-    },
-    "nginx_edge": {"production": "nginx", "staging": "nginx-staging", "clone": "nginx"},
-    "docker_runtime": {
-        "production": "docker-runtime",
-        "staging": "docker-runtime-staging",
-        "clone": "docker-runtime",
-    },
-    "docker_build": {
-        "production": "docker-build",
-        "staging": "docker-build-staging",
-        "clone": "docker-build",
-    },
-    "monitoring": {"production": "monitoring", "staging": "monitoring-staging", "clone": "monitoring"},
-    "postgres": {"production": "postgres", "staging": "postgres-staging", "clone": "postgres"},
-    "backup": {"production": "backup", "staging": "backup-staging", "clone": "backup"},
+    "coolify": {"production": "coolify", "staging": "coolify-staging"},
+    "coolify_apps": {"production": "coolify-apps", "staging": "coolify-apps-staging"},
+    "nginx_edge": {"production": "nginx", "staging": "nginx-staging"},
+    "docker_runtime": {"production": "docker-runtime", "staging": "docker-runtime-staging"},
+    "docker_build": {"production": "docker-build", "staging": "docker-build-staging"},
+    "monitoring": {"production": "monitoring", "staging": "monitoring-staging"},
+    "postgres": {"production": "postgres", "staging": "postgres-staging"},
+    "backup": {"production": "backup", "staging": "backup-staging"},
     # Hosts without dedicated staging VMs — fall back to shared staging VM
-    "runtime_ai": {
-        "production": "runtime-ai",
-        "staging": "docker-runtime-staging",
-        "clone": "runtime-ai",
-    },
-    "runtime_control": {
-        "production": "runtime-control",
-        "staging": "docker-runtime-staging",
-        "clone": "runtime-control",
-    },
-    "runtime_general": {
-        "production": "runtime-general",
-        "staging": "docker-runtime-staging",
-        "clone": "runtime-general",
-    },
-    "runtime_comms": {
-        "production": "runtime-comms",
-        "staging": "docker-runtime-staging",
-        "clone": "runtime-comms",
-    },
-    "runtime_apps": {
-        "production": "runtime-apps",
-        "staging": "docker-runtime-staging",
-        "clone": "runtime-apps",
-    },
-    "postgres_apps": {
-        "production": "postgres-apps",
-        "staging": "postgres-staging",
-        "clone": "postgres-apps",
-    },
-    "postgres_data": {
-        "production": "postgres-data",
-        "staging": "postgres-staging",
-        "clone": "postgres-data",
-    },
+    "runtime_ai": {"production": "runtime-ai", "staging": "docker-runtime-staging"},
+    "runtime_control": {"production": "runtime-control", "staging": "docker-runtime-staging"},
+    "runtime_general": {"production": "runtime-general", "staging": "docker-runtime-staging"},
+    "runtime_comms": {"production": "runtime-comms", "staging": "docker-runtime-staging"},
+    "runtime_apps": {"production": "runtime-apps", "staging": "docker-runtime-staging"},
+    "postgres_apps": {"production": "postgres-apps", "staging": "postgres-staging"},
+    "postgres_data": {"production": "postgres-data", "staging": "postgres-staging"},
 }
 
 
@@ -266,7 +231,7 @@ def build_inventory(host_vars: dict) -> dict:
         "all": {
             "vars": {
                 "playbook_execution_env": "{{ env | default('production') }}",
-                "playbook_execution_allowed_envs": ["production", "staging", "clone"],
+                "playbook_execution_allowed_envs": ["production", "staging"],
                 "playbook_execution_host_patterns": _EXECUTION_HOST_PATTERNS,
             },
             "children": {
@@ -348,40 +313,69 @@ def ansible_host(host_vars: dict, hostname: str) -> dict:
 
 
 def load_host_vars(path: Path = HOST_VARS_PATH) -> dict:
-    # ADR 0430: when the caller uses the default HOST_VARS_PATH, apply the
-    # `.local/host_vars/proxmox-host.yml` overlay (if present) so forks see
-    # their own proxmox_guests list. An explicit --host-vars argument
-    # bypasses the overlay (tests, cross-env comparisons).
-    if path == HOST_VARS_PATH:
-        # Import here to avoid circular-import risk during test collection.
-        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-        existing_platform = sys.modules.get("platform")
-        if existing_platform is not None and not hasattr(existing_platform, "__path__"):
-            del sys.modules["platform"]
-        from platform.repo import load_topology_host_vars  # noqa: PLC0415
-
-        return load_topology_host_vars()
     with path.open() as fh:
         return yaml.safe_load(fh)
 
 
-def generate(host_vars: dict) -> str:
+def merge_overlay(base: dict, overlay: dict) -> dict:
+    """Merge an overlay host_vars dict on top of the base.
+
+    Semantics (ADR 0437):
+      - Top-level scalars in overlay replace base values (management_*,
+        proxmox_staging_ipv4, etc.).
+      - If overlay defines proxmox_guests, it replaces the base list wholesale
+        (consistent with the ADR 0430 "wholesale replacement" convention for
+        the .local/host_vars overlay).
+      - Keys present only in base are preserved.
+    """
+    merged = dict(base)
+    for key, value in overlay.items():
+        merged[key] = value
+    return merged
+
+
+def load_host_vars_with_overlay(
+    base_path: Path = HOST_VARS_PATH,
+    overlay_path: Path | None = None,
+) -> dict:
+    """Load base host_vars and optionally merge an overlay on top."""
+    base = load_host_vars(base_path)
+    if overlay_path is None or not overlay_path.exists():
+        return base
+    with overlay_path.open() as fh:
+        overlay = yaml.safe_load(fh) or {}
+    return merge_overlay(base, overlay)
+
+
+def generate(host_vars: dict, overlay_path: Path | None = None) -> str:
     """Return the complete hosts.yml string (header + YAML)."""
-    return GENERATED_HEADER + render_yaml(build_inventory(host_vars))
+    if overlay_path is not None:
+        header = GENERATED_HEADER_OVERLAY.format(overlay=str(overlay_path))
+    else:
+        header = GENERATED_HEADER_BASE
+    return header + render_yaml(build_inventory(host_vars))
 
 
-def check_drift(host_vars: dict, current_path: Path = HOSTS_YML_PATH) -> bool:
+def check_drift(
+    host_vars: dict,
+    current_path: Path = HOSTS_YML_PATH,
+    overlay_path: Path | None = None,
+) -> bool:
     """Return True if current hosts.yml matches generated output, False if drift."""
-    generated = generate(host_vars)
+    generated = generate(host_vars, overlay_path=overlay_path)
     if not current_path.exists():
         return False
     current = current_path.read_text()
     return current == generated
 
 
-def show_diff(host_vars: dict, current_path: Path = HOSTS_YML_PATH) -> str:
+def show_diff(
+    host_vars: dict,
+    current_path: Path = HOSTS_YML_PATH,
+    overlay_path: Path | None = None,
+) -> str:
     """Return a unified diff between current file and generated output."""
-    generated = generate(host_vars).splitlines(keepends=True)
+    generated = generate(host_vars, overlay_path=overlay_path).splitlines(keepends=True)
     current = current_path.read_text().splitlines(keepends=True) if current_path.exists() else []
     return "".join(
         difflib.unified_diff(
@@ -418,6 +412,26 @@ def main() -> None:
         default=str(HOST_VARS_PATH),
         help=f"Path to proxmox-host.yml (default: {HOST_VARS_PATH})",
     )
+    parser.add_argument(
+        "--host-vars-overlay",
+        metavar="PATH",
+        default=None,
+        help=(
+            "Optional overlay host_vars file (ADR 0437). When present, merges "
+            "on top of --host-vars. Top-level scalars override base; "
+            "proxmox_guests replaces the base list wholesale."
+        ),
+    )
+    parser.add_argument(
+        "--out",
+        metavar="PATH",
+        default=str(HOSTS_YML_PATH),
+        help=(
+            f"Output path for --write/--check (default: {HOSTS_YML_PATH}). "
+            "For fork bootstraps, write to .local/inventory/hosts.yml so the "
+            "committed production file is not polluted."
+        ),
+    )
     args = parser.parse_args()
 
     host_vars_path = Path(args.host_vars)
@@ -425,10 +439,22 @@ def main() -> None:
         print(f"ERROR: {host_vars_path} not found", file=sys.stderr)
         sys.exit(2)
 
+    overlay_path: Path | None = None
+    if args.host_vars_overlay:
+        overlay_path = Path(args.host_vars_overlay)
+        if not overlay_path.exists():
+            print(f"ERROR: overlay {overlay_path} not found", file=sys.stderr)
+            sys.exit(2)
+
+    out_path = Path(args.out)
+
     try:
-        host_vars = load_host_vars(host_vars_path)
+        host_vars = load_host_vars_with_overlay(host_vars_path, overlay_path)
     except Exception as exc:
-        print(f"ERROR loading {host_vars_path}: {exc}", file=sys.stderr)
+        src_desc = f"{host_vars_path}"
+        if overlay_path:
+            src_desc += f" + overlay {overlay_path}"
+        print(f"ERROR loading {src_desc}: {exc}", file=sys.stderr)
         sys.exit(2)
 
     if args.list:
@@ -442,32 +468,35 @@ def main() -> None:
         return
 
     if args.print:
-        print(generate(host_vars), end="")
+        print(generate(host_vars, overlay_path=overlay_path), end="")
         return
 
     if args.check:
-        if check_drift(host_vars):
-            print("inventory/hosts.yml is up to date.", file=sys.stderr)
+        if check_drift(host_vars, current_path=out_path, overlay_path=overlay_path):
+            print(f"{out_path} is up to date.", file=sys.stderr)
             sys.exit(0)
-        diff = show_diff(host_vars)
+        diff = show_diff(host_vars, current_path=out_path, overlay_path=overlay_path)
         if diff:
-            print("DRIFT DETECTED — inventory/hosts.yml is out of date:", file=sys.stderr)
+            print(f"DRIFT DETECTED — {out_path} is out of date:", file=sys.stderr)
             print(diff, file=sys.stderr)
         else:
             print(
-                "DRIFT DETECTED — inventory/hosts.yml does not exist or is empty.",
+                f"DRIFT DETECTED — {out_path} does not exist or is empty.",
                 file=sys.stderr,
             )
         print("Run: make generate-inventory", file=sys.stderr)
         sys.exit(1)
 
     if args.write:
-        content = generate(host_vars)
-        HOSTS_YML_PATH.write_text(content)
+        content = generate(host_vars, overlay_path=overlay_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(content)
         guests = host_vars.get("proxmox_guests", [])
         staging_count = sum(1 for g in guests if g.get("has_staging", False))
+        overlay_note = f" (overlay: {overlay_path})" if overlay_path else ""
         print(
-            f"Written {HOSTS_YML_PATH} — {len(guests)} production guests, {staging_count} staging counterparts.",
+            f"Written {out_path}{overlay_note} — {len(guests)} production guests, "
+            f"{staging_count} staging counterparts.",
             file=sys.stderr,
         )
 

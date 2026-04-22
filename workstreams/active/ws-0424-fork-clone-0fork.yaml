@@ -81,6 +81,15 @@ ownership_manifest:
         - docs/release-notes/**
       mode: shared_contract
       contract: release-bump-v1
+    - id: ws_0424_overlay_aware_bootstrap
+      paths:
+        - Makefile
+        - scripts/generate_inventory.py
+        - scripts/timed.sh
+        - docs/adr/0437-overlay-aware-bootstrap.md
+        - docs/postmortems/2026-04-22-fork-bootstrap-gap.md
+        - docs/diaries/2026-04-22-fork-bootstrap.md
+      mode: exclusive
     - id: ws_0424_ioc_prefix_parameterization
       paths:
         - inventory/group_vars/all/identity.yml

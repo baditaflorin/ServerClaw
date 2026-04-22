@@ -1,7 +1,32 @@
 REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 LOCAL_OVERLAY_ROOT ?= $(shell $(REPO_ROOT)/scripts/resolve_local_overlay_root.sh)
+
+# ADR 0437: overlay-aware bootstrap.
+# When PLATFORM_IDENTITY_OVERLAY is set, rewire inventory, SSH key, env and
+# ansible extras so `make bootstrap` works for forks off a single env var.
+# Production (no env var) is byte-identical to the pre-ADR-0437 Makefile.
+PLATFORM_IDENTITY_OVERLAY ?=
+ifneq ($(strip $(PLATFORM_IDENTITY_OVERLAY)),)
+BOOTSTRAP_OVERLAY_MODE := 1
+BOOTSTRAP_OVERLAY_HOST_VARS ?= $(LOCAL_OVERLAY_ROOT)/host_vars/proxmox-host.yml
+BOOTSTRAP_OVERLAY_INVENTORY ?= $(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml
+BOOTSTRAP_OVERLAY_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed25519
+BOOTSTRAP_OVERLAY_ENV ?= clone
+BOOTSTRAP_OVERLAY_HOST_ADDR ?= $(shell awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(PLATFORM_IDENTITY_OVERLAY) 2>/dev/null)
+ANSIBLE_INVENTORY := $(BOOTSTRAP_OVERLAY_INVENTORY)
+BOOTSTRAP_KEY := $(BOOTSTRAP_OVERLAY_SSH_KEY)
+env := $(BOOTSTRAP_OVERLAY_ENV)
+ANSIBLE_OVERLAY_EXTRA := -e env=$(BOOTSTRAP_OVERLAY_ENV) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+export PLATFORM_IDENTITY_OVERLAY
+ifneq ($(strip $(BOOTSTRAP_OVERLAY_HOST_ADDR)),)
+export LV3_PROXMOX_HOST_ADDR := $(BOOTSTRAP_OVERLAY_HOST_ADDR)
+endif
+else
+BOOTSTRAP_OVERLAY_MODE :=
 ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml
+ANSIBLE_OVERLAY_EXTRA :=
 BOOTSTRAP_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
+endif
 ANSIBLE_LOCAL_TEMP ?= /tmp/platform_server-ansible-local
 ANSIBLE_REMOTE_TEMP ?= /tmp
 ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
@@ -431,10 +456,23 @@ install-cli:
 update-cli: install-cli
 
 generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml
+ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
+	@mkdir -p $(dir $(BOOTSTRAP_OVERLAY_INVENTORY))
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write \
+		--host-vars-overlay $(BOOTSTRAP_OVERLAY_HOST_VARS) \
+		--out $(BOOTSTRAP_OVERLAY_INVENTORY)
+else
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write
+endif
 
 validate-generated-inventory: ## Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests
+ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --check \
+		--host-vars-overlay $(BOOTSTRAP_OVERLAY_HOST_VARS) \
+		--out $(BOOTSTRAP_OVERLAY_INVENTORY)
+else
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --check
+endif
 
 generate-readme: ## Regenerate README.md from docs/templates/README.md.j2 and live repo data
 	uv run --with pyyaml --with jinja2 python $(REPO_ROOT)/scripts/generate_readme.py --write
@@ -990,11 +1028,11 @@ quarterly-access-review:
 
 install-proxmox:
 	$(MAKE) preflight WORKFLOW=install-proxmox
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY)
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_OVERLAY_EXTRA)
 
 configure-network:
 	$(MAKE) preflight WORKFLOW=configure-network
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags repository,network
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags repository,network $(ANSIBLE_OVERLAY_EXTRA)
 
 configure-staging-bridge:
 	$(MAKE) preflight WORKFLOW=configure-network
@@ -1025,11 +1063,11 @@ configure-host-control-loops:
 
 provision-guests:
 	$(MAKE) preflight WORKFLOW=provision-guests
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags guests
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags guests $(ANSIBLE_OVERLAY_EXTRA)
 
 harden-access:
 	$(MAKE) preflight WORKFLOW=harden-access
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags access
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags access $(ANSIBLE_OVERLAY_EXTRA)
 
 harden-guest-access:
 	$(MAKE) preflight WORKFLOW=harden-guest-access
@@ -1836,12 +1874,25 @@ generate-local-example: ## Regenerate local-overlay-template/ scaffold from secr
 	python3 $(REPO_ROOT)/scripts/init_local_overlay.py --generate-example
 
 bootstrap: ## Full platform bootstrap from bare Debian 13 (ADR 0386)
+ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
+	@echo "=== ADR 0437: overlay-aware bootstrap ==="
+	@echo "  PLATFORM_IDENTITY_OVERLAY = $(PLATFORM_IDENTITY_OVERLAY)"
+	@echo "  ANSIBLE_INVENTORY         = $(ANSIBLE_INVENTORY)"
+	@echo "  BOOTSTRAP_KEY             = $(BOOTSTRAP_KEY)"
+	@echo "  env                       = $(env)"
+	@echo "  LV3_PROXMOX_HOST_ADDR     = $(LV3_PROXMOX_HOST_ADDR)"
+	@echo ""
+endif
 	@echo "=== Stage 1: Local overlay initialization ==="
 	@if [ ! -d "$(LOCAL_OVERLAY_ROOT)" ]; then \
 		$(MAKE) init-local; \
 	else \
 		echo "  .local/ exists — skipping init (use FORCE=true to regenerate missing files)"; \
 	fi
+ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
+	@echo "  overlay mode: regenerating $(BOOTSTRAP_OVERLAY_INVENTORY)"
+	$(MAKE) generate-inventory
+endif
 	@echo ""
 	@echo "=== Stage 2: Proxmox VE installation ==="
 	$(MAKE) install-proxmox
@@ -1868,6 +1919,10 @@ bootstrap-minimal: ## Bootstrap critical path only (PG + Keycloak + Nginx + Open
 	else \
 		echo "  .local/ exists — skipping init"; \
 	fi
+ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
+	@echo "  overlay mode: regenerating $(BOOTSTRAP_OVERLAY_INVENTORY)"
+	$(MAKE) generate-inventory
+endif
 	$(MAKE) install-proxmox
 	$(MAKE) verify-bootstrap-proxmox
 	$(MAKE) configure-network
@@ -1881,13 +1936,13 @@ bootstrap-minimal: ## Bootstrap critical path only (PG + Keycloak + Nginx + Open
 	@echo "=== Minimal bootstrap complete (PG, Keycloak, OpenBao, API Gateway) ==="
 
 verify-bootstrap-proxmox: ## Verify Proxmox VE is installed and operational
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-proxmox.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-proxmox.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS) $(ANSIBLE_OVERLAY_EXTRA)
 
 verify-bootstrap-guests: ## Verify all guest VMs are reachable
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-guests.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-guests.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS) $(ANSIBLE_OVERLAY_EXTRA)
 
 verify-platform: ## Verify critical platform services are healthy
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-platform.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-platform.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS) $(ANSIBLE_OVERLAY_EXTRA)
 
 converge-site: ## Full site convergence (all services)
 	$(MAKE) preflight WORKFLOW=converge-site
