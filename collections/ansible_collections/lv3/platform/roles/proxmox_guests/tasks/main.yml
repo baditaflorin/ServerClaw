@@ -195,7 +195,7 @@
       - "{{ ((item.tags | default([])) + proxmox_guest_policy_tags) | unique | join(';') }}"
       - --net0
       - >-
-        virtio{% if item.macaddr is defined %}={{ item.macaddr }}{% endif %},bridge={{ proxmox_internal_bridge }}
+        virtio{% if item.macaddr is defined %}={{ item.macaddr }}{% endif %},bridge={{ proxmox_internal_bridge }},firewall={{ item.proxmox_firewall_enabled | default(true) | ternary('1', '0') }}
       - --ipconfig0
       - "ip={{ item.ipv4 }}/{{ item.cidr }},gw={{ item.gateway4 }}"
       - --nameserver
@@ -272,6 +272,18 @@
   register: proxmox_guest_start
   failed_when: proxmox_guest_start.rc not in [0, 255]
   changed_when: proxmox_guest_start.rc == 0
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Wait for guest SSH after hardware and cloud-init update
+  ansible.builtin.wait_for:
+    host: "{{ item.ipv4 }}"
+    port: 22
+    timeout: 120
+    connect_timeout: 5
+    delay: 2
+  delegate_to: "{{ inventory_hostname }}"
   loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   loop_control:
     label: "{{ item.name }}"
