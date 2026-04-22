@@ -499,6 +499,38 @@ def main() -> None:
             f"{staging_count} staging counterparts.",
             file=sys.stderr,
         )
+        # ADR 0437 — when generating an overlay inventory, also emit the merged
+        # host_vars/proxmox-host.yml alongside it. Ansible only auto-discovers
+        # host_vars from directories co-located with the inventory file; if the
+        # fork's overlay host_vars stays at .local/host_vars/ (parallel to
+        # .local/inventory/), Ansible never reads it and the committed
+        # inventory/host_vars/proxmox-host.yml wins during Stage 4 guest
+        # provisioning — producing guests on the committed subnet while the
+        # overlay inventory tries to SSH to the fork's intended subnet.
+        # Writing the merged host_vars next to the overlay inventory makes the
+        # overlay self-contained so ansible-inventory discovers it without any
+        # extra wiring.
+        if overlay_path is not None:
+            host_vars_dir = out_path.parent / "host_vars"
+            host_vars_dir.mkdir(parents=True, exist_ok=True)
+            merged_host_vars_path = host_vars_dir / "proxmox-host.yml"
+            merged_header = (
+                "# =============================================================================\n"
+                "# GENERATED (overlay mode) — do not edit manually.\n"
+                "# Emitted alongside overlay inventory so ansible host_vars discovery\n"
+                "# picks up the fork's merged proxmox_guests + network values.\n"
+                f"# Run: PLATFORM_IDENTITY_OVERLAY=<path> make generate-inventory\n"
+                f"# Sources: inventory/host_vars/proxmox-host.yml + {overlay_path}\n"
+                "# ADR 0437 — overlay-aware bootstrap.\n"
+                "# =============================================================================\n"
+            )
+            merged_host_vars_path.write_text(
+                merged_header + yaml.safe_dump(host_vars, sort_keys=False, default_flow_style=False)
+            )
+            print(
+                f"Written {merged_host_vars_path} — merged host_vars for ansible discovery.",
+                file=sys.stderr,
+            )
 
 
 if __name__ == "__main__":
