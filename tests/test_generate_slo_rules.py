@@ -17,6 +17,17 @@ def test_generated_payloads_include_fast_and_slow_burn_alerts():
     assert "SLOSlowBurn_keycloak_availability" in alert_names
 
 
+def test_generated_slo_files_include_decommission_block_markers():
+    for path in (
+        generate_slo_rules.PROMETHEUS_RULES_PATH,
+        generate_slo_rules.PROMETHEUS_ALERTS_PATH,
+        generate_slo_rules.PROMETHEUS_TARGETS_PATH,
+    ):
+        content = path.read_text(encoding="utf-8")
+        assert "# BEGIN SERVICE: keycloak" in content
+        assert "# END SERVICE: keycloak" in content
+
+
 def test_latency_slo_recording_rules_use_subqueries():
     catalog = generate_slo_rules.load_slo_catalog(generate_slo_rules.SLO_CATALOG_PATH)
     recording_payload = generate_slo_rules.build_recording_rules(catalog)

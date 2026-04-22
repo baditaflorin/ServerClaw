@@ -1,0 +1,116 @@
+id: ws-0396-live-apply
+adr: 0396
+title: Deterministic service decommissioning live apply and validation replay
+status: live_applied
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/ws-0396-live-apply
+worktree_path: .worktrees/ws-0396-live-apply
+doc: docs/workstreams/ws-0396-live-apply.md
+depends_on:
+- adr-0389-service-decommissioning-procedure
+- adr-0391-cpu-only-operational-automation
+conflicts_with: []
+shared_surfaces:
+- workstreams.yaml
+- workstreams/active/ws-0396-live-apply.yaml
+- docs/workstreams/ws-0396-live-apply.md
+- docs/adr/0396-deterministic-service-decommissioning.md
+- docs/runbooks/data-retention.md
+- docs/runbooks/slo-tracking.md
+- scripts/decommission_service.py
+- scripts/generate_slo_rules.py
+- scripts/platform_ops.py
+- scripts/uptime_contract.py
+- config/prometheus/rules/slo_alerts.yml
+- config/prometheus/rules/slo_rules.yml
+- config/prometheus/file_sd/slo_targets.yml
+- tests/test_decommission_service.py
+- tests/test_generate_slo_rules.py
+- tests/test_monitoring_vm_role.py
+- tests/test_uptime_contract.py
+- receipts/live-applies/**
+ownership_manifest:
+  owned_surfaces:
+  - id: workstream_registry
+    paths:
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0396_tracking
+    paths:
+    - workstreams/active/ws-0396-live-apply.yaml
+    - docs/workstreams/ws-0396-live-apply.md
+    - docs/adr/0396-deterministic-service-decommissioning.md
+    - docs/runbooks/data-retention.md
+    - docs/runbooks/slo-tracking.md
+    mode: exclusive
+  - id: ws_0396_decommissioning_automation
+    paths:
+    - scripts/decommission_service.py
+    - scripts/platform_ops.py
+    - scripts/generate_slo_rules.py
+    - scripts/uptime_contract.py
+    - tests/test_decommission_service.py
+    - tests/test_generate_slo_rules.py
+    - tests/test_monitoring_vm_role.py
+    - tests/test_uptime_contract.py
+    mode: shared_contract
+    contract: adr-0396-decommissioning-automation-v1
+  - id: ws_0396_generated_slo_assets
+    paths:
+    - config/prometheus/rules/slo_alerts.yml
+    - config/prometheus/rules/slo_rules.yml
+    - config/prometheus/file_sd/slo_targets.yml
+    mode: shared_contract
+    contract: generated-slo-assets-v1
+  - id: ws_0396_live_apply_evidence
+    paths:
+    - receipts/live-applies/**
+    mode: shared_contract
+    contract: live-apply-evidence-v1
+canonical_truth:
+  changelog_entry: make deterministic service decommissioning safer by keeping registry
+    validation machine-readable, extending structural catalog cleanup, and adding
+    SLO block markers to the active SLO generator
+  release_bump: patch
+  included_in_repo_version: null
+  protected_integration_updates_pending:
+  - VERSION
+  - changelog.md
+  - README.md
+  - versions/stack.yaml
+notes: |
+  Started from latest origin/main commit 04638e669 on 2026-04-21.
+
+  Branch-local fixes completed before live apply:
+  - decommission plans now read current subdomain-catalog service_id/fqdn fields while preserving legacy service/hostname compatibility
+  - --validate-registry keeps stdout as parseable JSON and writes human status to stderr
+  - platform_ops decommission-preview reports HTTPS/TLS marker files and the new JSON list-item registry handlers
+  - generate_slo_rules.py emits ADR 0396 # BEGIN/END SERVICE markers in the active generated SLO assets
+  - uptime_contract.py stamps generated Uptime Kuma monitors with service_id for structural decommission cleanup
+  - code purge skips fallback line deletion for structured JSON/YAML files and uses structured handlers plus regeneration instead
+
+  Disposable purge proof:
+  - service: browser_runner
+  - command: python3 scripts/decommission_service.py --service browser_runner --purge-code --confirm browser_runner --validate-registry
+  - result: code_purged=true, registry_warnings=[], integrity_errors=[]
+  - regenerated: SLO assets, HTTPS/TLS assurance assets, platform manifest, discovery artifacts, workstream registry
+
+  Live apply proof:
+  - date: 2026-04-21
+  - command: make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'
+  - result: monitoring ok=254 changed=39 unreachable=0 failed=0 skipped=54 rescued=0 ignored=0
+  - Prometheus rule groups: slo_recording_rules=378, slo_alert_rules=126, https_tls_assurance=165
+  - deployed service blocks: SLO files=42 each, HTTPS/TLS files=52 each
+  - restic live-apply backup receipt: receipts/restic-backups/20260421T114502Z.json
+  - branch evidence: receipts/live-applies/2026-04-21-adr-0396-deterministic-service-decommissioning-live-apply.json and receipts/live-applies/evidence/2026-04-21-ws-0396-live-apply.txt
+
+  Protected integration updates intentionally pending for merge-to-main:
+  - VERSION
+  - changelog.md release sections
+  - top-level README.md integrated status summary
+  - versions/stack.yaml
+blockers: []
+plane_issue_id: 3d700a28-78fd-4edb-b4ac-6bce7f6cf20f

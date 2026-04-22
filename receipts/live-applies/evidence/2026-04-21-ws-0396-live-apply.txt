@@ -1,0 +1,60 @@
+WS-0396 / ADR 0396 live-apply evidence
+Recorded: 2026-04-21
+Branch: codex/ws-0396-live-apply
+Base commit: 04638e669de921ce818b0625147d6421902ca669
+
+Repository preparation:
+- Created isolated worktree .worktrees/ws-0396-live-apply from latest origin/main.
+- Created Plane issue 3d700a28-78fd-4edb-b4ac-6bce7f6cf20f through scripts/sync_plane_agent_issues.py.
+- Implemented deterministic decommissioning fixes for current subdomain-catalog schema, JSON list-item registries, generated SLO marker files, HTTPS/TLS marker previews, and structured purge integrity.
+
+Pre-live validation:
+- make validate-generated-slo: pass
+- make validate-generated-https-tls-assurance: pass
+- uv run --with pytest --with pyyaml python -m pytest -q tests/test_decommission_service.py tests/test_data_catalog.py tests/test_generate_slo_rules.py tests/test_slo_tracking.py tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py: 39 passed
+
+Disposable purge smoke:
+- Command: python3 scripts/decommission_service.py --service browser_runner --purge-code --confirm browser_runner --validate-registry
+- Result: code_purged=true, registry_warnings=[], integrity_errors=[]
+- Regenerated: SLO assets, HTTPS/TLS assurance assets, platform manifest, discovery artifacts, workstream registry
+
+Live apply:
+- Initial live-apply attempt was blocked before Ansible by the vulnerability-budget freshness gate.
+- Host-only security posture refresh was recorded at receipts/security-reports/20260421T112535Z.json.
+- python3 scripts/vulnerability_budget.py --service grafana: approved
+- Command: make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'
+- Result: pass
+- Grafana play recap: monitoring ok=254 changed=39 unreachable=0 failed=0 skipped=54 rescued=0 ignored=0
+- Restic live-apply backup result: status=ok, receipt=receipts/restic-backups/20260421T114502Z.json, latest=receipts/restic-snapshots-latest.json
+
+Direct Prometheus verification:
+- slo_recording_rules: 378 rules
+- slo_alert_rules: 126 rules
+- https_tls_assurance: 165 rules
+
+Deployed marker verification on monitoring VM:
+- /etc/prometheus/rules/slo-rules.yml: 42 service blocks
+- /etc/prometheus/rules/slo-alerts.yml: 42 service blocks
+- /etc/prometheus/file_sd/slo-targets.yml: 42 service blocks
+- /etc/prometheus/rules/https-tls-alerts.yml: 52 service blocks
+- /etc/prometheus/file_sd/https-tls-targets.yml: 52 service blocks
+
+Closeout validation:
+- ./scripts/validate_repo.sh agent-standards: pass
+- ./scripts/validate_repo.sh workstream-surfaces: pass after dropping unrelated generated/runtime byproducts
+- git diff --check: pass
+- python3 scripts/workstream_registry.py --check: pass
+- uv run --with pyyaml python3 scripts/live_apply_receipts.py --validate: pass
+- ./scripts/validate_repo.sh generated-docs: expected branch-local fail on changelog.md canonical truth; protected merge-to-main update remains pending
+
+Final merge-readiness replay on 2026-04-22:
+- Merge-check worktree: .worktrees/ws-0396-merge-check
+- Base: origin/main 467fe6eef5b1159e5d25c3d0515083018b8274fe
+- uv run --with pytest --with pyyaml python -m pytest -q tests/test_decommission_service.py tests/test_data_catalog.py tests/test_generate_slo_rules.py tests/test_slo_tracking.py tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_uptime_contract.py tests/test_platform_ops.py: pass, 46 passed
+- make validate-generated-uptime-kuma-monitors: pass after materializing the ignored generated Uptime Kuma monitor artifact in the fresh worktree
+
+Protected integration surfaces intentionally left pending on the workstream branch:
+- VERSION
+- changelog.md release sections
+- top-level README.md integrated status summary
+- versions/stack.yaml

@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-04-21-adr-0396-deterministic-service-decommissioning-live-apply",
+  "environment": "production",
+  "applied_on": "2026-04-21",
+  "recorded_on": "2026-04-21",
+  "recorded_at": "2026-04-21T11:45:08Z",
+  "recorded_by": "codex",
+  "source_commit": "04638e669de921ce818b0625147d6421902ca669",
+  "repo_version_context": "0.178.148",
+  "workflow_id": "live-apply-service",
+  "adr": "0396",
+  "summary": "Replayed ADR 0396 deterministic service decommissioning from an isolated worktree, live-applied the generated SLO and HTTPS/TLS marker assets through the governed Grafana monitoring path, verified Prometheus and deployed marker state end to end, and completed the restic live-apply backup hook.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "address": "10.10.10.20"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Governed Grafana monitoring live apply",
+      "result": "pass",
+      "observed": "`make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'` completed with `monitoring ok=254 changed=39 unreachable=0 failed=0 skipped=54 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Prometheus generated rule groups",
+      "result": "pass",
+      "observed": "Direct Prometheus API verification found `slo_recording_rules` with 378 rules, `slo_alert_rules` with 126 rules, and `https_tls_assurance` with 165 rules."
+    },
+    {
+      "check": "Deployed service block markers",
+      "result": "pass",
+      "observed": "The monitoring VM has balanced `# BEGIN SERVICE:` / `# END SERVICE:` blocks in `/etc/prometheus/rules/slo-rules.yml`, `/etc/prometheus/rules/slo-alerts.yml`, `/etc/prometheus/file_sd/slo-targets.yml`, `/etc/prometheus/rules/https-tls-alerts.yml`, and `/etc/prometheus/file_sd/https-tls-targets.yml`."
+    },
+    {
+      "check": "Restic live-apply backup hook",
+      "result": "pass",
+      "observed": "The live-apply wrapper completed the restic backup trigger with status `ok` and remote receipt `receipts/restic-backups/20260421T114502Z.json`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0396-deterministic-service-decommissioning.md",
+    "docs/workstreams/ws-0396-live-apply.md",
+    "docs/runbooks/data-retention.md",
+    "docs/runbooks/slo-tracking.md",
+    "receipts/live-applies/evidence/2026-04-21-ws-0396-live-apply.txt"
+  ],
+  "notes": [
+    "The first live-apply attempt was correctly blocked by a stale vulnerability-budget host scan; a host-only security posture refresh was recorded locally before `python3 scripts/vulnerability_budget.py --service grafana` approved the second attempt.",
+    "This workstream branch intentionally does not update `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, or `versions/stack.yaml`; those remain merge-to-main integration tasks."
+  ]
+}

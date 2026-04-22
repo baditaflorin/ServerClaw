@@ -462,6 +462,7 @@ generate-uptime-kuma-monitors:
 	python3 $(REPO_ROOT)/scripts/uptime_contract.py --write
 
 validate-generated-uptime-kuma-monitors:
+	python3 $(REPO_ROOT)/scripts/materialize_live_apply_worktree_artifacts.py --artifact uptime_kuma_monitors --repo-root $(REPO_ROOT)
 	python3 $(REPO_ROOT)/scripts/uptime_contract.py --check
 
 generate-cross-cutting-artifacts:

@@ -57,7 +57,8 @@ ownership_manifest:
         - docs/adr/index/by-status/accepted.yaml
         - docs/adr/index/by-status/implemented.yaml
         - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared
+      mode: shared_contract
+      contract: generated-index-and-diagram-v1
 progress:
   completed_2026_04_21:
     - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)

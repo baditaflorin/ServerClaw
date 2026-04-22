@@ -23,16 +23,72 @@ from slo_tracking import (
     metric_slug,
     slo_metric_queries,
     slo_success_expr,
-    write_yaml,
 )
 
 
 FAST_BURN_MULTIPLIER = 14
 SLOW_BURN_MULTIPLIER = 3
+RECORDING_RULES_PER_SLO = 9
+ALERT_RULES_PER_SLO = 3
 
 
 def promql_string(expr: str) -> str:
     return " ".join(expr.split())
+
+
+def dump_yaml_text(payload: Any) -> str:
+    try:
+        import yaml
+    except ModuleNotFoundError as exc:  # pragma: no cover - direct runtime guard
+        from controller_automation_toolkit import PYYAML_INSTALL_HINT
+
+        raise RuntimeError(PYYAML_INSTALL_HINT) from exc
+
+    class IndentedSafeDumper(yaml.SafeDumper):
+        def increase_indent(self, flow: bool = False, indentless: bool = False) -> Any:
+            return super().increase_indent(flow, False)
+
+    return yaml.dump(
+        payload,
+        Dumper=IndentedSafeDumper,
+        sort_keys=False,
+        default_flow_style=False,
+    )
+
+
+def _indent_yaml_block(text: str, spaces: int) -> str:
+    prefix = " " * spaces
+    return "\n".join((prefix + line) if line.strip() else line for line in text.rstrip("\n").splitlines())
+
+
+def build_marked_rule_file(catalog: dict[str, Any], payload: dict[str, Any], *, rules_per_slo: int) -> str:
+    group = payload["groups"][0]
+    rules = group["rules"]
+    parts = [
+        "groups:\n",
+        f"  - name: {group['name']}\n",
+        f"    interval: {group['interval']}\n",
+        "    rules:\n",
+    ]
+    offset = 0
+    for slo in catalog["slos"]:
+        service_id = slo["service_id"]
+        service_rules = rules[offset : offset + rules_per_slo]
+        offset += rules_per_slo
+        parts.append(f"# BEGIN SERVICE: {service_id}\n")
+        parts.append(_indent_yaml_block(dump_yaml_text(service_rules), 6) + "\n")
+        parts.append(f"# END SERVICE: {service_id}\n")
+    return "".join(parts)
+
+
+def build_marked_targets_file(catalog: dict[str, Any], targets: list[dict[str, Any]]) -> str:
+    parts: list[str] = []
+    for slo, target in zip(catalog["slos"], targets, strict=True):
+        service_id = slo["service_id"]
+        parts.append(f"# BEGIN SERVICE: {service_id}\n")
+        parts.append(dump_yaml_text([target]))
+        parts.append(f"# END SERVICE: {service_id}\n")
+    return "".join(parts)
 
 
 def build_recording_rules(catalog: dict[str, Any]) -> dict[str, Any]:
@@ -400,9 +456,21 @@ def outputs_match(catalog: dict[str, Any]) -> bool:
 
 def generate() -> None:
     catalog = load_slo_catalog(SLO_CATALOG_PATH)
-    write_yaml(PROMETHEUS_RULES_PATH, build_recording_rules(catalog))
-    write_yaml(PROMETHEUS_ALERTS_PATH, build_alert_rules(catalog))
-    write_yaml(PROMETHEUS_TARGETS_PATH, build_targets(catalog))
+    rules = build_recording_rules(catalog)
+    alerts = build_alert_rules(catalog)
+    targets = build_targets(catalog)
+    PROMETHEUS_RULES_PATH.parent.mkdir(parents=True, exist_ok=True)
+    PROMETHEUS_RULES_PATH.write_text(
+        build_marked_rule_file(catalog, rules, rules_per_slo=RECORDING_RULES_PER_SLO),
+        encoding="utf-8",
+    )
+    PROMETHEUS_ALERTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    PROMETHEUS_ALERTS_PATH.write_text(
+        build_marked_rule_file(catalog, alerts, rules_per_slo=ALERT_RULES_PER_SLO),
+        encoding="utf-8",
+    )
+    PROMETHEUS_TARGETS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    PROMETHEUS_TARGETS_PATH.write_text(build_marked_targets_file(catalog, targets), encoding="utf-8")
     write_dashboard(GRAFANA_DASHBOARD_PATH, build_dashboard(catalog))
 
 

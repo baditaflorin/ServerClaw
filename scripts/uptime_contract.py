@@ -46,7 +46,9 @@ def build_uptime_monitors(catalog: dict[str, Any]) -> list[dict[str, Any]]:
         if name in names:
             raise ValueError(f"duplicate Uptime Kuma monitor name in health probe catalog: {name}")
         names.add(name)
-        monitors.append(monitor)
+        monitor_payload = dict(monitor)
+        monitor_payload.setdefault("service_id", service_id)
+        monitors.append(monitor_payload)
 
     if not monitors:
         raise ValueError("health probe catalog does not define any enabled Uptime Kuma monitors")

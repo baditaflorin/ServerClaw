@@ -1,11 +1,13 @@
 # ADR 0396: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Implemented and live-applied
 - Implemented In Repo Version: 0.178.90
 - Amended: 0.178.92 (gaps from ADR 0401 Netdata removal postmortem)
-- Implemented In Platform Version: not yet applied
+- Amended: 0.178.148 (live-apply replay closed current subdomain-catalog, JSON list-item, SLO marker, and HTTPS/TLS preview gaps)
+- Implemented In Platform Version: 0.178.145 (verified by workstream live apply on 2026-04-21; final main integration bump pending)
 - Implemented On: 2026-04-10
+- Live Applied On: 2026-04-21
 - Date: 2026-04-10
 - Concern: Operational Automation, Developer Experience, Decommissioning
 - Depends on: ADR 0389 (Service Decommissioning Procedure), ADR 0393 (One-API Removal postmortem), ADR 0401 (Netdata Removal postmortem)
@@ -219,10 +221,10 @@ number dynamically.
 Postmortem: `docs/postmortems/adr-0401-netdata-removal-2026-04-10.md`
 
 The Netdata removal reduced to **~54% CPU-only** despite ADR 0396 improvements.
-Six new gap categories were identified. The following amendments are tracked for
-implementation:
+Seven new gap categories were identified and are now implemented far enough for
+the 2026-04-21 live-apply replay:
 
-### Pending Amendment 1: Registry Self-Validation (`--validate-registry`)
+### Implemented Amendment 1: Registry Self-Validation (`--validate-registry`)
 
 Before any mutation, verify each CATALOG_REGISTRY entry actually locates
 at least one entry for the target service (when the service is known to exist).
@@ -233,7 +235,10 @@ a clean catalog.
 instead of `"service_id"`) and wrong `list_key` in service-completeness
 (entries were top-level, not nested under `"services"`).
 
-### Pending Amendment 2: Missing Catalog Entries
+The validator now keeps stdout as machine-readable JSON and writes the human
+success line to stderr, so automation can safely parse purge output.
+
+### Implemented Amendment 2: Missing Catalog Entries
 
 Add to CATALOG_REGISTRY:
 
@@ -246,7 +251,11 @@ Add to CATALOG_REGISTRY:
 `service-completeness.json` entry: remove `list_key: "services"` — entries
 are at the top level. Handler should be `top_level_key` not `dict_key`.
 
-### Pending Amendment 3: Role Name Registry
+The live-apply replay also added structural cleanup for JSON list-item registries
+such as `config/agent-tool-registry.json` and
+`config/serverclaw/approved-port-refs.json`.
+
+### Implemented Amendment 3: Role Name Registry
 
 Add `"role_name"` and `"ansible_playbook"` fields to
 `config/service-capability-catalog.json` entries. The decommission script
@@ -256,7 +265,11 @@ test file. Fallback: `<service_id>_runtime`.
 **Fixes:** `netdata_runtime` role was not deleted by the script because the
 script looked for a `realtime_runtime` directory.
 
-### Pending Amendment 4: `# SERVICE: <id>` Inline Markers for Role Defaults
+Role lookup now supports explicit role metadata when available and preserves the
+conventional `<service_id>_runtime` fallback. Shared anchor roles remain
+protected from broad deletion unless a service explicitly owns them.
+
+### Implemented Amendment 4: `# SERVICE: <id>` Inline Markers for Role Defaults
 
 Variables in `roles/*/defaults/main.yml` that belong to a specific service
 get annotated:
@@ -278,7 +291,7 @@ And in Jinja2 templates (`prometheus.yml.j2`, etc.):
 The decommission script extends `_apply_catalog_registry_entry` to scan
 roles for these markers and remove the annotated lines/blocks.
 
-### Pending Amendment 5: Generate `https_tls_alerts.yml` and `https_tls_targets.yml`
+### Implemented Amendment 5: Generate `https_tls_alerts.yml` and `https_tls_targets.yml`
 
 Create `scripts/generate_https_tls_config.py` reading from
 `config/certificate-catalog.json`, outputting:
@@ -289,7 +302,11 @@ Identical treatment to `generate_slo_config.py`. Adds `generate-https-tls-config
 Makefile target. The decommission script then uses `_remove_yaml_block_markers`
 for these files (already implemented) instead of the fragile text-match path.
 
-### Pending Amendment 6: Post-Purge Integrity Validation
+The 2026-04-21 replay verified that both HTTPS/TLS files are present in
+`platform_ops.py decommission-preview` marker-removal output and are deployed
+with balanced service markers on the monitoring VM.
+
+### Implemented Amendment 6: Post-Purge Integrity Validation
 
 Add a mandatory `_validate_modified_files(paths)` call at the end of
 `execute_code_purge`:
@@ -301,7 +318,11 @@ Add a mandatory `_validate_modified_files(paths)` call at the end of
 the YAML corruption (https_tls_alerts) would have been caught immediately
 instead of at pre-commit time.
 
-### Pending Amendment 7: Inventory Topology Block as Catalog
+The purge path now validates modified structured files and skips fallback
+line-deletion for JSON/YAML files that must be handled structurally or
+regenerated.
+
+### Implemented Amendment 7: Inventory Topology Block as Catalog
 
 Add to CATALOG_REGISTRY:
 
@@ -317,14 +338,27 @@ requiring agent inspection of the file structure.
 
 ---
 
-### Projected impact if all amendments implemented
+### Live-Apply Replay
 
-| Status | CPU-only % |
-|--------|-----------|
-| ADR 0393 baseline (pre-0396) | ~85% |
-| After ADR 0396 (CATALOG_REGISTRY + block markers) | ~72% (ADR 0401 actual) |
-| After all 7 pending amendments | ~95% |
-| Remaining ~5% | Human judgment (coverage gaps) + ADR/runbook prose |
+The 2026-04-21 `ws-0396-live-apply` replay verified the amended behavior from a
+fresh worktree based on `origin/main` `04638e669`:
+
+- focused pytest coverage for decommissioning, data catalog, SLO generation,
+  HTTPS/TLS assurance targets, and monitoring role expectations passed
+  (`39 passed`);
+- disposable `browser_runner` purge completed with
+  `code_purged=true`, `registry_warnings=[]`, and `integrity_errors=[]`;
+- governed live apply
+  `make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'`
+  completed with `monitoring failed=0`;
+- Prometheus loaded `slo_recording_rules`, `slo_alert_rules`, and
+  `https_tls_assurance`;
+- deployed SLO and HTTPS/TLS files on the monitoring VM have balanced service
+  block markers.
+
+The branch intentionally leaves protected integration surfaces (`VERSION`,
+release sections in `changelog.md`, top-level `README.md`, and
+`versions/stack.yaml`) for the merge-to-main integration step.
 
 ---
 

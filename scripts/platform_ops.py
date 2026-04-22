@@ -868,6 +868,8 @@ def _find_yaml_marker_files(service_id: str) -> list[dict[str, Any]]:
         REPO_ROOT / "config" / "prometheus" / "rules" / "slo_alerts.yml",
         REPO_ROOT / "config" / "prometheus" / "rules" / "slo_rules.yml",
         REPO_ROOT / "config" / "prometheus" / "file_sd" / "slo_targets.yml",
+        REPO_ROOT / "config" / "prometheus" / "rules" / "https_tls_alerts.yml",
+        REPO_ROOT / "config" / "prometheus" / "file_sd" / "https_tls_targets.yml",
         REPO_ROOT / "config" / "dependency-graph.yaml",
     ]
     result: list[dict[str, Any]] = []
@@ -966,6 +968,58 @@ def _catalog_removals(service_id: str) -> list[dict[str, Any]]:
                     would_remove = [k for k in (obj or {}) if any(v in str(k) for v in variants_set)]
                 except Exception:
                     pass
+            elif kind == "yaml_topology_block":
+                try:
+                    import yaml
+
+                    data = yaml.safe_load(full.read_text()) or {}
+                    obj = data.get(entry.get("list_key", ""), {})
+                    would_remove = [k for k in (obj or {}) if k in variants_set]
+                except Exception:
+                    pass
+            elif kind == "yaml_marker_block":
+                content = full.read_text()
+                would_remove = [v for v in variants_set if f"# BEGIN SERVICE: {v}" in content]
+            elif kind == "json_array_flat":
+                items = load_json(repo_path(*entry["path"].split("/")))
+                would_remove = [
+                    str(i.get(entry["id_field"]))
+                    for i in items
+                    if isinstance(i, dict) and i.get(entry["id_field"]) in variants_set
+                ]
+            elif kind == "json_list_item_contains":
+                data = load_json(repo_path(*entry["path"].split("/")))
+                list_items = []
+
+                def collect_matches(value: Any, path: str = "$") -> None:
+                    if isinstance(value, list):
+                        for index, item in enumerate(value):
+                            encoded = json.dumps(item, sort_keys=True) if isinstance(item, (dict, list)) else str(item)
+                            if isinstance(item, (dict, list)) and any(v in encoded for v in variants_set):
+                                label = item.get("name") or item.get("id") if isinstance(item, dict) else None
+                                list_items.append(str(label or f"{path}[{index}]"))
+                            else:
+                                collect_matches(item, f"{path}[{index}]")
+                    elif isinstance(value, dict):
+                        for key, item in value.items():
+                            collect_matches(item, f"{path}.{key}")
+
+                collect_matches(data)
+                would_remove = list_items
+            elif kind == "yaml_var_prefix":
+                try:
+                    import yaml
+
+                    data = yaml.safe_load(full.read_text()) or {}
+                    obj = data.get(entry.get("parent_key", ""), {})
+                    would_remove = [
+                        k for k in (obj or {}) if any(k == v or k.startswith(f"{v}_") for v in variants_set)
+                    ]
+                except Exception:
+                    pass
+            elif kind == "top_level_key":
+                catalog = load_json(repo_path(*entry["path"].split("/")))
+                would_remove = [k for k in (catalog or {}) if k in variants_set]
         except Exception:
             pass
 

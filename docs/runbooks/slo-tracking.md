@@ -22,6 +22,9 @@ make generate-slo-rules
 ```
 
 This rewrites the committed Prometheus rules, blackbox targets, and Grafana dashboard from the catalog.
+The generated Prometheus files include `# BEGIN SERVICE: <id>` and
+`# END SERVICE: <id>` markers so `scripts/decommission_service.py` can remove a
+service's SLO blocks without line-level YAML edits.
 
 ## Validate Before Merge
 
@@ -73,3 +76,8 @@ If promotion is unexpectedly rejected, inspect the `slo_gate` section in the ret
 2. Regenerate assets with `make generate-slo-rules`.
 3. Re-run the validation commands above.
 4. Update ADR metadata if the implementation state changed.
+
+Do not edit `config/prometheus/rules/slo_rules.yml`,
+`config/prometheus/rules/slo_alerts.yml`, or
+`config/prometheus/file_sd/slo_targets.yml` by hand; changes should flow from
+`config/slo-catalog.json` and preserve the service block markers.

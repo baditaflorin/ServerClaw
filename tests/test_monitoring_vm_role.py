@@ -32,7 +32,7 @@ def test_defaults_include_loki_minio_contract() -> None:
     defaults = DEFAULTS_PATH.read_text()
     assert 'monitoring_loki_minio_schema_cutover_date: "2026-03-30"' in defaults
     assert "monitoring_loki_minio_access_key_id: lokichunks" in defaults
-    assert ".local/monitoring/loki-minio-secret-key.txt" in defaults
+    assert "repo_shared_local_root }}/monitoring/loki-minio-secret-key.txt" in defaults
     assert "monitoring_loki_minio_bucket_name: loki-chunks" in defaults
     assert "lv3_service_topology.minio.private_ip" in defaults
 
@@ -94,9 +94,16 @@ def test_verify_tasks_check_public_dashboard_lockdown() -> None:
 def test_main_tasks_require_loki_minio_secret() -> None:
     tasks = load_tasks(TASKS_PATH)
     names = {task["name"] for task in tasks}
-    assert "Ensure the Loki MinIO secret key exists on the control machine" in names
-    assert "Fail if the Loki MinIO secret key is missing locally" in names
+    assert "Check monitoring stack prerequisites on the control machine" in names
     assert "Record the Loki MinIO secret key" in names
+    check_task = next(
+        task for task in tasks if task.get("name") == "Check monitoring stack prerequisites on the control machine"
+    )
+    assert check_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert check_task["ansible.builtin.include_role"]["tasks_from"] == "check_local_secrets"
+    assert check_task["vars"]["common_check_local_secrets_files"][0]["path"] == (
+        "{{ monitoring_loki_minio_secret_key_local_file }}"
+    )
 
 
 def test_capacity_dashboard_is_copied_imported_and_verified() -> None:

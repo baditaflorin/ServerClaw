@@ -136,6 +136,9 @@ CATALOG_REGISTRY: list[dict[str, str]] = [
         "list_key": "service_overrides",
         "id_field": "service_id",
     },
+    # --- JSON list-item pruning: remove nested list objects that reference the service variant ---
+    {"path": "config/agent-tool-registry.json", "type": "json_list_item_contains"},
+    {"path": "config/serverclaw/approved-port-refs.json", "type": "json_list_item_contains"},
 ]
 
 
@@ -176,9 +179,14 @@ def find_subdomain_records(service_id: str, subdomain_catalog: dict[str, Any]) -
     matches: list[dict[str, Any]] = []
     for record in subdomains:
         record = require_mapping(record, "config/subdomain-catalog.json.subdomains[]")
-        if record.get("service") == service_id:
+        if record.get("service_id", record.get("service")) == service_id:
             matches.append(record)
     return matches
+
+
+def _subdomain_record_name(record: dict[str, Any]) -> str | None:
+    value = record.get("hostname", record.get("fqdn"))
+    return str(value) if value else None
 
 
 def infer_database_name(service_id: str) -> str | None:
@@ -199,10 +207,10 @@ def build_plan(service_id: str) -> dict[str, Any]:
         "openbao_policy_name": f"lv3-service-{service_id}-runtime",
         "openbao_approle_name": f"{service_id}-runtime",
         "keycloak_client_id": service_id,
-        "subdomains": [record.get("hostname") for record in subdomains],
+        "subdomains": [_subdomain_record_name(record) for record in subdomains],
         "catalog_changes": {
             "service_capability_catalog": service_id,
-            "subdomain_catalog": [record.get("hostname") for record in subdomains],
+            "subdomain_catalog": [_subdomain_record_name(record) for record in subdomains],
         },
     }
 
@@ -221,7 +229,12 @@ def rewrite_service_catalog(service_id: str, path: Path = SERVICE_CATALOG_PATH) 
 def rewrite_subdomain_catalog(service_id: str, path: Path = SUBDOMAIN_CATALOG_PATH) -> bool:
     catalog = load_subdomain_catalog(path)
     subdomains = require_list(catalog.get("subdomains"), "config/subdomain-catalog.json.subdomains")
-    filtered = [record for record in subdomains if require_mapping(record, "subdomain").get("service") != service_id]
+    filtered = [
+        record
+        for record in subdomains
+        if require_mapping(record, "subdomain").get("service_id", require_mapping(record, "subdomain").get("service"))
+        != service_id
+    ]
     changed = len(filtered) != len(subdomains)
     if changed:
         catalog["subdomains"] = filtered
@@ -745,6 +758,52 @@ def _remove_from_json_array_flat(path: Path, service_id: str, id_field: str) -> 
     return True
 
 
+def _json_value_contains_variant(value: Any, variants: set[str]) -> bool:
+    try:
+        encoded = json.dumps(value, sort_keys=True)
+    except TypeError:
+        encoded = str(value)
+    return any(variant in encoded for variant in variants)
+
+
+def _prune_json_list_items_containing(value: Any, variants: set[str]) -> tuple[Any, bool]:
+    """Remove dict/list items from JSON arrays when the item references a service variant."""
+    changed = False
+    if isinstance(value, list):
+        kept: list[Any] = []
+        for item in value:
+            if isinstance(item, (dict, list)) and _json_value_contains_variant(item, variants):
+                changed = True
+                continue
+            pruned, item_changed = _prune_json_list_items_containing(item, variants)
+            changed = changed or item_changed
+            kept.append(pruned)
+        return kept, changed
+    if isinstance(value, dict):
+        result: dict[str, Any] = {}
+        for key, item in value.items():
+            pruned, item_changed = _prune_json_list_items_containing(item, variants)
+            changed = changed or item_changed
+            result[key] = pruned
+        return result, changed
+    return value, False
+
+
+def _remove_json_list_items_containing(path: Path, service_id: str) -> bool:
+    """Remove nested JSON list objects containing a service variant.
+
+    Used for registry-style JSON files whose service-specific entries are list
+    items rather than objects keyed directly by service id.
+    """
+    if not path.is_file():
+        return False
+    data = load_json(path)
+    pruned, changed = _prune_json_list_items_containing(data, set(_service_name_variants(service_id)))
+    if changed:
+        write_json(path, pruned, indent=2)
+    return changed
+
+
 def _remove_from_yaml_var_prefix(path: Path, parent_key: str, service_id: str) -> bool:
     """Remove lines under parent_key whose YAML key starts with any service variant.
 
@@ -931,6 +990,8 @@ def _apply_catalog_registry_entry(entry: dict[str, str], service_id: str) -> boo
         return _remove_from_json_array_flat(path, service_id, entry["id_field"])
     elif kind == "yaml_var_prefix":
         return _remove_from_yaml_var_prefix(path, entry.get("parent_key", ""), service_id)
+    elif kind == "json_list_item_contains":
+        return _remove_json_list_items_containing(path, service_id)
     return False
 
 
@@ -1165,6 +1226,9 @@ def build_code_purge_plan(service_id: str) -> dict[str, Any]:
                 hit = isinstance(data, list) and any(
                     isinstance(i, dict) and i.get(entry["id_field"]) in variants_set for i in data
                 )
+            elif kind == "json_list_item_contains":
+                data = load_json(full)
+                _, hit = _prune_json_list_items_containing(data, variants_set)
             elif kind == "yaml_var_prefix":
                 try:
                     import yaml
@@ -1213,8 +1277,10 @@ def build_code_purge_plan(service_id: str) -> dict[str, Any]:
         "adr_deprecation": "will scan docs/adr/ for service-specific ADRs (handles both bold and list-item Status: formats)",
         "stack_yaml": "will remove receipt entry",
         "regenerate": [
-            "python scripts/platform_manifest.py --write",
-            "python scripts/generate_discovery_artifacts.py --write",
+            "python3 scripts/generate_slo_rules.py --write",
+            "python3 scripts/generate_https_tls_assurance.py --write",
+            "python3 scripts/platform_manifest.py --write",
+            "python3 scripts/generate_discovery_artifacts.py --write",
             "python3 scripts/workstream_registry.py --write",
         ],
     }
@@ -1267,6 +1333,7 @@ def execute_code_purge(plan: dict[str, Any]) -> dict[str, Any]:
         repo_path("config", "prometheus", "file_sd", "https_tls_targets.yml"),
         repo_path("config", "dependency-graph.yaml"),
     ]
+    generated_yaml_set = {str(path) for path in generated_yaml_files}
     for yaml_file in generated_yaml_files:
         if _remove_yaml_block_markers(yaml_file, service_id):
             results["reference_files_cleaned"].append(str(yaml_file.relative_to(repo_path())))
@@ -1277,6 +1344,8 @@ def execute_code_purge(plan: dict[str, Any]) -> dict[str, Any]:
         full = repo_path() / rel_file
         # Skip files already handled by catalog registry or markers
         if any(str(full).endswith(e["path"]) for e in CATALOG_REGISTRY):
+            continue
+        if str(full) in generated_yaml_set or full.suffix in {".json", ".yml", ".yaml"}:
             continue
         if _remove_line_references(full, service_id):
             results["reference_files_cleaned"].append(rel_file)
@@ -1574,6 +1643,9 @@ def validate_catalog_registry(probe_service_id: str) -> list[str]:
                 found = isinstance(data, list) and any(
                     isinstance(i, dict) and i.get(entry["id_field"]) in variants_set for i in data
                 )
+            elif kind == "json_list_item_contains":
+                data = load_json(full)
+                _, found = _prune_json_list_items_containing(data, variants_set)
             elif kind == "yaml_var_prefix":
                 try:
                     import yaml
@@ -1588,17 +1660,15 @@ def validate_catalog_registry(probe_service_id: str) -> list[str]:
         except Exception:
             pass
 
-        # Only warn on entries we'd expect to have this service (optional catalogs
-        # might legitimately be absent for a given service)
-        OPTIONAL_CATALOG_TYPES = {
-            "dep_graph",
-            "partitions",
-            "yaml_topology_block",
-            "yaml_marker_block",  # platform_services.yml — only docker-compose services; VMs are absent
-            "json_array_flat",  # monitors.json — not all services have uptime monitors
-            "yaml_var_prefix",  # topology host_vars — not all services have port assignments
-        }
-        if not found and kind not in OPTIONAL_CATALOG_TYPES:
+        # Optional catalogs legitimately omit many services. Warn only when the
+        # service text appears in the catalog but the structured handler found
+        # nothing, which catches wrong id_field/list_key registry entries without
+        # treating every absent optional surface as a failure.
+        try:
+            raw_contains_service = any(v in full.read_text() for v in variants_set)
+        except Exception:
+            raw_contains_service = False
+        if not found and (raw_contains_service or entry["path"] == "config/service-capability-catalog.json"):
             warnings.append(
                 f"WARN registry: {entry['path']} ({kind}) — zero matches for '{probe_service_id}'. "
                 f"Check id_field/list_key in CATALOG_REGISTRY."
@@ -1656,7 +1726,7 @@ def main(argv: list[str] | None = None) -> int:
                 for w in registry_warnings:
                     print(w, file=sys.stderr)
             else:
-                print(f"Registry OK — all entries matched '{args.service}'.")
+                print(f"Registry OK — all entries matched '{args.service}'.", file=sys.stderr)
 
         # Runtime plan (always computed for context)
         try:

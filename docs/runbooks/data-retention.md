@@ -6,12 +6,12 @@ This runbook defines the repository-managed data retention controls introduced b
 
 ## Canonical Sources
 
-- ADR: [docs/adr/0103-data-classification-and-retention-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0103-data-classification-and-retention-policy.md)
-- data catalog: [config/data-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/data-catalog.json)
-- schema: [docs/schema/data-catalog.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/schema/data-catalog.schema.json)
-- purge tool: [scripts/purge_old_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/purge_old_receipts.py)
-- decommission helper: [scripts/decommission_service.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/decommission_service.py)
-- scheduled runtime role: [roles/data_retention](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/roles/data_retention)
+- ADR: [docs/adr/0103-data-classification-and-retention-policy.md](../adr/0103-data-classification-and-retention-policy.md)
+- data catalog: [config/data-catalog.json](../../config/data-catalog.json)
+- schema: [docs/schema/data-catalog.schema.json](../schema/data-catalog.schema.json)
+- purge tool: [scripts/purge_old_receipts.py](../../scripts/purge_old_receipts.py)
+- decommission helper: [scripts/decommission_service.py](../../scripts/decommission_service.py)
+- scheduled runtime role: [roles/data_retention](../../roles/data_retention)
 
 ## What Is Enforced
 
@@ -62,13 +62,18 @@ That role installs the canonical purge script and catalog onto the target, then 
 
 ## Decommission A Service
 
-Preview the cleanup plan:
+Preview the structural cleanup plan:
 
 ```bash
-python3 scripts/decommission_service.py --service netbox
+python3 scripts/platform_ops.py decommission-preview --service netbox
+python3 scripts/decommission_service.py --service netbox --validate-registry
 ```
 
-Execute destructive cleanup:
+Both commands print machine-readable JSON on stdout. `--validate-registry`
+writes human status to stderr and should report an empty `registry_warnings`
+list before destructive cleanup.
+
+Execute destructive runtime cleanup:
 
 ```bash
 LV3_POSTGRES_ADMIN_DSN='postgresql://postgres:...@database.example.com/postgres' \
@@ -83,4 +88,19 @@ python3 scripts/decommission_service.py \
   --keycloak-url https://sso.example.com
 ```
 
-The script removes the service from the repo catalogs as part of execution, so run it from a clean branch and review the resulting diff before merge.
+Execute deterministic code cleanup from a clean branch:
+
+```bash
+python3 scripts/decommission_service.py \
+  --service netbox \
+  --purge-code \
+  --confirm netbox \
+  --validate-registry
+```
+
+The code purge removes registered catalog entries structurally, removes
+`# BEGIN SERVICE:` / `# END SERVICE:` blocks from generated Prometheus assets,
+regenerates derived SLO and HTTPS/TLS files, and parses modified JSON/YAML
+before returning. If integrity validation fails, stop and use the printed
+`git checkout HEAD -- <path>` recovery command before retrying from a clean
+tree.

@@ -2,9 +2,10 @@ groups:
   - name: slo_alert_rules
     interval: 1m
     rules:
+# BEGIN SERVICE: browser_runner
       - alert: SLOFastBurn_browser_runner_availability
-        expr: (slo:browser_runner_availability:error_rate_5m > (14 * 0.010000)) and
-          (slo:browser_runner_availability:error_rate_1h > (14 * 0.010000))
+        expr: (slo:browser_runner_availability:error_rate_5m > (14 * 0.010000)) and (slo:browser_runner_availability:error_rate_1h
+          > (14 * 0.010000))
         for: 2m
         labels:
           severity: critical
@@ -13,8 +14,8 @@ groups:
           indicator: availability
         annotations:
           summary: browser-runner-availability is burning its error budget at 14x
-          description: The private browser runner remains reachable on docker-runtime
-            for governed Playwright session execution.
+          description: The private browser runner remains reachable on docker-runtime for
+            governed Playwright session execution.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_browser_runner_availability
         expr: slo:browser_runner_availability:error_rate_1h > (3 * 0.010000)
@@ -26,8 +27,8 @@ groups:
           indicator: availability
         annotations:
           summary: browser-runner-availability is burning its error budget at 3x
-          description: The private browser runner remains reachable on docker-runtime
-            for governed Playwright session execution.
+          description: The private browser runner remains reachable on docker-runtime for
+            governed Playwright session execution.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_browser_runner_availability
         expr: slo:browser_runner_availability:budget_remaining < 0.10
@@ -39,12 +40,14 @@ groups:
           indicator: availability
         annotations:
           summary: browser-runner-availability has less than 10% error budget remaining
-          description: The private browser runner remains reachable on docker-runtime
-            for governed Playwright session execution.
+          description: The private browser runner remains reachable on docker-runtime for
+            governed Playwright session execution.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: browser_runner
+# BEGIN SERVICE: changedetection
       - alert: SLOFastBurn_changedetection_availability
-        expr: (slo:changedetection_availability:error_rate_5m > (14 * 0.010000)) and
-          (slo:changedetection_availability:error_rate_1h > (14 * 0.010000))
+        expr: (slo:changedetection_availability:error_rate_5m > (14 * 0.010000)) and (slo:changedetection_availability:error_rate_1h
+          > (14 * 0.010000))
         for: 2m
         labels:
           severity: critical
@@ -53,9 +56,8 @@ groups:
           indicator: availability
         annotations:
           summary: changedetection-availability is burning its error budget at 14x
-          description: The private Changedetection.io runtime remains reachable on
-            docker-runtime for governed upstream release, advisory, and API change
-            monitoring.
+          description: The private Changedetection.io runtime remains reachable on docker-runtime
+            for governed upstream release, advisory, and API change monitoring.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_changedetection_availability
         expr: slo:changedetection_availability:error_rate_1h > (3 * 0.010000)
@@ -67,9 +69,8 @@ groups:
           indicator: availability
         annotations:
           summary: changedetection-availability is burning its error budget at 3x
-          description: The private Changedetection.io runtime remains reachable on
-            docker-runtime for governed upstream release, advisory, and API change
-            monitoring.
+          description: The private Changedetection.io runtime remains reachable on docker-runtime
+            for governed upstream release, advisory, and API change monitoring.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_changedetection_availability
         expr: slo:changedetection_availability:budget_remaining < 0.10
@@ -81,10 +82,11 @@ groups:
           indicator: availability
         annotations:
           summary: changedetection-availability has less than 10% error budget remaining
-          description: The private Changedetection.io runtime remains reachable on
-            docker-runtime for governed upstream release, advisory, and API change
-            monitoring.
+          description: The private Changedetection.io runtime remains reachable on docker-runtime
+            for governed upstream release, advisory, and API change monitoring.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: changedetection
+# BEGIN SERVICE: crawl4ai
       - alert: SLOFastBurn_crawl4ai_availability
         expr: (slo:crawl4ai_availability:error_rate_5m > (14 * 0.010000)) and (slo:crawl4ai_availability:error_rate_1h
           > (14 * 0.010000))
@@ -125,6 +127,8 @@ groups:
           description: The private Crawl4AI runtime remains reachable on docker-runtime
             for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: crawl4ai
+# BEGIN SERVICE: directus
       - alert: SLOFastBurn_directus_availability
         expr: (slo:directus_availability:error_rate_5m > (14 * 0.005000)) and (slo:directus_availability:error_rate_1h
           > (14 * 0.005000))
@@ -165,6 +169,8 @@ groups:
           description: Directus should keep the public health contract on data.example.com
             reachable through the shared edge.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: directus
+# BEGIN SERVICE: dozzle
       - alert: SLOFastBurn_dozzle_availability
         expr: (slo:dozzle_availability:error_rate_5m > (14 * 0.010000)) and (slo:dozzle_availability:error_rate_1h
           > (14 * 0.010000))
@@ -176,8 +182,8 @@ groups:
           indicator: availability
         annotations:
           summary: dozzle-availability is burning its error budget at 14x
-          description: The Dozzle hub remains reachable on the private runtime network
-            for real-time container log access.
+          description: The Dozzle hub remains reachable on the private runtime network for
+            real-time container log access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_dozzle_availability
         expr: slo:dozzle_availability:error_rate_1h > (3 * 0.010000)
@@ -189,8 +195,8 @@ groups:
           indicator: availability
         annotations:
           summary: dozzle-availability is burning its error budget at 3x
-          description: The Dozzle hub remains reachable on the private runtime network
-            for real-time container log access.
+          description: The Dozzle hub remains reachable on the private runtime network for
+            real-time container log access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_dozzle_availability
         expr: slo:dozzle_availability:budget_remaining < 0.10
@@ -202,9 +208,11 @@ groups:
           indicator: availability
         annotations:
           summary: dozzle-availability has less than 10% error budget remaining
-          description: The Dozzle hub remains reachable on the private runtime network
-            for real-time container log access.
+          description: The Dozzle hub remains reachable on the private runtime network for
+            real-time container log access.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: dozzle
+# BEGIN SERVICE: excalidraw
       - alert: SLOFastBurn_excalidraw_availability
         expr: (slo:excalidraw_availability:error_rate_5m > (14 * 0.005000)) and (slo:excalidraw_availability:error_rate_1h
           > (14 * 0.005000))
@@ -216,8 +224,8 @@ groups:
           indicator: availability
         annotations:
           summary: excalidraw-availability is burning its error budget at 14x
-          description: The private Excalidraw publication remains reachable through
-            the authenticated LV3 edge.
+          description: The private Excalidraw publication remains reachable through the
+            authenticated LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_excalidraw_availability
         expr: slo:excalidraw_availability:error_rate_1h > (3 * 0.005000)
@@ -229,8 +237,8 @@ groups:
           indicator: availability
         annotations:
           summary: excalidraw-availability is burning its error budget at 3x
-          description: The private Excalidraw publication remains reachable through
-            the authenticated LV3 edge.
+          description: The private Excalidraw publication remains reachable through the
+            authenticated LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_excalidraw_availability
         expr: slo:excalidraw_availability:budget_remaining < 0.10
@@ -242,9 +250,11 @@ groups:
           indicator: availability
         annotations:
           summary: excalidraw-availability has less than 10% error budget remaining
-          description: The private Excalidraw publication remains reachable through
-            the authenticated LV3 edge.
+          description: The private Excalidraw publication remains reachable through the
+            authenticated LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: excalidraw
+# BEGIN SERVICE: gitea
       - alert: SLOFastBurn_gitea_availability
         expr: (slo:gitea_availability:error_rate_5m > (14 * 0.005000)) and (slo:gitea_availability:error_rate_1h
           > (14 * 0.005000))
@@ -256,8 +266,8 @@ groups:
           indicator: availability
         annotations:
           summary: gitea-availability is burning its error budget at 14x
-          description: The private Gitea runtime remains reachable for repository
-            hosting, webhooks, and self-hosted CI orchestration.
+          description: The private Gitea runtime remains reachable for repository hosting,
+            webhooks, and self-hosted CI orchestration.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_gitea_availability
         expr: slo:gitea_availability:error_rate_1h > (3 * 0.005000)
@@ -269,8 +279,8 @@ groups:
           indicator: availability
         annotations:
           summary: gitea-availability is burning its error budget at 3x
-          description: The private Gitea runtime remains reachable for repository
-            hosting, webhooks, and self-hosted CI orchestration.
+          description: The private Gitea runtime remains reachable for repository hosting,
+            webhooks, and self-hosted CI orchestration.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_gitea_availability
         expr: slo:gitea_availability:budget_remaining < 0.10
@@ -282,9 +292,11 @@ groups:
           indicator: availability
         annotations:
           summary: gitea-availability has less than 10% error budget remaining
-          description: The private Gitea runtime remains reachable for repository
-            hosting, webhooks, and self-hosted CI orchestration.
+          description: The private Gitea runtime remains reachable for repository hosting,
+            webhooks, and self-hosted CI orchestration.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: gitea
+# BEGIN SERVICE: glitchtip
       - alert: SLOFastBurn_glitchtip_availability
         expr: (slo:glitchtip_availability:error_rate_5m > (14 * 0.005000)) and (slo:glitchtip_availability:error_rate_1h
           > (14 * 0.005000))
@@ -296,8 +308,8 @@ groups:
           indicator: availability
         annotations:
           summary: glitchtip-availability is burning its error budget at 14x
-          description: The public GlitchTip health endpoint remains reachable for
-            browser sign-in, DSN ingestion, and repo-managed smoke verification.
+          description: The public GlitchTip health endpoint remains reachable for browser
+            sign-in, DSN ingestion, and repo-managed smoke verification.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_glitchtip_availability
         expr: slo:glitchtip_availability:error_rate_1h > (3 * 0.005000)
@@ -309,8 +321,8 @@ groups:
           indicator: availability
         annotations:
           summary: glitchtip-availability is burning its error budget at 3x
-          description: The public GlitchTip health endpoint remains reachable for
-            browser sign-in, DSN ingestion, and repo-managed smoke verification.
+          description: The public GlitchTip health endpoint remains reachable for browser
+            sign-in, DSN ingestion, and repo-managed smoke verification.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_glitchtip_availability
         expr: slo:glitchtip_availability:budget_remaining < 0.10
@@ -322,9 +334,11 @@ groups:
           indicator: availability
         annotations:
           summary: glitchtip-availability has less than 10% error budget remaining
-          description: The public GlitchTip health endpoint remains reachable for
-            browser sign-in, DSN ingestion, and repo-managed smoke verification.
+          description: The public GlitchTip health endpoint remains reachable for browser
+            sign-in, DSN ingestion, and repo-managed smoke verification.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: glitchtip
+# BEGIN SERVICE: gotenberg
       - alert: SLOFastBurn_gotenberg_availability
         expr: (slo:gotenberg_availability:error_rate_5m > (14 * 0.010000)) and (slo:gotenberg_availability:error_rate_1h
           > (14 * 0.010000))
@@ -336,8 +350,8 @@ groups:
           indicator: availability
         annotations:
           summary: gotenberg-availability is burning its error budget at 14x
-          description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai for synchronous PDF conversion workflows.
+          description: The private Gotenberg document rendering API remains reachable on
+            runtime-ai for synchronous PDF conversion workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_gotenberg_availability
         expr: slo:gotenberg_availability:error_rate_1h > (3 * 0.010000)
@@ -349,8 +363,8 @@ groups:
           indicator: availability
         annotations:
           summary: gotenberg-availability is burning its error budget at 3x
-          description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai for synchronous PDF conversion workflows.
+          description: The private Gotenberg document rendering API remains reachable on
+            runtime-ai for synchronous PDF conversion workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_gotenberg_availability
         expr: slo:gotenberg_availability:budget_remaining < 0.10
@@ -362,9 +376,11 @@ groups:
           indicator: availability
         annotations:
           summary: gotenberg-availability has less than 10% error budget remaining
-          description: The private Gotenberg document rendering API remains reachable
-            on runtime-ai for synchronous PDF conversion workflows.
+          description: The private Gotenberg document rendering API remains reachable on
+            runtime-ai for synchronous PDF conversion workflows.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: gotenberg
+# BEGIN SERVICE: grafana
       - alert: SLOFastBurn_grafana_availability
         expr: (slo:grafana_availability:error_rate_5m > (14 * 0.005000)) and (slo:grafana_availability:error_rate_1h
           > (14 * 0.005000))
@@ -402,6 +418,8 @@ groups:
           summary: grafana-availability has less than 10% error budget remaining
           description: Grafana remains reachable through the public LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: grafana
+# BEGIN SERVICE: grist
       - alert: SLOFastBurn_grist_availability
         expr: (slo:grist_availability:error_rate_5m > (14 * 0.005000)) and (slo:grist_availability:error_rate_1h
           > (14 * 0.005000))
@@ -442,6 +460,8 @@ groups:
           description: Grist remains reachable through the public LV3 edge for operator-managed
             spreadsheet databases and workflow tables.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: grist
+# BEGIN SERVICE: harbor
       - alert: SLOFastBurn_harbor_availability
         expr: (slo:harbor_availability:error_rate_5m > (14 * 0.005000)) and (slo:harbor_availability:error_rate_1h
           > (14 * 0.005000))
@@ -453,8 +473,8 @@ groups:
           indicator: availability
         annotations:
           summary: harbor-availability is burning its error budget at 14x
-          description: Harbor remains reachable through the shared LV3 edge for image
-            pulls, pushes, and operator access.
+          description: Harbor remains reachable through the shared LV3 edge for image pulls,
+            pushes, and operator access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_harbor_availability
         expr: slo:harbor_availability:error_rate_1h > (3 * 0.005000)
@@ -466,8 +486,8 @@ groups:
           indicator: availability
         annotations:
           summary: harbor-availability is burning its error budget at 3x
-          description: Harbor remains reachable through the shared LV3 edge for image
-            pulls, pushes, and operator access.
+          description: Harbor remains reachable through the shared LV3 edge for image pulls,
+            pushes, and operator access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_harbor_availability
         expr: slo:harbor_availability:budget_remaining < 0.10
@@ -479,9 +499,11 @@ groups:
           indicator: availability
         annotations:
           summary: harbor-availability has less than 10% error budget remaining
-          description: Harbor remains reachable through the shared LV3 edge for image
-            pulls, pushes, and operator access.
+          description: Harbor remains reachable through the shared LV3 edge for image pulls,
+            pushes, and operator access.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: harbor
+# BEGIN SERVICE: homepage
       - alert: SLOFastBurn_homepage_availability
         expr: (slo:homepage_availability:error_rate_5m > (14 * 0.005000)) and (slo:homepage_availability:error_rate_1h
           > (14 * 0.005000))
@@ -493,8 +515,8 @@ groups:
           indicator: availability
         annotations:
           summary: homepage-availability is burning its error budget at 14x
-          description: The unified operator dashboard remains reachable through the
-            authenticated LV3 edge.
+          description: The unified operator dashboard remains reachable through the authenticated
+            LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_homepage_availability
         expr: slo:homepage_availability:error_rate_1h > (3 * 0.005000)
@@ -506,8 +528,8 @@ groups:
           indicator: availability
         annotations:
           summary: homepage-availability is burning its error budget at 3x
-          description: The unified operator dashboard remains reachable through the
-            authenticated LV3 edge.
+          description: The unified operator dashboard remains reachable through the authenticated
+            LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_homepage_availability
         expr: slo:homepage_availability:budget_remaining < 0.10
@@ -519,9 +541,11 @@ groups:
           indicator: availability
         annotations:
           summary: homepage-availability has less than 10% error budget remaining
-          description: The unified operator dashboard remains reachable through the
-            authenticated LV3 edge.
+          description: The unified operator dashboard remains reachable through the authenticated
+            LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: homepage
+# BEGIN SERVICE: keycloak
       - alert: SLOFastBurn_keycloak_availability
         expr: (slo:keycloak_availability:error_rate_5m > (14 * 0.003000)) and (slo:keycloak_availability:error_rate_1h
           > (14 * 0.003000))
@@ -533,8 +557,7 @@ groups:
           indicator: availability
         annotations:
           summary: keycloak-availability is burning its error budget at 14x
-          description: Keycloak discovery remains reachable for operator and service
-            authentication.
+          description: Keycloak discovery remains reachable for operator and service authentication.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_keycloak_availability
         expr: slo:keycloak_availability:error_rate_1h > (3 * 0.003000)
@@ -546,8 +569,7 @@ groups:
           indicator: availability
         annotations:
           summary: keycloak-availability is burning its error budget at 3x
-          description: Keycloak discovery remains reachable for operator and service
-            authentication.
+          description: Keycloak discovery remains reachable for operator and service authentication.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_keycloak_availability
         expr: slo:keycloak_availability:budget_remaining < 0.10
@@ -559,9 +581,10 @@ groups:
           indicator: availability
         annotations:
           summary: keycloak-availability has less than 10% error budget remaining
-          description: Keycloak discovery remains reachable for operator and service
-            authentication.
+          description: Keycloak discovery remains reachable for operator and service authentication.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: keycloak
+# BEGIN SERVICE: keycloak
       - alert: SLOFastBurn_keycloak_latency
         expr: (slo:keycloak_latency:error_rate_5m > (14 * 0.050000)) and (slo:keycloak_latency:error_rate_1h
           > (14 * 0.050000))
@@ -599,9 +622,11 @@ groups:
           summary: keycloak-latency has less than 10% error budget remaining
           description: Keycloak discovery responds in under 500ms for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: keycloak
+# BEGIN SERVICE: label_studio
       - alert: SLOFastBurn_label_studio_availability
-        expr: (slo:label_studio_availability:error_rate_5m > (14 * 0.010000)) and
-          (slo:label_studio_availability:error_rate_1h > (14 * 0.010000))
+        expr: (slo:label_studio_availability:error_rate_5m > (14 * 0.010000)) and (slo:label_studio_availability:error_rate_1h
+          > (14 * 0.010000))
         for: 2m
         labels:
           severity: critical
@@ -639,6 +664,8 @@ groups:
           description: The private Label Studio runtime remains reachable on docker-runtime
             for governed annotation queues and API automation.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: label_studio
+# BEGIN SERVICE: langfuse
       - alert: SLOFastBurn_langfuse_availability
         expr: (slo:langfuse_availability:error_rate_5m > (14 * 0.005000)) and (slo:langfuse_availability:error_rate_1h
           > (14 * 0.005000))
@@ -650,8 +677,8 @@ groups:
           indicator: availability
         annotations:
           summary: langfuse-availability is burning its error budget at 14x
-          description: Langfuse remains reachable through the public LV3 edge for
-            trace ingestion and operator access.
+          description: Langfuse remains reachable through the public LV3 edge for trace
+            ingestion and operator access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_langfuse_availability
         expr: slo:langfuse_availability:error_rate_1h > (3 * 0.005000)
@@ -663,8 +690,8 @@ groups:
           indicator: availability
         annotations:
           summary: langfuse-availability is burning its error budget at 3x
-          description: Langfuse remains reachable through the public LV3 edge for
-            trace ingestion and operator access.
+          description: Langfuse remains reachable through the public LV3 edge for trace
+            ingestion and operator access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_langfuse_availability
         expr: slo:langfuse_availability:budget_remaining < 0.10
@@ -676,9 +703,11 @@ groups:
           indicator: availability
         annotations:
           summary: langfuse-availability has less than 10% error budget remaining
-          description: Langfuse remains reachable through the public LV3 edge for
-            trace ingestion and operator access.
+          description: Langfuse remains reachable through the public LV3 edge for trace
+            ingestion and operator access.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: langfuse
+# BEGIN SERVICE: mailpit
       - alert: SLOFastBurn_mailpit_availability
         expr: (slo:mailpit_availability:error_rate_5m > (14 * 0.010000)) and (slo:mailpit_availability:error_rate_1h
           > (14 * 0.010000))
@@ -690,8 +719,8 @@ groups:
           indicator: availability
         annotations:
           summary: mailpit-availability is burning its error budget at 14x
-          description: Mailpit remains reachable on the private guest-network listener
-            for staging and development SMTP capture flows.
+          description: Mailpit remains reachable on the private guest-network listener for
+            staging and development SMTP capture flows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_mailpit_availability
         expr: slo:mailpit_availability:error_rate_1h > (3 * 0.010000)
@@ -703,8 +732,8 @@ groups:
           indicator: availability
         annotations:
           summary: mailpit-availability is burning its error budget at 3x
-          description: Mailpit remains reachable on the private guest-network listener
-            for staging and development SMTP capture flows.
+          description: Mailpit remains reachable on the private guest-network listener for
+            staging and development SMTP capture flows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_mailpit_availability
         expr: slo:mailpit_availability:budget_remaining < 0.10
@@ -716,12 +745,14 @@ groups:
           indicator: availability
         annotations:
           summary: mailpit-availability has less than 10% error budget remaining
-          description: Mailpit remains reachable on the private guest-network listener
-            for staging and development SMTP capture flows.
+          description: Mailpit remains reachable on the private guest-network listener for
+            staging and development SMTP capture flows.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: mailpit
+# BEGIN SERVICE: matrix_synapse
       - alert: SLOFastBurn_matrix_synapse_availability
-        expr: (slo:matrix_synapse_availability:error_rate_5m > (14 * 0.005000)) and
-          (slo:matrix_synapse_availability:error_rate_1h > (14 * 0.005000))
+        expr: (slo:matrix_synapse_availability:error_rate_5m > (14 * 0.005000)) and (slo:matrix_synapse_availability:error_rate_1h
+          > (14 * 0.005000))
         for: 2m
         labels:
           severity: critical
@@ -730,8 +761,7 @@ groups:
           indicator: availability
         annotations:
           summary: matrix-synapse-availability is burning its error budget at 14x
-          description: Matrix Synapse remains reachable on the public client versions
-            endpoint.
+          description: Matrix Synapse remains reachable on the public client versions endpoint.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_matrix_synapse_availability
         expr: slo:matrix_synapse_availability:error_rate_1h > (3 * 0.005000)
@@ -743,8 +773,7 @@ groups:
           indicator: availability
         annotations:
           summary: matrix-synapse-availability is burning its error budget at 3x
-          description: Matrix Synapse remains reachable on the public client versions
-            endpoint.
+          description: Matrix Synapse remains reachable on the public client versions endpoint.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_matrix_synapse_availability
         expr: slo:matrix_synapse_availability:budget_remaining < 0.10
@@ -756,9 +785,10 @@ groups:
           indicator: availability
         annotations:
           summary: matrix-synapse-availability has less than 10% error budget remaining
-          description: Matrix Synapse remains reachable on the public client versions
-            endpoint.
+          description: Matrix Synapse remains reachable on the public client versions endpoint.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: matrix_synapse
+# BEGIN SERVICE: minio
       - alert: SLOFastBurn_minio_availability
         expr: (slo:minio_availability:error_rate_5m > (14 * 0.005000)) and (slo:minio_availability:error_rate_1h
           > (14 * 0.005000))
@@ -799,6 +829,8 @@ groups:
           description: The shared MinIO S3-compatible object-storage API remains reachable
             through the public LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: minio
+# BEGIN SERVICE: netbox
       - alert: SLOFastBurn_netbox_availability
         expr: (slo:netbox_availability:error_rate_5m > (14 * 0.005000)) and (slo:netbox_availability:error_rate_1h
           > (14 * 0.005000))
@@ -810,8 +842,7 @@ groups:
           indicator: availability
         annotations:
           summary: netbox-availability is burning its error budget at 14x
-          description: NetBox remains reachable for inventory, IPAM, and topology
-            workflows.
+          description: NetBox remains reachable for inventory, IPAM, and topology workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_netbox_availability
         expr: slo:netbox_availability:error_rate_1h > (3 * 0.005000)
@@ -823,8 +854,7 @@ groups:
           indicator: availability
         annotations:
           summary: netbox-availability is burning its error budget at 3x
-          description: NetBox remains reachable for inventory, IPAM, and topology
-            workflows.
+          description: NetBox remains reachable for inventory, IPAM, and topology workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_netbox_availability
         expr: slo:netbox_availability:budget_remaining < 0.10
@@ -836,9 +866,10 @@ groups:
           indicator: availability
         annotations:
           summary: netbox-availability has less than 10% error budget remaining
-          description: NetBox remains reachable for inventory, IPAM, and topology
-            workflows.
+          description: NetBox remains reachable for inventory, IPAM, and topology workflows.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: netbox
+# BEGIN SERVICE: nextcloud
       - alert: SLOFastBurn_nextcloud_availability
         expr: (slo:nextcloud_availability:error_rate_5m > (14 * 0.005000)) and (slo:nextcloud_availability:error_rate_1h
           > (14 * 0.005000))
@@ -850,8 +881,8 @@ groups:
           indicator: availability
         annotations:
           summary: nextcloud-availability is burning its error budget at 14x
-          description: The public Nextcloud status endpoint remains reachable for
-            the canonical personal file and DAV data plane.
+          description: The public Nextcloud status endpoint remains reachable for the canonical
+            personal file and DAV data plane.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_nextcloud_availability
         expr: slo:nextcloud_availability:error_rate_1h > (3 * 0.005000)
@@ -863,8 +894,8 @@ groups:
           indicator: availability
         annotations:
           summary: nextcloud-availability is burning its error budget at 3x
-          description: The public Nextcloud status endpoint remains reachable for
-            the canonical personal file and DAV data plane.
+          description: The public Nextcloud status endpoint remains reachable for the canonical
+            personal file and DAV data plane.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_nextcloud_availability
         expr: slo:nextcloud_availability:budget_remaining < 0.10
@@ -876,9 +907,11 @@ groups:
           indicator: availability
         annotations:
           summary: nextcloud-availability has less than 10% error budget remaining
-          description: The public Nextcloud status endpoint remains reachable for
-            the canonical personal file and DAV data plane.
+          description: The public Nextcloud status endpoint remains reachable for the canonical
+            personal file and DAV data plane.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: nextcloud
+# BEGIN SERVICE: nginx_edge
       - alert: SLOFastBurn_nginx_edge_availability
         expr: (slo:nginx_edge_availability:error_rate_5m > (14 * 0.000500)) and (slo:nginx_edge_availability:error_rate_1h
           > (14 * 0.000500))
@@ -916,6 +949,8 @@ groups:
           summary: nginx-edge-availability has less than 10% error budget remaining
           description: The edge reverse proxy remains reachable for published services.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: nginx_edge
+# BEGIN SERVICE: openfga
       - alert: SLOFastBurn_openfga_availability
         expr: (slo:openfga_availability:error_rate_5m > (14 * 0.005000)) and (slo:openfga_availability:error_rate_1h
           > (14 * 0.005000))
@@ -956,6 +991,8 @@ groups:
           description: The private OpenFGA runtime remains reachable on runtime-control
             for delegated authorization queries from the platform guest network.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: openfga
+# BEGIN SERVICE: openfga
       - alert: SLOFastBurn_openfga_latency
         expr: (slo:openfga_latency:error_rate_5m > (14 * 0.050000)) and (slo:openfga_latency:error_rate_1h
           > (14 * 0.050000))
@@ -967,8 +1004,8 @@ groups:
           indicator: latency
         annotations:
           summary: openfga-latency is burning its error budget at 14x
-          description: The private OpenFGA runtime responds in under 500ms for 95%
-            of guest-network probes.
+          description: The private OpenFGA runtime responds in under 500ms for 95% of guest-network
+            probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_openfga_latency
         expr: slo:openfga_latency:error_rate_1h > (3 * 0.050000)
@@ -980,8 +1017,8 @@ groups:
           indicator: latency
         annotations:
           summary: openfga-latency is burning its error budget at 3x
-          description: The private OpenFGA runtime responds in under 500ms for 95%
-            of guest-network probes.
+          description: The private OpenFGA runtime responds in under 500ms for 95% of guest-network
+            probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_openfga_latency
         expr: slo:openfga_latency:budget_remaining < 0.10
@@ -993,9 +1030,11 @@ groups:
           indicator: latency
         annotations:
           summary: openfga-latency has less than 10% error budget remaining
-          description: The private OpenFGA runtime responds in under 500ms for 95%
-            of guest-network probes.
+          description: The private OpenFGA runtime responds in under 500ms for 95% of guest-network
+            probes.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: openfga
+# BEGIN SERVICE: outline
       - alert: SLOFastBurn_outline_availability
         expr: (slo:outline_availability:error_rate_5m > (14 * 0.005000)) and (slo:outline_availability:error_rate_1h
           > (14 * 0.005000))
@@ -1036,6 +1075,8 @@ groups:
           description: Outline remains reachable through the public LV3 edge for living
             knowledge browsing and sync automation.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: outline
+# BEGIN SERVICE: paperless
       - alert: SLOFastBurn_paperless_availability
         expr: (slo:paperless_availability:error_rate_5m > (14 * 0.010000)) and (slo:paperless_availability:error_rate_1h
           > (14 * 0.010000))
@@ -1047,8 +1088,8 @@ groups:
           indicator: availability
         annotations:
           summary: paperless-availability is burning its error budget at 14x
-          description: Paperless remains reachable through the public LV3 edge for
-            document archive access and governed API reconciliation.
+          description: Paperless remains reachable through the public LV3 edge for document
+            archive access and governed API reconciliation.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_paperless_availability
         expr: slo:paperless_availability:error_rate_1h > (3 * 0.010000)
@@ -1060,8 +1101,8 @@ groups:
           indicator: availability
         annotations:
           summary: paperless-availability is burning its error budget at 3x
-          description: Paperless remains reachable through the public LV3 edge for
-            document archive access and governed API reconciliation.
+          description: Paperless remains reachable through the public LV3 edge for document
+            archive access and governed API reconciliation.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_paperless_availability
         expr: slo:paperless_availability:budget_remaining < 0.10
@@ -1073,9 +1114,11 @@ groups:
           indicator: availability
         annotations:
           summary: paperless-availability has less than 10% error budget remaining
-          description: Paperless remains reachable through the public LV3 edge for
-            document archive access and governed API reconciliation.
+          description: Paperless remains reachable through the public LV3 edge for document
+            archive access and governed API reconciliation.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: paperless
+# BEGIN SERVICE: piper
       - alert: SLOFastBurn_piper_availability
         expr: (slo:piper_availability:error_rate_5m > (14 * 0.010000)) and (slo:piper_availability:error_rate_1h
           > (14 * 0.010000))
@@ -1087,8 +1130,8 @@ groups:
           indicator: availability
         annotations:
           summary: piper-availability is burning its error budget at 14x
-          description: The private Piper TTS health endpoint remains reachable on
-            docker-runtime for real-time voice synthesis workflows.
+          description: The private Piper TTS health endpoint remains reachable on docker-runtime
+            for real-time voice synthesis workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_piper_availability
         expr: slo:piper_availability:error_rate_1h > (3 * 0.010000)
@@ -1100,8 +1143,8 @@ groups:
           indicator: availability
         annotations:
           summary: piper-availability is burning its error budget at 3x
-          description: The private Piper TTS health endpoint remains reachable on
-            docker-runtime for real-time voice synthesis workflows.
+          description: The private Piper TTS health endpoint remains reachable on docker-runtime
+            for real-time voice synthesis workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_piper_availability
         expr: slo:piper_availability:budget_remaining < 0.10
@@ -1113,9 +1156,11 @@ groups:
           indicator: availability
         annotations:
           summary: piper-availability has less than 10% error budget remaining
-          description: The private Piper TTS health endpoint remains reachable on
-            docker-runtime for real-time voice synthesis workflows.
+          description: The private Piper TTS health endpoint remains reachable on docker-runtime
+            for real-time voice synthesis workflows.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: piper
+# BEGIN SERVICE: plane
       - alert: SLOFastBurn_plane_availability
         expr: (slo:plane_availability:error_rate_5m > (14 * 0.010000)) and (slo:plane_availability:error_rate_1h
           > (14 * 0.010000))
@@ -1127,8 +1172,8 @@ groups:
           indicator: availability
         annotations:
           summary: plane-availability is burning its error budget at 14x
-          description: Plane remains reachable through the public LV3 edge for ADR
-            board tracking and issue synchronization.
+          description: Plane remains reachable through the public LV3 edge for ADR board
+            tracking and issue synchronization.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_plane_availability
         expr: slo:plane_availability:error_rate_1h > (3 * 0.010000)
@@ -1140,8 +1185,8 @@ groups:
           indicator: availability
         annotations:
           summary: plane-availability is burning its error budget at 3x
-          description: Plane remains reachable through the public LV3 edge for ADR
-            board tracking and issue synchronization.
+          description: Plane remains reachable through the public LV3 edge for ADR board
+            tracking and issue synchronization.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_plane_availability
         expr: slo:plane_availability:budget_remaining < 0.10
@@ -1153,12 +1198,14 @@ groups:
           indicator: availability
         annotations:
           summary: plane-availability has less than 10% error budget remaining
-          description: Plane remains reachable through the public LV3 edge for ADR
-            board tracking and issue synchronization.
+          description: Plane remains reachable through the public LV3 edge for ADR board
+            tracking and issue synchronization.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: plane
+# BEGIN SERVICE: platform_context_api
       - alert: SLOFastBurn_platform_context_api_availability
-        expr: (slo:platform_context_api_availability:error_rate_5m > (14 * 0.010000))
-          and (slo:platform_context_api_availability:error_rate_1h > (14 * 0.010000))
+        expr: (slo:platform_context_api_availability:error_rate_5m > (14 * 0.010000)) and
+          (slo:platform_context_api_availability:error_rate_1h > (14 * 0.010000))
         for: 2m
         labels:
           severity: critical
@@ -1166,10 +1213,9 @@ groups:
           slo_id: platform-context-api-availability
           indicator: availability
         annotations:
-          summary: platform-context-api-availability is burning its error budget at
-            14x
-          description: The platform context API remains reachable for agent-assisted
-            operator workflows.
+          summary: platform-context-api-availability is burning its error budget at 14x
+          description: The platform context API remains reachable for agent-assisted operator
+            workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_platform_context_api_availability
         expr: slo:platform_context_api_availability:error_rate_1h > (3 * 0.010000)
@@ -1180,10 +1226,9 @@ groups:
           slo_id: platform-context-api-availability
           indicator: availability
         annotations:
-          summary: platform-context-api-availability is burning its error budget at
-            3x
-          description: The platform context API remains reachable for agent-assisted
-            operator workflows.
+          summary: platform-context-api-availability is burning its error budget at 3x
+          description: The platform context API remains reachable for agent-assisted operator
+            workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_platform_context_api_availability
         expr: slo:platform_context_api_availability:budget_remaining < 0.10
@@ -1194,11 +1239,12 @@ groups:
           slo_id: platform-context-api-availability
           indicator: availability
         annotations:
-          summary: platform-context-api-availability has less than 10% error budget
-            remaining
-          description: The platform context API remains reachable for agent-assisted
-            operator workflows.
+          summary: platform-context-api-availability has less than 10% error budget remaining
+          description: The platform context API remains reachable for agent-assisted operator
+            workflows.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: platform_context_api
+# BEGIN SERVICE: plausible
       - alert: SLOFastBurn_plausible_availability
         expr: (slo:plausible_availability:error_rate_5m > (14 * 0.005000)) and (slo:plausible_availability:error_rate_1h
           > (14 * 0.005000))
@@ -1210,8 +1256,8 @@ groups:
           indicator: availability
         annotations:
           summary: plausible-availability is burning its error budget at 14x
-          description: The public Plausible readiness endpoint remains reachable for
-            dashboard access, tracker delivery, and synthetic event verification.
+          description: The public Plausible readiness endpoint remains reachable for dashboard
+            access, tracker delivery, and synthetic event verification.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_plausible_availability
         expr: slo:plausible_availability:error_rate_1h > (3 * 0.005000)
@@ -1223,8 +1269,8 @@ groups:
           indicator: availability
         annotations:
           summary: plausible-availability is burning its error budget at 3x
-          description: The public Plausible readiness endpoint remains reachable for
-            dashboard access, tracker delivery, and synthetic event verification.
+          description: The public Plausible readiness endpoint remains reachable for dashboard
+            access, tracker delivery, and synthetic event verification.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_plausible_availability
         expr: slo:plausible_availability:budget_remaining < 0.10
@@ -1236,9 +1282,11 @@ groups:
           indicator: availability
         annotations:
           summary: plausible-availability has less than 10% error budget remaining
-          description: The public Plausible readiness endpoint remains reachable for
-            dashboard access, tracker delivery, and synthetic event verification.
+          description: The public Plausible readiness endpoint remains reachable for dashboard
+            access, tracker delivery, and synthetic event verification.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: plausible
+# BEGIN SERVICE: semaphore
       - alert: SLOFastBurn_semaphore_availability
         expr: (slo:semaphore_availability:error_rate_5m > (14 * 0.005000)) and (slo:semaphore_availability:error_rate_1h
           > (14 * 0.005000))
@@ -1250,8 +1298,8 @@ groups:
           indicator: availability
         annotations:
           summary: semaphore-availability is burning its error budget at 14x
-          description: Semaphore stays reachable for private Ansible job launches
-            and API-based task inspection.
+          description: Semaphore stays reachable for private Ansible job launches and API-based
+            task inspection.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_semaphore_availability
         expr: slo:semaphore_availability:error_rate_1h > (3 * 0.005000)
@@ -1263,8 +1311,8 @@ groups:
           indicator: availability
         annotations:
           summary: semaphore-availability is burning its error budget at 3x
-          description: Semaphore stays reachable for private Ansible job launches
-            and API-based task inspection.
+          description: Semaphore stays reachable for private Ansible job launches and API-based
+            task inspection.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_semaphore_availability
         expr: slo:semaphore_availability:budget_remaining < 0.10
@@ -1276,9 +1324,11 @@ groups:
           indicator: availability
         annotations:
           summary: semaphore-availability has less than 10% error budget remaining
-          description: Semaphore stays reachable for private Ansible job launches
-            and API-based task inspection.
+          description: Semaphore stays reachable for private Ansible job launches and API-based
+            task inspection.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: semaphore
+# BEGIN SERVICE: serverclaw
       - alert: SLOFastBurn_serverclaw_availability
         expr: (slo:serverclaw_availability:error_rate_5m > (14 * 0.010000)) and (slo:serverclaw_availability:error_rate_1h
           > (14 * 0.010000))
@@ -1290,8 +1340,8 @@ groups:
           indicator: availability
         annotations:
           summary: serverclaw-availability is burning its error budget at 14x
-          description: ServerClaw remains reachable through the public LV3 edge for
-            chat-first assistant access.
+          description: ServerClaw remains reachable through the public LV3 edge for chat-first
+            assistant access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_serverclaw_availability
         expr: slo:serverclaw_availability:error_rate_1h > (3 * 0.010000)
@@ -1303,8 +1353,8 @@ groups:
           indicator: availability
         annotations:
           summary: serverclaw-availability is burning its error budget at 3x
-          description: ServerClaw remains reachable through the public LV3 edge for
-            chat-first assistant access.
+          description: ServerClaw remains reachable through the public LV3 edge for chat-first
+            assistant access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_serverclaw_availability
         expr: slo:serverclaw_availability:budget_remaining < 0.10
@@ -1316,9 +1366,11 @@ groups:
           indicator: availability
         annotations:
           summary: serverclaw-availability has less than 10% error budget remaining
-          description: ServerClaw remains reachable through the public LV3 edge for
-            chat-first assistant access.
+          description: ServerClaw remains reachable through the public LV3 edge for chat-first
+            assistant access.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: serverclaw
+# BEGIN SERVICE: status_page
       - alert: SLOFastBurn_status_page_availability
         expr: (slo:status_page_availability:error_rate_5m > (14 * 0.001000)) and (slo:status_page_availability:error_rate_1h
           > (14 * 0.001000))
@@ -1330,8 +1382,8 @@ groups:
           indicator: availability
         annotations:
           summary: status-page-availability is burning its error budget at 14x
-          description: The public status page remains externally reachable as the
-            last-resort platform signal.
+          description: The public status page remains externally reachable as the last-resort
+            platform signal.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_status_page_availability
         expr: slo:status_page_availability:error_rate_1h > (3 * 0.001000)
@@ -1343,8 +1395,8 @@ groups:
           indicator: availability
         annotations:
           summary: status-page-availability is burning its error budget at 3x
-          description: The public status page remains externally reachable as the
-            last-resort platform signal.
+          description: The public status page remains externally reachable as the last-resort
+            platform signal.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_status_page_availability
         expr: slo:status_page_availability:budget_remaining < 0.10
@@ -1356,9 +1408,11 @@ groups:
           indicator: availability
         annotations:
           summary: status-page-availability has less than 10% error budget remaining
-          description: The public status page remains externally reachable as the
-            last-resort platform signal.
+          description: The public status page remains externally reachable as the last-resort
+            platform signal.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: status_page
+# BEGIN SERVICE: superset
       - alert: SLOFastBurn_superset_availability
         expr: (slo:superset_availability:error_rate_5m > (14 * 0.005000)) and (slo:superset_availability:error_rate_1h
           > (14 * 0.005000))
@@ -1370,8 +1424,8 @@ groups:
           indicator: availability
         annotations:
           summary: superset-availability is burning its error budget at 14x
-          description: Superset remains reachable through the public LV3 edge for
-            SQL-first BI exploration, dashboard viewing, and governed datasource verification.
+          description: Superset remains reachable through the public LV3 edge for SQL-first
+            BI exploration, dashboard viewing, and governed datasource verification.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_superset_availability
         expr: slo:superset_availability:error_rate_1h > (3 * 0.005000)
@@ -1383,8 +1437,8 @@ groups:
           indicator: availability
         annotations:
           summary: superset-availability is burning its error budget at 3x
-          description: Superset remains reachable through the public LV3 edge for
-            SQL-first BI exploration, dashboard viewing, and governed datasource verification.
+          description: Superset remains reachable through the public LV3 edge for SQL-first
+            BI exploration, dashboard viewing, and governed datasource verification.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_superset_availability
         expr: slo:superset_availability:budget_remaining < 0.10
@@ -1396,12 +1450,14 @@ groups:
           indicator: availability
         annotations:
           summary: superset-availability has less than 10% error budget remaining
-          description: Superset remains reachable through the public LV3 edge for
-            SQL-first BI exploration, dashboard viewing, and governed datasource verification.
+          description: Superset remains reachable through the public LV3 edge for SQL-first
+            BI exploration, dashboard viewing, and governed datasource verification.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: superset
+# BEGIN SERVICE: tesseract_ocr
       - alert: SLOFastBurn_tesseract_ocr_availability
-        expr: (slo:tesseract_ocr_availability:error_rate_5m > (14 * 0.010000)) and
-          (slo:tesseract_ocr_availability:error_rate_1h > (14 * 0.010000))
+        expr: (slo:tesseract_ocr_availability:error_rate_5m > (14 * 0.010000)) and (slo:tesseract_ocr_availability:error_rate_1h
+          > (14 * 0.010000))
         for: 2m
         labels:
           severity: critical
@@ -1439,6 +1495,8 @@ groups:
           description: The private Tesseract OCR runtime remains reachable on runtime-ai
             for scanned-image and image-only document fallback extraction.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: tesseract_ocr
+# BEGIN SERVICE: tika
       - alert: SLOFastBurn_tika_availability
         expr: (slo:tika_availability:error_rate_5m > (14 * 0.010000)) and (slo:tika_availability:error_rate_1h
           > (14 * 0.010000))
@@ -1450,8 +1508,8 @@ groups:
           indicator: availability
         annotations:
           summary: tika-availability is burning its error budget at 14x
-          description: The private Apache Tika extraction API remains reachable on
-            runtime-ai for synchronous document text and metadata extraction workflows.
+          description: The private Apache Tika extraction API remains reachable on runtime-ai
+            for synchronous document text and metadata extraction workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_tika_availability
         expr: slo:tika_availability:error_rate_1h > (3 * 0.010000)
@@ -1463,8 +1521,8 @@ groups:
           indicator: availability
         annotations:
           summary: tika-availability is burning its error budget at 3x
-          description: The private Apache Tika extraction API remains reachable on
-            runtime-ai for synchronous document text and metadata extraction workflows.
+          description: The private Apache Tika extraction API remains reachable on runtime-ai
+            for synchronous document text and metadata extraction workflows.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_tika_availability
         expr: slo:tika_availability:budget_remaining < 0.10
@@ -1476,9 +1534,11 @@ groups:
           indicator: availability
         annotations:
           summary: tika-availability has less than 10% error budget remaining
-          description: The private Apache Tika extraction API remains reachable on
-            runtime-ai for synchronous document text and metadata extraction workflows.
+          description: The private Apache Tika extraction API remains reachable on runtime-ai
+            for synchronous document text and metadata extraction workflows.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: tika
+# BEGIN SERVICE: typesense
       - alert: SLOFastBurn_typesense_availability
         expr: (slo:typesense_availability:error_rate_5m > (14 * 0.010000)) and (slo:typesense_availability:error_rate_1h
           > (14 * 0.010000))
@@ -1490,8 +1550,8 @@ groups:
           indicator: availability
         annotations:
           summary: typesense-availability is burning its error budget at 14x
-          description: The private Typesense controller endpoint remains reachable
-            for repo-managed structured search sync and operator keyword lookups.
+          description: The private Typesense controller endpoint remains reachable for repo-managed
+            structured search sync and operator keyword lookups.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_typesense_availability
         expr: slo:typesense_availability:error_rate_1h > (3 * 0.010000)
@@ -1503,8 +1563,8 @@ groups:
           indicator: availability
         annotations:
           summary: typesense-availability is burning its error budget at 3x
-          description: The private Typesense controller endpoint remains reachable
-            for repo-managed structured search sync and operator keyword lookups.
+          description: The private Typesense controller endpoint remains reachable for repo-managed
+            structured search sync and operator keyword lookups.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_typesense_availability
         expr: slo:typesense_availability:budget_remaining < 0.10
@@ -1516,9 +1576,11 @@ groups:
           indicator: availability
         annotations:
           summary: typesense-availability has less than 10% error budget remaining
-          description: The private Typesense controller endpoint remains reachable
-            for repo-managed structured search sync and operator keyword lookups.
+          description: The private Typesense controller endpoint remains reachable for repo-managed
+            structured search sync and operator keyword lookups.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: typesense
+# BEGIN SERVICE: uptime_kuma
       - alert: SLOFastBurn_uptime_kuma_availability
         expr: (slo:uptime_kuma_availability:error_rate_5m > (14 * 0.001000)) and (slo:uptime_kuma_availability:error_rate_1h
           > (14 * 0.001000))
@@ -1556,6 +1618,8 @@ groups:
           summary: uptime-kuma-availability has less than 10% error budget remaining
           description: Uptime Kuma remains reachable through the public status surface.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: uptime_kuma
+# BEGIN SERVICE: vaultwarden
       - alert: SLOFastBurn_vaultwarden_availability
         expr: (slo:vaultwarden_availability:error_rate_5m > (14 * 0.005000)) and (slo:vaultwarden_availability:error_rate_1h
           > (14 * 0.005000))
@@ -1567,8 +1631,7 @@ groups:
           indicator: availability
         annotations:
           summary: vaultwarden-availability is burning its error budget at 14x
-          description: Vaultwarden remains reachable on the private Tailscale operator
-            path.
+          description: Vaultwarden remains reachable on the private Tailscale operator path.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_vaultwarden_availability
         expr: slo:vaultwarden_availability:error_rate_1h > (3 * 0.005000)
@@ -1580,8 +1643,7 @@ groups:
           indicator: availability
         annotations:
           summary: vaultwarden-availability is burning its error budget at 3x
-          description: Vaultwarden remains reachable on the private Tailscale operator
-            path.
+          description: Vaultwarden remains reachable on the private Tailscale operator path.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_vaultwarden_availability
         expr: slo:vaultwarden_availability:budget_remaining < 0.10
@@ -1593,9 +1655,10 @@ groups:
           indicator: availability
         annotations:
           summary: vaultwarden-availability has less than 10% error budget remaining
-          description: Vaultwarden remains reachable on the private Tailscale operator
-            path.
+          description: Vaultwarden remains reachable on the private Tailscale operator path.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: vaultwarden
+# BEGIN SERVICE: windmill
       - alert: SLOFastBurn_windmill_availability
         expr: (slo:windmill_availability:error_rate_5m > (14 * 0.005000)) and (slo:windmill_availability:error_rate_1h
           > (14 * 0.005000))
@@ -1633,6 +1696,8 @@ groups:
           summary: windmill-availability has less than 10% error budget remaining
           description: Windmill API stays reachable for scheduled automation.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: windmill
+# BEGIN SERVICE: woodpecker
       - alert: SLOFastBurn_woodpecker_availability
         expr: (slo:woodpecker_availability:error_rate_5m > (14 * 0.005000)) and (slo:woodpecker_availability:error_rate_1h
           > (14 * 0.005000))
@@ -1644,8 +1709,8 @@ groups:
           indicator: availability
         annotations:
           summary: woodpecker-availability is burning its error budget at 14x
-          description: Woodpecker stays reachable for repo-managed CI bootstrap, API
-            inspection, and manual validation pipeline triggers.
+          description: Woodpecker stays reachable for repo-managed CI bootstrap, API inspection,
+            and manual validation pipeline triggers.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_woodpecker_availability
         expr: slo:woodpecker_availability:error_rate_1h > (3 * 0.005000)
@@ -1657,8 +1722,8 @@ groups:
           indicator: availability
         annotations:
           summary: woodpecker-availability is burning its error budget at 3x
-          description: Woodpecker stays reachable for repo-managed CI bootstrap, API
-            inspection, and manual validation pipeline triggers.
+          description: Woodpecker stays reachable for repo-managed CI bootstrap, API inspection,
+            and manual validation pipeline triggers.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_woodpecker_availability
         expr: slo:woodpecker_availability:budget_remaining < 0.10
@@ -1670,6 +1735,7 @@ groups:
           indicator: availability
         annotations:
           summary: woodpecker-availability has less than 10% error budget remaining
-          description: Woodpecker stays reachable for repo-managed CI bootstrap, API
-            inspection, and manual validation pipeline triggers.
+          description: Woodpecker stays reachable for repo-managed CI bootstrap, API inspection,
+            and manual validation pipeline triggers.
           runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: woodpecker
