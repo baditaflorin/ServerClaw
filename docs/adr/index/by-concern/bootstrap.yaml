@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-22'
 facet: concern
 concern: bootstrap
-total_adrs: 8
+total_adrs: 9
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -158,3 +158,23 @@ adrs:
     summary: Deploy a collapsed nested-Proxmox topology on the AX41-NVMe, driven by the
     filename: 0424-fork-clone-onto-hetzner-ax41.md
     path: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  - adr: '0437'
+    title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-22'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - overlay
+      - fork-clone
+      - adr-0386-extension
+      - adr-0431-consolidation
+      - overlay-aware
+      - make
+      - single
+      - command
+      - any
+    summary: make bootstrap becomes overlay-aware. The single environment variable
+    filename: 0437-overlay-aware-bootstrap.md
+    path: docs/adr/0437-overlay-aware-bootstrap.md

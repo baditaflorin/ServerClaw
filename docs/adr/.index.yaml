@@ -8,20 +8,20 @@
 schema_version: 2
 generated: '2026-04-22'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 462
+total_adrs: 463
 adr_number_range:
   first: '0001'
-  last: '0435'
-  next_available: '0436'
+  last: '0437'
+  next_available: 0438
 implementation_status_summary:
   Implemented: 359
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
-  Accepted: 31
+  Accepted: 32
   Proposed: 30
 decision_status_summary:
-  Accepted: 362
+  Accepted: 363
   Proposed: 37
   Deprecated: 14
   Implemented: 49
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 30
+      count: 31
       first_adr: '0400'
-      last_adr: '0435'
+      last_adr: '0437'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -67,7 +67,7 @@ facets:
       count: 33
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
-      count: 8
+      count: 9
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
       count: 45
@@ -127,7 +127,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 31
+      count: 32
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
@@ -137,8 +137,13 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0436'
+  next_available_adr: 0438
 latest_adrs:
+  - adr: '0437'
+    title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
+    implementation_status: Accepted
+    concern: bootstrap
+    path: docs/adr/0437-overlay-aware-bootstrap.md
   - adr: '0435'
     title: Topology-Derived Health-Probe URLs
     implementation_status: Proposed
@@ -185,11 +190,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: ci-cd
     path: docs/adr/0420-ci-release-readiness-checks.md
-  - adr: 0419
-    title: Pull Request-Based Integration Flow
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0419-pr-based-integration-flow.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

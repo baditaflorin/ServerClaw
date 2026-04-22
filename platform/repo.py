@@ -41,15 +41,23 @@ def _path_exists(path: Path) -> bool:
 
 
 def _shared_worktree_root() -> Path | None:
-    if REPO_ROOT.parent.name != ".worktrees":
-        return None
-    return REPO_ROOT.parent.parent
+    # Historical ".worktrees/<name>" layout
+    if REPO_ROOT.parent.name == ".worktrees":
+        return REPO_ROOT.parent.parent
+    # Current ".claude/worktrees/<name>" layout used by Claude Code agent
+    # worktrees.  Resolving this here lets preflight checks, identity loaders,
+    # and other tooling find the operator's `.local/` on the main checkout.
+    if REPO_ROOT.parent.name == "worktrees" and REPO_ROOT.parent.parent.name == ".claude":
+        return REPO_ROOT.parent.parent.parent
+    return None
 
 
 def shared_repo_root(repo_root: Path | None = None) -> Path:
     root = Path(repo_root) if repo_root is not None else REPO_ROOT
     if root.parent.name == ".worktrees":
         return root.parent.parent
+    if root.parent.name == "worktrees" and root.parent.parent.name == ".claude":
+        return root.parent.parent.parent
     return root
 
 

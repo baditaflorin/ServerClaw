@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 30
+total_adrs: 31
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -537,3 +537,23 @@ adrs:
     summary: Health-probe catalog URLs must derive from topology at render time,
     filename: 0435-topology-derived-health-probe-urls.md
     path: docs/adr/0435-topology-derived-health-probe-urls.md
+  - adr: '0437'
+    title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
+    status: Accepted
+    implementation_status: Accepted
+    date: '2026-04-22'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - overlay
+      - fork-clone
+      - adr-0386-extension
+      - adr-0431-consolidation
+      - overlay-aware
+      - make
+      - single
+      - command
+      - any
+    summary: make bootstrap becomes overlay-aware. The single environment variable
+    filename: 0437-overlay-aware-bootstrap.md
+    path: docs/adr/0437-overlay-aware-bootstrap.md

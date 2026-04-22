@@ -86,6 +86,8 @@ ownership_manifest:
         - Makefile
         - scripts/generate_inventory.py
         - scripts/timed.sh
+        - scripts/init_remote_ops_user.sh
+        - platform/repo.py
         - docs/adr/0437-overlay-aware-bootstrap.md
         - docs/postmortems/2026-04-22-fork-bootstrap-gap.md
         - docs/diaries/2026-04-22-fork-bootstrap.md

@@ -10,9 +10,16 @@ ifneq ($(strip $(PLATFORM_IDENTITY_OVERLAY)),)
 BOOTSTRAP_OVERLAY_MODE := 1
 BOOTSTRAP_OVERLAY_HOST_VARS ?= $(LOCAL_OVERLAY_ROOT)/host_vars/proxmox-host.yml
 BOOTSTRAP_OVERLAY_INVENTORY ?= $(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml
-BOOTSTRAP_OVERLAY_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed25519
+# BOOTSTRAP_OVERLAY_SSH_KEY is the ops-user key that ansible plays use once
+# init-remote has created the ops sudoer. Provider-supplied root access is
+# only used for the init-remote step via BOOTSTRAP_OVERLAY_ROOT_KEY below.
+BOOTSTRAP_OVERLAY_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
 BOOTSTRAP_OVERLAY_ENV ?= clone
 BOOTSTRAP_OVERLAY_HOST_ADDR ?= $(shell awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(PLATFORM_IDENTITY_OVERLAY) 2>/dev/null)
+BOOTSTRAP_OVERLAY_ROOT_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed25519
+BOOTSTRAP_OVERLAY_ROOT_USER ?= root
+BOOTSTRAP_OVERLAY_OPS_USER ?= ops
+BOOTSTRAP_OVERLAY_OPS_PUBKEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub
 ANSIBLE_INVENTORY := $(BOOTSTRAP_OVERLAY_INVENTORY)
 BOOTSTRAP_KEY := $(BOOTSTRAP_OVERLAY_SSH_KEY)
 env := $(BOOTSTRAP_OVERLAY_ENV)
@@ -454,6 +461,23 @@ install-cli:
 	fi
 
 update-cli: install-cli
+
+init-remote: ## Create the ops sudoer on a fresh remote host (overlay-mode prerequisite for Stage 2)
+ifneq ($(BOOTSTRAP_OVERLAY_MODE),1)
+	@echo "init-remote is overlay-mode only; set PLATFORM_IDENTITY_OVERLAY to use it." >&2
+	@exit 1
+endif
+	@if [ -z "$(strip $(BOOTSTRAP_OVERLAY_HOST_ADDR))" ]; then \
+		echo "init-remote: could not derive host address from $(PLATFORM_IDENTITY_OVERLAY) (need management_ipv4:)" >&2; \
+		exit 1; \
+	fi
+	REMOTE_HOST=$(BOOTSTRAP_OVERLAY_HOST_ADDR) \
+	REMOTE_ROOT_USER=$(BOOTSTRAP_OVERLAY_ROOT_USER) \
+	REMOTE_ROOT_KEY=$(BOOTSTRAP_OVERLAY_ROOT_KEY) \
+	OPS_USER=$(BOOTSTRAP_OVERLAY_OPS_USER) \
+	OPS_PUBKEY_PATH=$(BOOTSTRAP_OVERLAY_OPS_PUBKEY) \
+	OPS_PROBE_KEY=$(BOOTSTRAP_KEY) \
+	$(REPO_ROOT)/scripts/init_remote_ops_user.sh
 
 generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml
 ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
@@ -1892,6 +1916,8 @@ endif
 ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@echo "  overlay mode: regenerating $(BOOTSTRAP_OVERLAY_INVENTORY)"
 	$(MAKE) generate-inventory
+	@echo "  overlay mode: ensuring $(BOOTSTRAP_OVERLAY_OPS_USER)@$(BOOTSTRAP_OVERLAY_HOST_ADDR) is a sudoer"
+	$(MAKE) init-remote
 endif
 	@echo ""
 	@echo "=== Stage 2: Proxmox VE installation ==="
@@ -1922,6 +1948,8 @@ bootstrap-minimal: ## Bootstrap critical path only (PG + Keycloak + Nginx + Open
 ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@echo "  overlay mode: regenerating $(BOOTSTRAP_OVERLAY_INVENTORY)"
 	$(MAKE) generate-inventory
+	@echo "  overlay mode: ensuring $(BOOTSTRAP_OVERLAY_OPS_USER)@$(BOOTSTRAP_OVERLAY_HOST_ADDR) is a sudoer"
+	$(MAKE) init-remote
 endif
 	$(MAKE) install-proxmox
 	$(MAKE) verify-bootstrap-proxmox
