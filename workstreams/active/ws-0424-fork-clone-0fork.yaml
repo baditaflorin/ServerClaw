@@ -87,6 +87,8 @@ ownership_manifest:
         - scripts/generate_inventory.py
         - scripts/timed.sh
         - scripts/init_remote_ops_user.sh
+        - scripts/ansible_scope_runner.py
+        - platform/ansible/execution_scopes.py
         - platform/repo.py
         - docs/adr/0437-overlay-aware-bootstrap.md
         - docs/postmortems/2026-04-22-fork-bootstrap-gap.md

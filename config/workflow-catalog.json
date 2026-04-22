@@ -6444,6 +6444,52 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-site": {
+      "description": "Stage 5 of `make bootstrap` (ADR 0386): converge every declared service against the freshly provisioned guests using the canonical lv3.platform site playbook, without the heavy live-apply governance gates that assume a steady-state platform.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-site",
+        "command": "make converge-site env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "bootstrap_manifest_ids": [
+          "controller-local-base"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "collections/ansible_collections/lv3/platform/playbooks/site.yml",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py"
+      ],
+      "outputs": [
+        "Full-platform convergence on the freshly bootstrapped host: every service in the lv3.platform site playbook reaches the repo-managed steady state."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=converge-site",
+        "make converge-site env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 5400,
+        "max_steps": 600,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 32,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "live-apply-site": {
       "description": "Run the full site live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
       "lifecycle_status": "active",

@@ -3,12 +3,12 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.178.154",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-22T14:05:28Z",
-  "next_refresh_at": "2026-04-22T15:05:28Z",
+  "generated_at": "2026-04-22T17:13:13Z",
+  "next_refresh_at": "2026-04-22T18:13:13Z",
   "environment": "production",
   "identity": {
-    "platform_name": "example.com",
-    "operator": "Platform Operator",
+    "platform_name": "0fork.com",
+    "operator": "0fork Clone Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -2836,6 +2836,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-serverclaw.md"
+      },
+      {
+        "id": "converge-site",
+        "description": "Stage 5 of `make bootstrap` (ADR 0386): converge every declared service against the freshly provisioned guests using the canonical lv3.platform site playbook, without the heavy live-apply governance gates that assume a steady-state platform.",
+        "tags": [
+          "converge-site",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 5400,
+          "max_steps": 600,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 32,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/playbook-execution-model.md"
       },
       {
         "id": "converge-step-ca",
@@ -5940,6 +5966,7 @@
         "steps": 0,
         "path": "docs/runbooks/playbook-execution-model.md",
         "workflow_ids": [
+          "converge-site",
           "live-apply-group",
           "live-apply-service",
           "live-apply-site"
@@ -6310,17 +6337,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.example.com",
+        "endpoint": "https://ops.0fork.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.example.com",
+        "endpoint": "https://windmill.0fork.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.example.com",
+        "endpoint": "https://api.0fork.com",
         "adr": "0092"
       }
     ],

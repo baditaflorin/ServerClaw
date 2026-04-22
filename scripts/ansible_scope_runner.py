@@ -9,6 +9,33 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+
+def _normalize_inventory_flags(argv: list[str]) -> list[str]:
+    """Translate short `-i PATH` into `--inventory PATH` so argparse can thread
+    every inventory through the append action. Makefile callers compose
+    multi-inventory as `--inventory A -i B`; without this pre-pass argparse
+    dumps the `-i B` tail into ansible_args (nargs=REMAINDER) and the planner
+    never sees it.
+
+    The translation stops at the first `--` sentinel so `-i` flags intended
+    for the downstream ansible-playbook passthrough are left untouched.
+    """
+    normalized: list[str] = []
+    i = 0
+    while i < len(argv):
+        token = argv[i]
+        if token == "--":
+            normalized.extend(argv[i:])
+            break
+        if token == "-i" and i + 1 < len(argv):
+            normalized.extend(("--inventory", argv[i + 1]))
+            i += 2
+            continue
+        normalized.append(token)
+        i += 1
+    return normalized
+
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -34,13 +61,13 @@ def build_parser() -> argparse.ArgumentParser:
         "validate", help="Validate the execution-scope catalog and Makefile coverage."
     )
     validate_parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
-    validate_parser.add_argument("--inventory", type=Path, default=INVENTORY_PATH)
+    validate_parser.add_argument("--inventory", type=Path, action="append", default=None)
 
     plan_parser = subparsers.add_parser("plan", help="Print the resolved scope and shard plan for a playbook.")
     plan_parser.add_argument("--playbook", required=True, type=Path)
     plan_parser.add_argument("--env", default="production")
     plan_parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
-    plan_parser.add_argument("--inventory", type=Path, default=INVENTORY_PATH)
+    plan_parser.add_argument("--inventory", type=Path, action="append", default=None)
     plan_parser.add_argument("--run-id")
     plan_parser.add_argument("--shard-root", type=Path)
 
@@ -48,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--playbook", required=True, type=Path)
     run_parser.add_argument("--env", default="production")
     run_parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
-    run_parser.add_argument("--inventory", type=Path, default=INVENTORY_PATH)
+    run_parser.add_argument("--inventory", type=Path, action="append", default=None)
     run_parser.add_argument("--run-id")
     run_parser.add_argument("--shard-root", type=Path)
     run_parser.add_argument("ansible_args", nargs=argparse.REMAINDER)
@@ -60,25 +87,40 @@ def build_parser() -> argparse.ArgumentParser:
     parallel_parser.add_argument("--playbooks", required=True, nargs="+", type=Path)
     parallel_parser.add_argument("--env", default="production")
     parallel_parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
-    parallel_parser.add_argument("--inventory", type=Path, default=INVENTORY_PATH)
+    parallel_parser.add_argument("--inventory", type=Path, action="append", default=None)
     parallel_parser.add_argument("--max-parallel", type=int, default=4, help="Max concurrent lanes.")
     parallel_parser.add_argument("ansible_args", nargs=argparse.REMAINDER)
     return parser
 
 
+def _resolve_inventory_paths(args: argparse.Namespace) -> tuple[Path, list[Path]]:
+    """Return (primary_path, full_list) given the append-action `--inventory`.
+
+    Falls back to INVENTORY_PATH when no `--inventory` was supplied, preserving
+    the pre-multi-inventory default.
+    """
+    inventories = list(args.inventory or [])
+    if not inventories:
+        inventories = [INVENTORY_PATH]
+    return inventories[0], inventories
+
+
 def handle_validate(args: argparse.Namespace) -> int:
-    validate_scope_catalog(catalog_path=args.catalog, inventory_path=args.inventory)
+    primary, _ = _resolve_inventory_paths(args)
+    validate_scope_catalog(catalog_path=args.catalog, inventory_path=primary)
     return 0
 
 
 def handle_plan(args: argparse.Namespace) -> int:
+    primary, inventories = _resolve_inventory_paths(args)
     plan = plan_playbook_execution(
         args.playbook,
         env=args.env,
         run_id=args.run_id,
         shard_root=args.shard_root,
         catalog_path=args.catalog,
-        inventory_path=args.inventory,
+        inventory_path=primary,
+        inventory_paths=inventories,
     )
     print(
         json.dumps(
@@ -107,6 +149,7 @@ def handle_run(args: argparse.Namespace) -> int:
     if passthrough_args and passthrough_args[0] == "--":
         passthrough_args = passthrough_args[1:]
     extra_vars = extract_extra_vars_from_passthrough(passthrough_args, repo_root=REPO_ROOT)
+    primary, inventories = _resolve_inventory_paths(args)
     print(f"Planning scoped playbook: {args.playbook} (env={args.env})", flush=True)
     plan = plan_playbook_execution(
         args.playbook,
@@ -115,7 +158,8 @@ def handle_run(args: argparse.Namespace) -> int:
         shard_root=args.shard_root,
         extra_vars=extra_vars,
         catalog_path=args.catalog,
-        inventory_path=args.inventory,
+        inventory_path=primary,
+        inventory_paths=inventories,
     )
     print(
         f"Running scoped playbook: {plan.playbook_path} limit={plan.limit_expression} shard={plan.inventory_shard_path}",
@@ -124,12 +168,13 @@ def handle_run(args: argparse.Namespace) -> int:
     result = run_planned_playbook(
         plan,
         passthrough_args=passthrough_args,
-        inventory_path=args.inventory,
+        inventory_path=primary,
+        inventory_paths=inventories,
     )
     return result.returncode
 
 
-def _run_single_plan(plan, passthrough_args, inventory_path):
+def _run_single_plan(plan, passthrough_args, inventory_path, inventory_paths=None):
     """Execute a single planned playbook and return (playbook_path, returncode)."""
     print(
         f"[lane={plan.target_lane or 'default'}] Running: {plan.playbook_path} limit={plan.limit_expression}",
@@ -139,6 +184,7 @@ def _run_single_plan(plan, passthrough_args, inventory_path):
         plan,
         passthrough_args=passthrough_args,
         inventory_path=inventory_path,
+        inventory_paths=inventory_paths,
     )
     return plan.playbook_path, result.returncode
 
@@ -149,6 +195,7 @@ def handle_parallel_run(args: argparse.Namespace) -> int:
     if passthrough_args and passthrough_args[0] == "--":
         passthrough_args = passthrough_args[1:]
     extra_vars = extract_extra_vars_from_passthrough(passthrough_args, repo_root=REPO_ROOT)
+    primary, inventories = _resolve_inventory_paths(args)
 
     # Plan all playbooks and group by target lane
     plans = []
@@ -158,7 +205,8 @@ def handle_parallel_run(args: argparse.Namespace) -> int:
             env=args.env,
             extra_vars=extra_vars,
             catalog_path=args.catalog,
-            inventory_path=args.inventory,
+            inventory_path=primary,
+            inventory_paths=inventories,
         )
         plans.append(plan)
 
@@ -182,7 +230,7 @@ def handle_parallel_run(args: argparse.Namespace) -> int:
     def run_lane(lane_key: str, lane_plans: list) -> list[tuple[str, int]]:
         results = []
         for plan in lane_plans:
-            playbook_path, rc = _run_single_plan(plan, passthrough_args, args.inventory)
+            playbook_path, rc = _run_single_plan(plan, passthrough_args, primary, inventories)
             results.append((playbook_path, rc))
             if rc != 0:
                 print(f"[lane={lane_key}] FAILED: {playbook_path} (rc={rc})", flush=True)
@@ -209,7 +257,8 @@ def handle_parallel_run(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
+    raw_argv = argv if argv is not None else sys.argv[1:]
+    args = parser.parse_args(_normalize_inventory_flags(list(raw_argv)))
     try:
         if args.command == "validate":
             return handle_validate(args)

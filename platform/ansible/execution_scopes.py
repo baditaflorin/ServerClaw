@@ -10,7 +10,24 @@ import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
+
+
+def _inventory_cli_args(
+    inventory_path: Path,
+    inventory_paths: Sequence[Path] | None,
+) -> list[str]:
+    """Build the `-i PATH [-i PATH ...]` flag sequence for Ansible CLI tools.
+
+    Callers may pass a single `inventory_path` (legacy single-inventory API) or
+    an optional `inventory_paths` list to support Ansible's multi-inventory
+    composition (committed defaults + host-var overlay, per ADR 0437).
+    """
+    paths = list(inventory_paths) if inventory_paths else [inventory_path]
+    args: list[str] = []
+    for path in paths:
+        args.extend(("-i", str(path)))
+    return args
 
 from platform.execution_lanes import LaneRegistry, load_execution_lane_catalog
 from platform.repo import REPO_ROOT, load_yaml, local_overlay_root
@@ -292,13 +309,13 @@ def _expand_inventory_limit(
     inventory_path: Path,
     repo_root: Path,
     ansible_inventory_bin: str,
+    inventory_paths: Sequence[Path] | None = None,
 ) -> tuple[str, ...]:
     if limit_expression == "localhost":
         return ("localhost",)
     command = [
         ansible_inventory_bin,
-        "-i",
-        str(inventory_path),
+        *_inventory_cli_args(inventory_path, inventory_paths),
         "-l",
         limit_expression,
         "--list",
@@ -488,6 +505,7 @@ def discover_target_hosts(
     resolved_scope: ResolvedPlaybookScope | None = None,
     ansible_playbook_bin: str = "ansible-playbook",
     ansible_inventory_bin: str = "ansible-inventory",
+    inventory_paths: Sequence[Path] | None = None,
 ) -> tuple[str, ...]:
     del ansible_playbook_bin
     playbook_path = normalize_repo_path(playbook, repo_root=repo_root)
@@ -528,6 +546,7 @@ def discover_target_hosts(
                 inventory_path=inventory_path,
                 repo_root=repo_root,
                 ansible_inventory_bin=ansible_inventory_bin,
+                inventory_paths=inventory_paths,
             )
         )
     return _unique_preserving_order(hosts)
@@ -572,13 +591,13 @@ def render_inventory_shard(
     inventory_path: Path = INVENTORY_PATH,
     repo_root: Path = REPO_ROOT,
     ansible_inventory_bin: str = "ansible-inventory",
+    inventory_paths: Sequence[Path] | None = None,
 ) -> Path:
     non_local_hosts = [host for host in target_hosts if host != "localhost"]
     if non_local_hosts:
         command = [
             ansible_inventory_bin,
-            "-i",
-            str(inventory_path),
+            *_inventory_cli_args(inventory_path, inventory_paths),
             "-l",
             ",".join(non_local_hosts),
             "--list",
@@ -624,6 +643,7 @@ def plan_playbook_execution(
     catalog_path: Path = CATALOG_PATH,
     ansible_playbook_bin: str = "ansible-playbook",
     ansible_inventory_bin: str = "ansible-inventory",
+    inventory_paths: Sequence[Path] | None = None,
 ) -> PlannedPlaybookExecution:
     resolved_scope = resolve_playbook_scope(playbook, repo_root=repo_root, catalog_path=catalog_path)
     target_hosts = discover_target_hosts(
@@ -636,6 +656,7 @@ def plan_playbook_execution(
         resolved_scope=resolved_scope,
         ansible_playbook_bin=ansible_playbook_bin,
         ansible_inventory_bin=ansible_inventory_bin,
+        inventory_paths=inventory_paths,
     )
     non_local_hosts = [host for host in target_hosts if host != "localhost"]
     if resolved_scope.mutation_scope == "host" and len(non_local_hosts) != 1:
@@ -657,6 +678,7 @@ def plan_playbook_execution(
         inventory_path=inventory_path,
         repo_root=repo_root,
         ansible_inventory_bin=ansible_inventory_bin,
+        inventory_paths=inventory_paths,
     )
 
     derived_surfaces = [f"host:{host}" for host in non_local_hosts]
@@ -851,11 +873,11 @@ def run_planned_playbook(
     repo_root: Path = REPO_ROOT,
     ansible_playbook_bin: str = "ansible-playbook",
     lane_registry: LaneRegistry | None = None,
+    inventory_paths: Sequence[Path] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     command = [
         ansible_playbook_bin,
-        "-i",
-        str(inventory_path),
+        *_inventory_cli_args(inventory_path, inventory_paths),
         "-i",
         plan.inventory_shard_path,
         "--limit",

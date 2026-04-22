@@ -6,7 +6,17 @@ LOCAL_OVERLAY_ROOT ?= $(shell $(REPO_ROOT)/scripts/resolve_local_overlay_root.sh
 # ansible extras so `make bootstrap` works for forks off a single env var.
 # Production (no env var) is byte-identical to the pre-ADR-0437 Makefile.
 PLATFORM_IDENTITY_OVERLAY ?=
+# Agents often invoke `make bootstrap` from inside a .claude/worktrees/ copy
+# whose CWD has no `.local/` (per CLAUDE.md: "worktrees intentionally lack
+# .local/"). Relative PLATFORM_IDENTITY_OVERLAY paths like
+# `.local/identity.yml.0fork` resolve against CWD by default and then fail
+# when passed to ansible-playbook. Normalize any relative path through
+# LOCAL_OVERLAY_ROOT (which resolve_local_overlay_root.sh already points at
+# the authoritative main-repo `.local/`).
 ifneq ($(strip $(PLATFORM_IDENTITY_OVERLAY)),)
+ifeq ($(patsubst /%,,$(PLATFORM_IDENTITY_OVERLAY)),$(PLATFORM_IDENTITY_OVERLAY))
+PLATFORM_IDENTITY_OVERLAY := $(LOCAL_OVERLAY_ROOT)/$(patsubst .local/%,%,$(PLATFORM_IDENTITY_OVERLAY))
+endif
 BOOTSTRAP_OVERLAY_MODE := 1
 BOOTSTRAP_OVERLAY_HOST_VARS ?= $(LOCAL_OVERLAY_ROOT)/host_vars/proxmox-host.yml
 BOOTSTRAP_OVERLAY_INVENTORY ?= $(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml
@@ -2001,7 +2011,14 @@ verify-platform: ## Verify critical platform services are healthy
 
 converge-site: ## Full site convergence (all services)
 	$(MAKE) preflight WORKFLOW=converge-site
-	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/collections/ansible_collections/lv3/platform/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) $(EXTRA_ARGS)
+	# Bootstrap Stage 5 calls the raw ansible-playbook command rather than
+	# going through ansible_scope_runner.py because site.yml imports many
+	# leaf playbooks whose `hosts:` expressions are not all statically
+	# resolvable by the scope planner (e.g. nested Jinja2 ternaries). The
+	# scope runner is the correct entrypoint for per-service live-apply
+	# wrappers on a steady-state platform; for fresh-host bootstrap we want
+	# the simplest possible converge-everything path.
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_OVERLAY_EXTRA) $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 # =============================================================================
 # Docker Development Environment — ADR 0387
