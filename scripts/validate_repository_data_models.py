@@ -402,7 +402,7 @@ def guest_plan_key(role: str) -> str:
     return f"{role.replace('-', '_')}_vm"
 
 
-def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str, str]:
+def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str, str, bool]:
     guest = require_mapping(guest, path)
     vmid = require_int(guest.get("vmid"), f"{path}.vmid", minimum=1)
     name = validate_hostname(guest.get("name"), f"{path}.name")
@@ -414,11 +414,12 @@ def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str, str]:
     require_int(guest.get("cores"), f"{path}.cores", minimum=1)
     require_int(guest.get("memory_mb"), f"{path}.memory_mb", minimum=1)
     require_int(guest.get("disk_gb"), f"{path}.disk_gb", minimum=1)
-    require_string_list(guest.get("tags"), f"{path}.tags")
+    tags = require_string_list(guest.get("tags"), f"{path}.tags")
+    is_alias = "alias" in tags
     require_string_list(guest.get("packages"), f"{path}.packages")
 
     macaddr = guest.get("macaddr")
-    if macaddr is not None:
+    if macaddr is not None and not is_alias:
         macaddr = require_str(macaddr, f"{path}.macaddr")
         if not MAC_PATTERN.match(macaddr):
             raise ValueError(f"{path}.macaddr must use uppercase colon-separated MAC format")
@@ -430,7 +431,7 @@ def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str, str]:
         require_str(disk.get("storage"), f"{path}.extra_disks[{index}].storage")
         require_int(disk.get("size_gb"), f"{path}.extra_disks[{index}].size_gb", minimum=1)
 
-    return vmid, name, ipv4, template_key
+    return vmid, name, ipv4, template_key, is_alias
 
 
 def validate_service_topology_entry(
@@ -701,7 +702,7 @@ def validate_host_vars() -> dict[str, Any]:
     guest_ips_by_key: dict[str, str] = {}
     backup_guest_key: str | None = None
     for index, guest in enumerate(proxmox_guests):
-        vmid, name, ipv4, template_key = validate_proxmox_guest(guest, f"host_vars.proxmox_guests[{index}]")
+        vmid, name, ipv4, template_key, is_alias = validate_proxmox_guest(guest, f"host_vars.proxmox_guests[{index}]")
         role = guest_plan_key(require_identifier(guest.get("role"), f"host_vars.proxmox_guests[{index}].role"))
         if template_key not in proxmox_vm_templates:
             raise ValueError(
@@ -711,12 +712,14 @@ def validate_host_vars() -> dict[str, Any]:
             raise ValueError(f"duplicate proxmox guest vmid: {vmid}")
         if name in guest_names:
             raise ValueError(f"duplicate proxmox guest name: {name}")
+        guest_vmids.add(vmid)
+        guest_names.add(name)
+        if is_alias:
+            continue
         if ipv4 in guest_ips:
             raise ValueError(f"duplicate proxmox guest ipv4: {ipv4}")
         if role in guest_plan_keys:
             raise ValueError(f"duplicate proxmox guest role key: {role}")
-        guest_vmids.add(vmid)
-        guest_names.add(name)
         guest_ips.add(ipv4)
         guest_plan_keys.add(role)
         guest_vmids_by_key[role] = vmid
@@ -1068,7 +1071,7 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             name = validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
             if name in expected_monitors:
                 raise ValueError(f"duplicate Uptime Kuma monitor contract in health probe catalog: {name}")
-            expected_monitors[name] = monitor
+            expected_monitors[name] = {**monitor, "service_id": service_id}
         elif "reason" in uptime_kuma:
             require_str(uptime_kuma.get("reason"), f"{service_path}.uptime_kuma.reason")
 

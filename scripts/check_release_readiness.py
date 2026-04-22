@@ -187,9 +187,15 @@ def check_adr_index() -> dict:
 
 def check_platform_manifest() -> dict:
     """Check if platform manifest is current."""
+    helper_path = REPO_ROOT / "scripts" / "run_python_with_packages.sh"
     result = subprocess.run(
         [
-            sys.executable,
+            str(helper_path),
+            "pyyaml",
+            "jsonschema",
+            "requests",
+            "jinja2",
+            "--",
             str(REPO_ROOT / "scripts" / "platform_manifest.py"),
             "--check",
         ],

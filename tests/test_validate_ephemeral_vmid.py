@@ -80,3 +80,20 @@ def test_validation_detects_overlap_in_inventory(validation_repo: Path) -> None:
     violations = validate_ephemeral_vmid.validate_ephemeral_vmid_ranges()
 
     assert violations == ["inventory guest overlap uses reserved ephemeral VMID 910"]
+
+
+def test_validation_ignores_alias_inventory_entries(validation_repo: Path) -> None:
+    (validation_repo / "inventory" / "host_vars" / "proxmox-host.yml").write_text(
+        "\n".join(
+            [
+                "proxmox_guests:",
+                "  - vmid: 910",
+                "    name: docker-runtime",
+                "    tags:",
+                "      - alias",
+            ]
+        )
+        + "\n"
+    )
+
+    assert validate_ephemeral_vmid.validate_ephemeral_vmid_ranges() == []

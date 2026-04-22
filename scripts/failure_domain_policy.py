@@ -226,6 +226,16 @@ def guest_placement_index(
     for index, guest in enumerate(guests):
         guest = require_mapping(guest, f"host_vars.proxmox_guests[{index}]")
         guest_name = require_str(guest.get("name"), f"host_vars.proxmox_guests[{index}].name")
+        base_tags = unique_string_list(guest.get("tags"), f"host_vars.proxmox_guests[{index}].tags")
+        if "alias" in base_tags:
+            indexed[guest_name] = {
+                "name": guest_name,
+                "vmid": guest.get("vmid"),
+                "alias": True,
+                "base_tags": base_tags,
+                "live_tags": [],
+            }
+            continue
         placement = validate_guest_placement(
             guest,
             path=f"host_vars.proxmox_guests[{index}]",
@@ -234,8 +244,9 @@ def guest_placement_index(
         indexed[guest_name] = {
             "name": guest_name,
             "vmid": guest.get("vmid"),
+            "alias": False,
             "placement": placement,
-            "base_tags": unique_string_list(guest.get("tags"), f"host_vars.proxmox_guests[{index}].tags"),
+            "base_tags": base_tags,
             "live_tags": placement_live_tags(placement, domain_index),
         }
     return indexed
@@ -296,6 +307,8 @@ def validate_service_alignment(
             raise ValueError(f"service '{service_id}' primary vm '{primary_vm}' is missing placement metadata")
         if standby_vm not in guest_index:
             raise ValueError(f"service '{service_id}' standby vm '{standby_vm}' is missing placement metadata")
+        if guest_index[primary_vm].get("alias") or guest_index[standby_vm].get("alias"):
+            continue
 
         primary = guest_index[primary_vm]["placement"]
         replica = guest_index[standby_vm]["placement"]
@@ -327,7 +340,9 @@ def validate_service_alignment(
         standby_guests.add(standby_vm)
 
     declared_standby_guests = {
-        guest_name for guest_name, guest in guest_index.items() if guest["placement"]["placement_class"] == "standby"
+        guest_name
+        for guest_name, guest in guest_index.items()
+        if not guest.get("alias") and guest["placement"]["placement_class"] == "standby"
     }
     if declared_standby_guests != standby_guests:
         missing = sorted(declared_standby_guests - standby_guests)
@@ -375,6 +390,7 @@ def build_policy_report(
                 "live_tags": guest["live_tags"],
             }
             for guest_name, guest in sorted(guest_index.items())
+            if not guest.get("alias")
         ],
         "environments": [
             {

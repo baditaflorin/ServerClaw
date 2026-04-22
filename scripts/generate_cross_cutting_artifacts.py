@@ -39,7 +39,16 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+existing_platform = sys.modules.get("platform")
+if existing_platform is not None and not hasattr(existing_platform, "__path__"):
+    del sys.modules["platform"]
 
 import yaml
 from identity_yaml import load_yaml_with_identity
@@ -52,7 +61,6 @@ from validation_toolkit import (
     require_str,
 )
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
 SUBDOMAIN_CATALOG_PATH = REPO_ROOT / "config" / "subdomain-catalog.json"
 DNS_OUTPUT_PATH = REPO_ROOT / "config" / "generated" / "dns-declarations.yaml"

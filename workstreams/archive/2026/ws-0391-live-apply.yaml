@@ -55,14 +55,14 @@ canonical_truth:
   changelog_entry: complete ADR 0391 CPU-only operational automation with deterministic
     validation planning and documented ops Make targets
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.178.152
   latest_receipts:
     platform_ops: 2026-04-21-adr-0391-cpu-only-operational-automation-live-apply
 blockers: []
 notes: 'Branch-local live apply completed from origin/main@04638e669 with source
 
-  commit a660ea551539e848dfb91e44d07f5e43b8347c89 on codex/ws-0391-live-apply.
-  Final PR integration continues on codex/ws-0391-main-integration. Protected release and
+  commit a660ea551539e848dfb91e44d07f5e43b8347c89 on codex/ws-0391-live-apply. Final
+  PR integration continues on codex/ws-0391-main-integration. Protected release and
 
   platform-version files remain for the final main integration step.
 

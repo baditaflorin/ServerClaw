@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.151",
+  "repo_version": "0.178.152",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-21T12:27:04Z",
-  "next_refresh_at": "2026-04-21T13:27:04Z",
+  "generated_at": "2026-04-22T11:44:55Z",
+  "next_refresh_at": "2026-04-22T12:44:55Z",
   "environment": "production",
   "identity": {
-    "platform_name": "example.com",
-    "operator": "Platform Operator",
+    "platform_name": "0fork.com",
+    "operator": "0fork Clone Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-04-15T00:00:00Z"
+        "last_live_apply": "2026-04-21T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -255,7 +255,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.example.com",
-        "last_live_apply": "2026-04-15T00:00:00Z",
+        "last_live_apply": "2026-04-21T00:00:00Z",
         "slo_status": "unknown"
       },
       "grist": {
@@ -521,7 +521,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://scheduler.example.com",
-        "last_live_apply": "2026-04-15T00:00:00Z"
+        "last_live_apply": "2026-04-21T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.150",
-    "deployed_at": "2026-04-21",
-    "summary": "ADR 0422: Evaluate lsp-ai as editor-side AI language server \u2014 **Accepted (decision only, no deployment)** ADR 0423: Operator-local lsp-ai against LiteLLM \u2014 **Rejected** (kept as historical design record)",
-    "release_notes_url": "docs/release-notes/0.178.151.md"
+    "last_version": "0.178.151",
+    "deployed_at": "2026-04-22",
+    "summary": "complete ADR 0391 CPU-only operational automation with deterministic validation planning and documented ops Make targets make deterministic service decommissioning safer by keeping registry validation machine-readable, extending structural catalog cleanup, and adding SLO block markers to the active SLO generator",
+    "release_notes_url": "docs/release-notes/0.178.152.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6310,17 +6310,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.example.com",
+        "endpoint": "https://ops.0fork.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.example.com",
+        "endpoint": "https://windmill.0fork.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.example.com",
+        "endpoint": "https://api.0fork.com",
         "adr": "0092"
       }
     ],

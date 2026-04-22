@@ -10,6 +10,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | --- | --- |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
+| `platform_ops` | `2026-04-21-adr-0391-cpu-only-operational-automation-live-apply` |
 | `platform` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `public_edge_publication` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
 | `keycloak` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |

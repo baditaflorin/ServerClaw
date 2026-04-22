@@ -17,9 +17,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 320
+  total_workstreams: 321
   by_year:
-    '2026': 320
+    '2026': 321
 workstreams:
 - id: ws-0424-fork-clone-0fork
   adr: '0424'
@@ -382,7 +382,7 @@ workstreams:
 - id: ws-0396-live-apply
   adr: 0396
   title: Deterministic service decommissioning live apply and validation replay
-  status: live_applied
+  status: ready_for_merge
   ready_to_merge: true
   live_applied: true
   owner: codex
@@ -396,14 +396,18 @@ workstreams:
   shared_surfaces:
   - workstreams.yaml
   - workstreams/active/ws-0396-live-apply.yaml
+  - workstreams/archive/2026/ws-0396-live-apply.yaml
   - docs/workstreams/ws-0396-live-apply.md
   - docs/adr/0396-deterministic-service-decommissioning.md
   - docs/runbooks/data-retention.md
   - docs/runbooks/slo-tracking.md
   - scripts/decommission_service.py
+  - scripts/failure_domain_policy.py
   - scripts/generate_slo_rules.py
   - scripts/platform_ops.py
   - scripts/uptime_contract.py
+  - scripts/validate_ephemeral_vmid.py
+  - scripts/validate_repository_data_models.py
   - config/prometheus/rules/slo_alerts.yml
   - config/prometheus/rules/slo_rules.yml
   - config/prometheus/file_sd/slo_targets.yml
@@ -411,6 +415,29 @@ workstreams:
   - tests/test_generate_slo_rules.py
   - tests/test_monitoring_vm_role.py
   - tests/test_uptime_contract.py
+  - tests/test_validate_ephemeral_vmid.py
+  - tests/test_validate_repository_data_models.py
+  - VERSION
+  - changelog.md
+  - README.md
+  - RELEASE.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/release-notes/**
+  - docs/status/history/**
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - config/ansible-execution-scopes.yaml
+  - config/subdomain-exposure-registry.json
+  - inventory/group_vars/platform.yml
+  - inventory/group_vars/platform_tls_certs.yml
+  - scripts/check_release_readiness.py
+  - scripts/generate_cross_cutting_artifacts.py
+  - scripts/topology-snapshot.json
+  - workstreams/active/ws-0391-live-apply.yaml
+  - workstreams/archive/2026/ws-0391-live-apply.yaml
+  - workstreams/active/ws-0424-fork-clone-0fork.yaml
   - receipts/live-applies/**
   ownership_manifest:
     owned_surfaces:
@@ -422,6 +449,7 @@ workstreams:
     - id: ws_0396_tracking
       paths:
       - workstreams/active/ws-0396-live-apply.yaml
+      - workstreams/archive/2026/ws-0396-live-apply.yaml
       - docs/workstreams/ws-0396-live-apply.md
       - docs/adr/0396-deterministic-service-decommissioning.md
       - docs/runbooks/data-retention.md
@@ -430,13 +458,18 @@ workstreams:
     - id: ws_0396_decommissioning_automation
       paths:
       - scripts/decommission_service.py
+      - scripts/failure_domain_policy.py
       - scripts/platform_ops.py
       - scripts/generate_slo_rules.py
       - scripts/uptime_contract.py
+      - scripts/validate_ephemeral_vmid.py
+      - scripts/validate_repository_data_models.py
       - tests/test_decommission_service.py
       - tests/test_generate_slo_rules.py
       - tests/test_monitoring_vm_role.py
       - tests/test_uptime_contract.py
+      - tests/test_validate_ephemeral_vmid.py
+      - tests/test_validate_repository_data_models.py
       mode: shared_contract
       contract: adr-0396-decommissioning-automation-v1
     - id: ws_0396_generated_slo_assets
@@ -451,17 +484,46 @@ workstreams:
       - receipts/live-applies/**
       mode: shared_contract
       contract: live-apply-evidence-v1
+    - id: ws_0396_release_integration
+      paths:
+      - VERSION
+      - changelog.md
+      - README.md
+      - RELEASE.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/**
+      - docs/status/history/**
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: main-release-integration-v1
+    - id: ws_0396_cross_workstream_release_bookkeeping
+      paths:
+      - workstreams/active/ws-0391-live-apply.yaml
+      - workstreams/archive/2026/ws-0391-live-apply.yaml
+      mode: shared_contract
+      contract: canonical-truth-release-bookkeeping-v1
+    - id: ws_0396_integration_gate_repairs
+      paths:
+      - config/ansible-execution-scopes.yaml
+      - config/subdomain-exposure-registry.json
+      - inventory/group_vars/platform.yml
+      - inventory/group_vars/platform_tls_certs.yml
+      - scripts/check_release_readiness.py
+      - scripts/generate_cross_cutting_artifacts.py
+      - scripts/topology-snapshot.json
+      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      mode: shared_contract
+      contract: workstream-metadata-gate-repair-v1
   canonical_truth:
     changelog_entry: make deterministic service decommissioning safer by keeping registry
       validation machine-readable, extending structural catalog cleanup, and adding
       SLO block markers to the active SLO generator
     release_bump: patch
-    included_in_repo_version: null
-    protected_integration_updates_pending:
-    - VERSION
-    - changelog.md
-    - README.md
-    - versions/stack.yaml
+    included_in_repo_version: 0.178.152
+    protected_integration_updates_pending: []
   notes: 'Started from latest origin/main commit 04638e669 on 2026-04-21.
 
 
@@ -519,90 +581,22 @@ workstreams:
     and receipts/live-applies/evidence/2026-04-21-ws-0396-live-apply.txt
 
 
-    Protected integration updates intentionally pending for merge-to-main:
+    Merge-to-main integration:
 
-    - VERSION
+    - PR #13 merged the live-apply automation and evidence to main at d9bf754b on
+    2026-04-22.
 
-    - changelog.md release sections
+    - This follow-up integration cut repo release 0.178.152, refreshed README/changelog/release/manifest/status
+    artifacts, archived ws-0391, kept ws-0396 active for branch registration until
+    the follow-up PR merges, and repaired validation gates found during merge readiness.
 
-    - top-level README.md integrated status summary
-
-    - versions/stack.yaml
+    - Remaining operator action is optional post-merge live verification from main;
+    the live platform state was already verified during the 2026-04-21 branch live
+    apply.
 
     '
   blockers: []
   plane_issue_id: 3d700a28-78fd-4edb-b4ac-6bce7f6cf20f
-- id: ws-0391-live-apply
-  adr: 0391
-  title: CPU-only operational automation live apply
-  status: live_applied
-  ready_to_merge: true
-  live_applied: true
-  owner: codex
-  branch: codex/ws-0391-main-integration
-  worktree_path: .worktrees/ws-0391-main-integration
-  doc: docs/workstreams/ws-0391-live-apply.md
-  depends_on:
-  - adr-0373-service-registry-and-derived-defaults
-  - adr-0389-service-decommissioning-procedure
-  conflicts_with: []
-  shared_surfaces:
-  - Makefile
-  - scripts/platform_ops.py
-  - tests/test_platform_ops.py
-  - docs/adr/0391-cpu-only-operational-automation.md
-  - docs/adr/.index.yaml
-  - docs/adr/index/**
-  - docs/runbooks/cpu-only-platform-ops.md
-  - docs/workstreams/ws-0391-live-apply.md
-  - workstreams/active/ws-0391-live-apply.yaml
-  - workstreams.yaml
-  - receipts/live-applies/**
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0391_platform_ops_cli
-      paths:
-      - scripts/platform_ops.py
-      - tests/test_platform_ops.py
-      - Makefile
-      mode: exclusive
-    - id: ws_0391_docs_and_tracking
-      paths:
-      - docs/adr/0391-cpu-only-operational-automation.md
-      - docs/adr/.index.yaml
-      - docs/adr/index/**
-      - docs/runbooks/cpu-only-platform-ops.md
-      - docs/workstreams/ws-0391-live-apply.md
-      - workstreams/active/ws-0391-live-apply.yaml
-      mode: exclusive
-    - id: ws_0391_workstream_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: ws_0391_live_apply_evidence
-      paths:
-      - receipts/live-applies/**
-      mode: shared_contract
-      contract: live-apply-evidence-v1
-  canonical_truth:
-    changelog_entry: complete ADR 0391 CPU-only operational automation with deterministic
-      validation planning and documented ops Make targets
-    release_bump: patch
-    included_in_repo_version: null
-    latest_receipts:
-      platform_ops: 2026-04-21-adr-0391-cpu-only-operational-automation-live-apply
-  blockers: []
-  notes: 'Branch-local live apply completed from origin/main@04638e669 with source
-
-    commit a660ea551539e848dfb91e44d07f5e43b8347c89 on codex/ws-0391-live-apply. Final
-    PR integration continues on codex/ws-0391-main-integration. Protected release
-    and
-
-    platform-version files remain for the final main integration step.
-
-    '
-  plane_issue_id: 82943d49-b7a3-4aea-8aca-12913987ea47
 - id: ws-0375-certificate-validation
   adr: '0375'
   title: Certificate Validation and Concordance Enforcement

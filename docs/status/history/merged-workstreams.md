@@ -8,7 +8,6 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
-| `0391` | CPU-only operational automation live apply | `live_applied` | [ws-0391-live-apply.md](../../workstreams/ws-0391-live-apply.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](../../workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
@@ -169,6 +168,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `0391` | CPU-only operational automation live apply | `live_applied` | [ws-0391-live-apply.md](../../workstreams/ws-0391-live-apply.md) |
 | `0373` | Live apply service registry and derived defaults from latest origin/main | `merged` | [ws-0373-live-apply.md](../../workstreams/ws-0373-live-apply.md) |
 | `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](../../workstreams/ws-0372-live-apply.md) |
 | `0382` | Latest-main Keycloak interactive login incident closure | `merged` | [ws-0382-live-apply.md](../../workstreams/ws-0382-live-apply.md) |

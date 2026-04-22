@@ -69,6 +69,12 @@ playbooks:
       - service:subdomain-catalog
       - config/subdomain-catalog.json
       - inventory/host_vars/proxmox-host.yml
+  playbooks/rotate-hetzner-dns-token.yml:
+    playbook_id: rotate-hetzner-dns-token
+    mutation_scope: platform
+    shared_surfaces:
+      - service:hetzner-dns
+      - inventory/host_vars/proxmox-host.yml
   playbooks/docker-runtime.yml:
     playbook_id: docker-runtime
     mutation_scope: host
@@ -198,6 +204,13 @@ playbooks:
   playbooks/mail-platform.yml:
     playbook_id: mail-platform
     mutation_scope: platform
+    shared_surfaces:
+      - service:mail-platform
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/mail-platform-send-gmail.yml:
+    playbook_id: mail-platform-send-gmail
+    mutation_scope: platform
+    execution_class: diagnostic
     shared_surfaces:
       - service:mail-platform
       - inventory/host_vars/proxmox-host.yml

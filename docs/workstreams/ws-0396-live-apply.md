@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0396](../adr/0396-deterministic-service-decommissioning.md)
 - Title: Deterministic Service Decommissioning
-- Status: live applied
+- Status: ready for follow-up merge
 - Branch: `codex/ws-0396-live-apply`
 - Worktree: `.worktrees/ws-0396-live-apply`
 - Owner: `codex`
@@ -134,16 +134,35 @@ vulnerability-budget host scan. A host-only security posture refresh was recorde
 at `receipts/security-reports/20260421T112535Z.json`, after which
 `python3 scripts/vulnerability_budget.py --service grafana` approved the replay.
 
-## Merge-To-Main Remainder
+## Merge-To-Main Integration
 
-After this branch is merged through the PR flow:
+On 2026-04-22, the branch was rebased onto `origin/main` `467fe6eef`.
+The merge-readiness pass also repaired current-main workstream metadata for
+`ws-0424-fork-clone-0fork`: its generated-index claim used the obsolete
+`shared` mode, which blocked the workstream surface validator. The source shard
+now uses `shared_contract` with `generated-index-surfaces-v1`.
+The same pass registered `playbooks/mail-platform-send-gmail.yml` and
+`playbooks/rotate-hetzner-dns-token.yml` as Ansible execution-scope leaves
+because the new `0fork-full-day.yml` orchestrator imports them.
+It also made repository data-model validation alias-aware for ADR 0430/0431
+local overlays, so alias-only fork guest entries can share a consolidation
+target IP without being treated as real Proxmox guests.
+Finally, it fixed the cross-cutting artifact generator import bootstrap so
+`make generate-platform-vars` can run from a worktree without resolving Python's
+standard-library `platform` module before the repo package, then refreshed the
+generated platform vars, TLS cert vars, subdomain exposure registry, and
+topology snapshot. It also made the release-readiness manifest check use the
+repo package wrapper so its dependency environment matches the manifest
+generator.
 
-- replay the same monitoring verification from merged `main`
-- update protected integration surfaces as part of the final integration step:
-  - `VERSION`
-  - `changelog.md`
-  - `README.md`
-  - `versions/stack.yaml`
-- rerun `./scripts/validate_repo.sh generated-docs`; the workstream-branch run
-  truthfully failed only because `canonical_truth.py --check` wants the protected
-  `changelog.md` update deferred to merge-to-main
+The integration pass also cut repo release `0.178.152` from the pending
+canonical-truth entries for `ws-0391-live-apply` and `ws-0396-live-apply`,
+refreshed generated release/status/ADR/manifest/diagram surfaces, and moved
+`ws-0391-live-apply` to the 2026 workstream archive.
+
+PR #13 merged the ADR 0396 live-apply automation and evidence to `main` at
+`d9bf754b` on 2026-04-22. This follow-up merge-readiness pass completes release
+`0.178.152`, archives `ws-0391-live-apply`, keeps `ws-0396-live-apply` active
+for branch registration until the follow-up PR lands, and leaves only optional
+post-merge live verification from `main`; the live platform state was already
+verified during the branch live apply on 2026-04-21.

@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.178.151
+repo_version: 0.178.152
 platform_version: 0.178.149
 
 live_apply_evidence:
@@ -189,6 +189,7 @@ live_apply_evidence:
     validation_toolkit: 2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply
     repowise: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
     repo_intake: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
+    platform_ops: 2026-04-21-adr-0391-cpu-only-operational-automation-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -1186,7 +1187,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.178.151
+    current: 0.178.152
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.178.149

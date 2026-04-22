@@ -58,6 +58,9 @@ def validate_ephemeral_vmid_ranges() -> list[str]:
     for guest in host_vars.get("proxmox_guests", []):
         if not isinstance(guest, dict):
             continue
+        tags = guest.get("tags", [])
+        if isinstance(tags, list) and "alias" in tags:
+            continue
         vmid = guest.get("vmid")
         if isinstance(vmid, int):
             append_violation(violations, vmid, f"inventory guest {guest.get('name', 'unknown')}", vmid_range)
