@@ -70,7 +70,7 @@
     postgres_vm_cluster_conf_dir: "{{ postgres_vm_config_files.files[0].path | dirname }}"
     postgres_vm_cluster_version: "{{ postgres_vm_config_files.files[0].path | dirname | dirname | basename }}"
     postgres_vm_cluster_major_version: "{{ postgres_vm_config_files.files[0].path | dirname | dirname | basename }}"
-    postgres_vm_managed_conf_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/conf.d/90-lv3-postgres.conf' }}"
+    postgres_vm_managed_conf_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/conf.d/90-' ~ platform_config_prefix ~ '-postgres.conf' }}"
     postgres_vm_hba_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/pg_hba.conf' }}"
 
 - name: Ensure PostgreSQL pgaudit package is present

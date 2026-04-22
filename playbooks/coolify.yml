@@ -141,7 +141,7 @@
       run_once: true
 
 - name: Converge Coolify on the dedicated guest
-  hosts: "{{ 'coolify' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
+  hosts: "{{ 'coolify' if (env | default('production')) == 'production' else 'coolify-staging' }}"
   become: true
   gather_facts: false
   vars_files:
@@ -187,7 +187,7 @@
         playbook_execution_notification_service: coolify
 
 - name: Converge the Coolify apps runtime on the dedicated apps guest
-  hosts: "{{ 'coolify-apps' if (env | default('production')) == 'production' else 'coolify-apps-staging-lv3' }}"
+  hosts: "{{ 'coolify-apps' if (env | default('production')) == 'production' else 'coolify-apps-staging' }}"
   become: true
   gather_facts: false
   vars_files:

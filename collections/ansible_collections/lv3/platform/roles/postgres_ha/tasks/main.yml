@@ -174,7 +174,7 @@
 - name: Render managed PostgreSQL HA parameters
   ansible.builtin.template:
     src: postgresql-ha.conf.j2
-    dest: "{{ postgres_ha_cluster_conf_dir }}/conf.d/90-lv3-postgres-ha.conf"
+    dest: "{{ postgres_ha_cluster_conf_dir }}/conf.d/90-{{ platform_config_prefix }}-postgres-ha.conf"
     owner: root
     group: root
     mode: "0644"

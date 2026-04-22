@@ -17,15 +17,15 @@ falco_runtime_disabled_services:
   - falco-bpf.service
   - falcoctl-artifact-follow.service
 falco_runtime_systemd_override_dir: "/etc/systemd/system/{{ falco_runtime_service_name }}.service.d"
-falco_runtime_systemd_override_file: "{{ falco_runtime_systemd_override_dir }}/lv3-journald.conf"
+falco_runtime_systemd_override_file: "{{ falco_runtime_systemd_override_dir }}/{{ platform_config_prefix }}-journald.conf"
 falco_runtime_config_dir: /etc/falco/config.d
-falco_runtime_config_override_file: "{{ falco_runtime_config_dir }}/lv3-runtime.yaml"
+falco_runtime_config_override_file: "{{ falco_runtime_config_dir }}/{{ platform_config_prefix }}-runtime.yaml"
 falco_runtime_rules_dir: /etc/falco/rules.d
 falco_runtime_rule_sources:
   - src: "{{ falco_runtime_repo_root }}/config/falco/rules.d/platform-overrides.yaml"
-    dest: "{{ falco_runtime_rules_dir }}/50-lv3-platform-overrides.yaml"
+    dest: "{{ falco_runtime_rules_dir }}/50-{{ platform_config_prefix }}-platform-overrides.yaml"
   - src: "{{ falco_runtime_repo_root }}/config/falco/suppressions.yaml"
-    dest: "{{ falco_runtime_rules_dir }}/60-lv3-suppressions.yaml"
+    dest: "{{ falco_runtime_rules_dir }}/60-{{ platform_config_prefix }}-suppressions.yaml"
 falco_runtime_bridge_host_inventory_name: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 falco_runtime_bridge_host: >-
   {{

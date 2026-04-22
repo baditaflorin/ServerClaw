@@ -95,18 +95,18 @@ proxmox_guest_ssh_common_args:
 proxmox_host_admin_user: ops
 proxmox_host_admin_shell: /bin/bash
 proxmox_host_sudo_group: sudo
-proxmox_host_ssh_hardening_file: /etc/ssh/sshd_config.d/90-lv3-hardening.conf
+proxmox_host_ssh_hardening_file: "/etc/ssh/sshd_config.d/90-{{ platform_config_prefix }}-hardening.conf"
 proxmox_breakglass_ssh_port: 2222
 proxmox_acme_account_name: default
 proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
-proxmox_acme_plugin_id: lv3-hetzner-dns
+proxmox_acme_plugin_id: "{{ platform_config_prefix }}-hetzner-dns"
 proxmox_acme_validation_delay: 30
 proxmox_tfa_description: Primary TOTP
-proxmox_api_automation_user: lv3-automation@pve
-proxmox_api_automation_comment: LV3 durable automation identity
+proxmox_api_automation_user: "{{ platform_config_prefix }}-automation@pve"
+proxmox_api_automation_comment: "{{ platform_operator_name }} durable automation identity"
 proxmox_api_token_id: primary
-proxmox_api_token_comment: LV3 primary automation token
-proxmox_api_token_role: LV3Automation
+proxmox_api_token_comment: "{{ platform_operator_name }} primary automation token"
+proxmox_api_token_role: "{{ platform_config_prefix | capitalize }}Automation"
 proxmox_api_token_role_manage: true
 proxmox_api_token_role_privileges:
   - Datastore.Allocate
@@ -153,7 +153,7 @@ proxmox_api_token_role_privileges:
 proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
 proxmox_api_token_local_dir: "{{ repo_shared_local_root }}/proxmox-api"
-proxmox_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-api/lv3-automation-primary.json"
+proxmox_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-api/{{ platform_config_prefix }}-automation-primary.json"
 proxmox_tool_topology_file: "{{ repo_shared_local_root }}/proxmox-api/topology.yaml"
 
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
@@ -164,7 +164,7 @@ monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
 monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
 monitoring_proxmox_writer_token_local_file: "{{ repo_shared_local_root }}/monitoring/proxmox-writer.token"
 monitoring_guest_writer_token_local_file: "{{ repo_shared_local_root }}/monitoring/guest-writer.token"
-keycloak_agent_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/lv3-agent-hub-client-secret.txt"
+keycloak_agent_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/{{ platform_config_prefix }}-agent-hub-client-secret.txt"
 monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
 monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
 monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
@@ -199,7 +199,7 @@ smtp_docker_network_name: mail-platform_default
 smtp_from_address: "{{ mail_platform_mailbox_address }}"
 smtp_reply_to_address: "{{ mail_platform_reply_to_email }}"
 openbao_postgres_admin_role: openbao_rotator
-openbao_postgres_connect_role: lv3_openbao_connect_all
+openbao_postgres_connect_role: "{{ platform_config_prefix }}_openbao_connect_all"
 openbao_postgres_database: postgres
 openbao_tls_enabled: true
 openbao_database_mount_path: database
@@ -213,14 +213,14 @@ openbao_atlas_approle_local_file: "{{ repo_shared_local_root }}/openbao/atlas-ap
 openbao_mail_platform_approle_local_file: "{{ repo_shared_local_root }}/openbao/mail-platform-approle.json"
 typesense_local_artifact_dir: "{{ repo_shared_local_root }}/typesense"
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
-compose_runtime_secret_root: /run/lv3-secrets
+compose_runtime_secret_root: "/run/{{ platform_config_prefix }}-secrets"
 openbao_site_dir: /opt/openbao
 openbao_config_dir: /opt/openbao/config
 openbao_policy_dir: /opt/openbao/policies
 openbao_tls_dir: /opt/openbao/tls
 windmill_site_dir: /opt/windmill
-windmill_secret_dir: /etc/lv3/windmill
-windmill_env_file: /run/lv3-secrets/windmill/runtime.env
+windmill_secret_dir: "/etc/{{ platform_config_prefix }}/windmill"
+windmill_env_file: "{{ compose_runtime_secret_root }}/windmill/runtime.env"
 ollama_version: 0.18.2
 ollama_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
 ollama_default_model: llama3.2:3b
@@ -288,7 +288,7 @@ step_ca_remote_ssh_host_ca_file: "{{ step_ca_home }}/certs/ssh_host_ca_key.pub"
 step_ca_services_password_file: "{{ step_ca_password_dir }}/services-password.txt"
 step_ca_local_artifact_dir: "{{ repo_shared_local_root }}/step-ca"
 mail_platform_site_dir: /opt/mail-platform
-mail_platform_secret_dir: /etc/lv3/mail-platform
+mail_platform_secret_dir: "/etc/{{ platform_config_prefix }}/mail-platform"
 
 control_plane_recovery_local_artifact_dir: "{{ repo_shared_local_root }}/control-plane-recovery"
 control_plane_recovery_local_ssh_dir: "{{ repo_shared_local_root }}/control-plane-recovery/ssh"
@@ -298,7 +298,7 @@ control_plane_recovery_runtime_ssh_public_key_local_file: "{{ repo_shared_local_
 control_plane_recovery_local_controller_bundle_file: "{{ repo_shared_local_root }}/control-plane-recovery/controller/controller-recovery-bundle.tar.zst"
 control_plane_recovery_local_controller_manifest_file: "{{ repo_shared_local_root }}/control-plane-recovery/controller/control-plane-recovery-manifest.json"
 control_plane_recovery_backup_store_root: /srv/control-plane-recovery
-control_plane_recovery_backup_store_user: lv3-control-plane-backup
+control_plane_recovery_backup_store_user: "{{ platform_config_prefix }}-control-plane-backup"
 control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
 control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"
 control_metadata_witness_script: "{{ inventory_dir | dirname }}/scripts/control_metadata_witness.py"
@@ -310,13 +310,13 @@ control_metadata_witness_enabled: "{{ (control_metadata_witness_archive_root | t
 
 dr_offsite_backup_storage:
   enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_ENABLED') | default('false', true)) | bool }}"
-  id: lv3-backup-offsite
+  id: "{{ platform_config_prefix }}-backup-offsite"
   type: cifs
   server: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SERVER') | default('', true) }}"
   share: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SHARE') | default('', true) }}"
   username: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_USERNAME') | default('', true) }}"
   password_env: PROXMOX_DR_OFFSITE_PASSWORD
-  path: /mnt/pve/lv3-backup-offsite
+  path: "/mnt/pve/{{ platform_config_prefix }}-backup-offsite"
   content:
     - backup
   nodes:

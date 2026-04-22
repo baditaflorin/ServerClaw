@@ -36,7 +36,7 @@
 # --- Neko-specific plays ---
 
 - name: Converge Neko Remote Desktop Runtime
-  hosts: "{{ 'runtime-comms-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-comms' }}"
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-comms' }}"
   become: true
   gather_facts: true
   tags:

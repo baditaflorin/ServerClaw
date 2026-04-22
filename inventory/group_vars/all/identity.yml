@@ -13,6 +13,13 @@ platform_operator_email: operator@example.com
 platform_operator_name: "Platform Operator"
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 
+# Short identifier derived from domain — used as a prefix/suffix in internal
+# config filenames, policy names, and service identities that must be unique
+# per deployment. Defaults to the first segment of platform_domain (so
+# `lv3.org` → `lv3`, `0fork.com` → `0fork`). Override here to decouple from
+# the domain if needed.
+platform_config_prefix: "{{ platform_domain | split('.') | first }}"
+
 # ---------------------------------------------------------------------------
 # Keycloak SSO identity — ADR 0388
 # ---------------------------------------------------------------------------

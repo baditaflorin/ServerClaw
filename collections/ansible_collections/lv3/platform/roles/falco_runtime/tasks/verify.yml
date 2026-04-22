@@ -24,7 +24,7 @@
       - grep
       - -F
       - __lv3_falco_smoke__
-      - "{{ falco_runtime_rules_dir }}/50-lv3-platform-overrides.yaml"
+      - "{{ falco_runtime_rule_sources[0].dest }}"
   register: falco_runtime_smoke_rule
   changed_when: false
   failed_when: falco_runtime_smoke_rule.rc != 0

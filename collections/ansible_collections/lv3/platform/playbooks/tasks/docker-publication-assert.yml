@@ -10,7 +10,7 @@
 - name: Create a transient Docker publication assurance helper path
   ansible.builtin.tempfile:
     state: file
-    suffix: -lv3-docker-publication-assurance
+    suffix: "-{{ platform_config_prefix }}-docker-publication-assurance"
   register: playbook_execution_docker_publication_helper_tempfile
   changed_when: false
   when: playbook_execution_docker_publication_command is not defined

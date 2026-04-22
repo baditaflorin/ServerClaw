@@ -119,11 +119,11 @@
 
 - name: Render break-glass sshd port drop-in
   ansible.builtin.copy:
-    dest: /etc/ssh/sshd_config.d/91-lv3-breakglass.conf
+    dest: "/etc/ssh/sshd_config.d/91-{{ platform_config_prefix }}-breakglass.conf"
     mode: "0644"
     content: |
       # Break-glass port: publicly reachable even when Tailscale is down.
-      # Key authentication is enforced by 90-lv3-hardening.conf; no password path exists.
+      # Key authentication is enforced by {{ proxmox_host_ssh_hardening_file | basename }}; no password path exists.
       Port 22
       Port {{ proxmox_breakglass_ssh_port }}
   when: proxmox_breakglass_ssh_port is defined

@@ -63,7 +63,7 @@
 
 - name: Persist IPv4 forwarding configuration
   ansible.builtin.copy:
-    dest: /etc/sysctl.d/99-lv3-ip-forwarding.conf
+    dest: "/etc/sysctl.d/99-{{ platform_config_prefix }}-ip-forwarding.conf"
     content: |
       net.ipv4.ip_forward = 1
     mode: "0644"

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.153",
+  "repo_version": "0.178.154",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-22T13:04:03Z",
-  "next_refresh_at": "2026-04-22T14:04:03Z",
+  "generated_at": "2026-04-22T14:05:28Z",
+  "next_refresh_at": "2026-04-22T15:05:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.com",
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.152",
+    "last_version": "0.178.153",
     "deployed_at": "2026-04-22",
-    "summary": "clone-deploy tactical fixes: linux_guest_firewall template resolves alias-host sources via hostvars fallback; firewall role ends cleanly on inventory aliases outside proxmox_guests; keycloak_runtime GlitchTip read/mirror gated behind keycloak_glitchtip_enabled; new playbooks/vars/fork-overrides.yml bundle; new preflight_topology_connectivity.yml probes postgres:5432 from every client VM before a converge; ADR 0435 proposes topology-derived health-probe URLs",
-    "release_notes_url": "docs/release-notes/0.178.153.md"
+    "summary": "ADR 0385 follow-up \u2014 IoC: introduce `platform_config_prefix` (defaults to first segment of `platform_domain`) and parameterize `lv3-` literals in `inventory/group_vars/all/main.yml` and role defaults (linux_access, step_ca_ssh_trust, falco_runtime, proxmox_ntopng, proxmox_security, proxmox_network, postgres_vm, postgres_ha). Strips hardcoded `*-staging-lv3` host names in coolify/librechat/serverclaw/neko playbooks to align with `playbook_execution_host_patterns` source of truth. Zero behavior change on the `lv3.org` deployment; fork deployments auto-derive prefix from their own domain.",
+    "release_notes_url": "docs/release-notes/0.178.154.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
