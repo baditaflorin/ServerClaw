@@ -320,6 +320,7 @@
   when:
     - platform_environment | default('production') != 'docker-dev'
     - not public_edge_certificate.stat.exists
+    - not public_edge_skip_certbot
   changed_when: true
 
 - name: Check whether site-local certificates already exist for hostnames missing from the shared certificate
@@ -416,7 +417,9 @@
       else {}
     }}
   loop: "{{ public_edge_site_certificate_requirements | default([]) }}"
-  when: item.missing_domains | length > 0
+  when:
+    - item.missing_domains | length > 0
+    - not public_edge_skip_certbot
   changed_when: true
 
 - name: Build the site-local TLS material map for the final NGINX render

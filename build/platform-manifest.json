@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.156",
+  "repo_version": "0.178.157",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-22T22:16:26Z",
-  "next_refresh_at": "2026-04-22T23:16:26Z",
+  "generated_at": "2026-04-22T22:55:08Z",
+  "next_refresh_at": "2026-04-22T23:55:08Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.155",
+    "last_version": "0.178.156",
     "deployed_at": "2026-04-22",
     "summary": "No changelog notes were present in `## Unreleased` at release time.",
-    "release_notes_url": "docs/release-notes/0.178.156.md"
+    "release_notes_url": "docs/release-notes/0.178.157.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

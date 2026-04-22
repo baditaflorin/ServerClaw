@@ -80,6 +80,7 @@ workstreams:
       - docs/adr/index/by-status/implemented.yaml
       - docs/adr/index/by-status/proposed.yaml
       - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
       mode: shared_contract
       contract: generated-index-and-diagram-v1
     - id: ws_0424_clone_deploy_tactical_fixes
@@ -153,6 +154,11 @@ workstreams:
       - playbooks/librechat.yml
       - playbooks/serverclaw.yml
       - playbooks/neko.yml
+      mode: exclusive
+    - id: ws_0424_bootstrap_converge_fixes
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml
       mode: exclusive
     - id: ws_0424_schema_catalog_fixes
       paths:
