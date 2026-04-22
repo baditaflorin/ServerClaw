@@ -60,17 +60,26 @@
       changed_when: false
       failed_when: pve_check.rc != 0
 
+    # A live PVE API returns 200 only for authenticated requests; a bare
+    # anonymous GET on /api2/json/version correctly returns 401 once the
+    # automation token has been provisioned. Either response proves the
+    # daemon is listening, which is all this verifier needs to establish.
     - name: Verify Proxmox API is accessible
       ansible.builtin.uri:
         url: "https://127.0.0.1:8006/api2/json/version"
         validate_certs: false
         method: GET
-        status_code: 200
+        status_code: [200, 401]
       register: pve_api
 
     - name: Report Proxmox version
+      ansible.builtin.command: pveversion
+      register: pve_version
+      changed_when: false
+
+    - name: Show Proxmox version
       ansible.builtin.debug:
-        msg: "Proxmox VE {{ pve_api.json.data.version }} ({{ pve_api.json.data.release }})"
+        msg: "{{ pve_version.stdout }}"
 
     - name: Verify ops user exists
       ansible.builtin.command: id ops
@@ -112,6 +121,6 @@
       ansible.builtin.debug:
         msg: >-
           Proxmox bootstrap verified successfully.
-          PVE {{ pve_api.json.data.version }},
+          {{ pve_version.stdout }},
           {{ storage_pools.stdout_lines | length - 1 }} storage pool(s),
           ops user present, SSH running, KVM available.

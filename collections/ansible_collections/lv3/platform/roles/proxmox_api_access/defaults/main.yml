@@ -58,3 +58,11 @@ proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
 proxmox_api_token_local_dir: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/proxmox-api"
 proxmox_api_token_local_file: "{{ proxmox_api_token_local_dir }}/lv3-automation-primary.json"
+
+# Whether the controller should validate the PVE API's TLS certificate when
+# verifying the automation token. Defaults to true: in steady state, the
+# Proxmox API endpoint is fronted by an ACME-issued cert. During bootstrap of
+# a fresh PVE host (or when proxmox_security_manage_acme=false), the API
+# still presents the default self-signed pveproxy cert and verification must
+# be relaxed. Overlay this to false in identity overlays that skip ACME.
+proxmox_api_validate_certs: true

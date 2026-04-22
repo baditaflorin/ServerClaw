@@ -20,10 +20,13 @@ BOOTSTRAP_OVERLAY_ROOT_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed255
 BOOTSTRAP_OVERLAY_ROOT_USER ?= root
 BOOTSTRAP_OVERLAY_OPS_USER ?= ops
 BOOTSTRAP_OVERLAY_OPS_PUBKEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub
-ANSIBLE_INVENTORY := $(BOOTSTRAP_OVERLAY_INVENTORY)
+# Multi-inventory: committed inventory supplies group_vars/host_vars defaults
+# (so everything in inventory/group_vars/all/main.yml loads), while the
+# overlay inventory wins on host-level data it redefines.
+ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml -i $(BOOTSTRAP_OVERLAY_INVENTORY)
 BOOTSTRAP_KEY := $(BOOTSTRAP_OVERLAY_SSH_KEY)
 env := $(BOOTSTRAP_OVERLAY_ENV)
-ANSIBLE_OVERLAY_EXTRA := -e env=$(BOOTSTRAP_OVERLAY_ENV) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ANSIBLE_OVERLAY_EXTRA := -e env=$(BOOTSTRAP_OVERLAY_ENV) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(PLATFORM_IDENTITY_OVERLAY)
 export PLATFORM_IDENTITY_OVERLAY
 ifneq ($(strip $(BOOTSTRAP_OVERLAY_HOST_ADDR)),)
 export LV3_PROXMOX_HOST_ADDR := $(BOOTSTRAP_OVERLAY_HOST_ADDR)
@@ -1052,11 +1055,25 @@ quarterly-access-review:
 
 install-proxmox:
 	$(MAKE) preflight WORKFLOW=install-proxmox
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_OVERLAY_EXTRA)
+	# Runs the Proxmox-base playbook only and defers guest provisioning to
+	# Stage 4. Skipping the `guests` tag prevents the proxmox_guests role
+	# from asserting that templates exist before the template-build step
+	# has had a chance to run, which is what breaks fresh-host bootstrap.
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/proxmox-install.yml --private-key $(BOOTSTRAP_KEY) --skip-tags guests $(ANSIBLE_OVERLAY_EXTRA)
 
 configure-network:
 	$(MAKE) preflight WORKFLOW=configure-network
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags repository,network $(ANSIBLE_OVERLAY_EXTRA)
+	# Run against proxmox-install.yml, not site.yml. The repository+network
+	# tags are only wired into proxmox-install.yml plays. Going via site.yml
+	# imports every group (security, observability, platform-apps, ...)
+	# which then triggers role-argument-spec validation (tag=always) on
+	# every `*_runtime` role — and those roles derive required args from
+	# platform_service_registry at task-run time via ADR 0373, which is
+	# after arg-spec runs. Result: cascading "missing required arguments"
+	# failures for roles that should not be in scope here at all. Keeping
+	# Stage 3 targeted at proxmox-install.yml keeps arg-spec validation
+	# scoped to Proxmox-host roles whose vars are all statically set.
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/proxmox-install.yml --private-key $(BOOTSTRAP_KEY) --tags repository,network $(ANSIBLE_OVERLAY_EXTRA)
 
 configure-staging-bridge:
 	$(MAKE) preflight WORKFLOW=configure-network
@@ -1087,11 +1104,21 @@ configure-host-control-loops:
 
 provision-guests:
 	$(MAKE) preflight WORKFLOW=provision-guests
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags guests $(ANSIBLE_OVERLAY_EXTRA)
+	# The `guests` tag lives on the proxmox_guests role inside
+	# proxmox-install.yml. Routing through site.yml would trigger arg-spec
+	# validation for every `*_runtime` role before the guests it targets
+	# even exist — see the configure-network comment for the full rationale.
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/proxmox-install.yml --private-key $(BOOTSTRAP_KEY) --tags guests $(ANSIBLE_OVERLAY_EXTRA)
 
 harden-access:
 	$(MAKE) preflight WORKFLOW=harden-access
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags access $(ANSIBLE_OVERLAY_EXTRA)
+	# Same reasoning as configure-network: scope Stage 3 hardening to the
+	# Proxmox-install roles tagged `access`. The `access` tag is also used
+	# by many service playbooks (homepage, serverclaw, librechat, etc.)
+	# but those should not run before guests exist — and going via site.yml
+	# would trigger their role-argument-spec validations (tag=always)
+	# against ADR-0373-derived vars that aren't set yet.
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/proxmox-install.yml --private-key $(BOOTSTRAP_KEY) --tags access $(ANSIBLE_OVERLAY_EXTRA)
 
 harden-guest-access:
 	$(MAKE) preflight WORKFLOW=harden-guest-access

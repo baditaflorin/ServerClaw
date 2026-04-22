@@ -1,0 +1,10 @@
+#cloud-config
+hostname: {{ proxmox_base_template_name }}
+package_update: true
+packages:
+{% for pkg in proxmox_base_template_packages %}
+  - {{ pkg }}
+{% endfor %}
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+ssh_pwauth: false

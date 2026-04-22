@@ -90,6 +90,13 @@
       - reset-failed
       - "{{ proxmox_host_control_loops_service_name }}"
   changed_when: false
+  # On a fresh bootstrap the unit has never been loaded, so reset-failed
+  # exits 1 with "Unit not loaded". That's the desired state — there are
+  # no prior failures to clear — so treat it as success.
+  failed_when: >-
+    proxmox_host_control_loops_reset_failed.rc != 0
+    and 'not loaded' not in (proxmox_host_control_loops_reset_failed.stderr | default(''))
+  register: proxmox_host_control_loops_reset_failed
 
 - name: Ensure the host control-loop timer is enabled and active
   ansible.builtin.include_role:

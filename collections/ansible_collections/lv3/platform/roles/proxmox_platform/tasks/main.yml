@@ -28,6 +28,23 @@
     update_cache: true
     force_apt_get: true
 
+- name: Detect existing postfix main.cf
+  ansible.builtin.stat:
+    path: /etc/postfix/main.cf
+  register: proxmox_postfix_main_cf
+
+# Debian postfix only populates /etc/postfix/main.cf during the interactive
+# install.  On provider images where postfix is pre-seeded non-interactively
+# (Hetzner installimage Debian-13 is the proximate example) main.cf stays
+# missing and every downstream sendmail/probe call hard-fails with
+# "fatal: open /etc/postfix/main.cf: No such file or directory".  Driving
+# dpkg-reconfigure with the debconf answers laid down above writes a real
+# main.cf.
+- name: Materialize postfix main.cf from preseed on first run
+  ansible.builtin.command: dpkg-reconfigure -f noninteractive postfix
+  when: not proxmox_postfix_main_cf.stat.exists
+  changed_when: true
+
 - name: Remove Debian kernel meta package and os-prober
   ansible.builtin.apt:
     name: "{{ proxmox_cleanup_packages }}"

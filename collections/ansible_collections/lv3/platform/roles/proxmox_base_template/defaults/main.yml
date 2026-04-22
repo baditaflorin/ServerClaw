@@ -1,0 +1,23 @@
+---
+# VMID for the base Debian 13 cloud-init template. This must match the
+# `vmid` declared for `lv3-debian-base` in inventory/group_vars/all/main.yml
+# because proxmox_guests clones from that ID. Every specialized template
+# (lv3-docker-host, lv3-postgres-host, lv3-ops-base) also falls back to
+# this VMID when the specialized version hasn't been built yet.
+proxmox_base_template_vmid: "{{ proxmox_vm_templates['lv3-debian-base'].vmid }}"
+proxmox_base_template_name: "{{ proxmox_vm_templates['lv3-debian-base'].source_template }}"
+proxmox_base_template_memory_mb: 1024
+proxmox_base_template_cores: 1
+proxmox_base_template_storage: "{{ proxmox_storage_id }}"
+proxmox_base_template_bridge: "{{ proxmox_internal_bridge }}"
+proxmox_base_template_image_url: >-
+  https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2
+proxmox_base_template_image_dir: /var/lib/vz/template/qcow
+proxmox_base_template_image_filename: debian-13-genericcloud-amd64.qcow2
+proxmox_base_template_snippet_path: /var/lib/vz/snippets/debian13-cloud-template-user-data.yml
+proxmox_base_template_packages:
+  - qemu-guest-agent
+  - python3
+  - sudo
+  - curl
+  - ca-certificates

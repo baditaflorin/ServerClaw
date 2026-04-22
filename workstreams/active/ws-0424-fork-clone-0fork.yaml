@@ -92,6 +92,20 @@ ownership_manifest:
         - docs/postmortems/2026-04-22-fork-bootstrap-gap.md
         - docs/diaries/2026-04-22-fork-bootstrap.md
       mode: exclusive
+    - id: ws_0424_fresh_host_bootstrap_fixes
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/proxmox_api_access/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_api_access/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_base_template/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_base_template/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_base_template/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_base_template/templates/template-user-data.yml.j2
+        - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_platform/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/defaults/main.yml
+        - playbooks/proxmox-install.yml
+        - playbooks/verify-bootstrap-proxmox.yml
+      mode: exclusive
     - id: ws_0424_ioc_prefix_parameterization
       paths:
         - inventory/group_vars/all/identity.yml

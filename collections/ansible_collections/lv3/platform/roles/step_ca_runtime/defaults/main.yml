@@ -1,7 +1,14 @@
 ---
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
-# from platform_service_registry — ADR 0373.
+# from platform_service_registry via derive_service_defaults at task-run
+# time — ADR 0373. Role argument-spec validation, however, runs before
+# those facts are set (it's implicitly tagged `always`), so `compose_file`
+# needs a literal fallback here that matches the derived value. The derive
+# task overwrites it at task-run time; this fallback only exists so the
+# arg-spec validator does not fail during tag-filtered site.yml runs (e.g.
+# `configure-network`, which has no reason to converge step-ca).
+step_ca_compose_file: "{{ step_ca_site_dir | default('/opt/step-ca') }}/docker-compose.yml"
 step_ca_name: LV3 Internal CA
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1

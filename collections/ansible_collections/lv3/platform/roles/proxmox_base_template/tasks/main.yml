@@ -1,0 +1,166 @@
+---
+# Build the Debian 13 cloud-init base template (VMID 9000 by default) on
+# a fresh Proxmox host. proxmox_guests clones every service VM from this
+# template — without it, Stage 4 provision-guests fails on a bare host.
+#
+# This role is idempotent: it checks whether the template already exists
+# before downloading the image or creating the VM. On an existing host
+# it's effectively a no-op.
+#
+# Related runbook: docs/runbooks/hetzner-bare-metal-bootstrap.md §11b
+# Related ADRs: 0386 (bootstrap contract), 0424 (fork deployment plan)
+
+- name: Check whether the base template VM already exists
+  ansible.builtin.command:
+    argv:
+      - qm
+      - status
+      - "{{ proxmox_base_template_vmid | string }}"
+  register: proxmox_base_template_status
+  changed_when: false
+  failed_when: false
+
+- name: Ensure the Proxmox cloud-image cache directory exists
+  ansible.builtin.file:
+    path: "{{ proxmox_base_template_image_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: proxmox_base_template_status.rc != 0
+
+- name: Download the Debian 13 generic cloud image
+  ansible.builtin.get_url:
+    url: "{{ proxmox_base_template_image_url }}"
+    dest: "{{ proxmox_base_template_image_dir }}/{{ proxmox_base_template_image_filename }}"
+    mode: "0644"
+  when: proxmox_base_template_status.rc != 0
+
+- name: Ensure the Proxmox snippets directory exists
+  ansible.builtin.file:
+    path: "{{ proxmox_base_template_snippet_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the cloud-init user-data snippet for the base template
+  ansible.builtin.template:
+    src: template-user-data.yml.j2
+    dest: "{{ proxmox_base_template_snippet_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create the base template VM skeleton
+  ansible.builtin.command:
+    argv:
+      - qm
+      - create
+      - "{{ proxmox_base_template_vmid | string }}"
+      - --name
+      - "{{ proxmox_base_template_name }}"
+      - --memory
+      - "{{ proxmox_base_template_memory_mb | string }}"
+      - --cores
+      - "{{ proxmox_base_template_cores | string }}"
+      - --cpu
+      - host
+      - --net0
+      - "virtio,bridge={{ proxmox_base_template_bridge }}"
+      - --ostype
+      - l26
+      - --agent
+      - enabled=1,fstrim_cloned_disks=1
+      - --scsihw
+      - virtio-scsi-pci
+      - --serial0
+      - socket
+      - --vga
+      - serial0
+  when: proxmox_base_template_status.rc != 0
+  changed_when: true
+
+- name: Import the cloud image into the template VM
+  ansible.builtin.command:
+    argv:
+      - qm
+      - importdisk
+      - "{{ proxmox_base_template_vmid | string }}"
+      - "{{ proxmox_base_template_image_dir }}/{{ proxmox_base_template_image_filename }}"
+      - "{{ proxmox_base_template_storage }}"
+      - --format
+      - qcow2
+  when: proxmox_base_template_status.rc != 0
+  changed_when: true
+
+- name: Attach the imported disk as scsi0 and set boot order
+  ansible.builtin.command:
+    argv:
+      - qm
+      - set
+      - "{{ proxmox_base_template_vmid | string }}"
+      - --scsi0
+      - "{{ proxmox_base_template_storage }}:{{ proxmox_base_template_vmid }}/vm-{{ proxmox_base_template_vmid }}-disk-0.qcow2"
+      - --boot
+      - order=scsi0
+  when: proxmox_base_template_status.rc != 0
+  changed_when: true
+
+- name: Attach the cloud-init ide2 drive
+  ansible.builtin.command:
+    argv:
+      - qm
+      - set
+      - "{{ proxmox_base_template_vmid | string }}"
+      - --ide2
+      - "{{ proxmox_base_template_storage }}:cloudinit"
+  when: proxmox_base_template_status.rc != 0
+  changed_when: true
+
+- name: Attach the cloud-init user-data snippet
+  ansible.builtin.command:
+    argv:
+      - qm
+      - set
+      - "{{ proxmox_base_template_vmid | string }}"
+      - --cicustom
+      - "user={{ proxmox_snippets_storage_id | default('local') }}:snippets/{{ proxmox_base_template_snippet_path | basename }}"
+  when: proxmox_base_template_status.rc != 0
+  changed_when: true
+
+- name: Convert the VM into a template
+  ansible.builtin.command:
+    argv:
+      - qm
+      - template
+      - "{{ proxmox_base_template_vmid | string }}"
+  when: proxmox_base_template_status.rc != 0
+  changed_when: true
+
+# pvesh /cluster/resources is served from pve-cluster's in-memory cache,
+# which refreshes on a short interval. A fresh `qm template` mark may
+# take up to ~10s to propagate. proxmox_guests queries that endpoint to
+# decide whether the template is live, so on fresh-host bootstraps the
+# query can return the template as "not a template yet" and fail the
+# subsequent assertion. Poll until the cache catches up before returning.
+- name: Wait for the cluster-resources cache to mark the template
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - get
+      - /cluster/resources
+      - --type
+      - vm
+      - --output-format
+      - json
+  register: proxmox_base_template_cluster_probe
+  changed_when: false
+  retries: 30
+  delay: 2
+  until: >-
+    (proxmox_base_template_cluster_probe.stdout | from_json
+     | selectattr('vmid', 'equalto', proxmox_base_template_vmid | int)
+     | selectattr('template', 'defined')
+     | selectattr('template', 'equalto', 1)
+     | list | length) > 0

@@ -65,6 +65,10 @@
     - role: lv3.platform.proxmox_tailscale_proxy
       tags:
         - tailscale
+    - role: lv3.platform.proxmox_base_template
+      tags:
+        - guests
+        - base-template
     - role: lv3.platform.proxmox_guests
       tags:
         - guests

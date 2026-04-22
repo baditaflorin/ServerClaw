@@ -319,7 +319,7 @@
     method: GET
     headers:
       Authorization: "{{ proxmox_api_effective_token_payload.authorization_header }}"
-    validate_certs: true
+    validate_certs: "{{ proxmox_api_validate_certs | bool }}"
     return_content: true
   register: proxmox_api_version_check
   delegate_to: localhost
