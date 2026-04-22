@@ -8,20 +8,20 @@
 schema_version: 2
 generated: '2026-04-22'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 461
+total_adrs: 462
 adr_number_range:
   first: '0001'
-  last: '0431'
-  next_available: '0432'
+  last: '0435'
+  next_available: '0436'
 implementation_status_summary:
   Implemented: 359
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 31
-  Proposed: 29
+  Proposed: 30
 decision_status_summary:
-  Accepted: 361
+  Accepted: 362
   Proposed: 37
   Deprecated: 14
   Implemented: 49
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 29
+      count: 30
       first_adr: '0400'
-      last_adr: '0431'
+      last_adr: '0435'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -106,7 +106,7 @@ facets:
       count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 44
+      count: 45
   by_status:
     - implementation_status: Implemented
       slug: implemented
@@ -131,14 +131,19 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 29
+      count: 30
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0432'
+  next_available_adr: '0436'
 latest_adrs:
+  - adr: '0435'
+    title: Topology-Derived Health-Probe URLs
+    implementation_status: Proposed
+    concern: vm-topology
+    path: docs/adr/0435-topology-derived-health-probe-urls.md
   - adr: '0431'
     title: 0fork Full-Day Deployment — Single-Command IaC Entry Point
     implementation_status: Accepted
@@ -185,11 +190,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: platform
     path: docs/adr/0419-pr-based-integration-flow.md
-  - adr: 0418
-    title: Automatic Receipt-to-Outline Publishing — Shared Utility and Coverage Gaps
-    implementation_status: Proposed
-    concern: platform
-    path: docs/adr/0418-receipt-to-outline-auto-publish.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

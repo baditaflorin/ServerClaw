@@ -1,0 +1,52 @@
+---
+# Purpose: Aggregate the common extra-vars needed to run LV3 playbooks against
+# a forked deployment (ADR 0424) where certain LV3-specific features are
+# intentionally disabled and the collapsed topology uses a remote OpenBao.
+#
+# Use case: Included via `-e @playbooks/vars/fork-overrides.yml` to avoid
+# repeating the same 6-flag --extra-vars JSON on every converge. Individual
+# flags can still be overridden by a later -e on the command line.
+#
+# Inputs: None.
+#
+# Outputs: Override variables consumed by the keycloak, mail-platform, and
+# openbao-agent-sidecar paths.
+#
+# Idempotency: N/A for vars file because it only declares variables.
+#
+# Dependencies:
+#   - ADR 0407 (generic-by-default / .local overlay)
+#   - ADR 0424 (0fork clone topology)
+#   - ADR 0430 (topology host_vars overlay)
+
+# --- Public edge ---
+# Forks typically run behind a single shared nginx and skip the per-service
+# edge-publication play. Individual services that DO want public edge can
+# override by passing -e service_needs_nginx_edge=true after this file.
+service_needs_nginx_edge: false
+
+# --- Identity (ADR 0407) ---
+# Real deployment domain normally lives in .local/identity.yml, which
+# worktrees do not ship. Fork deploys set it explicitly.
+# Override on the CLI for non-0fork forks: -e platform_domain=<your-domain>.
+platform_domain: 0fork.com
+
+# --- Keycloak reconciliation flags ---
+# Mail-platform submission recovery runs an SSO-authenticated smoke test
+# against the live edge. It is optional and frequently fails on fresh
+# forks whose TLS / oauth2-proxy are not yet warmed up.
+keycloak_mail_platform_submission_recovery_enabled: false
+
+# GlitchTip: the keycloak_runtime role reads its OAuth client secret but
+# has no matching create task. Forks that do not run GlitchTip must set
+# this to false to skip the 24-retry 404 loop (see ADR 0435 notes + the
+# gated read/mirror tasks in keycloak_runtime/tasks/main.yml).
+keycloak_glitchtip_enabled: false
+
+# --- OpenBao sidecar ---
+# ADR 0424 §2 collapses openbao onto runtime-control for the fork. Other
+# docker-runtime roles that ship an openbao-agent sidecar (minio, gitea,
+# directus, etc.) must be told NOT to start a local OpenBao and to speak
+# to the remote one instead.
+common_openbao_compose_env_manage_local_openbao_runtime: false
+common_openbao_compose_env_openbao_address: http://10.20.10.10:8201

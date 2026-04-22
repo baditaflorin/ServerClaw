@@ -9,6 +9,22 @@
   ansible.builtin.meta: end_role
   when: platform_environment | default('production') == 'docker-dev'
 
+# Collapsed topologies (ADR 0424) may define multiple inventory_hostname
+# aliases that all point at the same physical VM (e.g. 0fork's
+# docker-runtime / runtime-comms / runtime-ai all → runtime-apps).
+# The alias hosts are not in proxmox_guests, so the firewall policy has no
+# entry for them; they already get the real VM's firewall via the canonical
+# inventory_hostname. End the role here for aliases rather than failing the
+# assert below.
+- name: Skip guest firewall for alias hosts that share a VM with a canonical guest
+  ansible.builtin.meta: end_role
+  when: >-
+    hostvars[linux_guest_firewall_host_id].proxmox_guests is defined
+    and inventory_hostname not in (
+      hostvars[linux_guest_firewall_host_id].proxmox_guests
+      | map(attribute='name') | list
+    )
+
 - name: Validate guest network policy inputs
   ansible.builtin.assert:
     that:

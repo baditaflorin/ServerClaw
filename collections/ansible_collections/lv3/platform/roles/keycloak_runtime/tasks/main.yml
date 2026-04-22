@@ -2360,6 +2360,11 @@
     # END SERVICE: grist
 
     # BEGIN SERVICE: glitchtip
+    # NOTE: There is no matching "Ensure GlitchTip OAuth client exists" create
+    # task in this role — the client must be provisioned out-of-band before
+    # this read will succeed. Downstream deployments that do not run GlitchTip
+    # can set keycloak_glitchtip_enabled=false to skip it rather than pinning
+    # `retries` seconds per converge on a 404.
     - name: Read the GlitchTip client secret
       community.general.keycloak_clientsecret_info:
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -2370,6 +2375,7 @@
       delay: "{{ keycloak_admin_reconciliation_delay }}"
       until: keycloak_glitchtip_client_secret_info is succeeded
       no_log: true
+      when: keycloak_glitchtip_enabled | default(true) | bool
     # END SERVICE: glitchtip
 
     # BEGIN SERVICE: outline
@@ -2497,7 +2503,7 @@
     keycloak_grist_client_secret: "{{ keycloak_grist_client_secret_info.clientsecret_info.value }}"
     # END SERVICE: grist
     # BEGIN SERVICE: glitchtip
-    keycloak_glitchtip_client_secret: "{{ keycloak_glitchtip_client_secret_info.clientsecret_info.value }}"
+    keycloak_glitchtip_client_secret: "{{ (keycloak_glitchtip_client_secret_info.clientsecret_info | default({})).value | default('') }}"
     # END SERVICE: glitchtip
     # BEGIN SERVICE: directus
     keycloak_directus_client_secret: "{{ keycloak_directus_client_secret_info.clientsecret_info.value }}"
@@ -2638,6 +2644,7 @@
   delegate_to: localhost
   become: false
   no_log: true
+  when: keycloak_glitchtip_enabled | default(true) | bool
 # END SERVICE: glitchtip
 
 # BEGIN SERVICE: directus

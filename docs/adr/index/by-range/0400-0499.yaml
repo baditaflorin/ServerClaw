@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 29
+total_adrs: 30
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -519,3 +519,21 @@ adrs:
     summary: Ship a single orchestrator target — make deploy-0fork — that chains the
     filename: 0431-0fork-full-day-deployment.md
     path: docs/adr/0431-0fork-full-day-deployment.md
+  - adr: '0435'
+    title: Topology-Derived Health-Probe URLs
+    status: Accepted
+    implementation_status: Proposed
+    date: '2026-04-22'
+    concern: vm-topology
+    keywords:
+      - health-probe-catalog
+      - topology
+      - ioc
+      - adr-0407-extension
+      - adr-0424
+      - topology-derived
+      - health-probe
+      - urls
+    summary: Health-probe catalog URLs must derive from topology at render time,
+    filename: 0435-topology-derived-health-probe-urls.md
+    path: docs/adr/0435-topology-derived-health-probe-urls.md

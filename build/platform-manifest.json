@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.152",
+  "repo_version": "0.178.153",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-22T11:44:55Z",
-  "next_refresh_at": "2026-04-22T12:44:55Z",
+  "generated_at": "2026-04-22T13:04:03Z",
+  "next_refresh_at": "2026-04-22T14:04:03Z",
   "environment": "production",
   "identity": {
-    "platform_name": "0fork.com",
-    "operator": "0fork Clone Operator",
+    "platform_name": "example.com",
+    "operator": "Platform Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6295,10 +6295,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.151",
+    "last_version": "0.178.152",
     "deployed_at": "2026-04-22",
-    "summary": "complete ADR 0391 CPU-only operational automation with deterministic validation planning and documented ops Make targets make deterministic service decommissioning safer by keeping registry validation machine-readable, extending structural catalog cleanup, and adding SLO block markers to the active SLO generator",
-    "release_notes_url": "docs/release-notes/0.178.152.md"
+    "summary": "clone-deploy tactical fixes: linux_guest_firewall template resolves alias-host sources via hostvars fallback; firewall role ends cleanly on inventory aliases outside proxmox_guests; keycloak_runtime GlitchTip read/mirror gated behind keycloak_glitchtip_enabled; new playbooks/vars/fork-overrides.yml bundle; new preflight_topology_connectivity.yml probes postgres:5432 from every client VM before a converge; ADR 0435 proposes topology-derived health-probe URLs",
+    "release_notes_url": "docs/release-notes/0.178.153.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6310,17 +6310,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.0fork.com",
+        "endpoint": "https://ops.example.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.0fork.com",
+        "endpoint": "https://windmill.example.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.0fork.com",
+        "endpoint": "https://api.example.com",
         "adr": "0092"
       }
     ],

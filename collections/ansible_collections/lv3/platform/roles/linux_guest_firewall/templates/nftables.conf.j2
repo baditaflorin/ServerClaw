@@ -29,6 +29,8 @@ ip protocol vrrp
 {% endfor %}
 {% elif rule.source in guest_ip_map %}
     ip saddr {{ guest_ip_map[rule.source] }}/32 {{ render_match(rule) }} accept
+{% elif rule.source in hostvars and hostvars[rule.source].ansible_host is defined %}
+    ip saddr {{ hostvars[rule.source].ansible_host }}/32 {{ render_match(rule) }} accept
 {% else %}
     ip saddr {{ rule.source }} {{ render_match(rule) }} accept
 {% endif %}
@@ -48,6 +50,8 @@ ip protocol vrrp
 {% endfor %}
 {% elif rule.source in guest_ip_map %}
     ip saddr {{ guest_ip_map[rule.source] }}/32 accept
+{% elif rule.source in hostvars and hostvars[rule.source].ansible_host is defined %}
+    ip saddr {{ hostvars[rule.source].ansible_host }}/32 accept
 {% else %}
     ip saddr {{ rule.source }} accept
 {% endif %}

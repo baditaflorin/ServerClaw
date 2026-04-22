@@ -5,8 +5,8 @@ status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: claude
-branch: claude/xenodochial-borg
-worktree_path: .claude/worktrees/xenodochial-borg
+branch: claude/gallant-chebyshev-b0def1
+worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
 doc: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
 related_adrs:
   - docs/adr/0425-retrospective-420-adr-platform-build.md
@@ -53,12 +53,32 @@ ownership_manifest:
         - docs/adr/.index.yaml
         - docs/adr/index/by-concern/bootstrap.yaml
         - docs/adr/index/by-concern/identity.yaml
+        - docs/adr/index/by-concern/vm-topology.yaml
         - docs/adr/index/by-range/0400-0499.yaml
         - docs/adr/index/by-status/accepted.yaml
         - docs/adr/index/by-status/implemented.yaml
+        - docs/adr/index/by-status/proposed.yaml
         - docs/diagrams/agent-coordination-map.excalidraw
       mode: shared_contract
       contract: generated-index-and-diagram-v1
+    - id: ws_0424_clone_deploy_tactical_fixes
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
+        - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+        - playbooks/vars/fork-overrides.yml
+        - playbooks/preflight_topology_connectivity.yml
+        - docs/adr/0435-topology-derived-health-probe-urls.md
+      mode: exclusive
+    - id: ws_0424_release_artifacts
+      paths:
+        - VERSION
+        - RELEASE.md
+        - changelog.md
+        - build/platform-manifest.json
+        - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
 progress:
   completed_2026_04_21:
     - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-22'
 facet: concern
 concern: vm-topology
-total_adrs: 44
+total_adrs: 45
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -814,3 +814,21 @@ adrs:
     summary: bash
     filename: 0417-service-vm-migration-iac.md
     path: docs/adr/0417-service-vm-migration-iac.md
+  - adr: '0435'
+    title: Topology-Derived Health-Probe URLs
+    status: Accepted
+    implementation_status: Proposed
+    date: '2026-04-22'
+    concern: vm-topology
+    keywords:
+      - health-probe-catalog
+      - topology
+      - ioc
+      - adr-0407-extension
+      - adr-0424
+      - topology-derived
+      - health-probe
+      - urls
+    summary: Health-probe catalog URLs must derive from topology at render time,
+    filename: 0435-topology-derived-health-probe-urls.md
+    path: docs/adr/0435-topology-derived-health-probe-urls.md

@@ -1,0 +1,116 @@
+---
+# Playbook: preflight_topology_connectivity.yml
+# Purpose: Validate that each PostgreSQL client VM can reach the PostgreSQL
+#   host on TCP 5432 BEFORE any service converge. Catches firewall drift
+#   (e.g. ADR 0416 Phase 2 misses, alias-host resolution bugs in
+#   linux_guest_firewall) in ~10s instead of ~10 minutes of converge + retry.
+#
+# Use case: Run after inventory/firewall changes, before a service converge
+#   wave, or as the first step of a first-time fork deploy (ADR 0424).
+#
+# Inputs:
+#   - platform_postgres_clients: Per-service postgres registry (ADR 0359).
+#   - platform_service_registry: Maps each service to its host_group.
+#   - inventory: Provides ansible_host for each host_group alias.
+#
+# Outputs:
+#   - Per-client pass/fail report. Any unreachable client fails the play
+#     with the expected source IP and the destination postgres IP, so the
+#     operator can patch the firewall before wasting converge time.
+#
+# Idempotency: Fully idempotent (read-only TCP probes).
+#
+# Dependencies:
+#   - ADR 0359 (declarative postgres client registry)
+#   - ADR 0416 (pg_hba derived from service_registry.host_group)
+#   - ADR 0424 (fork clone collapsed topology)
+#   - ADR 0433 (topology-derived guest firewall host_source)
+#
+# Invocation:
+#   ansible-playbook playbooks/preflight_topology_connectivity.yml -e env=production
+
+- name: Preflight — PostgreSQL client connectivity matrix
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    preflight_postgres_host: "{{ hostvars[groups['postgres_guests'][0]].ansible_host | default('') }}"
+    preflight_postgres_port: 5432
+    preflight_connect_timeout_seconds: 5
+
+  tasks:
+    - name: Resolve the postgres target ansible_host
+      ansible.builtin.assert:
+        that:
+          - preflight_postgres_host | length > 0
+        fail_msg: >-
+          Cannot resolve a postgres_guests group member with ansible_host.
+          Check inventory/hosts.yml — postgres_guests must list at least one
+          host with an ansible_host.
+
+    - name: Enumerate unique client host_groups from platform_postgres_clients
+      ansible.builtin.set_fact:
+        preflight_client_host_groups: >-
+          {{
+            (platform_postgres_clients | default([]))
+            | map('extract', platform_service_registry | default({}))
+            | list
+          }}
+
+    - name: Build unique client VM names from service registry host_group (ADR 0416)
+      ansible.builtin.set_fact:
+        preflight_client_vms: >-
+          {{
+            (platform_postgres_clients | default([]))
+            | map(attribute='service')
+            | map('extract', platform_service_registry | default({}), 'host_group')
+            | select('string')
+            | unique
+            | list
+          }}
+
+    - name: Show the clients we are about to probe
+      ansible.builtin.debug:
+        msg: "Probing postgres:{{ preflight_postgres_port }} from: {{ preflight_client_vms }} → {{ preflight_postgres_host }}"
+
+- name: Preflight — probe postgres:5432 from each client VM
+  hosts: "{{ preflight_client_vms | default([]) }}"
+  gather_facts: false
+  become: false
+  vars:
+    preflight_postgres_host: "{{ hostvars[groups['postgres_guests'][0]].ansible_host | default('') }}"
+    preflight_postgres_port: 5432
+    preflight_connect_timeout_seconds: 5
+
+  tasks:
+    - name: Attempt TCP connect to postgres from {{ inventory_hostname }}
+      ansible.builtin.wait_for:
+        host: "{{ preflight_postgres_host }}"
+        port: "{{ preflight_postgres_port }}"
+        timeout: "{{ preflight_connect_timeout_seconds }}"
+        state: started
+      register: preflight_probe
+      failed_when: false
+      changed_when: false
+
+    - name: Report connectivity result
+      ansible.builtin.debug:
+        msg: >-
+          {{ 'OK' if (preflight_probe.state | default('') == 'started')
+             else 'FAIL' }}
+          {{ inventory_hostname }}
+          ({{ ansible_host | default('?') }})
+          → {{ preflight_postgres_host }}:{{ preflight_postgres_port }}
+
+    - name: Fail fast on unreachable postgres
+      ansible.builtin.fail:
+        msg: >-
+          {{ inventory_hostname }} ({{ ansible_host | default('?') }})
+          cannot reach postgres at {{ preflight_postgres_host }}:{{ preflight_postgres_port }}.
+          Likely cause: postgres firewall does not allow this source IP.
+          Check linux_guest_firewall policy on the postgres guest — rules
+          driven by network_policy.guests.postgres.allowed_inbound and
+          platform_postgres_clients (ADR 0359 / ADR 0416). If this is a
+          forked deployment with alias hosts, verify the firewall template
+          resolves alias source names via hostvars fallback (ADR 0435 peer).
+      when: preflight_probe.state | default('') != 'started'
