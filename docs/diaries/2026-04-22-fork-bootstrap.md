@@ -108,3 +108,95 @@ ones hide.
 > `.local/timings/journal.ndjson` — to this diary under a new
 > dated section. If any stage fails, do not work around it in
 > `.local/`; fix the root cause in the committed repo and ship a PR.
+
+---
+
+## 2026-04-22 (later that evening) — 7 more gaps closed, Stages 2-4 now green
+
+Picked up the baton from the earlier session. Ran `make bootstrap`
+twelve times against 65.109.84.223 with fork-pve-01 in clean-slate
+state. Each failure was a distinct root-cause; each fix was a single
+commit to the committed repo (never a `.local/` patch). PR #31 merged
+to `main` with the accumulated fixes.
+
+Gaps closed in order of discovery:
+
+1. **`proxmox_api_access` rejected self-signed pveproxy cert.**
+   During Hetzner DNS brownout (read-only until 2026-05-20) ACME
+   cannot issue a real cert for `proxmox.0fork.com`, so PVE stays
+   on its default self-signed `pveproxy-ssl.pem`. The token-probe
+   was hard-coded to `validate_certs: true`. Fix: added
+   `proxmox_api_validate_certs` default. Overlays that set
+   `proxmox_security_manage_acme: false` flip it to false.
+
+2. **`systemctl reset-failed` returned rc=1 on fresh host.**
+   Because the unit has never run, `reset-failed` says
+   "Unit not loaded" — which is the desired state. Fix: tolerate
+   that error text via `failed_when`.
+
+3. **`verify-bootstrap-proxmox` treated 401 as fatal.**
+   Anonymous GET on `/api2/json/version` correctly returns 401 once
+   the automation token is provisioned (because access is gated).
+   Fix: accept `[200, 401]`; report the version via `pveversion`
+   instead of parsing JSON from the 401 body.
+
+4. **`step_ca_runtime` arg-spec missing `step_ca_compose_file`.**
+   Role argument-spec validation runs as `tags: always` (implicit),
+   i.e. *before* ADR 0373's `derive_service_defaults` sets the
+   conventional vars. Fix: a literal default in the role matching
+   the derived value. Harmless in steady state; the derive task
+   still overwrites it at run time.
+
+5. **The whack-a-mole moment.** Patch #4 above revealed that this
+   would keep happening for every `*_runtime` role whose
+   `configure-network`, `harden-access`, or `provision-guests`
+   invocation went through `site.yml`. Root cause: those three
+   Makefile targets each ran against `site.yml`, which imports
+   every service group — and arg-spec validation (tagged `always`)
+   cascaded into "missing required arguments" errors for roles
+   that had no reason to run. Fix: rewrote the three Makefile
+   targets to target `proxmox-install.yml` directly. Comment in
+   the Makefile spells out why site.yml is not the right playbook
+   for Stage 3/4.
+
+6. **Stage 4 `proxmox_guests` asserted templates 9000/9002 exist.**
+   On a fresh host they don't. The documented workaround was a
+   hand-run shell block in `docs/runbooks/hetzner-bare-metal-bootstrap.md`
+   §11b. Fix: new `proxmox_base_template` role that idempotently
+   downloads the Debian 13 generic-cloud image, creates VMID 9000,
+   importdisks, attaches a cloud-init snippet, and converts to
+   template. Wired into `playbooks/proxmox-install.yml` before
+   `proxmox_guests` under the `guests` tag.
+
+7. **pvesh cluster-resources cache lag.** Bootstrap #12 built
+   template 9000 correctly, but `proxmox_guests` queried
+   `/cluster/resources` 300 ms later and found `template:1` had
+   not yet propagated to the pve-cluster in-memory cache. 17 guest
+   assertions failed. Fix: final task in `proxmox_base_template`
+   polls `pvesh get /cluster/resources` up to 30 × 2s until the
+   cache reflects template=1.
+
+End state after PR #31: `make bootstrap` goes cleanly through Stage 2
+(install-proxmox), Stage 3 (configure-network, harden-access), and
+Stage 4 (provision-guests). On a fresh fork-pve-01 all 17 guests
+clone from template 9000, boot, and reach cloud-init-complete.
+
+Stage 5 (converge-site) is untested. Expect more gaps there —
+PostgreSQL setup, docker runtime, service-specific secrets. Same
+rules apply: fix in the committed repo, not `.local/`.
+
+### Gate bypass used
+
+PR #31 pushed with `SKIP_REMOTE_GATE=1` and reason
+`pre_existing_gate_failures`. Local `platform.yml` drifts when
+`.local/identity.yml` is the 0fork overlay — but none of the PR's
+changes touch that file. Receipt:
+`receipts/gate-bypasses/20260422T170110Z-claude-gallant-chebyshev-b0def1-8ee15db-skip-remote-gate.json`.
+
+### For the next agent
+
+Running `make bootstrap` now gets you through 4 of 5 stages on a
+fresh host. Stage 5 is the unknown; it will likely reveal another
+batch of gaps. Do not revert to manual workarounds. Fix each gap in
+the committed repo, push a PR, and re-run bootstrap. The goal is
+still the single-command self-replicating repo.
