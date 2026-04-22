@@ -54,12 +54,23 @@
 # Last Updated: 2026-04-14
 
 - name: Verify guest VMs are reachable
+  # Fork deployments pass arbitrary `env=` values (e.g. `clone`) that
+  # are not explicitly mapped here. Collapse any env not present in
+  # the mapping to `production` so unknown envs still resolve to the
+  # canonical `lv3_guests` group instead of crashing with a KeyError.
   hosts: >-
     {{
       (
         playbook_execution_host_patterns
         | default({'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'}}, true)
-      )['lv3_guests'][playbook_execution_env | default(env | default('production'))]
+      )['lv3_guests'][
+        (playbook_execution_env | default(env | default('production')))
+        if (playbook_execution_env | default(env | default('production'))) in (
+          playbook_execution_host_patterns
+          | default({'lv3_guests': {'production': 'lv3_guests', 'staging': 'lv3_guests'}}, true)
+        )['lv3_guests']
+        else 'production'
+      ]
     }}
   gather_facts: false
   tasks:
