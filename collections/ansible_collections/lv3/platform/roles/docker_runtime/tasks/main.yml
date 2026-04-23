@@ -88,6 +88,12 @@
     src: docker.sources.j2
     dest: "{{ docker_runtime_apt_repo_file }}"
     mode: "0644"
+  register: docker_runtime_apt_repo_configured
+
+- name: Update apt cache after adding Docker apt repository
+  ansible.builtin.apt:
+    update_cache: true
+  when: docker_runtime_apt_repo_configured is changed
 
 - name: Inspect conflicting Docker package status
   ansible.builtin.command:

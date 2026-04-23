@@ -160,6 +160,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/proxmox_backups/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - playbooks/step-ca.yml
       mode: exclusive
     - id: ws_0424_schema_catalog_fixes
