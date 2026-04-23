@@ -33,7 +33,7 @@
     common_verify_service_name: grafana
     common_verify_port: 3000
     common_verify_health_url: "http://127.0.0.1:3000/api/health"
-    common_verify_health_retries: 20
+    common_verify_health_retries: 40
     common_verify_health_delay: 3
     common_verify_extra_endpoints:
       - url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/-/healthy"
@@ -218,8 +218,8 @@
     status_code: 200
     return_content: true
   register: monitoring_verify_loki_canary_metrics
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: >
     monitoring_verify_loki_canary_metrics.status == 200
     and 'loki_canary_entries_total' in (monitoring_verify_loki_canary_metrics.content | default(''))
@@ -232,8 +232,8 @@
     status_code: 200
     return_content: true
   register: monitoring_verify_loki_canary_scrape
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: >
     monitoring_verify_loki_canary_scrape.status == 200
     and (monitoring_verify_loki_canary_scrape.json.data.result | length) > 0

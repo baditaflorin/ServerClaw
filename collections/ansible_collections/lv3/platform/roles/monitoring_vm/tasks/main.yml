@@ -372,8 +372,8 @@
     method: GET
     status_code: 200
   register: monitoring_influxdb_health
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_influxdb_health.status == 200
 
 - name: Check whether InfluxDB setup is still allowed
@@ -851,8 +851,8 @@
     method: GET
     status_code: 200
   register: monitoring_grafana_health
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_grafana_health.status == 200
 
 - name: Wait for blackbox exporter metrics endpoint
@@ -861,8 +861,8 @@
     method: GET
     status_code: 200
   register: monitoring_blackbox_exporter_health
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_blackbox_exporter_health.status == 200
 
 - name: Check current Grafana admin password hash marker

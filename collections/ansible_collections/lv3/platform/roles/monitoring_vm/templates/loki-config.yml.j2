@@ -7,6 +7,11 @@ common:
   path_prefix: {{ monitoring_loki_data_dir }}
   replication_factor: 1
   ring:
+    # instance_addr keeps all intra-process ring traffic on loopback so the
+    # querier can resolve the query-scheduler immediately on single-node
+    # deployments (Loki 3.x /ready hangs without this if ring traffic tries
+    # to route through a non-loopback interface that isn't yet stable).
+    instance_addr: 127.0.0.1
     kvstore:
       store: inmemory
 

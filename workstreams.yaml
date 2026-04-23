@@ -137,6 +137,7 @@ workstreams:
       - .ansible-lint
       - inventory/group_vars/all/identity.yml
       - inventory/group_vars/all/main.yml
+      - docs/postmortems/2026-04-23-digit-prefix-domain-identifier-compat.md
       - collections/ansible_collections/lv3/platform/roles/linux_access/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/step_ca_ssh_trust/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/falco_runtime/defaults/main.yml
@@ -165,6 +166,11 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/tasks/verify.yml
       - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
       - collections/ansible_collections/lv3/platform/roles/step_ca_ssh_trust/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/loki-config.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
       - Makefile
       - playbooks/step-ca.yml
       mode: exclusive

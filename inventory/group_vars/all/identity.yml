@@ -20,6 +20,12 @@ platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 # the domain if needed.
 platform_config_prefix: "{{ platform_domain | split('.') | first }}"
 
+# SQL-safe identifier derived from platform_config_prefix.
+# PostgreSQL role names must start with [a-z_], so any leading digits or
+# punctuation are stripped (e.g. `0fork` → `fork`, `lv3` → `lv3`).
+# Used wherever the prefix appears in a database role or schema name.
+platform_sql_prefix: "{{ platform_config_prefix | regex_replace('^[^a-z_]+', '') }}"
+
 # ---------------------------------------------------------------------------
 # Keycloak SSO identity — ADR 0388
 # ---------------------------------------------------------------------------

@@ -90,6 +90,9 @@ monitoring_loki_config_file: /etc/loki/config.yml
 monitoring_loki_data_dir: /var/lib/loki
 monitoring_loki_http_url: http://127.0.0.1:3100
 monitoring_loki_port: "{{ hostvars[groups['proxmox_hosts'][0]].platform_port_assignments.monitoring_loki_port }}"
+# gRPC port used internally for querier→query-scheduler communication.
+# Must match the Loki server.grpc_listen_port (default 9095).
+monitoring_loki_grpc_port: 9095
 monitoring_loki_filesystem_schema_start_date: "2026-03-22"
 monitoring_loki_minio_schema_cutover_date: "2026-03-30"
 monitoring_loki_minio_access_key_id: lokichunks

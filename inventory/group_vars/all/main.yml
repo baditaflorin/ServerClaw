@@ -99,14 +99,14 @@ proxmox_host_ssh_hardening_file: "/etc/ssh/sshd_config.d/90-{{ platform_config_p
 proxmox_breakglass_ssh_port: 2222
 proxmox_acme_account_name: default
 proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
-proxmox_acme_plugin_id: "{{ platform_config_prefix }}-hetzner-dns"
+proxmox_acme_plugin_id: "{{ platform_sql_prefix }}-hetzner-dns"
 proxmox_acme_validation_delay: 30
 proxmox_tfa_description: Primary TOTP
-proxmox_api_automation_user: "{{ platform_config_prefix }}-automation@pve"
+proxmox_api_automation_user: "{{ platform_sql_prefix }}-automation@pve"
 proxmox_api_automation_comment: "{{ platform_operator_name }} durable automation identity"
 proxmox_api_token_id: primary
 proxmox_api_token_comment: "{{ platform_operator_name }} primary automation token"
-proxmox_api_token_role: "{{ platform_config_prefix | capitalize }}Automation"
+proxmox_api_token_role: "{{ platform_sql_prefix | capitalize }}Automation"
 proxmox_api_token_role_manage: true
 proxmox_api_token_role_privileges:
   - Datastore.Allocate
@@ -199,7 +199,7 @@ smtp_docker_network_name: mail-platform_default
 smtp_from_address: "{{ mail_platform_mailbox_address }}"
 smtp_reply_to_address: "{{ mail_platform_reply_to_email }}"
 openbao_postgres_admin_role: openbao_rotator
-openbao_postgres_connect_role: "{{ platform_config_prefix }}_openbao_connect_all"
+openbao_postgres_connect_role: "{{ platform_sql_prefix }}_openbao_connect_all"
 openbao_postgres_database: postgres
 openbao_tls_enabled: true
 openbao_database_mount_path: database
@@ -298,7 +298,7 @@ control_plane_recovery_runtime_ssh_public_key_local_file: "{{ repo_shared_local_
 control_plane_recovery_local_controller_bundle_file: "{{ repo_shared_local_root }}/control-plane-recovery/controller/controller-recovery-bundle.tar.zst"
 control_plane_recovery_local_controller_manifest_file: "{{ repo_shared_local_root }}/control-plane-recovery/controller/control-plane-recovery-manifest.json"
 control_plane_recovery_backup_store_root: /srv/control-plane-recovery
-control_plane_recovery_backup_store_user: "{{ platform_config_prefix }}-control-plane-backup"
+control_plane_recovery_backup_store_user: "{{ platform_sql_prefix }}-control-plane-backup"
 control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
 control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"
 control_metadata_witness_script: "{{ inventory_dir | dirname }}/scripts/control_metadata_witness.py"
@@ -310,13 +310,13 @@ control_metadata_witness_enabled: "{{ (control_metadata_witness_archive_root | t
 
 dr_offsite_backup_storage:
   enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_ENABLED') | default('false', true)) | bool }}"
-  id: "{{ platform_config_prefix }}-backup-offsite"
+  id: "{{ platform_sql_prefix }}-backup-offsite"
   type: cifs
   server: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SERVER') | default('', true) }}"
   share: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SHARE') | default('', true) }}"
   username: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_USERNAME') | default('', true) }}"
   password_env: PROXMOX_DR_OFFSITE_PASSWORD
-  path: "/mnt/pve/{{ platform_config_prefix }}-backup-offsite"
+  path: "/mnt/pve/{{ platform_sql_prefix }}-backup-offsite"
   content:
     - backup
   nodes:

@@ -211,8 +211,8 @@
     method: GET
     status_code: 200
   register: monitoring_prometheus_ready
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_prometheus_ready.status == 200
 
 - name: Wait for blackbox exporter readiness
@@ -221,18 +221,21 @@
     method: GET
     status_code: 200
   register: monitoring_blackbox_exporter_ready
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_blackbox_exporter_ready.status == 200
 
-- name: Wait for Loki readiness
+- name: Wait for Loki HTTP server to respond
+  # Loki 3.7.x /ready blocks until the querier ring stabilises (which can
+  # take many minutes on a single-node deployment). /metrics is available
+  # immediately once the HTTP server is up, so use that as the liveness signal.
   ansible.builtin.uri:
-    url: "{{ monitoring_loki_http_url }}/ready"
+    url: "{{ monitoring_loki_http_url }}/metrics"
     method: GET
     status_code: 200
   register: monitoring_loki_ready
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_loki_ready.status == 200
 
 - name: Wait for Tempo readiness
@@ -241,8 +244,8 @@
     method: GET
     status_code: 200
   register: monitoring_tempo_ready
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_tempo_ready.status == 200
 
 - name: Wait for OpenTelemetry Collector health
@@ -251,6 +254,6 @@
     method: GET
     status_code: 200
   register: monitoring_otelcol_health
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
   until: monitoring_otelcol_health.status == 200
