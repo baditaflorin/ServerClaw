@@ -878,11 +878,16 @@
   no_log: true
 
 - name: Reset Grafana admin password when the managed secret changes
+  # Use --config so Grafana CLI reads the real data path (/var/lib/grafana).
+  # The old --homepath /usr/share/grafana form misses /etc/grafana/grafana.ini
+  # and writes to the wrong SQLite DB (/usr/share/grafana/data/grafana.db),
+  # causing a permanent 401 on the API verification step.
   ansible.builtin.command:
     argv:
-      - grafana-cli
-      - --homepath
-      - /usr/share/grafana
+      - grafana
+      - cli
+      - --config
+      - /etc/grafana/grafana.ini
       - admin
       - reset-admin-password
       - "{{ monitoring_grafana_admin_password }}"
