@@ -162,6 +162,8 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/proxmox_backups/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/verify_service_health.yml
       - playbooks/step-ca.yml
       mode: exclusive
     - id: ws_0424_schema_catalog_fixes

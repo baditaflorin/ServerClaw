@@ -9,6 +9,7 @@
     common_verify_port: "{{ step_ca_api_port }}"
     common_verify_port_timeout: 120
     common_verify_health_url: "https://127.0.0.1:{{ step_ca_api_port }}{{ step_ca_healthcheck_path }}"
+    common_verify_ca_path: "{{ step_ca_home }}/certs/root_ca.crt"
     common_verify_health_retries: 12
     common_verify_health_delay: 3
 

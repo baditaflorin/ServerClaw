@@ -11,6 +11,7 @@
     url: "{{ common_verify_health_url }}"
     method: GET
     status_code: "{{ common_verify_health_status_code | default(200) }}"
+    ca_path: "{{ common_verify_ca_path | default(omit) }}"
     return_content: true
   register: common_verify_health_response
   retries: "{{ common_verify_health_retries | default(36) }}"
