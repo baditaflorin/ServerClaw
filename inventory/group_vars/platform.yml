@@ -4142,7 +4142,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8080
     host: runtime-control
-    ip: 10.20.10.10
+    ip: 10.10.10.92
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4153,7 +4153,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8000
     host: coolify
-    ip: 10.20.10.12
+    ip: 10.10.10.70
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4164,7 +4164,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8094
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4175,7 +4175,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8055
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4186,7 +4186,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8089
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4197,7 +4197,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 3095
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4208,7 +4208,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8017
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4219,7 +4219,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 3005
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4230,7 +4230,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8484
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4241,7 +4241,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8095
     host: runtime-control
-    ip: 10.20.10.10
+    ip: 10.10.10.92
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4252,7 +4252,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 3090
     host: runtime-general
-    ip: 10.20.10.12
+    ip: 10.10.10.91
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4264,7 +4264,7 @@ platform_nginx_upstreams:
       - sso.staging.0fork.com
     port: 8091
     host: runtime-control
-    ip: 10.20.10.10
+    ip: 10.10.10.92
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4275,7 +4275,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8110
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4286,7 +4286,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8099
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4297,7 +4297,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 3002
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4308,7 +4308,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8096
     host: coolify
-    ip: 10.20.10.12
+    ip: 10.10.10.70
     auth_proxy: false
     websocket: true
     max_body_size: 10m
@@ -4319,7 +4319,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 7880
     host: runtime-comms
-    ip: 10.20.10.12
+    ip: 10.10.10.21
     auth_proxy: false
     websocket: true
     max_body_size: 10m
@@ -4330,7 +4330,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8008
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: true
     max_body_size: 10m
@@ -4341,7 +4341,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 9010
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4352,7 +4352,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 5678
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: true
     max_body_size: 10m
@@ -4363,7 +4363,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8084
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 4096m
@@ -4374,7 +4374,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 2586
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4386,7 +4386,7 @@ platform_nginx_upstreams:
       - ops.staging.0fork.com
     port: 8092
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4397,7 +4397,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 3006
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: true
     max_body_size: 10m
@@ -4408,7 +4408,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8018
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 256m
@@ -4419,7 +4419,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8093
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: true
     max_body_size: 10m
@@ -4430,7 +4430,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8016
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4442,7 +4442,7 @@ platform_nginx_upstreams:
       - repo-intake.staging.0fork.com
     port: 8101
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: true
     websocket: false
     max_body_size: 10m
@@ -4453,7 +4453,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 7070
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4464,7 +4464,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8105
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: false
     max_body_size: 10m
@@ -4476,7 +4476,7 @@ platform_nginx_upstreams:
       - uptime.staging.0fork.com
     port: 3001
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: true
     max_body_size: 10m
@@ -4487,7 +4487,7 @@ platform_nginx_upstreams:
     extra_fqdns: []
     port: 8102
     host: docker-runtime
-    ip: 10.20.10.12
+    ip: 10.10.10.20
     auth_proxy: false
     websocket: true
     max_body_size: 10m
@@ -4653,27 +4653,27 @@ platform_sso_clients:
     service: vikunja
 platform_hairpin_nat_hosts:
   - hostname: agents.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: bi.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: chat.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: data.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: dify.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: files.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: grist.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: langfuse.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: paperless.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: sso.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
   - hostname: wiki.0fork.com
-    address: 10.20.10.11
+    address: 10.10.10.10
 platform_tls_certs:
   agents.0fork.com:
     cert_validity_days: 90

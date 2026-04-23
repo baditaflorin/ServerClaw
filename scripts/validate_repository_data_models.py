@@ -122,6 +122,7 @@ from workbench_information_architecture import TASK_LANE_IDS, TASK_LANE_ORDER, n
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
+IDENTITY_VARS_PATH = repo_path("inventory", "group_vars", "all", "identity.yml")
 GLOBAL_VARS_PATH_CANDIDATES = (
     repo_path("inventory", "group_vars", "all.yml"),
     repo_path("inventory", "group_vars", "all", "main.yml"),
@@ -3180,6 +3181,69 @@ def validate_repo_deploy_base_image_profiles() -> None:
 def validate_replaceability_review_data() -> None:
     payload = load_replaceability_review_catalog(REPLACEABILITY_REVIEW_CATALOG_PATH)
     validate_replaceability_review_catalog(payload)
+
+
+# TODO(ADR-0424): validate_identity_prefixes()
+#
+# Postmortem 2026-04-23-digit-prefix-domain-identifier-compat.md describes a
+# class of breakage where a digit-leading platform_domain (e.g. "0fork.com")
+# causes platform_config_prefix = "0fork", which is injected into identifier
+# namespaces (PostgreSQL roles, PVE users/roles, POSIX usernames, Proxmox ACME
+# plugin IDs, Proxmox storage IDs) that all require a letter-leading value.
+#
+# The fix — platform_sql_prefix = platform_config_prefix | regex_replace('^[^a-z_]+', '')
+# — lives in inventory/group_vars/all/identity.yml. This script should verify
+# the fix stays wired correctly by evaluating the template with a synthetic
+# digit-leading domain and asserting the output passes every target grammar.
+#
+# Implementation spec (add when jinja2 template evaluation is added to this script):
+#
+#   def validate_identity_prefixes() -> None:
+#       """Assert platform_sql_prefix produces valid identifiers for digit-leading domains."""
+#       import re, jinja2
+#
+#       identity_vars = require_mapping(load_yaml(IDENTITY_VARS_PATH), str(IDENTITY_VARS_PATH))
+#       raw_sql_prefix = require_str(
+#           identity_vars.get("platform_sql_prefix"),
+#           "identity.yml:platform_sql_prefix",
+#       )
+#       # Evaluate with a synthetic digit-leading prefix (worst-case: "0test")
+#       env = jinja2.Environment()
+#       env.filters["regex_replace"] = lambda s, pattern, repl: re.sub(pattern, repl, s)
+#       rendered = env.from_string(raw_sql_prefix).render(platform_config_prefix="0test")
+#
+#       if not rendered:
+#           raise ValidationError("platform_sql_prefix is empty after stripping digit prefix")
+#       if not re.fullmatch(r"[a-z_][a-z0-9_]*", rendered):
+#           raise ValidationError(
+#               f"platform_sql_prefix '{rendered}' does not match ^[a-z_][a-z0-9_]*$ "
+#               f"(PostgreSQL role / Proxmox ID grammar)"
+#           )
+#       # Spot-check derived identifiers that caused convergence failures on 0fork.com
+#       # (see postmortem for full list)
+#       main_vars = require_mapping(load_yaml(GLOBAL_VARS_PATH_CANDIDATES[1]), "main.yml")
+#       for key in (
+#           "openbao_postgres_connect_role",
+#           "proxmox_acme_plugin_id",
+#           "proxmox_api_automation_user",
+#           "proxmox_api_token_role",
+#           "control_plane_recovery_backup_store_user",
+#       ):
+#           raw = main_vars.get(key, "")
+#           evaluated = env.from_string(raw).render(
+#               platform_sql_prefix=rendered,
+#               platform_config_prefix="0test",
+#           )
+#           # Assert each produced value starts with a letter (weakest common rule)
+#           if evaluated and not re.match(r"[a-zA-Z]", evaluated):
+#               raise ValidationError(
+#                   f"main.yml:{key} evaluates to '{evaluated}' which starts with a non-letter "
+#                   f"using digit-leading domain; check platform_sql_prefix wiring"
+#               )
+#
+#   NOTE: Call validate_identity_prefixes() from validate_repository_data_models()
+#   immediately after validate_mutation_audit_schema() at line ~3214.
+#   Tracking issue: add to ADR 0424 prevention section once implemented.
 
 
 def validate_repository_data_models() -> int:

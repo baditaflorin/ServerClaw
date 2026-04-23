@@ -14,7 +14,19 @@
           + (public_edge_extra_sites | map(attribute='hostname') | list)
           + public_edge_additional_certificate_domains
         ) | unique
+        | reject('match', '\*\.') | list
+        if public_edge_acme_challenge_method == 'webroot'
+        else
+        (
+          (public_edge_service_topology | service_topology_edge_certificate_domains)
+          + (public_edge_extra_sites | map(attribute='hostname') | list)
+          + public_edge_additional_certificate_domains
+        ) | unique
       }}
+    # ^ HTTP-01 (webroot) cannot validate wildcard SANs — Let's Encrypt requires
+    # DNS-01 for any domain starting with '*.'. When the acme_challenge_method is
+    # 'webroot', all wildcard entries are stripped from the domain list so certbot
+    # does not request a challenge it cannot fulfil.
     public_edge_sites: >-
       {{
         (
