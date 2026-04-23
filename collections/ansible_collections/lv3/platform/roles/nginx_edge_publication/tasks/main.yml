@@ -259,7 +259,14 @@
             {
               'hostname': item.hostname,
               'cert_name': item.hostname,
-              'domains': ([item.hostname] + (item.aliases | default([]))) | unique,
+              'domains': (
+                ([item.hostname] + (item.aliases | default([])))
+                | unique
+                | reject('match', '\*\.') | list
+                if public_edge_acme_challenge_method == 'webroot'
+                else
+                ([item.hostname] + (item.aliases | default([]))) | unique
+              ),
             }
           ]
       }}
@@ -269,9 +276,13 @@
     and (
       (
         ([item.hostname] + (item.aliases | default([])))
-        | difference(public_edge_current_certificate_domains)
-      ) | length
-    ) > 0
+        | reject('match', '\*\.') | list
+        if public_edge_acme_challenge_method == 'webroot'
+        else
+        ([item.hostname] + (item.aliases | default([])))
+      )
+      | difference(public_edge_current_certificate_domains)
+    ) | length > 0
 
 - name: Render NGINX public edge configuration
   ansible.builtin.template:
