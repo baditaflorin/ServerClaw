@@ -124,6 +124,19 @@
   changed_when: false
   when: step_ca_ssh_needs_renewal.rc != 1
 
+- name: Install the hosts provisioner password on the signing delegate
+  ansible.builtin.copy:
+    dest: "{{ step_ca_ssh_hosts_password_remote_file }}"
+    content: "{{ lookup('file', step_ca_local_hosts_password_file) }}"
+    owner: root
+    group: root
+    mode: "0600"
+  delegate_to: "{{ step_ca_ssh_sign_delegate_host }}"
+  become: true
+  run_once: true
+  no_log: true
+  when: step_ca_ssh_needs_renewal.rc != 1
+
 - name: Issue or renew the SSH host certificate from step-ca
   ansible.builtin.shell: |
     set -euo pipefail
