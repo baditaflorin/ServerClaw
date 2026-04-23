@@ -62,7 +62,7 @@ compactor:
   working_directory: {{ monitoring_loki_data_dir }}/retention
   compaction_interval: 10m
   retention_enabled: true
-  delete_request_store: s3
+  delete_request_store: {{ monitoring_loki_delete_request_store }}
 
 analytics:
   reporting_enabled: false

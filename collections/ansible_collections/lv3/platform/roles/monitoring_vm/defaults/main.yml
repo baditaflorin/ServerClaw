@@ -106,6 +106,10 @@ monitoring_loki_minio_endpoint: >-
 monitoring_loki_retention_default: 720h
 monitoring_loki_retention_edge_access: 720h
 monitoring_loki_retention_control_plane: 720h
+# Where the Loki compactor stores delete requests.
+# Production uses "s3" (MinIO backend). Forks without MinIO must set this
+# to "filesystem" via fork-overrides.yml (see ADR 0424).
+monitoring_loki_delete_request_store: s3
 monitoring_loki_canary_service_name: loki-canary
 monitoring_loki_canary_service_file: /etc/systemd/system/loki-canary.service
 monitoring_loki_canary_metrics_port: 3500

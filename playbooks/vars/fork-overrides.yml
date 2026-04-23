@@ -50,3 +50,13 @@ keycloak_glitchtip_enabled: false
 # to the remote one instead.
 common_openbao_compose_env_manage_local_openbao_runtime: false
 common_openbao_compose_env_openbao_address: http://10.20.10.10:8201
+
+# --- Loki / MinIO ---
+# Production Loki uses MinIO (10.10.10.20:9010) as its S3 chunk backend.
+# Fork deployments do not ship a MinIO VM, so the S3 schema cutover is
+# pushed far into the future and the compactor delete-request store is
+# switched to filesystem. Without these overrides Loki crash-loops on
+# startup trying to reach the non-existent MinIO endpoint.
+# (Root cause documented in postmortem 2026-04-23-loki-minio-missing-fork.md)
+monitoring_loki_minio_schema_cutover_date: "2099-01-01"
+monitoring_loki_delete_request_store: filesystem
