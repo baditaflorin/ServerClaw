@@ -70,22 +70,44 @@
         state: directory
         mode: "0700"
 
-    - name: Persist the CIFS storage password in the Proxmox private storage area
+    - name: Stage CIFS storage password on node-local filesystem
       ansible.builtin.copy:
-        dest: "/etc/pve/priv/storage/{{ proxmox_backup_storage.id }}.pw"
+        dest: "/root/.lv3-storage-{{ proxmox_backup_storage.id }}.pw"
         mode: "0600"
         content: "{{ proxmox_backup_storage_password }}\n"
-        unsafe_writes: true
       when: proxmox_backup_storage.type == "cifs"
       no_log: true
+      register: _cifs_pw_staged
 
-    - name: Persist the PBS API token secret in the Proxmox private storage area
+    - name: Commit CIFS storage password into pmxcfs via staged install
+      ansible.builtin.command:
+        cmd: >-
+          install -m 0600
+          /root/.lv3-storage-{{ proxmox_backup_storage.id }}.pw
+          /etc/pve/priv/storage/{{ proxmox_backup_storage.id }}.pw
+      when:
+        - proxmox_backup_storage.type == "cifs"
+        - _cifs_pw_staged is changed
+      no_log: true
+
+    - name: Stage PBS API token secret on node-local filesystem
       ansible.builtin.copy:
-        dest: "/etc/pve/priv/storage/{{ proxmox_backup_storage.id }}.pw"
+        dest: "/root/.lv3-storage-{{ proxmox_backup_storage.id }}.pw"
         mode: "0600"
         content: "{{ proxmox_backup_storage_token_payload.value }}\n"
-        unsafe_writes: true
       when: proxmox_backup_storage.type == "pbs"
+      no_log: true
+      register: _pbs_pw_staged
+
+    - name: Commit PBS API token secret into pmxcfs via staged install
+      ansible.builtin.command:
+        cmd: >-
+          install -m 0600
+          /root/.lv3-storage-{{ proxmox_backup_storage.id }}.pw
+          /etc/pve/priv/storage/{{ proxmox_backup_storage.id }}.pw
+      when:
+        - proxmox_backup_storage.type == "pbs"
+        - _pbs_pw_staged is changed
       no_log: true
 
     - name: Render managed backup storage block
