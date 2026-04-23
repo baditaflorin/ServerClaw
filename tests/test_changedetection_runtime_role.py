@@ -28,11 +28,11 @@ def test_defaults_pin_private_runtime_and_watch_catalogue() -> None:
     defaults = load_yaml(ROLE_DEFAULTS)
 
     assert defaults["changedetection_runtime_site_dir"] == "/opt/changedetection"
-    assert defaults["changedetection_runtime_secret_dir"] == "/etc/lv3/changedetection"
+    assert defaults["changedetection_runtime_secret_dir"] == "/etc/{{ platform_identity.unix_prefix }}/changedetection"
     assert defaults["changedetection_runtime_container_name"] == "changedetection"
     assert defaults["changedetection_runtime_volume_name"] == "changedetection-datastore"
     assert defaults["changedetection_runtime_port"] == (
-        "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('changedetection', 'internal') }}"
+        "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('changedetection', 'internal') }}"
     )
     assert defaults["changedetection_runtime_recheck_minimum_seconds"] == 3600
     assert len(defaults["changedetection_runtime_watch_groups"]) == 4

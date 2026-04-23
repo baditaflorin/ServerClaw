@@ -6,12 +6,12 @@ flagsmith_site_dir: /opt/flagsmith
 flagsmith_compose_file: "{{ flagsmith_site_dir }}/docker-compose.yml"
 flagsmith_env_file: "{{ compose_runtime_secret_root }}/flagsmith/runtime.env"
 flagsmith_legacy_env_file: "{{ flagsmith_site_dir }}/flagsmith.env"
-flagsmith_secret_dir: /etc/lv3/flagsmith
+flagsmith_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/flagsmith"
 flagsmith_openbao_agent_dir: "{{ flagsmith_site_dir }}/openbao"
 flagsmith_openbao_agent_image: "{{ openbao_agent_image }}"
 flagsmith_openbao_agent_container_name: flagsmith-openbao-agent
 flagsmith_openbao_secret_path: services/flagsmith/runtime-env
-flagsmith_openbao_policy_name: lv3-service-flagsmith-runtime
+flagsmith_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-flagsmith-runtime"
 flagsmith_openbao_approle_name: flagsmith-runtime
 flagsmith_openbao_environment_keys_path: services/flagsmith/environment-keys
 flagsmith_internal_port: "{{ platform_service_topology | platform_service_port('flagsmith', 'internal') }}"

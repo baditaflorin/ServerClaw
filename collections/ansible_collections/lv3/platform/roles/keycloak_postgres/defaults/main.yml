@@ -1,7 +1,7 @@
 ---
 keycloak_database_name: keycloak
 keycloak_database_user: keycloak
-keycloak_postgres_secret_dir: /etc/lv3/keycloak
+keycloak_postgres_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/keycloak"
 keycloak_postgres_password_file: "{{ keycloak_postgres_secret_dir }}/database-password"
 keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
 keycloak_database_password_local_file: "{{ repo_shared_local_root }}/keycloak/database-password.txt"

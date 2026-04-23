@@ -14,14 +14,14 @@ server_resident_reconciliation_runtime_root: /var/lib/lv3/server-resident-reconc
 server_resident_reconciliation_inventory_path: "{{ server_resident_reconciliation_runtime_root }}/ansible-pull-inventory.yml"
 server_resident_reconciliation_receipts_dir: "{{ server_resident_reconciliation_runtime_root }}/receipts"
 server_resident_reconciliation_lock_file: "{{ server_resident_reconciliation_runtime_root }}/reconcile.lock"
-server_resident_reconciliation_secret_dir: /etc/lv3/server-resident-reconciliation
+server_resident_reconciliation_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/server-resident-reconciliation"
 server_resident_reconciliation_http_token_remote_file: "{{ server_resident_reconciliation_secret_dir }}/gitea-read-token"
 server_resident_reconciliation_gitea_admin_token_local_file: >-
   {{ lookup('ansible.builtin.env', 'LV3_GITEA_ADMIN_TOKEN_FILE') | default(repo_shared_local_root ~ '/gitea/admin-token.txt', true) }}
 server_resident_reconciliation_gitea_read_token_local_file: >-
-  {{ lookup('ansible.builtin.env', 'LV3_SERVER_RESIDENT_RECONCILIATION_GITEA_TOKEN_FILE') | default(repo_shared_local_root ~ '/gitea/lv3-reconcile-read-token.txt', true) }}
-server_resident_reconciliation_gitea_username: lv3-reconcile
-server_resident_reconciliation_gitea_email: lv3-reconcile@{{ platform_domain }}
+  {{ lookup('ansible.builtin.env', 'LV3_SERVER_RESIDENT_RECONCILIATION_GITEA_TOKEN_FILE') | default(repo_shared_local_root ~ '/gitea/{{ platform_identity.config_prefix }}-reconcile-read-token.txt', true) }}
+server_resident_reconciliation_gitea_username: "{{ platform_identity.config_prefix }}-reconcile"
+server_resident_reconciliation_gitea_email: "{{ platform_identity.config_prefix }}-reconcile@{{ platform_domain }}"
 server_resident_reconciliation_gitea_login_name: empty
 server_resident_reconciliation_gitea_source_id: 0
 server_resident_reconciliation_gitea_token_name: proxmox-host-ansible-pull
@@ -29,10 +29,10 @@ server_resident_reconciliation_gitea_token_scopes:
   - read:repository
 server_resident_reconciliation_gitea_restricted_user: true
 server_resident_reconciliation_gitea_collaborator_permission: read
-server_resident_reconciliation_askpass_path: /usr/local/libexec/lv3-server-resident-reconciliation-askpass.sh
-server_resident_reconciliation_wrapper_path: /usr/local/libexec/lv3-server-resident-reconciliation.sh
-server_resident_reconciliation_service_name: lv3-server-resident-reconciliation.service
-server_resident_reconciliation_timer_name: lv3-server-resident-reconciliation.timer
+server_resident_reconciliation_askpass_path: /usr/local/libexec/{{ platform_identity.config_prefix }}-server-resident-reconciliation-askpass.sh
+server_resident_reconciliation_wrapper_path: /usr/local/libexec/{{ platform_identity.config_prefix }}-server-resident-reconciliation.sh
+server_resident_reconciliation_service_name: "{{ platform_identity.config_prefix }}-server-resident-reconciliation.service"
+server_resident_reconciliation_timer_name: "{{ platform_identity.config_prefix }}-server-resident-reconciliation.timer"
 server_resident_reconciliation_on_calendar: "*:0/30"
 server_resident_reconciliation_randomized_delay_sec: 300
 server_resident_reconciliation_timeout_start_sec: 2700

@@ -4,8 +4,8 @@
 # because proxmox_guests clones from that ID. Every specialized template
 # (lv3-docker-host, lv3-postgres-host, lv3-ops-base) also falls back to
 # this VMID when the specialized version hasn't been built yet.
-proxmox_base_template_vmid: "{{ proxmox_vm_templates['lv3-debian-base'].vmid }}"
-proxmox_base_template_name: "{{ proxmox_vm_templates['lv3-debian-base'].source_template }}"
+proxmox_base_template_vmid: "{{ proxmox_vm_templates['{{ platform_identity.config_prefix }}-debian-base'].vmid }}"
+proxmox_base_template_name: "{{ proxmox_vm_templates['{{ platform_identity.config_prefix }}-debian-base'].source_template }}"
 proxmox_base_template_memory_mb: 1024
 proxmox_base_template_cores: 1
 proxmox_base_template_storage: "{{ proxmox_storage_id }}"

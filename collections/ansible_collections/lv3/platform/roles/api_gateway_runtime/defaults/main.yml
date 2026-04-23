@@ -26,7 +26,7 @@ api_gateway_lago_service_topology: >-
 api_gateway_repo_root: "{{ inventory_dir | dirname }}"
 api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
 api_gateway_config_dir: "{{ api_gateway_site_dir }}/config"
-api_gateway_image_name: lv3-platform-api-gateway
+api_gateway_image_name: "{{ platform_identity.config_prefix }}-platform-api-gateway"
 api_gateway_network_mode: host
 api_gateway_shared_local_root: >-
   {{
@@ -322,11 +322,11 @@ api_gateway_graph_dsn: >-
     | replace('/', '%2F')
   }}@{{ api_gateway_database_host }}:{{ api_gateway_database_port }}/{{ api_gateway_database_name }}?sslmode=disable
 api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"
-api_gateway_verify_client_id: lv3-agent-hub
+api_gateway_verify_client_id: "{{ platform_identity.config_prefix }}-agent-hub"
 api_gateway_verify_client_secret_local_file: >-
   {{
     keycloak_agent_client_secret_local_file
-    | default(api_gateway_repo_root ~ '/.local/keycloak/lv3-agent-hub-client-secret.txt')
+    | default(api_gateway_repo_root ~ '/.local/keycloak/{{ platform_identity.config_prefix }}-agent-hub-client-secret.txt')
   }}
 api_gateway_nats_url: nats://127.0.0.1:4222
 api_gateway_nats_username: jetstream-admin

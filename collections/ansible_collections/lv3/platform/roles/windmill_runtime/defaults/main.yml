@@ -168,7 +168,7 @@ windmill_worker_secret_mirror_ids:
   - nats_jetstream_admin_password
   - ntfy_windmill_token
 windmill_worker_proxmox_api_token_payload_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/proxmox-api"
-windmill_worker_proxmox_api_token_payload_file: "{{ windmill_worker_proxmox_api_token_payload_dir }}/lv3-automation-primary.json"
+windmill_worker_proxmox_api_token_payload_file: "{{ windmill_worker_proxmox_api_token_payload_dir }}/{{ platform_identity.config_prefix }}-automation-primary.json"
 windmill_worker_superadmin_secret_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
 windmill_worker_superadmin_secret_file: "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
 windmill_worker_seed_job_secret_root: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill-job-secrets"
@@ -392,7 +392,7 @@ windmill_worker_checkout_stale_paths:
   - "{{ windmill_worker_repo_checkout_host_path }}/lv3_platform_cli.egg-info"
 windmill_operator_manager_env:
   LV3_OPERATOR_MANAGER_SURFACE: windmill
-  LV3_OPENBAO_URL: http://lv3-openbao:8201
+  LV3_OPENBAO_URL: http://{{ platform_identity.config_prefix }}-openbao:8201
   KEYCLOAK_BOOTSTRAP_PASSWORD: >-
     {{
       lookup('ansible.builtin.file', windmill_controller_local_root ~ '/keycloak/bootstrap-admin-password.txt', errors='ignore')
@@ -428,7 +428,7 @@ windmill_seed_scripts:
     summary: Validation gate status
     description: Repo-managed Windmill wrapper that returns the latest repository validation gate status as structured JSON.
   - path: f/lv3/windmill_healthcheck
-    local_file: "{{ windmill_seed_script_root_local_dir }}/lv3-healthcheck.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/{{ platform_identity.config_prefix }}-healthcheck.py"
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
@@ -493,7 +493,7 @@ windmill_seed_scripts:
     summary: LV3 deploy and promote workflow
     description: Repo-managed wrapper for ADR 0073 staging gate evaluation, production promotion, and receipt generation.
   - path: f/lv3/mutation_audit_emit
-    local_file: "{{ windmill_seed_script_root_local_dir }}/lv3-mutation-audit.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/{{ platform_identity.config_prefix }}-mutation-audit.py"
     language: python3
     summary: LV3 mutation audit helper
     description: Repo-managed helper that emits a structured mutation audit event from a Windmill job.

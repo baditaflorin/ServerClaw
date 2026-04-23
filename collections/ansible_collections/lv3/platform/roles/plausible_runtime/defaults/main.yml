@@ -36,12 +36,12 @@ plausible_compose_file: "{{ plausible_site_dir }}/docker-compose.yml"
 plausible_clickhouse_config_dir: "{{ plausible_site_dir }}/clickhouse"
 plausible_env_file: "{{ compose_runtime_secret_root }}/plausible/runtime.env"
 plausible_legacy_env_file: "{{ plausible_site_dir }}/plausible.env"
-plausible_secret_dir: /etc/lv3/plausible
+plausible_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/plausible"
 plausible_openbao_agent_dir: "{{ plausible_site_dir }}/openbao"
 plausible_openbao_agent_image: "{{ openbao_agent_image }}"
 plausible_openbao_agent_container_name: plausible-openbao-agent
 plausible_openbao_secret_path: services/plausible/runtime-env
-plausible_openbao_policy_name: lv3-service-plausible-runtime
+plausible_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-plausible-runtime"
 plausible_openbao_approle_name: plausible-runtime
 plausible_internal_port: "{{ platform_service_topology | platform_service_port('plausible', 'internal') }}"
 plausible_internal_base_url: "{{ platform_service_topology | platform_service_url('plausible', 'internal') }}"

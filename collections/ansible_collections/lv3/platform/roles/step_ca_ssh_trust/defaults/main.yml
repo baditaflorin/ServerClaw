@@ -6,10 +6,10 @@ step_ca_internal_url: "{{ platform_service_topology | platform_service_url('step
 step_ca_local_root_certificate_file: "{{ repo_shared_local_root }}/step-ca/certs/root_ca.crt"
 step_ca_local_ssh_user_ca_file: "{{ repo_shared_local_root }}/step-ca/certs/ssh_user_ca.pub"
 step_ca_local_hosts_password_file: "{{ repo_shared_local_root }}/step-ca/secrets/provisioners/hosts-password.txt"
-step_ca_remote_dir: /etc/lv3/step-ca
-step_ca_root_remote_file: /etc/lv3/step-ca/root_ca.crt
-step_ca_ssh_trusted_user_ca_file: /etc/ssh/lv3-user-ca.pub
-step_ca_ssh_hosts_password_remote_file: /etc/lv3/step-ca/hosts-password.txt
+step_ca_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/step-ca"
+step_ca_root_remote_file: "/etc/{{ platform_identity.unix_prefix }}/step-ca/root_ca.crt"
+step_ca_ssh_trusted_user_ca_file: /etc/ssh/{{ platform_identity.config_prefix }}-user-ca.pub
+step_ca_ssh_hosts_password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/step-ca/hosts-password.txt"
 step_ca_ssh_trust_dropin_file: "/etc/ssh/sshd_config.d/95-{{ platform_config_prefix }}-step-ca.conf"
 step_ca_ssh_host_private_key: /etc/ssh/ssh_host_ed25519_key
 step_ca_ssh_host_public_key: /etc/ssh/ssh_host_ed25519_key.pub

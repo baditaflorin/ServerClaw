@@ -64,7 +64,7 @@ langfuse_keycloak_client_id: langfuse
 langfuse_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
 langfuse_init_org_id: lv3
 langfuse_init_org_name: LV3
-langfuse_init_project_id: lv3-agent-observability
+langfuse_init_project_id: "{{ platform_identity.config_prefix }}-agent-observability"
 langfuse_init_project_name: LV3 Agent Observability
 langfuse_init_user_email: "{{ platform_operator_email }}"
 langfuse_init_user_name: "{{ platform_operator_name }}"

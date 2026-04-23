@@ -1,9 +1,10 @@
-# Release 0.178.158
+# Release 0.178.160
 
 - Date: 2026-04-23
 
 ## Summary
-- No changelog notes were present in `## Unreleased` at release time.
+- ADR 0438 Phase 1-2: generic-by-construction IaC refactor — introduce
+- Add Tier-0 cross-reference validator (9 checks) and raw-split lint gate.
 
 ## Platform Impact
 - no live platform version bump; this release updates repository automation, release metadata, and operator tooling only

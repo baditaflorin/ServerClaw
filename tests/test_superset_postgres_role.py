@@ -20,7 +20,7 @@ def test_defaults_define_metadata_schema_reader_role_and_catalog_paths() -> None
     assert defaults["superset_database_schema"] == "superset"
     assert defaults["superset_database_user"] == "superset"
     assert defaults["superset_reader_user"] == "superset_reader"
-    assert defaults["superset_postgres_secret_dir"] == "/etc/lv3/superset"
+    assert defaults["superset_postgres_secret_dir"] == "/etc/{{ platform_identity.unix_prefix }}/superset"
     assert (
         defaults["superset_database_password_local_file"] == "{{ superset_local_artifact_dir }}/database-password.txt"
     )

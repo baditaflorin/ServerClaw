@@ -10,72 +10,72 @@ platform_postgres_clients:
     database: dify
     user: dify
     password_local_file: "{{ repo_shared_root }}/.local/dify/database-password.txt"
-    password_remote_dir: /etc/lv3/dify
-    password_remote_file: /etc/lv3/dify/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/dify"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/dify/database-password"
 
   - service: directus
     database: directus
     user: directus
     password_local_file: "{{ repo_shared_root }}/.local/directus/database-password.txt"
-    password_remote_dir: /etc/lv3/directus
-    password_remote_file: /etc/lv3/directus/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/directus"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/directus/database-password"
 
   - service: flagsmith
     database: flagsmith
     user: flagsmith
     password_local_file: "{{ repo_shared_root }}/.local/flagsmith/database-password.txt"
-    password_remote_dir: /etc/lv3/flagsmith
-    password_remote_file: /etc/lv3/flagsmith/database-password.txt
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/flagsmith"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/flagsmith/database-password.txt"
 
   - service: gitea
     database: gitea
     user: gitea
     password_local_file: "{{ repo_shared_root }}/.local/gitea/database-password.txt"
-    password_remote_dir: /etc/lv3/gitea
-    password_remote_file: /etc/lv3/gitea/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/gitea"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/gitea/database-password"
 
   - service: glitchtip
     database: glitchtip
     user: glitchtip
     password_local_file: "{{ repo_shared_root }}/.local/glitchtip/database-password.txt"
-    password_remote_dir: /etc/lv3/glitchtip
-    password_remote_file: /etc/lv3/glitchtip/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/glitchtip"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/glitchtip/database-password"
 
   - service: keycloak
     database: keycloak
     user: keycloak
     password_local_file: "{{ repo_shared_root }}/.local/keycloak/database-password.txt"
-    password_remote_dir: /etc/lv3/keycloak
-    password_remote_file: /etc/lv3/keycloak/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/keycloak"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/keycloak/database-password"
 
   - service: label_studio
     database: label_studio
     user: label_studio
     password_local_file: "{{ repo_shared_root }}/.local/label-studio/database-password.txt"
-    password_remote_dir: /etc/lv3/label-studio
-    password_remote_file: /etc/lv3/label-studio/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/label-studio"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/label-studio/database-password"
 
   - service: lago
     database: lago
     user: lago
     password_local_file: "{{ repo_shared_root }}/.local/lago/database-password.txt"
-    password_remote_dir: /etc/lv3/lago
-    password_remote_file: /etc/lv3/lago/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/lago"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/lago/database-password"
     role_options: CREATEDB
 
   - service: langfuse
     database: langfuse
     user: langfuse
     password_local_file: "{{ repo_shared_root }}/.local/langfuse/database-password.txt"
-    password_remote_dir: /etc/lv3/langfuse
-    password_remote_file: /etc/lv3/langfuse/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/langfuse"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/langfuse/database-password"
 
   - service: matrix_synapse
     database: matrix_synapse
     user: matrix_synapse
     password_local_file: "{{ repo_shared_root }}/.local/matrix-synapse/database-password.txt"
-    password_remote_dir: /etc/lv3/matrix-synapse
-    password_remote_file: /etc/lv3/matrix-synapse/database-password.txt
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/matrix-synapse"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/matrix-synapse/database-password.txt"
     database_collation: C
     database_ctype: C
     database_template: template0
@@ -84,118 +84,118 @@ platform_postgres_clients:
     database: mattermost
     user: mattermost_admin
     password_local_file: "{{ repo_shared_root }}/.local/mattermost/database-password.txt"
-    password_remote_dir: /etc/lv3/mattermost
-    password_remote_file: /etc/lv3/mattermost/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/mattermost"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/mattermost/database-password"
     support_role: mattermost_user
 
   - service: n8n
     database: n8n
     user: n8n
     password_local_file: "{{ repo_shared_root }}/.local/n8n/database-password.txt"
-    password_remote_dir: /etc/lv3/n8n
-    password_remote_file: /etc/lv3/n8n/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/n8n"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/n8n/database-password"
 
   - service: netbox
     database: netbox
     user: netbox
     password_local_file: "{{ repo_shared_root }}/.local/netbox/database-password.txt"
-    password_remote_dir: /etc/lv3/netbox
-    password_remote_file: /etc/lv3/netbox/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/netbox"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/netbox/database-password"
 
   - service: nextcloud
     database: nextcloud
     user: nextcloud
     password_local_file: "{{ repo_shared_root }}/.local/nextcloud/database-password.txt"
-    password_remote_dir: /etc/lv3/nextcloud
-    password_remote_file: /etc/lv3/nextcloud/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/nextcloud"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/nextcloud/database-password"
 
   - service: litellm
     database: litellm
     user: litellm
     password_local_file: "{{ repo_shared_root }}/.local/litellm/database-password.txt"
-    password_remote_dir: /etc/lv3/litellm
-    password_remote_file: /etc/lv3/litellm/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/litellm"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/litellm/database-password"
 
   - service: openfga
     database: openfga
     user: openfga
     password_local_file: "{{ repo_shared_root }}/.local/openfga/database-password.txt"
-    password_remote_dir: /etc/lv3/openfga
-    password_remote_file: /etc/lv3/openfga/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/openfga"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/openfga/database-password"
 
   - service: outline
     database: outline
     user: outline
     password_local_file: "{{ repo_shared_root }}/.local/outline/database-password.txt"
-    password_remote_dir: /etc/lv3/outline
-    password_remote_file: /etc/lv3/outline/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/outline"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/outline/database-password"
 
   - service: paperless
     database: paperless
     user: paperless
     password_local_file: "{{ repo_shared_root }}/.local/paperless/database-password.txt"
-    password_remote_dir: /etc/lv3/paperless
-    password_remote_file: /etc/lv3/paperless/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/paperless"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/paperless/database-password"
 
   - service: plane
     database: plane
     user: plane_admin
     password_local_file: "{{ repo_shared_root }}/.local/plane/database-password.txt"
-    password_remote_dir: /etc/lv3/plane
-    password_remote_file: /etc/lv3/plane/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/plane"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/plane/database-password"
     support_role: plane_user
 
   - service: semaphore
     database: semaphore
     user: semaphore_admin
     password_local_file: "{{ repo_shared_root }}/.local/semaphore/database-password.txt"
-    password_remote_dir: /etc/lv3/semaphore
-    password_remote_file: /etc/lv3/semaphore/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/semaphore"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/semaphore/database-password"
     support_role: semaphore_user
 
   - service: sftpgo
     database: sftpgo
     user: sftpgo
     password_local_file: "{{ repo_shared_root }}/.local/sftpgo/database-password.txt"
-    password_remote_dir: /etc/lv3/sftpgo
-    password_remote_file: /etc/lv3/sftpgo/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/sftpgo"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/sftpgo/database-password"
 
   - service: superset
     database: superset
     user: superset
     password_local_file: "{{ repo_shared_root }}/.local/superset/database-password.txt"
-    password_remote_dir: /etc/lv3/superset
-    password_remote_file: /etc/lv3/superset/database-password.txt
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/superset"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/superset/database-password.txt"
 
   - service: temporal
     database: temporal
     user: temporal
     password_local_file: "{{ repo_shared_root }}/.local/temporal/database-password.txt"
-    password_remote_dir: /etc/lv3/temporal
-    password_remote_file: /etc/lv3/temporal/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/temporal"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/temporal/database-password"
 
   - service: vaultwarden
     database: vaultwarden
     user: vaultwarden_admin
     password_local_file: "{{ repo_shared_root }}/.local/vaultwarden/database-password.txt"
-    password_remote_dir: /etc/lv3/vaultwarden
-    password_remote_file: /etc/lv3/vaultwarden/database-password.txt
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/vaultwarden"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/vaultwarden/database-password.txt"
     support_role: vaultwarden_support
 
   - service: vikunja
     database: vikunja
     user: vikunja_admin
     password_local_file: "{{ repo_shared_root }}/.local/vikunja/database-password.txt"
-    password_remote_dir: /etc/lv3/vikunja
-    password_remote_file: /etc/lv3/vikunja/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/vikunja"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/vikunja/database-password"
     support_role: vikunja_user
 
   - service: windmill
     database: windmill
     user: windmill_admin
     password_local_file: "{{ repo_shared_root }}/.local/windmill/database-password.txt"
-    password_remote_dir: /etc/lv3/windmill
-    password_remote_file: /etc/lv3/windmill/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/windmill"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/windmill/database-password"
     support_role: windmill_user
     role_options: BYPASSRLS
 
@@ -203,5 +203,14 @@ platform_postgres_clients:
     database: woodpecker
     user: woodpecker
     password_local_file: "{{ repo_shared_root }}/.local/woodpecker/database-password.txt"
-    password_remote_dir: /etc/lv3/woodpecker
-    password_remote_file: /etc/lv3/woodpecker/database-password
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/woodpecker"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/woodpecker/database-password"
+
+  # OpenBao dynamic credential backend — uses the postgres database with the
+  # openbao_rotator user (created by openbao_postgres_backend role).  No
+  # password_local_file here because the backend role manages its own credential;
+  # this entry exists solely to generate the pg_hba.conf allow-line so OpenBao
+  # can reach PostgreSQL from runtime-control without hitting auth rejection.
+  - service: openbao
+    database: postgres
+    user: openbao_rotator

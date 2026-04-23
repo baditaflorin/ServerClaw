@@ -45,7 +45,7 @@ coolify_bridge_gateway: 172.18.0.1
 
 coolify_root_username: LV3 Ops
 coolify_root_email: ops@{{ platform_domain }}
-coolify_api_token_name: lv3-automation
+coolify_api_token_name: "{{ platform_identity.config_prefix }}-automation"
 coolify_api_allowed_ips:
   - 127.0.0.1
   - "{{ coolify_bridge_gateway }}"

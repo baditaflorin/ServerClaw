@@ -24,7 +24,7 @@
 #     Extra metadata as needed (varies by service type: kernel module, daemon, etc.)
 #
 # Optional fields (all service types):
-#   secret_dir         — override /etc/lv3/<service_name> (docker_compose only)
+#   secret_dir         — override /etc/<platform_prefix>/<service_name> (docker_compose only; platform_prefix = platform_identity.unix_prefix)
 #   needs_openbao      — default true; set false to skip OpenBao variable derivation
 #   needs_redis        — informational, default false
 #   needs_postgres     — informational, default false
@@ -1829,7 +1829,7 @@ platform_service_registry:
     state_dirs:
       config: /etc/nginx
       data: /var/cache/nginx
-      secrets: /etc/lv3/nginx
+      secrets: "/etc/{{ platform_identity.unix_prefix }}/nginx"
   # END SERVICE: nginx_runtime
 
   # BEGIN SERVICE: runtime_pool_substrate

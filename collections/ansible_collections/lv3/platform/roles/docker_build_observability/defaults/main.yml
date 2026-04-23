@@ -1,6 +1,6 @@
 ---
-docker_build_observability_state_dir: /etc/lv3/build-observability
-docker_build_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-docker-build.conf
+docker_build_observability_state_dir: "/etc/{{ platform_identity.unix_prefix }}/build-observability"
+docker_build_observability_telegraf_config_file: /etc/telegraf/telegraf.d/{{ platform_identity.config_prefix }}-docker-build.conf
 docker_build_observability_hostname: "{{ inventory_hostname }}"
 docker_build_observability_role: docker-build
 docker_build_observability_docker_daemon_config_file: /etc/docker/daemon.json

@@ -63,7 +63,7 @@ argument_specs:
       server_resident_reconciliation_secret_dir:
         type: str
         required: false
-        default: /etc/lv3/server-resident-reconciliation
+        default: /etc/<platform_prefix>/server-resident-reconciliation  # runtime: platform_identity.unix_prefix
       server_resident_reconciliation_http_token_remote_file:
         type: str
         required: false

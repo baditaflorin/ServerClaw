@@ -63,7 +63,7 @@ superset_landing_dataset_name: platform_database_inventory
 superset_landing_dataset_sql: "SELECT datname AS database_name FROM pg_database WHERE datistemplate = false ORDER BY datname"
 superset_landing_chart_title: PostgreSQL Databases
 superset_landing_dashboard_title: LV3 Platform Database Inventory
-superset_landing_dashboard_slug: lv3-platform-database-inventory
+superset_landing_dashboard_slug: "{{ platform_identity.config_prefix }}-platform-database-inventory"
 superset_admin_username: admin
 superset_admin_first_name: LV3
 superset_admin_last_name: Admin
@@ -82,5 +82,5 @@ superset_keycloak_scopes:
   - email
 superset_auth_user_registration_role: Gamma
 superset_auth_roles_mapping:
-  /lv3-platform-admins:
+  /{{ platform_identity.config_prefix }}-platform-admins:
     - Admin

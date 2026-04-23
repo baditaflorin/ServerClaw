@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.159",
+  "repo_version": "0.178.160",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-23T13:56:32Z",
-  "next_refresh_at": "2026-04-23T14:56:32Z",
+  "generated_at": "2026-04-23T17:50:31Z",
+  "next_refresh_at": "2026-04-23T18:50:31Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.158",
+    "last_version": "0.178.159",
     "deployed_at": "2026-04-23",
-    "summary": "fix(nginx-edge): also filter wildcard SANs from site-local per-hostname cert requests when using HTTP-01 webroot challenge; the previous fix only covered the shared multi-SAN cert but the site-local cert path (for hostnames not in the shared cert) was still requesting *.apps.0fork.com causing certbot to fail",
-    "release_notes_url": "docs/release-notes/0.178.159.md"
+    "summary": "ADR 0438 Phase 1-2: generic-by-construction IaC refactor \u2014 introduce Add Tier-0 cross-reference validator (9 checks) and raw-split lint gate.",
+    "release_notes_url": "docs/release-notes/0.178.160.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -11,7 +11,7 @@ service_needs_nginx_edge: true
 # ADR 0373: Conventional service variables derived from platform_service_registry
 minio_site_dir: /opt/minio
 minio_data_dir: /opt/minio/data
-minio_secret_dir: /etc/lv3/minio
+minio_secret_dir: /etc/{{ platform_identity.unix_prefix }}/minio
 minio_local_artifact_dir: "{{ repo_shared_local_root }}/minio"
 minio_compose_file: "{{ minio_site_dir }}/docker-compose.yml"
 minio_env_file: "{{ minio_site_dir }}/minio.env"

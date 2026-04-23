@@ -1,7 +1,7 @@
 ---
 @@VARIABLE_PREFIX@@_service_topology: "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('@@SERVICE_ID@@') }}"
 @@VARIABLE_PREFIX@@_site_dir: /opt/@@SERVICE_NAME@@
-@@VARIABLE_PREFIX@@_secret_dir: /etc/lv3/@@SERVICE_NAME@@
+@@VARIABLE_PREFIX@@_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/@@SERVICE_NAME@@"
 @@VARIABLE_PREFIX@@_compose_file: "{{ @@VARIABLE_PREFIX@@_site_dir }}/docker-compose.yml"
 @@VARIABLE_PREFIX@@_env_file: "{{ compose_runtime_secret_root }}/@@SERVICE_NAME@@/runtime.env"
 @@VARIABLE_PREFIX@@_legacy_env_file: "{{ @@VARIABLE_PREFIX@@_site_dir }}/@@SERVICE_NAME@@.env"

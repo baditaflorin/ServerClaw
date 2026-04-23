@@ -16,7 +16,7 @@ def test_defaults_define_litellm_runtime_env_contract() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text(encoding="utf-8"))
 
     assert defaults["litellm_site_dir"] == "/opt/litellm"
-    assert defaults["litellm_secret_dir"] == "/etc/lv3/litellm"
+    assert defaults["litellm_secret_dir"] == "/etc/{{ platform_identity.unix_prefix }}/litellm"
     assert defaults["litellm_env_file"] == "{{ compose_runtime_secret_root }}/litellm/runtime.env"
     assert defaults["litellm_legacy_env_file"] == "{{ litellm_site_dir }}/litellm.env"
     assert defaults["litellm_local_artifact_dir"] == "{{ repo_shared_local_root }}/litellm"

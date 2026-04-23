@@ -23,7 +23,7 @@
             'http://127.0.0.1:8081/v1/profiles',
             method='GET',
             headers={
-                'X-API-Key': Path('/etc/lv3/mail-platform/gateway-api-key').read_text(encoding='utf-8').strip(),
+                'X-API-Key': Path('/etc/{{ platform_identity.unix_prefix }}/mail-platform/gateway-api-key').read_text(encoding='utf-8').strip(),
             },
         )
 
@@ -65,7 +65,7 @@
             method='POST',
             headers={
                 'Content-Type': 'application/json',
-                'X-API-Key': Path('/etc/lv3/mail-platform/profiles/operator-alerts-gateway-api-key').read_text(encoding='utf-8').strip(),
+                'X-API-Key': Path('/etc/{{ platform_identity.unix_prefix }}/mail-platform/profiles/operator-alerts-gateway-api-key').read_text(encoding='utf-8').strip(),
             },
         )
 
@@ -94,19 +94,19 @@
         profiles = [
             (
                 'operator-alerts',
-                '/etc/lv3/mail-platform/profiles/operator-alerts-gateway-api-key',
+                '/etc/{{ platform_identity.unix_prefix }}/mail-platform/profiles/operator-alerts-gateway-api-key',
                 'LV3 operator alerts live test',
                 'Operator alert notification profile delivery test.',
             ),
             (
                 'platform-transactional',
-                '/etc/lv3/mail-platform/profiles/platform-transactional-gateway-api-key',
+                '/etc/{{ platform_identity.unix_prefix }}/mail-platform/profiles/platform-transactional-gateway-api-key',
                 'LV3 platform transactional live test',
                 'Platform transactional notification profile delivery test.',
             ),
             (
                 'agent-reports',
-                '/etc/lv3/mail-platform/profiles/agent-reports-gateway-api-key',
+                '/etc/{{ platform_identity.unix_prefix }}/mail-platform/profiles/agent-reports-gateway-api-key',
                 'LV3 agent reports live test',
                 'Agent reporting notification profile delivery test.',
             ),

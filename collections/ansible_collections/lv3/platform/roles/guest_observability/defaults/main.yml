@@ -11,7 +11,7 @@ guest_observability_influx_repo_key_url: "{{ monitoring_influxdb_repo_key_url }}
 guest_observability_influx_repo_key_temp_file: /tmp/influxdata-archive.key
 guest_observability_influx_repo_keyring: "{{ monitoring_influxdb_repo_keyring }}"
 guest_observability_influx_repo_file: "{{ monitoring_influxdb_repo_file }}"
-guest_observability_state_dir: /etc/lv3/observability
+guest_observability_state_dir: "/etc/{{ platform_identity.unix_prefix }}/observability"
 guest_observability_writer_token_local_file: "{{ monitoring_guest_writer_token_local_file }}"
 guest_observability_writer_token_file: "{{ guest_observability_state_dir }}/influxdb-guest-writer.token"
 guest_observability_influx_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('grafana', 'influxdb') }}"
@@ -24,4 +24,4 @@ guest_observability_managed_directories:
     group: root
     mode: "0700"
 guest_observability_telegraf_service_name: telegraf
-guest_observability_base_inputs_config_file: /etc/telegraf/telegraf.d/lv3-base-inputs.conf
+guest_observability_base_inputs_config_file: /etc/telegraf/telegraf.d/{{ platform_identity.config_prefix }}-base-inputs.conf

@@ -73,7 +73,7 @@ plane_openbao_agent_dir: "{{ plane_site_dir }}/openbao"
 plane_openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 plane_openbao_agent_container_name: plane-openbao-agent
 plane_openbao_secret_path: services/plane/runtime-env
-plane_openbao_policy_name: lv3-service-plane-runtime
+plane_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-plane-runtime"
 plane_openbao_approle_name: plane-runtime
 plane_database_name: plane
 plane_database_user: plane_admin
@@ -101,7 +101,7 @@ plane_bootstrap_admin_first_name: Florin
 plane_bootstrap_admin_last_name: Badita
 plane_bootstrap_company_name: LV3
 plane_bootstrap_workspace_name: LV3 Platform
-plane_bootstrap_workspace_slug: lv3-platform
+plane_bootstrap_workspace_slug: "{{ platform_identity.config_prefix }}-platform"
 plane_bootstrap_project_name: Architecture Decisions
 plane_bootstrap_project_identifier: ADR
 plane_bootstrap_api_token_label: LV3 Plane Automation
@@ -123,7 +123,7 @@ plane_workspace_members: []
 plane_oidc_enabled: true
 plane_oidc_server_url: "https://sso.{{ platform_domain }}"
 plane_oidc_realm: "lv3"
-plane_oidc_client_id: "lv3-plane-oidc"
+plane_oidc_client_id: "{{ platform_identity.config_prefix }}-plane-oidc"
 plane_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/plane-oidc-client-secret.txt"
 plane_oidc_client_secret_remote_file: "{{ plane_secret_dir }}/oidc-client-secret.txt"
 plane_oidc_discovery_url: "{{ plane_oidc_server_url }}/realms/{{ plane_oidc_realm }}/.well-known/openid-configuration"

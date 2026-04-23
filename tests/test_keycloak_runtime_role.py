@@ -119,7 +119,7 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_compose_project_name"] == "keycloak"
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_local_artifact_dir"] == "{{ repo_shared_local_root }}/keycloak"
-    assert defaults["keycloak_secret_dir"] == "/etc/lv3/keycloak"
+    assert defaults["keycloak_secret_dir"] == "/etc/{{ platform_identity.unix_prefix }}/keycloak"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert (
         defaults["keycloak_langfuse_client_secret_local_file"]
@@ -144,12 +144,14 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"] == (
         "{{ keycloak_local_artifact_dir }}/serverclaw-runtime-client-secret.txt"
     )
-    assert defaults["keycloak_admin_client_id"] == "lv3-admin-runtime"
+    assert defaults["keycloak_admin_client_id"] == "{{ platform_identity.config_prefix }}-admin-runtime"
     assert (
         defaults["keycloak_admin_client_secret_local_file"]
         == "{{ keycloak_local_artifact_dir }}/admin-client-secret.txt"
     )
-    assert defaults["keycloak_recovery_admin_service_client_id"] == "lv3-recovery-admin"
+    assert (
+        defaults["keycloak_recovery_admin_service_client_id"] == "{{ platform_identity.config_prefix }}-recovery-admin"
+    )
     assert defaults["keycloak_grist_client_id"] == "grist"
     assert (
         defaults["keycloak_grist_client_secret_local_file"]

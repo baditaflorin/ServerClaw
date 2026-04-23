@@ -52,7 +52,7 @@ paperless_volume_names:
   media: paperless-media
   export: paperless-export
   consume: paperless-consume
-paperless_default_sso_group: lv3-platform-users
+paperless_default_sso_group: "{{ platform_identity.config_prefix }}-platform-users"
 paperless_default_sso_group_permissions:
   - view_document
   - add_document
@@ -83,7 +83,7 @@ paperless_default_sso_group_permissions:
 paperless_taxonomy_manifest:
   schema_version: "1.0.0"
   correspondents:
-    - id: lv3-platform
+    - id: "{{ platform_identity.config_prefix }}-platform"
       name: LV3 Platform
     - id: external-vendor
       name: External Vendor

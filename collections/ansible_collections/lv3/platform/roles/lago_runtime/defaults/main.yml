@@ -104,10 +104,10 @@ lago_smoke_plan_amount_cents: 0
 lago_smoke_plan_amount_currency: USD
 lago_smoke_charge_code: api_calls_charge
 lago_smoke_charge_unit_amount: "0.01"
-lago_smoke_external_customer_id: lv3-billing-smoke-customer
+lago_smoke_external_customer_id: "{{ platform_identity.config_prefix }}-billing-smoke-customer"
 lago_smoke_customer_name: LV3 Billing Smoke Customer
 lago_smoke_customer_email: billing-smoke@{{ platform_domain }}
-lago_smoke_external_subscription_id: lv3-billing-smoke-subscription
+lago_smoke_external_subscription_id: "{{ platform_identity.config_prefix }}-billing-smoke-subscription"
 lago_smoke_subscription_name: LV3 Billing Smoke Subscription
 lago_smoke_event_properties: {}
 lago_public_ingest_url: "{{ lago_public_base_url }}/api/v1/events"

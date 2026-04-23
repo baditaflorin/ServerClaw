@@ -50,7 +50,7 @@
     "{{ common_derive_service_name }}_data_dir": >-
       {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/data' }}
     "{{ common_derive_service_name }}_secret_dir": >-
-      {{ __derive_service_entry.secret_dir | default('/etc/lv3/' + common_derive_service_name) }}
+      {{ __derive_service_entry.secret_dir | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_compose_file": >-
       {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
     "{{ common_derive_service_name }}_env_file": >-
@@ -78,7 +78,7 @@
     "{{ common_derive_service_name }}_data_dir": >-
       {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/data' }}
     "{{ common_derive_service_name }}_secret_dir": >-
-      {{ __derive_service_entry.secret_dir | default('/etc/lv3/' + common_derive_service_name) }}
+      {{ __derive_service_entry.secret_dir | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_compose_file": >-
       {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
     "{{ common_derive_service_name }}_env_file": >-
@@ -109,9 +109,9 @@
     "{{ common_derive_service_name }}_data_dir": >-
       {{ __derive_service_entry.state_dirs.data | default('/var/lib/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_secret_dir": >-
-      {{ __derive_service_entry.state_dirs.secrets | default('/etc/lv3/' + common_derive_service_name) }}
+      {{ __derive_service_entry.state_dirs.secrets | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name) }}
     "{{ common_derive_service_name }}_env_file": >-
-      {{ __derive_service_entry.state_dirs.secrets | default('/etc/lv3/' + common_derive_service_name) }}/runtime.env
+      {{ __derive_service_entry.state_dirs.secrets | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name) }}/runtime.env
     "{{ common_derive_service_name }}_internal_port": >-
       {{ __derive_service_entry.internal_port }}
     "{{ common_derive_service_name }}_internal_base_url": >-
@@ -158,9 +158,9 @@
       {%- if __derive_service_type == 'docker_compose' -%}
       {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/openbao' }}
       {%- elif __derive_service_type == 'system_package' -%}
-      {{ (__derive_service_entry.state_dirs.secrets | default('/etc/lv3/' + common_derive_service_name)) + '/openbao' }}
+      {{ (__derive_service_entry.state_dirs.secrets | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name)) + '/openbao' }}
       {%- else -%}
-      /etc/lv3/{{ common_derive_service_name }}/openbao
+      /etc/{{ platform_identity.unix_prefix }}/{{ common_derive_service_name }}/openbao
       {%- endif -%}
     "{{ common_derive_service_name }}_openbao_agent_image": "{{ openbao_agent_image }}"
     "{{ common_derive_service_name }}_openbao_agent_container_name": >-
@@ -168,7 +168,7 @@
     "{{ common_derive_service_name }}_openbao_secret_path": >-
       services/{{ common_derive_service_name }}/runtime-env
     "{{ common_derive_service_name }}_openbao_policy_name": >-
-      lv3-service-{{ common_derive_service_name }}-runtime
+      {{ platform_identity.config_prefix }}-service-{{ common_derive_service_name }}-runtime
     "{{ common_derive_service_name }}_openbao_approle_name": >-
       {{ common_derive_service_name }}-runtime
   when: __derive_service_entry.needs_openbao | default(true)

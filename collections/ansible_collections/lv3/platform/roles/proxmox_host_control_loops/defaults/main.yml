@@ -15,18 +15,18 @@
 #   - ADR 0226: Selects systemd as the canonical host-resident supervisor.
 # Related ADRs: 0204, 0220, 0224, 0226
 
-proxmox_host_control_loops_root: /var/lib/lv3-host-control-loops
+proxmox_host_control_loops_root: /var/lib/{{ platform_identity.config_prefix }}-host-control-loops
 proxmox_host_control_loops_request_dir: "{{ proxmox_host_control_loops_root }}/requests"
 proxmox_host_control_loops_history_dir: "{{ proxmox_host_control_loops_root }}/runs"
 proxmox_host_control_loops_status_dir: "{{ proxmox_host_control_loops_root }}/status"
 proxmox_host_control_loops_status_file: "{{ proxmox_host_control_loops_status_dir }}/latest.json"
 proxmox_host_control_loops_reconcile_request_path: "{{ proxmox_host_control_loops_request_dir }}/reconcile.request"
-proxmox_host_control_loops_script_path: /usr/local/libexec/lv3-host-control-loop-reconcile.py
-proxmox_host_control_loops_service_name: lv3-host-control-loop-reconcile.service
-proxmox_host_control_loops_timer_name: lv3-host-control-loop-reconcile.timer
-proxmox_host_control_loops_path_name: lv3-host-control-loop-reconcile.path
+proxmox_host_control_loops_script_path: /usr/local/libexec/{{ platform_identity.config_prefix }}-host-control-loop-reconcile.py
+proxmox_host_control_loops_service_name: "{{ platform_identity.config_prefix }}-host-control-loop-reconcile.service"
+proxmox_host_control_loops_timer_name: "{{ platform_identity.config_prefix }}-host-control-loop-reconcile.timer"
+proxmox_host_control_loops_path_name: "{{ platform_identity.config_prefix }}-host-control-loop-reconcile.path"
 proxmox_host_control_loops_description: LV3 host control-loop reconcile baseline
-proxmox_host_control_loops_syslog_identifier: lv3-host-control-loop-reconcile
+proxmox_host_control_loops_syslog_identifier: "{{ platform_identity.config_prefix }}-host-control-loop-reconcile"
 proxmox_host_control_loops_service_user: root
 proxmox_host_control_loops_service_group: root
 proxmox_host_control_loops_timer_on_calendar: "*:0/30"

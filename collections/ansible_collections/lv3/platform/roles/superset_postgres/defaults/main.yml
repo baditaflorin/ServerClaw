@@ -9,7 +9,7 @@ superset_database_name: postgres
 superset_database_schema: superset
 superset_database_user: superset
 superset_reader_user: superset_reader
-superset_postgres_secret_dir: /etc/lv3/superset
+superset_postgres_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/superset"
 superset_postgres_password_file: "{{ superset_postgres_secret_dir }}/database-password.txt"
 superset_reader_password_file: "{{ superset_postgres_secret_dir }}/reader-password.txt"
 superset_postgres_database_catalog_remote_file: "{{ superset_postgres_secret_dir }}/postgres-databases.json"

@@ -9,7 +9,7 @@
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
 crawl4ai_runtime_site_dir: /opt/crawl4ai
-crawl4ai_runtime_config_dir: /etc/lv3/crawl4ai
+crawl4ai_runtime_config_dir: "/etc/{{ platform_identity.unix_prefix }}/crawl4ai"
 crawl4ai_runtime_compose_file: "{{ crawl4ai_runtime_site_dir }}/docker-compose.yml"
 crawl4ai_runtime_config_file: "{{ crawl4ai_runtime_config_dir }}/config.yml"
 crawl4ai_runtime_container_name: crawl4ai

@@ -7,7 +7,7 @@
 ---
 librechat_site_dir: /opt/librechat
 librechat_data_dir: "{{ librechat_site_dir }}/data"
-librechat_secret_dir: /etc/lv3/librechat
+librechat_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/librechat"
 librechat_compose_file: "{{ librechat_site_dir }}/docker-compose.yml"
 librechat_config_file: "{{ librechat_site_dir }}/librechat.yaml"
 librechat_env_file: "{{ compose_runtime_secret_root }}/librechat/runtime.env"
@@ -17,7 +17,7 @@ librechat_openbao_agent_image: "{{ openbao_agent_image }}"
 librechat_openbao_agent_container_name: librechat-openbao-agent
 librechat_enable_openbao_agent: false
 librechat_openbao_secret_path: services/librechat/runtime-env
-librechat_openbao_policy_name: lv3-service-librechat-runtime
+librechat_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-librechat-runtime"
 librechat_openbao_approle_name: librechat-runtime
 librechat_container_name: librechat
 librechat_internal_port: 8096

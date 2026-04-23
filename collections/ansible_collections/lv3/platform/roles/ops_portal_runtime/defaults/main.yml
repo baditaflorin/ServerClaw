@@ -33,7 +33,7 @@ ops_portal_site_dir: >-
      | default('/opt/ops-portal') }}
 ops_portal_secret_dir: >-
   {{ hostvars[platform_topology_host].platform_service_registry['ops_portal'].secret_dir
-     | default('/etc/lv3/ops_portal') }}
+     | default('/etc/' + platform_identity.unix_prefix + '/ops_portal') }}
 ops_portal_data_dir: "{{ ops_portal_site_dir }}/data"
 ops_portal_compose_file: "{{ ops_portal_site_dir }}/docker-compose.yml"
 ops_portal_env_file: "{{ ops_portal_site_dir }}/ops-portal.env"
@@ -109,7 +109,7 @@ ops_portal_gateway_url: >-
 ops_portal_public_base_url: https://ops.{{ platform_domain }}
 ops_portal_docs_base_url: https://docs.{{ platform_domain }}
 ops_portal_grafana_logs_url: https://grafana.{{ platform_domain }}/explore?left=%7B%22queries%22:%5B%5D%7D
-ops_portal_service_image_name: lv3-ops-portal
+ops_portal_service_image_name: "{{ platform_identity.config_prefix }}-ops-portal"
 ops_portal_repo_root: "{{ playbook_dir | dirname }}"
 ops_portal_static_api_token: >-
   {{

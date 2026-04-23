@@ -4,7 +4,7 @@
 # from platform_service_registry — ADR 0373.
 searxng_runtime_site_dir: /opt/searxng
 searxng_runtime_config_dir: /etc/searxng
-searxng_runtime_secret_dir: /etc/lv3/searxng
+searxng_runtime_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/searxng"
 searxng_runtime_cache_dir: /data/searxng/cache
 searxng_runtime_valkey_data_dir: /data/searxng/valkey
 searxng_runtime_compose_file: "{{ searxng_runtime_site_dir }}/docker-compose.yml"

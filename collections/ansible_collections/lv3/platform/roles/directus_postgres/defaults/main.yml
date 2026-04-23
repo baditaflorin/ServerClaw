@@ -7,7 +7,7 @@
 ---
 directus_database_name: directus
 directus_database_user: directus
-directus_postgres_secret_dir: /etc/lv3/directus
+directus_postgres_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/directus"
 directus_postgres_password_file: "{{ directus_postgres_secret_dir }}/database-password"
 directus_local_artifact_dir: "{{ repo_shared_local_root }}/directus"
 directus_database_password_local_file: "{{ directus_local_artifact_dir }}/database-password.txt"

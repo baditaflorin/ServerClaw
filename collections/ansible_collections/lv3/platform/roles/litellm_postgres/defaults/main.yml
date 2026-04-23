@@ -7,7 +7,7 @@
 ---
 litellm_database_name: litellm
 litellm_database_user: litellm
-litellm_postgres_secret_dir: /etc/lv3/litellm
+litellm_postgres_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/litellm"
 litellm_postgres_password_file: "{{ litellm_postgres_secret_dir }}/database-password"
 litellm_local_artifact_dir: "{{ repo_shared_local_root }}/litellm"
 litellm_database_password_local_file: "{{ repo_shared_local_root }}/litellm/database-password.txt"

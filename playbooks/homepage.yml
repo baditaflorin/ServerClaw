@@ -8,7 +8,7 @@
     # ADR 0373: Conventional service variables (derive_service_defaults compatibility)
     homepage_site_dir: /opt/homepage
     homepage_data_dir: /opt/homepage/data
-    homepage_secret_dir: /etc/lv3/homepage
+    homepage_secret_dir: /etc/{{ platform_identity.unix_prefix }}/homepage
     homepage_local_artifact_dir: "{{ repo_shared_local_root }}/homepage"
     homepage_image: "ghcr.io/gethomepage/homepage:v1.8.0@sha256:a543b3b044b2fa349dfe319c9e9b256c4eb5b4f6923361045aa468be4d2ba990"
     homepage_container_name: homepage

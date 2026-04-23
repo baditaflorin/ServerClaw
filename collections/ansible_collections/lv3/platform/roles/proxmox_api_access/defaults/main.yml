@@ -6,7 +6,7 @@
 # Dependencies: ADR 0165, ADR 0034, ADR 0167, and ADR 0333.
 ---
 proxmox_api_hostname: proxmox.{{ platform_domain }}
-proxmox_api_automation_user: lv3-automation@pve
+proxmox_api_automation_user: "{{ platform_identity.config_prefix }}-automation@pve"
 proxmox_api_automation_comment: LV3 durable automation identity
 proxmox_api_token_id: primary
 proxmox_api_token_comment: LV3 primary automation token
@@ -57,7 +57,7 @@ proxmox_api_token_role_privileges:
 proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
 proxmox_api_token_local_dir: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/proxmox-api"
-proxmox_api_token_local_file: "{{ proxmox_api_token_local_dir }}/lv3-automation-primary.json"
+proxmox_api_token_local_file: "{{ proxmox_api_token_local_dir }}/{{ platform_identity.config_prefix }}-automation-primary.json"
 
 # Whether the controller should validate the PVE API's TLS certificate when
 # verifying the automation token. Defaults to true: in steady state, the

@@ -11,7 +11,7 @@ control_plane_recovery_local_controller_bundle_file: "{{ control_plane_recovery_
 control_plane_recovery_local_controller_manifest_file: "{{ control_plane_recovery_local_controller_dir }}/control-plane-recovery-manifest.json"
 control_plane_recovery_local_controller_staging_dir: "{{ control_plane_recovery_local_controller_dir }}/staging"
 control_plane_recovery_store_controller_dir: /srv/control-plane-recovery/controller
-control_plane_recovery_store_user: lv3-control-plane-backup
+control_plane_recovery_store_user: "{{ platform_identity.config_prefix }}-control-plane-backup"
 control_plane_recovery_store_group: "{{ control_plane_recovery_store_user }}"
 control_plane_recovery_controller_bundle_sources:
   - id: step_ca
@@ -31,8 +31,8 @@ control_plane_recovery_controller_bundle_sources:
     archive_name: mail-platform
     required: true
   - id: proxmox_api
-    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/proxmox-api/lv3-automation-primary.json"
-    archive_name: proxmox-api/lv3-automation-primary.json
+    path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/proxmox-api/{{ platform_identity.config_prefix }}-automation-primary.json"
+    archive_name: proxmox-api/{{ platform_identity.config_prefix }}-automation-primary.json
     required: true
   - id: proxmox_tfa
     path: "{{ repo_shared_local_root | default((playbook_dir | dirname) ~ '/.local', true) }}/tfa/proxmox-ops-pam-totp.json"

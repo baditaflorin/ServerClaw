@@ -21,6 +21,194 @@ archive_summary:
   by_year:
     '2026': 321
 workstreams:
+- id: ws-0438-generic-by-construction
+  adr: 0438
+  title: "Generic-by-construction \u2014 eliminate lv3-prefix and credential-variable\
+    \ hardcoding"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/gallant-chebyshev-b0def1
+  worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
+  doc: docs/adr/0438-generic-by-construction.md
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0409-zero-sanitization-publication
+  - adr-0437-overlay-aware-bootstrap
+  - adr-0373-service-registry
+  - adr-0359-postgres-client-registry
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0438-generic-by-construction.md
+  - workstreams/active/ws-0438-generic-by-construction.yaml
+  - collections/ansible_collections/lv3/platform/plugins/filter/platform_identity.py
+  - tests/test_platform_identity_filters.py
+  - tests/test_platform_identity_no_raw_split.py
+  - tests/test_tier0_crossrefs.py
+  - scripts/validate_tier0_crossrefs.py
+  - inventory/group_vars/all/identity.yml
+  - inventory/group_vars/all/main.yml
+  - inventory/group_vars/platform_postgres.yml
+  - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/**/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/**/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/**/templates/**.j2
+  - collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/defaults-main.yml.tpl
+  - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+  - roles/**/defaults/main.yml
+  - playbooks/vars/fork-overrides.yml
+  - playbooks/vars/minio.yml
+  - playbooks/vars/keycloak.yml
+  - playbooks/homepage.yml
+  - playbooks/harbor.yml
+  - playbooks/keycloak.yml
+  - playbooks/gitea.yml
+  - playbooks/mail-platform-*.yml
+  - collections/ansible_collections/lv3/platform/playbooks/mail-platform-*.yml
+  - inventory/host_vars/runtime-control.yml
+  - inventory/group_vars/all/platform_services.yml
+  - scripts/ansible_scope_runner.py
+  - scripts/publish_to_serverclaw.py
+  - config/publication-sanitization.yaml
+  summary: 'Move the platform from "generic by convention" (ADR 0407) to "generic
+    by construction" for the axis ADR 0409 did not cover: role-internal prefix hardcoding.
+    Audit found 190+ literal lv3_*/lv3-* identifiers across role defaults, templates,
+    and !unsafe blocks, plus a structural credential-variable-name divergence pattern
+    that breaks fork overrides silently.
+
+    '
+  phases:
+    phase_0_stop_the_bleed:
+      status: completed
+      done:
+      - 'fix(openbao): parameterize creation_statements connect role'
+      - 'fix(openbao): align openbao_postgres_admin_password_local_file to fork path'
+      - 'fix(inventory): use platform_config_prefix for Proxmox automation user'
+      - 'fix(openbao): fix fork topology IP mismatches + artifact path isolation'
+      - 'fix(postgres): add openbao_rotator pg_hba entry via platform_postgres_clients'
+    phase_1_platform_identity:
+      status: completed
+      target_version: 0.179.0
+      done:
+      - 'feat(identity): platform_identity filter plugin with 5 flavors (config/sql/pve/unix/dns_label)'
+      - 'test: 18 unit tests across lv3/0fork/UPPERCASE/edge-case inputs'
+      - 'fix(identity): migrate proxmox_notification_*, keycloak_realm_name, monitoring_influxdb_org
+        to platform_identity'
+      - 'fix(identity): migrate proxmox_api_automation_user to pve_prefix (was config_prefix)'
+      - 'fix(identity): migrate proxmox_acme_plugin_id to config_prefix (was sql_prefix)'
+      - 'test(lint): Tier-0 raw-split scanner + Tier-0 cross-ref validator + pytest
+        gates'
+    phase_2_literal_prefix_sweep:
+      status: in_progress
+      target_version: 0.180.0
+      done:
+      - 'fix(postgres): parameterize /etc/lv3/ in all platform_postgres_clients (54
+        A2 warnings cleared)'
+      - 'fix(derive): parameterize /etc/lv3/ in derive_service_defaults.yml (covers
+        all 70+ services)'
+      - 'fix(roles): parameterize /etc/lv3/ in 63 role defaults/main.yml files (80
+        occurrences)'
+      - 'fix(playbooks): parameterize /etc/lv3/ in mail-platform playbooks and inline
+        vars'
+      - 'fix(scaffold): update service scaffold template to use platform_identity.unix_prefix'
+      - "fix(roles): parameterize lv3- identifiers in 68 role defaults (203 occurrences\
+        \ \u2014 container_name, policy_name, network_name, service_image_name)"
+      - 'fix(tests): update 6 role defaults test files to expect platform_identity
+        template values'
+      - 'fix(openbao): replace 4 !unsafe SQL grants with Jinja-escape pattern (Phase
+        0 ef1445216)'
+      remaining:
+      - Rename lv3_service_topology fact to platform_service_topology (50+ callsites)
+    phase_3_unified_credentials:
+      status: not_started
+      target_version: 0.181.0
+      tasks:
+      - Add platform_credentials registry schema
+      - Unify openbao_postgres rotator variable name (writer+reader)
+      - Sweep remaining ~20 credential variable divergences
+      - Contract test for credential owner/reader consistency
+    phase_4_shard_laziness:
+      status: not_started
+      target_version: 0.182.0
+      blocked_on: audit-3-shard-bake-behavior
+      tasks:
+      - Change ansible_scope_runner.py to emit Jinja templates for derived paths
+      - Drop redundant override lines from playbooks/vars/fork-overrides.yml
+    phase_5_phase_aware_address:
+      status: not_started
+      target_version: 0.183.0
+      tasks:
+      - Write platform_host_address filter with phase semantics
+      - Migrate common_openbao_compose_env_openbao_address + ~5 known callsites
+      - Add lint for raw IPs in role defaults
+    phase_6_generic_deploy_ci:
+      status: not_started
+      target_version: 0.184.0
+      tasks:
+      - Add tests/fixtures/synthetic-identity.yml
+      - CI job runs every playbook in --check mode against synthetic identity
+      - Promote from advisory to required
+  acceptance_criteria:
+  - Pre-push lint scanner green on main with zero allow-comments outside docs/tests
+  - PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make bootstrap completes without
+    any lv3/prefix/credential hardcoding workaround in fork-overrides.yml
+  - Generic-deploy CI job green against testfork.invalid synthetic identity
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0438_colocated_ws0424_surfaces
+      paths:
+      - '*'
+      mode: shared_contract
+      contract: colocated-on-ws-0424-branch
+    - id: ws_0438_docs_and_plugin
+      paths:
+      - docs/adr/0438-generic-by-construction.md
+      - workstreams/active/ws-0438-generic-by-construction.yaml
+      - collections/ansible_collections/lv3/platform/plugins/filter/platform_identity.py
+      - tests/test_platform_identity_filters.py
+      - tests/test_platform_identity_no_raw_split.py
+      - tests/test_tier0_crossrefs.py
+      - scripts/validate_tier0_crossrefs.py
+      mode: shared_contract
+      contract: adr-0438-generic-by-construction-v1
+    - id: ws_0438_role_defaults_sweep
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/*/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/*/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+      - collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/defaults-main.yml.tpl
+      - inventory/group_vars/all/identity.yml
+      - inventory/group_vars/all/main.yml
+      - inventory/group_vars/platform_postgres.yml
+      - inventory/group_vars/all/platform_services.yml
+      - inventory/host_vars/runtime-control.yml
+      mode: shared_contract
+      contract: adr-0438-generic-by-construction-v1
+    - id: ws_0438_playbooks_sweep
+      paths:
+      - playbooks/vars/minio.yml
+      - playbooks/vars/keycloak.yml
+      - playbooks/homepage.yml
+      - playbooks/harbor.yml
+      - playbooks/keycloak.yml
+      - playbooks/gitea.yml
+      - playbooks/mail-platform-diagnostics.yml
+      - playbooks/mail-platform-notification-profiles-verify.yml
+      - playbooks/mail-platform-send-gmail.yml
+      - playbooks/mail-platform-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-diagnostics.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-notification-profiles-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-send-gmail.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+      mode: shared_contract
+      contract: adr-0438-generic-by-construction-v1
+  notes:
+  - 'ADR 0409 proved the refactor pattern works for domain/PII/IP axis. This workstream
+    applies the same rigor to the role-internal prefix axis that 0409 explicitly left
+    alone.
+
+    '
 - id: ws-0424-fork-clone-0fork
   adr: '0424'
   title: "ADR 0424 \u2014 0fork.com Clone onto Hetzner AX41-NVMe"
@@ -181,6 +369,42 @@ workstreams:
       - inventory/group_vars/platform.yml
       - scripts/generate_platform_vars.py
       - scripts/validate_repository_data_models.py
+      mode: exclusive
+    - id: ws_0438_generic_by_construction
+      description: "ADR 0438 \u2014 generative-cascade IaC refactor co-located on\
+        \ this branch. Eliminates /etc/lv3/ prefix hardcoding + introduces platform_identity\
+        \ filter plugin. Phase 1 (plugin + tests) and Phase 2 (path sweep) complete.\n"
+      paths:
+      - docs/adr/0438-generic-by-construction.md
+      - workstreams/active/ws-0438-generic-by-construction.yaml
+      - collections/ansible_collections/lv3/platform/plugins/filter/platform_identity.py
+      - tests/test_platform_identity_filters.py
+      - tests/test_platform_identity_no_raw_split.py
+      - tests/test_tier0_crossrefs.py
+      - scripts/validate_tier0_crossrefs.py
+      - inventory/group_vars/all/identity.yml
+      - inventory/group_vars/all/main.yml
+      - inventory/group_vars/platform_postgres.yml
+      - inventory/group_vars/all/platform_services.yml
+      - inventory/host_vars/runtime-control.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+      - collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/defaults-main.yml.tpl
+      - collections/ansible_collections/lv3/platform/roles/*/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/*/meta/argument_specs.yml
+      - playbooks/vars/minio.yml
+      - playbooks/vars/keycloak.yml
+      - playbooks/homepage.yml
+      - playbooks/harbor.yml
+      - playbooks/keycloak.yml
+      - playbooks/gitea.yml
+      - playbooks/mail-platform-diagnostics.yml
+      - playbooks/mail-platform-notification-profiles-verify.yml
+      - playbooks/mail-platform-send-gmail.yml
+      - playbooks/mail-platform-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-diagnostics.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-notification-profiles-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-send-gmail.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
       mode: exclusive
   progress:
     completed_2026_04_21:

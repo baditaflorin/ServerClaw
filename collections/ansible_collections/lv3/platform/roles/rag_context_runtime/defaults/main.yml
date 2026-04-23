@@ -33,7 +33,7 @@ platform_context_corpus_dir: "{{ platform_context_site_dir }}/corpus"
 platform_context_data_dir: "{{ platform_context_site_dir }}/qdrant"
 platform_context_memory_index_dir: "{{ platform_context_site_dir }}/memory-search-index"
 platform_context_memory_index_path: "{{ platform_context_memory_index_dir }}/documents.json"
-platform_context_secret_dir: /etc/lv3/platform-context
+platform_context_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/platform-context"
 platform_context_compose_file: "{{ platform_context_site_dir }}/docker-compose.yml"
 platform_context_env_file: "{{ compose_runtime_secret_root }}/platform-context/runtime.env"
 platform_context_legacy_env_file: "{{ platform_context_site_dir }}/platform-context.env"
@@ -41,7 +41,7 @@ platform_context_openbao_agent_dir: "{{ platform_context_site_dir }}/openbao"
 platform_context_openbao_agent_image: "{{ openbao_agent_image }}"
 platform_context_openbao_agent_container_name: platform-context-openbao-agent
 platform_context_openbao_secret_path: services/platform-context/runtime-env
-platform_context_openbao_policy_name: lv3-service-platform-context-runtime
+platform_context_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-platform-context-runtime"
 platform_context_openbao_approle_name: platform-context-runtime
 platform_context_api_token_remote_file: "{{ platform_context_secret_dir }}/api-token.txt"
 platform_context_local_artifact_dir: "{{ repo_shared_local_root }}/platform-context"
@@ -57,7 +57,7 @@ platform_context_controller_url: "http://{{ hostvars[platform_topology_host].man
 platform_context_private_url: "http://127.0.0.1:{{ platform_context_internal_port }}"
 platform_context_qdrant_host_port: 6333
 platform_context_qdrant_image: qdrant/qdrant:v1.15.1
-platform_context_api_image_name: lv3-platform-context-api
+platform_context_api_image_name: "{{ platform_identity.config_prefix }}-platform-context-api"
 platform_context_qdrant_collection: platform_context
 platform_context_memory_collection: serverclaw_memory
 platform_context_embedding_backend: ollama

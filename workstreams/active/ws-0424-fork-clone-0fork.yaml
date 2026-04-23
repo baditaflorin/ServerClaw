@@ -161,6 +161,49 @@ ownership_manifest:
         - scripts/generate_platform_vars.py
         - scripts/validate_repository_data_models.py
       mode: exclusive
+    - id: ws_0438_generic_by_construction
+      description: >
+        ADR 0438 — generative-cascade IaC refactor co-located on this branch.
+        Eliminates /etc/lv3/ prefix hardcoding + introduces platform_identity
+        filter plugin. Phase 1 (plugin + tests) and Phase 2 (path sweep) complete.
+      paths:
+        # ADR, workstream, and docs
+        - docs/adr/0438-generic-by-construction.md
+        - workstreams/active/ws-0438-generic-by-construction.yaml
+        # Filter plugin and tests
+        - collections/ansible_collections/lv3/platform/plugins/filter/platform_identity.py
+        - tests/test_platform_identity_filters.py
+        - tests/test_platform_identity_no_raw_split.py
+        - tests/test_tier0_crossrefs.py
+        - scripts/validate_tier0_crossrefs.py
+        # Identity vars
+        - inventory/group_vars/all/identity.yml
+        - inventory/group_vars/all/main.yml
+        - inventory/group_vars/platform_postgres.yml
+        - inventory/group_vars/all/platform_services.yml
+        - inventory/host_vars/runtime-control.yml
+        # Core derivation
+        - collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml
+        - collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/defaults-main.yml.tpl
+        # Role defaults (Phase 2 sweep — 63 files, covered by glob)
+        - collections/ansible_collections/lv3/platform/roles/*/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/*/meta/argument_specs.yml
+        # Playbooks
+        - playbooks/vars/minio.yml
+        - playbooks/vars/keycloak.yml
+        - playbooks/homepage.yml
+        - playbooks/harbor.yml
+        - playbooks/keycloak.yml
+        - playbooks/gitea.yml
+        - playbooks/mail-platform-diagnostics.yml
+        - playbooks/mail-platform-notification-profiles-verify.yml
+        - playbooks/mail-platform-send-gmail.yml
+        - playbooks/mail-platform-verify.yml
+        - collections/ansible_collections/lv3/platform/playbooks/mail-platform-diagnostics.yml
+        - collections/ansible_collections/lv3/platform/playbooks/mail-platform-notification-profiles-verify.yml
+        - collections/ansible_collections/lv3/platform/playbooks/mail-platform-send-gmail.yml
+        - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+      mode: exclusive
 progress:
   completed_2026_04_21:
     - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)

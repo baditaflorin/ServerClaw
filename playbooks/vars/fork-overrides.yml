@@ -49,7 +49,53 @@ keycloak_glitchtip_enabled: false
 # directus, etc.) must be told NOT to start a local OpenBao and to speak
 # to the remote one instead.
 common_openbao_compose_env_manage_local_openbao_runtime: false
-common_openbao_compose_env_openbao_address: http://10.20.10.10:8201
+# runtime-control is re-addressed to 10.10.10.92 after bootstrap network
+# reconfiguration (bootstrap assigns 10.20.10.10, Ansible converge moves it).
+common_openbao_compose_env_openbao_address: http://10.10.10.92:8201
+
+# --- OpenBao local artifact isolation ---
+# The shard generation bakes each artifact path as
+#   {{ repo_shared_local_root }}/openbao/<file>
+# directly — overriding openbao_local_artifact_dir alone is insufficient.
+# Each path must be overridden here so that the fork uses its own credential
+# store and does not collide with the main-production .local/openbao/ files.
+# Adjust the "0fork" component for non-0fork forks.
+openbao_local_artifact_dir: "{{ repo_shared_local_root }}/0fork/openbao"
+openbao_init_local_file: "{{ repo_shared_local_root }}/0fork/openbao/init.json"
+openbao_ops_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/ops-password.txt"
+openbao_breakglass_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/breakglass-password.txt"
+openbao_postgres_rotator_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/postgres-rotator-password.txt"
+# openbao_postgres_backend role (play 1) uses a DIFFERENT variable name:
+openbao_postgres_admin_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/postgres-rotator-password.txt"
+openbao_controller_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/controller-automation-approle.json"
+openbao_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/atlas-approle.json"
+openbao_mail_platform_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/mail-platform-approle.json"
+openbao_secret_rotation_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/secret-rotation-approle.json"
+
+# --- OpenBao legacy restore ---
+# The legacy migration path (openbao_runtime/tasks/main.yml) tries to reach
+# the old docker-runtime VM (10.10.10.20) to pull a raft snapshot.  Fork
+# deployments start fresh — there is no pre-existing OpenBao on docker-runtime
+# to migrate from.  Disabling this path prevents the role from delegating to a
+# non-existent host and timing-out with connection-refused.
+openbao_legacy_restore_enabled: false
+
+# --- OpenBao PostgreSQL backend ---
+# openbao_postgres_host resolves from hostvars[...postgres_ha.initial_primary].ansible_host,
+# which is 10.10.10.60 in the production inventory.  The fork's postgres VM
+# was re-addressed to 10.10.10.50 during bootstrap network reconfiguration.
+# Without this override OpenBao cannot verify its DB connection and returns HTTP 400.
+openbao_postgres_host: 10.10.10.50
+
+# --- OpenBao TLS certificate duration ---
+# The step-ca services provisioner has no explicit claims overrides, so the
+# default max TLS cert duration is 24h. The role default (72h) exceeds this.
+# Override to 24h so cert issuance succeeds; use 23h renewal threshold so
+# openbao converge renews with at least 1h left on the cert.
+# TODO: fix the step-ca role to add --x509-max-dur to provisioner creation
+# so longer durations are supported without fork-specific overrides.
+openbao_tls_certificate_not_after: 24h
+openbao_tls_cert_renew_before_seconds: 3600
 
 # --- Loki / MinIO ---
 # Production Loki uses MinIO (10.10.10.20:9010) as its S3 chunk backend.

@@ -16,7 +16,7 @@ typesense_openbao_agent_dir: "{{ typesense_site_dir }}/openbao"
 typesense_openbao_agent_image: "{{ openbao_agent_image }}"
 typesense_openbao_agent_container_name: typesense-openbao-agent
 typesense_openbao_secret_path: services/typesense/runtime-env
-typesense_openbao_policy_name: lv3-service-typesense-runtime
+typesense_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-typesense-runtime"
 typesense_openbao_approle_name: typesense-runtime
 typesense_image: "{{ container_image_catalog.images.typesense_runtime.ref }}"
 typesense_container_name: typesense

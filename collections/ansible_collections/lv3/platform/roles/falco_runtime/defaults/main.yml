@@ -35,4 +35,4 @@ falco_runtime_bridge_host: >-
   }}
 falco_runtime_bridge_port: "{{ hostvars[platform_topology_host].platform_port_assignments.falco_event_bridge_port }}"
 falco_runtime_http_output_url: "http://{{ falco_runtime_bridge_host }}:{{ falco_runtime_bridge_port }}/events"
-falco_runtime_http_user_agent: lv3-falco-runtime
+falco_runtime_http_user_agent: "{{ platform_identity.config_prefix }}-falco-runtime"

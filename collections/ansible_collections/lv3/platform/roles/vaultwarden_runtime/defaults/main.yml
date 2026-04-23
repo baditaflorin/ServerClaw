@@ -40,7 +40,7 @@ vaultwarden_tls_server_sans:
   - "{{ ansible_host }}"
 vaultwarden_tls_certificate_not_after: 24h
 vaultwarden_tls_cert_renew_before_seconds: 21600
-vaultwarden_tls_renewal_timer_name: lv3-vaultwarden-cert-renew
+vaultwarden_tls_renewal_timer_name: "{{ platform_identity.config_prefix }}-vaultwarden-cert-renew"
 vaultwarden_tls_renewal_script_path: "/usr/local/libexec/{{ vaultwarden_tls_renewal_timer_name }}.sh"
 vaultwarden_tls_renewal_service_path: "/etc/systemd/system/{{ vaultwarden_tls_renewal_timer_name }}.service"
 vaultwarden_tls_renewal_timer_path: "/etc/systemd/system/{{ vaultwarden_tls_renewal_timer_name }}.timer"

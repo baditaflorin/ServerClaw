@@ -17,7 +17,7 @@ def test_defaults_define_local_and_guest_password_mirrors() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
     assert defaults["sftpgo_database_name"] == "sftpgo"
     assert defaults["sftpgo_database_user"] == "sftpgo"
-    assert defaults["sftpgo_postgres_secret_dir"] == "/etc/lv3/sftpgo"
+    assert defaults["sftpgo_postgres_secret_dir"] == "/etc/{{ platform_identity.unix_prefix }}/sftpgo"
     assert defaults["sftpgo_postgres_password_file"] == "{{ sftpgo_postgres_secret_dir }}/database-password"
     assert defaults["sftpgo_database_password_local_file"].endswith("/.local/sftpgo/database-password.txt")
 

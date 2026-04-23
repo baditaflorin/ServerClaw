@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-22'
+generated: '2026-04-23'
 facet: concern
 concern: resilience
-total_adrs: 7
+total_adrs: 8
 adrs:
   - adr: '0163'
     title: Platform-Wide Retry Taxonomy and Exponential Backoff
@@ -133,3 +133,22 @@ adrs:
     summary: Deploy a platformservicewatchdog role to every VM that runs application
     filename: 0421-platform-wide-service-watchdog.md
     path: docs/adr/0421-platform-wide-service-watchdog.md
+  - adr: 0438
+    title: Generic-by-Construction — Generative Cascade IaC
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-23'
+    concern: resilience
+    keywords:
+      - refactor
+      - generic-by-default
+      - fork-clone
+      - adr-0409-complement
+      - adr-0437-prerequisite
+      - generic-by-construction
+      - generative
+      - cascade
+      - iac
+    summary: Generic-by-Construction — Generative Cascade IaC
+    filename: 0438-generic-by-construction.md
+    path: docs/adr/0438-generic-by-construction.md

@@ -14,12 +14,12 @@ sftpgo_database_name: sftpgo
 sftpgo_database_user: sftpgo
 sftpgo_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 sftpgo_database_password_local_file: "{{ sftpgo_local_artifact_dir }}/database-password.txt"
-sftpgo_bootstrap_admin_username: lv3-sftpgo-admin
+sftpgo_bootstrap_admin_username: "{{ platform_identity.config_prefix }}-sftpgo-admin"
 sftpgo_bootstrap_admin_password_local_file: "{{ sftpgo_local_artifact_dir }}/bootstrap-admin-password.txt"
 sftpgo_oidc_admin_username: florin.badita
 sftpgo_oidc_admin_email: "{{ platform_operator_email }}"
 sftpgo_oidc_admin_password_local_file: "{{ sftpgo_local_artifact_dir }}/florin.badita-password.txt"
-sftpgo_api_key_name: lv3-sftpgo-rest-provisioner
+sftpgo_api_key_name: "{{ platform_identity.config_prefix }}-sftpgo-rest-provisioner"
 sftpgo_api_key_local_file: "{{ sftpgo_local_artifact_dir }}/admin-api-key.txt"
 sftpgo_bootstrap_report_local_file: "{{ sftpgo_local_artifact_dir }}/bootstrap-report.json"
 sftpgo_smoke_user_username: sftpgo-smoke

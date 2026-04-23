@@ -18,7 +18,7 @@ argument_specs:
       data_retention_config_dir:
         type: str
         required: false
-        default: /etc/lv3/data-retention
+        default: /etc/<platform_prefix>/data-retention  # runtime: platform_identity.unix_prefix
       data_retention_receipts_root:
         type: str
         required: false

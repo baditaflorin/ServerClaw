@@ -11,14 +11,14 @@ semaphore_compose_file: "{{ semaphore_site_dir }}/docker-compose.yml"
 semaphore_image: docker.io/semaphoreui/semaphore:latest
 semaphore_container_name: semaphore
 semaphore_local_artifact_dir: "{{ repo_shared_local_root }}/semaphore"
-semaphore_secret_dir: /etc/lv3/semaphore
+semaphore_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/semaphore"
 
 # OpenBao agent configuration (from ADR 0373)
 semaphore_openbao_agent_dir: "{{ semaphore_site_dir }}/openbao"
 semaphore_openbao_agent_image: "{{ openbao_agent_image }}"
 semaphore_openbao_agent_container_name: semaphore-openbao-agent
 semaphore_openbao_secret_path: services/semaphore/runtime-env
-semaphore_openbao_policy_name: lv3-service-semaphore-runtime
+semaphore_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-semaphore-runtime"
 semaphore_openbao_approle_name: semaphore-runtime
 
 semaphore_database_name: semaphore
@@ -51,7 +51,7 @@ semaphore_oidc_scopes: "openid profile email"
 semaphore_oidc_auto_provision_user: true
 
 semaphore_project_name: LV3 Semaphore
-semaphore_repository_name: lv3-repo
+semaphore_repository_name: "{{ platform_identity.config_prefix }}-repo"
 semaphore_inventory_name: semaphore-localhost
 semaphore_self_test_template_name: Semaphore Self-Test
 semaphore_repo_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."

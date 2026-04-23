@@ -30,7 +30,7 @@ matrix_synapse_database_user: matrix_synapse
 matrix_synapse_database_collation: C
 matrix_synapse_database_ctype: C
 matrix_synapse_database_template: template0
-matrix_synapse_postgres_secret_dir: /etc/lv3/matrix-synapse
+matrix_synapse_postgres_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/matrix-synapse"
 matrix_synapse_postgres_password_file: "{{ matrix_synapse_postgres_secret_dir }}/database-password.txt"
 matrix_synapse_local_artifact_dir: "{{ repo_shared_local_root }}/matrix-synapse"
 matrix_synapse_database_password_local_file: "{{ repo_shared_local_root }}/matrix-synapse/database-password.txt"

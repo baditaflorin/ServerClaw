@@ -41,7 +41,7 @@ public_edge_service_topology: >-
   }}
 public_edge_session_authority: "{{ platform_session_authority }}"
 public_edge_certbot_email: "{{ platform_operator_email }}"
-public_edge_cert_name: lv3-edge
+public_edge_cert_name: "{{ platform_identity.config_prefix }}-edge"
 public_edge_site_tls_materials: {}
 public_edge_acme_challenge_method: webroot
 public_edge_skip_certbot: false
@@ -49,9 +49,9 @@ public_edge_certbot_retries: 6
 public_edge_certbot_delay_seconds: 15
 public_edge_update_apt_cache: false
 public_edge_sync_generated_static_dirs: true
-public_edge_static_root: /var/www/lv3-edge
-public_edge_generated_static_root: /var/www/lv3-generated
-public_edge_acme_root: /var/www/lv3-edge-acme
+public_edge_static_root: /var/www/{{ platform_identity.config_prefix }}-edge
+public_edge_generated_static_root: /var/www/{{ platform_identity.config_prefix }}-generated
+public_edge_acme_root: /var/www/{{ platform_identity.config_prefix }}-edge-acme
 public_edge_dns_hetzner_plugin_version: 3.0.0
 public_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
 public_edge_dns_hetzner_propagation_seconds: 120

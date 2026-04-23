@@ -51,14 +51,14 @@ openbao_tls_server_sans:
   - "{{ platform_host.management.tailscale_ipv4 }}"
 openbao_tls_certificate_not_after: 72h
 openbao_tls_cert_renew_before_seconds: 21600
-openbao_tls_renewal_timer_name: lv3-openbao-cert-renew
+openbao_tls_renewal_timer_name: "{{ platform_identity.config_prefix }}-openbao-cert-renew"
 openbao_tls_renewal_script_path: "/usr/local/libexec/{{ openbao_tls_renewal_timer_name }}.sh"
 openbao_tls_renewal_service_path: "/etc/systemd/system/{{ openbao_tls_renewal_timer_name }}.service"
 openbao_tls_renewal_timer_path: "/etc/systemd/system/{{ openbao_tls_renewal_timer_name }}.timer"
 openbao_tls_renewal_on_calendar: "*:0/15"
 openbao_tls_renewal_randomized_delay_seconds: 60
 openbao_tls_reload_command: "docker compose --file {{ openbao_compose_file }} restart openbao"
-openbao_unseal_watcher_service_name: lv3-openbao-unseal-watcher
+openbao_unseal_watcher_service_name: "{{ platform_identity.config_prefix }}-openbao-unseal-watcher"
 openbao_unseal_watcher_script_path: "{{ openbao_site_dir }}/unseal-watcher.sh"
 openbao_unseal_watcher_service_path: "/etc/systemd/system/{{ openbao_unseal_watcher_service_name }}.service"
 openbao_unseal_watcher_start_delay_seconds: 5
@@ -90,32 +90,32 @@ openbao_userpass_users:
   - username: ops
     password_local_file: "{{ openbao_ops_password_local_file }}"
     policies:
-      - lv3-human-ops
+      - "{{ platform_identity.config_prefix }}-human-ops"
     token_ttl: 8h
     token_max_ttl: 24h
   - username: breakglass
     password_local_file: "{{ openbao_breakglass_password_local_file }}"
     policies:
-      - lv3-breakglass
+      - "{{ platform_identity.config_prefix }}-breakglass"
     token_ttl: 15m
     token_max_ttl: 1h
 openbao_policies:
-  - name: lv3-human-ops
-    src: policy-lv3-human-ops.hcl.j2
-  - name: lv3-breakglass
-    src: policy-lv3-breakglass.hcl.j2
-  - name: lv3-agent-controller
-    src: policy-lv3-agent-controller.hcl.j2
-  - name: lv3-agent-atlas
-    src: policy-lv3-agent-atlas.hcl.j2
-  - name: lv3-agent-secret-rotation
-    src: policy-lv3-agent-secret-rotation.hcl.j2
-  - name: lv3-service-mail-platform
-    src: policy-lv3-service-mail-platform.hcl.j2
+  - name: "{{ platform_identity.config_prefix }}-human-ops"
+    src: policy-{{ platform_identity.config_prefix }}-human-ops.hcl.j2
+  - name: "{{ platform_identity.config_prefix }}-breakglass"
+    src: policy-{{ platform_identity.config_prefix }}-breakglass.hcl.j2
+  - name: "{{ platform_identity.config_prefix }}-agent-controller"
+    src: policy-{{ platform_identity.config_prefix }}-agent-controller.hcl.j2
+  - name: "{{ platform_identity.config_prefix }}-agent-atlas"
+    src: policy-{{ platform_identity.config_prefix }}-agent-atlas.hcl.j2
+  - name: "{{ platform_identity.config_prefix }}-agent-secret-rotation"
+    src: policy-{{ platform_identity.config_prefix }}-agent-secret-rotation.hcl.j2
+  - name: "{{ platform_identity.config_prefix }}-service-mail-platform"
+    src: policy-{{ platform_identity.config_prefix }}-service-mail-platform.hcl.j2
 openbao_approles:
   - name: controller-automation
     policies:
-      - lv3-agent-controller
+      - "{{ platform_identity.config_prefix }}-agent-controller"
     token_ttl: 15m
     token_max_ttl: 1h
     token_num_uses: 0
@@ -124,7 +124,7 @@ openbao_approles:
     local_file: "{{ openbao_controller_approle_local_file }}"
   - name: atlas
     policies:
-      - lv3-agent-atlas
+      - "{{ platform_identity.config_prefix }}-agent-atlas"
     token_ttl: 15m
     token_max_ttl: 1h
     token_num_uses: 0
@@ -133,7 +133,7 @@ openbao_approles:
     local_file: "{{ openbao_atlas_approle_local_file }}"
   - name: mail-platform
     policies:
-      - lv3-service-mail-platform
+      - "{{ platform_identity.config_prefix }}-service-mail-platform"
     token_ttl: 15m
     token_max_ttl: 1h
     token_num_uses: 0
@@ -142,7 +142,7 @@ openbao_approles:
     local_file: "{{ openbao_mail_platform_approle_local_file }}"
   - name: secret-rotation
     policies:
-      - lv3-agent-secret-rotation
+      - "{{ platform_identity.config_prefix }}-agent-secret-rotation"
     token_ttl: 15m
     token_max_ttl: 1h
     token_num_uses: 0
@@ -153,7 +153,7 @@ openbao_transit_keys:
   - controller-automation
   - mail-platform
 openbao_database_mount_path: database
-openbao_database_name: lv3-postgres
+openbao_database_name: "{{ platform_identity.config_prefix }}-postgres"
 openbao_database_allowed_roles:
   - postgres-readonly
   - postgres-atlas-readonly
@@ -161,27 +161,33 @@ openbao_database_connection_url: >-
   postgresql://{{ "{{username}}" }}:{{ "{{password}}" }}@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable
 openbao_database_plugin_name: postgresql-database-plugin
 openbao_database_password_authentication: scram-sha-256
+# NOTE: {{ "{{name}}" }} / {{ "{{password}}" }} / {{ "{{expiration}}" }} are
+# OpenBao template placeholders that must reach OpenBao literally.  We use the
+# {{ '{{foo}}' }} Jinja escape (same pattern as openbao_database_connection_url)
+# so Ansible can still substitute openbao_postgres_connect_role above them.
+# Production (platform_sql_prefix=lv3) and forks (e.g. platform_sql_prefix=fork)
+# both get the correct role name.
 openbao_database_roles:
   - name: postgres-readonly
     db_name: "{{ openbao_database_name }}"
-    creation_statements: !unsafe |-
-      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
-      GRANT lv3_openbao_connect_all TO "{{name}}";
-      GRANT pg_read_all_data TO "{{name}}";
-      GRANT pg_use_reserved_connections TO "{{name}}";
-    revocation_statements: !unsafe |-
-      DROP ROLE IF EXISTS "{{name}}";
+    creation_statements: |-
+      CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}';
+      GRANT {{ openbao_postgres_connect_role }} TO "{{ '{{name}}' }}";
+      GRANT pg_read_all_data TO "{{ '{{name}}' }}";
+      GRANT pg_use_reserved_connections TO "{{ '{{name}}' }}";
+    revocation_statements: |-
+      DROP ROLE IF EXISTS "{{ '{{name}}' }}";
     default_ttl: 1h
     max_ttl: 24h
   - name: postgres-atlas-readonly
     db_name: "{{ openbao_database_name }}"
-    creation_statements: !unsafe |-
-      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
-      GRANT lv3_openbao_connect_all TO "{{name}}";
-      GRANT pg_read_all_data TO "{{name}}";
-      GRANT pg_use_reserved_connections TO "{{name}}";
-    revocation_statements: !unsafe |-
-      DROP ROLE IF EXISTS "{{name}}";
+    creation_statements: |-
+      CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}';
+      GRANT {{ openbao_postgres_connect_role }} TO "{{ '{{name}}' }}";
+      GRANT pg_read_all_data TO "{{ '{{name}}' }}";
+      GRANT pg_use_reserved_connections TO "{{ '{{name}}' }}";
+    revocation_statements: |-
+      DROP ROLE IF EXISTS "{{ '{{name}}' }}";
     default_ttl: 1h
     max_ttl: 24h
 openbao_seeded_secret_paths:

@@ -99,14 +99,24 @@ proxmox_host_ssh_hardening_file: "/etc/ssh/sshd_config.d/90-{{ platform_config_p
 proxmox_breakglass_ssh_port: 2222
 proxmox_acme_account_name: default
 proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
-proxmox_acme_plugin_id: "{{ platform_sql_prefix }}-hetzner-dns"
+# ADR 0438: plugin ID is a Proxmox storage identifier (config scope, not
+# a SQL role). Use config_prefix, not sql_prefix — otherwise a domain
+# whose first label starts with a digit would silently lose the leading
+# digit from its plugin name.
+proxmox_acme_plugin_id: "{{ platform_identity.config_prefix }}-hetzner-dns"
 proxmox_acme_validation_delay: 30
 proxmox_tfa_description: Primary TOTP
-proxmox_api_automation_user: "{{ platform_sql_prefix }}-automation@pve"
+# ADR 0438: PVE user names must match `^[A-Za-z]`. Use pve_prefix, not
+# config_prefix — otherwise `0fork-automation@pve` would fail PVE regex.
+# Phase 0 set this to config_prefix as a stopgap; Phase 1 promotes it
+# to the correct flavor.
+proxmox_api_automation_user: "{{ platform_identity.pve_prefix }}-automation@pve"
 proxmox_api_automation_comment: "{{ platform_operator_name }} durable automation identity"
 proxmox_api_token_id: primary
 proxmox_api_token_comment: "{{ platform_operator_name }} primary automation token"
-proxmox_api_token_role: "{{ platform_sql_prefix | capitalize }}Automation"
+# ADR 0438: PVE role name follows the same regex as user name. Use
+# pve_prefix, capitalize after digit-stripping.
+proxmox_api_token_role: "{{ platform_identity.pve_prefix | capitalize }}Automation"
 proxmox_api_token_role_manage: true
 proxmox_api_token_role_privileges:
   - Datastore.Allocate

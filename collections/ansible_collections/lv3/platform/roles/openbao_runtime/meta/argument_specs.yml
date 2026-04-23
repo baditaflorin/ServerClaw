@@ -5,52 +5,57 @@ argument_specs:
     options:
       openbao_image:
         type: str
-        required: true
+        required: false
         description:
           - Container image reference used for OpenBao.
+          - Derived at runtime by derive_service_defaults (ADR 0373); the assert in main.yml provides the real guard.
       openbao_container_name:
         type: str
-        required: true
+        required: false
         description:
           - Expected running container name used for verification.
+          - Derived at runtime by derive_service_defaults (ADR 0373).
       openbao_site_dir:
         type: path
-        required: true
+        required: false
         description:
           - Base directory for the OpenBao runtime stack.
+          - Derived at runtime by derive_service_defaults (ADR 0373).
       openbao_config_dir:
         type: path
-        required: true
+        required: false
         description:
           - Directory containing rendered OpenBao configuration.
       openbao_data_dir:
         type: path
-        required: true
+        required: false
         description:
           - Persistent data directory used by OpenBao.
+          - Derived at runtime by derive_service_defaults (ADR 0373).
       openbao_log_dir:
         type: path
-        required: true
+        required: false
         description:
           - Directory that stores OpenBao logs.
       openbao_policy_dir:
         type: path
-        required: true
+        required: false
         description:
           - Directory that stores rendered OpenBao policies.
       openbao_tls_dir:
         type: path
-        required: true
+        required: false
         description:
           - Host directory that stores OpenBao TLS material.
       openbao_compose_file:
         type: path
-        required: true
+        required: false
         description:
           - Compose file path for the managed OpenBao stack.
+          - Derived at runtime by derive_service_defaults (ADR 0373).
       openbao_config_file:
         type: path
-        required: true
+        required: false
         description:
           - Main OpenBao configuration file rendered by the role.
       openbao_tls_enabled:

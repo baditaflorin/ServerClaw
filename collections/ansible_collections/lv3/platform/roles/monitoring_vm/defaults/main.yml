@@ -39,53 +39,53 @@ monitoring_stack_packages:
   - loki-canary
   - prometheus
   - prometheus-blackbox-exporter
-monitoring_stack_dir: /etc/lv3/monitoring
+monitoring_stack_dir: "/etc/{{ platform_identity.unix_prefix }}/monitoring"
 monitoring_repo_root: "{{ inventory_dir | dirname }}"
 monitoring_grafana_admin_user: admin
-monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password
-monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-password.sha256
+monitoring_grafana_admin_password_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/grafana-admin-password"
+monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.{{ platform_identity.config_prefix }}-admin-password.sha256
 monitoring_grafana_datasource_name: InfluxDB Proxmox
-monitoring_grafana_datasource_token_file: /etc/lv3/monitoring/grafana-reader.token
+monitoring_grafana_datasource_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/grafana-reader.token"
 monitoring_grafana_provisioning_file: /etc/grafana/provisioning/datasources/influxdb-proxmox.yml
 monitoring_grafana_loki_datasource_name: Loki Logs
 monitoring_grafana_loki_provisioning_file: /etc/grafana/provisioning/datasources/loki-logs.yml
 monitoring_grafana_prometheus_datasource_name: Prometheus Service Graphs
-monitoring_grafana_prometheus_datasource_uid: lv3-prometheus
+monitoring_grafana_prometheus_datasource_uid: "{{ platform_identity.config_prefix }}-prometheus"
 monitoring_grafana_prometheus_provisioning_file: /etc/grafana/provisioning/datasources/prometheus-service-graphs.yml
 monitoring_grafana_tempo_datasource_name: Tempo
-monitoring_grafana_tempo_datasource_uid: lv3-tempo
+monitoring_grafana_tempo_datasource_uid: "{{ platform_identity.config_prefix }}-tempo"
 monitoring_grafana_tempo_provisioning_file: /etc/grafana/provisioning/datasources/tempo-traces.yml
 monitoring_grafana_folder_uid: lv3
 monitoring_grafana_folder_title: LV3
 monitoring_grafana_dashboard_dir: /var/lib/grafana/dashboards/lv3
-monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-platform-overview.json
-monitoring_grafana_dashboard_uid: lv3-platform-overview
+monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-platform-overview.json
+monitoring_grafana_dashboard_uid: "{{ platform_identity.config_prefix }}-platform-overview"
 monitoring_grafana_dashboard_title: LV3 Platform Overview
 monitoring_grafana_public_url: "https://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.public_hostname }}"
 monitoring_grafana_vm_dashboard_dir: /var/lib/grafana/dashboards/lv3/vms
-monitoring_grafana_mail_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-mail-platform.json
-monitoring_grafana_mail_dashboard_uid: lv3-mail-platform
+monitoring_grafana_mail_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-mail-platform.json
+monitoring_grafana_mail_dashboard_uid: "{{ platform_identity.config_prefix }}-mail-platform"
 monitoring_grafana_mail_dashboard_title: LV3 Mail Platform
-monitoring_grafana_slo_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-slo-overview.json
-monitoring_grafana_slo_dashboard_uid: lv3-slo-overview
+monitoring_grafana_slo_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-slo-overview.json
+monitoring_grafana_slo_dashboard_uid: "{{ platform_identity.config_prefix }}-slo-overview"
 monitoring_grafana_slo_dashboard_title: LV3 SLO Overview
 monitoring_grafana_slo_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/slo-overview.json"
-monitoring_grafana_capacity_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-capacity-overview.json
-monitoring_grafana_capacity_dashboard_uid: lv3-capacity-overview
+monitoring_grafana_capacity_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-capacity-overview.json
+monitoring_grafana_capacity_dashboard_uid: "{{ platform_identity.config_prefix }}-capacity-overview"
 monitoring_grafana_capacity_dashboard_title: Capacity Overview
 monitoring_grafana_capacity_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/capacity-overview.json"
-monitoring_grafana_log_canary_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-log-canary-overview.json
-monitoring_grafana_log_canary_dashboard_uid: lv3-log-canary-overview
+monitoring_grafana_log_canary_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-log-canary-overview.json
+monitoring_grafana_log_canary_dashboard_uid: "{{ platform_identity.config_prefix }}-log-canary-overview"
 monitoring_grafana_log_canary_dashboard_title: LV3 Log Canary
 monitoring_grafana_log_canary_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/log-canary-overview.json"
-monitoring_influxdb_admin_user: lv3-monitoring-admin
-monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
-monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token
-monitoring_influxdb_proxmox_writer_token_file: /etc/lv3/monitoring/influxdb-proxmox-writer.token
-monitoring_influxdb_proxmox_writer_description: lv3-proxmox-writer
-monitoring_influxdb_guest_writer_token_file: /etc/lv3/monitoring/influxdb-guest-writer.token
-monitoring_influxdb_guest_writer_description: lv3-guest-writer
-monitoring_influxdb_grafana_reader_description: lv3-grafana-reader
+monitoring_influxdb_admin_user: "{{ platform_identity.config_prefix }}-monitoring-admin"
+monitoring_influxdb_admin_password_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-admin-password"
+monitoring_influxdb_operator_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-operator.token"
+monitoring_influxdb_proxmox_writer_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-proxmox-writer.token"
+monitoring_influxdb_proxmox_writer_description: "{{ platform_identity.config_prefix }}-proxmox-writer"
+monitoring_influxdb_guest_writer_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-guest-writer.token"
+monitoring_influxdb_guest_writer_description: "{{ platform_identity.config_prefix }}-guest-writer"
+monitoring_influxdb_grafana_reader_description: "{{ platform_identity.config_prefix }}-grafana-reader"
 monitoring_loki_config_file: /etc/loki/config.yml
 monitoring_loki_data_dir: /var/lib/loki
 monitoring_loki_http_url: http://127.0.0.1:3100
@@ -126,8 +126,8 @@ monitoring_loki_canary_line_size: 256
 monitoring_loki_canary_log_selector: >-
   {name="loki-canary",stream="stdout"}
 monitoring_grafana_annotation_retention: 2160h
-monitoring_prometheus_service_name: lv3-prometheus
-monitoring_prometheus_service_file: /etc/systemd/system/lv3-prometheus.service
+monitoring_prometheus_service_name: "{{ platform_identity.config_prefix }}-prometheus"
+monitoring_prometheus_service_file: /etc/systemd/system/{{ platform_identity.config_prefix }}-prometheus.service
 monitoring_prometheus_config_file: /etc/prometheus/prometheus.yml
 monitoring_prometheus_data_dir: /var/lib/prometheus
 monitoring_prometheus_rules_dir: /etc/prometheus/rules

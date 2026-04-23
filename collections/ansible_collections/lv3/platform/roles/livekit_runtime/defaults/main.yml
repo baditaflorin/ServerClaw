@@ -33,7 +33,7 @@
 livekit_service_topology: "{{ platform_service_topology | service_topology_get('livekit') }}"
 livekit_openbao_service_topology: "{{ platform_service_topology | service_topology_get('openbao') }}"
 livekit_image: "{{ container_image_catalog.images.livekit_runtime.ref }}"
-livekit_container_name: lv3-livekit
+livekit_container_name: "{{ platform_identity.config_prefix }}-livekit"
 livekit_site_dir: /opt/livekit
 livekit_compose_file: "{{ livekit_site_dir }}/docker-compose.yml"
 livekit_config_file: "{{ livekit_site_dir }}/livekit.yaml"
@@ -45,7 +45,7 @@ livekit_openbao_agent_container_name: livekit-openbao-agent
 livekit_runtime_openbao_address: "http://{{ livekit_openbao_service_topology.private_ip }}:{{ hostvars[platform_topology_host].platform_port_assignments.openbao_http_port }}"
 livekit_runtime_openbao_local_address: "http://127.0.0.1:{{ openbao_http_port }}"
 livekit_openbao_secret_path: services/livekit/runtime-env
-livekit_openbao_policy_name: lv3-service-livekit-runtime
+livekit_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-livekit-runtime"
 livekit_openbao_approle_name: livekit-runtime
 livekit_repo_root: "{{ inventory_dir | dirname }}"
 livekit_shared_local_root: >-
@@ -74,6 +74,6 @@ livekit_bind_address: 0.0.0.0
 livekit_use_external_ip: true
 livekit_room_empty_timeout_seconds: 300
 livekit_log_level: info
-livekit_verify_room_prefix: lv3-livekit-verify
+livekit_verify_room_prefix: "{{ platform_identity.config_prefix }}-livekit-verify"
 livekit_verify_identity: livekit-health-probe
 livekit_verify_timeout_seconds: 120

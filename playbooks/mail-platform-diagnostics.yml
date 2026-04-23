@@ -56,7 +56,7 @@
         import urllib.request
         from pathlib import Path
 
-        password = Path('/etc/lv3/mail-platform/stalwart-admin-password').read_text(encoding='utf-8').strip()
+        password = Path('/etc/{{ platform_identity.unix_prefix }}/mail-platform/stalwart-admin-password').read_text(encoding='utf-8').strip()
         token = base64.b64encode(f'admin:{password}'.encode('utf-8')).decode('ascii')
         request = urllib.request.Request(
             'http://127.0.0.1:8080/api/queue/messages?limit=20&max-total=100&page=0',

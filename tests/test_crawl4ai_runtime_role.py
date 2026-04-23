@@ -27,7 +27,7 @@ def test_defaults_define_private_runtime_port_and_crawl_contract() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
     assert defaults["crawl4ai_runtime_site_dir"] == "/opt/crawl4ai"
-    assert defaults["crawl4ai_runtime_config_dir"] == "/etc/lv3/crawl4ai"
+    assert defaults["crawl4ai_runtime_config_dir"] == "/etc/{{ platform_identity.unix_prefix }}/crawl4ai"
     assert defaults["crawl4ai_runtime_container_name"] == "crawl4ai"
     assert defaults["crawl4ai_runtime_container_port"] == 11235
     assert defaults["crawl4ai_runtime_healthcheck_path"] == "/health"

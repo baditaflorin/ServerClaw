@@ -51,7 +51,7 @@ directus_keycloak_icon: lock
 directus_observer_role_id: 4b0fd2c2-596a-4e1f-bd0a-a9d8617c4c40
 directus_operator_role_id: 1e4a3bf6-1798-49dd-b8e3-1c129422e7df
 directus_keycloak_role_mapping_json: >-
-  {"/lv3-platform-admins":"{{ directus_operator_role_id }}"}
+  {"/{{ platform_identity.config_prefix }}-platform-admins":"{{ directus_operator_role_id }}"}
 directus_keycloak_login_path: /auth/login/keycloak
 directus_keycloak_callback_path: /auth/login/keycloak/callback
 directus_bootstrap_collection_name: service_registry
