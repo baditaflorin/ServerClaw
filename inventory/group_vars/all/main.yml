@@ -214,10 +214,19 @@ openbao_postgres_database: postgres
 openbao_tls_enabled: true
 openbao_database_mount_path: database
 openbao_local_artifact_dir: "{{ repo_shared_local_root }}/openbao"
-# openbao_init_local_file must live in group_vars (not only in openbao_runtime role defaults) because
-# the standalone play "Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification"
-# uses it directly without including the role, so role defaults are never loaded there.
+# These artifact-path variables must live in group_vars (not only in openbao_runtime role defaults)
+# because several standalone plays (e.g. "Ensure OpenBao remains unsealed before PostgreSQL
+# end-to-end verification", postgres approle consumers) reference them directly without including
+# the role, so role defaults are never loaded there.  ADR 0438 Phase 4 removed them; restoring all
+# *_local_file paths here to fix "'openbao_*_local_file' is undefined" in standalone plays.
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
+openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"
+openbao_breakglass_password_local_file: "{{ openbao_local_artifact_dir }}/breakglass-password.txt"
+openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/postgres-rotator-password.txt"
+openbao_controller_approle_local_file: "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
+openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"
+openbao_mail_platform_approle_local_file: "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
+openbao_secret_rotation_approle_local_file: "{{ openbao_local_artifact_dir }}/secret-rotation-approle.json"
 # ADR 0438 Phase 4: individual artifact paths removed from group_vars — role defaults now use
 # {{ openbao_local_artifact_dir }}/... and are resolved lazily at task time (not baked by shard generator)
 # ADR 0438 Phase 5 (partial): derive OpenBao address from topology inventory instead of hardcoding.

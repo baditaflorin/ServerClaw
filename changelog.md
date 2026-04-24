@@ -12,14 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- `group_vars/all`: promote `openbao_init_local_file` from `openbao_runtime` role defaults to `group_vars/all/main.yml` — the standalone play "Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification" uses this variable directly without including the role, so role defaults are never loaded; fixes `'openbao_init_local_file' is undefined` on `runtime-control`
+- `group_vars/all`: promote all `openbao_*_local_file` artifact-path variables from `openbao_runtime` role defaults to `group_vars/all/main.yml` — multiple standalone plays reference these directly without including the role (role defaults are never loaded); fixes `'openbao_controller_approle_local_file' is undefined` (and 6 sibling variables) on postgres hosts and any other play that consumers OpenBao credentials without the full role
 
 ## Latest Release
 
-- [0.178.169 release notes](docs/release-notes/0.178.169.md)
+- [0.178.170 release notes](docs/release-notes/0.178.170.md)
 
 ## Previous Releases
 
+- [0.178.169 release notes](docs/release-notes/0.178.169.md)
 - [0.178.168 release notes](docs/release-notes/0.178.168.md)
 - [0.178.167 release notes](docs/release-notes/0.178.167.md)
 - [0.178.166 release notes](docs/release-notes/0.178.166.md)
@@ -31,9 +32,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.160 release notes](docs/release-notes/0.178.160.md)
 - [0.178.159 release notes](docs/release-notes/0.178.159.md)
 - [0.178.158 release notes](docs/release-notes/0.178.158.md)
-- [0.178.157 release notes](docs/release-notes/0.178.157.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (494 releases)](docs/release-notes/index/2026.md)
+- [2026 (495 releases)](docs/release-notes/index/2026.md)
