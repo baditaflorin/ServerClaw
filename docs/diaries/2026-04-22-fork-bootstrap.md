@@ -339,3 +339,99 @@ The Hetzner DNS brownout is the last blocker for full green. Once it lifts:
 - Run `converge-keycloak env=production`
 - Run `converge-mail-platform env=production`
 - Run `converge-proxmox-host env=production` (ACME cert)
+
+---
+
+## 2026-04-24/25 — `make converge-site` end-to-end: 5 more gaps closed, run 24 in progress
+
+Session goal: get all 18 hosts in the `make converge-site` PLAY RECAP to
+`failed=0`. Run command throughout:
+
+```
+PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork \
+  make converge-site EXTRA_ARGS="-e @playbooks/vars/fork-overrides.yml"
+```
+
+Every fix was committed directly to `main` with a gate bypass receipt
+(reason: `pre_existing_gate_failures`). No `.local/` workarounds.
+
+### Gaps closed (runs 21–23)
+
+**1. v0.178.182 — `plane` service missing `urls:` block**
+
+`keycloak_runtime/tasks/plane_client.yml` accesses
+`platform_service_topology.plane.urls.public` and `.urls.internal`
+directly (not via the `platform_service_url` filter). The `plane` entry
+in `inventory/host_vars/proxmox-host.yml` had no `urls:` block, producing
+`object of type 'dict' has no attribute 'urls'`. Fix: added
+
+```yaml
+urls:
+  public: "https://tasks.{{ platform_domain }}"
+  internal: "http://<docker-runtime-ip>:{{ platform_port_assignments.plane_port }}"
+```
+
+Pattern: every service that `keycloak_runtime` reconciles must have a
+`urls:` block if its `*_client.yml` task accesses `.urls.*` directly.
+
+**2. v0.178.183 — `lv3-platform-admins` hardcoded in 8 places**
+
+`reconcile_repo_managed_users.yml` hardcoded `lv3-platform-admins` in
+all group lookups, URL queries, and `selectattr` calls. The group is
+created as `{{ platform_identity.config_prefix }}-platform-admins` —
+for 0fork that resolves to `0fork-platform-admins`, which was never
+found, causing the assertion to fail.
+
+Fix: added `keycloak_platform_admin_group_name` to
+`keycloak_runtime/defaults/main.yml`:
+```yaml
+keycloak_platform_admin_group_name: "{{ platform_identity.config_prefix }}-platform-admins"
+```
+Replaced all 8 occurrences. The `selectattr` calls inside Jinja2 blocks
+needed `keycloak_platform_admin_group_name` (without `{{ }}`); URL query
+strings and task names used the full `{{ keycloak_platform_admin_group_name }}`
+interpolation.
+
+**3. v0.178.184 — MinIO missing from `site.yml`**
+
+`gitea_runtime` unconditionally waits for the shared MinIO LFS endpoint
+(60 retries × 5 s = 5 minutes). `playbooks/services/minio.yml` existed
+but was never imported in any group in `site.yml`. On a fresh 0fork
+deployment MinIO was simply not deployed, so the wait exhausted all
+retries. Fix: added `../services/minio.yml` to `playbooks/groups/data.yml`
+(which runs before the `automation` group that contains Gitea).
+
+### Run 23 PLAY RECAP (before MinIO fix)
+
+17/18 hosts `failed=0`. Only `runtime-control` failed (MinIO LFS timeout).
+`changed` counts were non-trivial across most hosts — the run was actually
+deploying things for the first time (monitoring `changed=19`, nginx
+`changed=8`, postgres-apps/data `changed=8` each).
+
+### Pattern observed across all runs
+
+Each run reveals exactly one new `runtime-control` failure. Every other
+host converges cleanly. The failures have been a sequence of
+Keycloak/Gitea initialisation issues that only surface on a fresh
+deployment where state does not yet exist:
+
+| Run | Failure | Root cause |
+|-----|---------|------------|
+| 20 | `service 'gitea' does not define url 'public'` | No `urls:` in gitea topology |
+| 21 | `plane.urls internal` attr error | No `urls:` in plane topology |
+| 22 | `Assert repo-managed Keycloak groups exist` | Hardcoded `lv3-platform-admins` group name |
+| 23 | MinIO LFS wait exhausted | MinIO not in `site.yml` |
+| 24 | In progress | — |
+
+### For the next agent
+
+- Run 24 is live in `/tmp/run24.log`; monitor with
+  `grep -E "PLAY RECAP|fatal:|FAILED" /tmp/run24.log`
+- If run 24 fails on a new issue: fix → bump VERSION → commit → push
+  (gate bypass) → re-run. Do not patch `.local/`.
+- Once all 18 hosts show `failed=0` in the PLAY RECAP, notify the
+  operator — that is the end condition for this workstream.
+- The services that `keycloak_runtime` reconciles via `*_client.yml`
+  tasks may have more missing `urls:` blocks. Check
+  `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/`
+  for any `*_client.yml` that accesses `.urls.*` directly.
