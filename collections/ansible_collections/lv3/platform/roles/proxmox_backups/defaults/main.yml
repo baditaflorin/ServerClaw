@@ -9,7 +9,7 @@ proxmox_backup_protected_vmids:
 
 proxmox_backup_storage:
   enabled: "{{ proxmox_backup_storage_enabled_override | default(false) }}"
-  id: "{{ platform_identity.config_prefix }}-backup-pbs"
+  id: "{{ platform_identity.pve_prefix }}-backup-pbs"
   type: pbs
   server: "{{ backup_vm_ipv4 }}"
   port: 8007

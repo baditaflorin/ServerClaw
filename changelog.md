@@ -12,15 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- `platform_facts.py` filters: add optional `default` parameter to `platform_service_url`, `platform_service_port`, `platform_service_host` — when a service or key is absent and a default is provided, return the default instead of raising `AnsibleFilterError`; fixes fatal task-arg-resolution crash on forks that omit optional services (e.g. ntfy)
-- `group_vars/all/main.yml`: pass `''` default to `platform_service_url('ntfy', 'internal')` so the ntfy start notification is gracefully skipped on deployments that do not run ntfy
+- `proxmox_backups/defaults/main.yml`: backup storage ID changed from `config_prefix` to `pve_prefix` — Proxmox storage IDs cannot start with a digit; `0fork` config_prefix → `fork` pve_prefix produces valid ID `fork-backup-pbs`
 
 ## Latest Release
 
-- [0.178.166 release notes](docs/release-notes/0.178.166.md)
+- [0.178.167 release notes](docs/release-notes/0.178.167.md)
 
 ## Previous Releases
 
+- [0.178.166 release notes](docs/release-notes/0.178.166.md)
 - [0.178.165 release notes](docs/release-notes/0.178.165.md)
 - [0.178.164 release notes](docs/release-notes/0.178.164.md)
 - [0.178.163 release notes](docs/release-notes/0.178.163.md)
@@ -32,9 +32,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.157 release notes](docs/release-notes/0.178.157.md)
 - [0.178.156 release notes](docs/release-notes/0.178.156.md)
 - [0.178.155 release notes](docs/release-notes/0.178.155.md)
-- [0.178.154 release notes](docs/release-notes/0.178.154.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (491 releases)](docs/release-notes/index/2026.md)
+- [2026 (492 releases)](docs/release-notes/index/2026.md)
