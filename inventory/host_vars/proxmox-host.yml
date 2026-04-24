@@ -2440,6 +2440,10 @@ platform_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ gitea_controller_url }}"
+    urls:
+      public: "https://git.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.gitea_http_port }}"
+      controller: "http://{{ management_tailscale_ipv4 }}:{{ platform_port_assignments.gitea_host_proxy_port }}"
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime
