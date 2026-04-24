@@ -67,6 +67,7 @@
         return_content: false
         timeout: 30
       changed_when: false
+      when: minio_verify_public_edge | default(true) | bool
 
     - name: Verify the MinIO console redirects through oauth2-proxy
       ansible.builtin.uri:
@@ -78,6 +79,7 @@
         timeout: 30
       register: minio_console_public_redirect
       changed_when: false
+      when: minio_verify_public_edge | default(true) | bool
 
     - name: Assert the MinIO console stays behind oauth2-proxy
       ansible.builtin.assert:
@@ -85,3 +87,4 @@
           - "'/oauth2/' in (minio_console_public_redirect.location | default(''))"
         fail_msg: >-
           {{ minio_console_public_url }} must redirect through oauth2-proxy before exposing the MinIO console.
+      when: minio_verify_public_edge | default(true) | bool

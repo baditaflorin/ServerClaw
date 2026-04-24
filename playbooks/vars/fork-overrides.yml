@@ -99,6 +99,12 @@ monitoring_loki_delete_request_store: filesystem
 # They require nginx-edge to be converged first. Skip until nginx is up.
 monitoring_verify_public_edge: false
 
+# --- MinIO public-edge verify ---
+# MinIO verify tasks hit https://minio.<domain>/ from the controller.
+# Requires nginx-edge publication and a resolvable public domain.
+# Skip on fork deployments where service_needs_nginx_edge=false.
+minio_verify_public_edge: false
+
 # --- nginx-edge Let's Encrypt certificate ---
 # Fork bootstrap runs before DNS is fully wired and before platform.yml is
 # regenerated with 0fork.com values — the committed platform.yml carries
