@@ -40,9 +40,13 @@
               'backup': 'backup',
               'coolify': 'paas',
               'coolify-apps': 'paas',
+              'postgres-apps': 'data',
+              'postgres-data': 'data',
               'runtime-ai': 'runtime',
               'runtime-general': 'runtime',
-              'runtime-control': 'runtime'
+              'runtime-control': 'runtime',
+              'runtime-comms': 'runtime',
+              'runtime-apps': 'runtime'
             }[
               (
                 hostvars[groups['proxmox_hosts'][0]].proxmox_guests

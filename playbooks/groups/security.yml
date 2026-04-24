@@ -1,3 +1,4 @@
 ---
 - import_playbook: ../services/step-ca.yml
 - import_playbook: ../services/openbao.yml
+- import_playbook: ../services/keycloak.yml
