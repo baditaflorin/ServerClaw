@@ -26,3 +26,9 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 - import_playbook: ../minio.yml
+  vars:
+    service_audit_name: minio
+    service_runtime_roles:
+      - lv3.platform.linux_guest_firewall
+      - lv3.platform.docker_runtime
+      - lv3.platform.minio_runtime
