@@ -30,9 +30,9 @@
       Authorization: "Bearer {{ keycloak_repo_user_admin_token.json.access_token }}"
   no_log: true
 
-- name: Look up the lv3-platform-admins group in Keycloak
+- name: Look up the {{ keycloak_platform_admin_group_name }} group in Keycloak
   ansible.builtin.uri:
-    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/groups?search=lv3-platform-admins"
+    url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/groups?search={{ keycloak_platform_admin_group_name }}"
     method: GET
     headers: "{{ keycloak_repo_user_admin_headers }}"
     return_content: true
@@ -64,7 +64,7 @@
       {{
         (
           keycloak_platform_admin_group_lookup.json
-          | selectattr('name', 'equalto', 'lv3-platform-admins')
+          | selectattr('name', 'equalto', keycloak_platform_admin_group_name)
           | map(attribute='id')
           | first
         ) | default('')
@@ -221,7 +221,7 @@
   changed_when: false
   no_log: true
 
-- name: Ensure the named operator belongs to lv3-platform-admins
+- name: Ensure the named operator belongs to {{ keycloak_platform_admin_group_name }}
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_operator_lookup_final.json[0].id }}/groups/{{ keycloak_platform_admin_group_id }}"
     method: PUT
@@ -230,7 +230,7 @@
   when: >-
     (
       keycloak_operator_groups.json
-      | selectattr('name', 'equalto', 'lv3-platform-admins')
+      | selectattr('name', 'equalto', keycloak_platform_admin_group_name)
       | list
       | length
     ) == 0
@@ -348,7 +348,7 @@
   changed_when: false
   no_log: true
 
-- name: Ensure platform-admin belongs to lv3-platform-admins
+- name: Ensure platform-admin belongs to {{ keycloak_platform_admin_group_name }}
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_platform_admin_lookup_final.json[0].id }}/groups/{{ keycloak_platform_admin_group_id }}"
     method: PUT
@@ -357,7 +357,7 @@
   when: >-
     (
       keycloak_platform_admin_groups.json
-      | selectattr('name', 'equalto', 'lv3-platform-admins')
+      | selectattr('name', 'equalto', keycloak_platform_admin_group_name)
       | list | length
     ) == 0
   register: keycloak_platform_admin_group_put
@@ -550,7 +550,7 @@
   no_log: true
   when: keycloak_reconcile_outline_users | bool
 
-- name: Ensure the Outline automation user belongs to lv3-platform-admins
+- name: Ensure the Outline automation user belongs to {{ keycloak_platform_admin_group_name }}
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_outline_automation_lookup_final.json[0].id }}/groups/{{ keycloak_platform_admin_group_id }}"
     method: PUT
@@ -561,7 +561,7 @@
     - >-
       (
         keycloak_outline_automation_groups.json
-        | selectattr('name', 'equalto', 'lv3-platform-admins')
+        | selectattr('name', 'equalto', keycloak_platform_admin_group_name)
         | list
         | length
       ) == 0

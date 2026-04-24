@@ -156,6 +156,7 @@ keycloak_grafana_groups:
   admins: grafana-admins
   viewers: grafana-viewers
 # END SERVICE: grafana
+keycloak_platform_admin_group_name: "{{ platform_identity.config_prefix }}-platform-admins"
 keycloak_realm_groups:
   - name: "{{ platform_identity.config_prefix }}-platform-admins"
     attributes:
