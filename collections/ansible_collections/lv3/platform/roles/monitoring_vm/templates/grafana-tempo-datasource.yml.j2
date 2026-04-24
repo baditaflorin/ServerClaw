@@ -10,14 +10,3 @@ datasources:
     jsonData:
       nodeGraph:
         enabled: true
-      serviceMap:
-        datasourceUid: {{ monitoring_grafana_prometheus_datasource_uid }}
-      tracesToMetrics:
-        datasourceUid: {{ monitoring_grafana_prometheus_datasource_uid }}
-        spanStartTimeShift: "-5m"
-        spanEndTimeShift: "5m"
-        tags:
-          - key: service.name
-            value: service
-          - key: deployment.environment
-          - key: service.namespace
