@@ -101,17 +101,17 @@ openbao_userpass_users:
     token_max_ttl: 1h
 openbao_policies:
   - name: "{{ platform_identity.config_prefix }}-human-ops"
-    src: policy-{{ platform_identity.config_prefix }}-human-ops.hcl.j2
+    src: policy-human-ops.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-breakglass"
-    src: policy-{{ platform_identity.config_prefix }}-breakglass.hcl.j2
+    src: policy-breakglass.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-agent-controller"
-    src: policy-{{ platform_identity.config_prefix }}-agent-controller.hcl.j2
+    src: policy-agent-controller.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-agent-atlas"
-    src: policy-{{ platform_identity.config_prefix }}-agent-atlas.hcl.j2
+    src: policy-agent-atlas.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-agent-secret-rotation"
-    src: policy-{{ platform_identity.config_prefix }}-agent-secret-rotation.hcl.j2
+    src: policy-agent-secret-rotation.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-service-mail-platform"
-    src: policy-{{ platform_identity.config_prefix }}-service-mail-platform.hcl.j2
+    src: policy-service-mail-platform.hcl.j2
 openbao_approles:
   - name: controller-automation
     policies:

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.167",
+  "repo_version": "0.178.168",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-24T09:03:09Z",
-  "next_refresh_at": "2026-04-24T10:03:09Z",
+  "generated_at": "2026-04-24T09:22:57Z",
+  "next_refresh_at": "2026-04-24T10:22:57Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.166",
+    "last_version": "0.178.167",
     "deployed_at": "2026-04-24",
-    "summary": "`proxmox_backups/defaults/main.yml`: backup storage ID changed from `config_prefix` to `pve_prefix` \u2014 Proxmox storage IDs cannot start with a digit; `0fork` config_prefix \u2192 `fork` pve_prefix produces valid ID `fork-backup-pbs`",
-    "release_notes_url": "docs/release-notes/0.178.167.md"
+    "summary": "`openbao_runtime`: rename policy templates from `policy-lv3-*.hcl.j2` to `policy-*.hcl.j2` (all content is generic); update `openbao_policies` default `src` fields to use prefix-free filenames \u2014 fixes \"Could not find policy-0fork-*.hcl.j2\" on any deployment whose domain doesn't start with `lv3`",
+    "release_notes_url": "docs/release-notes/0.178.168.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

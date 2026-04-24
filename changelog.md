@@ -12,14 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- `proxmox_backups/defaults/main.yml`: backup storage ID changed from `config_prefix` to `pve_prefix` — Proxmox storage IDs cannot start with a digit; `0fork` config_prefix → `fork` pve_prefix produces valid ID `fork-backup-pbs`
+- `openbao_runtime`: rename policy templates from `policy-lv3-*.hcl.j2` to `policy-*.hcl.j2` (all content is generic); update `openbao_policies` default `src` fields to use prefix-free filenames — fixes "Could not find policy-0fork-*.hcl.j2" on any deployment whose domain doesn't start with `lv3`
 
 ## Latest Release
 
-- [0.178.167 release notes](docs/release-notes/0.178.167.md)
+- [0.178.168 release notes](docs/release-notes/0.178.168.md)
 
 ## Previous Releases
 
+- [0.178.167 release notes](docs/release-notes/0.178.167.md)
 - [0.178.166 release notes](docs/release-notes/0.178.166.md)
 - [0.178.165 release notes](docs/release-notes/0.178.165.md)
 - [0.178.164 release notes](docs/release-notes/0.178.164.md)
@@ -31,9 +32,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.158 release notes](docs/release-notes/0.178.158.md)
 - [0.178.157 release notes](docs/release-notes/0.178.157.md)
 - [0.178.156 release notes](docs/release-notes/0.178.156.md)
-- [0.178.155 release notes](docs/release-notes/0.178.155.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (492 releases)](docs/release-notes/index/2026.md)
+- [2026 (493 releases)](docs/release-notes/index/2026.md)
