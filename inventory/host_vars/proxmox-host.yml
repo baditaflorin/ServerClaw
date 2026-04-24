@@ -2101,6 +2101,10 @@ platform_service_topology:
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}"
     public_hostname: grafana.{{ platform_domain }}
     exposure_model: edge-published
+    urls:
+      loki_push: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.monitoring_loki_port }}/loki/api/v1/push"
+      influxdb: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.monitoring_influxdb_port }}"
+      otlp_http: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.monitoring_otlp_http_port }}"
     observability:
       guest_dashboard: true
       service_telemetry: false
@@ -3219,6 +3223,7 @@ platform_service_topology:
     exposure_model: edge-published
     urls:
       internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}"
+      public: "https://ntfy.{{ platform_domain }}"
     observability:
       guest_dashboard: false
       service_telemetry: false

@@ -5,6 +5,7 @@ Versioned release notes live here after `Unreleased` is cut on `main`.
 Detailed per-change deployment history is generated separately in the deployment history portal from receipts, promotion records, and mutation audit events.
 
 ## Releases
+- [0.178.176](0.178.176.md)
 - [0.178.175](0.178.175.md)
 - [0.178.174](0.178.174.md)
 - [0.178.173](0.178.173.md)
@@ -24,9 +25,8 @@ Detailed per-change deployment history is generated separately in the deployment
 - [0.178.159](0.178.159.md)
 - [0.178.158](0.178.158.md)
 - [0.178.157](0.178.157.md)
-- [0.178.156](0.178.156.md)
 
 ## Release Archives
 
 - [Release note archives](index/README.md)
-- [2026 (493 releases)](index/2026.md)
+- [2026 (494 releases)](index/2026.md)
