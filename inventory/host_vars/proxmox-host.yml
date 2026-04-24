@@ -2718,6 +2718,9 @@ platform_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ plane_controller_url }}"
+    urls:
+      public: "https://tasks.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}"
   woodpecker:
     service_name: woodpecker
     owning_vm: docker-runtime
