@@ -45,6 +45,20 @@
     mode: "0755"
   notify: Restart Docker
 
+- name: Find telegraf docker-build config files from any deployment prefix
+  ansible.builtin.find:
+    paths: /etc/telegraf/telegraf.d/
+    patterns: "*-docker-build.conf"
+  register: _docker_build_obs_all_configs
+
+- name: Remove stale telegraf docker-build configs from other deployment prefixes
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ _docker_build_obs_all_configs.files }}"
+  when: item.path != docker_build_observability_telegraf_config_file
+  notify: Restart Telegraf
+
 - name: Render Telegraf docker build observability configuration
   ansible.builtin.template:
     src: telegraf-docker-build.conf.j2

@@ -94,6 +94,20 @@
   no_log: true
   notify: Restart Telegraf
 
+- name: Find telegraf base-inputs config files from any deployment prefix
+  ansible.builtin.find:
+    paths: /etc/telegraf/telegraf.d/
+    patterns: "*-base-inputs.conf"
+  register: _guest_obs_all_base_configs
+
+- name: Remove stale telegraf base-inputs configs from other deployment prefixes
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ _guest_obs_all_base_configs.files }}"
+  when: item.path != guest_observability_base_inputs_config_file
+  notify: Restart Telegraf
+
 - name: Deploy base system-level Telegraf inputs (disk, cpu, mem, net)
   ansible.builtin.template:
     src: telegraf-base-inputs.conf.j2
