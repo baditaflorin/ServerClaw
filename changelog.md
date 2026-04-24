@@ -12,14 +12,16 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- `fork-overrides.yml`: add `public_edge_skip_certbot: true` — fork bootstrap runs before DNS A-records are live and before platform.yml is regenerated with 0fork.com; committed platform.yml carries sanitised example.com hostnames which Let's Encrypt rejects; skipping certbot unblocks converge-site end-to-end
+- `platform_facts.py` filters: add optional `default` parameter to `platform_service_url`, `platform_service_port`, `platform_service_host` — when a service or key is absent and a default is provided, return the default instead of raising `AnsibleFilterError`; fixes fatal task-arg-resolution crash on forks that omit optional services (e.g. ntfy)
+- `group_vars/all/main.yml`: pass `''` default to `platform_service_url('ntfy', 'internal')` so the ntfy start notification is gracefully skipped on deployments that do not run ntfy
 
 ## Latest Release
 
-- [0.178.165 release notes](docs/release-notes/0.178.165.md)
+- [0.178.166 release notes](docs/release-notes/0.178.166.md)
 
 ## Previous Releases
 
+- [0.178.165 release notes](docs/release-notes/0.178.165.md)
 - [0.178.164 release notes](docs/release-notes/0.178.164.md)
 - [0.178.163 release notes](docs/release-notes/0.178.163.md)
 - [0.178.162 release notes](docs/release-notes/0.178.162.md)
@@ -31,9 +33,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.156 release notes](docs/release-notes/0.178.156.md)
 - [0.178.155 release notes](docs/release-notes/0.178.155.md)
 - [0.178.154 release notes](docs/release-notes/0.178.154.md)
-- [0.178.153 release notes](docs/release-notes/0.178.153.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (490 releases)](docs/release-notes/index/2026.md)
+- [2026 (491 releases)](docs/release-notes/index/2026.md)

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from ansible.errors import AnsibleFilterError
 
+_UNSET = object()
+
 
 def _ensure_mapping(value, label):
     if not isinstance(value, dict):
@@ -19,25 +21,61 @@ def platform_service(catalog, service_id):
     return merged
 
 
-def platform_service_url(catalog, service_id, url_key):
-    service = platform_service(catalog, service_id)
+def platform_service_url(catalog, service_id, url_key, default=_UNSET):
+    """Return the URL for url_key of service_id.
+
+    If default is provided and the URL key (or service) is absent, return
+    default instead of raising.  This is safe to call from group_vars where
+    the filter runs at variable-resolution time and AnsibleFilterError would
+    propagate as a fatal task-arg error even when failed_when: false is set.
+    """
+    try:
+        service = platform_service(catalog, service_id)
+    except AnsibleFilterError:
+        if default is not _UNSET:
+            return default
+        raise
     urls = _ensure_mapping(service.get("urls", {}), f"platform service {service_id!r}.urls")
     if url_key not in urls:
+        if default is not _UNSET:
+            return default
         raise AnsibleFilterError(f"service {service_id!r} does not define url {url_key!r}")
     return urls[url_key]
 
 
-def platform_service_port(catalog, service_id, port_key):
-    service = platform_service(catalog, service_id)
+def platform_service_port(catalog, service_id, port_key, default=_UNSET):
+    """Return the port for port_key of service_id.
+
+    Accepts an optional default for the same reason as platform_service_url.
+    """
+    try:
+        service = platform_service(catalog, service_id)
+    except AnsibleFilterError:
+        if default is not _UNSET:
+            return default
+        raise
     ports = _ensure_mapping(service.get("ports", {}), f"platform service {service_id!r}.ports")
     if port_key not in ports:
+        if default is not _UNSET:
+            return default
         raise AnsibleFilterError(f"service {service_id!r} does not define port {port_key!r}")
     return ports[port_key]
 
 
-def platform_service_host(catalog, service_id):
-    service = platform_service(catalog, service_id)
+def platform_service_host(catalog, service_id, default=_UNSET):
+    """Return the private_ip for service_id.
+
+    Accepts an optional default for the same reason as platform_service_url.
+    """
+    try:
+        service = platform_service(catalog, service_id)
+    except AnsibleFilterError:
+        if default is not _UNSET:
+            return default
+        raise
     if not service.get("private_ip"):
+        if default is not _UNSET:
+            return default
         raise AnsibleFilterError(f"service {service_id!r} does not define private_ip")
     return service["private_ip"]
 

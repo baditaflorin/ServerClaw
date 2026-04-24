@@ -378,7 +378,7 @@ playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/con
 playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"
 playbook_execution_ntfy_publish_script: "{{ inventory_dir | dirname }}/scripts/ntfy_publish.py"
 playbook_execution_ntfy_topic_registry_path: "{{ inventory_dir | dirname }}/config/ntfy/topics.yaml"
-playbook_execution_ntfy_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('ntfy', 'internal') }}"
+playbook_execution_ntfy_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('ntfy', 'internal', '') }}"
 playbook_execution_ntfy_token_local_file: "{{ repo_shared_local_root }}/ntfy/ansible-token.txt"
 playbook_execution_ntfy_dedupe_state_file: "{{ repo_shared_local_root }}/state/ntfy/ansible-playbooks.json"
 playbook_execution_ntfy_start_topic: platform-ansible-warn
