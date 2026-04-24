@@ -98,3 +98,11 @@ monitoring_loki_delete_request_store: filesystem
 # Public-edge verify tasks hit https://grafana.<domain>/ from the controller.
 # They require nginx-edge to be converged first. Skip until nginx is up.
 monitoring_verify_public_edge: false
+
+# --- nginx-edge Let's Encrypt certificate ---
+# Fork bootstrap runs before DNS is fully wired and before platform.yml is
+# regenerated with 0fork.com values — the committed platform.yml carries
+# sanitised example.com hostnames which Let's Encrypt rejects. Skip certbot
+# on fresh fork deployments; run nginx_edge_publication manually once DNS
+# A-records are live and platform.yml has been regenerated for the fork.
+public_edge_skip_certbot: true

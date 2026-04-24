@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.164",
+  "repo_version": "0.178.165",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-24T07:45:21Z",
-  "next_refresh_at": "2026-04-24T08:45:21Z",
+  "generated_at": "2026-04-24T08:06:35Z",
+  "next_refresh_at": "2026-04-24T09:06:35Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.163",
+    "last_version": "0.178.164",
     "deployed_at": "2026-04-24",
-    "summary": "ADR 0438 Phase 6: `proxmox_vm_templates` keys renamed from `lv3-*` to generic names (`debian-base`, `docker-host`, `postgres-host`, `ops-base`); `proxmox_base_template` role default lookups fixed from broken Jinja2 double-interpolation to static key `'debian-base'`; all `template_key` references updated in `platform.yml`, `host_vars/proxmox-host.yml`, and `publication/templates/proxmox-host.yml` \u2014 unblocks `make converge-site` on 0fork.com",
-    "release_notes_url": "docs/release-notes/0.178.164.md"
+    "summary": "`fork-overrides.yml`: add `public_edge_skip_certbot: true` \u2014 fork bootstrap runs before DNS A-records are live and before platform.yml is regenerated with 0fork.com; committed platform.yml carries sanitised example.com hostnames which Let's Encrypt rejects; skipping certbot unblocks converge-site end-to-end",
+    "release_notes_url": "docs/release-notes/0.178.165.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
