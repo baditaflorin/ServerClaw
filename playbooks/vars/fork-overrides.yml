@@ -51,6 +51,13 @@ keycloak_glitchtip_enabled: false
 # ADR 0438 Phase 5 (partial): common_openbao_compose_env_openbao_address is now a group_var
 # derived from platform_service_topology.openbao.private_ip — no hardcoded IP needed here.
 common_openbao_compose_env_manage_local_openbao_runtime: false
+# Fork deployments use the remote OpenBao on runtime-control via its TLS port (8200,
+# bound to 0.0.0.0). The plain HTTP port (8201) is loopback-only and unreachable
+# from other VMs. Cert validation is skipped because the step-ca CA is not yet
+# installed in the system trust store on docker-runtime during bootstrap.
+common_openbao_compose_env_openbao_address: >-
+  https://{{ hostvars[platform_topology_host].platform_service_topology.openbao.private_ip }}:{{ platform_ports.openbao_proxy_port }}
+common_openbao_compose_env_validate_certs: false
 
 # --- OpenBao local artifact isolation ---
 # ADR 0438 Phase 4: individual path overrides removed — role defaults now use

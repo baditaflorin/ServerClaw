@@ -9,6 +9,7 @@
   ansible.builtin.uri:
     url: "{{ common_openbao_unseal_api_url }}/v1/sys/seal-status"
     method: GET
+    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
     return_content: true
     status_code: 200
   register: common_openbao_unseal_status
@@ -34,6 +35,7 @@
   ansible.builtin.uri:
     url: "{{ common_openbao_unseal_api_url }}/v1/sys/seal-status"
     method: GET
+    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
     return_content: true
     status_code: 200
   register: common_openbao_unsealed_status
