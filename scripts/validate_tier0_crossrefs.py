@@ -82,7 +82,7 @@ def _load_json(rel: str) -> Any:
 
 
 def load_tier0() -> dict[str, Any]:
-    """Load the seven Tier-0 root files. Missing files return None."""
+    """Load the Tier-0 root files. Missing files return None."""
     return {
         "identity": _load_yaml("inventory/group_vars/all/identity.yml"),
         "proxmox_host": _load_yaml("inventory/host_vars/proxmox-host.yml"),
@@ -90,7 +90,22 @@ def load_tier0() -> dict[str, Any]:
         "postgres_clients": _load_yaml("inventory/group_vars/platform_postgres.yml"),
         "subdomain_exposure": _load_json("config/subdomain-exposure-registry.json"),
         "execution_scopes": _load_yaml("config/ansible-execution-scopes.yaml"),
+        "credentials": _load_yaml("config/platform_credentials.yml"),
     }
+
+
+def _all_role_names() -> frozenset[str]:
+    """Return the union of all role names under collections/ and roles/."""
+    names: set[str] = set()
+    for base in (
+        REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles",
+        REPO_ROOT / "roles",
+    ):
+        if base.exists():
+            for entry in base.iterdir():
+                if entry.is_dir() and not entry.name.startswith("_"):
+                    names.add(entry.name)
+    return frozenset(names)
 
 
 # ---------------------------------------------------------------------------
@@ -273,6 +288,160 @@ def check_C2_service_type_is_known(tier0: dict) -> list[Finding]:
 
 
 # ---------------------------------------------------------------------------
+# Group D — credentials registry integrity (ADR 0438 Phase 3)
+# ---------------------------------------------------------------------------
+
+_CRED_FILE = "config/platform_credentials.yml"
+_ROLE_NAME_RE = re.compile(r"^[a-z][a-z0-9_-]*$")
+_VAR_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*_local_file$")
+_ID_RE = re.compile(r"^[a-z][a-z0-9_]*$")
+
+
+@check
+def check_D1_credentials_unique_ids(tier0: dict) -> list[Finding]:
+    """D1: every platform_credentials[*].id is unique."""
+    findings = []
+    creds = (tier0.get("credentials") or {}).get("platform_credentials", []) or []
+    seen: dict[str, int] = {}
+    for idx, entry in enumerate(creds):
+        cid = entry.get("id", "")
+        if not cid:
+            continue
+        if cid in seen:
+            findings.append(
+                Finding(
+                    check_id="D1",
+                    severity="error",
+                    location=f"{_CRED_FILE}[{idx}]",
+                    message=f"Duplicate credential id `{cid}` (first seen at index {seen[cid]})",
+                    fix_hint="Each credential must have a unique id.",
+                )
+            )
+        else:
+            seen[cid] = idx
+    return findings
+
+
+@check
+def check_D2_credentials_unique_var_names(tier0: dict) -> list[Finding]:
+    """D2: every platform_credentials[*].local_file_var is unique."""
+    findings = []
+    creds = (tier0.get("credentials") or {}).get("platform_credentials", []) or []
+    seen: dict[str, int] = {}
+    for idx, entry in enumerate(creds):
+        var = entry.get("local_file_var", "")
+        if not var:
+            continue
+        if var in seen:
+            findings.append(
+                Finding(
+                    check_id="D2",
+                    severity="error",
+                    location=f"{_CRED_FILE}[{idx}]",
+                    message=f"Duplicate local_file_var `{var}` (first seen at index {seen[var]})",
+                    fix_hint="Two credentials cannot share the same variable name — writer/reader confusion is the failure class this registry prevents.",
+                )
+            )
+        else:
+            seen[var] = idx
+    return findings
+
+
+@check
+def check_D3_credentials_var_naming_convention(tier0: dict) -> list[Finding]:
+    """D3: local_file_var must match ^[a-z][a-z0-9_]*_local_file$."""
+    findings = []
+    creds = (tier0.get("credentials") or {}).get("platform_credentials", []) or []
+    for idx, entry in enumerate(creds):
+        cid = entry.get("id", f"[{idx}]")
+        var = entry.get("local_file_var", "")
+        if var and not _VAR_NAME_RE.match(var):
+            findings.append(
+                Finding(
+                    check_id="D3",
+                    severity="error",
+                    location=f"{_CRED_FILE}[{cid}]",
+                    message=f"local_file_var `{var}` does not match required pattern `*_local_file`",
+                    fix_hint="Rename to `<service>_<purpose>_local_file`.",
+                )
+            )
+    return findings
+
+
+@check
+def check_D4_credentials_owner_role_exists(tier0: dict) -> list[Finding]:
+    """D4: owner_role must name a role that exists on disk."""
+    findings = []
+    creds = (tier0.get("credentials") or {}).get("platform_credentials", []) or []
+    if not creds:
+        return findings
+
+    all_roles = _all_role_names()
+    for idx, entry in enumerate(creds):
+        cid = entry.get("id", f"[{idx}]")
+        owner = entry.get("owner_role", "")
+        if owner and owner not in all_roles:
+            findings.append(
+                Finding(
+                    check_id="D4",
+                    severity="error",
+                    location=f"{_CRED_FILE}[{cid}]",
+                    message=f"owner_role `{owner}` does not match any role in collections/ or roles/",
+                    fix_hint=f"Create the role at collections/ansible_collections/lv3/platform/roles/{owner}/ or check the spelling.",
+                )
+            )
+    return findings
+
+
+@check
+def check_D5_credentials_consumer_roles_exist(tier0: dict) -> list[Finding]:
+    """D5: all consumer_roles must name roles that exist on disk."""
+    findings = []
+    creds = (tier0.get("credentials") or {}).get("platform_credentials", []) or []
+    if not creds:
+        return findings
+
+    all_roles = _all_role_names()
+    for idx, entry in enumerate(creds):
+        cid = entry.get("id", f"[{idx}]")
+        for consumer in entry.get("consumer_roles", []):
+            if consumer and consumer not in all_roles:
+                findings.append(
+                    Finding(
+                        check_id="D5",
+                        severity="warning",
+                        location=f"{_CRED_FILE}[{cid}]",
+                        message=f"consumer_role `{consumer}` does not match any role in collections/ or roles/",
+                        fix_hint="Create the role or correct the spelling. Warning only — consumer_roles may reference roles in planned future phases.",
+                    )
+                )
+    return findings
+
+
+@check
+def check_D6_credentials_var_matches_id(tier0: dict) -> list[Finding]:
+    """D6: local_file_var should equal <id>_local_file (naming consistency)."""
+    findings = []
+    creds = (tier0.get("credentials") or {}).get("platform_credentials", []) or []
+    for idx, entry in enumerate(creds):
+        cid = entry.get("id", "")
+        var = entry.get("local_file_var", "")
+        if cid and var:
+            expected = f"{cid}_local_file"
+            if var != expected:
+                findings.append(
+                    Finding(
+                        check_id="D6",
+                        severity="warning",
+                        location=f"{_CRED_FILE}[{cid}]",
+                        message=f"local_file_var `{var}` does not match expected `{expected}` (id=`{cid}`)",
+                        fix_hint="Convention: local_file_var = id + '_local_file'. Divergence is allowed during transition but must be documented in `notes:`.",
+                    )
+                )
+    return findings
+
+
+# ---------------------------------------------------------------------------
 # Group E — identity flavor hygiene in Tier-0 root files
 # ---------------------------------------------------------------------------
 
@@ -422,6 +591,32 @@ def _load_schema(schema_rel: str) -> dict | None:
         return json.loads(path.read_text())
     except json.JSONDecodeError:
         return None
+
+
+@check
+def check_S2_credentials_schema(tier0: dict) -> list[Finding]:
+    """S2: validate config/platform_credentials.yml against its JSON schema."""
+    if jsonschema is None:
+        return []
+    schema = _load_schema("config/schemas/credentials.schema.json")
+    if schema is None:
+        return []
+    creds_data = tier0.get("credentials")
+    if creds_data is None:
+        return []
+    try:
+        jsonschema.validate(creds_data, schema)
+    except jsonschema.ValidationError as e:
+        return [
+            Finding(
+                check_id="S2",
+                severity="error",
+                location=f"config/platform_credentials.yml: {e.json_path}",
+                message=f"Schema validation failed: {e.message}",
+                fix_hint="Check config/schemas/credentials.schema.json for the required structure.",
+            )
+        ]
+    return []
 
 
 @check

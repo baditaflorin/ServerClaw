@@ -29,8 +29,8 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  branch: claude/gallant-chebyshev-b0def1
-  worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
+  branch: claude/phase3-credentials
+  worktree_path: .claude/worktrees/phase3-credentials
   doc: docs/adr/0438-generic-by-construction.md
   depends_on:
   - adr-0407-generic-by-default
@@ -71,6 +71,15 @@ workstreams:
   - scripts/ansible_scope_runner.py
   - scripts/publish_to_serverclaw.py
   - config/publication-sanitization.yaml
+  - config/platform_credentials.yml
+  - config/schemas/credentials.schema.json
+  - tests/test_platform_credentials.py
+  - collections/ansible_collections/lv3/platform/roles/openbao_postgres_backend/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/openbao_postgres_backend/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/openbao_postgres_backend/tasks/main.yml
+  - roles/openbao_postgres_backend/defaults/main.yml
+  - roles/openbao_postgres_backend/meta/argument_specs.yml
+  - roles/openbao_postgres_backend/tasks/main.yml
   summary: 'Move the platform from "generic by convention" (ADR 0407) to "generic
     by construction" for the axis ADR 0409 did not cover: role-internal prefix hardcoding.
     Audit found 190+ literal lv3_*/lv3-* identifiers across role defaults, templates,
@@ -121,13 +130,21 @@ workstreams:
       remaining:
       - Rename lv3_service_topology fact to platform_service_topology (50+ callsites)
     phase_3_unified_credentials:
-      status: not_started
+      status: in_progress
       target_version: 0.181.0
-      tasks:
-      - Add platform_credentials registry schema
-      - Unify openbao_postgres rotator variable name (writer+reader)
-      - Sweep remaining ~20 credential variable divergences
-      - Contract test for credential owner/reader consistency
+      done:
+      - "fix(openbao): rename openbao_postgres_admin_password_local_file \u2192 openbao_postgres_rotator_password_local_file\
+        \ in writer role (openbao_postgres_backend)"
+      - 'feat(credentials): create config/platform_credentials.yml registry with 10
+        initial entries'
+      - 'feat(credentials): create config/schemas/credentials.schema.json JSON schema'
+      - 'feat(credentials): add credentials registry validation to validate_tier0_crossrefs.py'
+      - "test(credentials): contract test \u2014 each credential has exactly one owner,\
+        \ consumer roles exist"
+      remaining:
+      - Sweep remaining ~20 credential variable divergences (audit in progress)
+      - Remove now-redundant openbao_postgres_rotator_password_local_file bridge alias
+        from group_vars/all/main.yml
     phase_4_shard_laziness:
       status: not_started
       target_version: 0.182.0

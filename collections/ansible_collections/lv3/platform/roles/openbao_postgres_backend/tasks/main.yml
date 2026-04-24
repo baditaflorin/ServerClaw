@@ -4,14 +4,14 @@
     that:
       - openbao_postgres_admin_role is match('^[a-z_][a-z0-9_]*$')
       - openbao_postgres_connect_role is match('^[a-z_][a-z0-9_]*$')
-      - openbao_postgres_admin_password_local_file | length > 0
+      - openbao_postgres_rotator_password_local_file | length > 0
       - openbao_postgres_database | length > 0
       - openbao_postgres_reserved_connection_role is match('^[a-z_][a-z0-9_]*$')
     fail_msg: "openbao_postgres_backend requires a safe admin role name, local password path, and target database."
 
 - name: Ensure the OpenBao local artifact directory exists on the control machine
   ansible.builtin.file:
-    path: "{{ openbao_postgres_admin_password_local_file | dirname }}"
+    path: "{{ openbao_postgres_rotator_password_local_file | dirname }}"
     state: directory
     mode: "0700"
   delegate_to: localhost
@@ -20,9 +20,9 @@
 - name: Ensure the OpenBao PostgreSQL rotator password exists locally
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ ! -s "{{ openbao_postgres_admin_password_local_file }}" ]; then
+    if [ ! -s "{{ openbao_postgres_rotator_password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ openbao_postgres_admin_password_local_file }}"
+      openssl rand -base64 24 > "{{ openbao_postgres_rotator_password_local_file }}"
       echo changed
     fi
   args:
@@ -35,7 +35,7 @@
 
 - name: Read the OpenBao PostgreSQL rotator password from the control machine
   ansible.builtin.slurp:
-    src: "{{ openbao_postgres_admin_password_local_file }}"
+    src: "{{ openbao_postgres_rotator_password_local_file }}"
   delegate_to: localhost
   become: false
   register: openbao_postgres_password_raw

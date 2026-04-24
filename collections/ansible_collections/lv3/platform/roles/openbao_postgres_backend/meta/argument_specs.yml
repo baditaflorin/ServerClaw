@@ -13,11 +13,12 @@ argument_specs:
         required: true
         description:
           - Shared PostgreSQL role that carries CONNECT grants across managed databases.
-      openbao_postgres_admin_password_local_file:
+      openbao_postgres_rotator_password_local_file:
         type: path
         required: true
         description:
           - Controller-local artifact path that stores the OpenBao rotator password.
+          - Canonical name shared with openbao_runtime (ADR 0438 Phase 3 — unified credential naming).
       openbao_postgres_database:
         type: str
         required: true

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.160",
+  "repo_version": "0.178.161",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-23T17:50:31Z",
-  "next_refresh_at": "2026-04-23T18:50:31Z",
+  "generated_at": "2026-04-24T04:31:06Z",
+  "next_refresh_at": "2026-04-24T05:31:06Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.159",
-    "deployed_at": "2026-04-23",
-    "summary": "ADR 0438 Phase 1-2: generic-by-construction IaC refactor \u2014 introduce Add Tier-0 cross-reference validator (9 checks) and raw-split lint gate.",
-    "release_notes_url": "docs/release-notes/0.178.160.md"
+    "last_version": "0.178.160",
+    "deployed_at": "2026-04-24",
+    "summary": "ADR 0438 Phase 3: Unified credentials registry \u2014 `config/platform_credentials.yml` with 13 initial entries, `credentials.schema.json`, Tier-0 Group D cross-reference checks, 10 new contract tests, openbao_postgres rotator variable rename (writer/reader unification)",
+    "release_notes_url": "docs/release-notes/0.178.161.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
