@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.171",
+  "repo_version": "0.178.172",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-24T10:51:47Z",
-  "next_refresh_at": "2026-04-24T11:51:47Z",
+  "generated_at": "2026-04-24T12:15:34Z",
+  "next_refresh_at": "2026-04-24T13:15:34Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.170",
+    "last_version": "0.178.171",
     "deployed_at": "2026-04-24",
-    "summary": "`playbooks/openbao.yml`: target only the primary postgres (`postgres` / `postgres-staging`) for the \"Verify PostgreSQL dynamic credentials end to end\" play \u2014 dynamic credentials are created on the OpenBao-managed primary only; running psql against replicas or separate app/data postgres VMs fails because the ephemeral role doesn't exist there",
-    "release_notes_url": "docs/release-notes/0.178.171.md"
+    "summary": "No changelog notes were present in `## Unreleased` at release time.",
+    "release_notes_url": "docs/release-notes/0.178.172.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

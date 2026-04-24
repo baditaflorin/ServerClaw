@@ -12,14 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- `playbooks/openbao.yml`: target only the primary postgres (`postgres` / `postgres-staging`) for the "Verify PostgreSQL dynamic credentials end to end" play — dynamic credentials are created on the OpenBao-managed primary only; running psql against replicas or separate app/data postgres VMs fails because the ephemeral role doesn't exist there
-
 ## Latest Release
 
-- [0.178.171 release notes](docs/release-notes/0.178.171.md)
+- [0.178.172 release notes](docs/release-notes/0.178.172.md)
 
 ## Previous Releases
 
+- [0.178.171 release notes](docs/release-notes/0.178.171.md)
 - [0.178.170 release notes](docs/release-notes/0.178.170.md)
 - [0.178.169 release notes](docs/release-notes/0.178.169.md)
 - [0.178.168 release notes](docs/release-notes/0.178.168.md)
@@ -31,9 +30,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.162 release notes](docs/release-notes/0.178.162.md)
 - [0.178.161 release notes](docs/release-notes/0.178.161.md)
 - [0.178.160 release notes](docs/release-notes/0.178.160.md)
-- [0.178.159 release notes](docs/release-notes/0.178.159.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (496 releases)](docs/release-notes/index/2026.md)
+- [2026 (497 releases)](docs/release-notes/index/2026.md)
