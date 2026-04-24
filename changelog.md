@@ -12,14 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- `openbao_runtime`: rename policy templates from `policy-lv3-*.hcl.j2` to `policy-*.hcl.j2` (all content is generic); update `openbao_policies` default `src` fields to use prefix-free filenames — fixes "Could not find policy-0fork-*.hcl.j2" on any deployment whose domain doesn't start with `lv3`
+- `group_vars/all`: promote `openbao_init_local_file` from `openbao_runtime` role defaults to `group_vars/all/main.yml` — the standalone play "Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification" uses this variable directly without including the role, so role defaults are never loaded; fixes `'openbao_init_local_file' is undefined` on `runtime-control`
 
 ## Latest Release
 
-- [0.178.168 release notes](docs/release-notes/0.178.168.md)
+- [0.178.169 release notes](docs/release-notes/0.178.169.md)
 
 ## Previous Releases
 
+- [0.178.168 release notes](docs/release-notes/0.178.168.md)
 - [0.178.167 release notes](docs/release-notes/0.178.167.md)
 - [0.178.166 release notes](docs/release-notes/0.178.166.md)
 - [0.178.165 release notes](docs/release-notes/0.178.165.md)
@@ -31,9 +32,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.159 release notes](docs/release-notes/0.178.159.md)
 - [0.178.158 release notes](docs/release-notes/0.178.158.md)
 - [0.178.157 release notes](docs/release-notes/0.178.157.md)
-- [0.178.156 release notes](docs/release-notes/0.178.156.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (493 releases)](docs/release-notes/index/2026.md)
+- [2026 (494 releases)](docs/release-notes/index/2026.md)

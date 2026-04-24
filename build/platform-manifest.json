@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.168",
+  "repo_version": "0.178.169",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-24T09:22:57Z",
-  "next_refresh_at": "2026-04-24T10:22:57Z",
+  "generated_at": "2026-04-24T09:50:30Z",
+  "next_refresh_at": "2026-04-24T10:50:30Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.167",
+    "last_version": "0.178.168",
     "deployed_at": "2026-04-24",
-    "summary": "`openbao_runtime`: rename policy templates from `policy-lv3-*.hcl.j2` to `policy-*.hcl.j2` (all content is generic); update `openbao_policies` default `src` fields to use prefix-free filenames \u2014 fixes \"Could not find policy-0fork-*.hcl.j2\" on any deployment whose domain doesn't start with `lv3`",
-    "release_notes_url": "docs/release-notes/0.178.168.md"
+    "summary": "`group_vars/all`: promote `openbao_init_local_file` from `openbao_runtime` role defaults to `group_vars/all/main.yml` \u2014 the standalone play \"Ensure OpenBao remains unsealed before PostgreSQL end-to-end verification\" uses this variable directly without including the role, so role defaults are never loaded; fixes `'openbao_init_local_file' is undefined` on `runtime-control`",
+    "release_notes_url": "docs/release-notes/0.178.169.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
