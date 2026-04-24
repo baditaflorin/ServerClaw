@@ -342,7 +342,7 @@ The Hetzner DNS brownout is the last blocker for full green. Once it lifts:
 
 ---
 
-## 2026-04-24/25 — `make converge-site` end-to-end: 5 more gaps closed, run 24 in progress
+## 2026-04-25 — `make converge-site` end-to-end: 3 more gaps closed, run 24 in progress
 
 Session goal: get all 18 hosts in the `make converge-site` PLAY RECAP to
 `failed=0`. Run command throughout:
