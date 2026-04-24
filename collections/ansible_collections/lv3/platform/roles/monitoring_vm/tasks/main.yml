@@ -794,6 +794,18 @@
   register: monitoring_grafana_slo_dashboard_file_rendered
   notify: Restart Grafana
 
+- name: Patch SLO dashboard UID for deployment prefix
+  ansible.builtin.replace:
+    path: "{{ monitoring_grafana_slo_dashboard_file }}"
+    regexp: '"uid": "lv3-slo-overview"'
+    replace: '"uid": "{{ platform_identity.config_prefix }}-slo-overview"'
+
+- name: Patch SLO dashboard datasource UIDs for deployment prefix
+  ansible.builtin.replace:
+    path: "{{ monitoring_grafana_slo_dashboard_file }}"
+    regexp: '"uid": "lv3-prometheus"'
+    replace: '"uid": "{{ platform_identity.config_prefix }}-prometheus"'
+
 - name: Copy LV3 capacity overview dashboard
   ansible.builtin.copy:
     src: "{{ monitoring_grafana_capacity_dashboard_source_file }}"
@@ -804,6 +816,12 @@
   register: monitoring_grafana_capacity_dashboard_file_rendered
   notify: Restart Grafana
 
+- name: Patch capacity dashboard UID for deployment prefix
+  ansible.builtin.replace:
+    path: "{{ monitoring_grafana_capacity_dashboard_file }}"
+    regexp: '"uid": "lv3-capacity-overview"'
+    replace: '"uid": "{{ platform_identity.config_prefix }}-capacity-overview"'
+
 - name: Copy LV3 log canary overview dashboard
   ansible.builtin.copy:
     src: "{{ monitoring_grafana_log_canary_dashboard_source_file }}"
@@ -813,6 +831,18 @@
     mode: "0644"
   register: monitoring_grafana_log_canary_dashboard_file_rendered
   notify: Restart Grafana
+
+- name: Patch log canary dashboard UID for deployment prefix
+  ansible.builtin.replace:
+    path: "{{ monitoring_grafana_log_canary_dashboard_file }}"
+    regexp: '"uid": "lv3-log-canary-overview"'
+    replace: '"uid": "{{ platform_identity.config_prefix }}-log-canary-overview"'
+
+- name: Patch log canary dashboard datasource UIDs for deployment prefix
+  ansible.builtin.replace:
+    path: "{{ monitoring_grafana_log_canary_dashboard_file }}"
+    regexp: '"uid": "lv3-prometheus"'
+    replace: '"uid": "{{ platform_identity.config_prefix }}-prometheus"'
 
 - name: Render Loki Canary systemd unit
   ansible.builtin.template:
