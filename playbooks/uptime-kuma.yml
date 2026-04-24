@@ -37,6 +37,7 @@
 
   roles:
     - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
     - role: lv3.platform.uptime_kuma_runtime
 
 - name: Publish Uptime Kuma through the NGINX edge

@@ -36,9 +36,17 @@
               'monitoring': 'monitoring',
               'postgres': 'data',
               'postgres-replica': 'data',
+              'postgres-apps': 'data',
+              'postgres-data': 'data',
               'artifact-cache': 'cache',
               'backup': 'backup',
-              'coolify': 'paas'
+              'coolify': 'paas',
+              'coolify-apps': 'paas',
+              'runtime-control': 'control-plane',
+              'runtime-ai': 'app',
+              'runtime-general': 'app',
+              'runtime-comms': 'app',
+              'runtime-apps': 'app'
             }[
               (
                 hostvars[groups['proxmox_hosts'][0]].proxmox_guests
