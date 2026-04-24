@@ -48,10 +48,9 @@ keycloak_glitchtip_enabled: false
 # docker-runtime roles that ship an openbao-agent sidecar (minio, gitea,
 # directus, etc.) must be told NOT to start a local OpenBao and to speak
 # to the remote one instead.
+# ADR 0438 Phase 5 (partial): common_openbao_compose_env_openbao_address is now a group_var
+# derived from platform_service_topology.openbao.private_ip — no hardcoded IP needed here.
 common_openbao_compose_env_manage_local_openbao_runtime: false
-# runtime-control is re-addressed to 10.10.10.92 after bootstrap network
-# reconfiguration (bootstrap assigns 10.20.10.10, Ansible converge moves it).
-common_openbao_compose_env_openbao_address: http://10.10.10.92:8201
 
 # --- OpenBao local artifact isolation ---
 # ADR 0438 Phase 4: individual path overrides removed — role defaults now use

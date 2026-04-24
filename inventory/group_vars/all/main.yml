@@ -216,6 +216,12 @@ openbao_database_mount_path: database
 openbao_local_artifact_dir: "{{ repo_shared_local_root }}/openbao"
 # ADR 0438 Phase 4: individual artifact paths removed from group_vars — role defaults now use
 # {{ openbao_local_artifact_dir }}/... and are resolved lazily at task time (not baked by shard generator)
+# ADR 0438 Phase 5 (partial): derive OpenBao address from topology inventory instead of hardcoding.
+# openbao.private_ip is derived from proxmox_guests[runtime-control].ipv4 — correct for all deployments.
+# Forks that keep OpenBao collapsed onto runtime-control need no override; their topology inventory
+# already maps openbao.owning_vm=runtime-control → the correct IP.
+common_openbao_compose_env_openbao_address: >-
+  http://{{ hostvars[platform_topology_host].platform_service_topology.openbao.private_ip }}:{{ platform_ports.openbao_http_port }}
 typesense_local_artifact_dir: "{{ repo_shared_local_root }}/typesense"
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 compose_runtime_secret_root: "/run/{{ platform_config_prefix }}-secrets"

@@ -1,6 +1,6 @@
 ---
 openbao_postgres_admin_role: openbao_rotator
-openbao_postgres_connect_role: lv3_openbao_connect_all
+openbao_postgres_connect_role: "{{ platform_sql_prefix }}_openbao_connect_all"
 openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/postgres-rotator-password.txt"
 openbao_postgres_database: postgres
 openbao_postgres_reserved_connection_role: pg_use_reserved_connections
