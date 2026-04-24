@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.170",
+  "repo_version": "0.178.171",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-24T10:19:29Z",
-  "next_refresh_at": "2026-04-24T11:19:29Z",
+  "generated_at": "2026-04-24T10:51:47Z",
+  "next_refresh_at": "2026-04-24T11:51:47Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.169",
+    "last_version": "0.178.170",
     "deployed_at": "2026-04-24",
-    "summary": "`group_vars/all`: promote all `openbao_*_local_file` artifact-path variables from `openbao_runtime` role defaults to `group_vars/all/main.yml` \u2014 multiple standalone plays reference these directly without including the role (role defaults are never loaded); fixes `'openbao_controller_approle_local_file' is undefined` (and 6 sibling variables) on postgres hosts and any other play that consumers OpenBao credentials without the full role",
-    "release_notes_url": "docs/release-notes/0.178.170.md"
+    "summary": "`playbooks/openbao.yml`: target only the primary postgres (`postgres` / `postgres-staging`) for the \"Verify PostgreSQL dynamic credentials end to end\" play \u2014 dynamic credentials are created on the OpenBao-managed primary only; running psql against replicas or separate app/data postgres VMs fails because the ephemeral role doesn't exist there",
+    "release_notes_url": "docs/release-notes/0.178.171.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

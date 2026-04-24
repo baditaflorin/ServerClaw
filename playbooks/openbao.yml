@@ -116,7 +116,11 @@
         openbao_unseal_init_payload: "{{ openbao_verify_init_payload }}"
 
 - name: Verify PostgreSQL dynamic credentials end to end
-  hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
+  # Target only the OpenBao-managed primary postgres (the host whose connection_url is registered
+  # in the database secrets engine).  The dynamic credential is created on the primary only;
+  # running psql --host 127.0.0.1 on replicas or separate app/data postgres instances fails because
+  # the ephemeral role does not exist on those hosts.
+  hosts: "{{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}"
   become: true
   gather_facts: true
   tags:
