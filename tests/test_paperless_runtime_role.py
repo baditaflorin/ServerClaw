@@ -34,7 +34,7 @@ def test_defaults_define_public_oidc_runtime_and_taxonomy_contract() -> None:
     )
     assert (
         defaults["paperless_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox-host'].lv3_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.public_hostname }}"
     )
     assert defaults["paperless_internal_port"] == "{{ paperless_service_topology.ports.internal }}"
     assert defaults["paperless_internal_base_url"] == "http://127.0.0.1:{{ paperless_internal_port }}"

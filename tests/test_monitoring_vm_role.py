@@ -24,7 +24,7 @@ def load_tasks(path: Path) -> list[dict]:
 def test_defaults_define_public_grafana_url_from_service_topology() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     assert defaults["monitoring_grafana_public_url"] == (
-        "https://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.public_hostname }}"
+        "https://{{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.grafana.public_hostname }}"
     )
 
 
@@ -34,7 +34,7 @@ def test_defaults_include_loki_minio_contract() -> None:
     assert "monitoring_loki_minio_access_key_id: lokichunks" in defaults
     assert "repo_shared_local_root }}/monitoring/loki-minio-secret-key.txt" in defaults
     assert "monitoring_loki_minio_bucket_name: loki-chunks" in defaults
-    assert "lv3_service_topology.minio.private_ip" in defaults
+    assert "platform_service_topology.minio.private_ip" in defaults
 
 
 def test_defaults_expose_private_prometheus_remote_write_endpoint() -> None:
@@ -43,7 +43,7 @@ def test_defaults_expose_private_prometheus_remote_write_endpoint() -> None:
 
     assert defaults["monitoring_prometheus_listen_address"] == "0.0.0.0:9090"
     assert defaults["monitoring_prometheus_remote_write_url"] == (
-        "http://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.private_ip }}:9090/api/v1/write"
+        "http://{{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.grafana.private_ip }}:9090/api/v1/write"
     )
     assert "{{ monitoring_prometheus_listen_address }}" in template
 

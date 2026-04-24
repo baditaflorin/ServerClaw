@@ -1,9 +1,9 @@
-# Release 0.178.161
+# Release 0.178.162
 
 - Date: 2026-04-24
 
 ## Summary
-- ADR 0438 Phase 3: Unified credentials registry — `config/platform_credentials.yml` with 13 initial entries, `credentials.schema.json`, Tier-0 Group D cross-reference checks, 10 new contract tests, openbao_postgres rotator variable rename (writer/reader unification)
+- No changelog notes were present in `## Unreleased` at release time.
 
 ## Platform Impact
 - no live platform version bump; this release updates repository automation, release metadata, and operator tooling only

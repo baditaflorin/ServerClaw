@@ -99,8 +99,10 @@ def test_inventory_and_health_catalog_capture_repo_intake_runtime_contract() -> 
     repo_intake_service = next(item for item in service_catalog["services"] if item["id"] == "repo_intake")
 
     assert nginx_rule["description"] == "Reverse proxy access to the repo-intake deployment surface"
-    assert host_vars["lv3_service_topology"]["repo_intake"]["public_hostname"] == "repo-intake.{{ platform_domain }}"
-    assert host_vars["lv3_service_topology"]["repo_intake"]["edge"]["upstream"].endswith(":8101")
+    assert (
+        host_vars["platform_service_topology"]["repo_intake"]["public_hostname"] == "repo-intake.{{ platform_domain }}"
+    )
+    assert host_vars["platform_service_topology"]["repo_intake"]["edge"]["upstream"].endswith(":8101")
     assert health_catalog["services"]["repo_intake"]["verify_file"] == "roles/repo_intake_runtime/tasks/verify.yml"
     assert health_catalog["services"]["repo_intake"]["liveness"]["url"] == "http://127.0.0.1:8101/health"
     assert health_catalog["services"]["repo_intake"]["uptime_kuma"]["enabled"] is False

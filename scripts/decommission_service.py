@@ -113,11 +113,11 @@ CATALOG_REGISTRY: list[dict[str, str]] = [
     {"path": "config/contracts/service-partitions/catalog.json", "type": "partitions"},
     # --- YAML dict-key: remove keys under list_key that match any variant ---
     {"path": "config/ansible-role-idempotency.yml", "type": "yaml_dict_key", "list_key": "roles"},
-    # --- YAML topology block: remove service key from lv3_service_topology dict ---
+    # --- YAML topology block: remove service key from platform_service_topology dict ---
     {
         "path": f"inventory/host_vars/{TOPOLOGY_HOST}.yml",
         "type": "yaml_topology_block",
-        "list_key": "lv3_service_topology",
+        "list_key": "platform_service_topology",
     },
     # --- YAML var-prefix: remove <service_id>_* lines under a named parent dict ---
     {
@@ -642,7 +642,7 @@ def _remove_from_yaml_topology_block(path: Path, list_key: str, service_id: str)
     Operates line-by-line to avoid clobbering comments and surrounding content.
     Scoped to the ``list_key`` section so only the service entry inside it is removed.
 
-    Used for ``lv3_service_topology`` in ``inventory/host_vars/{TOPOLOGY_HOST}.yml``.
+    Used for ``platform_service_topology`` in ``inventory/host_vars/{TOPOLOGY_HOST}.yml``.
     """
     if not path.is_file():
         return False

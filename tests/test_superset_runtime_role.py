@@ -38,7 +38,7 @@ def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract()
 
     assert (
         defaults["superset_service_topology"]
-        == "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('superset') }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology | service_topology_get('superset') }}"
     )
     assert defaults["superset_site_dir"] == "/opt/superset"
     assert defaults["superset_build_dir"] == "{{ superset_site_dir }}/build"

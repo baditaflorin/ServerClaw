@@ -214,20 +214,20 @@ def build_edge_route_index(
     )
 
     service_topology = subdomain_catalog.require_mapping(
-        host_vars.get("lv3_service_topology"),
-        "inventory/host_vars/proxmox-host.yml.lv3_service_topology",
+        host_vars.get("platform_service_topology"),
+        "inventory/host_vars/proxmox-host.yml.platform_service_topology",
     )
     for service_id, service in service_topology.items():
         service = subdomain_catalog.require_mapping(
             service,
-            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}",
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}",
         )
         edge = service.get("edge")
         if edge is None:
             continue
         edge = subdomain_catalog.require_mapping(
             edge,
-            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}.edge",
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.edge",
         )
         if not edge.get("enabled"):
             continue
@@ -239,7 +239,7 @@ def build_edge_route_index(
         site.update(edge)
         for hostname in subdomain_catalog.collect_site_hostnames(
             site,
-            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}",
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}",
             allow_wildcards=True,
         ):
             routes[hostname] = _route_entry(
@@ -277,7 +277,7 @@ def build_edge_route_index(
         apex_hostname = subdomain_catalog.require_hostname(apex_hostname, "public_edge_apex_hostname")
         nginx_edge_service = subdomain_catalog.require_mapping(
             service_topology.get("nginx_edge"),
-            "inventory/host_vars/proxmox-host.yml.lv3_service_topology.nginx_edge",
+            "inventory/host_vars/proxmox-host.yml.platform_service_topology.nginx_edge",
         )
         routes[apex_hostname] = _route_entry(
             hostname=apex_hostname,
@@ -289,7 +289,7 @@ def build_edge_route_index(
                 "kind": "redirect",
                 "redirect_target_hostname": subdomain_catalog.require_hostname(
                     nginx_edge_service.get("public_hostname"),
-                    "inventory/host_vars/proxmox-host.yml.lv3_service_topology.nginx_edge.public_hostname",
+                    "inventory/host_vars/proxmox-host.yml.platform_service_topology.nginx_edge.public_hostname",
                 ),
             },
             authenticated_sites=authenticated_sites,
@@ -300,13 +300,13 @@ def build_edge_route_index(
 
 def build_service_topology_index(host_vars: dict[str, Any]) -> dict[str, dict[str, Any]]:
     service_topology = subdomain_catalog.require_mapping(
-        host_vars.get("lv3_service_topology"),
-        "inventory/host_vars/proxmox-host.yml.lv3_service_topology",
+        host_vars.get("platform_service_topology"),
+        "inventory/host_vars/proxmox-host.yml.platform_service_topology",
     )
     return {
         service_id: subdomain_catalog.require_mapping(
             service,
-            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}",
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}",
         )
         for service_id, service in service_topology.items()
     }

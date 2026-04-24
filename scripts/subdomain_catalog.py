@@ -158,7 +158,7 @@ def _resolve_identity_placeholders(value: Any) -> Any:
     """Recursively resolve ``{{ platform_domain }}``-style placeholders in
     string values of *value*. Operators' overlay values are typically literal,
     but the committed host_vars file uses identity placeholders in
-    ``lv3_service_topology[*].public_hostname`` — so the resolved form is what
+    ``platform_service_topology[*].public_hostname`` — so the resolved form is what
     subdomain validation needs."""
     if isinstance(value, str):
         return resolve_jinja2_vars(value)
@@ -171,7 +171,7 @@ def _resolve_identity_placeholders(value: Any) -> Any:
 
 def load_host_vars() -> dict[str, Any]:
     # ADR 0430 — overlay-aware so subdomain validation and portal rendering
-    # see fork-specific `proxmox_guests` and `lv3_service_topology`. Identity
+    # see fork-specific `proxmox_guests` and `platform_service_topology`. Identity
     # placeholders in the committed base (e.g. ``public_hostname:
     # nginx.{{ platform_domain }}``) are resolved post-merge so downstream
     # hostname validation matches the operator's real domain.
@@ -252,25 +252,25 @@ def collect_edge_route_hostnames(
     hostnames: set[str] = set()
 
     service_topology = require_mapping(
-        host_vars.get("lv3_service_topology"),
-        "inventory/host_vars/proxmox-host.yml.lv3_service_topology",
+        host_vars.get("platform_service_topology"),
+        "inventory/host_vars/proxmox-host.yml.platform_service_topology",
     )
     for service_id, service in service_topology.items():
         service = require_mapping(
             service,
-            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}",
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}",
         )
         edge = service.get("edge")
         if edge is None:
             continue
         edge = require_mapping(
             edge,
-            f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}.edge",
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.edge",
         )
         enabled = edge.get("enabled", False)
         if not isinstance(enabled, bool):
             raise ValueError(
-                f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}.edge.enabled must be boolean"
+                f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.edge.enabled must be boolean"
             )
         if not enabled:
             continue
@@ -279,7 +279,7 @@ def collect_edge_route_hostnames(
         hostnames.update(
             collect_site_hostnames(
                 route,
-                f"inventory/host_vars/proxmox-host.yml.lv3_service_topology.{service_id}",
+                f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}",
                 allow_wildcards=True,
             )
         )

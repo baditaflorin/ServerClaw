@@ -104,7 +104,7 @@ phases:
       - "fix(tests): update 6 role defaults test files to expect platform_identity template values"
       - "fix(openbao): replace 4 !unsafe SQL grants with Jinja-escape pattern (Phase 0 ef1445216)"
     remaining:
-      - "Rename lv3_service_topology fact to platform_service_topology (50+ callsites)"
+      - "Rename platform_service_topology fact to platform_service_topology (50+ callsites)"
   phase_3_unified_credentials:
     status: in_progress
     target_version: 0.181.0

@@ -83,7 +83,7 @@ stale
     write(
         tmp_path / "inventory" / "host_vars" / "proxmox-host.yml",
         """
-lv3_service_topology:
+platform_service_topology:
   api:
     public_hostname: api.example.com
     service_name: api_gateway

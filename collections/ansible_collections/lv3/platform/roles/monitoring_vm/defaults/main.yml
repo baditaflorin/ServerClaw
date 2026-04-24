@@ -61,7 +61,7 @@ monitoring_grafana_dashboard_dir: /var/lib/grafana/dashboards/lv3
 monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-platform-overview.json
 monitoring_grafana_dashboard_uid: "{{ platform_identity.config_prefix }}-platform-overview"
 monitoring_grafana_dashboard_title: LV3 Platform Overview
-monitoring_grafana_public_url: "https://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.public_hostname }}"
+monitoring_grafana_public_url: "https://{{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.grafana.public_hostname }}"
 monitoring_grafana_vm_dashboard_dir: /var/lib/grafana/dashboards/lv3/vms
 monitoring_grafana_mail_dashboard_file: /var/lib/grafana/dashboards/lv3/{{ platform_identity.config_prefix }}-mail-platform.json
 monitoring_grafana_mail_dashboard_uid: "{{ platform_identity.config_prefix }}-mail-platform"
@@ -100,7 +100,7 @@ monitoring_loki_minio_secret_key_local_file: "{{ repo_shared_local_root }}/monit
 monitoring_loki_minio_bucket_name: loki-chunks
 monitoring_loki_minio_region: us-east-1
 monitoring_loki_minio_endpoint: >-
-  {{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.minio.private_ip }}:{{
+  {{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.minio.private_ip }}:{{
     hostvars[groups['proxmox_hosts'][0]].platform_port_assignments.minio_api_port
   }}
 monitoring_loki_retention_default: 720h
@@ -148,7 +148,7 @@ monitoring_prometheus_enable_features:
   - native-histograms
 monitoring_prometheus_listen_address: 0.0.0.0:9090
 monitoring_prometheus_remote_write_url: >-
-  http://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.private_ip }}:9090/api/v1/write
+  http://{{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.grafana.private_ip }}:9090/api/v1/write
 monitoring_prometheus_url: http://127.0.0.1:9090
 monitoring_blackbox_exporter_service_name: prometheus-blackbox-exporter
 monitoring_blackbox_exporter_env_file: /etc/default/prometheus-blackbox-exporter

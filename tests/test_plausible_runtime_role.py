@@ -24,7 +24,7 @@ def test_plausible_runtime_defaults_reference_service_topology_images_and_local_
 
     assert (
         defaults["plausible_service_topology"]
-        == "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('plausible') }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('plausible') }}"
     )
     assert (
         defaults["plausible_internal_port"]

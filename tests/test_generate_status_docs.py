@@ -109,7 +109,7 @@ live_apply_evidence:
     write(
         tmp_path / "inventory" / "host_vars" / "proxmox-host.yml",
         """
-lv3_service_topology:
+platform_service_topology:
   docs_portal:
     public_hostname: docs.example.test
     exposure_model: edge-published

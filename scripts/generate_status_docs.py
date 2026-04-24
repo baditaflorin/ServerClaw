@@ -101,7 +101,7 @@ def render_platform_status() -> str:
         ["Observed kernel", f"`{stack['observed_state']['os']['kernel']}`"],
     ]
 
-    topology = host_vars["lv3_service_topology"]
+    topology = host_vars["platform_service_topology"]
     exposure_counts: dict[str, int] = {}
     for service in topology.values():
         exposure_model = service.get("exposure_model", "unknown")
@@ -219,7 +219,7 @@ def render_version_summary() -> str:
         ["Observed OS", f"`Debian {stack['observed_state']['os']['major']}`"],
         ["Observed Proxmox installed", "`true`" if stack["observed_state"]["proxmox"]["installed"] else "`false`"],
         ["Observed PVE manager version", f"`{stack['observed_state']['proxmox']['version']}`"],
-        ["Declared services", str(len(host_vars["lv3_service_topology"]))],
+        ["Declared services", str(len(host_vars["platform_service_topology"]))],
     ]
     return "\n".join(
         [

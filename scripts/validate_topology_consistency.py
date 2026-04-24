@@ -10,7 +10,7 @@ derived registry that encodes the same fact:
   1. platform_postgres_clients — After ADR 0416 Phase 2, source_vm is derived from
      host_group at template time. This check verifies no legacy source_vm fields remain
      and that every postgres client service has a registry entry with a resolvable host_group.
-  2. lv3_service_topology.{service}.owning_vm / IP references  (inventory/host_vars/proxmox-host.yml)
+  2. platform_service_topology.{service}.owning_vm / IP references  (inventory/host_vars/proxmox-host.yml)
 
 Usage:
     python scripts/validate_topology_consistency.py --check   # exit 1 if any drift
@@ -36,7 +36,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # Each entry here must have a comment explaining WHY it is excluded.
 # See ADR 0416 for the remediation checklist for the remaining items.
 TOPOLOGY_OWNING_VM_EXCLUDES: set[str] = {
-    # "docker_runtime" is a system-level meta-entry in lv3_service_topology
+    # "docker_runtime" is a system-level meta-entry in platform_service_topology
     # representing the Docker daemon host itself, not a deployable service.
     # Its registry entry has host_group="all" (systemwide) intentionally.
     "docker_runtime",
@@ -77,11 +77,11 @@ def load_postgres_clients() -> list[dict]:
 
 
 def load_service_topology() -> dict[str, Any]:
-    """Return lv3_service_topology dict from proxmox-host.yml."""
+    """Return platform_service_topology dict from proxmox-host.yml."""
     raw = _load_yaml(PROXMOX_HOST_VARS_PATH)
-    topology = raw.get("lv3_service_topology", {})
+    topology = raw.get("platform_service_topology", {})
     if not isinstance(topology, dict):
-        sys.exit(f"ERROR: lv3_service_topology is not a mapping in {PROXMOX_HOST_VARS_PATH}")
+        sys.exit(f"ERROR: platform_service_topology is not a mapping in {PROXMOX_HOST_VARS_PATH}")
     return topology
 
 
@@ -162,7 +162,7 @@ def check_postgres_source_vm_drift(
 
 
 # ---------------------------------------------------------------------------
-# Check 2: lv3_service_topology.{service}.owning_vm vs host_group
+# Check 2: platform_service_topology.{service}.owning_vm vs host_group
 # ---------------------------------------------------------------------------
 
 
@@ -174,7 +174,7 @@ def check_service_topology_owning_vm_drift(
 ) -> list[str]:
     """Return list of drift error messages.
 
-    For every entry in lv3_service_topology where the service name
+    For every entry in platform_service_topology where the service name
     exists in platform_service_registry, assert that:
       owning_vm == host_group
     """
@@ -205,7 +205,7 @@ def check_service_topology_owning_vm_drift(
             errors.append(
                 f"DRIFT  topology entry '{service_name}': "
                 f"owning_vm={owning_vm!r} but platform_service_registry.host_group={host_group!r}\n"
-                f"       Fix: update lv3_service_topology.{service_name}.owning_vm "
+                f"       Fix: update platform_service_topology.{service_name}.owning_vm "
                 f"in {PROXMOX_HOST_VARS_PATH.name} to {host_group!r} (or vice versa — "
                 f"the registry host_group is the authoritative single source of truth)"
             )
@@ -347,7 +347,7 @@ def main() -> int:
     if not errors:
         print(f"  ✓ All {len(postgres_clients)} postgres clients match registry host_group")
 
-    print("Checking lv3_service_topology owning_vm vs service registry host_group...")
+    print("Checking platform_service_topology owning_vm vs service registry host_group...")
     errors = check_service_topology_owning_vm_drift(registry, topology, verbose=verbose)
     all_errors.extend(errors)
     if not errors:

@@ -37,7 +37,7 @@ def test_keycloak_playbook_targets_the_runtime_control_vm() -> None:
 def test_keycloak_service_topology_points_at_runtime_control() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
 
-    host_topology = host_vars["lv3_service_topology"]["keycloak"]
+    host_topology = host_vars["platform_service_topology"]["keycloak"]
 
     assert host_topology["owning_vm"] == "runtime-control"
     assert "runtime-control" in host_topology["private_ip"]

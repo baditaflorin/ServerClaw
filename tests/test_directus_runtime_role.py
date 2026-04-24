@@ -20,7 +20,7 @@ def test_directus_defaults_define_runtime_and_publication_contract() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
 
     assert defaults["directus_service_topology"] == (
-        "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('directus') }}"
+        "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('directus') }}"
     )
     assert defaults["directus_session_authority"] == "{{ platform_session_authority }}"
     assert defaults["directus_public_base_url"] == "https://{{ directus_service_topology.public_hostname }}"

@@ -54,23 +54,11 @@ common_openbao_compose_env_manage_local_openbao_runtime: false
 common_openbao_compose_env_openbao_address: http://10.10.10.92:8201
 
 # --- OpenBao local artifact isolation ---
-# The shard generation bakes each artifact path as
-#   {{ repo_shared_local_root }}/openbao/<file>
-# directly — overriding openbao_local_artifact_dir alone is insufficient.
-# Each path must be overridden here so that the fork uses its own credential
-# store and does not collide with the main-production .local/openbao/ files.
+# ADR 0438 Phase 4: individual path overrides removed — role defaults now use
+# {{ openbao_local_artifact_dir }}/... resolved lazily at task time (not baked
+# by the shard generator). Only the base directory needs a fork-specific override.
 # Adjust the "0fork" component for non-0fork forks.
 openbao_local_artifact_dir: "{{ repo_shared_local_root }}/0fork/openbao"
-openbao_init_local_file: "{{ repo_shared_local_root }}/0fork/openbao/init.json"
-openbao_ops_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/ops-password.txt"
-openbao_breakglass_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/breakglass-password.txt"
-openbao_postgres_rotator_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/postgres-rotator-password.txt"
-# openbao_postgres_backend role (play 1) uses a DIFFERENT variable name:
-openbao_postgres_admin_password_local_file: "{{ repo_shared_local_root }}/0fork/openbao/postgres-rotator-password.txt"
-openbao_controller_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/controller-automation-approle.json"
-openbao_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/atlas-approle.json"
-openbao_mail_platform_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/mail-platform-approle.json"
-openbao_secret_rotation_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/secret-rotation-approle.json"
 
 # --- OpenBao legacy restore ---
 # The legacy migration path (openbao_runtime/tasks/main.yml) tries to reach

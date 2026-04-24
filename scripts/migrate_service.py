@@ -13,7 +13,7 @@ migrations are deprecated. The script:
 Registries updated (authoritative first):
   platform_services.yml              host_group              (AUTHORITATIVE)
   platform_services.yml              proxy.upstream_host     (derived — updated to match)
-  inventory/host_vars/proxmox-host.yml  lv3_service_topology.owning_vm  (updated to match)
+  inventory/host_vars/proxmox-host.yml  platform_service_topology.owning_vm  (updated to match)
   inventory/host_vars/proxmox-host.yml  Jinja2 VM refs in topology block (updated to match)
 
 Usage:
@@ -67,7 +67,7 @@ def load_postgres_clients() -> list[dict]:
 
 def load_topology() -> dict[str, Any]:
     raw = _load_yaml(PROXMOX_HOST_VARS_PATH)
-    return raw.get("lv3_service_topology", {})
+    return raw.get("platform_service_topology", {})
 
 
 def load_known_guests() -> set[str]:
@@ -160,7 +160,7 @@ def _find_topology_service_block(lines: list[str], svc_name: str) -> tuple[int, 
 
 
 def update_proxmox_host_vars(svc_name: str, from_vm: str, to_vm: str) -> list[str]:
-    """Update lv3_service_topology block for svc_name in proxmox-host.yml.
+    """Update platform_service_topology block for svc_name in proxmox-host.yml.
 
     Updates:
       - owning_vm: <from_vm>  →  owning_vm: <to_vm>
@@ -201,14 +201,14 @@ def update_proxmox_host_vars(svc_name: str, from_vm: str, to_vm: str) -> list[st
             line,
         )
         if line != original:
-            changes.append(f"  proxmox-host.yml  lv3_service_topology.{svc_name}: {from_vm!r} → {to_vm!r}")
+            changes.append(f"  proxmox-host.yml  platform_service_topology.{svc_name}: {from_vm!r} → {to_vm!r}")
         new_block.append(line)
 
     if changes:
         lines[start:end] = new_block
         PROXMOX_HOST_VARS_PATH.write_text("".join(lines))
         # Deduplicate multi-line changes to one summary
-        changes = [f"  proxmox-host.yml  lv3_service_topology.{svc_name}: all refs {from_vm!r} → {to_vm!r}"]
+        changes = [f"  proxmox-host.yml  platform_service_topology.{svc_name}: all refs {from_vm!r} → {to_vm!r}"]
 
     return changes
 
@@ -456,7 +456,7 @@ def main() -> int:
         if has_upstream:
             print(f"  platform_services.yml  {svc_name}.proxy.upstream_host: {from_vm} → {to_vm}")
         if _has_topology_entry(svc_name, topology):
-            print(f"  proxmox-host.yml      lv3_service_topology.{svc_name}: all refs {from_vm!r} → {to_vm!r}")
+            print(f"  proxmox-host.yml      platform_service_topology.{svc_name}: all refs {from_vm!r} → {to_vm!r}")
     else:
         print("\nApplying registry changes...")
         all_changes: list[str] = []

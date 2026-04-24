@@ -197,7 +197,7 @@ def render_service_dependency_graph(dependency_graph: dict[str, Any]) -> dict[st
 
 
 def render_trust_tier_model(host_vars: dict[str, Any]) -> dict[str, Any]:
-    topology = host_vars["lv3_service_topology"]
+    topology = host_vars["platform_service_topology"]
     authenticated = sorted(
         service["public_hostname"]
         for service in topology.values()

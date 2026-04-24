@@ -28,7 +28,7 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     assert defaults["outline_public_hostname_overrides"][0]["address"] == "{{ outline_public_edge_private_ip }}"
     assert (
         defaults["outline_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox-host'].lv3_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.public_hostname }}"
     )
     assert defaults["outline_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.outline_port }}"
     assert defaults["outline_internal_base_url"] == "http://127.0.0.1:{{ outline_internal_port }}"

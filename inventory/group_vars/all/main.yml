@@ -214,13 +214,8 @@ openbao_postgres_database: postgres
 openbao_tls_enabled: true
 openbao_database_mount_path: database
 openbao_local_artifact_dir: "{{ repo_shared_local_root }}/openbao"
-openbao_init_local_file: "{{ repo_shared_local_root }}/openbao/init.json"
-openbao_ops_password_local_file: "{{ repo_shared_local_root }}/openbao/ops-password.txt"
-openbao_breakglass_password_local_file: "{{ repo_shared_local_root }}/openbao/breakglass-password.txt"
-openbao_postgres_rotator_password_local_file: "{{ repo_shared_local_root }}/openbao/postgres-rotator-password.txt"
-openbao_controller_approle_local_file: "{{ repo_shared_local_root }}/openbao/controller-automation-approle.json"
-openbao_atlas_approle_local_file: "{{ repo_shared_local_root }}/openbao/atlas-approle.json"
-openbao_mail_platform_approle_local_file: "{{ repo_shared_local_root }}/openbao/mail-platform-approle.json"
+# ADR 0438 Phase 4: individual artifact paths removed from group_vars — role defaults now use
+# {{ openbao_local_artifact_dir }}/... and are resolved lazily at task time (not baked by shard generator)
 typesense_local_artifact_dir: "{{ repo_shared_local_root }}/typesense"
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 compose_runtime_secret_root: "/run/{{ platform_config_prefix }}-secrets"

@@ -395,7 +395,7 @@ def tool_get_platform_status(_tool: dict[str, Any], _args: dict[str, Any]) -> di
     # ADR 0430 — apply .local/host_vars/proxmox-host.yml overlay so the
     # agent tool registry resolves to fork-specific service topology.
     host_vars = require_mapping(load_topology_host_vars(), str(TOPOLOGY_HOST_VARS_PATH))
-    topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
+    topology = require_mapping(host_vars.get("platform_service_topology"), "host_vars.platform_service_topology")
     public_services = sorted(
         service["public_hostname"]
         for service in topology.values()

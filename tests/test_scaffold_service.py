@@ -75,7 +75,7 @@ class ScaffoldServiceTests(unittest.TestCase):
                             "ipv4": "10.10.10.20",
                         }
                     ],
-                    "lv3_service_topology": {
+                    "platform_service_topology": {
                         "docker_runtime": {
                             "service_name": "docker-runtime",
                             "owning_vm": "docker-runtime",

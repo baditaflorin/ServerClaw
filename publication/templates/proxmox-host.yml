@@ -2045,7 +2045,7 @@ plausible_site_registrations:
     site_domain: ops.{{ platform_domain }}
     timezone: Europe/Bucharest
 
-lv3_service_topology:
+platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
     owning_vm: nginx-lv3

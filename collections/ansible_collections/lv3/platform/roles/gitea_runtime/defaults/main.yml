@@ -36,8 +36,8 @@ gitea_legacy_env_file: "{{ gitea_site_dir }}/gitea.env"
 gitea_container_name: gitea
 gitea_image: docker.io/gitea/gitea:1.25.5
 gitea_internal_port: 3003
-gitea_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('gitea') }}"
-gitea_keycloak_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('keycloak') }}"
+gitea_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('gitea') }}"
+gitea_keycloak_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('keycloak') }}"
 gitea_bootstrap_script: "{{ gitea_site_dir }}/bootstrap-gitea.sh"
 gitea_network_name: gitea_runtime_default
 gitea_network_subnet: 172.16.240.0/24
@@ -63,7 +63,7 @@ gitea_oidc_group_team_map:
   /{{ platform_identity.config_prefix }}-platform-admins:
     ops:
       - Owners
-gitea_minio_service_topology: "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('minio') }}"
+gitea_minio_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('minio') }}"
 gitea_minio_access_key_id: gitealfs
 gitea_minio_secret_key_local_file: "{{ gitea_local_artifact_dir }}/minio-secret-key.txt"
 gitea_minio_bucket_name: gitea-lfs

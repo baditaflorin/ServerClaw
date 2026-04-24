@@ -303,7 +303,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
 
     host_vars = load_yaml(TOPOLOGY_HOST_VARS_PATH)
     stack = load_yaml(STACK_PATH)
-    topology = require_mapping(host_vars.get("lv3_service_topology"), "lv3_service_topology")
+    topology = require_mapping(host_vars.get("platform_service_topology"), "platform_service_topology")
     guest_vmids = {
         guest["name"]: guest["vmid"] for guest in require_list(host_vars.get("proxmox_guests"), "proxmox_guests")
     }

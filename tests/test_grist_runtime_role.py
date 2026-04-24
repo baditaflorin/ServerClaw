@@ -25,7 +25,7 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     assert defaults["grist_public_hostname_overrides"][0]["hostname"] == "{{ grist_service_topology.public_hostname }}"
     assert (
         defaults["grist_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox-host'].lv3_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.public_hostname }}"
     )
     assert defaults["grist_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.grist_port }}"
     assert defaults["grist_internal_base_url"] == "http://127.0.0.1:{{ grist_internal_port }}"
@@ -285,7 +285,7 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert "{{ grist_public_edge_private_ip }}" in keycloak_discovery["ansible.builtin.shell"]
     assert "{{ grist_keycloak_issuer }}/.well-known/openid-configuration" in keycloak_discovery["ansible.builtin.shell"]
     assert (
-        '{{ hostvars["proxmox-host"].lv3_service_topology.keycloak.public_hostname }}'
+        '{{ hostvars["proxmox-host"].platform_service_topology.keycloak.public_hostname }}'
         in keycloak_discovery["ansible.builtin.shell"]
     )
     assert (

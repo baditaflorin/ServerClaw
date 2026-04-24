@@ -847,27 +847,29 @@ def build_service_topology(
     ports: dict[str, int],
     service_classification_by_id: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    raw_topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
+    raw_topology = require_mapping(host_vars.get("platform_service_topology"), "host_vars.platform_service_topology")
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
     tailscale_ipv4 = require_string(host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4")
 
     resolved: dict[str, Any] = {}
     for service_id, raw_service in raw_topology.items():
-        raw_service = require_mapping(raw_service, f"host_vars.lv3_service_topology.{service_id}")
+        raw_service = require_mapping(raw_service, f"host_vars.platform_service_topology.{service_id}")
         service = copy.deepcopy(raw_service)
-        owning_vm = require_string(service.get("owning_vm"), f"host_vars.lv3_service_topology.{service_id}.owning_vm")
+        owning_vm = require_string(
+            service.get("owning_vm"), f"host_vars.platform_service_topology.{service_id}.owning_vm"
+        )
         if "private_ip" in service:
             private_ip_candidate = require_string(
                 service.get("private_ip"),
-                f"host_vars.lv3_service_topology.{service_id}.private_ip",
+                f"host_vars.platform_service_topology.{service_id}.private_ip",
             )
             private_ip_candidate = require_string(
                 resolve_host_var_template(
                     private_ip_candidate,
                     host_vars,
-                    f"host_vars.lv3_service_topology.{service_id}.private_ip",
+                    f"host_vars.platform_service_topology.{service_id}.private_ip",
                 ),
-                f"host_vars.lv3_service_topology.{service_id}.private_ip",
+                f"host_vars.platform_service_topology.{service_id}.private_ip",
             )
             if "proxmox_guests" in private_ip_candidate:
                 private_ip = tailscale_ipv4 if owning_vm == host_id else guest_ipv4_by_name[owning_vm]
@@ -891,7 +893,9 @@ def build_service_topology(
 
         if "dns" in service:
             service["dns"]["target"] = resolve_dns_target(
-                require_string(service["dns"]["target"], f"host_vars.lv3_service_topology.{service_id}.dns.target"),
+                require_string(
+                    service["dns"]["target"], f"host_vars.platform_service_topology.{service_id}.dns.target"
+                ),
                 host_vars,
             )
 
@@ -917,7 +921,7 @@ def build_service_topology(
             host_vars,
             guest_ipv4_by_name,
             ports,
-            f"host_vars.lv3_service_topology.{service_id}",
+            f"host_vars.platform_service_topology.{service_id}",
         )
 
         resolved[service_id] = service

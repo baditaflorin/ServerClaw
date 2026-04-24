@@ -46,7 +46,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
     assert defaults["windmill_service_topology"] == (
-        "{{ hostvars[platform_topology_host].lv3_service_topology | service_topology_get('windmill') }}"
+        "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('windmill') }}"
     )
     assert (
         defaults["windmill_server_port"]

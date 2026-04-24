@@ -441,54 +441,58 @@ def validate_service_topology_entry(
     guest_names: set[str],
     host_id: str,
 ) -> tuple[str, str | None]:
-    service = require_mapping(service, f"lv3_service_topology.{service_id}")
-    require_identifier(service_id, f"lv3_service_topology key '{service_id}'")
-    service_name = require_identifier(service.get("service_name"), f"lv3_service_topology.{service_id}.service_name")
-    owning_vm = require_identifier(service.get("owning_vm"), f"lv3_service_topology.{service_id}.owning_vm")
+    service = require_mapping(service, f"platform_service_topology.{service_id}")
+    require_identifier(service_id, f"platform_service_topology key '{service_id}'")
+    service_name = require_identifier(
+        service.get("service_name"), f"platform_service_topology.{service_id}.service_name"
+    )
+    owning_vm = require_identifier(service.get("owning_vm"), f"platform_service_topology.{service_id}.owning_vm")
     if owning_vm not in guest_names and owning_vm != host_id:
-        raise ValueError(f"lv3_service_topology.{service_id}.owning_vm must reference a known guest or host id")
+        raise ValueError(f"platform_service_topology.{service_id}.owning_vm must reference a known guest or host id")
 
-    require_str(service.get("private_ip"), f"lv3_service_topology.{service_id}.private_ip")
+    require_str(service.get("private_ip"), f"platform_service_topology.{service_id}.private_ip")
     require_enum(
         service.get("exposure_model"),
-        f"lv3_service_topology.{service_id}.exposure_model",
+        f"platform_service_topology.{service_id}.exposure_model",
         SERVICE_EXPOSURE_MODELS,
     )
 
     public_hostname = service.get("public_hostname")
     if public_hostname is not None:
-        public_hostname = validate_hostname(public_hostname, f"lv3_service_topology.{service_id}.public_hostname")
+        public_hostname = validate_hostname(public_hostname, f"platform_service_topology.{service_id}.public_hostname")
 
-    observability = require_mapping(service.get("observability"), f"lv3_service_topology.{service_id}.observability")
+    observability = require_mapping(
+        service.get("observability"), f"platform_service_topology.{service_id}.observability"
+    )
     require_bool(
         observability.get("guest_dashboard"),
-        f"lv3_service_topology.{service_id}.observability.guest_dashboard",
+        f"platform_service_topology.{service_id}.observability.guest_dashboard",
     )
     require_bool(
         observability.get("service_telemetry"),
-        f"lv3_service_topology.{service_id}.observability.service_telemetry",
+        f"platform_service_topology.{service_id}.observability.service_telemetry",
     )
 
     dns = service.get("dns")
     if dns is not None:
-        dns = require_mapping(dns, f"lv3_service_topology.{service_id}.dns")
-        managed = require_bool(dns.get("managed"), f"lv3_service_topology.{service_id}.dns.managed")
+        dns = require_mapping(dns, f"platform_service_topology.{service_id}.dns")
+        managed = require_bool(dns.get("managed"), f"platform_service_topology.{service_id}.dns.managed")
         if managed:
             require_enum(
                 dns.get("visibility"),
-                f"lv3_service_topology.{service_id}.dns.visibility",
+                f"platform_service_topology.{service_id}.dns.visibility",
                 DNS_VISIBILITIES,
             )
-            name = validate_hostname(dns.get("name"), f"lv3_service_topology.{service_id}.dns.name")
+            name = validate_hostname(dns.get("name"), f"platform_service_topology.{service_id}.dns.name")
             if not DNS_LABEL_PATTERN.match(name):
-                raise ValueError(f"lv3_service_topology.{service_id}.dns.name must be a single DNS label")
+                raise ValueError(f"platform_service_topology.{service_id}.dns.name must be a single DNS label")
             require_enum(
                 dns.get("type"),
-                f"lv3_service_topology.{service_id}.dns.type",
+                f"platform_service_topology.{service_id}.dns.type",
                 DNS_RECORD_TYPES,
             )
-            require_str(dns.get("target"), f"lv3_service_topology.{service_id}.dns.target")
-            require_int(dns.get("ttl"), f"lv3_service_topology.{service_id}.dns.ttl", minimum=1)
+            require_str(dns.get("target"), f"platform_service_topology.{service_id}.dns.target")
+            require_int(dns.get("ttl"), f"platform_service_topology.{service_id}.dns.ttl", minimum=1)
             if "additional_records" in dns:
                 validate_extra_dns_records(
                     [
@@ -500,19 +504,19 @@ def validate_service_topology_entry(
                         }
                         for record in require_list(
                             dns.get("additional_records"),
-                            f"lv3_service_topology.{service_id}.dns.additional_records",
+                            f"platform_service_topology.{service_id}.dns.additional_records",
                         )
                     ],
-                    f"lv3_service_topology.{service_id}.dns.additional_records",
+                    f"platform_service_topology.{service_id}.dns.additional_records",
                 )
 
     edge = service.get("edge")
     if edge is not None:
-        edge = require_mapping(edge, f"lv3_service_topology.{service_id}.edge")
-        enabled = require_bool(edge.get("enabled"), f"lv3_service_topology.{service_id}.edge.enabled")
-        aliases = require_string_list(edge.get("aliases", []), f"lv3_service_topology.{service_id}.edge.aliases")
+        edge = require_mapping(edge, f"platform_service_topology.{service_id}.edge")
+        enabled = require_bool(edge.get("enabled"), f"platform_service_topology.{service_id}.edge.enabled")
+        aliases = require_string_list(edge.get("aliases", []), f"platform_service_topology.{service_id}.edge.aliases")
         for index, alias in enumerate(aliases):
-            alias = require_str(alias, f"lv3_service_topology.{service_id}.edge.aliases[{index}]")
+            alias = require_str(alias, f"platform_service_topology.{service_id}.edge.aliases[{index}]")
             if "{{" in alias:
                 continue  # Jinja2 template — resolved at Ansible runtime
             if not (
@@ -520,37 +524,39 @@ def validate_service_topology_entry(
                 or (alias.startswith("*.") and HOSTNAME_PATTERN.match(alias[2:]) and "." in alias[2:])
             ):
                 raise ValueError(
-                    f"lv3_service_topology.{service_id}.edge.aliases[{index}] must be a lowercase hostname or wildcard hostname"
+                    f"platform_service_topology.{service_id}.edge.aliases[{index}] must be a lowercase hostname or wildcard hostname"
                 )
         if enabled:
             if public_hostname is None:
-                raise ValueError(f"lv3_service_topology.{service_id} enables edge without public_hostname")
-            require_bool(edge.get("tls"), f"lv3_service_topology.{service_id}.edge.tls")
-            kind = require_enum(edge.get("kind"), f"lv3_service_topology.{service_id}.edge.kind", EDGE_KINDS)
+                raise ValueError(f"platform_service_topology.{service_id} enables edge without public_hostname")
+            require_bool(edge.get("tls"), f"platform_service_topology.{service_id}.edge.tls")
+            kind = require_enum(edge.get("kind"), f"platform_service_topology.{service_id}.edge.kind", EDGE_KINDS)
             if kind == "static":
-                validate_hostname(edge.get("slug"), f"lv3_service_topology.{service_id}.edge.slug")
-                require_str(edge.get("title"), f"lv3_service_topology.{service_id}.edge.title")
+                validate_hostname(edge.get("slug"), f"platform_service_topology.{service_id}.edge.slug")
+                require_str(edge.get("title"), f"platform_service_topology.{service_id}.edge.title")
                 require_str(
                     edge.get("description"),
-                    f"lv3_service_topology.{service_id}.edge.description",
+                    f"platform_service_topology.{service_id}.edge.description",
                 )
-                require_str(edge.get("meta"), f"lv3_service_topology.{service_id}.edge.meta")
+                require_str(edge.get("meta"), f"platform_service_topology.{service_id}.edge.meta")
                 if "action_url" in edge:
-                    require_str(edge.get("action_url"), f"lv3_service_topology.{service_id}.edge.action_url")
+                    require_str(edge.get("action_url"), f"platform_service_topology.{service_id}.edge.action_url")
                 if "action_label" in edge:
                     require_str(
                         edge.get("action_label"),
-                        f"lv3_service_topology.{service_id}.edge.action_label",
+                        f"platform_service_topology.{service_id}.edge.action_label",
                     )
             if kind == "proxy":
-                require_str(edge.get("upstream"), f"lv3_service_topology.{service_id}.edge.upstream")
+                require_str(edge.get("upstream"), f"platform_service_topology.{service_id}.edge.upstream")
                 if "root_proxy_path" in edge:
                     root_proxy_path = require_str(
                         edge.get("root_proxy_path"),
-                        f"lv3_service_topology.{service_id}.edge.root_proxy_path",
+                        f"platform_service_topology.{service_id}.edge.root_proxy_path",
                     )
                     if not root_proxy_path.startswith("/"):
-                        raise ValueError(f"lv3_service_topology.{service_id}.edge.root_proxy_path must start with '/'")
+                        raise ValueError(
+                            f"platform_service_topology.{service_id}.edge.root_proxy_path must start with '/'"
+                        )
 
     return service_name, public_hostname
 
@@ -770,9 +776,9 @@ def validate_host_vars() -> dict[str, Any]:
         )
     validate_network_policy(host_vars.get("network_policy"), "host_vars.network_policy", guest_names)
 
-    topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
+    topology = require_mapping(host_vars.get("platform_service_topology"), "host_vars.platform_service_topology")
     if not topology:
-        raise ValueError("host_vars.lv3_service_topology must not be empty")
+        raise ValueError("host_vars.platform_service_topology must not be empty")
 
     service_names: set[str] = set()
     public_hostnames: set[str] = set()
@@ -1020,7 +1026,7 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
     unknown_services = set(services.keys()) - allowed_service_ids
     if missing_topology_services or unknown_services:
         raise ValueError(
-            "config/health-probe-catalog.json.services must include all canonical lv3_service_topology services and only known platform services"
+            "config/health-probe-catalog.json.services must include all canonical platform_service_topology services and only known platform services"
         )
 
     expected_monitors: dict[str, dict[str, Any]] = {}

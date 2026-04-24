@@ -543,7 +543,7 @@ def build_service_catalog(
     lane_catalog: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     services: dict[str, dict[str, Any]] = {}
-    topology = host_vars["lv3_service_topology"]
+    topology = host_vars["platform_service_topology"]
     guest_ips = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     tailscale_proxy_by_name = {
         normalize_key(proxy["name"]): proxy for proxy in host_vars.get("proxmox_tailscale_tcp_proxies", [])

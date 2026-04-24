@@ -41,7 +41,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
                 }
             ]
         }
-        host_vars = {"lv3_service_topology": {}}
+        host_vars = {"platform_service_topology": {}}
         public_edge_defaults = {
             "public_edge_authenticated_sites": {},
             "public_edge_extra_sites": [],

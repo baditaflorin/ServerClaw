@@ -26,7 +26,7 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
     defaults = load_yaml(ROLE_DEFAULTS)
 
     assert defaults["glitchtip_service_topology"] == (
-        "{{ hostvars['proxmox-host'].lv3_service_topology | service_topology_get('glitchtip') }}"
+        "{{ hostvars['proxmox-host'].platform_service_topology | service_topology_get('glitchtip') }}"
     )
     assert (
         defaults["glitchtip_internal_port"]
