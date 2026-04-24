@@ -3217,6 +3217,8 @@ platform_service_topology:
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}"
     public_hostname: ntfy.{{ platform_domain }}
     exposure_model: edge-published
+    urls:
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}"
     observability:
       guest_dashboard: false
       service_telemetry: false
