@@ -1,3 +1,4 @@
 ---
 - import_playbook: ../services/postgres-vm.yml
 - import_playbook: ../services/backup-vm.yml
+- import_playbook: ../services/minio.yml
