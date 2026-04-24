@@ -284,7 +284,7 @@ proxmox_guests:
     name: nginx-lv3
     role: nginx
     proxmox_firewall_enabled: false
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.10
     cidr: 24
     gateway4: 10.10.10.1
@@ -307,7 +307,7 @@ proxmox_guests:
     name: docker-runtime-lv3
     role: docker-runtime
     proxmox_firewall_enabled: false
-    template_key: lv3-docker-host
+    template_key: docker-host
     ipv4: 10.10.10.20
     cidr: 24
     gateway4: 10.10.10.1
@@ -329,7 +329,7 @@ proxmox_guests:
   - vmid: 130
     name: docker-build-lv3
     role: docker-build
-    template_key: lv3-docker-host
+    template_key: docker-host
     ipv4: 10.10.10.30
     cidr: 24
     gateway4: 10.10.10.1
@@ -355,7 +355,7 @@ proxmox_guests:
   - vmid: 140
     name: monitoring-lv3
     role: monitoring
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.40
     cidr: 24
     gateway4: 10.10.10.1
@@ -377,7 +377,7 @@ proxmox_guests:
   - vmid: 150
     name: postgres-lv3
     role: postgres
-    template_key: lv3-postgres-host
+    template_key: postgres-host
     ipv4: 10.10.10.50
     cidr: 24
     gateway4: 10.10.10.1
@@ -402,7 +402,7 @@ proxmox_guests:
   - vmid: 151
     name: postgres-replica-lv3
     role: postgres-replica
-    template_key: lv3-postgres-host
+    template_key: postgres-host
     ipv4: 10.10.10.51
     cidr: 24
     gateway4: 10.10.10.1
@@ -430,7 +430,7 @@ proxmox_guests:
   - vmid: 160
     name: backup-lv3
     role: backup
-    template_key: lv3-ops-base
+    template_key: ops-base
     ipv4: 10.10.10.60
     cidr: 24
     gateway4: 10.10.10.1
@@ -459,7 +459,7 @@ proxmox_guests:
   - vmid: 170
     name: coolify-lv3
     role: coolify
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.70
     cidr: 24
     gateway4: 10.10.10.1
@@ -482,7 +482,7 @@ proxmox_guests:
   - vmid: 171
     name: coolify-apps-lv3
     role: coolify-apps
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.71
     cidr: 24
     gateway4: 10.10.10.1
@@ -505,7 +505,7 @@ proxmox_guests:
   - vmid: 180
     name: artifact-cache-lv3
     role: artifact-cache
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.80
     cidr: 24
     gateway4: 10.10.10.1
@@ -528,7 +528,7 @@ proxmox_guests:
   - vmid: 190
     name: runtime-ai-lv3
     role: runtime-ai
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.90
     cidr: 24
     gateway4: 10.10.10.1
@@ -550,7 +550,7 @@ proxmox_guests:
   - vmid: 191
     name: runtime-general-lv3
     role: runtime-general
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.91
     cidr: 24
     gateway4: 10.10.10.1
@@ -572,7 +572,7 @@ proxmox_guests:
   - vmid: 192
     name: runtime-control-lv3
     role: runtime-control
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.92
     cidr: 24
     gateway4: 10.10.10.1
@@ -594,7 +594,7 @@ proxmox_guests:
   - vmid: 121
     name: runtime-comms-lv3
     role: runtime-comms
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.21
     cidr: 24
     gateway4: 10.10.10.1
@@ -616,7 +616,7 @@ proxmox_guests:
   - vmid: 122
     name: runtime-apps-lv3
     role: runtime-apps
-    template_key: lv3-debian-base
+    template_key: debian-base
     ipv4: 10.10.10.22
     cidr: 24
     gateway4: 10.10.10.1
@@ -638,7 +638,7 @@ proxmox_guests:
   - vmid: 152
     name: postgres-apps-lv3
     role: postgres-apps
-    template_key: lv3-postgres-host
+    template_key: postgres-host
     ipv4: 10.10.10.52
     cidr: 24
     gateway4: 10.10.10.1
@@ -666,7 +666,7 @@ proxmox_guests:
   - vmid: 154
     name: postgres-data-lv3
     role: postgres-data
-    template_key: lv3-postgres-host
+    template_key: postgres-host
     ipv4: 10.10.10.54
     cidr: 24
     gateway4: 10.10.10.1

@@ -55,22 +55,22 @@ bootstrap_authorized_key_path: >-
   {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PUBLIC_KEY') | default(repo_shared_bootstrap_public_key_path, true) }}
 
 proxmox_vm_templates:
-  lv3-debian-base:
+  debian-base:
     vmid: 9000
-    name: lv3-debian-base
+    name: "{{ platform_identity.config_prefix }}-debian-base"
     source_template: debian13-cloud-template
-  lv3-docker-host:
+  docker-host:
     vmid: 9001
-    name: lv3-docker-host
-    source_template: lv3-debian-base
-  lv3-postgres-host:
+    name: "{{ platform_identity.config_prefix }}-docker-host"
+    source_template: debian-base
+  postgres-host:
     vmid: 9002
-    name: lv3-postgres-host
-    source_template: lv3-debian-base
-  lv3-ops-base:
+    name: "{{ platform_identity.config_prefix }}-postgres-host"
+    source_template: debian-base
+  ops-base:
     vmid: 9003
-    name: lv3-ops-base
-    source_template: lv3-debian-base
+    name: "{{ platform_identity.config_prefix }}-ops-base"
+    source_template: debian-base
 proxmox_storage_id: local
 proxmox_snippets_storage_id: local
 proxmox_guest_ci_user: ops

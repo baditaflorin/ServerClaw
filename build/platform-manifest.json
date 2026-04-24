@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.163",
+  "repo_version": "0.178.164",
   "platform_version": "0.178.149",
-  "generated_at": "2026-04-24T06:26:31Z",
-  "next_refresh_at": "2026-04-24T07:26:31Z",
+  "generated_at": "2026-04-24T07:45:21Z",
+  "next_refresh_at": "2026-04-24T08:45:21Z",
   "environment": "production",
   "identity": {
-    "platform_name": "example.com",
-    "operator": "Platform Operator",
+    "platform_name": "0fork.com",
+    "operator": "0fork Clone Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.162",
+    "last_version": "0.178.163",
     "deployed_at": "2026-04-24",
-    "summary": "ADR 0438 Phase 5 (partial): `common_openbao_compose_env_openbao_address` now derived from `platform_service_topology.openbao.private_ip` in `group_vars/all/main.yml` \u2014 eliminates last hardcoded production IP from `fork-overrides.yml`; fork deployments automatically get the correct OpenBao address from their topology inventory `openbao_postgres_backend/defaults/main.yml`: `openbao_postgres_connect_role` changed from hardcoded `lv3_openbao_connect_all` to `{{ platform_sql_prefix }}_openbao_connect_all` \u2014 dead-code hardcoding removed",
-    "release_notes_url": "docs/release-notes/0.178.163.md"
+    "summary": "ADR 0438 Phase 6: `proxmox_vm_templates` keys renamed from `lv3-*` to generic names (`debian-base`, `docker-host`, `postgres-host`, `ops-base`); `proxmox_base_template` role default lookups fixed from broken Jinja2 double-interpolation to static key `'debian-base'`; all `template_key` references updated in `platform.yml`, `host_vars/proxmox-host.yml`, and `publication/templates/proxmox-host.yml` \u2014 unblocks `make converge-site` on 0fork.com",
+    "release_notes_url": "docs/release-notes/0.178.164.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6337,17 +6337,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.example.com",
+        "endpoint": "https://ops.0fork.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.example.com",
+        "endpoint": "https://windmill.0fork.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.example.com",
+        "endpoint": "https://api.0fork.com",
         "adr": "0092"
       }
     ],
