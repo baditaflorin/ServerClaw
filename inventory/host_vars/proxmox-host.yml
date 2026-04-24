@@ -2624,6 +2624,11 @@ platform_service_topology:
       proxy_send_timeout_seconds: 900
       security_headers_enabled: false
       crawl_policy_enabled: false
+    urls:
+      public: "https://minio.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}"
+      console_public: "https://minio-console.{{ platform_domain }}"
+      console_internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_console_port }}"
   glitchtip:
     service_name: glitchtip
     owning_vm: docker-runtime
