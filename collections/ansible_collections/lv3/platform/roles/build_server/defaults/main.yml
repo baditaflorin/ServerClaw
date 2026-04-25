@@ -15,7 +15,12 @@ build_server_apt_proxy_url: "http://{{ hostvars[playbook_execution_host_patterns
 build_server_buildkit_service_name: "{{ platform_identity.config_prefix }}-buildkitd"
 build_server_buildkit_container_name: "{{ platform_identity.config_prefix }}-buildkitd"
 build_server_buildkit_image: moby/buildkit:buildx-stable-1
-build_server_buildkit_builder_name: "{{ platform_identity.config_prefix }}-cache"
+build_server_buildkit_builder_name: >-
+  {{
+    platform_identity.config_prefix
+    | regex_replace('^[^a-zA-Z]+', '')
+    | default('platform', true)
+  }}-cache
 build_server_buildkit_config_dir: /etc/buildkit
 build_server_buildkit_config_file: /etc/buildkit/buildkitd.toml
 build_server_buildkit_socket_dir: /run/buildkit
