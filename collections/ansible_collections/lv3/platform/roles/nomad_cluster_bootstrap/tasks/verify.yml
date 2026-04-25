@@ -2,7 +2,7 @@
 - name: Wait for the expected Nomad nodes to join the cluster
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_cluster_bootstrap_cli_wrapper }}"
       - node
       - status
       - -json
@@ -42,7 +42,7 @@
 - name: Wait for the smoke service allocation on the build node
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_cluster_bootstrap_cli_wrapper }}"
       - job
       - allocs
       - -json
@@ -100,7 +100,7 @@
 - name: Dispatch the smoke batch job
   ansible.builtin.shell: |
     set -euo pipefail
-    /usr/local/bin/lv3-nomad job dispatch \
+    {{ nomad_cluster_bootstrap_cli_wrapper }} job dispatch \
       -meta "message={{ nomad_cluster_bootstrap_smoke_batch_message }}" \
       "{{ nomad_cluster_bootstrap_smoke_batch_job_name }}" \
       | awk -F'= ' '/Dispatched Job ID/ {print $2}'
@@ -118,7 +118,7 @@
 - name: Wait for the dispatched smoke batch allocation to complete on the runtime node
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_cluster_bootstrap_cli_wrapper }}"
       - job
       - allocs
       - -json

@@ -1,5 +1,6 @@
 ---
 nomad_cluster_bootstrap_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+nomad_cluster_bootstrap_cli_wrapper: "/usr/local/bin/{{ platform_identity.config_prefix }}-nomad"
 nomad_cluster_bootstrap_local_dir: "{{ repo_shared_local_root }}/nomad"
 nomad_cluster_bootstrap_local_tls_dir: "{{ nomad_cluster_bootstrap_local_dir }}/tls"
 nomad_cluster_bootstrap_local_tokens_dir: "{{ nomad_cluster_bootstrap_local_dir }}/tokens"

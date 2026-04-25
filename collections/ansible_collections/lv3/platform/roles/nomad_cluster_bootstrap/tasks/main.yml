@@ -135,7 +135,7 @@
 - name: Register the repo-managed Nomad smoke service job
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_cluster_bootstrap_cli_wrapper }}"
       - job
       - run
       - "{{ nomad_cluster_bootstrap_smoke_service_job_file_remote }}"
@@ -145,7 +145,7 @@
 - name: Register the repo-managed Nomad smoke batch job
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_cluster_bootstrap_cli_wrapper }}"
       - job
       - run
       - "{{ nomad_cluster_bootstrap_smoke_batch_job_file_remote }}"

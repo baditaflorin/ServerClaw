@@ -149,3 +149,13 @@ minio_verify_public_edge: false
 # on fresh fork deployments; run nginx_edge_publication manually once DNS
 # A-records are live and platform.yml has been regenerated for the fork.
 public_edge_skip_certbot: true
+
+# --- Nomad smoke service verification ---
+# The nomad_cluster_bootstrap role hardcodes the CLI wrapper as /usr/local/bin/lv3-nomad
+# and the smoke service expected text as "lv3 nomad smoke service". In a fork the
+# config_prefix is "0fork", so the wrapper is 0fork-nomad and the service
+# serves "0fork nomad smoke service". The role now derives the wrapper via
+# nomad_cluster_bootstrap_cli_wrapper but the default still needs to match the
+# config_prefix. Override the expected_text for the fork to avoid a false
+# assertion failure during the Nomad smoke service HTTP verify step.
+nomad_cluster_bootstrap_smoke_service_expected_text: "0fork nomad smoke service"
