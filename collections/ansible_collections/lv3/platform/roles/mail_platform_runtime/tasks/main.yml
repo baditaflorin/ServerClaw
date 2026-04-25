@@ -845,28 +845,6 @@
     delay: 0
     timeout: 120
 
-- name: Verify the private mail submission relay keeps STARTTLS disabled and accepts auth
-  ansible.builtin.shell: |
-    python3 - <<'PY'
-    import smtplib
-    from pathlib import Path
-
-    password = Path("{{ mail_platform_mailbox_password_file }}").read_text().strip()
-    with smtplib.SMTP("{{ ansible_host }}", {{ mail_platform_internal_submission_port }}, timeout=10) as client:
-        client.ehlo()
-        if "starttls" in client.esmtp_features:
-            raise SystemExit("internal submission relay unexpectedly advertises STARTTLS")
-        code, response = client.login("{{ mail_platform_mailbox_login }}", password)
-        if code != 235:
-            raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
-    PY
-  register: mail_platform_submission_auth_check
-  changed_when: false
-  retries: "{{ mail_platform_submission_auth_retries }}"
-  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
-  until: mail_platform_submission_auth_check.rc == 0
-  no_log: true
-
 - name: Inspect the mail gateway startup state before waiting on the API
   ansible.builtin.command:
     argv:
@@ -1017,6 +995,32 @@
   loop_control:
     label: "{{ item.localpart }}"
   changed_when: mail_platform_mailbox_bootstrap.json.status != 'unchanged'
+  no_log: true
+
+# Verify SMTP auth AFTER mailbox bootstrap so the account exists in Stalwart.
+# On a fresh deployment the server@ account is not present until the gateway
+# CRUD API upsert above runs (Stalwart stores accounts in its database, not
+# in the TOML config). Moving the check here makes it work on first converge.
+- name: Verify the private mail submission relay keeps STARTTLS disabled and accepts auth
+  ansible.builtin.shell: |
+    python3 - <<'PY'
+    import smtplib
+    from pathlib import Path
+
+    password = Path("{{ mail_platform_mailbox_password_file }}").read_text().strip()
+    with smtplib.SMTP("{{ ansible_host }}", {{ mail_platform_internal_submission_port }}, timeout=10) as client:
+        client.ehlo()
+        if "starttls" in client.esmtp_features:
+            raise SystemExit("internal submission relay unexpectedly advertises STARTTLS")
+        code, response = client.login("{{ mail_platform_mailbox_login }}", password)
+        if code != 235:
+            raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
+    PY
+  register: mail_platform_submission_auth_check
+  changed_when: false
+  retries: "{{ mail_platform_submission_auth_retries }}"
+  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
+  until: mail_platform_submission_auth_check.rc == 0
   no_log: true
 
 - name: Verify the mail gateway health endpoint
