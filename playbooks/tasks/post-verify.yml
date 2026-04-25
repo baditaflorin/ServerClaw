@@ -48,6 +48,21 @@
     playbook_execution_service_probe: "{{ playbook_execution_health_probe_catalog.services[service_health_probe_id] }}"
   changed_when: false
 
+- name: Apply service health probe overrides when defined
+  ansible.builtin.set_fact:
+    playbook_execution_service_probe: >-
+      {{
+        playbook_execution_service_probe
+        | combine(
+            playbook_execution_health_probe_overrides[service_health_probe_id],
+            recursive=true
+          )
+      }}
+  when:
+    - playbook_execution_health_probe_overrides is defined
+    - service_health_probe_id in (playbook_execution_health_probe_overrides | default({}))
+  changed_when: false
+
 - name: Run startup verification
   ansible.builtin.include_tasks: verify-probe.yml
   vars:

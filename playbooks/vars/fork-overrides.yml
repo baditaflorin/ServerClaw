@@ -159,3 +159,20 @@ public_edge_skip_certbot: true
 # config_prefix. Override the expected_text for the fork to avoid a false
 # assertion failure during the Nomad smoke service HTTP verify step.
 nomad_cluster_bootstrap_smoke_service_expected_text: "0fork nomad smoke service"
+
+# --- Nomad health probe catalog overrides ---
+# config/health-probe-catalog.json hardcodes lv3-nomad for both the
+# liveness systemd unit and the readiness CLI argv.  On 0fork the systemd
+# service and wrapper are both named 0fork-nomad.  The post-verify task
+# deep-merges these overrides on top of the catalog entry before running.
+playbook_execution_health_probe_overrides:
+  nomad:
+    liveness:
+      unit: "0fork-nomad"
+      description: "The 0fork-nomad systemd unit is active on monitoring."
+    readiness:
+      argv:
+        - "/usr/local/bin/0fork-nomad"
+        - "node"
+        - "status"
+        - "-json"
