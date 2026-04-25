@@ -109,7 +109,10 @@ mail_platform_gateway_trace_service_namespace: lv3
 mail_platform_gateway_trace_environment: lv3
 mail_platform_gateway_trace_otlp_endpoint: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
 mail_platform_gateway_sentry_dsn_local_file: "{{ repo_shared_local_root }}/glitchtip/mail-gateway.dsn"
-mail_platform_gateway_sentry_dsn: "{{ lookup('ansible.builtin.file', mail_platform_gateway_sentry_dsn_local_file, errors='ignore') | trim }}"
+# lookup(..., errors='ignore') returns Python None (not '') when the file is absent.
+# default('', true) coerces None → '' so the template renders SENTRY_DSN= (empty)
+# rather than SENTRY_DSN=None (a literal string that sentry_sdk rejects as an invalid DSN).
+mail_platform_gateway_sentry_dsn: "{{ lookup('ansible.builtin.file', mail_platform_gateway_sentry_dsn_local_file, errors='ignore') | default('', true) | trim }}"
 mail_platform_gateway_sentry_environment: "{{ env | default('production') }}"
 mail_platform_gateway_sentry_release: "{{ lookup('ansible.builtin.file', repo_shared_root ~ '/VERSION') | trim }}"
 mail_platform_metrics_username: prometheus
