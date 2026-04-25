@@ -109,6 +109,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     status_code:
       - 200
       - 429
@@ -134,6 +135,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     return_content: true
     status_code: 200
   register: common_openbao_compose_env_unsealed_status
@@ -157,6 +159,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     status_code:
       - 200
       - 429
@@ -198,6 +201,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -217,6 +221,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     return_content: true
     status_code: 200
   register: common_openbao_compose_env_secret_recovery_seal_status
@@ -231,6 +236,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/unseal"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     body_format: json
     body:
       key: "{{ item }}"
@@ -250,6 +256,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     status_code:
       - 200
       - 429
@@ -267,6 +274,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -288,6 +296,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
@@ -308,6 +317,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -329,6 +339,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
     method: PUT
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
@@ -349,6 +360,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
@@ -371,6 +383,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/role-id"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -406,6 +419,7 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/secret-id"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
