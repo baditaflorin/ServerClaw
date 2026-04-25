@@ -1,4 +1,8 @@
-job "lv3-nomad-smoke-batch" {
+{# Rendered by lv3.platform.nomad_cluster_bootstrap (ADR 0438). #}
+{# Single source of truth for the smoke batch job; per-deployment naming    #}
+{# is derived from platform_identity.config_prefix. Do not edit the rendered #}
+{# .hcl files in config/nomad/jobs/ directly. #}
+job "{{ nomad_cluster_bootstrap_smoke_batch_job_name }}" {
   region      = "global"
   datacenters = ["dc1"]
   type        = "batch"
@@ -24,7 +28,7 @@ job "lv3-nomad-smoke-batch" {
           "-lc",
           "mkdir -p /verification && printf '%s\n' \"$NOMAD_META_message\" > /verification/last-run.log && date -Iseconds >> /verification/last-run.log && cat /verification/last-run.log",
         ]
-        volumes = ["/var/lib/nomad/verification/lv3-nomad-smoke-batch:/verification"]
+        volumes = ["{{ nomad_cluster_bootstrap_smoke_batch_output_dir }}:/verification"]
       }
 
       resources {

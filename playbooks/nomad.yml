@@ -95,14 +95,9 @@
         nomad_cluster_client: false
 
 - name: Converge the Nomad clients on the runtime, runtime-general, runtime-ai, runtime-control, and build guests
-  hosts: >-
-    {{
-      (
-        'docker-runtime-staging:docker-build-staging'
-        if (env | default('production')) == 'staging'
-        else 'docker-runtime:runtime-general:runtime-ai:runtime-control:docker-build'
-      )
-    }}
+  # Inline single-line ternary so platform.ansible.execution_scopes._render_hosts_expression
+  # can parse it (the parser regex does not handle wrapping parentheses).
+  hosts: "{{ 'docker-runtime-staging:docker-build-staging' if (env | default('production')) == 'staging' else 'docker-runtime:runtime-general:runtime-ai:runtime-control:docker-build' }}"
   become: true
   gather_facts: true
   vars_files:

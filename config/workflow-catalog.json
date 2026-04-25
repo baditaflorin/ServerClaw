@@ -2311,8 +2311,8 @@
         "collections/ansible_collections/lv3/platform/playbooks/groups/automation.yml",
         "collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/tasks/main.yml",
-        "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl",
-        "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/templates/nomad-smoke-service.nomad.hcl.j2",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/templates/nomad-smoke-batch.nomad.hcl.j2",
         "inventory/host_vars/proxmox-host.yml",
         "scripts/generate_platform_vars.py"
       ],

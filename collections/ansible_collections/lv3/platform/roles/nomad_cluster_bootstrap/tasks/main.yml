@@ -10,9 +10,9 @@
       - nomad_cluster_bootstrap_remote_ca_cert_file
       - nomad_cluster_bootstrap_remote_job_dir
       - nomad_cluster_bootstrap_server_local_url
-      - nomad_cluster_bootstrap_smoke_service_job_file_local
+      - nomad_cluster_bootstrap_smoke_service_job_template
       - nomad_cluster_bootstrap_smoke_service_job_file_remote
-      - nomad_cluster_bootstrap_smoke_batch_job_file_local
+      - nomad_cluster_bootstrap_smoke_batch_job_template
       - nomad_cluster_bootstrap_smoke_batch_job_file_remote
       - nomad_cluster_bootstrap_build_host
       - nomad_cluster_bootstrap_runtime_host
@@ -117,16 +117,16 @@
     mode: "0755"
 
 - name: Install the repo-managed Nomad smoke service job
-  ansible.builtin.copy:
-    src: "{{ nomad_cluster_bootstrap_smoke_service_job_file_local }}"
+  ansible.builtin.template:
+    src: "{{ nomad_cluster_bootstrap_smoke_service_job_template }}"
     dest: "{{ nomad_cluster_bootstrap_smoke_service_job_file_remote }}"
     owner: root
     group: root
     mode: "0644"
 
 - name: Install the repo-managed Nomad smoke batch job
-  ansible.builtin.copy:
-    src: "{{ nomad_cluster_bootstrap_smoke_batch_job_file_local }}"
+  ansible.builtin.template:
+    src: "{{ nomad_cluster_bootstrap_smoke_batch_job_template }}"
     dest: "{{ nomad_cluster_bootstrap_smoke_batch_job_file_remote }}"
     owner: root
     group: root

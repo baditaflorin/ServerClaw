@@ -270,6 +270,11 @@
   register: nomad_oidc_auth_binding_rules_list
 
 - name: Identify existing admin binding rule
+  # selectattr() raises "object of type 'dict' has no attribute 'X'" when an
+  # element lacks the attribute key. Nomad's binding-rules list can include
+  # entries missing AuthMethod or BindName during partial bootstrap states
+  # (e.g. role-only entries). Filter on 'defined' first so the comparison
+  # only runs on entries that actually carry both keys.
   ansible.builtin.set_fact:
     nomad_oidc_auth_admin_binding_exists: >-
       {% set rules = nomad_oidc_auth_binding_rules_list.json
@@ -278,6 +283,8 @@
              and nomad_oidc_auth_binding_rules_list.json is not mapping)
          else [] %}
       {{ rules
+         | selectattr('AuthMethod', 'defined')
+         | selectattr('BindName', 'defined')
          | selectattr('AuthMethod', 'equalto', nomad_oidc_auth_method_name)
          | selectattr('BindName', 'equalto', nomad_oidc_auth_admin_role_name)
          | list | length > 0 }}
@@ -288,6 +295,8 @@
              and nomad_oidc_auth_binding_rules_list.json is not mapping)
          else [] %}
       {{ rules
+         | selectattr('AuthMethod', 'defined')
+         | selectattr('BindName', 'defined')
          | selectattr('AuthMethod', 'equalto', nomad_oidc_auth_method_name)
          | selectattr('BindName', 'equalto', nomad_oidc_auth_reader_role_name)
          | list | length > 0 }}

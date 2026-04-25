@@ -5,8 +5,8 @@ status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: claude
-branch: claude/phase3-credentials
-worktree_path: .claude/worktrees/phase3-credentials
+branch: claude/reverent-cray-37f3c3
+worktree_path: .claude/worktrees/reverent-cray-37f3c3
 doc: docs/adr/0438-generic-by-construction.md
 depends_on:
   - adr-0407-generic-by-default
@@ -103,6 +103,10 @@ phases:
       - "fix(roles): parameterize lv3- identifiers in 68 role defaults (203 occurrences — container_name, policy_name, network_name, service_image_name)"
       - "fix(tests): update 6 role defaults test files to expect platform_identity template values"
       - "fix(openbao): replace 4 !unsafe SQL grants with Jinja-escape pattern (Phase 0 ef1445216)"
+      - "fix(nomad): replace per-deployment lv3-/0fork- smoke job HCL files with single in-role Jinja template; job/service names derive from platform_identity.config_prefix"
+      - "fix(nomad): rewrite playbooks/nomad.yml multi-host-group hosts expression to single-line ternary (ansible_scope_runner regex parser does not handle parenthesised folded scalars)"
+      - "fix(nomad_oidc_auth): guard binding-rule equality checks with selectattr('AuthMethod','defined') and selectattr('BindName','defined') to handle Nomad list-rules dict shapes that omit fields"
+      - "fix(postgres_vm): replace hard pgaudit table assertion with probe + deferred-grant pattern (loop only over to_regclass-confirmed tables) so postgres can converge before downstream services that own the schemas (windmill, etc.)"
     remaining:
       - "Rename platform_service_topology fact to platform_service_topology (50+ callsites)"
   phase_3_unified_credentials:

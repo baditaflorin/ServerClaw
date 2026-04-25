@@ -311,7 +311,14 @@
     label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
   when: postgres_vm_pgaudit_enabled | bool
 
-- name: Assert pgaudit sensitive tables exist before grants are applied
+- name: Probe pgaudit sensitive tables (defer grants until owning service has migrated)
+  # Sensitive tables are owned by application services that converge AFTER
+  # postgres in site.yml. On a fresh bootstrap (and after schema-bumping
+  # service upgrades) the tables don't exist yet — the previous behaviour
+  # hard-failed the postgres role and blocked the rest of the play. Probe
+  # without failing; downstream grant tasks then iterate only over the
+  # tables that actually exist on this run, and the grants converge
+  # automatically on the next pass once the owning service has migrated.
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -326,8 +333,34 @@
     label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
   register: postgres_vm_pgaudit_relation_checks
   changed_when: false
-  failed_when: postgres_vm_pgaudit_relation_checks.stdout | trim != "t"
+  failed_when: false
   when: postgres_vm_pgaudit_enabled | bool
+
+- name: Build the list of pgaudit grants whose target table currently exists
+  ansible.builtin.set_fact:
+    postgres_vm_pgaudit_existing_grants: >-
+      {{
+        postgres_vm_pgaudit_relation_checks.results
+        | default([])
+        | selectattr('stdout', 'defined')
+        | selectattr('stdout', 'search', '^t$')
+        | map(attribute='item')
+        | list
+      }}
+  when: postgres_vm_pgaudit_enabled | bool
+
+- name: Report pgaudit grants deferred because the owning table does not exist yet
+  ansible.builtin.debug:
+    msg: >-
+      Deferring pgaudit grant for {{ item.item.database }}.{{ item.item.schema }}.{{ item.item.table }}
+      until the owning service has created it. The next postgres converge will pick it up.
+  loop: "{{ postgres_vm_pgaudit_relation_checks.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.database }}.{{ item.item.schema }}.{{ item.item.table }}"
+  when:
+    - postgres_vm_pgaudit_enabled | bool
+    - item.stdout is defined
+    - (item.stdout | trim) != 't'
 
 - name: Grant schema usage to the pgaudit audit role
   become: true
@@ -342,7 +375,7 @@
       - -c
       - "GRANT USAGE ON SCHEMA {{ item.schema }} TO {{ postgres_vm_pgaudit_audit_role }}"
   register: postgres_vm_pgaudit_schema_grant
-  loop: "{{ postgres_vm_pgaudit_table_grants_for_host }}"
+  loop: "{{ postgres_vm_pgaudit_existing_grants | default([]) }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}"
   changed_when: false
@@ -364,7 +397,7 @@
       - -c
       - "GRANT {{ item.privileges | map('upper') | join(', ') }} ON TABLE {{ item.schema }}.{{ item.table }} TO {{ postgres_vm_pgaudit_audit_role }}"
   register: postgres_vm_pgaudit_table_grant
-  loop: "{{ postgres_vm_pgaudit_table_grants_for_host }}"
+  loop: "{{ postgres_vm_pgaudit_existing_grants | default([]) }}"
   loop_control:
     label: "{{ item.database }}.{{ item.schema }}.{{ item.table }}"
   changed_when: false

@@ -1,4 +1,8 @@
-job "0fork-nomad-smoke-service" {
+{# Rendered by lv3.platform.nomad_cluster_bootstrap (ADR 0438). #}
+{# Single source of truth for the smoke service job; per-deployment naming  #}
+{# is derived from platform_identity.config_prefix. Do not edit the rendered #}
+{# .hcl files in config/nomad/jobs/ directly. #}
+job "{{ nomad_cluster_bootstrap_smoke_service_job_name }}" {
   region      = "global"
   datacenters = ["dc1"]
   type        = "service"
@@ -16,7 +20,7 @@ job "0fork-nomad-smoke-service" {
       mode = "host"
 
       port "http" {
-        static = 18180
+        static = {{ nomad_cluster_bootstrap_smoke_service_port }}
       }
     }
 
@@ -35,7 +39,7 @@ job "0fork-nomad-smoke-service" {
         command = "sh"
         args = [
           "-lc",
-          "mkdir -p /srv/www && printf '0fork nomad smoke service\\n' > /srv/www/index.html && exec python3 -m http.server 18180 --bind 0.0.0.0 --directory /srv/www",
+          "mkdir -p /srv/www && printf '{{ nomad_cluster_bootstrap_smoke_service_expected_text }}\\n' > /srv/www/index.html && exec python3 -m http.server {{ nomad_cluster_bootstrap_smoke_service_port }} --bind 0.0.0.0 --directory /srv/www",
         ]
         ports = ["http"]
       }
@@ -46,7 +50,7 @@ job "0fork-nomad-smoke-service" {
       }
 
       service {
-        name = "0fork-nomad-smoke-service"
+        name = "{{ nomad_cluster_bootstrap_smoke_service_job_name }}"
         provider = "nomad"
         port = "http"
         tags = ["repo-managed", "adr-0232", "smoke"]

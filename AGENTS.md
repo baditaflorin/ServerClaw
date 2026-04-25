@@ -564,13 +564,18 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 | **Clients** | docker-runtime, runtime-general, runtime-ai, runtime-control, docker-build |
 | **CLI wrapper** | `/usr/local/bin/lv3-nomad` on all cluster nodes (auto-loads token) |
 | **Playbook** | `playbooks/nomad.yml` |
-| **Job definitions** | `config/nomad/jobs/` |
+| **Job definitions** | In-role Jinja templates (e.g. `collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/templates/nomad-smoke-*.nomad.hcl.j2`) |
 | **Bootstrap token** | `.local/nomad/tokens/bootstrap-management.token` |
 
 **Agent tools:** `list-nomad-jobs`, `get-nomad-job-status`, `dispatch-nomad-job`
 
-When creating or modifying Nomad jobs, place the job spec in `config/nomad/jobs/`
-and register it through the Nomad playbook or the `lv3-nomad job run` wrapper.
+When creating or modifying Nomad jobs, render them from a single Jinja
+template inside the owning role's `templates/` directory and use
+`ansible.builtin.template:` (NOT `copy:`) so per-deployment naming derives
+from `platform_identity.config_prefix` (ADR 0438). Register the job through
+the Nomad playbook or the `{{ platform_identity.config_prefix }}-nomad job run`
+wrapper. Do NOT add per-deployment `.hcl` files under `config/nomad/jobs/` —
+that pattern was retired by ADR 0438.
 
 ## Service VM Migration (ADR 0416 + ADR 0417) — CRITICAL
 

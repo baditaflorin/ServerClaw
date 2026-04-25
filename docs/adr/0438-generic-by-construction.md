@@ -87,6 +87,10 @@ code ships.
 | 5 | Dynamic PostgreSQL role `creation_statements` hardcoded `GRANT lv3_openbao_connect_all …` inside `!unsafe` | `!unsafe` disables Jinja; literal prefix unreachable by override | Jinja-escape pattern + lint |
 | 6 | Overriding `openbao_local_artifact_dir` alone was insufficient — eight child paths had to be overridden individually | Shard generator (`scripts/ansible_scope_runner.py`) bakes child paths eagerly at shard-render time | shard emits template strings |
 | 7 | OpenBao's pg_hba entry was missing — its PostgreSQL user is provisioned by one role and consumed by another | No `platform_postgres_clients` entry for cross-role credential lifecycles | credentials registry expansion |
+| 8 | Nomad smoke jobs shipped as two committed `.hcl` files per deployment (`lv3-nomad-smoke-*.nomad.hcl`, `0fork-nomad-smoke-*.nomad.hcl`); fork bootstrap referenced the wrong filename and `copy:` failed | Per-deployment HCL files duplicate the same content with only the prefix swapped — generic-by-construction violation | extract to single in-role Jinja `template:` rendering `{{ platform_identity.config_prefix }}-…` (Phase 2, this session) |
+| 9 | `playbooks/nomad.yml` multi-host-group play used a folded-scalar (`>-`) parenthesised ternary for `hosts:`, which `scripts/ansible_scope_runner.py:201` cannot parse — bootstrap aborted before any task ran | Scope-runner regex predates multi-line ternary host expressions | rewrite as single-line ternary; longer term, the scope runner should evaluate via Ansible rather than regex (tracked under Phase 4) |
+| 10 | `nomad_oidc_auth` failed `BindName is undefined` on second converge | Nomad CLI `acl binding-rule list -json` returns dicts that omit absent fields (no `BindName` key when type ≠ `role`/`policy`); equality test on the missing key raised | guard with `selectattr('AuthMethod','defined') \| selectattr('BindName','defined')` before equality (general-purpose pattern for any Nomad/Consul list-output reconciler) |
+| 11 | `postgres_vm` hard-asserted Windmill schema tables exist before applying pgaudit grants — but Windmill converges *after* postgres in `site.yml`, so the assertion always failed on first run | Cross-role ordering coupling without a "deferred grant" mechanism — `fork-overrides.yml` workaround was to disable pgaudit entirely | replace assertion with `to_regclass` probe + `selectattr` filter; grant tasks loop only over confirmed-existing tables; subsequent converges pick up the rest idempotently |
 
 Audit (ran 2026-04-23, see `workstreams/active/generic-by-construction.yaml`)
 surfaced **190+ instances of hardcoded `lv3_*` / `lv3-*` literals** across
@@ -409,8 +413,25 @@ a measurable failure class.
 - [ ] Replace 120+ literal `lv3-*` role-default identifiers with
       `{{ platform_identity.<flavor>_prefix }}-*` — in batches by role
       family (monitoring_*, proxmox_*, openbao_*, *_runtime).
-- [ ] Replace 4 `!unsafe` SQL grants with the Jinja-escape pattern.
+- [x] Replace 4 `!unsafe` SQL grants with the Jinja-escape pattern.
 - [ ] Replace 15 template literals.
+- [x] Replace duplicated per-deployment Nomad smoke-job HCL files with a
+      single in-role Jinja template (failure #8 above): names derive from
+      `platform_identity.config_prefix`, fork-overrides drops the
+      hand-tuned filename + expected-text overrides.
+- [x] Rewrite `playbooks/nomad.yml` multi-host-group `hosts:` from a
+      folded-scalar parenthesised ternary to a single-line ternary
+      (failure #9 above). Long-term fix tracked under Phase 4 (replace
+      regex parser in `scripts/ansible_scope_runner.py` with a real
+      Ansible-driven evaluator).
+- [x] Add `selectattr('AuthMethod','defined') | selectattr('BindName','defined')`
+      guards in `nomad_oidc_auth` reconciliation (failure #10 above).
+      Pattern is reusable for any role that diff-reconciles against a
+      Nomad/Consul list-output where optional fields may be absent.
+- [x] Convert `postgres_vm` pgaudit grants from hard assertion to
+      `to_regclass` probe + deferred-grant loop (failure #11 above).
+      Removes the cross-role ordering coupling and the
+      `postgres_vm_pgaudit_enabled: false` fork-override workaround.
 - [ ] Each batch: lint must go green before merge.
 
 ### Phase 3 — Unified credential registry (target: v0.181.0)

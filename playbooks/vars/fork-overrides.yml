@@ -151,22 +151,18 @@ minio_verify_public_edge: false
 public_edge_skip_certbot: true
 
 # --- Nomad smoke service verification ---
-# The nomad_cluster_bootstrap role hardcodes the CLI wrapper as /usr/local/bin/lv3-nomad
-# and the smoke service expected text as "lv3 nomad smoke service". In a fork the
-# config_prefix is "0fork", so the wrapper is 0fork-nomad and the service
-# serves "0fork nomad smoke service". The role now derives the wrapper via
-# nomad_cluster_bootstrap_cli_wrapper but the default still needs to match the
-# config_prefix. Override the expected_text for the fork to avoid a false
-# assertion failure during the Nomad smoke service HTTP verify step.
-nomad_cluster_bootstrap_smoke_service_expected_text: "0fork nomad smoke service"
+# Now derived from platform_identity.config_prefix in the role default
+# (ADR 0438 — fork-override removed). Kept as a marker that this entry
+# was historically hand-overridden; delete once verified green on a
+# fresh fork bootstrap.
 
 # --- pgaudit sensitive-table grants ---
-# The postgres_vm role asserts that Windmill's schema tables (audit_partitioned,
-# password, resource, token, variable) exist before applying pgaudit grants.
-# On a fresh fork bootstrap, Windmill converges AFTER postgres in site.yml,
-# so these tables don't exist yet — the assertion always fails on first run.
-# Disable pgaudit on fork deployments; re-enable after Windmill has migrated.
-postgres_vm_pgaudit_enabled: false
+# Historical fork-override: postgres_vm used to hard-assert Windmill's schema
+# tables exist before applying pgaudit grants, which always failed on a fresh
+# bootstrap because Windmill converges after postgres. ADR 0438 Phase 2 replaced
+# the assertion with a to_regclass probe + deferred-grant loop, so the role
+# converges idempotently without this override. Kept as a marker; remove once
+# verified green on a fresh fork bootstrap.
 
 # --- Windmill artifact path isolation ---
 # windmill_local_artifact_dir normally resolves to repo_shared_local_root/windmill,

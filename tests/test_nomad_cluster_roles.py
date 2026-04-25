@@ -13,8 +13,8 @@ BOOTSTRAP_VERIFY_TASKS = ROLE_ROOT / "nomad_cluster_bootstrap" / "tasks" / "veri
 MEMBER_TEMPLATE = ROLE_ROOT / "nomad_cluster_member" / "templates" / "nomad.hcl.j2"
 CLI_WRAPPER_TEMPLATE = ROLE_ROOT / "nomad_cluster_member" / "templates" / "lv3-nomad.sh.j2"
 SERVICE_TEMPLATE = ROLE_ROOT / "nomad_cluster_member" / "templates" / "lv3-nomad.service.j2"
-SMOKE_SERVICE_JOB = REPO_ROOT / "config" / "nomad" / "jobs" / "lv3-nomad-smoke-service.nomad.hcl"
-SMOKE_BATCH_JOB = REPO_ROOT / "config" / "nomad" / "jobs" / "lv3-nomad-smoke-batch.nomad.hcl"
+SMOKE_SERVICE_JOB_TEMPLATE = ROLE_ROOT / "nomad_cluster_bootstrap" / "templates" / "nomad-smoke-service.nomad.hcl.j2"
+SMOKE_BATCH_JOB_TEMPLATE = ROLE_ROOT / "nomad_cluster_bootstrap" / "templates" / "nomad-smoke-batch.nomad.hcl.j2"
 
 
 def load_tasks(path: Path) -> list[dict]:
@@ -60,11 +60,17 @@ def test_nomad_member_tasks_install_the_binary_and_cli_wrapper() -> None:
 
 def test_nomad_bootstrap_defaults_track_controller_artifacts_and_smoke_jobs() -> None:
     defaults = BOOTSTRAP_DEFAULTS.read_text()
-    assert "/.local/nomad" in defaults
+    assert "{{ repo_shared_local_root }}/nomad" in defaults
     assert "nomad-agent-ca-key.pem" in defaults
     assert "bootstrap-management.token" in defaults
-    assert "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl" in defaults
-    assert "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl" in defaults
+    # ADR 0438: smoke jobs are now rendered from a single in-role template
+    # (no per-deployment .hcl files in config/nomad/jobs/). The defaults
+    # reference the template names, and the rendered remote filename is
+    # derived from platform_identity.config_prefix.
+    assert "nomad_cluster_bootstrap_smoke_service_job_template: nomad-smoke-service.nomad.hcl.j2" in defaults
+    assert "nomad_cluster_bootstrap_smoke_batch_job_template: nomad-smoke-batch.nomad.hcl.j2" in defaults
+    assert "{{ platform_identity.config_prefix }}-nomad-smoke-service.nomad.hcl" in defaults
+    assert "{{ platform_identity.config_prefix }}-nomad-smoke-batch.nomad.hcl" in defaults
     assert "nomad_cluster_bootstrap_runtime_host" in defaults
     assert "nomad_cluster_bootstrap_build_host" in defaults
     assert "nomad_cluster_bootstrap_build_ip" in defaults
@@ -134,13 +140,15 @@ def test_nomad_member_defaults_run_the_agent_as_root_for_tls_and_docker_access()
     assert "nomad_cluster_service_group: root" in defaults
 
 
-def test_nomad_smoke_service_registers_with_nomad_provider() -> None:
-    smoke_service_job = SMOKE_SERVICE_JOB.read_text()
-    assert 'provider = "nomad"' in smoke_service_job
+def test_nomad_smoke_service_template_registers_with_nomad_provider() -> None:
+    smoke_service_template = SMOKE_SERVICE_JOB_TEMPLATE.read_text()
+    assert 'provider = "nomad"' in smoke_service_template
+    # Job + service names derive from the single role default — see ADR 0438.
+    assert "{{ nomad_cluster_bootstrap_smoke_service_job_name }}" in smoke_service_template
 
 
-def test_nomad_smoke_batch_persists_a_runtime_verification_marker() -> None:
-    smoke_batch_job = SMOKE_BATCH_JOB.read_text()
-    assert "/var/lib/nomad/verification/lv3-nomad-smoke-batch:/verification" in smoke_batch_job
-    assert "$NOMAD_META_message" in smoke_batch_job
-    assert "/verification/last-run.log" in smoke_batch_job
+def test_nomad_smoke_batch_template_persists_a_runtime_verification_marker() -> None:
+    smoke_batch_template = SMOKE_BATCH_JOB_TEMPLATE.read_text()
+    assert "{{ nomad_cluster_bootstrap_smoke_batch_output_dir }}:/verification" in smoke_batch_template
+    assert "$NOMAD_META_message" in smoke_batch_template
+    assert "/verification/last-run.log" in smoke_batch_template

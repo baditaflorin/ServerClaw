@@ -28,12 +28,16 @@ nomad_cluster_bootstrap_expected_nodes:
   - "{{ nomad_cluster_bootstrap_runtime_host }}"
   - "{{ nomad_cluster_bootstrap_build_host }}"
 nomad_cluster_bootstrap_smoke_service_job_name: "{{ platform_identity.config_prefix }}-nomad-smoke-service"
-nomad_cluster_bootstrap_smoke_service_job_file_local: "{{ nomad_cluster_bootstrap_repo_root }}/config/nomad/jobs/{{ platform_identity.config_prefix }}-nomad-smoke-service.nomad.hcl"
+# Template source (resolved by Ansible's template lookup against the role's
+# templates/ directory). The .hcl file rendered to the remote node is named
+# from {{ platform_identity.config_prefix }} so each deployment lands on its
+# own per-deployment filename without duplicating the source artifact.
+nomad_cluster_bootstrap_smoke_service_job_template: nomad-smoke-service.nomad.hcl.j2
 nomad_cluster_bootstrap_smoke_service_job_file_remote: "{{ nomad_cluster_bootstrap_remote_job_dir }}/{{ platform_identity.config_prefix }}-nomad-smoke-service.nomad.hcl"
 nomad_cluster_bootstrap_smoke_service_port: 18180
-nomad_cluster_bootstrap_smoke_service_expected_text: lv3 nomad smoke service
+nomad_cluster_bootstrap_smoke_service_expected_text: "{{ platform_identity.config_prefix }} nomad smoke service"
 nomad_cluster_bootstrap_smoke_batch_job_name: "{{ platform_identity.config_prefix }}-nomad-smoke-batch"
-nomad_cluster_bootstrap_smoke_batch_job_file_local: "{{ nomad_cluster_bootstrap_repo_root }}/config/nomad/jobs/{{ platform_identity.config_prefix }}-nomad-smoke-batch.nomad.hcl"
+nomad_cluster_bootstrap_smoke_batch_job_template: nomad-smoke-batch.nomad.hcl.j2
 nomad_cluster_bootstrap_smoke_batch_job_file_remote: "{{ nomad_cluster_bootstrap_remote_job_dir }}/{{ platform_identity.config_prefix }}-nomad-smoke-batch.nomad.hcl"
 nomad_cluster_bootstrap_smoke_batch_message: adr-0232-live-apply batch verification
 nomad_cluster_bootstrap_smoke_batch_output_dir: /var/lib/nomad/verification/{{ platform_identity.config_prefix }}-nomad-smoke-batch
