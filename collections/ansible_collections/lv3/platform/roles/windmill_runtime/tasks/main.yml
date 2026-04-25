@@ -1808,7 +1808,6 @@
       # Note: default('', true) is required — default('') only replaces undefined, not None.
       - (windmill_bootstrap_identity_whoami.json.username | default('', true)) in ['', windmill_bootstrap_identity_username]
     fail_msg: "Windmill bootstrap API token did not resolve to the managed bootstrap identity."
-  no_log: true
 - name: Check whether the Windmill workspace already exists
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/workspaces/exists"
@@ -2261,7 +2260,8 @@
   ansible.builtin.assert:
     that:
       - item.local_file is string
-      - item.local_file | regex_search('^' ~ (windmill_worker_checkout_repo_root_local_dir | regex_escape) ~ '(/|$)')
+      # regex_search returns str|None; Ansible 2.18+ assert requires bool — use 'is not none'
+      - item.local_file | regex_search('^' ~ (windmill_worker_checkout_repo_root_local_dir | regex_escape) ~ '(/|$)') is not none
     fail_msg: >-
       Repo-managed Windmill script {{ item.path }} must resolve inside
       {{ windmill_worker_checkout_repo_root_local_dir }} so the runtime host can
