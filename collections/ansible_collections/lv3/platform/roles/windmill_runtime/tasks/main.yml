@@ -2640,3 +2640,4 @@
   when: windmill_remote_verification_enabled | bool
 - name: Verify Windmill health probes
   ansible.builtin.import_tasks: verify.yml
+  when: windmill_remote_verification_enabled | bool
