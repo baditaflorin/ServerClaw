@@ -272,12 +272,22 @@
 - name: Identify existing admin binding rule
   ansible.builtin.set_fact:
     nomad_oidc_auth_admin_binding_exists: >-
-      {{ nomad_oidc_auth_binding_rules_list.json | default([])
+      {% set rules = nomad_oidc_auth_binding_rules_list.json
+         if (nomad_oidc_auth_binding_rules_list.json is sequence
+             and nomad_oidc_auth_binding_rules_list.json is not string
+             and nomad_oidc_auth_binding_rules_list.json is not mapping)
+         else [] %}
+      {{ rules
          | selectattr('AuthMethod', 'equalto', nomad_oidc_auth_method_name)
          | selectattr('BindName', 'equalto', nomad_oidc_auth_admin_role_name)
          | list | length > 0 }}
     nomad_oidc_auth_reader_binding_exists: >-
-      {{ nomad_oidc_auth_binding_rules_list.json | default([])
+      {% set rules = nomad_oidc_auth_binding_rules_list.json
+         if (nomad_oidc_auth_binding_rules_list.json is sequence
+             and nomad_oidc_auth_binding_rules_list.json is not string
+             and nomad_oidc_auth_binding_rules_list.json is not mapping)
+         else [] %}
+      {{ rules
          | selectattr('AuthMethod', 'equalto', nomad_oidc_auth_method_name)
          | selectattr('BindName', 'equalto', nomad_oidc_auth_reader_role_name)
          | list | length > 0 }}

@@ -160,6 +160,14 @@ public_edge_skip_certbot: true
 # assertion failure during the Nomad smoke service HTTP verify step.
 nomad_cluster_bootstrap_smoke_service_expected_text: "0fork nomad smoke service"
 
+# --- pgaudit sensitive-table grants ---
+# The postgres_vm role asserts that Windmill's schema tables (audit_partitioned,
+# password, resource, token, variable) exist before applying pgaudit grants.
+# On a fresh fork bootstrap, Windmill converges AFTER postgres in site.yml,
+# so these tables don't exist yet — the assertion always fails on first run.
+# Disable pgaudit on fork deployments; re-enable after Windmill has migrated.
+postgres_vm_pgaudit_enabled: false
+
 # --- Windmill artifact path isolation ---
 # windmill_local_artifact_dir normally resolves to repo_shared_local_root/windmill,
 # making windmill_controller_local_root = repo_shared_local_root. The windmill_runtime
