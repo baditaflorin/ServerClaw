@@ -15,7 +15,7 @@
 - name: Check whether the Nomad namespace already exists
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_namespace_cli_wrapper }}"
       - namespace
       - status
       - "{{ nomad_namespace_name }}"
@@ -26,7 +26,7 @@
 - name: Create the Nomad namespace when it is missing
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_namespace_cli_wrapper }}"
       - namespace
       - apply
       - -description
@@ -39,7 +39,7 @@
 - name: Re-check the Nomad namespace after creation
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/lv3-nomad
+      - "{{ nomad_namespace_cli_wrapper }}"
       - namespace
       - status
       - "{{ nomad_namespace_name }}"
