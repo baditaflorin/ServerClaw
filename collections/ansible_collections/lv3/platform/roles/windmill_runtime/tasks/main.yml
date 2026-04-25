@@ -1802,10 +1802,11 @@
   ansible.builtin.assert:
     that:
       - (windmill_bootstrap_identity_whoami.json.email | default('')) == windmill_bootstrap_identity_email
-      # username is workspace-scoped in Windmill and is null until the user is added to a workspace
-      # (which happens in subsequent tasks on a fresh bootstrap). Accept null/empty as valid here;
-      # the email check above is sufficient to confirm identity.
-      - (windmill_bootstrap_identity_whoami.json.username | default('')) in ['', windmill_bootstrap_identity_username]
+      # username is workspace-scoped in Windmill and is null (JSON null → Python None) until the user
+      # is added to a workspace (which happens in subsequent tasks on a fresh bootstrap). Accept
+      # null/empty as valid here; the email check above is sufficient to confirm identity.
+      # Note: default('', true) is required — default('') only replaces undefined, not None.
+      - (windmill_bootstrap_identity_whoami.json.username | default('', true)) in ['', windmill_bootstrap_identity_username]
     fail_msg: "Windmill bootstrap API token did not resolve to the managed bootstrap identity."
   no_log: true
 - name: Check whether the Windmill workspace already exists
