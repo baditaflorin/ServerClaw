@@ -200,3 +200,11 @@ playbook_execution_health_probe_overrides:
         - "node"
         - "status"
         - "-json"
+  # mail_platform readiness probe hardcodes /etc/lv3/ in the catalog.
+  # On 0fork the secret directory is /etc/0fork/ (platform_config_prefix=0fork).
+  mail_platform:
+    readiness:
+      argv:
+        - "python3"
+        - "-c"
+        - "from pathlib import Path; import sys, urllib.request; api_key = Path('/etc/0fork/mail-platform/gateway-api-key').read_text(encoding='utf-8').strip(); request = urllib.request.Request('http://127.0.0.1:8081/v1/profiles', headers={'X-API-Key': api_key}); response = urllib.request.urlopen(request, timeout=60); sys.exit(0 if response.status == 200 else 1)"
