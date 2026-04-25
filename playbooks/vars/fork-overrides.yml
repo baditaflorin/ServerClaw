@@ -160,6 +160,18 @@ public_edge_skip_certbot: true
 # assertion failure during the Nomad smoke service HTTP verify step.
 nomad_cluster_bootstrap_smoke_service_expected_text: "0fork nomad smoke service"
 
+# --- Windmill artifact path isolation ---
+# windmill_local_artifact_dir normally resolves to repo_shared_local_root/windmill,
+# making windmill_controller_local_root = repo_shared_local_root. The windmill_runtime
+# role then constructs windmill_atlas_approle_local_file as
+# windmill_controller_local_root + '/openbao/atlas-approle.json'.
+#
+# On the fork, repo_shared_local_root/.local/openbao/atlas-approle.json is the
+# PRODUCTION lv3 file containing a raw token string (not JSON), not the 0fork
+# approle JSON. The length > 0 guard passes, then from_json fails on the
+# non-JSON content. Override to the 0fork-specific approle file.
+windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/atlas-approle.json"
+
 # --- Nomad health probe catalog overrides ---
 # config/health-probe-catalog.json hardcodes lv3-nomad for both the
 # liveness systemd unit and the readiness CLI argv.  On 0fork the systemd
