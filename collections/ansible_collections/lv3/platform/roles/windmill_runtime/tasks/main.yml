@@ -2604,6 +2604,7 @@
 
 - name: Wait for Windmill workers to register before seeded healthcheck execution
   ansible.builtin.import_tasks: wait_for_workers.yml
+  when: windmill_remote_verification_enabled | bool
 
 - name: Run the Windmill seeded healthcheck script
   ansible.builtin.shell: >
@@ -2627,6 +2628,7 @@
   changed_when: false
   failed_when: false
   no_log: true
+  when: windmill_remote_verification_enabled | bool
 
 - name: Assert the Windmill seeded healthcheck result
   ansible.builtin.assert:
@@ -2635,5 +2637,6 @@
       - (windmill_healthcheck.stdout | from_json).job_id_present | bool
       - (windmill_healthcheck.stdout | from_json).workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
+  when: windmill_remote_verification_enabled | bool
 - name: Verify Windmill health probes
   ansible.builtin.import_tasks: verify.yml

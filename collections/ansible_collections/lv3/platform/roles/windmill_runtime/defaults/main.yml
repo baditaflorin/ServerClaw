@@ -149,6 +149,9 @@ windmill_worker_container_wait_delay_seconds: 5
 windmill_worker_registration_retries: 18
 windmill_worker_registration_delay_seconds: 5
 windmill_seed_job_timeout_seconds: 120
+# Set to false on fork deployments where the controller cannot reach windmill_base_url
+# (e.g. no Tailscale configured yet during bootstrap). Skips worker-wait + live healthcheck.
+windmill_remote_verification_enabled: true
 windmill_worker_checkout_repo_root_local_dir: >-
   {{
     (inventory_dir ~ '/..')

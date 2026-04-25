@@ -176,6 +176,14 @@ public_edge_skip_certbot: true
 # non-JSON content. Override to the 0fork-specific approle file.
 windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/atlas-approle.json"
 
+# --- Windmill remote verification ---
+# windmill_base_url uses management_tailscale_ipv4 (the Tailscale IP of runtime-control)
+# so the controller (macOS) can reach Windmill for live healthcheck execution.
+# On fork deployments, Tailscale / Headscale is not yet provisioned during
+# bootstrap so management_tailscale_ipv4 is null and the URL is unreachable.
+# Disable the controller-side worker-wait + live healthcheck until Tailscale is up.
+windmill_remote_verification_enabled: false
+
 # --- Nomad health probe catalog overrides ---
 # config/health-probe-catalog.json hardcodes lv3-nomad for both the
 # liveness systemd unit and the readiness CLI argv.  On 0fork the systemd
