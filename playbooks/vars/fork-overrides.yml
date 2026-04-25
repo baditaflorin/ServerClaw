@@ -71,10 +71,22 @@ openbao_local_artifact_dir: "{{ repo_shared_local_root }}/0fork/openbao"
 # --- Nomad local artifact isolation ---
 # The Nomad bootstrap play runs on localhost (gather_facts: false). In that
 # context, inventory_dir is undefined, so repo_shared_root cannot be lazily
-# resolved. Use playbook_dir (always available on localhost) to derive the
-# repo root and point Nomad to the fork-specific .local subdirectory.
+# resolved. Use playbook_dir + git (always works on localhost) to locate the
+# git common dir (= main-worktree root) and point Nomad to the fork-specific
+# .local subdirectory. This produces the same absolute path that remote hosts
+# derive via repo_shared_local_root, keeping localhost bootstrap and remote
+# converge in sync.
 # Adjust the "0fork" component for non-0fork forks.
-nomad_cluster_bootstrap_local_dir: "{{ playbook_dir | dirname }}/.local/0fork/nomad"
+nomad_cluster_bootstrap_local_dir: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ (playbook_dir | dirname | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+  }}/.local/0fork/nomad
 
 # --- OpenBao legacy restore ---
 # The legacy migration path (openbao_runtime/tasks/main.yml) tries to reach
