@@ -52,10 +52,14 @@ keycloak_glitchtip_enabled: false
 # derived from platform_service_topology.openbao.private_ip — no hardcoded IP needed here.
 common_openbao_compose_env_manage_local_openbao_runtime: false
 # Fork topology separates OpenBao (runtime-control) from the service VMs that need it
-# (e.g. docker-runtime for minio). The plain HTTP loopback port (8201) is not reachable
-# cross-VM. Solution: delegate all OpenBao API calls to runtime-control itself, where
-# http://127.0.0.1:8201 resolves to the running OpenBao instance.
+# (e.g. docker-runtime for minio, docker-build for gitea-runner). The plain HTTP loopback
+# port (8201) is not reachable cross-VM. Solution: delegate all OpenBao API calls to
+# runtime-control itself, where http://127.0.0.1:8201 resolves to the running OpenBao.
 common_openbao_compose_env_api_host: runtime-control
+# Same delegation for the host-native (systemd credentials) OpenBao path used by
+# roles like gitea_runner for Renovate credential bundles on docker-build.
+common_openbao_systemd_credentials_manage_local_openbao_runtime: false
+common_openbao_systemd_credentials_api_host: runtime-control
 
 # --- OpenBao local artifact isolation ---
 # ADR 0438 Phase 4: individual path overrides removed — role defaults now use

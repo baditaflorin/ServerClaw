@@ -67,6 +67,8 @@ common_openbao_compose_env_openbao_address: ""
 common_openbao_compose_env_manage_local_openbao_runtime: true
 common_openbao_compose_env_validate_certs: true
 common_openbao_compose_env_api_host: ""
+common_openbao_systemd_credentials_validate_certs: true
+common_openbao_systemd_credentials_api_host: ""
 common_openbao_api_operation_retries: 36
 common_openbao_api_operation_delay: 5
 
