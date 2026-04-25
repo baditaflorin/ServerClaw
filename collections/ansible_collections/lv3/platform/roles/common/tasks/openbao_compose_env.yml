@@ -109,7 +109,6 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     status_code:
       - 200
       - 429
@@ -117,6 +116,8 @@
       - 473
       - 501
       - 503
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_api_health
   retries: 48
   delay: 5
@@ -135,9 +136,10 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     return_content: true
     status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_unsealed_status
   retries: 12
   delay: 2
@@ -159,12 +161,13 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     status_code:
       - 200
       - 429
       - 472
       - 473
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_health
   retries: 48
   delay: 5
@@ -201,7 +204,6 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -211,6 +213,8 @@
       - 500
       - 502
       - 503
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_current_secret_probe
   changed_when: false
   failed_when: false
@@ -221,9 +225,10 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     return_content: true
     status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_secret_recovery_seal_status
   retries: 12
   delay: 2
@@ -236,12 +241,13 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/unseal"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     body_format: json
     body:
       key: "{{ item }}"
     status_code: 200
   loop: "{{ common_openbao_compose_env_init_payload.keys_base64[: (openbao_init_key_threshold | default(2) | int)] }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_secret_recovery_unseal
   retries: 6
   delay: 2
@@ -256,12 +262,13 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     status_code:
       - 200
       - 429
       - 472
       - 473
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_secret_recovery_health
   retries: 24
   delay: 5
@@ -274,7 +281,6 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -284,6 +290,8 @@
       - 500
       - 502
       - 503
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_current_secret
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
@@ -296,13 +304,14 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
     body:
       data: "{{ common_openbao_compose_env_secret_payload }}"
     status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_secret_upsert
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
@@ -317,7 +326,6 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -327,6 +335,8 @@
       - 500
       - 502
       - 503
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_current_policy
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
@@ -339,13 +349,14 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
     method: PUT
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
     body:
       policy: "{{ common_openbao_compose_env_policy_rules }}"
     status_code: 204
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_policy_upsert
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
@@ -360,7 +371,6 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
@@ -372,6 +382,8 @@
       secret_id_ttl: 0
       secret_id_num_uses: 0
     status_code: 204
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_approle_upsert
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
@@ -383,7 +395,6 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/role-id"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     return_content: true
@@ -392,6 +403,8 @@
       - 500
       - 502
       - 503
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_role_id
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"
@@ -419,7 +432,6 @@
     url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/secret-id"
     method: POST
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     headers:
       X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
     body_format: json
@@ -430,6 +442,8 @@
       - 500
       - 502
       - 503
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_compose_env_secret_id
   retries: "{{ common_openbao_api_operation_retries }}"
   delay: "{{ common_openbao_api_operation_delay }}"

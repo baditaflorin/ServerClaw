@@ -10,9 +10,10 @@
     url: "{{ common_openbao_unseal_api_url }}/v1/sys/seal-status"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     return_content: true
     status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_unseal_status
   retries: 12
   delay: 2
@@ -37,9 +38,10 @@
     url: "{{ common_openbao_unseal_api_url }}/v1/sys/seal-status"
     method: GET
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
     return_content: true
     status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_unsealed_status
   retries: 12
   delay: 2

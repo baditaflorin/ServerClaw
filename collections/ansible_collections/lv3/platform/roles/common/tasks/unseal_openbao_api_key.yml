@@ -10,6 +10,8 @@
       key: "{{ common_openbao_unseal_key }}"
     return_content: true
     status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  become: false
   register: common_openbao_unseal_step
   retries: 6
   delay: 2
