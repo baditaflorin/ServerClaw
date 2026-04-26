@@ -1,11 +1,12 @@
 schema_version: 1.0.0
 repo_version: 0.178.206
-platform_version: 0.178.149
+platform_version: 0.178.222
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
+    platform: 2026-04-26-ws-0372-fork-converge-site-all-19-hosts-clean
+    fork_converge: 2026-04-26-ws-0372-fork-converge-site-all-19-hosts-clean
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
