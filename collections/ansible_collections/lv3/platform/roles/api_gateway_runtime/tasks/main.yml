@@ -693,7 +693,9 @@
       | default('{}', true)
       | from_json
     ).changed | bool
-  when: api_gateway_resolved_typesense_api_key | default('') | length > 0
+  when:
+    - api_gateway_resolved_typesense_api_key | default('') | length > 0
+    - api_gateway_typesense_controller_verify_enabled | bool
 
 - name: Verify the API gateway runtime
   ansible.builtin.meta: reset_connection
