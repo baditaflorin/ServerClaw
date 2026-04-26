@@ -21,6 +21,8 @@
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
     - tier-2
     - observability

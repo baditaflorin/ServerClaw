@@ -4654,23 +4654,65 @@ platform_sso_clients:
 platform_hairpin_nat_hosts:
   - hostname: agents.0fork.com
     address: 10.10.10.10
+  - hostname: analytics.0fork.com
+    address: 10.10.10.10
+  - hostname: api.0fork.com
+    address: 10.10.10.10
   - hostname: bi.0fork.com
     address: 10.10.10.10
+  - hostname: billing.0fork.com
+    address: 10.10.10.10
+  - hostname: browser.0fork.com
+    address: 10.10.10.10
   - hostname: chat.0fork.com
+    address: 10.10.10.10
+  - hostname: ci.0fork.com
+    address: 10.10.10.10
+  - hostname: cloud.0fork.com
     address: 10.10.10.10
   - hostname: data.0fork.com
     address: 10.10.10.10
   - hostname: dify.0fork.com
     address: 10.10.10.10
+  - hostname: draw.0fork.com
+    address: 10.10.10.10
+  - hostname: errors.0fork.com
+    address: 10.10.10.10
   - hostname: files.0fork.com
+    address: 10.10.10.10
+  - hostname: flags.0fork.com
+    address: 10.10.10.10
+  - hostname: grafana.0fork.com
     address: 10.10.10.10
   - hostname: grist.0fork.com
     address: 10.10.10.10
+  - hostname: headscale.0fork.com
+    address: 10.10.10.10
+  - hostname: home.0fork.com
+    address: 10.10.10.10
   - hostname: langfuse.0fork.com
+    address: 10.10.10.10
+  - hostname: matrix.0fork.com
+    address: 10.10.10.10
+  - hostname: minio.0fork.com
+    address: 10.10.10.10
+  - hostname: n8n.0fork.com
+    address: 10.10.10.10
+  - hostname: nginx.0fork.com
+    address: 10.10.10.10
+  - hostname: ntfy.0fork.com
+    address: 10.10.10.10
+  - hostname: ops.0fork.com
     address: 10.10.10.10
   - hostname: paperless.0fork.com
     address: 10.10.10.10
+  - hostname: registry.0fork.com
+    address: 10.10.10.10
   - hostname: sso.0fork.com
+    address: 10.10.10.10
+  - hostname: tasks.0fork.com
+    address: 10.10.10.10
+  - hostname: uptime.0fork.com
     address: 10.10.10.10
   - hostname: wiki.0fork.com
     address: 10.10.10.10

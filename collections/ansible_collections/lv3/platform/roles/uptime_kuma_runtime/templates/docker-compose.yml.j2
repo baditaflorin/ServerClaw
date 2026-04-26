@@ -1,3 +1,4 @@
+{% from 'compose_macros.j2' import hairpin_hosts %}
 services:
   uptime-kuma:
     image: {{ uptime_kuma_image }}
@@ -7,3 +8,4 @@ services:
       - {{ uptime_kuma_data_dir }}:/app/data
     ports:
       - "{{ uptime_kuma_port }}:3001"
+{{ hairpin_hosts() }}

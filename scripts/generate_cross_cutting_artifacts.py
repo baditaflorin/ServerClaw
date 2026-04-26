@@ -66,6 +66,10 @@ SUBDOMAIN_CATALOG_PATH = REPO_ROOT / "config" / "subdomain-catalog.json"
 DNS_OUTPUT_PATH = REPO_ROOT / "config" / "generated" / "dns-declarations.yaml"
 PLATFORM_YML_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
 TOPOLOGY_HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
+HEALTH_PROBE_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
+
+# Generic placeholder domain used in the health-probe catalog (safe for public repo).
+CATALOG_PLATFORM_DOMAIN = "example.com"
 
 VALID_CONCERNS = ("hairpin", "dns", "tls", "proxy", "sso")
 VALID_SSO_PROVIDERS = {"keycloak", "oauth2-proxy"}
@@ -532,7 +536,7 @@ def generate_nginx_upstreams(
                 raise ValueError(f"{path_prefix}.path_prefix must start with / (got: {path_prefix_val!r})")
 
         # Duplicate FQDN detection
-        all_fqdns = [public_fqdn] + list(extra_fqdns)
+        all_fqdns = [public_fqdn, *list(extra_fqdns)]
         for fqdn in all_fqdns:
             if fqdn in fqdn_owners:
                 raise ValueError(
@@ -615,6 +619,61 @@ def _write_nginx_upstreams_conf(upstreams: list[dict], out_path: Path) -> None:
 HAIRPIN_OUTPUT_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_hairpin.yml"
 
 
+def _extract_catalog_hairpin_hostnames(
+    platform_domain: str,
+    catalog_path: Path = HEALTH_PROBE_CATALOG_PATH,
+) -> list[str]:
+    """Return public hostnames from enabled Uptime Kuma monitors in the health probe catalog.
+
+    The catalog uses ``example.com`` as a generic placeholder domain.  This function
+    replaces that placeholder with *platform_domain* so the generated hairpin entries
+    use the real deployment domain.
+
+    Only HTTP(S) URLs whose hostname ends with the substituted domain are included;
+    raw-IP and internal-URL monitors are skipped because they don't need hairpin NAT.
+    """
+    import json
+    from urllib.parse import urlparse
+
+    if not catalog_path.exists():
+        return []
+
+    with catalog_path.open() as f:
+        catalog = json.load(f)
+
+    services = catalog.get("services", {})
+    hostnames: list[str] = []
+
+    for _service_id, service in services.items():
+        uk = service.get("uptime_kuma")
+        if not isinstance(uk, dict) or not uk.get("enabled"):
+            continue
+        monitor = uk.get("monitor")
+        if not isinstance(monitor, dict):
+            continue
+
+        url = monitor.get("url") or ""
+        if not url.startswith(("http://", "https://")):
+            continue
+
+        # Substitute catalog placeholder with the real domain
+        resolved_url = url.replace(CATALOG_PLATFORM_DOMAIN, platform_domain)
+        hostname = urlparse(resolved_url).hostname or ""
+
+        if not hostname:
+            continue
+        # Skip raw IP addresses — they don't need hairpin NAT
+        if hostname[0].isdigit():
+            continue
+        # Only include FQDNs that belong to the platform domain
+        if not hostname.endswith(f".{platform_domain}"):
+            continue
+
+        hostnames.append(hostname)
+
+    return sorted(set(hostnames))
+
+
 def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
     """Return platform_guest_catalog.by_name (inventory_hostname -> {ipv4, ...}).
 
@@ -678,10 +737,16 @@ def generate_hairpin(
     write: bool = False,
     repo_root: Path = REPO_ROOT,
 ) -> list[dict]:
-    """Aggregate hairpin.publish entries from all services into platform_hairpin_nat_hosts.
+    """Aggregate hairpin entries into platform_hairpin_nat_hosts.
 
-    Deduplicates by hostname. If two services declare the same hostname with
-    different addresses, an error is raised.
+    Sources (merged, deduplicated by hostname):
+    1. ``platform_service_registry[*].hairpin.publish`` entries — explicit per-service
+       hairpin declarations (e.g. OAuth2 redirect flows).
+    2. Enabled Uptime Kuma monitors in ``config/health-probe-catalog.json`` — every
+       public ``*.{platform_domain}`` URL that Uptime Kuma polls must be reachable
+       from inside the Docker network via hairpin NAT to the nginx edge.
+
+    If two sources declare the same hostname with different addresses, an error is raised.
 
     In --write mode writes inventory/group_vars/platform_hairpin.yml.
     In --check mode validates the committed file matches the derived set.
@@ -689,9 +754,12 @@ def generate_hairpin(
     Returns the sorted list of {hostname, address} dicts.
     Raises ValueError on any validation or drift error.
     """
-    catalog = _load_guest_catalog(repo_root)
+    from identity_yaml import load_identity_vars
+
+    guest_catalog = _load_guest_catalog(repo_root)
     seen: dict[str, str] = {}  # hostname -> resolved IP
 
+    # --- Source 1: explicit hairpin.publish entries from the service registry ---
     for service_name, service_config in registry.items():
         require_mapping(service_config, f"platform_service_registry.{service_name}")
         hairpin = service_config.get("hairpin")
@@ -712,7 +780,7 @@ def generate_hairpin(
             hostname = require_str(entry.get("hostname"), f"{ctx}.hostname")
             address_host = require_str(entry.get("address_host"), f"{ctx}.address_host")
 
-            ip = _resolve_catalog_ip(address_host, catalog, ctx)
+            ip = _resolve_catalog_ip(address_host, guest_catalog, ctx)
 
             if hostname in seen:
                 if seen[hostname] != ip:
@@ -722,6 +790,25 @@ def generate_hairpin(
                     )
             else:
                 seen[hostname] = ip
+
+    # --- Source 2: public hostnames from the health-probe catalog (Uptime Kuma) ---
+    # All *.{platform_domain} URLs that Uptime Kuma checks must route through nginx.
+    identity = load_identity_vars()
+    platform_domain = identity.get("platform_domain", CATALOG_PLATFORM_DOMAIN)
+
+    if platform_domain != CATALOG_PLATFORM_DOMAIN:
+        nginx_ip = _resolve_catalog_ip("nginx", guest_catalog, "health-probe-catalog hairpin")
+        for hostname in _extract_catalog_hairpin_hostnames(
+            platform_domain,
+            catalog_path=repo_root / "config" / "health-probe-catalog.json",
+        ):
+            if hostname not in seen:
+                seen[hostname] = nginx_ip
+            elif seen[hostname] != nginx_ip:
+                raise ValueError(
+                    f"health-probe-catalog: hostname '{hostname}' conflicts with a "
+                    f"registry hairpin entry: '{seen[hostname]}' vs '{nginx_ip}'"
+                )
 
     hosts = [{"hostname": h, "address": a} for h, a in sorted(seen.items())]
 
@@ -737,7 +824,8 @@ def _write_hairpin_file(hosts: list[dict], repo_root: Path) -> None:
     out_path = repo_root / "inventory" / "group_vars" / "platform_hairpin.yml"
     header = (
         "# GENERATED — do not edit by hand.\n"
-        "# Source: platform_service_registry hairpin declarations — ADR 0374 Phase 1.\n"
+        "# Sources: platform_service_registry hairpin declarations + health-probe-catalog.json (Uptime Kuma monitors).\n"
+        "# ADR 0374 Phase 1.\n"
         "# Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only hairpin\n"
         "---\n"
     )
