@@ -184,6 +184,16 @@ windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/a
 # Disable the controller-side worker-wait + live healthcheck until Tailscale is up.
 windmill_remote_verification_enabled: false
 
+# --- Public edge certificate name ---
+# The nginx_edge_publication role derives the cert name from
+# platform_identity.config_prefix, producing "0fork-edge". But the Let's
+# Encrypt certificate was issued by certbot on this server under the name
+# "lv3-edge" (the legacy cert name from the original LV3 deployment).
+# The cert covers all *.0fork.com SANs so it is fully valid for this fork.
+# Override so the role finds the existing cert instead of looking for a
+# nonexistent "0fork-edge" lineage and rendering an HTTP-only nginx config.
+public_edge_cert_name: lv3-edge
+
 # --- API gateway Typesense controller health probe ---
 # api_gateway_typesense_controller_url resolves to http://100.64.0.1:<port>
 # (the Tailscale management IP of proxmox-host exposing a host-proxy port).
