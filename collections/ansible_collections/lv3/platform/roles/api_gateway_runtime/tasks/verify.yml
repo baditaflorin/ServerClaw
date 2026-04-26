@@ -252,4 +252,6 @@
       - api_gateway_structured_search_check.json.results is sequence
       - api_gateway_structured_search_check.json.found | int > 0
     fail_msg: "API gateway structured search verification did not return a Typesense-backed result set."
-  when: api_gateway_resolved_typesense_api_key | default('') | length > 0
+  when:
+    - api_gateway_resolved_typesense_api_key | default('') | length > 0
+    - api_gateway_typesense_controller_verify_enabled | bool
