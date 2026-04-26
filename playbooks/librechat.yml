@@ -54,7 +54,7 @@
 #   ...
 
 - name: Converge LibreChat on the Coolify runtime VM
-  hosts: "{{ 'coolify' if (env | default('production')) == 'production' else 'coolify-staging' }}"
+  hosts: "{{ 'coolify-staging' if (env | default('production')) == 'staging' else 'coolify' }}"
   become: true
   gather_facts: true
   vars:

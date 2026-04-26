@@ -534,7 +534,9 @@ validate-generated-https-tls-assurance:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_https_tls_assurance.py --check
 
 generate-uptime-kuma-monitors:
-	python3 $(REPO_ROOT)/scripts/uptime_contract.py --write
+	python3 $(REPO_ROOT)/scripts/uptime_contract.py --write \
+	  $(if $(PLATFORM_DOMAIN),--platform-domain $(PLATFORM_DOMAIN)) \
+	  $(if $(KEYCLOAK_REALM_NAME),--keycloak-realm-name $(KEYCLOAK_REALM_NAME))
 
 validate-generated-uptime-kuma-monitors:
 	python3 $(REPO_ROOT)/scripts/materialize_live_apply_worktree_artifacts.py --artifact uptime_kuma_monitors --repo-root $(REPO_ROOT)

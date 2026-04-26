@@ -13,6 +13,10 @@ from controller_automation_toolkit import emit_cli_error, load_json, repo_path, 
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 
+# Generic placeholder values baked into the catalog (safe for public repo).
+CATALOG_PLATFORM_DOMAIN = "example.com"
+CATALOG_KEYCLOAK_REALM = "lv3"
+
 
 def load_health_probe_catalog(path: Path = HEALTH_PROBE_CATALOG_PATH) -> dict[str, Any]:
     payload = load_json(path)
@@ -24,7 +28,39 @@ def load_health_probe_catalog(path: Path = HEALTH_PROBE_CATALOG_PATH) -> dict[st
     return payload
 
 
-def build_uptime_monitors(catalog: dict[str, Any]) -> list[dict[str, Any]]:
+def _apply_substitutions(value: Any, substitutions: list[tuple[str, str]]) -> Any:
+    """Recursively apply (old, new) string substitutions to all string values."""
+    if isinstance(value, str):
+        for old, new in substitutions:
+            value = value.replace(old, new)
+        return value
+    if isinstance(value, dict):
+        return {k: _apply_substitutions(v, substitutions) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_apply_substitutions(item, substitutions) for item in value]
+    return value
+
+
+def build_uptime_monitors(
+    catalog: dict[str, Any],
+    *,
+    platform_domain: str | None = None,
+    keycloak_realm_name: str | None = None,
+) -> list[dict[str, Any]]:
+    """Build the monitor list, substituting deployment-specific values.
+
+    When *platform_domain* or *keycloak_realm_name* differ from the catalog
+    placeholders (``example.com`` / ``lv3``), every string field in the
+    generated monitors is updated accordingly.  This lets a single catalog
+    serve all deployments without hard-coding deployment-specific URLs.
+    """
+    substitutions: list[tuple[str, str]] = []
+    if platform_domain and platform_domain != CATALOG_PLATFORM_DOMAIN:
+        substitutions.append((CATALOG_PLATFORM_DOMAIN, platform_domain))
+    if keycloak_realm_name and keycloak_realm_name != CATALOG_KEYCLOAK_REALM:
+        # Replace /realms/<old>/ so we don't clobber unrelated occurrences of the prefix.
+        substitutions.append((f"/realms/{CATALOG_KEYCLOAK_REALM}/", f"/realms/{keycloak_realm_name}/"))
+
     services = catalog.get("services", {})
     monitors: list[dict[str, Any]] = []
     names: set[str] = set()
@@ -48,6 +84,8 @@ def build_uptime_monitors(catalog: dict[str, Any]) -> list[dict[str, Any]]:
         names.add(name)
         monitor_payload = dict(monitor)
         monitor_payload.setdefault("service_id", service_id)
+        if substitutions:
+            monitor_payload = _apply_substitutions(monitor_payload, substitutions)
         monitors.append(monitor_payload)
 
     if not monitors:
@@ -59,20 +97,39 @@ def render_uptime_monitors(monitors: list[dict[str, Any]]) -> str:
     return json.dumps(monitors, indent=2) + "\n"
 
 
-def outputs_match(*, output_path: Path = UPTIME_MONITORS_PATH, catalog_path: Path = HEALTH_PROBE_CATALOG_PATH) -> bool:
+def outputs_match(
+    *,
+    output_path: Path = UPTIME_MONITORS_PATH,
+    catalog_path: Path = HEALTH_PROBE_CATALOG_PATH,
+    platform_domain: str | None = None,
+    keycloak_realm_name: str | None = None,
+) -> bool:
     catalog = load_health_probe_catalog(catalog_path)
-    expected = render_uptime_monitors(build_uptime_monitors(catalog))
+    expected = render_uptime_monitors(
+        build_uptime_monitors(
+            catalog,
+            platform_domain=platform_domain,
+            keycloak_realm_name=keycloak_realm_name,
+        )
+    )
     if not output_path.exists():
         return False
     return output_path.read_text(encoding="utf-8") == expected
 
 
 def write_uptime_monitors(
-    *, output_path: Path = UPTIME_MONITORS_PATH, catalog_path: Path = HEALTH_PROBE_CATALOG_PATH
+    *,
+    output_path: Path = UPTIME_MONITORS_PATH,
+    catalog_path: Path = HEALTH_PROBE_CATALOG_PATH,
+    platform_domain: str | None = None,
+    keycloak_realm_name: str | None = None,
 ) -> None:
     catalog = load_health_probe_catalog(catalog_path)
-    monitors = build_uptime_monitors(catalog)
-    write_json(output_path, monitors, indent=2, sort_keys=False)
+    monitors = build_uptime_monitors(
+        catalog,
+        platform_domain=platform_domain,
+        keycloak_realm_name=keycloak_realm_name,
+    )
     output_path.write_text(render_uptime_monitors(monitors), encoding="utf-8")
 
 
@@ -94,6 +151,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--write", action="store_true", help="Write the generated monitor file.")
     parser.add_argument("--check", action="store_true", help="Fail if the generated file is stale.")
+    parser.add_argument(
+        "--platform-domain",
+        default=None,
+        help=(
+            "Deployment domain to substitute for the catalog placeholder "
+            f"({CATALOG_PLATFORM_DOMAIN!r}).  Omit on the main deployment."
+        ),
+    )
+    parser.add_argument(
+        "--keycloak-realm-name",
+        default=None,
+        help=(
+            "Keycloak realm name to substitute for the catalog placeholder "
+            f"({CATALOG_KEYCLOAK_REALM!r}).  Omit on the main deployment."
+        ),
+    )
     return parser
 
 
@@ -104,10 +177,16 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if not args.write and not args.check:
             parser.error("one of --write or --check is required")
+        kwargs: dict[str, Any] = {
+            "output_path": args.output,
+            "catalog_path": args.catalog,
+            "platform_domain": args.platform_domain,
+            "keycloak_realm_name": args.keycloak_realm_name,
+        }
         if args.write:
-            write_uptime_monitors(output_path=args.output, catalog_path=args.catalog)
+            write_uptime_monitors(**kwargs)
             return 0
-        if outputs_match(output_path=args.output, catalog_path=args.catalog):
+        if outputs_match(**kwargs):
             return 0
         raise ValueError(f"{args.output} is stale; run 'python3 scripts/uptime_contract.py --write' to regenerate it")
     except Exception as exc:
