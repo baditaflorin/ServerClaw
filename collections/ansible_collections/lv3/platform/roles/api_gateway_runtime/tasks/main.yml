@@ -666,7 +666,9 @@
   delay: 5
   until: api_gateway_typesense_health.status == 200
   changed_when: false
-  when: api_gateway_resolved_typesense_api_key | default('') | length > 0
+  when:
+    - api_gateway_resolved_typesense_api_key | default('') | length > 0
+    - api_gateway_typesense_controller_verify_enabled | bool
 
 - name: Sync the Typesense platform-services collection from the service catalog
   ansible.builtin.command:

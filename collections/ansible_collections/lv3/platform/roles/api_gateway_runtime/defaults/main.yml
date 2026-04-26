@@ -294,6 +294,10 @@ api_gateway_keycloak_verify_token_retries: 18
 api_gateway_keycloak_verify_token_delay: 5
 api_gateway_typesense_verify_retries: 24
 api_gateway_typesense_verify_delay: 5
+# Set to false on fork deployments where the controller-reachable Typesense URL
+# (normally via Tailscale management IP) is not yet accessible. The Typesense
+# catalog sync is still attempted but the controller-side health probe is skipped.
+api_gateway_typesense_controller_verify_enabled: true
 api_gateway_structured_search_verify_retries: 24
 api_gateway_structured_search_verify_delay: 5
 api_gateway_keycloak_docker_network: keycloak_default

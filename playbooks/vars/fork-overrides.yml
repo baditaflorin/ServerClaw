@@ -184,6 +184,14 @@ windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/a
 # Disable the controller-side worker-wait + live healthcheck until Tailscale is up.
 windmill_remote_verification_enabled: false
 
+# --- API gateway Typesense controller health probe ---
+# api_gateway_typesense_controller_url resolves to http://100.64.0.1:<port>
+# (the Tailscale management IP of proxmox-host exposing a host-proxy port).
+# On fork deployments Tailscale / Headscale is not yet provisioned, so the
+# controller (macOS) cannot reach that address. Disable the controller-side
+# health probe; the Typesense catalog sync is still attempted from runtime-control.
+api_gateway_typesense_controller_verify_enabled: false
+
 # --- Nomad health probe catalog overrides ---
 # config/health-probe-catalog.json hardcodes lv3-nomad for both the
 # liveness systemd unit and the readiness CLI argv.  On 0fork the systemd
