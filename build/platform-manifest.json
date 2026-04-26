@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.206",
-  "platform_version": "0.178.149",
-  "generated_at": "2026-04-25T17:32:28Z",
-  "next_refresh_at": "2026-04-25T18:32:28Z",
+  "repo_version": "0.178.225",
+  "platform_version": "0.178.222",
+  "generated_at": "2026-04-26T10:59:00Z",
+  "next_refresh_at": "2026-04-26T11:59:00Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6322,10 +6322,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.181",
-    "deployed_at": "2026-04-25",
-    "summary": "ADR 0438 Phase 2: extract Nomad smoke jobs to single in-role Jinja template (drops duplicated `lv3-`/`0fork-` HCL files); rewrite `playbooks/nomad.yml` hosts ternary; guard `nomad_oidc_auth` BindName/AuthMethod equality checks; replace `postgres_vm` pgaudit hard-assertion with `to_regclass` deferred-grant pattern.",
-    "release_notes_url": "docs/release-notes/0.178.206.md"
+    "last_version": "0.178.206",
+    "deployed_at": "2026-04-26",
+    "summary": "No changelog notes were present in `## Unreleased` at release time.",
+    "release_notes_url": "docs/release-notes/0.178.225.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
