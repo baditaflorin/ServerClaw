@@ -5,6 +5,7 @@ platform_version: 0.178.222
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
+    fork_services: 2026-04-27-ws-0372-0fork-services-all-7-deployed
     platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
