@@ -184,6 +184,19 @@ windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/a
 # Disable the controller-side worker-wait + live healthcheck until Tailscale is up.
 windmill_remote_verification_enabled: false
 
+# --- PostgreSQL pg_hba extra sources ---
+# In the fork topology, Keycloak runs on docker-runtime (10.10.10.20) but
+# platform_service_registry.keycloak.host_group points to runtime-control (10.10.10.92).
+# The pg_hba template only generates an entry for the registered host_group IP, so
+# Keycloak cannot connect from docker-runtime.
+# Adding 10.10.10.20/32 here generates a blanket "host all all 10.10.10.20/32" entry
+# that covers all services running on docker-runtime (safe for an internal fork VM).
+postgres_vm_client_allowed_sources_extra_bridge:
+  - 172.16.0.0/12
+  - 192.168.0.0/16
+  - 10.200.0.0/16
+  - 10.10.10.20/32
+
 # --- Public edge certificate name ---
 # The nginx_edge_publication role derives the cert name from
 # platform_identity.config_prefix, producing "0fork-edge". But the Let's
@@ -193,6 +206,14 @@ windmill_remote_verification_enabled: false
 # Override so the role finds the existing cert instead of looking for a
 # nonexistent "0fork-edge" lineage and rendering an HTTP-only nginx config.
 public_edge_cert_name: lv3-edge
+
+# --- Gitea controller URL ---
+# gitea_controller_url resolves to http://100.64.0.1:3009 (the Tailscale management
+# proxy port on proxmox-host). On fork deployments Tailscale / Headscale is not yet
+# provisioned, so the controller (macOS) cannot reach that address. Roles that call
+# the Gitea API from the controller (e.g. woodpecker_runtime prepare-oauth) must use
+# the public HTTPS URL instead.
+gitea_controller_url: "{{ gitea_root_url }}"
 
 # --- API gateway Typesense controller health probe ---
 # api_gateway_typesense_controller_url resolves to http://100.64.0.1:<port>
@@ -229,3 +250,12 @@ playbook_execution_health_probe_overrides:
         - "python3"
         - "-c"
         - "from pathlib import Path; import sys, urllib.request; api_key = Path('/etc/fork/mail_platform/gateway-api-key').read_text(encoding='utf-8').strip(); request = urllib.request.Request('http://127.0.0.1:8081/v1/profiles', headers={'X-API-Key': api_key}); response = urllib.request.urlopen(request, timeout=60); sys.exit(0 if response.status == 200 else 1)"
+
+# --- Woodpecker artifact path isolation ---
+# The woodpecker bootstrap play resolves artifact paths from repo_shared_local_root/woodpecker/.
+# On 0fork the seed repo is ops/proxmox_florin_server (not the production ops/platform),
+# so we redirect the bootstrap spec and output artifacts to the 0fork-specific paths
+# to avoid polluting or being confused by the production woodpecker local directory.
+woodpecker_bootstrap_spec_file: "{{ repo_shared_local_root }}/0fork/woodpecker/bootstrap-spec.json"
+woodpecker_auth_file: "{{ repo_shared_local_root }}/0fork/woodpecker/admin-auth.json"
+woodpecker_api_token_file: "{{ repo_shared_local_root }}/0fork/woodpecker/api-token.txt"

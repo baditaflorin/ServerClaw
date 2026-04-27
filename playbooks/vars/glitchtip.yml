@@ -4,8 +4,12 @@ service_dns_fqdn: errors.{{ platform_domain }}
 service_postgres_role: lv3.platform.glitchtip_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
-  - lv3.platform.keycloak_runtime
   - lv3.platform.glitchtip_runtime
 service_needs_dns: true
 service_needs_postgres: true
 service_needs_nginx_edge: true
+
+# glitchtip_internal_port and glitchtip_internal_base_url are required by the
+# arg spec validator before derive_service_defaults runs (ADR 0373).
+glitchtip_internal_port: 3005
+glitchtip_internal_base_url: "http://127.0.0.1:{{ glitchtip_internal_port }}"

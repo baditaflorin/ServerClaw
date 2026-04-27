@@ -2595,6 +2595,11 @@ platform_service_topology:
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}"
       security_headers_enabled: false
       preserve_upstream_security_headers: true
+    urls:
+      public: "https://analytics.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}"
+    ports:
+      internal: "{{ platform_port_assignments.plausible_port }}"
   minio:
     service_name: minio
     owning_vm: docker-runtime
@@ -2657,6 +2662,11 @@ platform_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.glitchtip_port }}"
+    urls:
+      public: "https://errors.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.glitchtip_port }}"
+    ports:
+      internal: "{{ platform_port_assignments.glitchtip_port }}"
   lago:
     service_name: lago
     owning_vm: docker-runtime
@@ -2757,6 +2767,13 @@ platform_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ woodpecker_controller_url }}"
+    urls:
+      public: "https://ci.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}"
+      controller: "http://{{ management_tailscale_ipv4 }}:{{ platform_port_assignments.woodpecker_host_proxy_port }}"
+    ports:
+      internal: "{{ platform_port_assignments.woodpecker_http_port }}"
+      controller: "{{ platform_port_assignments.woodpecker_host_proxy_port }}"
   outline:
     service_name: outline
     owning_vm: docker-runtime
@@ -2779,6 +2796,11 @@ platform_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
+    urls:
+      public: "https://wiki.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
+    ports:
+      internal: "{{ platform_port_assignments.outline_port }}"
   grist:
     service_name: grist
     owning_vm: docker-runtime
@@ -3138,6 +3160,11 @@ platform_service_topology:
       proxy_request_buffering: false
       proxy_read_timeout_seconds: 900
       proxy_send_timeout_seconds: 900
+    urls:
+      public: "https://registry.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.harbor_port }}"
+    ports:
+      internal: "{{ platform_port_assignments.harbor_port }}"
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime
@@ -3263,6 +3290,8 @@ platform_service_topology:
       proxy_request_buffering: false
       proxy_read_timeout_seconds: 900
       proxy_send_timeout_seconds: 900
+    ports:
+      internal: "{{ platform_port_assignments.ntfy_port }}"
   ntopng:
     service_name: ntopng
     owning_vm: proxmox-host

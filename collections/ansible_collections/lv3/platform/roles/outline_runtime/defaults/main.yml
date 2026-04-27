@@ -2,7 +2,15 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file, openbao_*,
 # container_name, internal_port, local_artifact_dir) are derived from
 # platform_service_registry — ADR 0373.
+# These defaults mirror the derive_service_defaults output so arg spec validation
+# passes before derive_service_defaults runs (same pattern as glitchtip_runtime).
 # Purpose: Default runtime inputs for the Outline knowledge wiki.
+
+outline_site_dir: /opt/outline
+outline_data_dir: "{{ outline_site_dir }}/data"
+outline_compose_file: "{{ outline_site_dir }}/docker-compose.yml"
+outline_env_file: "{{ compose_runtime_secret_root }}/outline/runtime.env"
+outline_image: "{{ container_image_catalog.images.outline_runtime.ref }}"
 
 outline_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('outline') }}"
 outline_session_authority: "{{ platform_session_authority }}"

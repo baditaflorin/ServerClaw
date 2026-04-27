@@ -131,11 +131,18 @@ def _host_resolves(hostname: str | None) -> bool:
     return True
 
 
-def _rewrite_url_if_host_unresolvable(url: str, fallback_base_url: str | None) -> str:
+def _rewrite_url_if_host_unresolvable(
+    url: str,
+    fallback_base_url: str | None,
+    force_fallback_hostnames: frozenset[str] | None = None,
+) -> str:
     if not fallback_base_url:
         return url
     parsed = urllib.parse.urlsplit(url)
-    if not parsed.hostname or _host_resolves(parsed.hostname):
+    if not parsed.hostname:
+        return url
+    forced = (force_fallback_hostnames or frozenset())
+    if parsed.hostname not in forced and _host_resolves(parsed.hostname):
         return url
     fallback = urllib.parse.urlsplit(fallback_base_url.rstrip("/"))
     if not fallback.scheme or not fallback.netloc:
@@ -149,6 +156,23 @@ def _rewrite_url_if_host_unresolvable(url: str, fallback_base_url: str | None) -
             parsed.fragment,
         )
     )
+
+
+class _PermissiveCookiePolicy(http.cookiejar.DefaultCookiePolicy):
+    """Cookie policy that allows Secure cookies to be sent over HTTP tunnels.
+
+    When a ``redirect_fallback_base_url`` pointing at a plain-HTTP localhost
+    tunnel is used, the upstream service (e.g. Gitea) may still issue cookies
+    with the ``Secure`` flag because its ``ROOT_URL`` uses HTTPS.  Python's
+    default cookie policy refuses to send those cookies over HTTP, breaking the
+    session.  This policy overrides that check so that cookies are always sent
+    regardless of the request scheme.  It is safe to use here because the
+    tunnel terminates at localhost; the cookie bytes never leave the machine
+    unencrypted.
+    """
+
+    def return_ok_secure(self, cookie: http.cookiejar.Cookie, request: object) -> bool:  # type: ignore[override]
+        return True
 
 
 class _LoginFormParser(HTMLParser):
@@ -259,12 +283,22 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
 
 
 class _FallbackRedirectHandler(urllib.request.HTTPRedirectHandler):
-    def __init__(self, *, fallback_base_url: str | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        fallback_base_url: str | None = None,
+        force_fallback_hostnames: frozenset[str] | None = None,
+    ) -> None:
         super().__init__()
         self._fallback_base_url = fallback_base_url
+        self._force_fallback_hostnames = force_fallback_hostnames
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        rewritten = _rewrite_url_if_host_unresolvable(newurl, self._fallback_base_url)
+        rewritten = _rewrite_url_if_host_unresolvable(
+            newurl,
+            self._fallback_base_url,
+            force_fallback_hostnames=self._force_fallback_hostnames,
+        )
         return super().redirect_request(req, fp, code, msg, headers, rewritten)
 
 
@@ -640,14 +674,24 @@ class WoodpeckerSessionClient:
         verify_ssl: bool = True,
         timeout: int = 20,
         redirect_fallback_base_url: str | None = None,
+        force_fallback_hostnames: frozenset[str] | None = None,
     ):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._redirect_fallback_base_url = redirect_fallback_base_url
+        self._force_fallback_hostnames = force_fallback_hostnames
         self._woodpecker_csrf_token: str | None = None
-        self._cookie_jar = http.cookiejar.CookieJar()
+        # When the fallback URL is plain HTTP (localhost tunnel), Gitea still
+        # issues Secure cookies because its ROOT_URL uses HTTPS.  Use the
+        # permissive policy so those cookies are sent back over the HTTP tunnel.
+        _fallback_scheme = urllib.parse.urlsplit(redirect_fallback_base_url or "").scheme
+        _cookie_policy = _PermissiveCookiePolicy() if _fallback_scheme == "http" else None
+        self._cookie_jar = http.cookiejar.CookieJar(policy=_cookie_policy)
         cookie_handler = urllib.request.HTTPCookieProcessor(self._cookie_jar)
-        redirect_handler = _FallbackRedirectHandler(fallback_base_url=redirect_fallback_base_url)
+        redirect_handler = _FallbackRedirectHandler(
+            fallback_base_url=redirect_fallback_base_url,
+            force_fallback_hostnames=force_fallback_hostnames,
+        )
         if not verify_ssl:
             import ssl
 
@@ -689,7 +733,11 @@ class WoodpeckerSessionClient:
         url = urllib.parse.urljoin(f"{self.base_url}/", url_or_path.lstrip("/"))
         if url_or_path.startswith("http://") or url_or_path.startswith("https://"):
             url = url_or_path
-        url = _rewrite_url_if_host_unresolvable(url, self._redirect_fallback_base_url)
+        url = _rewrite_url_if_host_unresolvable(
+            url,
+            self._redirect_fallback_base_url,
+            force_fallback_hostnames=self._force_fallback_hostnames,
+        )
         request = urllib.request.Request(url, data=data, method=method, headers=request_headers)
         opener = self._opener if follow_redirects else self._no_redirect_opener
         expected = expected_statuses or {200}
@@ -947,10 +995,41 @@ def bootstrap_woodpecker(
             api_token = ""
 
     if client is None:
+        # Discover which Gitea host Woodpecker embeds in its OAuth redirect.
+        # When the gitea_api_url uses a tunnel (different host/port than the
+        # Gitea URL Woodpecker knows), that hostname may resolve via wildcard
+        # DNS to a wrong server instead of Gitea.  If so, we add it to
+        # force_fallback_hostnames so _FallbackRedirectHandler routes it
+        # through the tunnel regardless of DNS resolution.
+        _force_fallback: frozenset[str] | None = None
+        _gitea_api_host = urllib.parse.urlsplit(gitea_api_url).hostname or ""
+        try:
+            import ssl as _ssl
+
+            _probe_ctx = _ssl.create_default_context()
+            if not login_verify_ssl:
+                _probe_ctx.check_hostname = False
+                _probe_ctx.verify_mode = _ssl.CERT_NONE
+            _probe_opener = urllib.request.build_opener(
+                urllib.request.HTTPSHandler(context=_probe_ctx),
+                _NoRedirectHandler(),
+            )
+            _probe_req = urllib.request.Request(login_base_url.rstrip("/") + "/authorize")
+            with _probe_opener.open(_probe_req, timeout=8) as _r:
+                _oauth_loc = _r.headers.get("location") or ""
+        except urllib.error.HTTPError as _e:
+            _oauth_loc = _e.headers.get("location") or ""
+        except Exception:
+            _oauth_loc = ""
+        if _oauth_loc:
+            _gitea_redirect_host = urllib.parse.urlsplit(_oauth_loc).hostname or ""
+            if _gitea_redirect_host and _gitea_redirect_host != _gitea_api_host:
+                _force_fallback = frozenset({_gitea_redirect_host})
         session = WoodpeckerSessionClient(
             login_base_url,
             verify_ssl=login_verify_ssl,
             redirect_fallback_base_url=gitea_api_url,
+            force_fallback_hostnames=_force_fallback,
         )
         session.login_via_gitea(gitea_username, gitea_password)
         api_token = session.create_user_token()

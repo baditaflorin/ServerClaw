@@ -1058,6 +1058,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     status_code: 200
   register: harbor_check_runner_project_query
   changed_when: false
@@ -1081,7 +1082,7 @@
     status_code:
       - 201
       - 409
-  when: harbor_check_runner_project_query.json | length == 0
+  when: (harbor_check_runner_project_query.json | default([])) | length == 0
   no_log: true
 
 - name: Re-query the check-runner Harbor project
@@ -1092,6 +1093,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     status_code: 200
   register: harbor_check_runner_project_query_after
   changed_when: false
@@ -1164,6 +1166,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     status_code: 200
   register: harbor_check_runner_project_metadata_before
   changed_when: false
@@ -1184,10 +1187,23 @@
     force_basic_auth: true
     body_format: json
     body: "{{ harbor_check_runner_retention_policy }}"
+    return_content: true
     status_code: 201
   register: harbor_check_runner_retention_create
   when: harbor_check_runner_retention_id_before == 0
+  ignore_errors: true
   no_log: true
+
+- name: Warn when retention policy creation was attempted but failed
+  ansible.builtin.debug:
+    msg: >-
+      Harbor retention policy creation returned HTTP {{ harbor_check_runner_retention_create.status | default('?') }}
+      (body: {{ harbor_check_runner_retention_create.content | default('') | truncate(200) }}).
+      This is non-fatal — converge will continue without the retention policy.
+      Re-run after Harbor is fully initialised to create it.
+  when:
+    - harbor_check_runner_retention_id_before == 0
+    - harbor_check_runner_retention_create is failed
 
 - name: Record the check-runner Harbor retention policy ID advertised after creation
   ansible.builtin.set_fact:
@@ -1218,7 +1234,10 @@
           | default('0')
         ) | int
       }}
-  when: harbor_check_runner_retention_id_before == 0
+  when:
+    - harbor_check_runner_retention_id_before == 0
+    - harbor_check_runner_retention_create is not failed
+    - harbor_check_runner_retention_create is not skipped
   no_log: true
 
 - name: Re-query the check-runner Harbor project metadata
@@ -1229,6 +1248,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     status_code: 200
   register: harbor_check_runner_project_metadata_after
   changed_when: false
@@ -1270,6 +1290,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     status_code: 200
   register: harbor_check_runner_project_metadata_synced
   changed_when: false
@@ -1313,6 +1334,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     status_code: 200
   register: harbor_check_runner_robot_query
   changed_when: false
@@ -1343,6 +1365,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     body_format: json
     body:
       name: "{{ harbor_check_runner_robot_name }}"
@@ -1483,6 +1506,7 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
+    return_content: true
     body_format: json
     body:
       secret: "{{ harbor_check_runner_robot_secret_generation.stdout }}"

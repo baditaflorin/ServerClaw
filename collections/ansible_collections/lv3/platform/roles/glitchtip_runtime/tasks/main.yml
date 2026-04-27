@@ -211,7 +211,7 @@
       DEFAULT_FROM_EMAIL: "{{ glitchtip_default_from_email }}"
       DEFAULT_REPLY_TO_EMAIL: "{{ glitchtip_default_reply_to_email }}"
       EMAIL_URL: >-
-        {{ glitchtip_mail_url_scheme }}://{{ glitchtip_mail_username | urlencode }}:{{ (lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim) | urlencode }}@{{ glitchtip_mail_host }}:{{ glitchtip_mail_port }}
+        {{ glitchtip_mail_url_scheme }}://{{ glitchtip_mail_username | urlencode | replace('/', '%2F') }}:{{ (lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim) | urlencode | replace('/', '%2F') }}@{{ glitchtip_mail_host }}:{{ glitchtip_mail_port }}
       GLITCHTIP_INSTANCE_NAME: "{{ glitchtip_instance_name }}"
       MEDIA_ROOT: /code/uploads
   no_log: true

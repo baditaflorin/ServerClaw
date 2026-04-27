@@ -57,7 +57,17 @@
       - "{{ outline_api_token_scopes | join(',') }}"
   changed_when: "'created api token' in outline_bootstrap_token.stdout"
   register: outline_bootstrap_token
+  ignore_errors: true
   no_log: true
+
+- name: Warn when Outline API token bootstrap failed
+  ansible.builtin.debug:
+    msg: >-
+      Outline API token bootstrap returned a non-zero exit code (rc={{ outline_bootstrap_token.rc | default('?') }}).
+      Doc sync will be skipped this converge. This is non-fatal — the Outline service is running.
+      Common cause on fork deployments: Keycloak OIDC flow not yet initialised for the automation user.
+      Re-run converge after Keycloak is fully settled to create the API token.
+  when: outline_bootstrap_token is failed
 
 - name: Sync the Outline landing and index documents
   ansible.builtin.command:
@@ -73,6 +83,7 @@
       - "{{ outline_api_token_local_file }}"
   changed_when: "'updated' in outline_sync_docs.stdout or 'created' in outline_sync_docs.stdout"
   register: outline_sync_docs
+  when: outline_bootstrap_token is not failed
 
 - name: Verify the Outline public living knowledge surface
   ansible.builtin.command:
@@ -88,3 +99,4 @@
       - "{{ outline_api_token_local_file }}"
   register: outline_verify_sync
   changed_when: false
+  when: outline_bootstrap_token is not failed

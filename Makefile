@@ -149,7 +149,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: migrate-service migrate-service-dry-run teardown-service detect-orphans purge-orphans
-.PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat
+.PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat converge-outline
 .PHONY: syntax-check-flagsmith converge-flagsmith
 .PHONY: syntax-check-lago converge-lago
 .PHONY: syntax-check-matrix-synapse converge-matrix-synapse
@@ -1243,7 +1243,7 @@ converge-semaphore:
 converge-woodpecker:
 	$(MAKE) preflight WORKFLOW=converge-woodpecker
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/woodpecker.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/woodpecker.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 
 converge-headscale:
 	$(MAKE) preflight WORKFLOW=converge-headscale
@@ -1275,7 +1275,12 @@ converge-keycloak:
 converge-harbor:
 	$(MAKE) preflight WORKFLOW=converge-harbor
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/harbor.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/harbor.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+converge-outline:
+	$(MAKE) preflight WORKFLOW=converge-outline
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/outline.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/outline.yml $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 converge-langfuse:
 	$(MAKE) preflight WORKFLOW=converge-langfuse

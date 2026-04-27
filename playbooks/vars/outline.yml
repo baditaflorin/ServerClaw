@@ -4,8 +4,23 @@ service_dns_fqdn: wiki.{{ platform_domain }}
 service_postgres_role: lv3.platform.outline_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
-  - lv3.platform.keycloak_runtime
   - lv3.platform.outline_runtime
 service_needs_dns: true
 service_needs_postgres: true
 service_needs_nginx_edge: true
+
+# The following variables must be pre-set here so the outline_runtime arg spec
+# validator can evaluate defaults/main.yml values that reference them before
+# derive_service_defaults runs (ADR 0373).
+outline_internal_port: 3006
+outline_local_artifact_dir: "{{ repo_shared_local_root }}/outline"
+outline_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/outline"
+
+# MinIO integration — outline_runtime references these minio_runtime vars
+# directly in its defaults (outline_s3_*). They must be in scope before
+# derive_service_defaults runs since minio_runtime is not loaded here.
+minio_outline_access_key_id: outline
+minio_outline_bucket_name: outline-documents
+minio_outline_secret_key_local_file: "{{ repo_shared_local_root }}/outline/minio-secret-key.txt"
+minio_public_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('minio', 'public') }}"
+minio_private_api_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('minio', 'internal') }}"

@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.206` |
-| Platform version | `0.178.149` |
+| Repository version | `0.178.231` |
+| Platform version | `0.178.222` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -58,6 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `fork_converge` | `2026-04-26-ws-0372-fork-converge-site-all-19-hosts-clean` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `platform_ops` | `2026-04-21-adr-0391-cpu-only-operational-automation-live-apply` |
@@ -77,9 +78,8 @@ monitored, and recoverable from a single repository.
 | `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `ops_portal` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 
-Showing 20 of 185 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 186 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 ## Version Summary
@@ -89,8 +89,8 @@ Showing 20 of 185 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.206` |
-| Platform version | `0.178.149` |
+| Repository version | `0.178.231` |
+| Platform version | `0.178.222` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

@@ -7909,6 +7909,56 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-outline": {
+      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure MinIO S3 storage, publish it at wiki.example.com, and bootstrap Keycloak OIDC.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-outline",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-outline"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "outline_database_password",
+          "outline_secret_key",
+          "outline_utils_secret",
+          "keycloak_outline_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-outline.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/outline.yml",
+        "playbooks/vars/outline.yml",
+        "collections/ansible_collections/lv3/platform/roles/outline_postgres",
+        "collections/ansible_collections/lv3/platform/roles/outline_runtime"
+      ],
+      "outputs": [
+        "A repo-managed Outline wiki runtime on docker-runtime with PostgreSQL on postgres, MinIO S3 document storage, Keycloak-backed browser sign-in, and an NGINX edge publication at wiki.example.com."
+      ],
+      "verification_commands": [
+        "curl -fsS https://wiki.example.com/api/auth.config"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-litellm": {
       "description": "Converge LiteLLM Proxy on docker-runtime with PostgreSQL backend.",
       "lifecycle_status": "active",

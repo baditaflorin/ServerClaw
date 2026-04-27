@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.228",
+  "repo_version": "0.178.231",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-26T11:59:15Z",
-  "next_refresh_at": "2026-04-26T12:59:15Z",
+  "generated_at": "2026-04-27T06:17:12Z",
+  "next_refresh_at": "2026-04-27T07:17:12Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -2524,6 +2524,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/platform-operations-portal.md"
+      },
+      {
+        "id": "converge-outline",
+        "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure MinIO S3 storage, publish it at wiki.example.com, and bootstrap Keycloak OIDC.",
+        "tags": [
+          "converge-outline",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-outline.md"
       },
       {
         "id": "converge-paperless",
@@ -5484,6 +5510,16 @@
         ]
       },
       {
+        "id": "configure-outline",
+        "title": "Configure Outline",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/configure-outline.md",
+        "workflow_ids": [
+          "converge-outline"
+        ]
+      },
+      {
         "id": "configure-paperless",
         "title": "Configure Paperless",
         "agent_trust_required": "T3",
@@ -6322,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.227",
-    "deployed_at": "2026-04-26",
+    "last_version": "0.178.230",
+    "deployed_at": "2026-04-27",
     "summary": "No changelog notes were present in `## Unreleased` at release time.",
-    "release_notes_url": "docs/release-notes/0.178.228.md"
+    "release_notes_url": "docs/release-notes/0.178.231.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

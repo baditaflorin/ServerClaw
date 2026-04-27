@@ -2377,6 +2377,51 @@
         "timeout_seconds": 3600
       }
     },
+    "converge-outline": {
+      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure MinIO S3 storage, publish it at wiki.example.com, and bootstrap Keycloak OIDC.",
+      "workflow_id": "converge-outline",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish wiki.example.com and expand the shared edge certificate SAN set."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-outline passes",
+        "make validate passes before the apply",
+        "MinIO platform bucket and Keycloak OIDC client are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record Outline container health, MinIO bucket reachability, Keycloak OIDC flow result, and the wiki.example.com /api/auth.config response."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if Outline fails to start, the S3 bucket is unreachable, or Keycloak OIDC bootstrap fails.",
+          "Stop if the converge would leave the wiki publicly reachable without authentication."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Outline runtime state before retrying.",
+          "Do not leave orphaned MinIO buckets or partially-created Keycloak clients after a failed rollout."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-openbao": {
       "description": "Converge the private OpenBao runtime, seeded auth identities, Transit, and PostgreSQL dynamic-credential integration.",
       "workflow_id": "converge-openbao",
