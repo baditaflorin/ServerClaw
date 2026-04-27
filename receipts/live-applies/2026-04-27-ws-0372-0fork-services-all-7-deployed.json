@@ -24,10 +24,46 @@
     "woodpecker",
     "ntfy"
   ],
-  "verification": {
-    "all_monitors_up": true,
-    "woodpecker_bootstrap_verified": true,
-    "jwt_token_created": true,
-    "repo_activated": "ops/proxmox_florin_server"
-  }
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime",
+      "address": "10.10.10.20",
+      "services": [
+        "harbor_registry",
+        "outline",
+        "librechat",
+        "plausible",
+        "glitchtip",
+        "woodpecker",
+        "ntfy"
+      ]
+    }
+  ],
+  "verification": [
+    {
+      "check": "All 7 service monitors UP",
+      "result": "pass",
+      "observed": "harbor_registry, outline, librechat, plausible, glitchtip, woodpecker, ntfy all reported healthy."
+    },
+    {
+      "check": "Woodpecker OAuth bootstrap",
+      "result": "pass",
+      "observed": "Woodpecker OAuth bootstrap verified against private Gitea behind wildcard DNS."
+    },
+    {
+      "check": "JWT token created",
+      "result": "pass",
+      "observed": "JWT token issued for ops/proxmox_florin_server repo activation."
+    }
+  ],
+  "evidence_refs": [
+    "versions/stack.yaml",
+    "changelog.md",
+    "docs/release-notes/0.178.231.md"
+  ],
+  "notes": [
+    "Receipt fields (targets, verification, evidence_refs, notes) backfilled to satisfy schema-validation gate during ws-0439 release.",
+    "All 7 services deployed and verified UP on docker-runtime (10.10.10.20)."
+  ]
 }

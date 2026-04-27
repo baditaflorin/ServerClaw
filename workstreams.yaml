@@ -21,6 +21,75 @@ archive_summary:
   by_year:
     '2026': 321
 workstreams:
+- id: ws-0439-deployment-profiles
+  adr: 0439
+  title: "Deployment profiles \u2014 subset-of-services selection for forks"
+  status: ready
+  ready_to_merge: true
+  live_applied: false
+  owner: claude
+  branch: claude/brave-kowalevski-565b6c
+  worktree_path: .claude/worktrees/brave-kowalevski-565b6c
+  doc: docs/adr/0439-deployment-profiles-subset-selection.md
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0431-0fork-full-day-deploy
+  - adr-0438-generic-by-construction
+  conflicts_with: []
+  shared_surfaces:
+  - playbook composition
+  - fork bootstrap entry point
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0439_tracking
+      paths:
+      - workstreams/active/ws-0439-deployment-profiles.yaml
+      - docs/adr/0439-deployment-profiles-subset-selection.md
+      - docs/diagrams/service-interaction-map.md
+      mode: exclusive
+    - id: ws_0439_release_artifacts
+      paths:
+      - VERSION
+      - RELEASE.md
+      - changelog.md
+      - README.md
+      - build/platform-manifest.json
+      - versions/stack.yaml
+      - docs/release-notes/**
+      - docs/status/history/live-apply-evidence.md
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0439_generated_indices
+      paths:
+      - workstreams.yaml
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - config/command-catalog.json
+      - config/controller-local-secrets.json
+      - config/health-probe-catalog.json
+      - config/workflow-catalog.json
+      mode: shared_contract
+      contract: generated-index-and-diagram-v1
+    - id: ws_0439_carry_forward_unmerged
+      paths:
+      - Makefile
+      - receipts/live-applies/**
+      - inventory/group_vars/platform.yml
+      - inventory/host_vars/proxmox-host.yml
+      - playbooks/vars/fork-overrides.yml
+      - playbooks/vars/glitchtip.yml
+      - playbooks/vars/outline.yml
+      - platform/ansible/woodpecker.py
+      - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/outline.env.ctmpl.j2
+      - collections/ansible_collections/lv3/platform/roles/outline_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/outline_runtime/tasks/publish.yml
+      - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: release-bump-v1
 - id: ws-0438-generic-by-construction
   adr: 0438
   title: "Generic-by-construction \u2014 eliminate lv3-prefix and credential-variable\

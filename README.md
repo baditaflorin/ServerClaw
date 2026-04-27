@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.231` |
+| Repository version | `0.178.232` |
 | Platform version | `0.178.222` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -58,7 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
-| `fork_converge` | `2026-04-26-ws-0372-fork-converge-site-all-19-hosts-clean` |
+| `fork_services` | `2026-04-27-ws-0372-0fork-services-all-7-deployed` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `platform_ops` | `2026-04-21-adr-0391-cpu-only-operational-automation-live-apply` |
@@ -89,7 +89,7 @@ Showing 20 of 186 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.231` |
+| Repository version | `0.178.232` |
 | Platform version | `0.178.222` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

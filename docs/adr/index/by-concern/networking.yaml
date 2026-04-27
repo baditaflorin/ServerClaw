@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-25'
+generated: '2026-04-27'
 facet: concern
 concern: networking
-total_adrs: 30
+total_adrs: 31
 adrs:
   - adr: '0015'
     title: example.com DNS And Subdomain Model
@@ -575,3 +575,23 @@ adrs:
     summary: Store the expiry timestamp as a custom user attribute on every temporary
     filename: 0412-keycloak-native-account-expiry.md
     path: docs/adr/0412-keycloak-native-account-expiry.md
+  - adr: 0439
+    title: Deployment Profiles — Subset-of-Services Selection for Forks
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-27'
+    concern: networking
+    keywords:
+      - profiles
+      - fork-clone
+      - subset-selection
+      - ansible-native
+      - adr-0410-complement
+      - adr-0438-prerequisite
+      - deployment
+      - subset-of-services
+      - selection
+      - forks
+    summary: Reuse Ansible's existing primitives. Do not invent a new DSL.
+    filename: 0439-deployment-profiles-subset-selection.md
+    path: docs/adr/0439-deployment-profiles-subset-selection.md

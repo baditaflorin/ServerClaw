@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.178.231",
+  "repo_version": "0.178.232",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-27T06:17:12Z",
-  "next_refresh_at": "2026-04-27T07:17:12Z",
+  "generated_at": "2026-04-27T08:54:11Z",
+  "next_refresh_at": "2026-04-27T09:54:11Z",
   "environment": "production",
   "identity": {
-    "platform_name": "0fork.com",
-    "operator": "0fork Clone Operator",
+    "platform_name": "example.com",
+    "operator": "Platform Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:8096",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "changedetection": {
@@ -71,7 +71,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:5000",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "changelog_portal": {
@@ -94,7 +94,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://coolify.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "coolify_apps": {
         "service_name": "Coolify Apps Ingress",
@@ -105,7 +105,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://apps.example.com",
-        "last_live_apply": "2026-04-03T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "crawl4ai": {
         "service_name": "Crawl4AI",
@@ -116,7 +116,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11235",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "dify": {
@@ -219,7 +219,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "glitchtip": {
@@ -231,7 +231,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://errors.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "gotenberg": {
@@ -243,7 +243,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:3007",
-        "last_live_apply": "2026-04-14T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "grafana": {
@@ -279,7 +279,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://registry.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "headscale": {
@@ -361,7 +361,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://chat.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "litellm": {
         "service_name": "LiteLLM",
@@ -372,7 +372,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:4000",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "livekit": {
         "service_name": "LiveKit",
@@ -429,7 +429,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8066",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "minio": {
         "service_name": "MinIO",
@@ -463,7 +463,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "nats://10.10.10.92:4222",
-        "last_live_apply": "2026-04-15T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "neko": {
         "service_name": "Neko Remote Desktop",
@@ -532,7 +532,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ntfy.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -554,7 +554,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11434",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "openbao": {
         "service_name": "OpenBao",
@@ -576,7 +576,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.92:8098",
-        "last_live_apply": "2026-04-15T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "ops_portal": {
@@ -599,7 +599,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://wiki.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "paperless": {
@@ -623,7 +623,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:8100",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "plane": {
@@ -659,7 +659,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://analytics.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "portainer": {
@@ -682,7 +682,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.example.com:5432",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -704,7 +704,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "kafka://10.10.10.20:9092",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "repo_intake": {
         "service_name": "Repo Intake",
@@ -760,7 +760,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://chat.example.com",
-        "last_live_apply": "2026-04-15T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "sftpgo": {
@@ -795,7 +795,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "superset": {
         "service_name": "Apache Superset",
@@ -806,7 +806,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://bi.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "temporal": {
@@ -818,7 +818,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "grpc://127.0.0.1:7233",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "tesseract_ocr": {
         "service_name": "Tesseract OCR",
@@ -829,7 +829,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:3008",
-        "last_live_apply": "2026-04-14T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "tika": {
@@ -841,7 +841,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.90:9998",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "typesense": {
@@ -853,7 +853,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8016",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "uptime_kuma": {
@@ -877,7 +877,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://vault.example.com",
-        "last_live_apply": "2026-04-15T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -901,7 +901,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://ci.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.230",
+    "last_version": "0.178.231",
     "deployed_at": "2026-04-27",
-    "summary": "No changelog notes were present in `## Unreleased` at release time.",
-    "release_notes_url": "docs/release-notes/0.178.231.md"
+    "summary": "ADR 0439: Deployment profiles \u2014 subset-of-services selection for forks (proposed; uses Ansible-native `import_playbook` composition). Add service interaction diagram (`docs/diagrams/service-interaction-map.md`) with candidate profile buckets.",
+    "release_notes_url": "docs/release-notes/0.178.232.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6373,17 +6373,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.0fork.com",
+        "endpoint": "https://ops.example.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.0fork.com",
+        "endpoint": "https://windmill.example.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.0fork.com",
+        "endpoint": "https://api.example.com",
         "adr": "0092"
       }
     ],

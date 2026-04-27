@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-25'
+generated: '2026-04-27'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 464
+total_adrs: 465
 adr_number_range:
   first: '0001'
-  last: 0438
-  next_available: 0439
+  last: 0439
+  next_available: '0440'
 implementation_status_summary:
   Implemented: 359
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 31
+  Proposed: 32
 decision_status_summary:
   Accepted: 363
-  Proposed: 38
+  Proposed: 39
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 32
+      count: 33
       first_adr: '0400'
-      last_adr: 0438
+      last_adr: 0439
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -85,7 +85,7 @@ facets:
       count: 11
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
-      count: 30
+      count: 31
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
       count: 145
@@ -131,14 +131,19 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 31
+      count: 32
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0439
+  next_available_adr: '0440'
 latest_adrs:
+  - adr: 0439
+    title: Deployment Profiles — Subset-of-Services Selection for Forks
+    implementation_status: Proposed
+    concern: networking
+    path: docs/adr/0439-deployment-profiles-subset-selection.md
   - adr: 0438
     title: Generic-by-Construction — Generative Cascade IaC
     implementation_status: Proposed
@@ -185,11 +190,6 @@ latest_adrs:
     concern: platform
     path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
     implemented_on: '2026-04-21'
-  - adr: '0421'
-    title: Platform-Wide Service Watchdog
-    implementation_status: Partial
-    concern: resilience
-    path: docs/adr/0421-platform-wide-service-watchdog.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

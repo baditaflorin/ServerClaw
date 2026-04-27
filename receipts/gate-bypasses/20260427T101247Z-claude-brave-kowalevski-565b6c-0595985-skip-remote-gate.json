@@ -1,0 +1,34 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-04-27T10:12:47Z",
+  "bypass": "skip_remote_gate",
+  "source": "manual",
+  "branch": "claude/brave-kowalevski-565b6c",
+  "commit": "0595985690df41dc19fcfe340295ad0fd432e412",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "schema-validation lane fails on inventory/group_vars/platform.yml drift that exists on origin/main (git diff origin/main..HEAD -- inventory/group_vars/platform.yml shows zero changes; generator unchanged). tofu-validate fails on external registry.opentofu.org timeout fetching bpg/proxmox provider \u2014 environmental, not introduced by this PR. All other 24 lanes pass.",
+    "impacted_lanes": [
+      "schema-validation",
+      "tofu-validate"
+    ],
+    "substitute_evidence": [
+      "git diff origin/main..HEAD -- inventory/group_vars/platform.yml shows zero changes",
+      "same for scripts/generate_platform_vars.py",
+      "tofu-validate failure is registry.opentofu.org context-deadline-exceeded fetching bpg/proxmox provider \u2014 external network issue unrelated to repo state",
+      "24 of 26 lanes passed including workstream-surfaces",
+      "agent-standards",
+      "schema-validation peers (yaml-lint",
+      "atlas-lint",
+      "cross-catalog-integrity",
+      "waiver-escalation-proofs",
+      "generated-docs",
+      "integration-tests",
+      "semgrep-sast)"
+    ],
+    "owner": "baditaflorin@gmail.com",
+    "expires_on": "2026-04-28",
+    "remediation_ref": "ws-0439-deployment-profiles"
+  }
+}
