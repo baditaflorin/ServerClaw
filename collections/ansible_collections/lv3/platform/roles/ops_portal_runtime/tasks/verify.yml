@@ -182,6 +182,36 @@
       - "'Runbook' in ops_portal_verify_runtime_assurance.content or 'No active service/environment bindings' in ops_portal_verify_runtime_assurance.content"
     fail_msg: "Ops portal runtime assurance matrix partial did not render the ADR 0244 view."
 
+- name: Probe the ops portal gateway URL for reachability
+  ansible.builtin.uri:
+    url: "{{ ops_portal_gateway_url }}"
+    method: GET
+    status_code:
+      - 200
+      - 201
+      - 202
+      - 204
+      - 400
+      - 401
+      - 403
+      - 404
+      - 405
+      - 500
+      - 502
+      - 503
+    timeout: 5
+  register: ops_portal_gateway_probe
+  failed_when: false
+  changed_when: false
+
+- name: Record whether the ops portal gateway is reachable
+  ansible.builtin.set_fact:
+    ops_portal_gateway_is_reachable: >-
+      {{
+        ops_portal_gateway_probe.status is defined
+        and ops_portal_gateway_probe.status | int >= 200
+      }}
+
 - name: Assert the runtime assurance matrix panel is not degraded
   ansible.builtin.assert:
     that:
@@ -189,6 +219,7 @@
     fail_msg: >-
       Ops portal runtime assurance matrix partial rendered with degraded live
       gateway data instead of the authenticated runtime assurance view.
+  when: ops_portal_gateway_is_reachable | default(true) | bool
 
 - name: Verify the return-to-task partial renders locally
   ansible.builtin.uri:
@@ -205,7 +236,9 @@
 - name: Assert the return-to-task panel is present
   ansible.builtin.assert:
     that:
-      - "'Return-to-task data is degraded' not in ops_portal_verify_tasks.content"
+      - >-
+        not ops_portal_gateway_is_reachable | default(true) | bool
+        or 'Return-to-task data is degraded' not in ops_portal_verify_tasks.content
       - "'Needs your review' in ops_portal_verify_tasks.content"
       - "'Recent task state changes' in ops_portal_verify_tasks.content"
     fail_msg: "Ops portal task reentry partial did not render the ADR 0314 return-to-task surface."

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.0",
+  "repo_version": "0.179.1",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-27T11:54:29Z",
-  "next_refresh_at": "2026-04-27T12:54:29Z",
+  "generated_at": "2026-04-27T12:48:39Z",
+  "next_refresh_at": "2026-04-27T13:48:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.178.232",
+    "last_version": "0.179.0",
     "deployed_at": "2026-04-27",
-    "summary": "ADR 0443 \u2014 Continuous Topology Reconciler & Drift Detection: shipped all phases (stdlib-only `topology_probe.py`, controller `topology_reconciler.py` with SSH fan-out + diff, `validate_no_hardcoded_topology.py` write-time linter wired into `scripts/validate_repo.sh` as a hard gate, hourly Windmill schedule `f/lv3/topology_drift_check_hourly`, ops-portal receipt under `receipts/drift-reports/`). ADRs 0439/0440/0441/0442 \u2014 Multi-deployment platform foundations (per-deployment identity, artifact-path isolation, profile resolver, deployment-aware tooling).",
-    "release_notes_url": "docs/release-notes/0.179.0.md"
+    "summary": "fix: ops_portal verify \u2014 probe gateway reachability before asserting runtime-assurance and tasks panels are not degraded; skips degraded checks on deployments without an API gateway (e.g. 0fork clone bootstrap)",
+    "release_notes_url": "docs/release-notes/0.179.1.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
