@@ -652,6 +652,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--generated-at", help="Override generated_at with an ISO-8601 timestamp for deterministic tests."
     )
+    parser.add_argument(
+        "--deployment",
+        metavar="SLUG",
+        help=(
+            "ADR 0440: write the manifest under .local/deployments/<slug>/generated/ "
+            "instead of build/. Overrides --output when set."
+        ),
+    )
     return parser
 
 
@@ -659,6 +667,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     output_path = Path(args.output).expanduser()
+    if args.deployment:
+        from scripts.deployment import load as load_deployment
+
+        deployment = load_deployment(args.deployment, validate=False)
+        deployment.ensure_runtime_dirs()
+        output_path = deployment.generated_dir / "platform-manifest.json"
     generated_at = parse_datetime(args.generated_at) if args.generated_at else None
     incident_dir = Path(args.incident_dir).expanduser()
 

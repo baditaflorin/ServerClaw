@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-27'
 facet: concern
 concern: networking
-total_adrs: 31
+total_adrs: 32
 adrs:
   - adr: '0015'
     title: example.com DNS And Subdomain Model
@@ -595,3 +595,23 @@ adrs:
     summary: Reuse Ansible's existing primitives. Do not invent a new DSL.
     filename: 0439-deployment-profiles-subset-selection.md
     path: docs/adr/0439-deployment-profiles-subset-selection.md
+  - adr: 0439
+    title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-27'
+    concern: networking
+    keywords:
+      - multi-deployment
+      - deployments
+      - parallel-converge
+      - agent-coordination
+      - refactor
+      - repo
+      - architecture
+      - independent
+      - servers
+      - from
+    summary: Introduce deployments as a first-class concept in this repo. A
+    filename: 0439-multi-deployment-repo-architecture.md
+    path: docs/adr/0439-multi-deployment-repo-architecture.md

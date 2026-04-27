@@ -450,13 +450,49 @@ def check_outputs(outputs: dict[Path, str]) -> list[str]:
     return stale
 
 
+def _redirect_outputs_for_deployment(outputs: dict[Path, str], slug: str) -> dict[Path, str]:
+    """ADR 0440: rewrite output paths to live under
+    .local/deployments/<slug>/generated/ rather than build/onboarding/ etc."""
+    from scripts.deployment import load as load_deployment
+
+    deployment = load_deployment(slug, validate=False)
+    deployment.ensure_runtime_dirs()
+    redirected: dict[Path, str] = {}
+    for path, text in outputs.items():
+        # Map well-known repo-root outputs to the deployment's generated/ dir.
+        if path == REPO_STRUCTURE_OUTPUT:
+            redirected[deployment.generated_dir / ".repo-structure.yaml"] = text
+        elif path == CONFIG_LOCATIONS_OUTPUT:
+            redirected[deployment.generated_dir / ".config-locations.yaml"] = text
+        elif path.parent == ONBOARDING_OUTPUT_DIR:
+            redirected[deployment.generated_dir / "onboarding" / path.name] = text
+        else:
+            # Unknown well-known path; preserve the relative tail under generated/.
+            try:
+                rel = path.relative_to(REPO_ROOT)
+            except ValueError:
+                rel = Path(path.name)
+            redirected[deployment.generated_dir / rel] = text
+    return redirected
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate ADR 0327 discovery entrypoints and onboarding packs.")
     parser.add_argument("--write", action="store_true", help="Write the generated outputs to disk.")
     parser.add_argument("--check", action="store_true", help="Exit non-zero if generated outputs are stale.")
+    parser.add_argument(
+        "--deployment",
+        metavar="SLUG",
+        help=(
+            "ADR 0440: write outputs under .local/deployments/<slug>/generated/ "
+            "instead of build/onboarding/ and the repo root."
+        ),
+    )
     args = parser.parse_args(argv)
 
     outputs = render_outputs()
+    if args.deployment:
+        outputs = _redirect_outputs_for_deployment(outputs, args.deployment)
 
     if args.check:
         stale = check_outputs(outputs)

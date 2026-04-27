@@ -349,6 +349,15 @@ validate_generated_vars() {
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_nginx_config.py" --check
 }
 
+validate_no_hardcoded_topology() {
+  # ADR 0443 Layer 1 — flag literal IP:port references that should be
+  # derived from platform_service_registry. Allowlist covers data-source
+  # files (catalog/, config/, inventory/host_vars/...); per-line opt-out
+  # via the `noqa: topology-hardcode` marker.
+  echo "Topology hardcode validation (ADR 0443)"
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_no_hardcoded_topology.py"
+}
+
 validate_yaml() {
   local yaml_files=()
 
@@ -908,6 +917,7 @@ for stage in "$@"; do
       validate_compose_runtime_envs
       validate_retry_guard
       validate_dependency_direction
+      validate_no_hardcoded_topology
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -957,6 +967,9 @@ for stage in "$@"; do
       ;;
     dependency-direction)
       validate_dependency_direction
+      ;;
+    no-hardcoded-topology)
+      validate_no_hardcoded_topology
       ;;
     service-definitions)
       validate_service_definitions

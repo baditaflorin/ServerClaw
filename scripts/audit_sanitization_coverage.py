@@ -34,6 +34,13 @@ OPERATORS_PATH = REPO_ROOT / "config" / "operators.yaml"
 # Detect host_vars file dynamically (name may vary per deployment)
 HOST_VARS_DIR = REPO_ROOT / "inventory" / "host_vars"
 
+# ADR 0440: per-deployment identity files. Each deployment owns its own
+# identity.yml under .local/deployments/<slug>/. The publish pipeline must
+# treat every deployment's sensitive values as leak markers — otherwise a
+# domain configured for deployment B could leak into the public mirror that
+# was sanitised against only deployment A.
+DEPLOYMENTS_DIR = REPO_ROOT / ".local" / "deployments"
+
 # IP patterns
 IPV4_RE = re.compile(r"\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b")
 IPV6_RE = re.compile(r"(?i)\b([0-9a-f:]{6,39})\b")
@@ -185,7 +192,7 @@ def extract_sensitive_values() -> list[SensitiveValue]:
         seen.add(value)
         values.append(SensitiveValue(value, source, category, severity))
 
-    # --- 1. identity.yml ---
+    # --- 1. identity.yml (legacy single-deployment path) ---
     if IDENTITY_PATH.exists():
         identity = yaml.safe_load(IDENTITY_PATH.read_text())
         if identity:
@@ -199,6 +206,32 @@ def extract_sensitive_values() -> list[SensitiveValue]:
                 add(email, "identity.yml", "pii", "CRITICAL")
             if name and name != "Platform Operator":
                 add(name, "identity.yml", "pii", "CRITICAL")
+
+    # --- 1b. .local/deployments/<slug>/identity.yml (ADR 0440) ---
+    if DEPLOYMENTS_DIR.is_dir():
+        for slug_dir in sorted(DEPLOYMENTS_DIR.iterdir()):
+            if not slug_dir.is_dir():
+                continue
+            identity_path = slug_dir / "identity.yml"
+            if not identity_path.exists():
+                continue
+            try:
+                identity = yaml.safe_load(identity_path.read_text())
+            except yaml.YAMLError:
+                continue
+            if not identity:
+                continue
+            slug = slug_dir.name
+            source = f"deployments/{slug}/identity.yml"
+            domain = identity.get("platform_domain", "")
+            email = identity.get("platform_operator_email", "")
+            name = identity.get("platform_operator_name", "")
+            if domain and domain != "example.com":
+                add(domain, source, "domain", "CRITICAL")
+            if email and "example.com" not in email:
+                add(email, source, "pii", "CRITICAL")
+            if name and name != "Platform Operator":
+                add(name, source, "pii", "CRITICAL")
 
     # --- 2. hosts.yml ---
     if HOSTS_PATH.exists():

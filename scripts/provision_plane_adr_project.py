@@ -7,7 +7,7 @@ This script is idempotent - can be run multiple times safely.
 
 Usage:
   python scripts/provision_plane_adr_project.py \
-    --plane-url http://10.10.10.20:8093/api/v1 \
+    --plane-url http://<plane-host>:8093/api/v1 \
     --workspace-slug default \
     --output-file .local/plane.env
 
@@ -135,8 +135,8 @@ def main():
     )
     parser.add_argument(
         "--plane-url",
-        default=os.getenv("PLANE_URL", "http://10.10.10.20:8093/api/v1"),
-        help="Plane API URL (default: from PLANE_URL env or http://10.10.10.20:8093/api/v1)",
+        default=os.getenv("PLANE_URL", "http://10.10.10.20:8093/api/v1"),  # noqa: topology-hardcode (legacy default; PLANE_URL env overrides)
+        help="Plane API URL (default: $PLANE_URL or the legacy production fallback)",
     )
     parser.add_argument(
         "--workspace-slug",

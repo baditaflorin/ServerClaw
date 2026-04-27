@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-27'
 facet: concern
 concern: vm-topology
-total_adrs: 45
+total_adrs: 46
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -832,3 +832,21 @@ adrs:
     summary: Health-probe catalog URLs must derive from topology at render time,
     filename: 0435-topology-derived-health-probe-urls.md
     path: docs/adr/0435-topology-derived-health-probe-urls.md
+  - adr: '0443'
+    title: Continuous Topology Reconciler & Drift Detection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-27'
+    concern: vm-topology
+    keywords:
+      - topology
+      - registry
+      - drift-detection
+      - observability
+      - continuous
+      - reconciler
+      - drift
+      - detection
+    summary: A new script scripts/validatenohardcodedtopology.py walks all
+    filename: 0443-continuous-topology-reconciler.md
+    path: docs/adr/0443-continuous-topology-reconciler.md

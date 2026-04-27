@@ -1,0 +1,187 @@
+---
+# service_profiles.yml — ADR 0441
+#
+# Named bundles of services that a deployment can opt into. A deployment's
+# profile.yml lists one or more profile names plus per-service overrides;
+# scripts/deployment.py::resolve_enabled_services walks this catalog,
+# applies extends, unions extra_services, subtracts disabled_services,
+# and pulls in the requires_services closure from platform_services.yml.
+#
+# Each profile entry shape:
+#   <name>:
+#     description: <human-readable summary>
+#     extends: [<other_profile>, ...]   # optional
+#     services: [<service_key>, ...]    # service keys from platform_service_registry
+#
+# Hand-edited; validated by scripts/validate_service_registry.py (Phase 3+).
+# The fall-through "core" profile is the minimum viable platform — every
+# real deployment should start from `profiles: [core]` or extend something
+# that extends core.
+
+service_profiles:
+
+  # ---------------------------------------------------------------------------
+  # core — minimum viable platform
+  # Required infrastructure that every deployment needs: secret store,
+  # identity provider, edge proxy, observability backbone, ops portal.
+  # Other profiles `extends: [core]`.
+  # ---------------------------------------------------------------------------
+  core:
+    description: Minimum viable platform — secrets, identity, proxy, ops.
+    services:
+      - openbao              # secret store
+      - keycloak             # identity provider
+      - step_ca              # internal CA
+      - nginx_runtime        # edge proxy
+      - docker_runtime       # container substrate
+      - alertmanager         # alert routing
+      - ops_portal           # operator landing page
+      - homepage             # service directory
+      - uptime_kuma          # endpoint health
+      - dozzle               # log viewer
+
+  # ---------------------------------------------------------------------------
+  # observability — telemetry, tracing, error capture
+  # ---------------------------------------------------------------------------
+  observability:
+    description: Telemetry, error capture, request tracing.
+    extends: [core]
+    services:
+      - glitchtip            # error capture (Sentry-compatible)
+      - langfuse             # LLM trace + eval store
+      - docker_runtime_observability
+      - falco                # runtime security events
+      - falco_event_bridge
+
+  # ---------------------------------------------------------------------------
+  # devtools — code hosting, CI, registry, project mgmt
+  # ---------------------------------------------------------------------------
+  devtools:
+    description: Source hosting, CI/CD, container registry, planning.
+    extends: [core]
+    services:
+      - gitea
+      - woodpecker
+      - harbor
+      - semaphore
+      - repowise
+      - plane
+
+  # ---------------------------------------------------------------------------
+  # knowledge — wiki, notes, docs, drawings, spreadsheets
+  # ---------------------------------------------------------------------------
+  knowledge:
+    description: Wiki, notes, document store, drawings, spreadsheets.
+    extends: [core]
+    services:
+      - outline
+      - paperless
+      - vikunja
+      - excalidraw
+      - grist
+      - nextcloud
+
+  # ---------------------------------------------------------------------------
+  # comms — chat, video, mail, push
+  # ---------------------------------------------------------------------------
+  comms:
+    description: Chat, video conferencing, mail, push notifications.
+    extends: [core]
+    services:
+      - matrix_synapse
+      - livekit
+      - mattermost
+      - mail_platform
+      - mailpit
+      - ntfy
+
+  # ---------------------------------------------------------------------------
+  # ai_lab — LLM apps, model serving, agent tooling
+  # ---------------------------------------------------------------------------
+  ai_lab:
+    description: LLM apps, model serving, agent tooling.
+    extends: [core, observability]
+    services:
+      - dify
+      - ollama
+      - librechat
+      - litellm
+      - browser_runner
+      - neko
+      - repo_intake
+      - rag_context
+      - label_studio
+      - piper
+      - tesseract_ocr
+      - tika
+
+  # ---------------------------------------------------------------------------
+  # automation — workflow + scheduled jobs
+  # ---------------------------------------------------------------------------
+  automation:
+    description: Workflow engines and scheduled jobs.
+    extends: [core]
+    services:
+      - windmill
+      - temporal
+      - semaphore
+      - changedetection
+
+  # ---------------------------------------------------------------------------
+  # data — search, analytics, object store, streaming
+  # ---------------------------------------------------------------------------
+  data:
+    description: Search, analytics, object store, event streaming.
+    extends: [core]
+    services:
+      - minio
+      - typesense
+      - searxng
+      - superset
+      - nats_jetstream
+      - redpanda
+
+  # ---------------------------------------------------------------------------
+  # platform_admin — IPAM, secrets UI, infra orchestration
+  # ---------------------------------------------------------------------------
+  platform_admin:
+    description: Network/IP management, infra orchestration UIs.
+    extends: [core]
+    services:
+      - netbox
+      - portainer
+      - coolify
+      - sftpgo
+
+  # ---------------------------------------------------------------------------
+  # business — billing, analytics, content
+  # ---------------------------------------------------------------------------
+  business:
+    description: Billing, web analytics, headless CMS.
+    extends: [core]
+    services:
+      - lago
+      - plausible
+      - directus
+      - flagsmith
+      - vaultwarden
+
+  # ---------------------------------------------------------------------------
+  # full — everything (sanity reference; not recommended for production)
+  # ---------------------------------------------------------------------------
+  full:
+    description: Every registered service. Reference profile only.
+    extends:
+      - core
+      - observability
+      - devtools
+      - knowledge
+      - comms
+      - ai_lab
+      - automation
+      - data
+      - platform_admin
+      - business
+    services:
+      - openfga              # not in any other bundle yet
+      - runtime_pool_substrate

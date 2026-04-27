@@ -8,6 +8,10 @@
 #
 # Invocation: ansible-playbook playbooks/paperless.yml -e @playbooks/vars/paperless.yml -e env=production
 
+- import_playbook: _includes/service_enabled_guard.yml
+  vars:
+    service_enabled_guard_name: paperless
+
 - import_playbook: _includes/dns_publication.yml
   when: service_needs_dns | default(false)
 

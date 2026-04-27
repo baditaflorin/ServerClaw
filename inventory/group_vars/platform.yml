@@ -3950,187 +3950,187 @@ platform_dns_records:
       value: 100.64.0.1
       ttl: 60
 platform_dns_declarations:
-  agents.0fork.com:
+  agents.example.com:
     service: dify
     target_host: nginx
     ttl: 60
     type: public
-  analytics.0fork.com:
+  analytics.example.com:
     service: plausible
     target_host: nginx
     ttl: 3600
     type: public
-  annotate.0fork.com:
+  annotate.example.com:
     service: label_studio
     target_host: nginx
     ttl: 3600
     type: public
-  api.0fork.com:
+  api.example.com:
     service: api_gateway
     target_host: nginx
     ttl: 60
     type: public
-  bi.0fork.com:
+  bi.example.com:
     service: superset
     target_host: nginx
     ttl: 3600
     type: public
-  billing.0fork.com:
+  billing.example.com:
     service: lago
     target_host: nginx
     ttl: 3600
     type: public
-  chat.0fork.com:
+  chat.example.com:
     service: librechat
     target_host: nginx
     ttl: 3600
     type: public
-  ci.0fork.com:
+  ci.example.com:
     service: woodpecker
     target_host: nginx
     ttl: 3600
     type: public
-  cloud.0fork.com:
+  cloud.example.com:
     service: nextcloud
     target_host: nginx
     ttl: 3600
     type: public
-  data.0fork.com:
+  data.example.com:
     service: directus
     target_host: nginx
     ttl: 60
     type: public
-  draw.0fork.com:
+  draw.example.com:
     service: excalidraw
     target_host: nginx
     ttl: 3600
     type: public
-  errors.0fork.com:
+  errors.example.com:
     service: glitchtip
     target_host: nginx
     ttl: 3600
     type: public
-  files.0fork.com:
+  files.example.com:
     service: sftpgo
     target_host: nginx
     ttl: 3600
     type: public
-  flags.0fork.com:
+  flags.example.com:
     service: flagsmith
     target_host: nginx
     ttl: 3600
     type: public
-  git.0fork.com:
+  git.example.com:
     service: gitea
     target_host: nginx
     ttl: 3600
     type: internal
-  grist.0fork.com:
+  grist.example.com:
     service: grist
     target_host: nginx
     ttl: 3600
     type: public
-  langfuse.0fork.com:
+  langfuse.example.com:
     service: langfuse
     target_host: nginx
     ttl: 3600
     type: public
-  livekit.0fork.com:
+  livekit.example.com:
     service: livekit
     target_host: nginx
     ttl: 60
     type: public
-  logs.0fork.com:
+  logs.example.com:
     service: dozzle
     target_host: nginx
     ttl: 3600
     type: public
-  mail.0fork.com:
+  mail.example.com:
     service: mail_platform
     target_host: docker-runtime
     ttl: 3600
     type: internal
-  matrix.0fork.com:
+  matrix.example.com:
     service: matrix_synapse
     target_host: nginx
     ttl: 3600
     type: public
-  minio-console.0fork.com:
+  minio-console.example.com:
     service: minio
     target_host: nginx
     ttl: 3600
     type: public
-  minio.0fork.com:
+  minio.example.com:
     service: minio
     target_host: nginx
     ttl: 3600
     type: public
-  n8n.0fork.com:
+  n8n.example.com:
     service: n8n
     target_host: nginx
     ttl: 3600
     type: public
-  ntfy.0fork.com:
+  ntfy.example.com:
     service: ntfy
     target_host: nginx
     ttl: 3600
     type: public
-  ops.0fork.com:
+  ops.example.com:
     service: ops_portal
     target_host: nginx
     ttl: 3600
     type: public
-  paperless.0fork.com:
+  paperless.example.com:
     service: paperless
     target_host: nginx
     ttl: 3600
     type: public
-  registry.0fork.com:
+  registry.example.com:
     service: harbor
     target_host: nginx
     ttl: 3600
     type: public
-  repo-intake.0fork.com:
+  repo-intake.example.com:
     service: repo_intake
     target_host: nginx
     ttl: 3600
     type: public
-  repowise.0fork.com:
+  repowise.example.com:
     service: repowise
     target_host: nginx
     ttl: 3600
     type: public
-  s3.0fork.com:
+  s3.example.com:
     service: minio
     target_host: nginx
     ttl: 3600
     type: public
-  search.0fork.com:
+  search.example.com:
     service: searxng
     target_host: nginx
     ttl: 3600
     type: internal
-  sso.0fork.com:
+  sso.example.com:
     service: keycloak
     target_host: nginx
     ttl: 60
     type: public
-  tasks.0fork.com:
+  tasks.example.com:
     service: plane
     target_host: nginx
     ttl: 3600
     type: public
-  uptime.0fork.com:
+  uptime.example.com:
     service: uptime_kuma
     target_host: nginx
     ttl: 3600
     type: public
-  vault.0fork.com:
+  vault.example.com:
     service: vaultwarden
     target_host: nginx
     ttl: 3600
     type: internal
-  wiki.0fork.com:
+  wiki.example.com:
     service: outline
     target_host: nginx
     ttl: 3600
@@ -4138,7 +4138,7 @@ platform_dns_declarations:
 platform_nginx_upstreams:
   - name: api_gateway_upstream
     service_name: api_gateway
-    fqdn: api.0fork.com
+    fqdn: api.example.com
     extra_fqdns: []
     port: 8080
     host: runtime-control
@@ -4149,7 +4149,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: coolify_upstream
     service_name: coolify
-    fqdn: coolify.0fork.com
+    fqdn: coolify.example.com
     extra_fqdns: []
     port: 8000
     host: coolify
@@ -4160,7 +4160,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: dify_upstream
     service_name: dify
-    fqdn: agents.0fork.com
+    fqdn: agents.example.com
     extra_fqdns: []
     port: 8094
     host: docker-runtime
@@ -4171,7 +4171,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: directus_upstream
     service_name: directus
-    fqdn: data.0fork.com
+    fqdn: data.example.com
     extra_fqdns: []
     port: 8055
     host: docker-runtime
@@ -4182,7 +4182,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: dozzle_upstream
     service_name: dozzle
-    fqdn: logs.0fork.com
+    fqdn: logs.example.com
     extra_fqdns: []
     port: 8089
     host: docker-runtime
@@ -4193,7 +4193,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: excalidraw_upstream
     service_name: excalidraw
-    fqdn: draw.0fork.com
+    fqdn: draw.example.com
     extra_fqdns: []
     port: 3095
     host: docker-runtime
@@ -4204,7 +4204,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: flagsmith_upstream
     service_name: flagsmith
-    fqdn: flags.0fork.com
+    fqdn: flags.example.com
     extra_fqdns: []
     port: 8017
     host: docker-runtime
@@ -4215,7 +4215,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: glitchtip_upstream
     service_name: glitchtip
-    fqdn: errors.0fork.com
+    fqdn: errors.example.com
     extra_fqdns: []
     port: 3005
     host: docker-runtime
@@ -4226,7 +4226,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: grist_upstream
     service_name: grist
-    fqdn: grist.0fork.com
+    fqdn: grist.example.com
     extra_fqdns: []
     port: 8484
     host: docker-runtime
@@ -4237,7 +4237,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: harbor_upstream
     service_name: harbor
-    fqdn: registry.0fork.com
+    fqdn: registry.example.com
     extra_fqdns: []
     port: 8095
     host: runtime-control
@@ -4248,7 +4248,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: homepage_upstream
     service_name: homepage
-    fqdn: home.0fork.com
+    fqdn: home.example.com
     extra_fqdns: []
     port: 3090
     host: runtime-general
@@ -4259,9 +4259,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: keycloak_upstream
     service_name: keycloak
-    fqdn: sso.0fork.com
+    fqdn: sso.example.com
     extra_fqdns:
-      - sso.staging.0fork.com
+      - sso.staging.example.com
     port: 8091
     host: runtime-control
     ip: 10.10.10.92
@@ -4271,7 +4271,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: label_studio_upstream
     service_name: label_studio
-    fqdn: annotate.0fork.com
+    fqdn: annotate.example.com
     extra_fqdns: []
     port: 8110
     host: docker-runtime
@@ -4282,7 +4282,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: lago_upstream
     service_name: lago
-    fqdn: billing.0fork.com
+    fqdn: billing.example.com
     extra_fqdns: []
     port: 8099
     host: docker-runtime
@@ -4293,7 +4293,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: langfuse_upstream
     service_name: langfuse
-    fqdn: langfuse.0fork.com
+    fqdn: langfuse.example.com
     extra_fqdns: []
     port: 3002
     host: docker-runtime
@@ -4304,7 +4304,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: librechat_upstream
     service_name: librechat
-    fqdn: chat.0fork.com
+    fqdn: chat.example.com
     extra_fqdns: []
     port: 8096
     host: coolify
@@ -4315,7 +4315,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: livekit_upstream
     service_name: livekit
-    fqdn: livekit.0fork.com
+    fqdn: livekit.example.com
     extra_fqdns: []
     port: 7880
     host: runtime-comms
@@ -4326,7 +4326,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: matrix_synapse_upstream
     service_name: matrix_synapse
-    fqdn: matrix.0fork.com
+    fqdn: matrix.example.com
     extra_fqdns: []
     port: 8008
     host: docker-runtime
@@ -4337,7 +4337,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: minio_upstream
     service_name: minio
-    fqdn: minio.0fork.com
+    fqdn: minio.example.com
     extra_fqdns: []
     port: 9010
     host: docker-runtime
@@ -4348,7 +4348,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: n8n_upstream
     service_name: n8n
-    fqdn: n8n.0fork.com
+    fqdn: n8n.example.com
     extra_fqdns: []
     port: 5678
     host: docker-runtime
@@ -4359,7 +4359,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: nextcloud_upstream
     service_name: nextcloud
-    fqdn: cloud.0fork.com
+    fqdn: cloud.example.com
     extra_fqdns: []
     port: 8084
     host: docker-runtime
@@ -4370,7 +4370,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: ntfy_upstream
     service_name: ntfy
-    fqdn: ntfy.0fork.com
+    fqdn: ntfy.example.com
     extra_fqdns: []
     port: 2586
     host: docker-runtime
@@ -4381,9 +4381,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: ops_portal_upstream
     service_name: ops_portal
-    fqdn: ops.0fork.com
+    fqdn: ops.example.com
     extra_fqdns:
-      - ops.staging.0fork.com
+      - ops.staging.example.com
     port: 8092
     host: docker-runtime
     ip: 10.10.10.20
@@ -4393,7 +4393,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: outline_upstream
     service_name: outline
-    fqdn: wiki.0fork.com
+    fqdn: wiki.example.com
     extra_fqdns: []
     port: 3006
     host: docker-runtime
@@ -4404,7 +4404,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: paperless_upstream
     service_name: paperless
-    fqdn: paperless.0fork.com
+    fqdn: paperless.example.com
     extra_fqdns: []
     port: 8018
     host: docker-runtime
@@ -4415,7 +4415,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: plane_upstream
     service_name: plane
-    fqdn: tasks.0fork.com
+    fqdn: tasks.example.com
     extra_fqdns: []
     port: 8093
     host: docker-runtime
@@ -4426,7 +4426,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: plausible_upstream
     service_name: plausible
-    fqdn: analytics.0fork.com
+    fqdn: analytics.example.com
     extra_fqdns: []
     port: 8016
     host: docker-runtime
@@ -4437,9 +4437,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: repo_intake_upstream
     service_name: repo_intake
-    fqdn: repo-intake.0fork.com
+    fqdn: repo-intake.example.com
     extra_fqdns:
-      - repo-intake.staging.0fork.com
+      - repo-intake.staging.example.com
     port: 8101
     host: docker-runtime
     ip: 10.10.10.20
@@ -4449,7 +4449,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: repowise_upstream
     service_name: repowise
-    fqdn: repowise.0fork.com
+    fqdn: repowise.example.com
     extra_fqdns: []
     port: 7070
     host: docker-runtime
@@ -4460,7 +4460,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: superset_upstream
     service_name: superset
-    fqdn: bi.0fork.com
+    fqdn: bi.example.com
     extra_fqdns: []
     port: 8105
     host: docker-runtime
@@ -4471,9 +4471,9 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: uptime_kuma_upstream
     service_name: uptime_kuma
-    fqdn: uptime.0fork.com
+    fqdn: uptime.example.com
     extra_fqdns:
-      - uptime.staging.0fork.com
+      - uptime.staging.example.com
     port: 3001
     host: docker-runtime
     ip: 10.10.10.20
@@ -4483,7 +4483,7 @@ platform_nginx_upstreams:
     path_prefix: /
   - name: woodpecker_upstream
     service_name: woodpecker
-    fqdn: ci.0fork.com
+    fqdn: ci.example.com
     extra_fqdns: []
     port: 8102
     host: docker-runtime
@@ -4504,7 +4504,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://agents.0fork.com/console/api/oauth/login/oidc/callback
+      - https://agents.example.com/console/api/oauth/login/oidc/callback
     scopes:
       - openid
       - profile
@@ -4514,7 +4514,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://data.0fork.com/auth/login/keycloak/callback
+      - https://data.example.com/auth/login/keycloak/callback
     scopes:
       - openid
       - profile
@@ -4524,7 +4524,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://git.0fork.com/user/oauth2/Keycloak/callback
+      - https://git.example.com/user/oauth2/Keycloak/callback
     scopes:
       - openid
       - profile
@@ -4534,7 +4534,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://errors.0fork.com/accounts/oidc/keycloak/login/callback/
+      - https://errors.example.com/accounts/oidc/keycloak/login/callback/
     scopes:
       - openid
       - profile
@@ -4544,7 +4544,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://grist.0fork.com/oauth2/callback
+      - https://grist.example.com/oauth2/callback
     scopes:
       - openid
       - profile
@@ -4554,7 +4554,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://registry.0fork.com/c/oidc/callback
+      - https://registry.example.com/c/oidc/callback
     scopes:
       - openid
       - profile
@@ -4565,7 +4565,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://langfuse.0fork.com/api/auth/callback/keycloak
+      - https://langfuse.example.com/api/auth/callback/keycloak
     scopes:
       - openid
       - profile
@@ -4575,7 +4575,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://ops.0fork.com/oauth2/callback
+      - https://ops.example.com/oauth2/callback
     scopes:
       - openid
       - profile
@@ -4585,7 +4585,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://wiki.0fork.com/auth/oidc.callback
+      - https://wiki.example.com/auth/oidc.callback
     scopes:
       - openid
       - profile
@@ -4595,7 +4595,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://paperless.0fork.com/accounts/oidc/keycloak/login/callback/
+      - https://paperless.example.com/accounts/oidc/keycloak/login/callback/
     scopes:
       - openid
       - profile
@@ -4605,7 +4605,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://repo-intake.0fork.com/oauth2/callback
+      - https://repo-intake.example.com/oauth2/callback
     scopes:
       - openid
       - profile
@@ -4615,7 +4615,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://chat.0fork.com/oauth/openid/callback
+      - https://chat.example.com/oauth/openid/callback
     scopes:
       - openid
       - profile
@@ -4625,7 +4625,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://files.0fork.com/web/oidc/redirect
+      - https://files.example.com/web/oidc/redirect
     scopes:
       - openid
       - profile
@@ -4635,7 +4635,7 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://bi.0fork.com/oauth-authorized/keycloak
+      - https://bi.example.com/oauth-authorized/keycloak
     scopes:
       - openid
       - profile
@@ -4645,249 +4645,207 @@ platform_sso_clients:
     provider: keycloak
     public_client: false
     redirect_uris:
-      - https://tasks.0fork.com/auth/openid/lv3
+      - https://tasks.example.com/auth/openid/lv3
     scopes:
       - openid
       - profile
       - email
     service: vikunja
 platform_hairpin_nat_hosts:
-  - hostname: agents.0fork.com
+  - hostname: agents.example.com
     address: 10.10.10.10
-  - hostname: analytics.0fork.com
+  - hostname: bi.example.com
     address: 10.10.10.10
-  - hostname: api.0fork.com
+  - hostname: chat.example.com
     address: 10.10.10.10
-  - hostname: bi.0fork.com
+  - hostname: data.example.com
     address: 10.10.10.10
-  - hostname: billing.0fork.com
+  - hostname: dify.example.com
     address: 10.10.10.10
-  - hostname: browser.0fork.com
+  - hostname: files.example.com
     address: 10.10.10.10
-  - hostname: chat.0fork.com
+  - hostname: grist.example.com
     address: 10.10.10.10
-  - hostname: ci.0fork.com
+  - hostname: langfuse.example.com
     address: 10.10.10.10
-  - hostname: cloud.0fork.com
+  - hostname: paperless.example.com
     address: 10.10.10.10
-  - hostname: data.0fork.com
+  - hostname: sso.example.com
     address: 10.10.10.10
-  - hostname: dify.0fork.com
-    address: 10.10.10.10
-  - hostname: draw.0fork.com
-    address: 10.10.10.10
-  - hostname: errors.0fork.com
-    address: 10.10.10.10
-  - hostname: files.0fork.com
-    address: 10.10.10.10
-  - hostname: flags.0fork.com
-    address: 10.10.10.10
-  - hostname: grafana.0fork.com
-    address: 10.10.10.10
-  - hostname: grist.0fork.com
-    address: 10.10.10.10
-  - hostname: headscale.0fork.com
-    address: 10.10.10.10
-  - hostname: home.0fork.com
-    address: 10.10.10.10
-  - hostname: langfuse.0fork.com
-    address: 10.10.10.10
-  - hostname: matrix.0fork.com
-    address: 10.10.10.10
-  - hostname: minio.0fork.com
-    address: 10.10.10.10
-  - hostname: n8n.0fork.com
-    address: 10.10.10.10
-  - hostname: nginx.0fork.com
-    address: 10.10.10.10
-  - hostname: ntfy.0fork.com
-    address: 10.10.10.10
-  - hostname: ops.0fork.com
-    address: 10.10.10.10
-  - hostname: paperless.0fork.com
-    address: 10.10.10.10
-  - hostname: registry.0fork.com
-    address: 10.10.10.10
-  - hostname: sso.0fork.com
-    address: 10.10.10.10
-  - hostname: tasks.0fork.com
-    address: 10.10.10.10
-  - hostname: uptime.0fork.com
-    address: 10.10.10.10
-  - hostname: wiki.0fork.com
+  - hostname: wiki.example.com
     address: 10.10.10.10
 platform_tls_certs:
-  agents.0fork.com:
+  agents.example.com:
     cert_validity_days: 90
     service: dify
     source: letsencrypt
     wildcard: false
-  analytics.0fork.com:
+  analytics.example.com:
     cert_validity_days: 90
     service: plausible
     source: letsencrypt
     wildcard: false
-  annotate.0fork.com:
+  annotate.example.com:
     cert_validity_days: 90
     service: label_studio
     source: letsencrypt
     wildcard: false
-  api.0fork.com:
+  api.example.com:
     cert_validity_days: 90
     service: api_gateway
     source: letsencrypt
     wildcard: false
-  bi.0fork.com:
+  bi.example.com:
     cert_validity_days: 90
     service: superset
     source: letsencrypt
     wildcard: false
-  billing.0fork.com:
+  billing.example.com:
     cert_validity_days: 90
     service: lago
     source: letsencrypt
     wildcard: false
-  chat.0fork.com:
+  chat.example.com:
     cert_validity_days: 90
     service: librechat
     source: letsencrypt
     wildcard: false
-  ci.0fork.com:
+  ci.example.com:
     cert_validity_days: 90
     service: woodpecker
     source: letsencrypt
     wildcard: false
-  cloud.0fork.com:
+  cloud.example.com:
     cert_validity_days: 90
     service: nextcloud
     source: letsencrypt
     wildcard: false
-  data.0fork.com:
+  data.example.com:
     cert_validity_days: 90
     service: directus
     source: letsencrypt
     wildcard: false
-  draw.0fork.com:
+  draw.example.com:
     cert_validity_days: 90
     service: excalidraw
     source: letsencrypt
     wildcard: false
-  errors.0fork.com:
+  errors.example.com:
     cert_validity_days: 90
     service: glitchtip
     source: letsencrypt
     wildcard: false
-  files.0fork.com:
+  files.example.com:
     cert_validity_days: 90
     service: sftpgo
     source: letsencrypt
     wildcard: false
-  flags.0fork.com:
+  flags.example.com:
     cert_validity_days: 90
     service: flagsmith
     source: letsencrypt
     wildcard: false
-  grist.0fork.com:
+  grist.example.com:
     cert_validity_days: 90
     service: grist
     source: letsencrypt
     wildcard: false
-  langfuse.0fork.com:
+  langfuse.example.com:
     cert_validity_days: 90
     service: langfuse
     source: letsencrypt
     wildcard: false
-  livekit.0fork.com:
+  livekit.example.com:
     cert_validity_days: 90
     service: livekit
     source: letsencrypt
     wildcard: false
-  logs.0fork.com:
+  logs.example.com:
     cert_validity_days: 90
     service: dozzle
     source: letsencrypt
     wildcard: false
-  mail.0fork.com:
+  mail.example.com:
     cert_validity_days: 90
     service: mail_platform
     source: letsencrypt
     wildcard: false
-  matrix.0fork.com:
+  matrix.example.com:
     cert_validity_days: 90
     service: matrix_synapse
     source: letsencrypt
     wildcard: false
-  minio-console.0fork.com:
+  minio-console.example.com:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  minio.0fork.com:
+  minio.example.com:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  n8n.0fork.com:
+  n8n.example.com:
     cert_validity_days: 90
     service: n8n
     source: letsencrypt
     wildcard: false
-  ntfy.0fork.com:
+  ntfy.example.com:
     cert_validity_days: 90
     service: ntfy
     source: letsencrypt
     wildcard: false
-  ops.0fork.com:
+  ops.example.com:
     cert_validity_days: 90
     service: ops_portal
     source: letsencrypt
     wildcard: false
-  paperless.0fork.com:
+  paperless.example.com:
     cert_validity_days: 90
     service: paperless
     source: letsencrypt
     wildcard: false
-  registry.0fork.com:
+  registry.example.com:
     cert_validity_days: 90
     service: harbor
     source: letsencrypt
     wildcard: false
-  repo-intake.0fork.com:
+  repo-intake.example.com:
     cert_validity_days: 90
     service: repo_intake
     source: letsencrypt
     wildcard: false
-  repowise.0fork.com:
+  repowise.example.com:
     cert_validity_days: 90
     service: repowise
     source: letsencrypt
     wildcard: false
-  s3.0fork.com:
+  s3.example.com:
     cert_validity_days: 90
     service: minio
     source: letsencrypt
     wildcard: false
-  sso.0fork.com:
+  sso.example.com:
     cert_validity_days: 90
     service: keycloak
     source: letsencrypt
     wildcard: false
-  tasks.0fork.com:
+  tasks.example.com:
     cert_validity_days: 90
     service: plane
     source: letsencrypt
     wildcard: false
-  uptime.0fork.com:
+  uptime.example.com:
     cert_validity_days: 90
     service: uptime_kuma
     source: letsencrypt
     wildcard: false
-  vault.0fork.com:
+  vault.example.com:
     cert_validity_days: 90
     service: vaultwarden
     source: step-ca
     wildcard: false
-  wiki.0fork.com:
+  wiki.example.com:
     cert_validity_days: 90
     service: outline
     source: letsencrypt

@@ -1356,13 +1356,55 @@ def dry_run(output_path: Path = PLATFORM_VARS_PATH) -> int:
     return 0
 
 
+def _apply_deployment_overrides(slug: str) -> Path:
+    """ADR 0440: when a deployment slug is passed, redirect the input
+    overlay and output paths to .local/deployments/<slug>/.
+
+    Returns the per-deployment output path so callers can pass it to
+    write_platform_vars(). Identity overlay and topology resolution are
+    redirected by mutating module-level globals (and platform.repo's
+    `_topology_host_vars_overlay_path`) so the rest of the generator
+    runs unchanged.
+    """
+    global LOCAL_IDENTITY_VARS_PATH
+
+    # Lazy import — scripts/deployment.py is only required when --deployment is used.
+    from scripts.deployment import load as load_deployment
+
+    deployment = load_deployment(slug, validate=False)
+    deployment.ensure_runtime_dirs()
+
+    # Redirect identity overlay to the deployment's identity.yml.
+    LOCAL_IDENTITY_VARS_PATH = deployment.root / "identity.yml"
+
+    # Redirect topology overlay to the deployment's topology.yml. We patch
+    # platform.repo's overlay resolver so load_topology_host_vars() picks
+    # the right file without needing every callsite updated.
+    import platform.repo as _platform_repo
+
+    deployment_topology = deployment.root / "topology.yml"
+    if deployment_topology.is_file():
+        _platform_repo._topology_host_vars_overlay_path = lambda repo_root=None: deployment_topology  # type: ignore[attr-defined]
+
+    return deployment.generated_dir / "platform.yml"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Generate the committed platform facts library from canonical stack and host vars."
+        description="Generate the platform facts library from canonical stack and host vars."
     )
-    parser.add_argument("--write", action="store_true", help="Write inventory/group_vars/platform.yml.")
+    parser.add_argument("--write", action="store_true", help="Write the platform.yml output.")
     parser.add_argument("--check", action="store_true", help="Exit non-zero if platform.yml is stale.")
     parser.add_argument("--dry-run", action="store_true", help="Print the generated YAML and exit.")
+    parser.add_argument(
+        "--deployment",
+        metavar="SLUG",
+        help=(
+            "ADR 0440: read identity/topology from .local/deployments/<slug>/ "
+            "and write platform.yml under .local/deployments/<slug>/generated/. "
+            "When omitted, the legacy single-deployment paths are used."
+        ),
+    )
     args = parser.parse_args()
 
     selected = [args.write, args.check, args.dry_run]
@@ -1370,12 +1412,16 @@ def main() -> int:
         parser.print_help()
         return 0
 
+    output_path: Path = PLATFORM_VARS_PATH
+    if args.deployment:
+        output_path = _apply_deployment_overrides(args.deployment)
+
     try:
         if args.write:
-            return write_platform_vars()
+            return write_platform_vars(output_path)
         if args.check:
-            return check_platform_vars()
-        return dry_run()
+            return check_platform_vars(output_path)
+        return dry_run(output_path)
     except (OSError, RuntimeError, ValueError) as exc:
         return emit_cli_error("Platform vars generator", exc)
 

@@ -1,6 +1,26 @@
 REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 LOCAL_OVERLAY_ROOT ?= $(shell $(REPO_ROOT)/scripts/resolve_local_overlay_root.sh)
 
+# ADR 0439/0440 — multi-deployment feature flag.
+# When MULTI_DEPLOYMENT_ENABLED=1, generator targets (generate-platform-vars,
+# generate-inventory, generate-platform-manifest) thread
+# `--deployment $(DEPLOYMENT)` so artifacts land under
+# .local/deployments/<slug>/generated/ instead of inventory/. The slug
+# resolves via deployment.py (explicit > $DEPLOYMENT > worktree marker >
+# .local/active-deployment). Off by default — single-deployment path is
+# byte-identical to pre-flag behavior.
+MULTI_DEPLOYMENT_ENABLED ?=
+ifeq ($(MULTI_DEPLOYMENT_ENABLED),1)
+DEPLOYMENT ?= $(shell uv run --quiet --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/deployment.py resolve --quiet 2>/dev/null)
+ifneq ($(strip $(DEPLOYMENT)),)
+DEPLOYMENT_ARG := --deployment $(DEPLOYMENT)
+else
+DEPLOYMENT_ARG :=
+endif
+else
+DEPLOYMENT_ARG :=
+endif
+
 # ADR 0437: overlay-aware bootstrap.
 # When PLATFORM_IDENTITY_OVERLAY is set, rewire inventory, SSH key, env and
 # ansible extras so `make bootstrap` works for forks off a single env var.
@@ -497,9 +517,9 @@ ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@mkdir -p $(dir $(BOOTSTRAP_OVERLAY_INVENTORY))
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write \
 		--host-vars-overlay $(BOOTSTRAP_OVERLAY_HOST_VARS) \
-		--out $(BOOTSTRAP_OVERLAY_INVENTORY)
+		--out $(BOOTSTRAP_OVERLAY_INVENTORY) $(DEPLOYMENT_ARG)
 else
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_inventory.py --write $(DEPLOYMENT_ARG)
 endif
 
 validate-generated-inventory: ## Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests
@@ -519,7 +539,7 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 
 generate-platform-vars:
 	$(MAKE) generate-cross-cutting-artifacts
-	PYTHONPATH=$(REPO_ROOT) python3 $(REPO_ROOT)/scripts/generate_platform_vars.py --write
+	PYTHONPATH=$(REPO_ROOT) python3 $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
 
 generate-slo-rules:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --write
@@ -620,7 +640,7 @@ check-canonical-truth:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/canonical_truth.py --check
 
 generate-platform-manifest:
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/platform_manifest.py --write
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/platform_manifest.py --write $(DEPLOYMENT_ARG)
 
 generate-ops-portal:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --write --probe-timeout $(OPS_PORTAL_PROBE_TIMEOUT)
@@ -1546,6 +1566,26 @@ detect-orphans:
 purge-orphans:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/detect_orphaned_containers.py --purge
 
+# ADR 0443 — topology drift detection.
+# Layer 1 (write-time): scan committed text for hardcoded service-host:port literals.
+validate-topology-templates:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/validate_no_hardcoded_topology.py
+
+# Layer 2a — guest-side probe. Useful for ad-hoc inspection of the local host.
+topology-probe-self:
+	python3 $(REPO_ROOT)/scripts/topology_probe.py --pretty
+
+# Layer 2b — controller-side reconciler. SSH-fan-out to every host
+# claimed by the active deployment's profile, diff against the registry,
+# write drift-report.{json,md} into .local/deployments/<slug>/state/.
+detect-topology-drift:
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/topology_reconciler.py --mode reconcile $(if $(deployment),--deployment $(deployment),)
+
+# Plan-only mode: print the expected (host -> services) mapping for the
+# active deployment without SSHing anywhere. Useful in CI.
+plan-topology:
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/topology_reconciler.py --mode plan $(if $(deployment),--deployment $(deployment),)
+
 rotate-secret:
 	$(MAKE) preflight WORKFLOW=rotate-secret
 	@test -n "$(SECRET_ID)" || (echo "set SECRET_ID=<secret-id>"; exit 1)
@@ -2163,3 +2203,6 @@ rotate-hetzner-dns-token: ## ADR 0424 item 7 — rotate the Hetzner DNS API toke
 	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/rotate-hetzner-dns-token.yml --env clone -- \
 	  --private-key $(ZERO_FORK_SSH_KEY) \
 	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+# Multi-deployment lifecycle (ADR 0439/0440/0442) — purely additive in Phase 1.
+include $(REPO_ROOT)/mk/multi-deployment.mk

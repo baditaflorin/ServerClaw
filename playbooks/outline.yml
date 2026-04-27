@@ -9,6 +9,10 @@
 
 # --- Standard plays (driven by vars/outline.yml) ---
 
+- import_playbook: _includes/service_enabled_guard.yml
+  vars:
+    service_enabled_guard_name: outline
+
 - import_playbook: _includes/dns_publication.yml
   when: service_needs_dns | default(false)
 

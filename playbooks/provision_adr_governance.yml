@@ -63,7 +63,7 @@
              make sync-adrs-to-plane
 
           3. Verify in Plane:
-             - Open http://10.10.10.20:8093
+             - Open http://10.10.10.20:8093  # noqa: topology-hardcode (operator-facing notice URL)
              - Check project "Architecture Decisions" (adr-index)
              - Confirm 406 ADR issues created
 

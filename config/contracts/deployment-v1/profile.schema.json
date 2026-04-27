@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schemas/deployment-v1/profile.json",
+  "title": "Deployment Service Profile",
+  "description": "Per-deployment service selection. Lives at .local/deployments/<slug>/profile.yml. Composes named profiles from inventory/group_vars/all/service_profiles.yml plus per-deployment opt-ins, opt-outs, and overrides. ADR 0441.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profiles": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+      "uniqueItems": true,
+      "description": "Named profiles to include. Resolved depth-first via the catalog's `extends` graph. Each profile's services are unioned together."
+    },
+    "extra_services": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+      "uniqueItems": true,
+      "description": "Services not in any selected profile that should still run on this deployment."
+    },
+    "disabled_services": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+      "uniqueItems": true,
+      "description": "Hard-disable list. Removes services that profile expansion would otherwise enable. If a kept service requires a disabled one, validation fails."
+    },
+    "service_overrides": {
+      "type": "object",
+      "description": "Per-service tuning. Keys are service names; values are merged onto the catalog defaults via deep merge for dicts and replacement for lists/scalars.",
+      "additionalProperties": {
+        "type": "object"
+      }
+    }
+  }
+}

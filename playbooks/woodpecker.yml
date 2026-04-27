@@ -27,6 +27,10 @@
 # Author: LV3 Platform
 # Last Updated: 2026-03-30
 
+- import_playbook: _includes/service_enabled_guard.yml
+  vars:
+    service_enabled_guard_name: woodpecker
+
 - name: Converge the Tailscale operator proxy for Woodpecker
   hosts: proxmox_hosts
   become: true

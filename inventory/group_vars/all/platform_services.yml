@@ -674,6 +674,8 @@ platform_service_registry:
     container_name: langfuse-web
     needs_openbao: true
     needs_postgres: true
+    requires_services:        # ADR 0441 — Langfuse stores blob events in MinIO
+      - minio
     hairpin:
       publish:
         - hostname: "langfuse.{{ platform_domain }}"
@@ -1121,6 +1123,8 @@ platform_service_registry:
     container_name: outline
     needs_openbao: true
     needs_postgres: true
+    requires_services:        # ADR 0441 — outline uses MinIO for attachment storage
+      - minio
     hairpin:
       publish:
         - hostname: "wiki.{{ platform_domain }}"
@@ -1174,6 +1178,9 @@ platform_service_registry:
     container_name: paperless
     needs_openbao: true
     needs_postgres: true
+    requires_services:        # ADR 0441 — paperless uses tika + tesseract for OCR pipelines
+      - tika
+      - tesseract_ocr
     hairpin:
       publish:
         - hostname: "paperless.{{ platform_domain }}"
@@ -1643,6 +1650,8 @@ platform_service_registry:
     site_dir: /opt/woodpecker
     container_name: woodpecker-server
     needs_openbao: true
+    requires_services:        # ADR 0441 — Woodpecker uses Gitea as its OAuth + git source
+      - gitea
     proxy:
       enabled: true
       upstream_port: 8102
@@ -1750,6 +1759,8 @@ platform_service_registry:
     container_name: librechat
     needs_openbao: true
     needs_postgres: false
+    requires_services:        # ADR 0441 — LibreChat fronts LiteLLM as its model gateway
+      - litellm
     hairpin:
       publish:
         - hostname: "chat.{{ platform_domain }}"

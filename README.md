@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.232` |
+| Repository version | `0.179.0` |
 | Platform version | `0.178.222` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -89,7 +89,7 @@ Showing 20 of 186 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.178.232` |
+| Repository version | `0.179.0` |
 | Platform version | `0.178.222` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

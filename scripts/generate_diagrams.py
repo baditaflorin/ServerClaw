@@ -231,8 +231,8 @@ def render_trust_tier_model(host_vars: dict[str, Any]) -> dict[str, Any]:
         height=120,
         background="#ede9fe",
     )
-    elements += rectangle("10.10.10.20:3095\nfrontend", x=760, y=280, background="#f5f3ff")
-    elements += rectangle("10.10.10.20:3096\ncollaboration room", x=760, y=420, background="#f5f3ff")
+    elements += rectangle("10.10.10.20:3095\nfrontend", x=760, y=280, background="#f5f3ff")  # noqa: topology-hardcode (diagram caption)
+    elements += rectangle("10.10.10.20:3096\ncollaboration room", x=760, y=420, background="#f5f3ff")  # noqa: topology-hardcode (diagram caption)
     elements.append(arrow("public-auth", x=300, y=120, dx=120, dy=0))
     elements.append(arrow("auth-runtime", x=640, y=170, dx=120, dy=170))
     elements.append(arrow("runtime-tailnet", x=980, y=120, dx=100, dy=0))

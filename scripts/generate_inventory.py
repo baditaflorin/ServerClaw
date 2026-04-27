@@ -432,7 +432,35 @@ def main() -> None:
             "committed production file is not polluted."
         ),
     )
+    parser.add_argument(
+        "--deployment",
+        metavar="SLUG",
+        help=(
+            "ADR 0440: read topology from .local/deployments/<slug>/topology.yml "
+            "and write hosts.yml under .local/deployments/<slug>/generated/. "
+            "When set, --host-vars / --host-vars-overlay / --out are ignored. "
+            "When omitted, the legacy single-deployment paths are used."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.deployment:
+        # ADR 0440: redirect inputs/outputs to the per-deployment layout.
+        from scripts.deployment import load as load_deployment
+
+        deployment = load_deployment(args.deployment, validate=False)
+        deployment.ensure_runtime_dirs()
+
+        # The deployment's topology.yml replaces the host_vars input wholesale —
+        # there is no "base + overlay" inside a deployment, the deployment
+        # owns its topology.
+        deployment_topology = deployment.root / "topology.yml"
+        if not deployment_topology.is_file():
+            print(f"ERROR: {deployment_topology} not found", file=sys.stderr)
+            sys.exit(2)
+        args.host_vars = str(deployment_topology)
+        args.host_vars_overlay = None
+        args.out = str(deployment.generated_dir / "hosts.yml")
 
     host_vars_path = Path(args.host_vars)
     if not host_vars_path.exists():

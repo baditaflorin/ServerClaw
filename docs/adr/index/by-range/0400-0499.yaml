@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 33
+total_adrs: 38
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -596,3 +596,98 @@ adrs:
     summary: Reuse Ansible's existing primitives. Do not invent a new DSL.
     filename: 0439-deployment-profiles-subset-selection.md
     path: docs/adr/0439-deployment-profiles-subset-selection.md
+  - adr: 0439
+    title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-27'
+    concern: networking
+    keywords:
+      - multi-deployment
+      - deployments
+      - parallel-converge
+      - agent-coordination
+      - refactor
+      - repo
+      - architecture
+      - independent
+      - servers
+      - from
+    summary: Introduce deployments as a first-class concept in this repo. A
+    filename: 0439-multi-deployment-repo-architecture.md
+    path: docs/adr/0439-multi-deployment-repo-architecture.md
+  - adr: '0440'
+    title: Per-Deployment Identity & Artifact Isolation
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-27'
+    concern: identity
+    keywords:
+      - multi-deployment
+      - generated-artifacts
+      - identity
+      - inventory
+      - refactor
+      - per-deployment
+      - artifact
+      - isolation
+    summary: ''
+    filename: 0440-per-deployment-identity-and-artifact-isolation.md
+    path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
+  - adr: '0441'
+    title: Deployment-Scoped Service Subsetting via Service Profiles
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-27'
+    concern: platform
+    keywords:
+      - multi-deployment
+      - service-profile
+      - allowlist
+      - registry
+      - refactor
+      - deployment-scoped
+      - service
+      - subsetting
+      - profiles
+    summary: Each deployment owns a profile.yml under
+    filename: 0441-deployment-scoped-service-subsetting.md
+    path: docs/adr/0441-deployment-scoped-service-subsetting.md
+  - adr: '0442'
+    title: Multi-Deployment Make Interface & Agent Worktree Binding
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-27'
+    concern: agent-discovery
+    keywords:
+      - multi-deployment
+      - makefile
+      - worktrees
+      - workstreams
+      - agents
+      - make
+      - interface
+      - agent
+      - worktree
+      - binding
+    summary: Every Make target that today accepts env= accepts deployment=.
+    filename: 0442-multi-deployment-make-interface-and-worktree-binding.md
+    path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
+  - adr: '0443'
+    title: Continuous Topology Reconciler & Drift Detection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-27'
+    concern: vm-topology
+    keywords:
+      - topology
+      - registry
+      - drift-detection
+      - observability
+      - continuous
+      - reconciler
+      - drift
+      - detection
+    summary: A new script scripts/validatenohardcodedtopology.py walks all
+    filename: 0443-continuous-topology-reconciler.md
+    path: docs/adr/0443-continuous-topology-reconciler.md

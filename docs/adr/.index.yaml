@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-27'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 465
+total_adrs: 470
 adr_number_range:
   first: '0001'
-  last: 0439
-  next_available: '0440'
+  last: '0443'
+  next_available: '0444'
 implementation_status_summary:
-  Implemented: 359
+  Implemented: 360
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 32
+  Proposed: 36
 decision_status_summary:
-  Accepted: 363
-  Proposed: 39
+  Accepted: 364
+  Proposed: 43
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,16 +49,16 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 33
+      count: 38
       first_adr: '0400'
-      last_adr: 0439
+      last_adr: '0443'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
       count: 2
     - concern: agent-discovery
       path: docs/adr/index/by-concern/agent-discovery.yaml
-      count: 26
+      count: 27
     - concern: api
       path: docs/adr/index/by-concern/api.yaml
       count: 12
@@ -79,16 +79,16 @@ facets:
       count: 10
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
-      count: 8
+      count: 9
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
       count: 11
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
-      count: 31
+      count: 32
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 145
+      count: 146
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -106,12 +106,12 @@ facets:
       count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 45
+      count: 46
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 359
+      count: 360
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -131,14 +131,39 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 32
+      count: 36
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0440'
+  next_available_adr: '0444'
 latest_adrs:
+  - adr: '0443'
+    title: Continuous Topology Reconciler & Drift Detection
+    implementation_status: Implemented
+    concern: vm-topology
+    path: docs/adr/0443-continuous-topology-reconciler.md
+  - adr: '0442'
+    title: Multi-Deployment Make Interface & Agent Worktree Binding
+    implementation_status: Proposed
+    concern: agent-discovery
+    path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
+  - adr: '0441'
+    title: Deployment-Scoped Service Subsetting via Service Profiles
+    implementation_status: Proposed
+    concern: platform
+    path: docs/adr/0441-deployment-scoped-service-subsetting.md
+  - adr: '0440'
+    title: Per-Deployment Identity & Artifact Isolation
+    implementation_status: Proposed
+    concern: identity
+    path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
+  - adr: 0439
+    title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
+    implementation_status: Proposed
+    concern: networking
+    path: docs/adr/0439-multi-deployment-repo-architecture.md
   - adr: 0439
     title: Deployment Profiles — Subset-of-Services Selection for Forks
     implementation_status: Proposed
@@ -164,32 +189,6 @@ latest_adrs:
     implementation_status: Accepted
     concern: platform
     path: docs/adr/0431-0fork-full-day-deployment.md
-  - adr: '0430'
-    title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
-    implementation_status: Accepted
-    concern: host-os
-    path: docs/adr/0430-topology-host-vars-local-overlay.md
-  - adr: '0425'
-    title: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
-    implementation_status: Accepted
-    concern: identity
-    path: docs/adr/0425-retrospective-420-adr-platform-build.md
-  - adr: '0424'
-    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
-    implementation_status: Implemented
-    concern: bootstrap
-    path: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
-  - adr: '0423'
-    title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
-    implementation_status: Not Implemented
-    concern: documentation
-    path: docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md
-  - adr: '0422'
-    title: Evaluate lsp-ai as an Editor-Side AI Language Server
-    implementation_status: Accepted
-    concern: platform
-    path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
-    implemented_on: '2026-04-21'
 discovery_queries:
   how do we bootstrap:
     - '0001'

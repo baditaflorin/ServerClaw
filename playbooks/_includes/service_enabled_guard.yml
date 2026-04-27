@@ -1,0 +1,62 @@
+---
+# _includes/service_enabled_guard.yml — ADR 0441
+#
+# Purpose: Skip a service playbook when the active deployment's profile.yml
+# does not enable this service. Imported at the top of per-service
+# playbooks so `make converge-<svc>` against a deployment that does not
+# include <svc> is a no-op rather than a wasteful or destructive run.
+#
+# Inputs (passed via -e):
+#   service_enabled_guard_name (required) — service key matching
+#       platform_service_registry. e.g. "outline".
+#
+# Inputs (resolved automatically):
+#   platform_enabled_services (set or list, optional) — when defined and
+#       service_enabled_guard_name is not in it, the play ends early.
+#       When unset, the guard is a no-op (backward compatibility for
+#       single-deployment runs that never declared a profile).
+#
+# Behavior:
+#   - service_enabled_guard_name in platform_enabled_services → continue.
+#   - service_enabled_guard_name not in platform_enabled_services →
+#     print a clear "skipped by profile" notice and end the play with
+#     meta: end_play (does not fail, does not propagate).
+#   - platform_enabled_services undefined → continue (legacy mode).
+#
+# Usage in a per-service playbook:
+#   - import_playbook: _includes/service_enabled_guard.yml
+#     vars:
+#       service_enabled_guard_name: outline
+
+- name: Profile guard for {{ service_enabled_guard_name }}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: "Assert service_enabled_guard_name is provided"
+      ansible.builtin.assert:
+        that:
+          - service_enabled_guard_name is defined
+          - service_enabled_guard_name | length > 0
+        fail_msg: >-
+          service_enabled_guard_name must be set when importing
+          _includes/service_enabled_guard.yml. Pass it via `vars:` on the
+          import_playbook line.
+        quiet: true
+
+    - name: "Skip {{ service_enabled_guard_name }} — not enabled by deployment profile"
+      ansible.builtin.debug:
+        msg: >-
+          Service '{{ service_enabled_guard_name }}' is not present in
+          platform_enabled_services for this deployment. Ending play
+          early. (Edit profile.yml to enable.)
+      when:
+        - platform_enabled_services is defined
+        - service_enabled_guard_name not in platform_enabled_services
+
+    - name: "End play if {{ service_enabled_guard_name }} is disabled"
+      ansible.builtin.meta: end_play
+      when:
+        - platform_enabled_services is defined
+        - service_enabled_guard_name not in platform_enabled_services

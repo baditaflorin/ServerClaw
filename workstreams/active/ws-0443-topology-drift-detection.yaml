@@ -1,0 +1,142 @@
+id: ws-0443-topology-drift-detection
+adr: "0443"
+title: "Continuous Topology Reconciler & Drift Detection (multi-deployment release 0.179.0)"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/loving-agnesi-b8dab1
+worktree_path: .claude/worktrees/loving-agnesi-b8dab1
+doc: docs/adr/0443-continuous-topology-reconciler.md
+depends_on:
+  - adr-0373-service-registry-derived-defaults
+  - adr-0416-pg-hba-from-service-registry
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+conflicts_with: []
+shared_surfaces:
+  - scripts/validate_repo.sh
+  - Makefile
+  - roles/windmill_runtime/defaults/main.yml
+ownership_manifest:
+  owned_surfaces:
+  - id: topology_reconciler_core
+    paths:
+    - scripts/topology_probe.py
+    - scripts/topology_reconciler.py
+    - scripts/validate_no_hardcoded_topology.py
+    - config/windmill/scripts/topology-drift-check.py
+    - tests/test_adr_0443_topology_drift.py
+    - docs/adr/0443-continuous-topology-reconciler.md
+    mode: exclusive
+  - id: multi_deployment_foundations
+    paths:
+    - scripts/deployment.py
+    - scripts/deployment_lock.py
+    - scripts/migrate_to_multi_deployment.py
+    - mk/multi-deployment.mk
+    - inventory/group_vars/all/service_profiles.yml
+    - playbooks/_includes/service_enabled_guard.yml
+    - config/contracts/deployment-v1/*
+    - tests/test_adr_0439_multi_deployment.py
+    - tests/test_adr_0440_phase2_generators.py
+    - docs/adr/0439-multi-deployment-repo-architecture.md
+    - docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
+    - docs/adr/0441-deployment-scoped-service-subsetting.md
+    - docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
+    mode: exclusive
+  - id: shared_pre_push_gate
+    paths:
+    - scripts/validate_repo.sh
+    - Makefile
+    mode: shared_contract
+    contract: pre-push-gate-v1
+  - id: windmill_schedule_registry
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+    mode: shared_contract
+    contract: windmill-schedule-registry-v1
+  - id: registry_lookups_for_topology
+    paths:
+    - inventory/group_vars/all/platform_services.yml
+    - inventory/host_vars/proxmox-host.yml
+    - playbooks/vars/fork-overrides.yml
+    - playbooks/vars/glitchtip.yml
+    - playbooks/vars/outline.yml
+    - playbooks/outline.yml
+    - playbooks/paperless.yml
+    - playbooks/woodpecker.yml
+    - playbooks/provision_adr_governance.yml
+    - platform/ansible/woodpecker.py
+    mode: shared_contract
+    contract: service-registry-v1
+  - id: noqa_topology_hardcode_annotations
+    paths:
+    - scripts/audit_sanitization_coverage.py
+    - scripts/generate_diagrams.py
+    - scripts/generate_inventory.py
+    - scripts/generate_librechat_tool_specs.py
+    - scripts/generate_platform_vars.py
+    - scripts/generate_topology_snapshot.py
+    - scripts/generate_discovery_artifacts.py
+    - scripts/platform_manifest.py
+    - scripts/provision_plane_adr_project.py
+    mode: shared_contract
+    contract: topology-hardcode-noqa-v1
+  - id: roles_touched_for_topology
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/harbor_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+    - collections/ansible_collections/lv3/platform/roles/outline_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/outline_runtime/tasks/publish.yml
+    - collections/ansible_collections/lv3/platform/roles/outline_runtime/templates/outline.env.ctmpl.j2
+    mode: shared_contract
+    contract: service-registry-v1
+  - id: release_artifacts_0_179_0
+    paths:
+    - VERSION
+    - RELEASE.md
+    - changelog.md
+    - README.md
+    - versions/stack.yaml
+    - workstreams.yaml
+    - build/platform-manifest.json
+    - config/health-probe-catalog.json
+    - config/controller-local-secrets.json
+    - config/workflow-catalog.json
+    - docs/release-notes/0.179.0.md
+    - docs/release-notes/README.md
+    - docs/release-notes/index/2026.md
+    - docs/release-notes/index/README.md
+    - docs/adr/.index.yaml
+    - docs/adr/index/by-concern/*.yaml
+    - docs/adr/index/by-range/*.yaml
+    - docs/adr/index/by-status/*.yaml
+    - docs/diagrams/*.excalidraw
+    - docs/diagrams/service-interaction-map.md
+    - docs/status/history/live-apply-evidence.md
+    - docs/status/history/merged-workstreams.md
+    - config/command-catalog.json
+    - docs/adr/0439-deployment-profiles-subset-selection.md
+    - docs/release-notes/0.178.231.md
+    - docs/release-notes/0.178.232.md
+    - workstreams/active/ws-0439-deployment-profiles.yaml
+    - receipts/gate-bypasses/*.json
+    - config/subdomain-exposure-registry.json
+    - inventory/group_vars/platform.yml
+    - inventory/group_vars/platform_tls_certs.yml
+    - receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0443_workstream
+    paths:
+    - workstreams/active/ws-0443-topology-drift-detection.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+notes: |
+  Ships ADR 0443 in full plus the four multi-deployment foundation ADRs
+  (0439-0442). Phase 1: stdlib-only topology_probe.py + controller-side
+  topology_reconciler.py with SSH fan-out + diff. Phase 2: linter promoted
+  to a hard pre-push gate (validate_repo.sh stage). Phase 3: hourly
+  Windmill schedule + ops-portal receipt translation under
+  receipts/drift-reports/.

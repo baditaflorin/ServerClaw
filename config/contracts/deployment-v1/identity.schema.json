@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schemas/deployment-v1/identity.json",
+  "title": "Deployment Identity",
+  "description": "Per-deployment operator identity. Lives at .local/deployments/<slug>/identity.yml. Defines the apex domain, operator, DNS provider, and network anchors. ADR 0440.",
+  "type": "object",
+  "required": [
+    "platform_domain",
+    "platform_operator_email",
+    "platform_operator_name"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "platform_domain": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$",
+      "minLength": 3,
+      "description": "Apex domain. Lowercase RFC 1123 hostname. The platform's identity anchor."
+    },
+    "platform_operator_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Operator contact email. Used for ACME, alerting, mail bridge."
+    },
+    "platform_operator_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable operator name. Appears in Proxmox notifications, mail headers."
+    },
+    "platform_config_prefix": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "Short identifier used in internal config filenames. Defaults to first label of platform_domain."
+    },
+    "hetzner_dns_zone_name": {
+      "type": "string",
+      "description": "Hetzner DNS zone name. Defaults to platform_domain."
+    },
+    "hetzner_dns_zone_id": {
+      "type": "string",
+      "description": "Hetzner DNS zone ID. Read from Hetzner DNS console."
+    },
+    "tailscale_tailnet": {
+      "type": "string",
+      "description": "Tailscale tailnet identifier (e.g. taild0123.ts.net). One per deployment for network isolation."
+    },
+    "platform_guest_network_cidr": {
+      "type": "string",
+      "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$",
+      "description": "Internal LAN CIDR for guest VMs (e.g. 10.10.10.0/24)."
+    },
+    "platform_tailscale_network_cidr": {
+      "type": "string",
+      "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$",
+      "description": "Tailscale CGNAT range (e.g. 100.64.0.0/10)."
+    },
+    "platform_topology_host": {
+      "type": "string",
+      "description": "Ansible reference to the proxmox host that holds the topology facts. Usually `{{ groups['proxmox_hosts'][0] }}`."
+    }
+  }
+}

@@ -351,8 +351,8 @@ def build_topology(
     if not prod_vms:
         _warn("Could not extract VM list from inventory; using hardcoded defaults")
         prod_vms = {
-            "coolify": {"vmid": 170, "ip": "10.10.10.70"},
-            "coolify-apps": {"vmid": 171, "ip": "10.10.10.71"},
+            "coolify": {"vmid": 170, "ip": "10.10.10.70"},  # noqa: topology-hardcode (deliberate fallback when inventory parse fails)
+            "coolify-apps": {"vmid": 171, "ip": "10.10.10.71"},  # noqa: topology-hardcode (deliberate fallback when inventory parse fails)
         }
 
     snapshot: dict[str, Any] = {

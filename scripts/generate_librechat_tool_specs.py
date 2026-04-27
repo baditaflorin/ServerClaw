@@ -86,7 +86,7 @@ TOOL_PACKS = {
     },
 }
 
-GATEWAY_BASE_URL = "http://10.10.10.92:8083"
+GATEWAY_BASE_URL = "http://10.10.10.92:8083"  # noqa: topology-hardcode (default; operator overrides via --gateway-base-url; TODO derive from registry)
 AUTH_HEADER = "X-LV3-Dify-Api-Key"
 
 
