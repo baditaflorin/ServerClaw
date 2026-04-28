@@ -12,6 +12,20 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0452 + ws-0452: Phase 7 drives doctor signals from 3/7 → 1/7
+  non-zero. Adds `# pending: <reason>` marker filter to
+  `scripts/generate_traceability.py` (mirror of ADR 0445's
+  `# late-bound-allow:` pattern). Annotates the 3 real dangling
+  surfaces in ws-0377, ws-0396, ws-realtime-dynamic-children — all
+  forward-looking references (generated artifact, archive forecast,
+  netdata replacement TBD). Replaces `.gitkeep` substrate placeholder
+  under `collections/.../molecule/` with a stub `proxmox-fixture`
+  driver — `create.yml` falls back to localhost so Molecule scenarios
+  load cleanly while the real Proxmox-API driver is deferred to
+  ws-0446 phase 4. Live `make doctor` output: `dangling_surfaces`
+  and `blocked_substrate` both flipped from `[!]` to `[ok]`. Only
+  `stale_receipts` remains red — a real operator-action signal.
+  10 new tests on the pending marker.
 - ADR 0451 + ws-0451: Phase 6 self-healing actions. Three primitives
   that close the doctor → heal loop: registry-driven role lookup in
   `refresh_safe_receipts.py` (consults `platform_service_registry`'s
@@ -48,10 +62,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.14 release notes](docs/release-notes/0.179.14.md)
+- [0.179.15 release notes](docs/release-notes/0.179.15.md)
 
 ## Previous Releases
 
+- [0.179.14 release notes](docs/release-notes/0.179.14.md)
 - [0.179.13 release notes](docs/release-notes/0.179.13.md)
 - [0.179.12 release notes](docs/release-notes/0.179.12.md)
 - [0.179.11 release notes](docs/release-notes/0.179.11.md)
@@ -63,9 +78,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.5 release notes](docs/release-notes/0.179.5.md)
 - [0.179.4 release notes](docs/release-notes/0.179.4.md)
 - [0.179.3 release notes](docs/release-notes/0.179.3.md)
-- [0.179.2 release notes](docs/release-notes/0.179.2.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (530 releases)](docs/release-notes/index/2026.md)
+- [2026 (531 releases)](docs/release-notes/index/2026.md)

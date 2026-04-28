@@ -15,7 +15,7 @@ conflicts_with: []
 shared_surfaces:
 - workstreams.yaml
 - workstreams/active/ws-0396-live-apply.yaml
-- workstreams/archive/2026/ws-0396-live-apply.yaml
+- workstreams/archive/2026/ws-0396-live-apply.yaml  # pending: forecast — workstream not yet archived (ADR 0455)
 - docs/workstreams/ws-0396-live-apply.md
 - docs/adr/0396-deterministic-service-decommissioning.md
 - docs/runbooks/data-retention.md

@@ -1,0 +1,47 @@
+---
+# proxmox-fixture create — STUB (ADR 0455 phase 7.3)
+#
+# Real implementation deferred to ws-0446 phase 4. This stub exists so
+# the substrate is no longer a `.gitkeep` placeholder and the doctor's
+# `blocked_substrate` signal flips to clean. See README.md in this
+# directory for the eventual contract.
+#
+# When run, this stub:
+#   1. Logs that it is a stub (so users can see why their guest isn't
+#      provisioned).
+#   2. Writes the Molecule inventory file pointing at localhost so the
+#      subsequent converge play has somewhere to land.
+- name: Provision Molecule fixture (proxmox-fixture stub)
+  hosts: localhost
+  gather_facts: false
+  vars:
+    molecule_ephemeral_dir: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}"
+    fixture_name: "{{ lookup('env', 'MOLECULE_FIXTURE_NAME') | default('localhost-fallback', true) }}"
+  tasks:
+    - name: Announce stub
+      ansible.builtin.debug:
+        msg: >-
+          proxmox-fixture create.yml is a stub (ADR 0455). The fixture
+          {{ fixture_name | default('unspecified') }} is not actually
+          provisioned. Replace this driver with a real implementation
+          via ws-0446 phase 4. Falling back to localhost so the
+          converge play has a target.
+
+    - name: Write a localhost-only Molecule inventory
+      ansible.builtin.copy:
+        dest: "{{ molecule_ephemeral_dir }}/inventory.json"
+        mode: "0644"
+        content: |
+          {
+            "all": {
+              "hosts": {
+                "fixture-host": {
+                  "ansible_connection": "local",
+                  "ansible_host": "localhost",
+                  "ansible_python_interpreter": "{{ ansible_python_interpreter | default('python3') }}",
+                  "molecule_fixture_name": "{{ fixture_name }}"
+                }
+              }
+            }
+          }
+      when: molecule_ephemeral_dir | length > 0

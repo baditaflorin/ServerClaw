@@ -14,8 +14,8 @@ shared_surfaces:
 - docs/workstreams/ws-realtime-dynamic-children.md
 - build/platform-manifest.json
 - docs/site-generated/architecture/dependency-graph.md
-- collections/ansible_collections/lv3/platform/playbooks/realtime.yml
-- collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
+- collections/ansible_collections/lv3/platform/playbooks/realtime.yml  # pending: realtime monitoring not yet implemented; netdata removed (ADR 0401)
+- collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml  # pending: netdata removed (ADR 0401); replacement TBD
 - .config-locations.yaml
 - .repo-structure.yaml
 - build/onboarding/agent-core.yaml

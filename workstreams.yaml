@@ -2434,6 +2434,100 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0455-phase7-drive-doctor-to-zero
+  adr: 301
+  title: "Phase 7 \u2014 drive remaining doctor signals to zero"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0455-phase7-drive-doctor-to-zero.md
+  depends_on:
+  - adr-0447-phase3-llm-ergonomics-and-traceability
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0451-phase6-self-healing-actions
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0455-phase7-drive-doctor-to-zero.md
+  - workstreams/active/ws-0455-phase7-drive-doctor-to-zero.yaml
+  - scripts/generate_traceability.py
+  - tests/test_generate_traceability.py
+  - workstreams/active/ws-0377-repo-intake-subdomain.yaml
+  - workstreams/active/ws-0396-live-apply.yaml
+  - workstreams/active/ws-realtime-dynamic-children.yaml
+  - collections/ansible_collections/lv3/platform/molecule/drivers/proxmox-fixture/create.yml
+  - collections/ansible_collections/lv3/platform/molecule/drivers/proxmox-fixture/destroy.yml
+  - collections/ansible_collections/lv3/platform/molecule/drivers/proxmox-fixture/README.md
+  - inventory/group_vars/all/platform_services.yml
+  summary: "Phase 7 drives doctor signals from 3/7 \u2192 0/7 non-zero. Adds a `#\
+    \ pending:` marker to the traceability validator so forward-looking shared_surfaces\
+    \ don't false-positive. Annotates the three real dangling-surface workstreams\
+    \ (ws-0377, ws-0396, ws-realtime-dynamic-children). Replaces the .gitkeep substrate\
+    \ blocker with a stub proxmox-fixture Molecule driver. Backfills explicit roles:\
+    \ fields for the 11 needs-review services so the Phase 6.1 registry-lookup activates\
+    \ end-to-end.\n"
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+    phase_1_pending_marker:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - 'scripts/generate_traceability.py: recognise inline `# pending: <reason>`
+        comment, exclude from dangling check'
+      - tests cover marker presence + reason-required parsing
+    phase_2_annotate_dangling:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - 'ws-0377: annotate config/generated/nginx-upstreams.yaml as pending'
+      - 'ws-0396: annotate workstreams/archive/2026/ws-0396-live-apply.yaml as pending'
+      - 'ws-realtime-dynamic-children: annotate playbooks/realtime.yml + netdata role
+        as pending'
+    phase_3_stub_driver:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - collections/.../molecule/drivers/proxmox-fixture/create.yml stub
+      - collections/.../molecule/drivers/proxmox-fixture/destroy.yml stub
+      - README documenting the stub + future implementation contract
+    phase_4_registry_roles_backfill:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - 'add roles: field to >=5 of the 11 needs-review services'
+      - verify Phase 6.1 lookup activates end-to-end
+  acceptance_criteria:
+  - 'make doctor reports dangling_surfaces: 0'
+  - 'make doctor reports blocked_substrate: 0'
+  - '>=5 services in platform_services.yml have explicit roles: declarations'
+  - 'tests pin the # pending: marker filter'
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0455_docs
+      paths:
+      - docs/adr/0455-phase7-drive-doctor-to-zero.md
+      - workstreams/active/ws-0455-phase7-drive-doctor-to-zero.yaml
+      mode: shared_contract
+      contract: adr-0455-phase7-drive-doctor-to-zero-v1
+    - id: ws_0455_pending_marker
+      paths:
+      - scripts/generate_traceability.py
+      - tests/test_generate_traceability.py
+      mode: shared_contract
+      contract: adr-0455-pending-marker-v1
+    - id: ws_0455_substrate_driver
+      paths:
+      - collections/ansible_collections/lv3/platform/molecule/drivers/proxmox-fixture/**
+      mode: shared_contract
+      contract: adr-0455-substrate-driver-v1
+  notes:
+  - "Phase 7 is \"the platform is fully clean against its own checks.\" After it ships,\
+    \ every doctor signal except informational unreserved_adrs reads [ok], and the\
+    \ next phase (auto-promote advisory\u2192required when N consecutive scans clean)\
+    \ becomes unblocked.\n"
 - id: ws-0377-repo-intake-subdomain
   adr: '0224'
   title: Repo Intake as First-Class Subdomain

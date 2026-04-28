@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.14",
+  "repo_version": "0.179.15",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-28T12:48:45Z",
-  "next_refresh_at": "2026-04-28T13:48:45Z",
+  "generated_at": "2026-04-28T17:07:10Z",
+  "next_refresh_at": "2026-04-28T18:07:10Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.13",
+    "last_version": "0.179.14",
     "deployed_at": "2026-04-28",
-    "summary": "ADR 0451 + ws-0451: Phase 6 self-healing actions. Three primitives ADR 0450 + ws-0450: Phase 5 self-healing aggregator + post-merge",
-    "release_notes_url": "docs/release-notes/0.179.14.md"
+    "summary": "ADR 0452 + ws-0452: Phase 7 drives doctor signals from 3/7 \u2192 1/7 ADR 0451 + ws-0451: Phase 6 self-healing actions. Three primitives",
+    "release_notes_url": "docs/release-notes/0.179.15.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

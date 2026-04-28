@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -172,6 +173,12 @@ def load_workstreams(
     (defaults to the module-level REPO_ROOT). Falls back to an absolute
     path if the file is outside the supplied root — which only happens
     in tests using `tmp_path`, never in production.
+
+    Each loaded dict also carries `__pending_surfaces` — a set of
+    `shared_surfaces` values whose source line carried a
+    `# pending: <reason>` marker (ADR 0455 phase 7.1). The build pass
+    uses that to skip the dangling-existence check for forward-looking
+    references.
     """
     if not directory.is_dir():
         return []
@@ -181,8 +188,9 @@ def load_workstreams(
         if path.name.startswith(("_", ".")):
             continue
         try:
-            data = yaml.safe_load(path.read_text()) or {}
-        except yaml.YAMLError:
+            text = path.read_text()
+            data = yaml.safe_load(text) or {}
+        except (yaml.YAMLError, OSError):
             continue
         if not isinstance(data, dict):
             continue
@@ -190,7 +198,50 @@ def load_workstreams(
             data["__source_path"] = str(path.relative_to(root))
         except ValueError:
             data["__source_path"] = str(path)
+        data["__pending_surfaces"] = extract_pending_markers(text)
         out.append(data)
+    return out
+
+
+_PENDING_MARKER_RE = re.compile(
+    r"""
+    ^\s*-\s+                    # YAML list-item dash + space
+    (?P<value>\S+?)             # the entry value (greedy non-whitespace)
+    \s*\#\s*pending\s*:\s*      # the # pending: marker
+    (?P<reason>\S.*?)           # the reason (non-empty)
+    $
+    """,
+    re.VERBOSE,
+)
+
+
+def extract_pending_markers(yaml_text: str) -> set[str]:
+    """Return the set of `shared_surfaces` values annotated with
+    `# pending: <reason>` in the raw YAML text.
+
+    Forward-looking surfaces (a generated artifact that doesn't exist
+    yet, the archive path a workstream will move to once archived,
+    blocked-on-decision targets) need a way to live in
+    `shared_surfaces` without being false-positive dangling hits.
+    Mirrors the `# late-bound-allow:` pattern in ADR 0445's late-bound
+    topology lint — same shape, same audit semantics.
+
+    The marker is parsed from the raw YAML text rather than via YAML
+    metadata because PyYAML's safe_load discards comments. The match
+    is anchored at start-of-line dash to avoid catching prose
+    mentions in `summary:` or `notes:` blocks that happen to contain
+    `# pending:`.
+
+    A reason is required. `# pending:` (empty reason) does not match —
+    the marker only fires when there's content after the colon.
+    """
+    out: set[str] = set()
+    for line in yaml_text.splitlines():
+        m = _PENDING_MARKER_RE.match(line)
+        if m:
+            value = m.group("value").strip("\"'")
+            if value:
+                out.add(value)
     return out
 
 
@@ -274,7 +325,19 @@ def build_traceability(
         #                                 The traceability validator can't
         #                                 stat those, so flagging them as
         #                                 dangling is a false positive.
-        surface_paths = [str(s) for s in surfaces_raw if "*" not in str(s) and not _looks_like_prose(str(s))]
+        # ADR 0455 phase 7.1 — also exclude entries annotated with a
+        # `# pending: <reason>` comment in the source YAML. These are
+        # forward-looking surfaces (artifacts not yet generated, archive
+        # paths a workstream will move to, blocked-on-decision targets)
+        # whose absence is intentional. The reason lives in-line so a
+        # monthly audit can re-evaluate whether the marker still
+        # applies.
+        pending_surfaces = ws.get("__pending_surfaces") or set()
+        surface_paths = [
+            str(s)
+            for s in surfaces_raw
+            if "*" not in str(s) and not _looks_like_prose(str(s)) and str(s) not in pending_surfaces
+        ]
         present = sum(1 for s in surface_paths if (repo_root / s).exists())
         dangling_surfaces = [s for s in surface_paths if not (repo_root / s).exists()]
 

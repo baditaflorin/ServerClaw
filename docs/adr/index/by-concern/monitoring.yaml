@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-28'
 facet: concern
 concern: monitoring
-total_adrs: 11
+total_adrs: 12
 adrs:
   - adr: '0041'
     title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
@@ -231,3 +231,19 @@ adrs:
     path: docs/adr/0401-remove-netdata.md
     implemented_in_repo_version: 0.178.92
     implemented_on: '2026-04-10'
+  - adr: '0453'
+    title: Integration-Health Telemetry
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: monitoring
+    keywords:
+      - telemetry
+      - metrics
+      - ci
+      - release-health
+      - integration-health
+    summary: Add scripts/generateintegrationhealth.py --write, producing
+    filename: 0453-integration-health-telemetry-and-bypass-governance.md
+    path: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md

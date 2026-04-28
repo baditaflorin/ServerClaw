@@ -10,7 +10,7 @@ generated: '2026-04-28'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 42
+total_adrs: 46
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -724,3 +724,74 @@ adrs:
     summary: Extend scripts/refreshsafereceipts.py::candidaterolepaths to
     filename: 0451-phase6-self-healing-actions.md
     path: docs/adr/0451-phase6-self-healing-actions.md
+  - adr: '0452'
+    title: Workstream Lifecycle Auto-Close
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: automation
+    keywords:
+      - workstreams
+      - registry
+      - archive
+      - lifecycle
+      - automation
+      - workstream
+      - auto-close
+    summary: 'Add three mechanical closures around ADR 0326''s existing data layout:'
+    filename: 0452-workstream-lifecycle-auto-close.md
+    path: docs/adr/0452-workstream-lifecycle-auto-close.md
+  - adr: '0453'
+    title: Integration-Health Telemetry
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: monitoring
+    keywords:
+      - telemetry
+      - metrics
+      - ci
+      - release-health
+      - integration-health
+    summary: Add scripts/generateintegrationhealth.py --write, producing
+    filename: 0453-integration-health-telemetry-and-bypass-governance.md
+    path: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
+  - adr: '0454'
+    title: Incident & Postmortem Registry
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: ci-cd
+    keywords:
+      - incidents
+      - postmortems
+      - registry
+      - index
+      - governance
+      - incident
+      - postmortem
+    summary: ''
+    filename: 0454-incident-and-postmortem-registry.md
+    path: docs/adr/0454-incident-and-postmortem-registry.md
+  - adr: '0455'
+    title: Phase 7 — Drive Doctor Signals to Zero
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: automation
+    keywords:
+      - doctor
+      - dangling-surfaces
+      - blocked-substrate
+      - registry-roles
+      - phase
+      - drive
+      - signals
+      - zero
+    summary: Extend scripts/generatetraceability.py to recognise an inline
+    filename: 0455-phase7-drive-doctor-to-zero.md
+    path: docs/adr/0455-phase7-drive-doctor-to-zero.md

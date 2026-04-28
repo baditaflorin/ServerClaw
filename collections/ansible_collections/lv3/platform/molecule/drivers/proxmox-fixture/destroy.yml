@@ -1,0 +1,15 @@
+---
+# proxmox-fixture destroy — STUB (ADR 0455 phase 7.3)
+#
+# Real implementation deferred to ws-0446 phase 4. This stub matches
+# create.yml's stub contract: it does not actually destroy a Proxmox
+# guest because create.yml did not actually provision one.
+- name: Destroy Molecule fixture (proxmox-fixture stub)
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Announce stub
+      ansible.builtin.debug:
+        msg: >-
+          proxmox-fixture destroy.yml is a stub (ADR 0455). Nothing to
+          destroy because create.yml didn't provision anything.

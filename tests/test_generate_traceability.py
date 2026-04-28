@@ -254,6 +254,93 @@ def test_build_traceability_skips_prose_surfaces(gt, tmp_path):
     assert t.dangling_surfaces == ["missing.yml"]
 
 
+# ---------------------------------------------------------------------------
+# # pending: marker — ADR 0455 phase 7.1
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "line,expected",
+    [
+        # Happy path — single-word value, marker present, reason given.
+        (
+            "  - config/generated/nginx-upstreams.yaml  # pending: artifact not generated yet",
+            {"config/generated/nginx-upstreams.yaml"},
+        ),
+        # Quoted value (rare in workstream YAMLs but should parse cleanly).
+        (
+            "  - 'roles/foo/main.yml'  # pending: blocked on decision",
+            {"roles/foo/main.yml"},
+        ),
+        # Reason absent → marker does NOT fire (reason required).
+        ("  - x.yml  # pending:", set()),
+        # No marker → no match.
+        ("  - x.yml  # something else", set()),
+        # Plain entry without comment → no match.
+        ("  - x.yml", set()),
+        # Indentation variations.
+        ("- x.yml  # pending: deferred to phase 8", {"x.yml"}),
+        # Wrong key prefix (e.g. inside summary block) — same regex
+        # still matches because it's just looking at line shape; the
+        # caller is responsible for scoping. Document the behaviour.
+        ("  - real_path.yml  # pending: documented", {"real_path.yml"}),
+    ],
+)
+def test_extract_pending_markers_from_line(gt, line, expected):
+    assert gt.extract_pending_markers(line) == expected
+
+
+def test_extract_pending_markers_multiline(gt):
+    text = (
+        "shared_surfaces:\n"
+        "  - committed/path.yml\n"
+        "  - future/artifact.yml  # pending: not generated yet\n"
+        "  - another/future.yml  # pending: blocked on ADR 9999\n"
+        "summary:\n"
+        "  - this is prose, no marker, ignored\n"
+    )
+    assert gt.extract_pending_markers(text) == {
+        "future/artifact.yml",
+        "another/future.yml",
+    }
+
+
+def test_build_traceability_skips_pending_surfaces(gt, tmp_path):
+    """A `shared_surfaces` entry annotated with `# pending: <reason>`
+    in the source YAML is a forward-looking reference. The validator
+    must skip the existence check for it — that's the whole point of
+    the marker. Dangling-count must NOT include pending entries."""
+    workstreams = [
+        {
+            "id": "ws-x",
+            "adr": "0001",
+            "shared_surfaces": [
+                "missing.yml",
+                "future/artifact.yml",
+            ],
+            "__pending_surfaces": {"future/artifact.yml"},
+        }
+    ]
+    traces = gt.build_traceability(workstreams, {"0001": {}}, tmp_path)
+    t = traces[0]
+    # `future/artifact.yml` excluded from total + dangling count.
+    assert t.surfaces_total == 1
+    assert t.dangling_surfaces == ["missing.yml"]
+
+
+def test_load_workstreams_attaches_pending_set(gt, tmp_path):
+    """End-to-end: load_workstreams reads the YAML, runs the marker
+    extractor over the raw text, and attaches __pending_surfaces."""
+    active = tmp_path / "active"
+    active.mkdir()
+    (active / "ws-x.yaml").write_text(
+        "id: ws-x\nshared_surfaces:\n  - foo/exists.yml\n  - foo/future.yml  # pending: deferred to phase 9\n"
+    )
+    out = gt.load_workstreams(active, repo_root=tmp_path)
+    assert len(out) == 1
+    assert out[0]["__pending_surfaces"] == {"foo/future.yml"}
+
+
 def test_build_traceability_handles_missing_id_via_source_path(gt, tmp_path):
     workstreams = [{"__source_path": "workstreams/active/ws-no-id.yaml"}]
     traces = gt.build_traceability(workstreams, {}, tmp_path)
