@@ -166,7 +166,7 @@ proxmox_api_token_local_dir: "{{ repo_shared_local_root }}/proxmox-api"
 proxmox_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-api/{{ platform_config_prefix }}-automation-primary.json"
 proxmox_tool_topology_file: "{{ repo_shared_local_root }}/proxmox-api/topology.yaml"
 
-hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
+hetzner_dns_api_base_url: https://api.hetzner.cloud/v1
 
 monitoring_local_artifact_dir: "{{ repo_shared_local_root }}/monitoring"
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key

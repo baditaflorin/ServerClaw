@@ -1,11 +1,9 @@
-# Release 0.179.14
+# Release 0.179.9
 
 - Date: 2026-04-28
 
 ## Summary
-- ADR 0451 + ws-0451: Phase 6 self-healing actions. Three primitives
-- ADR 0450 + ws-0450: Phase 5 self-healing aggregator + post-merge
-- ADR 0449 + ws-0449: Phase 4 self-healing primitives. Three new
+- No changelog notes were present in `## Unreleased` at release time.
 
 ## Platform Impact
 - no live platform version bump; this release updates repository automation, release metadata, and operator tooling only

@@ -5,14 +5,26 @@
       - hetzner_dns_zone_name | length > 0
       - hetzner_dns_records | length > 0
       - (lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim | length) > 0
-    fail_msg: "Set HETZNER_DNS_API_TOKEN before running the Uptime Kuma deployment."
+    fail_msg: "Set HETZNER_DNS_API_TOKEN before running this play."
 
+# ADR 0430 PR 4 — Hetzner DNS-Console (legacy dns.hetzner.com/api/v1) is being
+# replaced by the new Hetzner Console at api.hetzner.cloud/v1. The new API:
+#   - Authenticates with `Authorization: Bearer <token>` instead of the
+#     `Auth-API-Token` header.
+#   - Groups records into rrsets (record sets) keyed by name+type instead
+#     of returning a flat record list. Each rrset contains a `records[]`
+#     array of `{value, comment}` entries.
+#   - Uses path-style ids (e.g. `@/A`, `nginx/A`) on the rrset endpoint
+#     rather than opaque numeric record ids.
+# The role flattens rrsets into the canonical (one-record-per-value) model
+# the rest of the role already uses, so migration is contained here and in
+# record.yml.
 - name: Read Hetzner DNS zone information
   ansible.builtin.uri:
     url: "{{ hetzner_dns_api_base_url }}/zones?name={{ hetzner_dns_zone_name | urlencode }}"
     method: GET
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     return_content: true
   register: hetzner_dns_zone_lookup
   changed_when: false
@@ -42,47 +54,58 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_zone: "{{ dns_provider_boundary_zone_candidates[0] }}"
 
-- name: Read current Hetzner DNS records for the zone
+# Pull all rrsets for the zone in one request. per_page=100 is the maximum
+# the new Console API accepts; that covers any realistic single zone (e.g.
+# lv3.org has 67 rrsets as of 2026-04-28). The assert below catches the
+# day a zone outgrows a single page so we don't silently miss records and
+# infer false drift / spurious deletes; when that happens, extend this
+# task with a manual page-walk loop.
+- name: Read current Hetzner DNS rrsets for the zone
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_base_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref | urlencode }}"
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets?per_page=100"
     method: GET
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     return_content: true
   register: hetzner_dns_records_lookup
   changed_when: false
   no_log: true
 
-- name: Translate Hetzner DNS record provider payload into canonical record facts
+- name: Assert the rrset listing fits in a single 100-entry page
+  ansible.builtin.assert:
+    that:
+      - >-
+        (hetzner_dns_records_lookup.json.meta.pagination.next_page | default(None)) is none
+    fail_msg: >-
+      Hetzner zone {{ hetzner_dns_zone_name }} has more than 100 rrsets
+      (next_page={{ hetzner_dns_records_lookup.json.meta.pagination.next_page | default('?') }}).
+      Add a manual page-walk loop to this task before proceeding.
+
+# Each Hetzner Console rrset groups all values for one (name,type) pair.
+# Flatten each rrset.records[].value into a separate canonical record so the
+# rest of the role keeps working against its existing flat-record model.
+# The provider_ref is the rrset id (e.g. "@/A", "nginx/A") — multiple
+# canonical records for the same rrset will share the same provider_ref,
+# which the per-value matchers in record.yml use as the rrset locator on
+# update/delete.
+- name: Translate Hetzner DNS rrset provider payload into canonical record facts
   ansible.builtin.set_fact:
     dns_provider_boundary_existing_records: >-
       {%- set items = [] -%}
-      {%- for record in hetzner_dns_records_lookup.json.records | default([]) -%}
+      {%- for rrset in hetzner_dns_records_lookup.json.rrsets | default([]) -%}
+      {%- for entry in rrset.records | default([]) -%}
       {%- set _ = items.append({
-        "record_ref": "dns-record:" ~ (record.type | default("unknown")) ~ ":" ~ (record.name | default("")),
-        "record_name": record.name | default(""),
-        "record_type": record.type | default(""),
-        "record_value": record.value | default(""),
-        "record_ttl": record.ttl | default(0) | int,
-        "provider_ref": record.id | default(""),
+        "record_ref": "dns-record:" ~ (rrset.type | default("unknown")) ~ ":" ~ (rrset.name | default("")),
+        "record_name": rrset.name | default(""),
+        "record_type": rrset.type | default(""),
+        "record_value": entry.value | default(""),
+        "record_ttl": rrset.ttl | default(0) | int,
+        "provider_ref": rrset.id | default(""),
         "provider": "hetzner_dns"
       }) -%}
       {%- endfor -%}
+      {%- endfor -%}
       {{ items }}
-
-- name: Announce the active Hetzner DNS brownout manual-fallback mode
-  ansible.builtin.debug:
-    msg: >-
-      Hetzner DNS brownout manual-fallback is ACTIVE. API writes will be
-      skipped for this zone. A summary of records requiring manual
-      publication via https://dns.hetzner.com will be printed at the end
-      of this role. Drift detection (reads) still runs normally.
-  when: hetzner_dns_brownout_manual_fallback | bool
-
-- name: Reset the Hetzner DNS brownout pending-record accumulator
-  ansible.builtin.set_fact:
-    hetzner_dns_brownout_pending_records: []
-  when: hetzner_dns_brownout_manual_fallback | bool
 
 - name: Ensure desired Hetzner DNS records are present
   ansible.builtin.include_tasks: record.yml

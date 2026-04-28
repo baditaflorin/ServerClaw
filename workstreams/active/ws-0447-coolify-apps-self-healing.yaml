@@ -1,0 +1,160 @@
+id: ws-0447-coolify-apps-self-healing
+title: "Coolify apps self-healing: coolify-apps bootstrap + DNS-01 cert + app-deploy role"
+status: in_progress
+priority: p0
+owner: platform
+created: 2026-04-28
+branch: claude/ws-0447-coolify-apps-self-healing
+
+context: |
+  After the 0fork Coolify deployment (converges 16-25) and the first app deploy
+  (education_wemeshup), several manual steps were required:
+    1. nginx was manually patched to point to coolify VM (10.10.10.70:80) instead
+       of coolify-apps VM (10.10.10.71:443), because coolify-apps has no Traefik.
+    2. The app's domain scheme was switched from https:// to http:// to avoid
+       Traefik's HTTP-01 ACME challenge loop (nginx redirects port 80→443, so
+       the challenge can never complete).
+    3. PermitRootLogin was manually enabled on coolify-apps VM.
+
+  These patches are WRONG. The next `make converge-nginx` overwrites the manual
+  nginx patch and the app breaks. This workstream makes the platform converge to
+  the correct state unattended.
+
+  Key insight: the nginx template at publication/templates/proxmox-host.yml:2982
+  is ALREADY CORRECT — it looks up coolify-apps-lv3 by name, not by hardcoded IP.
+  The problem is that coolify-apps never has Traefik on it, so the upstream is dead.
+
+design: |
+  Three independent Ansible-level changes, all self-healing:
+
+  ## 1. coolify_runtime: bootstrap coolify-apps VM as a Coolify server
+
+  Add a second play in the coolify playbook targeting coolify-apps-lv3 that:
+  - Installs Docker (same docker_runtime role already used elsewhere)
+  - Adds PermitRootLogin yes + coolify deploy pubkey to authorized_keys
+    (derived from coolify_deploy_ssh_pubkey, already in defaults/main.yml)
+  - Registers coolify-apps as a Coolify server via API call
+    (idempotent: check if server with ip == coolify_apps_ip exists first)
+  - Triggers validate → Coolify installs its own Traefik on coolify-apps
+
+  When this runs, the nginx upstream (https://coolify-apps-lv3:443) is live and
+  correct. When coolify-apps IP changes, generate-platform-vars + converge heals it.
+
+  Variables needed (add to coolify_runtime defaults):
+    coolify_apps_vm_host: "{{ (proxmox_guests | selectattr('name', 'equalto',
+                              'coolify-apps-lv3') | map(attribute='ipv4') | first) }}"
+    coolify_apps_vm_ssh_port: 22
+    coolify_apps_server_name: coolify-apps
+
+  ## 2. coolify_runtime: switch Traefik to DNS-01 cert resolution
+
+  The docker-compose.yml.j2 template hardcodes HTTP-01 acme.httpchallenge.
+  HTTP-01 is broken when nginx is in front (port 80 redirects to 443; the
+  ACME challenge response can never be served).
+
+  Replace with DNS-01 via Hetzner DNS, which the platform already uses:
+    --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+    --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=hetzner
+    --certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=10
+
+  Traefik needs HETZNER_API_KEY env var injected at runtime (from Vault/OpenBao
+  or from the coolify .env file). The platform already has hetzner_dns_zone_id
+  in .local/identity.yml and a rotate-hetzner-dns-token playbook.
+
+  New variable (add to coolify_runtime defaults):
+    coolify_traefik_cert_resolver: dns  # or http; default dns for behind-nginx use
+    coolify_hetzner_dns_api_token_vault_path: "secret/hetzner/dns-api-token"
+
+  When coolify_traefik_cert_resolver == dns:
+    - Render the dnschallenge lines instead of httpchallenge in docker-compose.yml.j2
+    - Inject HETZNER_API_KEY into the proxy container env
+
+  This makes Traefik on coolify-apps get real certs for *.apps.0fork.com via
+  DNS TXT records — no dependency on nginx port-80 routing whatsoever.
+
+  ## 3. coolify_app_deploy role: idempotent app registration via Coolify API
+
+  A new role that, given:
+    - repo_url, branch, compose_file
+    - domain (derived from platform_domain — never hardcoded)
+    - service_name (the compose service that gets the domain)
+    - project_name, server_name
+
+  Does, via delegate_to targeting the coolify VM (bypasses API IP whitelist):
+    1. Check if project exists → create if not
+    2. Check if application exists → create if not
+    3. Check if GitHub deploy key exists for the repo → add if not
+       (uses coolify_deploy_ssh_pubkey, already derived from server-key.pub)
+    4. Trigger deploy if application config changed (changed_when on diff)
+    5. Wait for deployment status: finished
+
+  Domain derivation (no hardcoded TLD or host):
+    coolify_app_domain: "http://{{ app_name }}.apps.{{ platform_domain }}"
+    (http:// because nginx terminates TLS; Traefik on coolify-apps serves HTTP
+    internally and handles TLS from DNS-01 cert at its own entrypoint)
+
+  Receipts written to .local/coolify/apps/{{ app_name }}.json for admin-auth
+  parity.
+
+  ## What self-heals without LLM involvement
+
+  After these three changes, the full lifecycle is:
+
+    VM IP changes:
+      make generate-platform-vars → regenerates all IP references by name lookup
+      make converge-nginx → nginx picks up new coolify-apps IP from topology
+      make converge-coolify → coolify-apps re-registered if IP changed
+
+    New app deployment:
+      make deploy-app app=education_wemeshup → runs coolify_app_deploy role
+      GitHub deploy key added automatically
+      App registered in Coolify with correct domain from platform_domain
+      Deployed and health-checked
+
+    Certificate rotation:
+      Traefik on coolify-apps handles DNS-01 renewal automatically
+      No nginx involvement, no HTTP-01 dependency
+
+  Nothing in this path calls an LLM or requires a human to:
+    - patch nginx
+    - switch domain schemes
+    - relay API calls manually
+    - hardcode any IP or hostname
+
+tasks:
+  - id: t1
+    title: "Bootstrap coolify-apps in coolify_runtime play"
+    status: pending
+    files:
+      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/main.yml
+      - playbooks/coolify.yml
+  - id: t2
+    title: "Switch Traefik to DNS-01 cert resolver (Hetzner)"
+    status: pending
+    files:
+      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
+  - id: t3
+    title: "Write coolify_app_deploy role"
+    status: pending
+    files:
+      - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/ (new)
+  - id: t4
+    title: "Add make deploy-app target"
+    status: pending
+    files:
+      - Makefile
+  - id: t5
+    title: "Revert manual nginx patch via converge"
+    status: pending
+    notes: >
+      Once t1 is complete (coolify-apps has Traefik on 443), run
+      `make converge-nginx` to restore the correct upstream from the template.
+      The manual nginx patch (http://10.10.10.70:80) is TEMPORARY and will be
+      overwritten.
+
+references:
+  - postmortem: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
+  - adr: docs/adr/0340-coolify-vm-separation.md
+  - template: publication/templates/proxmox-host.yml:2982
+  - role: collections/ansible_collections/lv3/platform/roles/coolify_runtime/

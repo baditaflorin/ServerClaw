@@ -197,15 +197,29 @@ postgres_vm_client_allowed_sources_extra_bridge:
   - 10.200.0.0/16
   - 10.10.10.20/32
 
-# --- Public edge certificate name ---
+# --- Public edge certificate name and ACME challenge method ---
 # The nginx_edge_publication role derives the cert name from
-# platform_identity.config_prefix, producing "0fork-edge". But the Let's
-# Encrypt certificate was issued by certbot on this server under the name
-# "lv3-edge" (the legacy cert name from the original LV3 deployment).
-# The cert covers all *.0fork.com SANs so it is fully valid for this fork.
-# Override so the role finds the existing cert instead of looking for a
-# nonexistent "0fork-edge" lineage and rendering an HTTP-only nginx config.
-public_edge_cert_name: lv3-edge
+# platform_identity.config_prefix, producing "0fork-edge". The cert at
+# /etc/letsencrypt/live/0fork-edge/ now covers all named subdomains plus
+# *.apps.{{ platform_domain }} (added 2026-04-28 via certbot-dns-hetzner v3.0.0).
+# The lv3-edge cert is a legacy alias from the original LV3 deployment; the
+# 0fork-edge cert is now the canonical cert for this deployment.
+#
+# DNS-01 via certbot-dns-hetzner is required because:
+#   1. *.apps.{{ platform_domain }} is a wildcard — HTTP-01 cannot validate it
+#   2. The credentials file /etc/letsencrypt/hetzner.ini is already on the
+#      nginx VM (written 2026-04-28); it contains the Hetzner Cloud API token
+#      (67-char Bearer format — certbot-dns-hetzner v3.0.0 auto-selects the
+#      new api.hetzner.cloud/v1/zones backend for tokens longer than 32 chars)
+#
+# public_edge_additional_certificate_domains adds *.apps.{{ platform_domain }}
+# to the SAN list so every new Coolify-deployed app gets a valid cert automatically.
+# The nginx_edge_publication role strips wildcard entries when
+# public_edge_acme_challenge_method=webroot; they are preserved for dns-hetzner.
+public_edge_acme_challenge_method: dns-hetzner
+public_edge_additional_certificate_domains:
+  - "{{ platform_domain }}"
+  - "*.apps.{{ platform_domain }}"
 
 # --- Gitea controller URL ---
 # gitea_controller_url resolves to http://100.64.0.1:3009 (the Tailscale management

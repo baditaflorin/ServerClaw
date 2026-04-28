@@ -62,25 +62,36 @@
       Unsupported Hetzner DNS record state {{ hetzner_dns_record.state | default('present') }}
       for {{ hetzner_dns_record.name }} {{ hetzner_dns_record.type }}.
 
-- name: Build the canonical DNS record provider payload
+# Body shape for the new Hetzner Console API (api.hetzner.cloud/v1):
+#   POST /v1/zones/{zone_id}/rrsets        — body: {name, type, ttl, records}
+#   PUT  /v1/zones/{zone_id}/rrsets/{id}   — same body; records[] REPLACES set
+#   DELETE /v1/zones/{zone_id}/rrsets/{id} — no body
+# `records` is the rrset's full value list. Because this role iterates one
+# desired (name,type,value) at a time, the payload below carries a single-
+# entry records[] — fine for the predominant single-value rrset case.
+# A multi-value rrset (e.g. multiple MX hosts) where two desired records
+# share the same (name,type) would clobber each other on PUT; that's a
+# known limitation tracked by ADR 0430 PR 4 follow-up.
+- name: Build the canonical DNS rrset provider payload
   ansible.builtin.set_fact:
     dns_provider_boundary_desired_record_payload: >-
       {{
         {
-          'zone_id': dns_provider_boundary_zone.provider_ref,
           'name': hetzner_dns_record.name,
           'type': hetzner_dns_record.type,
-          'value': hetzner_dns_record.value,
-          'ttl': (hetzner_dns_record.ttl | default(60) | int)
+          'ttl': (hetzner_dns_record.ttl | default(60) | int),
+          'records': [
+            {'value': hetzner_dns_record.value, 'comment': ''}
+          ]
         }
       }}
 
 - name: Delete the canonical DNS record when it is retired
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_base_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
     method: DELETE
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     return_content: true
     status_code:
       - 200
@@ -97,27 +108,20 @@
     - dns_provider_boundary_matching_records | length == 1
   retries: 5
   delay: 2
-  until: >-
-    (
-      hetzner_dns_record_delete_response.json.error.code
-      | default(hetzner_dns_record_delete_response.status)
-      | int
-    ) in [200, 204]
-  failed_when: >-
-    (
-      hetzner_dns_record_delete_response.json.error.code
-      | default(hetzner_dns_record_delete_response.status)
-      | int
-    ) not in [200, 204]
+  # The new Hetzner Console API returns 201 + an action body for DELETE on
+  # rrsets (the deletion is async). 200 / 204 are kept for backward
+  # compatibility with the legacy API path.
+  until: hetzner_dns_record_delete_response.status in [200, 201, 204]
+  failed_when: hetzner_dns_record_delete_response.status not in [200, 201, 204]
   changed_when: true
   no_log: true
 
 - name: Create the canonical DNS record when it does not exist
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_base_url }}/records"
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets"
     method: POST
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     body_format: json
     return_content: true
     body: "{{ dns_provider_boundary_desired_record_payload }}"
@@ -136,30 +140,30 @@
     - dns_provider_boundary_matching_records | length == 0
   retries: 5
   delay: 2
-  until: >-
-    (
-      hetzner_dns_record_create_response.json.error.code
-      | default(hetzner_dns_record_create_response.status)
-      | int
-    ) in [200, 201]
-  failed_when: >-
-    (
-      hetzner_dns_record_create_response.json.error.code
-      | default(hetzner_dns_record_create_response.status)
-      | int
-    ) not in [200, 201]
+  until: hetzner_dns_record_create_response.status in [200, 201]
+  failed_when: hetzner_dns_record_create_response.status not in [200, 201]
   changed_when: true
   no_log: true
 
-- name: Update the canonical DNS record when drift is detected
+# Update path on the new Hetzner Console API:
+#   - PUT  /v1/zones/{id}/rrsets/{rrset}                — only updates rrset
+#     metadata (TTL, labels, protection). Sending `records` returns 422
+#     "can't update records with this endpoint".
+#   - POST /v1/zones/{id}/rrsets/{rrset}/actions/set_records — replaces the
+#     `records[]` list, returns a 201 with an async action object.
+# We update records via the action endpoint. TTL changes are handled by
+# the separate PUT task below; for the common "value drifts but TTL is
+# unchanged" case the action is sufficient.
+- name: Update the canonical DNS record values when value drift is detected
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_base_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
-    method: PUT
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets/{{ dns_provider_boundary_matching_records[0].provider_ref }}/actions/set_records"
+    method: POST
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     body_format: json
     return_content: true
-    body: "{{ dns_provider_boundary_desired_record_payload }}"
+    body:
+      records: "{{ dns_provider_boundary_desired_record_payload.records }}"
     status_code:
       - 200
       - 201
@@ -174,24 +178,43 @@
     - (hetzner_dns_record.state | default('present')) == 'present'
     - dns_provider_boundary_matching_records | length == 1
     - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record.value
-      or (
-        dns_provider_boundary_matching_records[0].record_ttl
-        | int
-      ) != (hetzner_dns_record.ttl | default(60) | int)
   retries: 5
   delay: 2
-  until: >-
-    (
-      hetzner_dns_record_update_response.json.error.code
-      | default(hetzner_dns_record_update_response.status)
-      | int
-    ) in [200, 201]
-  failed_when: >-
-    (
-      hetzner_dns_record_update_response.json.error.code
-      | default(hetzner_dns_record_update_response.status)
-      | int
-    ) not in [200, 201]
+  until: hetzner_dns_record_update_response.status in [200, 201]
+  failed_when: hetzner_dns_record_update_response.status not in [200, 201]
+  changed_when: true
+  no_log: true
+
+- name: Update the canonical DNS record TTL when only TTL drift is detected
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    body_format: json
+    return_content: true
+    body:
+      ttl: "{{ hetzner_dns_record.ttl | default(60) | int }}"
+    status_code:
+      - 200
+      - 201
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_ttl_update_response
+  when:
+    - not (hetzner_dns_brownout_manual_fallback | bool)
+    - (hetzner_dns_record.state | default('present')) == 'present'
+    - dns_provider_boundary_matching_records | length == 1
+    - >-
+      (dns_provider_boundary_matching_records[0].record_ttl | int)
+      != (hetzner_dns_record.ttl | default(60) | int)
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_ttl_update_response.status in [200, 201]
+  failed_when: hetzner_dns_record_ttl_update_response.status not in [200, 201]
   changed_when: true
   no_log: true
 

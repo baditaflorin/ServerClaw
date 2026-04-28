@@ -1,5 +1,10 @@
 ---
-hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
+# New Hetzner Console DNS API (api.hetzner.cloud/v1, ADR 0430 PR 4).
+# The legacy DNS-Console (dns.hetzner.com/api/v1) was deprecated when zones
+# migrated to the new console; the new API uses Bearer auth and groups
+# records into rrsets. Override with the legacy URL only on zones that have
+# not yet been migrated.
+hetzner_dns_api_base_url: https://api.hetzner.cloud/v1
 hetzner_dns_zone_name: ""
 hetzner_dns_records: []
 

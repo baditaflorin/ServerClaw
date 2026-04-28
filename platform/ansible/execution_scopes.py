@@ -854,15 +854,39 @@ def _reserved_lane(
 def _resolve_identity_override(repo_root: Path) -> list[str]:
     """Return extra-vars args for the local identity overlay (ADR 0407).
 
-    If ``.local/identity.yml`` exists, it is injected as ``-e @path`` so that
-    deployment-specific values (real domain, operator name) override the
-    generic defaults committed in ``inventory/group_vars/all/identity.yml``.
+    Order of precedence (later overrides earlier):
+
+    1. ``.local/identity.yml`` — the historical operator overlay; always
+       applied first when present (ADR 0407 default).
+    2. ``$PLATFORM_IDENTITY_OVERLAY`` — when set (ADR 0437 deployment-aware
+       bootstrap), the named overlay is appended *after* the base overlay
+       so the deployment-specific values win. This makes scoped runs
+       (``converge-<service>``) honor the same overlay the bootstrap chain
+       uses, eliminating the silent split between bootstrap-only flags and
+       day-to-day reconciles.
+
+    Both files are injected as ``-e @path`` so deployment-specific values
+    (real domain, operator name, brownout flags, kernel-required overrides,
+    etc.) override the generic defaults committed in
+    ``inventory/group_vars/all/identity.yml``.
     """
     # .local/ is always relative to the shared repo root, even from worktrees.
+    args: list[str] = []
     local_identity = local_overlay_root(repo_root) / "identity.yml"
     if local_identity.is_file():
-        return ["-e", f"@{local_identity}"]
-    return []
+        args.extend(["-e", f"@{local_identity}"])
+    overlay_env = os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip()
+    if overlay_env:
+        overlay_path = Path(overlay_env)
+        if not overlay_path.is_absolute():
+            # Resolve relative paths against the shared local-overlay root so
+            # callers can pass either ``.local/deployments/prod/identity.yml``
+            # or just ``deployments/prod/identity.yml``.
+            stripped = overlay_env.removeprefix(".local/")
+            overlay_path = local_overlay_root(repo_root) / stripped
+        if overlay_path.is_file() and overlay_path.resolve() != local_identity.resolve():
+            args.extend(["-e", f"@{overlay_path}"])
+    return args
 
 
 def run_planned_playbook(
