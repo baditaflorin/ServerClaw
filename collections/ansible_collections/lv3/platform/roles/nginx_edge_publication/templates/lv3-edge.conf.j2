@@ -483,6 +483,13 @@ server {
     location = /oauth2/callback {
         proxy_pass {{ protected_site.auth_proxy_upstream }};
         proxy_http_version 1.1;
+        # oauth2-proxy sets a large Set-Cookie header on the callback response that
+        # contains the full JWT access token + refresh token.  nginx's default
+        # proxy_buffer_size (4k / one OS page) is too small for this header and
+        # causes a 502 "upstream sent too big header" error.  16k comfortably
+        # accommodates Keycloak JWTs up to ~12 KB even with group-membership claims.
+        proxy_buffer_size 16k;
+        proxy_buffers 4 16k;
 {{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
