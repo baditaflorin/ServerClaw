@@ -181,6 +181,21 @@
     key: "{{ coolify_server_public_key }}"
     state: present
 
+- name: Allow root key-based login from the Coolify Docker bridge
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/95-coolify-bridge.conf
+    content: |
+      # Permit root login with a key from the Coolify Docker bridge network.
+      # The global hardening policy sets PermitRootLogin no; this Match block
+      # overrides it for connections originating inside the Coolify bridge subnet
+      # so that the Coolify controller can manage Docker on the local host via SSH.
+      Match Address {{ coolify_bridge_subnet }}
+          PermitRootLogin prohibit-password
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload sshd
+
 - name: Render the Coolify environment file
   ansible.builtin.template:
     src: coolify.env.j2
@@ -247,17 +262,15 @@
         use App\Models\User;
         use Illuminate\Support\Facades\Hash;
 
-        $user = User::find(0);
+        $user = User::where("email", getenv("LV3_ROOT_EMAIL"))->first();
         if (! $user) {
             $user = User::create([
-                "id" => 0,
                 "name" => getenv("LV3_ROOT_USERNAME"),
                 "email" => getenv("LV3_ROOT_EMAIL"),
                 "password" => Hash::make(getenv("LV3_ROOT_PASSWORD")),
             ]);
         } else {
             $user->name = getenv("LV3_ROOT_USERNAME");
-            $user->email = getenv("LV3_ROOT_EMAIL");
             $user->password = Hash::make(getenv("LV3_ROOT_PASSWORD"));
             $user->save();
         }
@@ -404,11 +417,13 @@
 - name: Rotate the Coolify API token and persist it locally
   ansible.builtin.shell: |
     set -euo pipefail
-    docker exec "{{ coolify_service_name }}" php artisan tinker --execute='
+    docker exec \
+      -e LV3_ROOT_EMAIL="{{ coolify_root_email }}" \
+      "{{ coolify_service_name }}" php artisan tinker --execute='
       use App\Models\User;
       use Illuminate\Support\Str;
 
-      $user = User::find(0);
+      $user = User::where("email", getenv("LV3_ROOT_EMAIL"))->firstOrFail();
       $user->tokens()->where("name", "{{ coolify_api_token_name }}")->delete();
       $tokenEntropy = Str::random(40);
       $plainTextToken = $tokenEntropy . hash("crc32b", $tokenEntropy);
