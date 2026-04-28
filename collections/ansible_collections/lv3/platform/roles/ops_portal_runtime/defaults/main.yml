@@ -109,6 +109,15 @@ ops_portal_gateway_url: >-
 ops_portal_public_base_url: https://ops.{{ platform_domain }}
 ops_portal_docs_base_url: https://docs.{{ platform_domain }}
 ops_portal_grafana_logs_url: https://grafana.{{ platform_domain }}/explore?left=%7B%22queries%22:%5B%5D%7D
+# Portal sibling-surface URLs — rendered into the connected-surfaces sidebar.
+# Real {{ platform_domain }} is injected at deploy time by `make generate-platform-vars`
+# from .local/identity.yml; the publish pipeline sanitises back to example.com (ADR 0407).
+ops_portal_parent_domain: "{{ platform_domain }}"
+ops_portal_home_url: https://home.{{ platform_domain }}
+ops_portal_changelog_url: https://changelog.{{ platform_domain }}
+ops_portal_grafana_url: https://grafana.{{ platform_domain }}
+ops_portal_tasks_url: https://tasks.{{ platform_domain }}
+ops_portal_wiki_url: https://wiki.{{ platform_domain }}
 ops_portal_service_image_name: "{{ platform_identity.config_prefix }}-ops-portal"
 ops_portal_repo_root: "{{ playbook_dir | dirname }}"
 ops_portal_static_api_token: >-

@@ -8,12 +8,14 @@ import os
 import uuid
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from functools import lru_cache
 from pathlib import Path
@@ -204,7 +206,7 @@ def append_query_param(url: str, key: str, value: str) -> str:
     return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query_items), parsed.fragment))
 
 
-def safe_requested_url(value: str | None) -> str | None:
+def safe_requested_url(value: str | None, *, portal_domain: str = "") -> str | None:
     if not isinstance(value, str):
         return None
     candidate = value.strip()
@@ -217,6 +219,9 @@ def safe_requested_url(value: str | None) -> str | None:
         return None
     host = parsed.hostname or ""
     if host == "localhost" or host.endswith(".localhost"):
+        return candidate
+    domain = (portal_domain or "").strip().lower()
+    if domain and host.endswith("." + domain):
         return candidate
     return None
 
@@ -1478,6 +1483,8 @@ class PortalSettings:
     maintenance_windows_path: Path | None
     docs_base_url: str
     grafana_logs_url: str
+    portal_domain: str = ""
+    portal_links: dict[str, str] = field(default_factory=dict)
 
     @classmethod
     def from_env(cls) -> PortalSettings:
@@ -1523,6 +1530,14 @@ class PortalSettings:
                 "OPS_PORTAL_GRAFANA_LOGS_URL",
                 "https://grafana.localhost/explore?left=%7B%22queries%22:%5B%5D%7D",
             ),
+            portal_domain=os.getenv("OPS_PORTAL_PARENT_DOMAIN", "localhost").strip(),
+            portal_links={
+                "home": os.getenv("OPS_PORTAL_HOME_URL", "https://home.localhost").rstrip("/"),
+                "changelog": os.getenv("OPS_PORTAL_CHANGELOG_URL", "https://changelog.localhost").rstrip("/"),
+                "grafana": os.getenv("OPS_PORTAL_GRAFANA_URL", "https://grafana.localhost").rstrip("/"),
+                "tasks": os.getenv("OPS_PORTAL_TASKS_URL", "https://tasks.localhost").rstrip("/"),
+                "wiki": os.getenv("OPS_PORTAL_WIKI_URL", "https://wiki.localhost").rstrip("/"),
+            },
         )
 
 
@@ -3488,6 +3503,8 @@ def create_app(
     templates = Jinja2Templates(directory=str(template_root() / "templates"))
     templates.env.filters["status_tone"] = status_tone
     templates.env.filters["humanize_timestamp"] = humanize_timestamp
+    templates.env.globals["portal_domain"] = settings.portal_domain
+    templates.env.globals["portal_links"] = settings.portal_links
     app.state.templates = templates
     app.state.settings = settings
     app.state.repository = PortalRepository(settings)
@@ -3509,7 +3526,10 @@ def create_app(
         context = await build_launcher_panel_context(request)
         entry_index = context["launcher"]["entry_index"]
         journey = dict(context["journey"])
-        requested_url = safe_requested_url(request.query_params.get("next"))
+        requested_url = safe_requested_url(
+            request.query_params.get("next"),
+            portal_domain=request.app.state.settings.portal_domain,
+        )
         invalid_requested_url = bool(request.query_params.get("next")) and requested_url is None
 
         if item_id:

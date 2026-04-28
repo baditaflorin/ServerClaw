@@ -951,6 +951,73 @@ workstreams:
     Related postmortem: ADR 0415.
 
     '
+- id: ws-0407-ops-portal-domain-substitution
+  adr: '0407'
+  title: Ops Portal Sibling-Link IaC Substitution
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0407-generic-by-default-local-overlay-architecture.md
+  depends_on:
+  - adr-0407-generic-by-default-local-overlay-architecture
+  - adr-0093-interactive-ops-portal
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0407-ops-portal-domain-substitution.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ops_portal_runtime_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
+      mode: exclusive
+    - id: ops_portal_app
+      paths:
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/templates/base.html
+      - scripts/ops_portal/templates/entry.html
+      - scripts/ops_portal/templates/partials/overview.html
+      - tests/test_interactive_ops_portal.py
+      mode: exclusive
+    - id: ws_0407_release_artifacts
+      paths:
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/**
+      - inventory/group_vars/platform.yml
+      - inventory/group_vars/platform_tls_certs.yml
+      - docs/diagrams/*.excalidraw
+      - config/subdomain-exposure-registry.json
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0407_workstream
+      paths:
+      - workstreams/active/ws-0407-ops-portal-domain-substitution.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  notes: 'Replace hardcoded example.com sidebar links in the ops portal with deploy-time
+
+    {{ platform_domain }} injection (ADR 0407 generic-by-default pattern).
+
+    Adds OPS_PORTAL_PARENT_DOMAIN and OPS_PORTAL_{HOME,CHANGELOG,GRAFANA,TASKS,WIKI}_URL
+
+    env vars. Registers portal_domain + portal_links as Jinja globals so all templates
+
+    see them with no per-route plumbing. Extends safe_requested_url to allow
+
+    https://*.<portal_domain> deep links so the entry router policy text matches behaviour.
+
+    '
 - id: ws-0396-live-apply
   adr: 0396
   title: Deterministic service decommissioning live apply and validation replay

@@ -1117,6 +1117,14 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         maintenance_windows_path=None,
         docs_base_url="https://docs.example.com",
         grafana_logs_url="https://grafana.example.com/explore?service={service}",
+        portal_domain="example.com",
+        portal_links={
+            "home": "https://home.example.com",
+            "changelog": "https://changelog.example.com",
+            "grafana": "https://grafana.example.com",
+            "tasks": "https://tasks.example.com",
+            "wiki": "https://wiki.example.com",
+        },
     )
     gateway = FakeGatewayClient()
     app = create_app(settings, gateway_client=gateway)
@@ -2106,6 +2114,14 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
         maintenance_windows_path=None,
         docs_base_url="https://docs.example.com",
         grafana_logs_url="https://grafana.example.com/explore?service={service}",
+        portal_domain="example.com",
+        portal_links={
+            "home": "https://home.example.com",
+            "changelog": "https://changelog.example.com",
+            "grafana": "https://grafana.example.com",
+            "tasks": "https://tasks.example.com",
+            "wiki": "https://wiki.example.com",
+        },
     )
 
     repository = PortalRepository(settings)

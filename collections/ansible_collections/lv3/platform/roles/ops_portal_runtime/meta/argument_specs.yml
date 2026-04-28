@@ -68,6 +68,36 @@ argument_specs:
         required: true
         description:
           - Base Explore URL used to open service logs in Grafana.
+      ops_portal_parent_domain:
+        type: str
+        required: true
+        description:
+          - Parent domain (platform_domain) used to build sibling-surface URLs and the entry-router allowlist.
+      ops_portal_home_url:
+        type: str
+        required: true
+        description:
+          - Public URL for the homepage surface in the portal sidebar.
+      ops_portal_changelog_url:
+        type: str
+        required: true
+        description:
+          - Public URL for the changelog surface in the portal sidebar.
+      ops_portal_grafana_url:
+        type: str
+        required: true
+        description:
+          - Public URL for the Grafana surface in the portal sidebar.
+      ops_portal_tasks_url:
+        type: str
+        required: true
+        description:
+          - Public URL for the tasks surface in the portal sidebar.
+      ops_portal_wiki_url:
+        type: str
+        required: true
+        description:
+          - Public URL for the wiki surface in the portal sidebar.
       ops_portal_service_image_name:
         type: str
         required: true

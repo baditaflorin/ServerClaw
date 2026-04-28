@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.2",
+  "repo_version": "0.179.3",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-28T06:35:15Z",
-  "next_refresh_at": "2026-04-28T07:35:15Z",
+  "generated_at": "2026-04-28T07:14:53Z",
+  "next_refresh_at": "2026-04-28T08:14:53Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.1",
+    "last_version": "0.179.2",
     "deployed_at": "2026-04-28",
-    "summary": "fix: nginx edge \u2014 add proxy_buffer_size 16k and proxy_buffers 4 16k to every /oauth2/callback location block; oauth2-proxy session cookies carrying Keycloak JWTs exceed the 4k default, causing \"upstream sent too big header\" 502 errors at login callback",
-    "release_notes_url": "docs/release-notes/0.179.2.md"
+    "summary": "ops_portal: replace hardcoded `example.com` sidebar links with deploy-time",
+    "release_notes_url": "docs/release-notes/0.179.3.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
