@@ -1,0 +1,211 @@
+# =============================================================================
+# GENERATED — do not edit manually.
+# Run: python3 scripts/generate_validator_catalogue.py --write
+# Source: scripts/validate_*.py, scripts/check_*.py × scripts/validate_repo.sh
+# ADR 0449 phase 4.2 — gate-coverage map for review authors and LLMs.
+# =============================================================================
+schema_version: 1
+generator: scripts/generate_validator_catalogue.py
+summary:
+  total: 30
+  in_validate_repo_sh: 18
+  in_pre_push_hook: 2
+  without_docstring: 14
+  without_related_adr: 18
+validators:
+- name: check_ad_hoc_retry.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/check_ad_hoc_retry.py
+- name: check_hardcoded_timeouts.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/check_hardcoded_timeouts.py
+- name: check_provenance_headers.py
+  purpose: 'ADR 0351: Audit Jinja2 templates for missing provenance headers.'
+  related_adrs:
+  - '0351'
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/check_provenance_headers.py
+- name: check_receipt_freshness.py
+  purpose: "Receipt freshness checker \u2014 ADR 0446 item 14."
+  related_adrs:
+  - '0446'
+  - '0443'
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/check_receipt_freshness.py
+- name: check_release_readiness.py
+  purpose: "Release-readiness checker \u2014 validates that the merge-to-main checklist\
+    \ is complete."
+  related_adrs: []
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/check_release_readiness.py
+- name: check_role_argument_specs.sh
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/check_role_argument_specs.sh
+- name: validate_adr_status_transitions.py
+  purpose: ADR Status Transition Validator
+  related_adrs: []
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: true
+  path: scripts/validate_adr_status_transitions.py
+- name: validate_alert_rules.py
+  purpose: Validate Alertmanager rule files for ADR 0097 label and annotation requirements.
+  related_adrs:
+  - 0097
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_alert_rules.py
+- name: validate_cross_catalog_integrity.py
+  purpose: Validate referential integrity across platform catalogs.
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_cross_catalog_integrity.py
+- name: validate_dependency_direction.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_dependency_direction.py
+- name: validate_dependency_graph.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_dependency_graph.py
+- name: validate_dns_declarations.py
+  purpose: Validate the generated DNS declarations file against the service registry.
+  related_adrs:
+  - '0374'
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_dns_declarations.py
+- name: validate_ephemeral_vmid.py
+  purpose: Validate that canonical managed VM declarations do not overlap the ephemeral
+    VMID pool.
+  related_adrs: []
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_ephemeral_vmid.py
+- name: validate_integrations.py
+  purpose: 'ADR 0353: Validate service integration contracts in config/integrations/.'
+  related_adrs:
+  - '0353'
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_integrations.py
+- name: validate_nats_topics.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: true
+  path: scripts/validate_nats_topics.py
+- name: validate_nginx_config.py
+  purpose: Validate the generated nginx upstream configuration against the platform
+    service registry.
+  related_adrs:
+  - '0374'
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_nginx_config.py
+- name: validate_no_hardcoded_topology.py
+  purpose: "ADR 0443 Layer 1 \u2014 write-time topology linter."
+  related_adrs:
+  - '0443'
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_no_hardcoded_topology.py
+- name: validate_packer_templates.sh
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_packer_templates.sh
+- name: validate_portal_auth.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_portal_auth.py
+- name: validate_public_entrypoints.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_public_entrypoints.py
+- name: validate_renovate_contract.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_renovate_contract.py
+- name: validate_repository_data_models.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_repository_data_models.py
+- name: validate_service_catalog.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_service_catalog.py
+- name: validate_service_completeness.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_service_completeness.py
+- name: validate_service_registry.py
+  purpose: Validate the platform service registry (inventory/group_vars/platform_services.yml).
+  related_adrs:
+  - '0373'
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_service_registry.py
+- name: validate_sso_clients.py
+  purpose: Validate the generated SSO client declarations.
+  related_adrs:
+  - '0374'
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_sso_clients.py
+- name: validate_tier0_crossrefs.py
+  purpose: "Tier 0 cross-reference validator \u2014 ADR 0438."
+  related_adrs:
+  - 0438
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_tier0_crossrefs.py
+- name: validate_timeout_hierarchy.py
+  purpose: (no docstring)
+  related_adrs: []
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_timeout_hierarchy.py
+- name: validate_tls_certs.py
+  purpose: Validate the generated TLS certificate declarations against platform catalogs.
+  related_adrs:
+  - '0374'
+  runs_in_validate_repo_sh: true
+  runs_in_pre_push_hook: false
+  path: scripts/validate_tls_certs.py
+- name: validate_topology_consistency.py
+  purpose: Validate cross-cutting topology consistency across all service registries.
+  related_adrs:
+  - '0416'
+  runs_in_validate_repo_sh: false
+  runs_in_pre_push_hook: false
+  path: scripts/validate_topology_consistency.py

@@ -378,6 +378,18 @@ validate_traceability() {
   fi
 }
 
+validate_catalogue_freshness() {
+  # ADR 0449 item A5 — gate-coverage catalogue. Advisory: regenerates
+  # build/validator-catalogue.yaml and fails on diff. Existing on-disk
+  # copy must match the regenerated content; if it doesn't, an author
+  # added or modified a validator without refreshing the catalogue.
+  echo "Validator catalogue freshness (ADR 0449 — advisory)"
+  if ! run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_validator_catalogue.py" --check; then
+    echo "validate_catalogue_freshness: drift reported above (advisory — not blocking)"
+    echo "  Refresh: python3 scripts/generate_validator_catalogue.py --write"
+  fi
+}
+
 validate_yaml() {
   local yaml_files=()
 
@@ -940,6 +952,7 @@ for stage in "$@"; do
       validate_no_hardcoded_topology
       validate_receipt_freshness
       validate_traceability
+      validate_catalogue_freshness
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -998,6 +1011,9 @@ for stage in "$@"; do
       ;;
     traceability)
       validate_traceability
+      ;;
+    catalogue-freshness)
+      validate_catalogue_freshness
       ;;
     service-definitions)
       validate_service_definitions

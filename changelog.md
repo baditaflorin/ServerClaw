@@ -12,12 +12,25 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0449 + ws-0449: Phase 4 self-healing primitives. Three new
+  scripts derived from the 2026-04-28 postmortem: `scripts/reserve_adr.py`
+  (atomic ADR-number CLI eliminating the collision class that forced
+  this very workstream to renumber 0448→0449 mid-session);
+  `scripts/generate_validator_catalogue.py` (gate-coverage map at
+  `build/validator-catalogue.yaml` — 30 validators surfaced, 18 in
+  `validate_repo.sh`, 14 missing docstrings); `scripts/refresh_safe_receipts.py`
+  (classifies stale receipts into safe-to-refresh vs needs-review;
+  live signal: 11 needs-review against the live stack.yaml).
+  Validator-catalogue freshness wired into `validate_repo.sh` as
+  advisory `validate_catalogue_freshness`. 60 new tests.
+
 ## Latest Release
 
-- [0.179.11 release notes](docs/release-notes/0.179.11.md)
+- [0.179.12 release notes](docs/release-notes/0.179.12.md)
 
 ## Previous Releases
 
+- [0.179.11 release notes](docs/release-notes/0.179.11.md)
 - [0.179.10 release notes](docs/release-notes/0.179.10.md)
 - [0.179.9 release notes](docs/release-notes/0.179.9.md)
 - [0.179.8 release notes](docs/release-notes/0.179.8.md)
@@ -29,9 +42,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.2 release notes](docs/release-notes/0.179.2.md)
 - [0.179.1 release notes](docs/release-notes/0.179.1.md)
 - [0.179.0 release notes](docs/release-notes/0.179.0.md)
-- [0.178.232 release notes](docs/release-notes/0.178.232.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (527 releases)](docs/release-notes/index/2026.md)
+- [2026 (528 releases)](docs/release-notes/index/2026.md)

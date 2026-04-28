@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-28'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 475
+total_adrs: 476
 adr_number_range:
   first: '0001'
-  last: 0448
-  next_available: 0449
+  last: 0449
+  next_available: '0450'
 implementation_status_summary:
   Implemented: 362
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 39
+  Proposed: 40
 decision_status_summary:
   Accepted: 366
-  Proposed: 46
+  Proposed: 47
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 43
+      count: 44
       first_adr: '0400'
-      last_adr: 0448
+      last_adr: 0449
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -73,7 +73,7 @@ facets:
       count: 45
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
-      count: 22
+      count: 23
     - concern: host-os
       path: docs/adr/index/by-concern/host-os.yaml
       count: 10
@@ -131,14 +131,20 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 39
+      count: 40
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0449
+  next_available_adr: '0450'
 latest_adrs:
+  - adr: 0449
+    title: Phase 4 Self-Healing Primitives
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: documentation
+    path: docs/adr/0449-phase4-self-healing-primitives.md
   - adr: 0448
     title: Per-Deployment Connection Registry & Wrapper
     implementation_status: Implemented
@@ -193,12 +199,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: identity
     path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
-  - adr: 0439
-    title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: networking
-    path: docs/adr/0439-multi-deployment-repo-architecture.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

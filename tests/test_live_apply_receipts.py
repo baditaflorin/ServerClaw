@@ -299,7 +299,9 @@ def test_validate_receipt_accepts_shared_root_receipt_refs(
     monkeypatch.setattr(
         live_apply_receipts,
         "repo_path",
-        lambda *parts: shared_root.joinpath(*parts) if parts and parts[0] == "receipts" else worktree_root.joinpath(*parts),
+        lambda *parts: (
+            shared_root.joinpath(*parts) if parts and parts[0] == "receipts" else worktree_root.joinpath(*parts)
+        ),
     )
     monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: False)
     monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.11",
+  "repo_version": "0.179.12",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-28T12:07:09Z",
-  "next_refresh_at": "2026-04-28T13:07:09Z",
+  "generated_at": "2026-04-28T12:20:04Z",
+  "next_refresh_at": "2026-04-28T13:20:04Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -94,7 +94,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://coolify.example.com",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "coolify_apps": {
         "service_name": "Coolify Apps Ingress",
@@ -162,7 +162,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.example.com",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -219,7 +219,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-04-28T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "glitchtip": {
@@ -361,7 +361,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://chat.example.com",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "litellm": {
         "service_name": "LiteLLM",
@@ -532,7 +532,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ntfy.example.com",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -671,7 +671,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -682,7 +682,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.example.com:5432",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -693,7 +693,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.example.com",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "redpanda": {
         "service_name": "Redpanda",
@@ -748,7 +748,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
-        "last_live_apply": "2026-04-28T00:00:00Z",
+        "last_live_apply": "2026-04-21T00:00:00Z",
         "slo_status": "unknown"
       },
       "serverclaw": {
@@ -760,7 +760,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://chat.example.com",
-        "last_live_apply": "2026-04-28T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       },
       "sftpgo": {
@@ -795,7 +795,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-04-28T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "superset": {
         "service_name": "Apache Superset",
@@ -901,7 +901,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://ci.example.com",
-        "last_live_apply": "2026-04-28T00:00:00Z",
+        "last_live_apply": "2026-04-27T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.10",
+    "last_version": "0.179.11",
     "deployed_at": "2026-04-28",
-    "summary": "ws-0447 follow-up: traceability false-positive cleanup. Added a ADR 0447 + ws-0447: Phase 3 LLM ergonomics + traceability \u2014",
-    "release_notes_url": "docs/release-notes/0.179.11.md"
+    "summary": "ADR 0449 + ws-0449: Phase 4 self-healing primitives. Three new",
+    "release_notes_url": "docs/release-notes/0.179.12.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

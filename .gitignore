@@ -46,6 +46,7 @@ build/
 build/*
 !build/platform-manifest.json
 !build/traceability.yaml
+!build/validator-catalogue.yaml
 !build/onboarding/
 build/onboarding/*
 !build/onboarding/*.yaml

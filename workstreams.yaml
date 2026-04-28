@@ -21,6 +21,147 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0449-phase4-self-healing-primitives
+  adr: 0449
+  title: "Phase 4 self-healing primitives \u2014 reserve_adr + validator-catalogue\
+    \ + safe receipt refresh"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0449-phase4-self-healing-primitives.md
+  depends_on:
+  - adr-0325-adr-discovery-and-reservation-ledger
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-receipt-freshness
+  - adr-0447-phase3-llm-ergonomics-and-traceability
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0449-phase4-self-healing-primitives.md
+  - workstreams/active/ws-0449-phase4-self-healing-primitives.yaml
+  - scripts/reserve_adr.py
+  - tests/test_reserve_adr.py
+  - scripts/generate_validator_catalogue.py
+  - tests/test_generate_validator_catalogue.py
+  - build/validator-catalogue.yaml
+  - scripts/refresh_safe_receipts.py
+  - tests/test_refresh_safe_receipts.py
+  - scripts/validate_repo.sh
+  summary: 'Phase 4 of the self-healing roadmap derived from postmortem 2026-04-28.
+    Three deliverables: atomic ADR reservation CLI (eliminates number-collision class);
+    validator catalogue generator (prevents the "we should add X validator (which
+    already exists)" review-authoring failure mode); safe receipt-refresh classifier
+    (turns 72 stale receipts into a one-command cleanup pass for the safe-to-refresh
+    subset). Two further postmortem items (post-merge rename hook, make-doctor aggregator)
+    deferred to phases 5/6.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+      target_version: 0.179.x
+    phase_1_reserve_adr:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "scripts/reserve_adr.py \u2014 fetches origin/main, scans for highest ADR\
+        \ number, optionally writes reservation entry"
+      - "tests/test_reserve_adr.py \u2014 fixture-based, no real git/network"
+    phase_2_validator_catalogue:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "scripts/generate_validator_catalogue.py \u2014 extracts docstring + ADR refs\
+        \ from scripts/validate_*.py"
+      - "build/validator-catalogue.yaml \u2014 generated artifact"
+      - advisory wiring in scripts/validate_repo.sh (validate_catalogue_freshness)
+      - tests/test_generate_validator_catalogue.py
+    phase_3_safe_receipt_refresh:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "scripts/refresh_safe_receipts.py \u2014 classifies stale receipts into safe_to_refresh\
+        \ / needs_review / unknown"
+      - --apply mode writes [receipt-refresh] commit for safe set
+      - "tests/test_refresh_safe_receipts.py \u2014 git-log mocking, classification\
+        \ matrix"
+    phase_4_windmill_schedule:
+      status: deferred
+      target_version: 0.180.x
+      deferred_reason: 'Production cron requires SSH access and Windmill schedule
+        wiring
+
+        that this worktree doesn''t have. The helper script is shippable
+
+        today; the recurring schedule needs a dedicated worktree with
+
+        .local/ access.
+
+        '
+    phase_5_post_merge_rename_hook:
+      status: deferred
+      target_version: 0.180.x
+      deferred_reason: 'Auto-rewrite of workstream YAMLs after a merge introduces
+        new
+
+        file renames. Needs a git hook + dry-run mode + safety on
+
+        shared_contract surfaces. Belongs in its own focused ADR.
+
+        '
+    phase_6_make_doctor:
+      status: deferred
+      target_version: 0.181.x
+      deferred_reason: 'Aggregator over every drift signal (stale receipts, dangling
+
+        surfaces, blocked substrate, validator coverage gaps). Should
+
+        land after phases 4 + 5 produce all the underlying signals in
+
+        machine-readable form.
+
+        '
+  acceptance_criteria:
+  - scripts/reserve_adr.py --next prints the next free ADR number
+  - scripts/generate_validator_catalogue.py --write produces build/validator-catalogue.yaml
+    with >=25 validators
+  - scripts/refresh_safe_receipts.py --json classifies every entry in versions/stack.yaml::live_apply_evidence
+  - validate_catalogue_freshness wired into validate_repo.sh as advisory
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0449_docs
+      paths:
+      - docs/adr/0449-phase4-self-healing-primitives.md
+      - workstreams/active/ws-0449-phase4-self-healing-primitives.yaml
+      mode: shared_contract
+      contract: adr-0449-phase4-self-healing-v1
+    - id: ws_0449_reserve_adr
+      paths:
+      - scripts/reserve_adr.py
+      - tests/test_reserve_adr.py
+      mode: shared_contract
+      contract: adr-0449-reserve-adr-v1
+    - id: ws_0449_validator_catalogue
+      paths:
+      - scripts/generate_validator_catalogue.py
+      - tests/test_generate_validator_catalogue.py
+      - build/validator-catalogue.yaml
+      mode: shared_contract
+      contract: adr-0449-validator-catalogue-v1
+    - id: ws_0449_receipt_refresh
+      paths:
+      - scripts/refresh_safe_receipts.py
+      - tests/test_refresh_safe_receipts.py
+      mode: shared_contract
+      contract: adr-0449-receipt-refresh-v1
+  notes:
+  - 'Phase 4 is the first session focused on self-healing primitives rather than drift
+    surfacing. Phases 1-3 surfaced signals; phase 4 turns them into machinery that
+    consumes the signals.
+
+    '
 - id: ws-0448-postmortem-and-handoff
   adr: 0448
   title: Cross-agent handoff postmortem for ws-0448 deployment connection registry

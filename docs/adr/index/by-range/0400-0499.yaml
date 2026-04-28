@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 43
+total_adrs: 44
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -825,3 +825,21 @@ adrs:
     summary: A new per-deployment file (gitignored under .local/) describing how
     filename: 0448-deployment-connection-registry-and-wrapper.md
     path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+  - adr: 0449
+    title: Phase 4 Self-Healing Primitives
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: documentation
+    keywords:
+      - adr-reservation
+      - validator-catalogue
+      - receipt-refresh
+      - doctor
+      - phase
+      - self-healing
+      - primitives
+    summary: Three deliverables in this ADR; two more (A6 post-merge rename hook,
+    filename: 0449-phase4-self-healing-primitives.md
+    path: docs/adr/0449-phase4-self-healing-primitives.md

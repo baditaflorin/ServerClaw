@@ -7,11 +7,11 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 22
-  with_resolved_adr: 22
+  total_workstreams: 24
+  with_resolved_adr: 24
   with_dangling_dependencies: 0
   with_dangling_surfaces: 3
-  ready_to_merge: 8
+  ready_to_merge: 9
 workstreams:
 - workstream_id: adr-0058-nats-event-bus
   title: NATS JetStream for internal event bus and agent coordination
@@ -342,7 +342,7 @@ workstreams:
     \ dry-run, late-bound topology lint, inventory parameterization"
   status: in_progress
   ready_to_merge: true
-  primary_adr: 0293
+  primary_adr: '0445'
   depends_on:
   - adr-0438-generic-by-construction
   - adr-0439-multi-deployment-repo-architecture
@@ -354,17 +354,17 @@ workstreams:
     total: 15
     present_on_disk: 15
   adr:
-    title: Livekit As The Real-Time Audio And Voice Channel For Agents
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: agent-discovery
-    path: docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: security
+    path: docs/adr/0445-phase1-multi-deployment-hardening.md
 - workstream_id: ws-0446-phase2-multi-deployment-hardening
   title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\
     \ + service-registry cross-refs"
   status: in_progress
   ready_to_merge: true
-  primary_adr: 0294
+  primary_adr: '0446'
   depends_on:
   - adr-0445-phase1-multi-deployment-hardening
   - adr-0438-generic-by-construction
@@ -375,17 +375,17 @@ workstreams:
     total: 6
     present_on_disk: 6
   adr:
-    title: One-API As The Unified LLM API Proxy And Router
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: api
-    path: docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+    title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: security
+    path: docs/adr/0446-phase2-multi-deployment-hardening.md
 - workstream_id: ws-0447-phase3-llm-ergonomics-and-traceability
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
     \ ADR index, build/traceability.yaml generator"
   status: in_progress
   ready_to_merge: true
-  primary_adr: 0295
+  primary_adr: '0447'
   depends_on:
   - adr-0445-phase1-multi-deployment-hardening
   - adr-0446-phase2-multi-deployment-hardening
@@ -394,11 +394,49 @@ workstreams:
     total: 8
     present_on_disk: 8
   adr:
-    title: Shared Artifact Cache Plane For Container And Package Dependencies
+    title: Phase 3 LLM Ergonomics + Traceability
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+- workstream_id: ws-0448-deployment-connection-registry
+  title: Per-deployment connection registry + run_with_deployment wrapper + topology
+    role auto-fill
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: 0448
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0445-phase1-multi-deployment-hardening
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Per-Deployment Connection Registry & Wrapper
     implementation_status: Implemented
     currently_describes: current_state
-    concern: ci-cd
-    path: docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+    concern: platform
+    path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+- workstream_id: ws-0449-phase4-self-healing-primitives
+  title: "Phase 4 self-healing primitives \u2014 reserve_adr + validator-catalogue\
+    \ + safe receipt refresh"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: 0449
+  depends_on:
+  - adr-0325-adr-discovery-and-reservation-ledger
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-receipt-freshness
+  - adr-0447-phase3-llm-ergonomics-and-traceability
+  surfaces:
+    total: 10
+    present_on_disk: 10
+  adr:
+    title: Phase 4 Self-Healing Primitives
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: documentation
+    path: docs/adr/0449-phase4-self-healing-primitives.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress
