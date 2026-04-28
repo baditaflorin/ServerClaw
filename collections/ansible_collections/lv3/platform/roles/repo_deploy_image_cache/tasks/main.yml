@@ -42,6 +42,14 @@
     group: root
     mode: "0755"
 
+- name: Copy the validation_toolkit helper alongside the repo deploy image cache script
+  ansible.builtin.copy:
+    src: "{{ repo_deploy_image_cache_repo_root }}/scripts/validation_toolkit.py"
+    dest: "{{ repo_deploy_image_cache_script_path | dirname }}/validation_toolkit.py"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Copy the approved repo deploy base-image catalog to the guest
   ansible.builtin.copy:
     src: "{{ repo_deploy_image_cache_catalog_path }}"

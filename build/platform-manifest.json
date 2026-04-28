@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.7",
+  "repo_version": "0.179.8",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-28T10:05:07Z",
-  "next_refresh_at": "2026-04-28T11:05:07Z",
+  "generated_at": "2026-04-28T10:38:01Z",
+  "next_refresh_at": "2026-04-28T11:38:01Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.6",
+    "last_version": "0.179.7",
     "deployed_at": "2026-04-28",
-    "summary": "ADR 0446 + ws-0446: Phase 2 multi-deployment hardening \u2014 receipt ADR 0445 + ws-0445: Phase 1 multi-deployment hardening \u2014 fork-shape",
-    "release_notes_url": "docs/release-notes/0.179.7.md"
+    "summary": "No changelog notes were present in `## Unreleased` at release time.",
+    "release_notes_url": "docs/release-notes/0.179.8.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

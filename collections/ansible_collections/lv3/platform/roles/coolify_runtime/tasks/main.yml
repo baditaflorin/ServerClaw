@@ -152,7 +152,12 @@
         if item in [coolify_site_dir, coolify_bootstrap_dir]
         else coolify_container_gid
       }}
-    mode: "{{ '0700' if item.startswith(coolify_bootstrap_dir) else '0755' }}"
+    mode: >-
+      {{
+        '0700'
+        if item.startswith(coolify_bootstrap_dir) or item == (coolify_env_file | dirname)
+        else '0755'
+      }}
   loop:
     - "{{ coolify_site_dir }}"
     - "{{ coolify_bootstrap_dir }}"
@@ -165,6 +170,7 @@
     - "{{ coolify_data_root }}/backups"
     - "{{ coolify_proxy_path }}"
     - "{{ coolify_proxy_path }}/dynamic"
+    - "{{ coolify_env_file | dirname }}"
 
 - name: Install the Coolify bootstrap SSH private key on the guest
   ansible.builtin.copy:
@@ -260,6 +266,7 @@
       php artisan tinker --execute='
         use App\Models\InstanceSettings;
         use App\Models\User;
+        use Illuminate\Support\Facades\DB;
         use Illuminate\Support\Facades\Hash;
 
         $user = User::where("email", getenv("LV3_ROOT_EMAIL"))->first();
@@ -275,6 +282,36 @@
             $user->save();
         }
 
+        // Coolify uses team_id=0 as the conventional "root team" for servers,
+        // private keys, and API tokens. User::create() bypasses the registration
+        // wizard that normally auto-creates this team row. We ensure id=0 exists
+        // using a raw INSERT so the sequence is not disturbed, and add the root
+        // user as owner so that /api/v1/teams/current resolves correctly.
+        $rootTeamExists = DB::table("teams")->where("id", 0)->exists();
+        if (! $rootTeamExists) {
+            DB::table("teams")->insert([
+                "id"            => 0,
+                "name"          => "Root Team",
+                "personal_team" => true,
+                "show_boarding" => false,
+                "created_at"    => now(),
+                "updated_at"    => now(),
+            ]);
+        }
+        $rootPivotExists = DB::table("team_user")
+            ->where("team_id", 0)
+            ->where("user_id", $user->id)
+            ->exists();
+        if (! $rootPivotExists) {
+            DB::table("team_user")->insert([
+                "team_id"    => 0,
+                "user_id"    => $user->id,
+                "role"       => "owner",
+                "created_at" => now(),
+                "updated_at" => now(),
+            ]);
+        }
+
         $settings = InstanceSettings::find(0);
         if (! $settings) {
             $settings = InstanceSettings::create(["id" => 0]);
@@ -286,8 +323,8 @@
 
       echo "__LV3_BOOTSTRAP__" . json_encode([
           "root_user_id" => $user->id,
-          "api_enabled" => $settings->is_api_enabled,
-          "allowed_ips" => $settings->allowed_ips,
+          "api_enabled"  => $settings->is_api_enabled,
+          "allowed_ips"  => $settings->allowed_ips,
         ]);
       '
   args:
@@ -295,6 +332,9 @@
   register: coolify_bootstrap_state
   changed_when: false
   no_log: true
+
+- name: Flush sshd handlers before ValidateServer to ensure bridge login rule is active
+  ansible.builtin.meta: flush_handlers
 
 - name: Register the Coolify deployment SSH key and local server
   ansible.builtin.shell: |
@@ -424,6 +464,8 @@
       use Illuminate\Support\Str;
 
       $user = User::where("email", getenv("LV3_ROOT_EMAIL"))->firstOrFail();
+      // Use team_id=0: the Coolify root-team convention used by all servers and
+      // private keys. The bootstrap task ensures a real team row with id=0 exists.
       $user->tokens()->where("name", "{{ coolify_api_token_name }}")->delete();
       $tokenEntropy = Str::random(40);
       $plainTextToken = $tokenEntropy . hash("crc32b", $tokenEntropy);

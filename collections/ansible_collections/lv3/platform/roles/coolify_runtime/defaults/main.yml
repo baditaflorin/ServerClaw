@@ -40,8 +40,8 @@ coolify_public_url: https://coolify.{{ platform_domain }}
 coolify_apps_public_url: https://apps.{{ platform_domain }}
 coolify_tunnel_host: "{{ hostvars[platform_topology_host].ansible_host | default(hostvars[platform_topology_host].management_ipv4 | default(''), true) }}"
 coolify_tunnel_user: ops
-coolify_bridge_subnet: 172.18.0.0/16
-coolify_bridge_gateway: 172.18.0.1
+coolify_bridge_subnet: 172.20.0.0/16
+coolify_bridge_gateway: 172.20.0.1
 
 coolify_root_username: LV3 Ops
 coolify_root_email: ops@{{ platform_domain }}

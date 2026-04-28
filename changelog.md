@@ -12,27 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- ADR 0446 + ws-0446: Phase 2 multi-deployment hardening — receipt
-  freshness checker (scripts/check_receipt_freshness.py) wired into
-  validate_repo.sh as advisory `validate_receipt_freshness`. Live
-  signal flags 72/186 stale receipts at the 30-day window. Phase 2
-  items 3/4/6/13 confirmed already covered (substrate via ws-0438,
-  ws-0439, validate_service_registry.py cross-refs); item 11
-  (Molecule scaffold) deferred until the proxmox-fixture driver is
-  implemented.
-- ADR 0445 + ws-0445: Phase 1 multi-deployment hardening — fork-shape
-  fixture inventories (lv3 / 0fork / synthetic), per-service convergence
-  dry-run wired into the pre-push gate (advisory), `late_bound_default`
-  rule extending validate_no_hardcoded_topology.py, and the
-  fork-shape-fixture × deployment-loader integration test that closes
-  the seam with ws-0439.
-
 ## Latest Release
 
-- [0.179.7 release notes](docs/release-notes/0.179.7.md)
+- [0.179.8 release notes](docs/release-notes/0.179.8.md)
 
 ## Previous Releases
 
+- [0.179.7 release notes](docs/release-notes/0.179.7.md)
 - [0.179.6 release notes](docs/release-notes/0.179.6.md)
 - [0.179.5 release notes](docs/release-notes/0.179.5.md)
 - [0.179.4 release notes](docs/release-notes/0.179.4.md)
@@ -44,9 +30,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.231 release notes](docs/release-notes/0.178.231.md)
 - [0.178.230 release notes](docs/release-notes/0.178.230.md)
 - [0.178.229 release notes](docs/release-notes/0.178.229.md)
-- [0.178.228 release notes](docs/release-notes/0.178.228.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (523 releases)](docs/release-notes/index/2026.md)
+- [2026 (524 releases)](docs/release-notes/index/2026.md)
