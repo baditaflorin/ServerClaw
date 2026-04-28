@@ -1,11 +1,12 @@
-# ============================================================================
-# ADR Reservation Ledger - ADR 0325
-# ============================================================================
-# Reserve future ADR numbers or windows here before parallel ADR authoring.
-# Active reservations participate in overlap checks and ADR allocation.
-# After editing this file, regenerate the ADR discovery metadata:
-#   python scripts/generate_adr_index.py --write
-# ============================================================================
-
 schema_version: 1
-reservations: []
+reservations:
+- id: res-0457-host-pinning-deployment-owner
+  start: 457
+  end: 457
+  owner: Florin Badita-Nistor
+  branch: claude/crazy-chaplygin-c7c256
+  workstream: ws-0457-host-pinning-deployment-owner
+  reason: host-pinning-deployment-owner
+  reserved_on: '2026-04-28'
+  expires_on: '2026-05-28'
+  status: active

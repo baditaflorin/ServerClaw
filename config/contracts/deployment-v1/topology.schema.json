@@ -54,7 +54,12 @@
             "description": "Free-form tags for inventory grouping."
           },
           "memory_mb": {"type": "integer", "minimum": 512},
-          "cores": {"type": "integer", "minimum": 1}
+          "cores": {"type": "integer", "minimum": 1},
+          "deployment_owner": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "ADR 0457 — slug of the deployment that owns this VM. When set, services from other deployments must not be installed/enabled on this host. Validated by scripts/host_pinning_check.py. Optional; when absent the VM is shared (legacy behavior)."
+          }
         }
       }
     },
