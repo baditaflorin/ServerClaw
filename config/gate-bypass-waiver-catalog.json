@@ -77,6 +77,14 @@
       "allowed_bypasses": [
         "skip_cert_validation"
       ]
+    },
+    "cross_deployment_drift": {
+      "summary": "A multi-deployment platform host (ADR 0440) is now serving a different deployment than the one the cert catalog was generated for; the certificate-validation gate flags FQDNs that belong to an unrelated deployment. Use only when the validator's --deployment scoping (ADR 0456) cannot be applied because the active deployment hasn't been registered yet.",
+      "max_expiry_days": 2,
+      "allowed_bypasses": [
+        "skip_cert_validation",
+        "skip_remote_gate"
+      ]
     }
   }
 }

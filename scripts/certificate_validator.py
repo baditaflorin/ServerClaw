@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
 import json
+import os
 from pathlib import Path
 import socket
 import ssl
@@ -309,16 +310,49 @@ def _read_platform_domain(path: Path) -> Optional[str]:
     return domain or None
 
 
-def _get_real_domain() -> Optional[str]:
-    """Read platform_domain from the shared .local overlay — returns None if unconfigured.
+def _get_real_domain(deployment_slug: Optional[str] = None) -> Optional[str]:
+    """Read platform_domain from the active deployment overlay (ADR 0456).
 
-    ADR 0410 Phase 4a: validators must not try to connect to example.com
-    (the generic committed placeholder). If .local/identity.yml is absent or
-    contains the default, return None so the caller can skip validation.
+    Resolution order:
+      1. If `deployment_slug` is provided, read from
+         `.local/deployments/<slug>/identity.yml`.
+      2. Otherwise, read the legacy single-deployment file
+         `.local/identity.yml` (ADR 0410 Phase 4a).
+
+    Returns None when the file is absent, malformed, or set to the
+    generic placeholder `example.com`.
     """
+    if deployment_slug:
+        slug_path = LOCAL_ROOT / "deployments" / deployment_slug / "identity.yml"
+        domain = _read_platform_domain(slug_path)
+        if domain and domain != "example.com":
+            return domain
+        return None
     domain = _read_platform_domain(LOCAL_ROOT / "identity.yml")
     if domain and domain != "example.com":
         return domain
+    return None
+
+
+def _resolve_deployment_slug(explicit: Optional[str]) -> Optional[str]:
+    """Resolve the active deployment slug for the cert validator (ADR 0456).
+
+    Precedence (matches scripts/deployment.py):
+      1. explicit --deployment flag
+      2. $DEPLOYMENT environment variable
+      3. .local/active-deployment file at the shared repo root
+      4. None (caller falls back to legacy .local/identity.yml)
+    """
+    if explicit:
+        return explicit.strip() or None
+    env_slug = os.environ.get("DEPLOYMENT", "").strip()
+    if env_slug:
+        return env_slug
+    active_file = LOCAL_ROOT / "active-deployment"
+    if active_file.is_file():
+        slug = active_file.read_text().strip()
+        if slug:
+            return slug
     return None
 
 
@@ -373,6 +407,16 @@ def main():
     parser.add_argument("--fqdn", help="Check only this FQDN")
     parser.add_argument("--json", action="store_true", dest="json_out", help="Output results as JSON")
     parser.add_argument("--timeout", type=int, default=10, help="Connection timeout in seconds (default: 10)")
+    parser.add_argument(
+        "--deployment",
+        help=(
+            "Validate certs for this deployment slug only (ADR 0456). "
+            "Reads .local/deployments/<slug>/identity.yml and only checks "
+            "FQDNs that match. Defaults to $DEPLOYMENT or "
+            ".local/active-deployment; falls back to legacy "
+            ".local/identity.yml when no deployment is registered."
+        ),
+    )
     args = parser.parse_args()
 
     entries = load_catalog(args.config)
@@ -384,25 +428,33 @@ def main():
         print("No active domains found to validate.", file=sys.stderr)
         sys.exit(2)
 
-    real_domain = _get_real_domain()
+    deployment_slug = _resolve_deployment_slug(args.deployment)
+    real_domain = _get_real_domain(deployment_slug=deployment_slug)
     if real_domain:
         entries = _rewrite_entries_for_real_domain(entries, real_domain)
 
     # ADR 0410 Phase 4a: skip example.com (generic committed placeholder).
-    # Only validate if the shared .local overlay has a real domain configured.
+    # ADR 0456: when a deployment is resolved, only check that deployment's
+    # domains. Cross-deployment drift becomes a non-event for the active
+    # deployment's gate because the validator only inspects domains owned by it.
     if not args.fqdn:
         if real_domain is None:
+            slug_hint = f" (deployment={deployment_slug})" if deployment_slug else ""
+            source_hint = (
+                f".local/deployments/{deployment_slug}/identity.yml" if deployment_slug else ".local/identity.yml"
+            )
             print(
-                "[info] No real platform_domain in the shared .local/identity.yml — skipping TLS validation "
-                "(committed catalog uses example.com placeholder). Configure the shared local overlay "
+                f"[info] No real platform_domain in {source_hint}{slug_hint} — skipping TLS validation "
+                "(committed catalog uses example.com placeholder). Configure the local overlay "
                 "with your real domain to enable certificate checks.",
                 file=sys.stderr,
             )
             sys.exit(0)
         entries = [e for e in entries if _entry_matches_domain(e, real_domain)]
         if not entries:
+            slug_hint = f" (deployment={deployment_slug})" if deployment_slug else ""
             print(
-                f"[info] No catalog entries match configured domain '{real_domain}' — skipping.",
+                f"[info] No catalog entries match configured domain '{real_domain}'{slug_hint} — skipping.",
                 file=sys.stderr,
             )
             sys.exit(0)

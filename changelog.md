@@ -13,6 +13,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Unreleased
 
 - Fix education_wemeshup API routing: add Traefik dynamic config to route `/api/` to `catalog-api` backend; add `coolify_traefik_extra_dynamic_configs` for persistent IaC
+- ADR 0456 + ws-0456: deployment-aware certificate validation. `scripts/certificate_validator.py --deployment <slug>` reads identity from `.local/deployments/<slug>/identity.yml`. New `cross_deployment_drift` reason code in `config/gate-bypass-waiver-catalog.json`. 11 new tests. Closes follow-up #2 from the ws-0448 postmortem.
 
 - ADR 0452 + ws-0452: Phase 7 drives doctor signals from 3/7 → 1/7
   non-zero. Adds `# pending: <reason>` marker filter to

@@ -1,0 +1,63 @@
+id: ws-0456-deployment-aware-cert-validation
+adr: "0456"
+title: "Deployment-aware cert validation + cross_deployment_drift gate-bypass reason"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0456-deployment-aware-certificate-validation.md
+depends_on:
+  - adr-0375-certificate-validation-and-concordance-enforcement
+  - adr-0410-generic-by-default-architecture
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0448-deployment-connection-registry-and-wrapper
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0456_adr
+    paths:
+      - docs/adr/0456-deployment-aware-certificate-validation.md
+    mode: exclusive
+  - id: ws_0456_cert_validator
+    paths:
+      - scripts/certificate_validator.py
+    mode: shared_contract
+    contract: cert-validator-v1
+  - id: ws_0456_gate_bypass_catalog
+    paths:
+      - config/gate-bypass-waiver-catalog.json
+    mode: shared_contract
+    contract: gate-bypass-catalog-v1
+  - id: ws_0456_tests
+    paths:
+      - tests/test_ws0456_deployment_aware_cert_validation.py
+    mode: exclusive
+  - id: ws_0456_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0456_workstream
+    paths:
+      - workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+    mode: exclusive
+notes: |
+  Closes follow-up #2 from the ws-0448 postmortem (2026-04-28).
+
+  - scripts/certificate_validator.py: --deployment <slug> reads identity
+    from .local/deployments/<slug>/identity.yml. Falls back to legacy
+    .local/identity.yml for single-deployment installs.
+  - config/gate-bypass-waiver-catalog.json: cross_deployment_drift reason
+    code (max 2-day expiry) allows skip_cert_validation +
+    skip_remote_gate. Composes with cert_lane_pre_existing_failures
+    (ADR 0451).
+
+  Renumbered through 0450/0451/0452/0453/0454/0455 (taken concurrently
+  by other agents) before settling on 0456.
