@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-28'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 476
+total_adrs: 477
 adr_number_range:
   first: '0001'
-  last: 0449
-  next_available: '0450'
+  last: '0450'
+  next_available: '0451'
 implementation_status_summary:
   Implemented: 362
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 40
+  Proposed: 41
 decision_status_summary:
   Accepted: 366
-  Proposed: 47
+  Proposed: 48
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 44
+      count: 45
       first_adr: '0400'
-      last_adr: 0449
+      last_adr: '0450'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -64,7 +64,7 @@ facets:
       count: 12
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 33
+      count: 34
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 9
@@ -131,14 +131,20 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 40
+      count: 41
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0450'
+  next_available_adr: '0451'
 latest_adrs:
+  - adr: '0450'
+    title: Phase 5 — `make doctor` Aggregator + Post-Merge Rename Hook
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: automation
+    path: docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md
   - adr: 0449
     title: Phase 4 Self-Healing Primitives
     implementation_status: Proposed
@@ -193,12 +199,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: platform
     path: docs/adr/0441-deployment-scoped-service-subsetting.md
-  - adr: '0440'
-    title: Per-Deployment Identity & Artifact Isolation
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: identity
-    path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

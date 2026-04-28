@@ -54,7 +54,7 @@ shared_surfaces:
 - scripts/check_release_readiness.py
 - scripts/generate_cross_cutting_artifacts.py
 - scripts/topology-snapshot.json
-- workstreams/active/ws-0391-live-apply.yaml
+- workstreams/archive/2026/ws-0391-live-apply.yaml
 - workstreams/archive/2026/ws-0391-live-apply.yaml
 - workstreams/active/ws-0424-fork-clone-0fork.yaml
 - receipts/live-applies/**

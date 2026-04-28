@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Post-merge auto-heal — ADR 0450 phase 5.2.
+#
+# When a merge introduces file renames, scan workstream YAMLs for
+# `shared_surfaces` paths matching the old names and rewrite them to
+# the new names. The hook runs in DRY-RUN mode by default — it
+# surfaces the changes it WOULD make and prints the command to apply
+# them. Auto-applying would rewrite files in the operator's working
+# tree without consent, which conflicts with the "operator decides"
+# principle from CLAUDE.md.
+#
+# To auto-apply on every merge, set HEAL_RENAMES_AUTOAPPLY=1 in your
+# environment. Operators on shared branches typically prefer dry-run.
+#
+# Bypass: HEAL_RENAMES_SKIP=1 git merge.
+
+set -euo pipefail
+
+if [[ "${HEAL_RENAMES_SKIP:-0}" == "1" ]]; then
+  exit 0
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="$REPO_ROOT/scripts/heal_workstream_renames.py"
+
+if [[ ! -x "$SCRIPT" && ! -f "$SCRIPT" ]]; then
+  exit 0
+fi
+
+# ORIG_HEAD points at the pre-merge tip. `git diff --diff-filter=R
+# ORIG_HEAD...HEAD` lists files renamed by the merge.
+if ! git rev-parse --verify ORIG_HEAD >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Pick uv if available so PyYAML is auto-installed in an ephemeral env.
+if command -v uv >/dev/null 2>&1; then
+  RUNNER=(uv run --with pyyaml python)
+else
+  RUNNER=(python3)
+fi
+
+EXTRA_ARGS=()
+if [[ "${HEAL_RENAMES_AUTOAPPLY:-0}" == "1" ]]; then
+  EXTRA_ARGS+=(--apply)
+fi
+
+"${RUNNER[@]}" "$SCRIPT" --since ORIG_HEAD "${EXTRA_ARGS[@]}" || true

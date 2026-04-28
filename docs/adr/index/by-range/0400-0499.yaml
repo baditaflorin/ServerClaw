@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 44
+total_adrs: 45
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -843,3 +843,23 @@ adrs:
     summary: Three deliverables in this ADR; two more (A6 post-merge rename hook,
     filename: 0449-phase4-self-healing-primitives.md
     path: docs/adr/0449-phase4-self-healing-primitives.md
+  - adr: '0450'
+    title: Phase 5 — `make doctor` Aggregator + Post-Merge Rename Hook
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: automation
+    keywords:
+      - doctor
+      - post-merge
+      - rename
+      - windmill
+      - scheduled-refresh
+      - phase
+      - make
+      - aggregator
+      - hook
+    summary: A single aggregator that runs every drift signal currently surfaced
+    filename: 0450-phase5-doctor-aggregator-and-rename-hook.md
+    path: docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md

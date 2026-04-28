@@ -12,6 +12,18 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0450 + ws-0450: Phase 5 self-healing aggregator + post-merge
+  rename hook. `scripts/doctor.py` + `make doctor` aggregates every
+  Phase-1/2/3/4 drift signal in one command (live: 4/7 non-zero —
+  72/187 stale receipts, 3 dangling surfaces, 14 missing validator
+  docstrings, 1 .gitkeep substrate placeholder).
+  `scripts/heal_workstream_renames.py` + `.githooks/post-merge`
+  auto-rewrites `shared_surfaces` paths after merges introduce file
+  renames (used during this release to fix 2 real dangling-surface
+  workstreams: ws-0377 and ws-0396).
+  `config/windmill/schedules/refresh-safe-receipts.yaml` is the
+  declarative template for the weekly receipt-refresh cron the next
+  production session activates. 39 new tests (18 doctor + 21 rename hook).
 - ADR 0449 + ws-0449: Phase 4 self-healing primitives. Three new
   scripts derived from the 2026-04-28 postmortem: `scripts/reserve_adr.py`
   (atomic ADR-number CLI eliminating the collision class that forced
@@ -26,10 +38,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.12 release notes](docs/release-notes/0.179.12.md)
+- [0.179.13 release notes](docs/release-notes/0.179.13.md)
 
 ## Previous Releases
 
+- [0.179.12 release notes](docs/release-notes/0.179.12.md)
 - [0.179.11 release notes](docs/release-notes/0.179.11.md)
 - [0.179.10 release notes](docs/release-notes/0.179.10.md)
 - [0.179.9 release notes](docs/release-notes/0.179.9.md)
@@ -41,9 +54,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.3 release notes](docs/release-notes/0.179.3.md)
 - [0.179.2 release notes](docs/release-notes/0.179.2.md)
 - [0.179.1 release notes](docs/release-notes/0.179.1.md)
-- [0.179.0 release notes](docs/release-notes/0.179.0.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (528 releases)](docs/release-notes/index/2026.md)
+- [2026 (529 releases)](docs/release-notes/index/2026.md)

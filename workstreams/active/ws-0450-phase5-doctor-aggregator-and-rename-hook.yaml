@@ -1,0 +1,102 @@
+id: ws-0450-phase5-doctor-aggregator-and-rename-hook
+adr: 0450
+title: Phase 5 self-healing — make doctor aggregator + post-merge rename hook + Windmill schedule template
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/objective-carson-cbe0c3
+worktree_path: .claude/worktrees/objective-carson-cbe0c3
+doc: docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md
+depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-receipt-freshness
+  - adr-0447-phase3-llm-ergonomics-and-traceability
+  - adr-0449-phase4-self-healing-primitives
+conflicts_with: []
+shared_surfaces:
+  # ADR + workstream docs
+  - docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md
+  - workstreams/active/ws-0450-phase5-doctor-aggregator-and-rename-hook.yaml
+  # A1 — doctor aggregator
+  - scripts/doctor.py
+  - tests/test_doctor.py
+  # A6 — post-merge rename hook
+  - .githooks/post-merge
+  - scripts/heal_workstream_renames.py
+  - tests/test_heal_workstream_renames.py
+  # A4-cron — Windmill schedule template
+  - config/windmill/schedules/refresh-safe-receipts.yaml
+  # Make wiring
+  - Makefile
+summary: >
+  Phase 5 of the postmortem-driven self-healing roadmap. Aggregates
+  every Phase-1/2/3/4 drift signal behind a single `make doctor`
+  command; auto-rewrites workstream-YAML `shared_surfaces` paths after
+  a merge introduces file renames; commits a Windmill schedule
+  template for the receipt-refresh cron the next production session
+  activates.
+phases:
+  phase_0_open_workstream:
+    status: in_progress
+    target_version: 0.179.x
+  phase_1_doctor_aggregator:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "scripts/doctor.py — runs check_receipt_freshness, generate_traceability --validate, generate_validator_catalogue summary, validate_no_hardcoded_topology --rule late_bound_default"
+      - "Makefile `doctor` target as thin wrapper"
+      - "tests/test_doctor.py — fixture-based aggregation logic"
+  phase_2_post_merge_rename_hook:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "scripts/heal_workstream_renames.py — pure helper, scans workstream YAMLs for old paths, rewrites in place"
+      - ".githooks/post-merge — executable shim that calls the helper"
+      - "tests/test_heal_workstream_renames.py — synthetic rename pairs + workstream YAML rewrite"
+  phase_3_windmill_schedule_template:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "config/windmill/schedules/refresh-safe-receipts.yaml — declarative template"
+      - "schema-validates against existing Windmill schedule contract"
+  phase_4_activate_in_production:
+    status: deferred
+    target_version: 0.180.x
+    deferred_reason: Requires SSH access to runtime-control + Windmill API key. The template lands now; production session imports it.
+acceptance_criteria:
+  - "make doctor runs against the live repo and reports every drift signal in <10s"
+  - ".githooks/post-merge exists, executable, exercised by unit test"
+  - "scripts/heal_workstream_renames.py rewrites paths conservatively (exact-match only)"
+  - "config/windmill/schedules/refresh-safe-receipts.yaml exists"
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0450_docs
+      paths:
+        - docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md
+        - workstreams/active/ws-0450-phase5-doctor-aggregator-and-rename-hook.yaml
+      mode: shared_contract
+      contract: adr-0450-phase5-doctor-and-rename-hook-v1
+    - id: ws_0450_doctor
+      paths:
+        - scripts/doctor.py
+        - tests/test_doctor.py
+      mode: shared_contract
+      contract: adr-0450-doctor-v1
+    - id: ws_0450_rename_hook
+      paths:
+        - .githooks/post-merge
+        - scripts/heal_workstream_renames.py
+        - tests/test_heal_workstream_renames.py
+      mode: shared_contract
+      contract: adr-0450-rename-hook-v1
+    - id: ws_0450_windmill_template
+      paths:
+        - config/windmill/schedules/refresh-safe-receipts.yaml
+      mode: shared_contract
+      contract: adr-0450-windmill-template-v1
+notes:
+  - >
+    Phase 5 is the bridge from "drift surfaces" (Phases 1-3) and "drift
+    primitives" (Phase 4) to "drift management UX". The first two
+    phases gave operators data; the third turns it into a workflow.

@@ -21,7 +21,7 @@ shared_surfaces:
 - docs/adr/index/**
 - docs/runbooks/cpu-only-platform-ops.md
 - docs/workstreams/ws-0391-live-apply.md
-- workstreams/active/ws-0391-live-apply.yaml
+- workstreams/archive/2026/ws-0391-live-apply.yaml
 - workstreams.yaml
 - receipts/live-applies/**
 ownership_manifest:

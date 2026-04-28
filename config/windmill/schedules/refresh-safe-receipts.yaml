@@ -1,0 +1,81 @@
+# =============================================================================
+# Windmill schedule template — ADR 0450 phase 5.3.
+# Activate via: wmill schedule create -f config/windmill/schedules/refresh-safe-receipts.yaml
+# Tracker: config/windmill/schedules/README.md
+# =============================================================================
+schema_version: 1
+schedule_id: refresh-safe-receipts
+adr: '0450'
+description: |
+  Weekly automated re-converge of safe-to-refresh receipts on the
+  platform deployment. ADR 0446 surfaces stale receipts; ADR 0449 phase
+  4.3 classifies them into safe / needs_review / unknown via git
+  history. This schedule runs the safe-set refresh on a weekly cadence
+  so the live_apply_evidence ledger drifts toward zero stale receipts
+  without manual operator action. Anything classified as needs_review
+  is left for a human to converge — automatically refreshing those
+  would mask real drift.
+cadence:
+  # Every Sunday at 04:00 UTC — outside business hours, before Monday
+  # operator review of any needs_review queue.
+  cron: "0 4 * * 0"
+  timezone: UTC
+runner:
+  type: python_script
+  path: scripts/refresh_safe_receipts.py
+  args:
+    - --max-age-days
+    - "30"
+    - --apply
+    - --json
+  # Working directory is the platform repo checkout the Windmill
+  # worker mounts. Operator confirms the checkout is up-to-date with
+  # main before activating.
+  cwd: /opt/platform
+on_signal:
+  # If the helper found needs_review entries, post a Plane issue so a
+  # human looks at the underlying role changes. The needs_review count
+  # is in the JSON payload's summary.needs_review field.
+  - condition: ".summary.needs_review > 0"
+    action: plane_issue
+    target:
+      project: platform-ops
+      title_template: "Receipt refresh — {{ summary.needs_review }} services need converge re-run"
+      body_template: |
+        The weekly receipt-refresh schedule found {{ summary.needs_review }}
+        service(s) whose receipts are stale AND whose role files have
+        changed since the last receipt date.
+
+        These cannot be auto-refreshed safely. Run a real converge for
+        each:
+
+        {{#each needs_review}}
+        - `{{ this.service }}` (last receipt {{ this.receipt_date }},
+          {{ this.age_days }}d old, {{ this.changed_paths | length }} files
+          changed since)
+        {{/each}}
+
+        Source: scripts/refresh_safe_receipts.py
+        ADR: 0446 (receipt freshness) + 0449 (refresh classifier)
+        Schedule: refresh-safe-receipts (weekly, Sun 04:00 UTC)
+  # If the helper crashed (non-zero exit), page on-call. A failing
+  # helper means the receipt ledger isn't being maintained.
+  - condition: ".exit_code != 0"
+    action: ops_portal_widget
+    target:
+      widget: schedule-failures
+      severity: P3
+ownership:
+  workstream: ws-0450-phase5-doctor-aggregator-and-rename-hook
+  contact: claude
+notes:
+  - >
+    Phase 5 of the postmortem-driven self-healing roadmap. The
+    schedule descriptor is committed; activation in the live Windmill
+    workspace requires an operator with `wmill` access (out of scope
+    for the worktree that authored this file).
+  - >
+    The --apply flag causes refresh_safe_receipts.py to write a
+    [receipt-refresh] commit on the platform branch. The worker
+    needs git push access to whatever ref the operator points it at
+    (typically a dedicated automation branch, not main).

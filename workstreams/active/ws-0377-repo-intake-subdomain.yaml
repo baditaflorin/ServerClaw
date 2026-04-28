@@ -17,7 +17,7 @@ shared_surfaces:
   - playbooks/repo-intake.yml
   - playbooks/services/repo_intake.yml
   - config/generated/nginx-upstreams.yaml
-  - inventory/group_vars/platform_services.yml
+  - inventory/group_vars/all/platform_services.yml
 ownership_manifest:
   owned_surfaces:
     - id: repo_intake_service

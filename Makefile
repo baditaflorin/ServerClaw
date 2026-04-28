@@ -223,6 +223,19 @@ validate: ## Run full validation suite (YAML, syntax, lint, cross-catalog, types
 validate-generated-vars:
 	$(REPO_ROOT)/scripts/validate_repo.sh generated-vars
 
+# ADR 0450 phase 5.1 — `make doctor`. Aggregates every Phase-1/2/3/4
+# drift signal in one command. Default advisory; --strict exits 1 on
+# any non-zero signal. Use `make doctor-json` for ops_portal consumers.
+.PHONY: doctor doctor-json doctor-strict
+doctor:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/doctor.py
+
+doctor-json:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/doctor.py --json
+
+doctor-strict:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/doctor.py --strict
+
 validate-ansible-syntax:
 	$(REPO_ROOT)/scripts/validate_repo.sh ansible-syntax
 

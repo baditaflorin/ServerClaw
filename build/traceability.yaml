@@ -7,8 +7,8 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 24
-  with_resolved_adr: 24
+  total_workstreams: 25
+  with_resolved_adr: 25
   with_dangling_dependencies: 0
   with_dangling_surfaces: 3
   ready_to_merge: 9
@@ -147,7 +147,7 @@ workstreams:
   - adr-0224-self-service-repo-intake-and-agent-assisted-deployments
   surfaces:
     total: 6
-    present_on_disk: 4
+    present_on_disk: 5
   adr:
     title: Self-Service Repo Intake And Agent-Assisted Deployments
     implementation_status: Implemented
@@ -156,7 +156,6 @@ workstreams:
     path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
   dangling_surfaces:
   - config/generated/nginx-upstreams.yaml
-  - inventory/group_vars/platform_services.yml
 - workstream_id: ws-0396-live-apply
   title: Deterministic service decommissioning live apply and validation replay
   status: ready_for_merge
@@ -167,7 +166,7 @@ workstreams:
   - adr-0391-cpu-only-operational-automation
   surfaces:
     total: 41
-    present_on_disk: 39
+    present_on_disk: 40
   adr:
     title: "Deterministic Service Decommissioning \u2014 Catalog Schema Registry,\
       \ YAML Block Markers, and Dry-Run Preview"
@@ -177,7 +176,6 @@ workstreams:
     path: docs/adr/0396-deterministic-service-decommissioning.md
   dangling_surfaces:
   - workstreams/archive/2026/ws-0396-live-apply.yaml
-  - workstreams/active/ws-0391-live-apply.yaml
 - workstream_id: ws-0414-cert-lifecycle-agent-tools
   title: 'Cert Lifecycle Management: Agent Tools, Cron Sync, and Skip-Validation Mode'
   status: in_progress
@@ -399,15 +397,13 @@ workstreams:
     currently_describes: goal_state
     concern: platform
     path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
-- workstream_id: ws-0448-deployment-connection-registry
-  title: Per-deployment connection registry + run_with_deployment wrapper + topology
-    role auto-fill
+- workstream_id: ws-0448-postmortem-and-handoff
+  title: Cross-agent handoff postmortem for ws-0448 deployment connection registry
   status: in_progress
   ready_to_merge: true
   primary_adr: 0448
   depends_on:
-  - adr-0440-per-deployment-identity-and-artifact-isolation
-  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0448-deployment-connection-registry-and-wrapper
   surfaces:
     total: 2
     present_on_disk: 2
@@ -437,6 +433,26 @@ workstreams:
     currently_describes: goal_state
     concern: documentation
     path: docs/adr/0449-phase4-self-healing-primitives.md
+- workstream_id: ws-0450-phase5-doctor-aggregator-and-rename-hook
+  title: "Phase 5 self-healing \u2014 make doctor aggregator + post-merge rename hook\
+    \ + Windmill schedule template"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: 0296
+  depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-receipt-freshness
+  - adr-0447-phase3-llm-ergonomics-and-traceability
+  - adr-0449-phase4-self-healing-primitives
+  surfaces:
+    total: 9
+    present_on_disk: 9
+  adr:
+    title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: vm-topology
+    path: docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress
