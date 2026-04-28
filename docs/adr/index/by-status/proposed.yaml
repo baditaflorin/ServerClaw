@@ -10,7 +10,7 @@ generated: '2026-04-28'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 36
+total_adrs: 37
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -576,3 +576,23 @@ adrs:
     summary: Every Make target that today accepts env= accepts deployment=.
     filename: 0442-multi-deployment-make-interface-and-worktree-binding.md
     path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
+  - adr: '0445'
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - multi-deployment
+      - ci
+      - lint
+      - generic-by-construction
+      - programmatic-deploy
+      - phase
+      - hardening
+      - fork
+      - com
+      - lv3
+    summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
+    filename: 0445-phase1-multi-deployment-hardening.md
+    path: docs/adr/0445-phase1-multi-deployment-hardening.md

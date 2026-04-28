@@ -1,0 +1,20 @@
+# lv3-shape — fixture identity overlay (ADR 0444 item 12)
+#
+# Mirrors the production lv3.org deployment shape. First DNS label is `lv3`,
+# which is already safe across all five platform_identity flavors:
+#
+#   config_prefix == sql_prefix == pve_prefix == unix_prefix == dns_label == "lv3"
+#
+# Use this fixture to exercise the "happy path" where no flavor needs to
+# transform the label.
+#
+# This file is publishable — no real secrets, no .local/ values. See
+# tests/fixtures/inventories/README.md for the full contract.
+
+platform_domain: lv3.example.invalid
+platform_operator_email: operator@lv3.example.invalid
+platform_operator_name: "lv3 Test Operator"
+
+# Fixtures intentionally omit topology (host IPs, VM counts). Topology is
+# covered by a parallel host_vars/*-shape.yml set once item 5 of ADR 0444
+# parameterizes inventory/hosts.yml.

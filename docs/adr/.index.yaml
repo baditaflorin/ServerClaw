@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-28'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 471
+total_adrs: 472
 adr_number_range:
   first: '0001'
-  last: '0444'
-  next_available: '0445'
+  last: '0445'
+  next_available: '0446'
 implementation_status_summary:
   Implemented: 361
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 36
+  Proposed: 37
 decision_status_summary:
   Accepted: 365
-  Proposed: 43
+  Proposed: 44
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 39
+      count: 40
       first_adr: '0400'
-      last_adr: '0444'
+      last_adr: '0445'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -97,7 +97,7 @@ facets:
       count: 8
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 41
+      count: 42
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -131,14 +131,19 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 36
+      count: 37
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0445'
+  next_available_adr: '0446'
 latest_adrs:
+  - adr: '0445'
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    implementation_status: Proposed
+    concern: security
+    path: docs/adr/0445-phase1-multi-deployment-hardening.md
   - adr: '0444'
     title: nginx Buffer Sizing for oauth2-proxy Subrequest and Callback
     implementation_status: Implemented
@@ -184,11 +189,6 @@ latest_adrs:
     implementation_status: Accepted
     concern: bootstrap
     path: docs/adr/0437-overlay-aware-bootstrap.md
-  - adr: '0435'
-    title: Topology-Derived Health-Probe URLs
-    implementation_status: Proposed
-    concern: vm-topology
-    path: docs/adr/0435-topology-derived-health-probe-urls.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

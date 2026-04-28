@@ -12,12 +12,20 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0445 + ws-0445: Phase 1 multi-deployment hardening — fork-shape
+  fixture inventories (lv3 / 0fork / synthetic), per-service convergence
+  dry-run wired into the pre-push gate (advisory), `late_bound_default`
+  rule extending validate_no_hardcoded_topology.py, and the
+  fork-shape-fixture × deployment-loader integration test that closes
+  the seam with ws-0439.
+
 ## Latest Release
 
-- [0.179.5 release notes](docs/release-notes/0.179.5.md)
+- [0.179.6 release notes](docs/release-notes/0.179.6.md)
 
 ## Previous Releases
 
+- [0.179.5 release notes](docs/release-notes/0.179.5.md)
 - [0.179.4 release notes](docs/release-notes/0.179.4.md)
 - [0.179.3 release notes](docs/release-notes/0.179.3.md)
 - [0.179.2 release notes](docs/release-notes/0.179.2.md)
@@ -29,9 +37,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.229 release notes](docs/release-notes/0.178.229.md)
 - [0.178.228 release notes](docs/release-notes/0.178.228.md)
 - [0.178.227 release notes](docs/release-notes/0.178.227.md)
-- [0.178.226 release notes](docs/release-notes/0.178.226.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (521 releases)](docs/release-notes/index/2026.md)
+- [2026 (522 releases)](docs/release-notes/index/2026.md)

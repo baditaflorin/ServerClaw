@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 39
+total_adrs: 40
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -710,3 +710,23 @@ adrs:
     summary: Apply proxybuffersize 64k; proxybuffers 4 64k; to both the
     filename: 0444-nginx-oauth2-proxy-buffer-sizing.md
     path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+  - adr: '0445'
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - multi-deployment
+      - ci
+      - lint
+      - generic-by-construction
+      - programmatic-deploy
+      - phase
+      - hardening
+      - fork
+      - com
+      - lv3
+    summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
+    filename: 0445-phase1-multi-deployment-hardening.md
+    path: docs/adr/0445-phase1-multi-deployment-hardening.md

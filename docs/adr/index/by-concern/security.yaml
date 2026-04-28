@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-28'
 facet: concern
 concern: security
-total_adrs: 41
+total_adrs: 42
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -766,3 +766,23 @@ adrs:
     summary: Apply proxybuffersize 64k; proxybuffers 4 64k; to both the
     filename: 0444-nginx-oauth2-proxy-buffer-sizing.md
     path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+  - adr: '0445'
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - multi-deployment
+      - ci
+      - lint
+      - generic-by-construction
+      - programmatic-deploy
+      - phase
+      - hardening
+      - fork
+      - com
+      - lv3
+    summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
+    filename: 0445-phase1-multi-deployment-hardening.md
+    path: docs/adr/0445-phase1-multi-deployment-hardening.md

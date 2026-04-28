@@ -1,0 +1,21 @@
+# synthetic-shape — fixture identity overlay (ADR 0444 item 12)
+#
+# Third unrelated identity, distinct from both lv3-shape and 0fork-shape.
+# First DNS label is `testfork` — all five platform_identity flavors resolve
+# to the same value (`testfork`), but the value collides with neither lv3
+# nor 0fork derivations.
+#
+#   config_prefix == sql_prefix == pve_prefix == unix_prefix == dns_label == "testfork"
+#
+# Purpose: catch lv3/0fork coincidences. A role that accidentally works on
+# both lv3 and 0fork because of a shared substring (e.g. both contain `f` or
+# both happen to land in the same VM count) will reveal itself here. Also
+# proves a third deployment can be added by editing only the overlay — no
+# code changes elsewhere.
+#
+# This file is publishable. The .invalid TLD (RFC 2606) guarantees the domain
+# never resolves and cannot collide with a real deployment.
+
+platform_domain: testfork.invalid
+platform_operator_email: operator@testfork.invalid
+platform_operator_name: "Synthetic Test Operator"

@@ -131,5 +131,23 @@ else
   fi
 fi
 
+# ADR 0444 item 10 — per-service convergence dry-run across the fork-shape
+# fixture matrix (lv3 / 0fork / synthetic). Advisory through phase 4;
+# ADR 0444 phase 5 promotes to required.
+#
+# Bypass while advisory: SKIP_CONVERGE_DRY_RUN=1 git push origin <branch>
+echo "validation gate: convergence dry-run (ADR 0444 — advisory)"
+if [[ "${SKIP_CONVERGE_DRY_RUN:-0}" == "1" ]]; then
+  echo "validation gate: skipping convergence dry-run because SKIP_CONVERGE_DRY_RUN=1"
+elif ! command -v ansible-playbook >/dev/null 2>&1; then
+  echo "validation gate: ansible-playbook not on PATH — skipping convergence dry-run"
+else
+  if ! uv run --with pyyaml python scripts/converge_dry_run.py \
+        --base "${CONVERGE_DRY_RUN_BASE:-origin/main}" \
+        --advisory; then
+    echo "validation gate: convergence dry-run reported issues (advisory — not blocking)"
+  fi
+fi
+
 echo "validation gate: running remote pre-push gate"
 scripts/remote_exec.sh pre-push-gate --local-fallback

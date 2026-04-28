@@ -1403,6 +1403,173 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0445-phase1-multi-deployment-hardening
+  adr: 293
+  title: "Phase 1 multi-deployment hardening \u2014 fork-shape fixtures, convergence\
+    \ dry-run, late-bound topology lint, inventory parameterization"
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0445-phase1-multi-deployment-hardening.md
+  depends_on:
+  - adr-0438-generic-by-construction
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0442-multi-deployment-make-interface
+  - adr-0443-continuous-topology-reconciler
+  - adr-0373-service-registry
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0445-phase1-multi-deployment-hardening.md
+  - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+  - tests/fixtures/inventories/lv3-shape.yml
+  - tests/fixtures/inventories/0fork-shape.yml
+  - tests/fixtures/inventories/synthetic-shape.yml
+  - tests/fixtures/inventories/README.md
+  - scripts/converge_dry_run.py
+  - tests/test_converge_dry_run.py
+  - scripts/validate_no_hardcoded_topology.py
+  - tests/test_validate_no_hardcoded_topology.py
+  - .githooks/pre-push
+  - scripts/run_gate.py
+  - inventory/hosts.yml
+  - inventory/group_vars/all/identity.yml
+  - deployment-model.yaml
+  - Makefile
+  summary: 'Open Phase 1 of the 20-change platform-maturity review (2026-04-28). Adds
+    the four items not already in flight: fork-shape fixture inventories, per-service
+    convergence dry-run in the pre-push gate, a lint banning late-bound topology lookups
+    in role defaults, and parameterization of inventory/hosts.yml from deployment-model.yaml.
+    Tracks (does not redefine) ws-0438 and ws-0439 as Phase 1 items 1 and 2.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: completed
+      target_version: 0.179.x
+      tasks:
+      - draft ADR 0445
+      - draft workstream YAML
+      - regenerate workstreams.yaml + ADR index
+      - commit workstream registration before implementation
+    phase_1_fork_shape_fixtures:
+      status: completed
+      target_version: 0.179.x
+      done:
+      - tests/fixtures/inventories/lv3-shape.yml (equal-flavor path)
+      - 'tests/fixtures/inventories/0fork-shape.yml (divergent-flavor path: leading
+        digit stripped)'
+      - tests/fixtures/inventories/synthetic-shape.yml (testfork.invalid third identity)
+      - tests/fixtures/inventories/README.md documenting fixture contract
+      - "tests/test_fixture_inventories.py \u2014 12 cases covering parse, scalars,\
+        \ identity render, prefix uniqueness, shape-path coverage"
+    phase_2_convergence_dry_run:
+      status: completed
+      target_version: 0.179.x
+      done:
+      - "scripts/converge_dry_run.py \u2014 git-diff-based change detection, playbook\
+        \ discovery, per-fixture matrix, advisory mode"
+      - "tests/test_converge_dry_run.py \u2014 13 cases covering helper functions"
+      - wired into .githooks/pre-push as advisory step (SKIP_CONVERGE_DRY_RUN=1 to
+        bypass)
+      notes: 'Default mode is `--syntax-check` (fast, no SSH); `--mode=full` runs
+
+        `--check --diff` for manual investigation. Live smoke run on the
+
+        current branch shows api_gateway_runtime passes 3/3 cells.
+
+        '
+    phase_3_late_bound_topology_lint:
+      status: completed
+      target_version: 0.179.x
+      done:
+      - 'scripts/validate_no_hardcoded_topology.py: new `late_bound_default` rule
+        scanning roles/*/defaults/main.yml + collections mirror'
+      - 'allow-comment escape hatch: `# late-bound-allow: <reason>` (reason required)'
+      - "tests/test_validate_no_hardcoded_topology.py \u2014 10 cases covering match,\
+        \ suppression, scope, edge cases"
+      - wired automatically through scripts/validate_repo.sh which already calls the
+        validator with --rule all
+      notes: "Live scan against the branch returns clean (zero existing hits) so\n\
+        the rule lands forward-looking \u2014 no cleanup pass required.\n"
+    phase_4_inventory_as_parameter:
+      status: completed_via_ws0439
+      target_version: 0.180.x
+      notes: "Substrate already shipped through ws-0439:\n  - scripts/deployment.py\
+        \ \u2014 slug resolver + Deployment loader\n  - config/contracts/deployment-v1/{identity,topology,profile}.schema.json\n\
+        \  - Makefile MULTI_DEPLOYMENT_ENABLED=1 + DEPLOYMENT_ARG flag\n  - .local/deployments/<slug>/\
+        \ layout (operator-authored, gitignored)\nws-0445's contribution is the integration\
+        \ test that confirms the\nfork-shape fixtures load + validate through that\
+        \ loader, closing\nthe seam between phase 1.1 (fixtures) and ws-0439 (substrate).\n"
+      done:
+      - "test: tests/test_ws0445_deployment_loader_integration.py \u2014 7 cases proving\
+        \ lv3/0fork/synthetic identity shapes validate through scripts/deployment.py\
+        \ against config/contracts/deployment-v1/ schemas"
+      deferred_to_phase_2:
+      - one-release deprecation warning for legacy `env=production` enum
+      - default-on of MULTI_DEPLOYMENT_ENABLED once all generators verified
+    phase_5_promote_to_required:
+      status: not_started
+      target_version: 0.181.x
+      tasks:
+      - promote convergence dry-run from advisory to required
+      - promote late-bound topology lint from advisory to required
+      - "retire or restructure ws-0438 phase 6 (generic_deploy_ci) \u2014 duplicate\
+        \ ownership"
+  acceptance_criteria:
+  - Three fixture inventories render full platform_service_registry without error
+  - Pre-push gate runs ansible-playbook --check --diff per changed role across all
+    three fixtures
+  - validate_no_hardcoded_topology.py flags default('<known-prod-IP-or-domain>') in
+    role defaults
+  - make converge-X deployment=0fork and make converge-X deployment=lv3 are first-class
+    entry points
+  - ws-0438 phase 6 is retired or restructured (no duplicate ownership)
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0444_docs
+      paths:
+      - docs/adr/0445-phase1-multi-deployment-hardening.md
+      - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+      mode: shared_contract
+      contract: adr-0445-phase1-multi-deployment-hardening-v1
+    - id: ws_0444_fixtures
+      paths:
+      - tests/fixtures/inventories/lv3-shape.yml
+      - tests/fixtures/inventories/0fork-shape.yml
+      - tests/fixtures/inventories/synthetic-shape.yml
+      - tests/fixtures/inventories/README.md
+      mode: shared_contract
+      contract: adr-0445-fork-shape-fixtures-v1
+    - id: ws_0444_dry_run
+      paths:
+      - scripts/converge_dry_run.py
+      - tests/test_converge_dry_run.py
+      mode: shared_contract
+      contract: adr-0445-convergence-dry-run-v1
+    - id: ws_0444_topology_lint_extension
+      paths:
+      - scripts/validate_no_hardcoded_topology.py
+      - tests/test_validate_no_hardcoded_topology.py
+      mode: shared_contract
+      contract: adr-0445-late-bound-topology-lint-v1
+  notes:
+  - 'Phase 1 items 1 (ADR 0438) and 2 (ADR 0439) are already in flight as ws-0438
+    and ws-0439 respectively. This workstream tracks their status under a Phase 1
+    milestone but does not own their surfaces.
+
+    '
+  - 'ws-0438 phase 6 (generic_deploy_ci) overlaps with this workstream''s phase 1
+    + phase 2. On merge, ws-0438 phase 6 should be retired and its remaining tasks
+    subsumed here.
+
+    '
+  - "Phase 4 (inventory as parameter) is coordinated with ADR 0442 but not blocked\
+    \ on its full design \u2014 the inventory generation is the load-bearing mechanism\
+    \ either way.\n"
 - id: ws-0377-repo-intake-subdomain
   adr: '0224'
   title: Repo Intake as First-Class Subdomain

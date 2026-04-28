@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.5",
+  "repo_version": "0.179.6",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-28T09:10:26Z",
-  "next_refresh_at": "2026-04-28T10:10:26Z",
+  "generated_at": "2026-04-28T09:50:53Z",
+  "next_refresh_at": "2026-04-28T10:50:53Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.4",
+    "last_version": "0.179.5",
     "deployed_at": "2026-04-28",
-    "summary": "nginx_edge_publication: bump `proxy_buffer_size` to 64k on BOTH the `/oauth2/auth` subrequest and `/oauth2/callback` response locations \u2014 fixes 500 Internal Server Error on `ops.<domain>` and other OIDC-protected sites caused by oauth2-proxy header overflow when Keycloak group/role claims are large. ADR 0444 codifies the rationale, the chosen value, and the rule that all oauth2-proxy locations share the same buffer size. Generalises and supersedes the v0.179.2 hot-fix (16k on callback only).",
-    "release_notes_url": "docs/release-notes/0.179.5.md"
+    "summary": "ADR 0445 + ws-0445: Phase 1 multi-deployment hardening \u2014 fork-shape",
+    "release_notes_url": "docs/release-notes/0.179.6.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

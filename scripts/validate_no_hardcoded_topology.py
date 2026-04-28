@@ -130,6 +130,19 @@ ALLOWLIST_GLOBS: tuple[str, ...] = (
 # script docstring or argparse default that the operator MUST override.
 NOQA_MARKER = "noqa: topology-hardcode"
 
+# Per-line opt-out for the LATE_BOUND_DEFAULT rule (ADR 0444 item 20).
+# Format: `# late-bound-allow: <reason>`. The reason is required so a
+# monthly audit can re-evaluate whether the allow is still warranted.
+LATE_BOUND_ALLOW_MARKER = "late-bound-allow:"
+
+# Glob patterns identifying role-default files. The LATE_BOUND_DEFAULT rule
+# only fires on these — templates and tasks legitimately reference real
+# topology at render time, but defaults must derive from platform_*.
+LATE_BOUND_TARGET_GLOBS: tuple[str, ...] = (
+    "roles/*/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/*/defaults/main.yml",
+)
+
 # File extensions we even bother reading.
 TEXT_SUFFIXES: tuple[str, ...] = (
     ".yml",
@@ -371,6 +384,67 @@ def scan_file(
     return findings
 
 
+def scan_late_bound_defaults(
+    path: Path,
+    rel: Path,
+    known_ips: frozenset[str],
+) -> list[Finding]:
+    """ADR 0444 item 20 — flag `default('<known-prod-IP>')` in role defaults.
+
+    The audit category from ADR 0438 ("openbao_postgres_host defaulting
+    to a production IP before overlay applied") is the canonical case:
+    a role default that bakes in a topology fact, so any deployment whose
+    overlay loads after the default is read inherits the production IP
+    silently.
+
+    Only role-default files are scanned (LATE_BOUND_TARGET_GLOBS).
+    Templates and task files legitimately reference real topology at
+    render time; the issue is specifically defaults baked at parse time.
+
+    Per-line opt-out: `# late-bound-allow: <reason>` on the same line.
+    """
+    if not any(rel.match(g) for g in LATE_BOUND_TARGET_GLOBS):
+        return []
+    if not known_ips:
+        return []
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return []
+    ip_alt = "|".join(re.escape(ip) for ip in sorted(known_ips))
+    # Match Jinja `default('<ip>')` or `default("<ip>")`, with arbitrary
+    # whitespace inside the parens. Anchored on the `default(` literal so
+    # we don't match arbitrary string occurrences.
+    default_re = re.compile(rf"\bdefault\(\s*['\"]({ip_alt})['\"]\s*\)")
+    findings: list[Finding] = []
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        if LATE_BOUND_ALLOW_MARKER in line:
+            continue
+        if NOQA_MARKER in line:
+            continue
+        for m in default_re.finditer(line):
+            ip = m.group(1)
+            findings.append(
+                Finding(
+                    path=rel.as_posix(),
+                    line=lineno,
+                    col=m.start() + 1,
+                    rule="late_bound_default",
+                    matched=ip,
+                    service="(role-default)",
+                    detail=(
+                        f"Role default uses default('{ip}') — the literal IP "
+                        f"is read at parse time, before any deployment overlay "
+                        f"can rebind it. Derive from platform_service_topology "
+                        f"or a platform_* var instead. Annotate with "
+                        f"`# late-bound-allow: <reason>` only if the literal "
+                        f"is intentional and the operator MUST override."
+                    ),
+                )
+            )
+    return findings
+
+
 def scan(
     repo_root: Path,
     *,
@@ -387,6 +461,7 @@ def scan(
     for sm in mappings:
         by_ip_port[(sm.ipv4, sm.port)] = sm
         by_ip.setdefault(sm.ipv4, []).append(sm)
+    known_ips = frozenset(host_ip_map.values())
 
     findings: list[Finding] = []
     for path in _iter_candidate_files(repo_root):
@@ -394,6 +469,7 @@ def scan(
         if any(rel.match(pat) for pat in extra_allowlist):
             continue
         findings.extend(scan_file(path, rel, by_ip_port, by_ip))
+        findings.extend(scan_late_bound_defaults(path, rel, known_ips))
     return findings
 
 
@@ -411,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--rule",
-        choices=["all", "strong", "heuristic"],
+        choices=["all", "strong", "heuristic", "late_bound_default"],
         default="all",
         help="Restrict to a single rule (default: all).",
     )
