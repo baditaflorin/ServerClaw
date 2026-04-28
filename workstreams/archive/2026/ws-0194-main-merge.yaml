@@ -1,5 +1,5 @@
 id: ws-0194-main-merge
-adr: 0194
+adr: "0194"
 title: Integrate ADR 0194 live apply into origin/main
 status: merged
 owner: codex

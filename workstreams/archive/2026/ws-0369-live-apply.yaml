@@ -1,5 +1,5 @@
 id: ws-0369-live-apply
-adr: 0369
+adr: "0369"
 title: ADR 0369 live apply — Python validation toolkit completion
 status: merged
 owner: codex

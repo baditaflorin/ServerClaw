@@ -1,5 +1,5 @@
 id: ws-0318-live-apply
-adr: 0318
+adr: "0318"
 title: Live apply ADR 0318 repeatable operator onboarding from latest
   origin/main
 status: live_applied

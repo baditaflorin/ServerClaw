@@ -1,5 +1,5 @@
 id: adr-0081-changelog-portal
-adr: 0081
+adr: "0081"
 title: Platform changelog and deployment history portal
 status: live_applied
 owner: codex

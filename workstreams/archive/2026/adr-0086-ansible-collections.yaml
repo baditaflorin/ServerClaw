@@ -1,5 +1,5 @@
 id: adr-0086-ansible-collections
-adr: 0086
+adr: "0086"
 title: Ansible collection packaging
 status: merged
 owner: codex

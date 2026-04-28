@@ -1,5 +1,5 @@
 id: adr-0108-operator-onboarding
-adr: 0108
+adr: "0108"
 title: Operator onboarding and off-boarding workflow
 status: live_applied
 owner: codex

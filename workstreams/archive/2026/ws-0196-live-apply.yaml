@@ -1,5 +1,5 @@
 id: ws-0196-live-apply
-adr: 0196
+adr: "0196"
 title: ADR 0196 live apply from latest origin/main
 status: merged
 owner: codex

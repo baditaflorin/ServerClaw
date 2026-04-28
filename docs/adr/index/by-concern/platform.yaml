@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-28'
 facet: concern
 concern: platform
-total_adrs: 147
+total_adrs: 148
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2787,3 +2787,22 @@ adrs:
     summary: 'Three deliverables, ordered light-to-heavy:'
     filename: 0447-phase3-llm-ergonomics-and-traceability.md
     path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+  - adr: 0448
+    title: Per-Deployment Connection Registry & Wrapper
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: platform
+    keywords:
+      - multi-deployment
+      - connection
+      - ssh
+      - makefile
+      - ergonomics
+      - per-deployment
+      - registry
+      - wrapper
+    summary: A new per-deployment file (gitignored under .local/) describing how
+    filename: 0448-deployment-connection-registry-and-wrapper.md
+    path: docs/adr/0448-deployment-connection-registry-and-wrapper.md

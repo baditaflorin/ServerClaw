@@ -1,5 +1,5 @@
 id: adr-0089-build-cache
-adr: 0089
+adr: "0089"
 title: Build artifact cache and layer registry
 status: merged
 owner: codex

@@ -1,5 +1,5 @@
 id: ws-0259-live-apply
-adr: 0259
+adr: "0259"
 title: Live apply n8n as the external app connector fabric for ServerClaw
 status: live_applied
 owner: codex

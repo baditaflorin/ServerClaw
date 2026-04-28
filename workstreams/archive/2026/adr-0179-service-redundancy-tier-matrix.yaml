@@ -1,5 +1,5 @@
 id: adr-0179-service-redundancy-tier-matrix
-adr: 0179
+adr: "0179"
 title: Service redundancy tier matrix
 status: merged
 owner: codex

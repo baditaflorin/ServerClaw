@@ -1,5 +1,5 @@
 id: adr-0129-runbook-automation-executor
-adr: 0129
+adr: "0129"
 title: Runbook automation executor
 status: merged
 owner: codex

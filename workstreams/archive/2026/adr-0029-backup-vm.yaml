@@ -1,5 +1,5 @@
 id: adr-0029-backup-vm
-adr: 0029
+adr: "0029"
 title: Dedicated backup VM with local PBS
 status: merged
 owner: codex

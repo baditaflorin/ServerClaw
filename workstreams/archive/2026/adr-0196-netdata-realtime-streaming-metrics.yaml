@@ -1,5 +1,5 @@
 id: adr-0196-netdata-realtime-streaming-metrics
-adr: 0196
+adr: "0196"
 title: Netdata realtime streaming metrics
 status: implemented
 owner: codex

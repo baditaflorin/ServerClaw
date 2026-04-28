@@ -1,5 +1,5 @@
 id: adr-0093-interactive-ops-portal
-adr: 0093
+adr: "0093"
 title: Interactive ops portal with live actions
 status: live_applied
 owner: codex

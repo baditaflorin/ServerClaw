@@ -1,5 +1,5 @@
 id: adr-0139-subdomain-exposure-audit
-adr: 0139
+adr: "0139"
 title: Subdomain exposure audit and registry
 status: merged
 owner: codex

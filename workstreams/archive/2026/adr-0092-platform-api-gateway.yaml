@@ -1,5 +1,5 @@
 id: adr-0092-platform-api-gateway
-adr: 0092
+adr: "0092"
 title: Unified platform API gateway
 status: live_applied
 owner: codex

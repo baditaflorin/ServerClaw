@@ -1,5 +1,5 @@
 id: adr-0180-standby-capacity
-adr: 0180
+adr: "0180"
 title: Standby capacity reservation and placement rules
 status: implemented
 owner: codex

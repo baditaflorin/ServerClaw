@@ -1,5 +1,5 @@
 id: adr-0178-dependency-wave
-adr: 0178
+adr: "0178"
 title: Dependency wave manifests for parallel apply
 status: merged
 owner: codex

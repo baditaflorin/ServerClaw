@@ -1,5 +1,5 @@
 id: ws-0292-superset-live-apply
-adr: 0292
+adr: "0292"
 title: Live apply ADR 0292 Apache Superset from latest origin/main
 status: live_applied
 owner: codex

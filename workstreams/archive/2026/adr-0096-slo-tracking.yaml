@@ -1,5 +1,5 @@
 id: adr-0096-slo-tracking
-adr: 0096
+adr: "0096"
 title: SLO definitions and error budget tracking
 status: live_applied
 owner: codex

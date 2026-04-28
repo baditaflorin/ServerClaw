@@ -1,5 +1,5 @@
 id: ws-0191-live-apply
-adr: 0191
+adr: "0191"
 title: Immutable guest replacement for stateful and edge services
 status: live_applied
 owner: codex

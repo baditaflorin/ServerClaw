@@ -1,5 +1,5 @@
 id: ws-0281-live-apply
-adr: 0281
+adr: "0281"
 title: Live apply the GlitchTip application error tracking stack from latest
   origin/main
 status: live_applied

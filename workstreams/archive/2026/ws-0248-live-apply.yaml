@@ -1,5 +1,5 @@
 id: ws-0248-live-apply
-adr: 0248
+adr: "0248"
 title: Live apply session and logout authority across Keycloak, oauth2-proxy,
   and app surfaces
 status: live_applied

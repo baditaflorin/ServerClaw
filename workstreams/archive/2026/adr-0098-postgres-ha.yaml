@@ -1,5 +1,5 @@
 id: adr-0098-postgres-ha
-adr: 0098
+adr: "0098"
 title: Postgres high availability and automated failover
 status: merged
 owner: codex

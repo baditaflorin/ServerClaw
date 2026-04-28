@@ -1,5 +1,5 @@
 id: ws-0299-live-apply
-adr: 0299
+adr: "0299"
 title: Live apply ntfy as the self-hosted push notification channel from latest
   origin/main
 status: merged

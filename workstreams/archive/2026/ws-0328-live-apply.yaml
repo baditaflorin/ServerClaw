@@ -1,5 +1,5 @@
 id: ws-0328-live-apply
-adr: 0328
+adr: "0328"
 title: Implement size-budgeted root summaries and automatic rollover ledgers
 status: live_applied
 owner: codex

@@ -1,5 +1,5 @@
 id: ws-0238-live-apply
-adr: 0238
+adr: "0238"
 title: Data-dense operator grids live apply
 status: live_applied
 owner: codex

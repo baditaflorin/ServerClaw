@@ -1,5 +1,5 @@
 id: ws-0295-live-apply
-adr: 0295
+adr: "0295"
 title: Live apply the shared artifact cache plane from latest origin/main
 status: live_applied
 owner: codex

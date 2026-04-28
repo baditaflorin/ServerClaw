@@ -1,5 +1,5 @@
 id: adr-0069-agent-tool-registry
-adr: 0069
+adr: "0069"
 title: Agent tool registry and governed tool calls
 status: merged
 owner: codex

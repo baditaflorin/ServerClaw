@@ -21,6 +21,482 @@ archive_summary:
   by_year:
     '2026': 322
 workstreams:
+- id: ws-0448-deployment-connection-registry
+  adr: 0448
+  title: Per-deployment connection registry + run_with_deployment wrapper + topology
+    role auto-fill
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0445-phase1-multi-deployment-hardening
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0448-deployment-connection-registry.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0448_adr
+      paths:
+      - docs/adr/0448-deployment-connection-registry-and-wrapper.md
+      mode: exclusive
+    - id: ws_0448_connection_schema
+      paths:
+      - config/contracts/deployment-v1/connection.schema.json
+      mode: exclusive
+    - id: ws_0448_deployment_loader
+      paths:
+      - scripts/deployment.py
+      mode: shared_contract
+      contract: deployment-loader-v1
+      co_owners:
+      - ws-0445-phase1-multi-deployment-hardening
+      - ws-0446-phase2-multi-deployment-hardening
+    - id: ws_0448_wrapper
+      paths:
+      - scripts/run_with_deployment.sh
+      mode: exclusive
+    - id: ws_0448_role_default
+      paths:
+      - scripts/generate_platform_vars.py
+      mode: shared_contract
+      contract: platform-vars-generator-v1
+    - id: ws_0448_tests
+      paths:
+      - tests/test_ws0448_connection_registry.py
+      - tests/test_ws0448_topology_role_default.py
+      mode: exclusive
+    - id: ws_0448_release_artifacts
+      paths:
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/**
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - docs/status/history/merged-workstreams.md
+      - docs/status/history/live-apply-evidence.md
+      - inventory/group_vars/platform.yml
+      - inventory/group_vars/platform_tls_certs.yml
+      - docs/diagrams/*.excalidraw
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0448_workstream
+      paths:
+      - workstreams/active/ws-0448-deployment-connection-registry.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0448_yaml_adr_quoting
+      paths:
+      - workstreams/active/**
+      - workstreams/archive/2026/**
+      mode: shared_contract
+      contract: workstream-registry-v1
+  notes: "Closes the operator-surface gap left by ws-0445 phase 1: every\ndeployment\
+    \ now carries its SSH/Proxmox-host metadata as committed\ndata (.local/deployments/<slug>/connection.yml),\
+    \ not as a per-target\nMakefile constant.\n\nThree pieces:\n1. config/contracts/deployment-v1/connection.schema.json\
+    \ \u2014 schema +\n   Deployment.connection field + `connection` CLI subcommand\
+    \ on\n   scripts/deployment.py emitting LV3_PROXMOX_HOST_*,\n   LV3_BOOTSTRAP_SSH_PRIVATE_KEY,\
+    \ PLATFORM_IDENTITY_OVERLAY.\n2. scripts/run_with_deployment.sh \u2014 exec-style\
+    \ wrapper that resolves\n   the slug, loads the env block, exec's the inner command.\
+    \ No\n   Makefile edits \u2014 composes with ws-0445 phase 1's MULTI_DEPLOYMENT\n\
+    \   opt-in.\n3. scripts/generate_platform_vars.py \u2014 proxmox_guests[*].role\
+    \ now\n   defaults to name when absent, so per-deployment topology overlays\n\
+    \   stay minimal.\n\nOut-of-scope for this slice (deferred to follow-ups):\n-\
+    \ Host-pinning so two deployments can't both install services on the\n  same VM\
+    \ (the lv3\u21940fork port-4180 collision).\n- inventory/hosts.yml parameterization\
+    \ (ws-0445 item 5 owns this).\n- 0fork's topology.yml still needs more guests\
+    \ \u2014 operator data gap,\n  not a code change.\n"
+- id: ws-0447-phase3-llm-ergonomics-and-traceability
+  adr: '0447'
+  title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
+    \ ADR index, build/traceability.yaml generator"
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+  depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-multi-deployment-hardening
+  - adr-0175-cross-workstream-interface-contracts
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+  - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+  - scripts/adr_discovery.py
+  - tests/test_adr_currently_describes.py
+  - scripts/generate_traceability.py
+  - tests/test_generate_traceability.py
+  - build/traceability.yaml
+  - scripts/validate_repo.sh
+  summary: 'Phase 3 of the 20-change platform-maturity review (2026-04-28). Two LLM-ergonomics
+    items with no current owner: status-context tag on the ADR index (item 17) and
+    a generated traceability matrix (item 19). Items 7, 8, 9, 18 are heavy structural
+    refactors tracked elsewhere (ws-0438 phase 2). Item 16 (per-service onboarding
+    cards) deferred pending design refresh.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+      target_version: 0.179.x
+      tasks:
+      - draft ADR 0447
+      - draft workstream YAML
+      - regenerate workstreams.yaml + ADR index
+      - commit workstream registration before implementation
+    phase_1_currently_describes:
+      status: completed
+      target_version: 0.179.x
+      tasks:
+      - extend AdrMeta with currently_describes computed field
+      - surface in to_entry and to_compact_entry
+      - "tests/test_adr_currently_describes.py \u2014 pin mapping for every status\
+        \ value"
+      - regenerate docs/adr/.index.yaml + shards
+    phase_2_traceability:
+      status: completed
+      target_version: 0.179.x
+      tasks:
+      - "scripts/generate_traceability.py \u2014 joins workstream YAML \xD7 ADR index"
+      - "build/traceability.yaml \u2014 generated artifact"
+      - "tests/test_generate_traceability.py \u2014 tmp-fixture-based join logic +\
+        \ dangling-ref detection"
+      - wire validate_traceability into scripts/validate_repo.sh as advisory
+    phase_3_onboarding_cards:
+      status: deferred
+      target_version: 0.181.x
+      deferred_reason: 'build/onboarding/service-catalog.yaml already covers flattened
+
+        service info; the per-service card design needs more thought
+
+        before generating duplicative files. Pick up once items 17 + 19
+
+        land and incremental value is measured.
+
+        '
+  acceptance_criteria:
+  - every ADR index entry carries currently_describes
+  - scripts/generate_traceability.py --write emits build/traceability.yaml
+  - "validate_traceability flags broken workstream\u2192ADR refs"
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0447_docs
+      paths:
+      - docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+      - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+      mode: shared_contract
+      contract: adr-0447-phase3-llm-ergonomics-v1
+    - id: ws_0447_currently_describes
+      paths:
+      - scripts/adr_discovery.py
+      - tests/test_adr_currently_describes.py
+      mode: shared_contract
+      contract: adr-0447-currently-describes-v1
+    - id: ws_0447_traceability
+      paths:
+      - scripts/generate_traceability.py
+      - tests/test_generate_traceability.py
+      - build/traceability.yaml
+      mode: shared_contract
+      contract: adr-0447-traceability-v1
+  notes:
+  - 'Phase 3 items 7, 8, 9, 18 are heavy structural refactors tracked via ws-0438.
+    Item 16 (per-service onboarding) deferred pending design refresh. This workstream
+    owns 17 + 19.
+
+    '
+- id: ws-0446-phase2-multi-deployment-hardening
+  adr: '0446'
+  title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\
+    \ + service-registry cross-refs"
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0446-phase2-multi-deployment-hardening.md
+  depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0438-generic-by-construction
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0443-continuous-topology-reconciler
+  - adr-0373-service-registry
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0446-phase2-multi-deployment-hardening.md
+  - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+  - scripts/check_receipt_freshness.py
+  - tests/test_check_receipt_freshness.py
+  - roles/mail_platform_runtime/molecule/**
+  - scripts/validate_service_registry.py
+  - tests/test_validate_service_registry.py
+  summary: "Phase 2 of the 20-change platform-maturity review (2026-04-28). Items\
+    \ 3, 4, 6, 13 from that list have substrate already shipped or in flight (ws-0438,\
+    \ ws-0439). This workstream owns the two items with no current owner \u2014 receipt\
+    \ freshness check (item 14) and Molecule scaffold (item 11) \u2014 plus a bonus\
+    \ service-registry cross-ref extension if validate_service_registry.py turns out\
+    \ not to cover image_catalog_key / host_group cross-refs.\n"
+  phases:
+    phase_0_open_workstream:
+      status: completed
+    phase_1_receipt_freshness:
+      status: completed
+      target_version: 0.179.x
+      done:
+      - "scripts/check_receipt_freshness.py \u2014 versions/stack.yaml parser, --max-age-days,\
+        \ --strict, --json"
+      - "tests/test_check_receipt_freshness.py \u2014 21 cases covering date parsing,\
+        \ threshold logic, malformed-entry handling, CLI advisory/strict/json modes"
+      - wired into scripts/validate_repo.sh as advisory step (validate_receipt_freshness)
+      notes: "Live signal: 72 of 186 receipts on the current branch are stale at\n\
+        the 30-day window. Phase 5 promotion to --strict will require a\ncleanup pass.\
+        \ Surfacing this signal now is the win \u2014 operators\ncan target which\
+        \ services need re-converge based on age, instead\nof waiting for a 502.\n"
+    phase_2_molecule_scaffold:
+      status: deferred
+      target_version: 0.180.x
+      deferred_reason: "The collections-level Molecule scaffold (proxmox-fixture driver)\n\
+        that docker_runtime references is currently a `.gitkeep` \u2014\n`collections/ansible_collections/lv3/platform/molecule/`\
+        \ has no\n`drivers/proxmox-fixture/{create,destroy}.yml`. Adding a second\n\
+        scenario that references the missing driver would land technical\ndebt rather\
+        \ than a working test. Phase 4 picks this up once the\ndriver is wired or\
+        \ once a different driver (delegated container)\nis chosen.\n"
+      deferred_to:
+      - phase_4_expand_molecule
+    phase_3_service_registry_crossrefs:
+      status: completed_already_covered
+      target_version: 0.179.x
+      notes: "Audit of scripts/validate_service_registry.py confirms both\ncross-refs\
+        \ are already enforced:\n  - line 148: host_group not in inventory_names \u2192\
+        \ error\n  - line 167: image_catalog_key not in image_catalog \u2192 error\n\
+        No code change needed; documenting coverage in this ADR is the\ndeliverable.\n"
+    phase_4_expand_molecule:
+      status: not_started
+      target_version: 0.180.x
+      blocked_on: proxmox-fixture-driver-implementation
+      tasks:
+      - implement collections/.../molecule/drivers/proxmox-fixture/{create,destroy}.yml
+        OR pick a delegated-container driver
+      - scenarios for the 9 most-changed roles after mail_platform_runtime
+    phase_5_promote_to_required:
+      status: not_started
+      target_version: 0.181.x
+      tasks:
+      - promote receipt-freshness check from advisory to --strict
+      - cleanup pass on the 72 stale receipts that triggered the surfacing
+  acceptance_criteria:
+  - scripts/check_receipt_freshness.py runs against versions/stack.yaml and reports
+    per-receipt age in --json
+  - tests/test_check_receipt_freshness.py covers date parsing, threshold logic, malformed-entry
+    edge cases
+  - One role has a working Molecule scenario invokable via make
+  - validate_service_registry.py covers image_catalog_key and host_group cross-refs
+    (extended or already)
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0446_docs
+      paths:
+      - docs/adr/0446-phase2-multi-deployment-hardening.md
+      - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+      mode: shared_contract
+      contract: adr-0446-phase2-multi-deployment-hardening-v1
+    - id: ws_0446_receipt_freshness
+      paths:
+      - scripts/check_receipt_freshness.py
+      - tests/test_check_receipt_freshness.py
+      mode: shared_contract
+      contract: adr-0446-receipt-freshness-v1
+    - id: ws_0446_molecule_scaffold
+      paths:
+      - roles/mail_platform_runtime/molecule/**
+      mode: shared_contract
+      contract: adr-0446-molecule-scaffold-v1
+  notes:
+  - 'Phase 2 items 3, 4, 6, 13 from the 20-change review are tracked elsewhere; this
+    workstream does not redefine them. Item 11 + 14 are the new owned deliverables;
+    the bonus item 15 may collapse into "already covered" after audit.
+
+    '
+- id: ws-0445-phase1-multi-deployment-hardening
+  adr: '0445'
+  title: "Phase 1 multi-deployment hardening \u2014 fork-shape fixtures, convergence\
+    \ dry-run, late-bound topology lint, inventory parameterization"
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0445-phase1-multi-deployment-hardening.md
+  depends_on:
+  - adr-0438-generic-by-construction
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0442-multi-deployment-make-interface
+  - adr-0443-continuous-topology-reconciler
+  - adr-0373-service-registry
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0445-phase1-multi-deployment-hardening.md
+  - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+  - tests/fixtures/inventories/lv3-shape.yml
+  - tests/fixtures/inventories/0fork-shape.yml
+  - tests/fixtures/inventories/synthetic-shape.yml
+  - tests/fixtures/inventories/README.md
+  - scripts/converge_dry_run.py
+  - tests/test_converge_dry_run.py
+  - scripts/validate_no_hardcoded_topology.py
+  - tests/test_validate_no_hardcoded_topology.py
+  - .githooks/pre-push
+  - scripts/run_gate.py
+  - inventory/hosts.yml
+  - inventory/group_vars/all/identity.yml
+  - Makefile
+  summary: 'Open Phase 1 of the 20-change platform-maturity review (2026-04-28). Adds
+    the four items not already in flight: fork-shape fixture inventories, per-service
+    convergence dry-run in the pre-push gate, a lint banning late-bound topology lookups
+    in role defaults, and parameterization of inventory/hosts.yml from deployment-model.yaml.
+    Tracks (does not redefine) ws-0438 and ws-0439 as Phase 1 items 1 and 2.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: completed
+      target_version: 0.179.x
+      tasks:
+      - draft ADR 0445
+      - draft workstream YAML
+      - regenerate workstreams.yaml + ADR index
+      - commit workstream registration before implementation
+    phase_1_fork_shape_fixtures:
+      status: completed
+      target_version: 0.179.x
+      done:
+      - tests/fixtures/inventories/lv3-shape.yml (equal-flavor path)
+      - 'tests/fixtures/inventories/0fork-shape.yml (divergent-flavor path: leading
+        digit stripped)'
+      - tests/fixtures/inventories/synthetic-shape.yml (testfork.invalid third identity)
+      - tests/fixtures/inventories/README.md documenting fixture contract
+      - "tests/test_fixture_inventories.py \u2014 12 cases covering parse, scalars,\
+        \ identity render, prefix uniqueness, shape-path coverage"
+    phase_2_convergence_dry_run:
+      status: completed
+      target_version: 0.179.x
+      done:
+      - "scripts/converge_dry_run.py \u2014 git-diff-based change detection, playbook\
+        \ discovery, per-fixture matrix, advisory mode"
+      - "tests/test_converge_dry_run.py \u2014 13 cases covering helper functions"
+      - wired into .githooks/pre-push as advisory step (SKIP_CONVERGE_DRY_RUN=1 to
+        bypass)
+      notes: 'Default mode is `--syntax-check` (fast, no SSH); `--mode=full` runs
+
+        `--check --diff` for manual investigation. Live smoke run on the
+
+        current branch shows api_gateway_runtime passes 3/3 cells.
+
+        '
+    phase_3_late_bound_topology_lint:
+      status: completed
+      target_version: 0.179.x
+      done:
+      - 'scripts/validate_no_hardcoded_topology.py: new `late_bound_default` rule
+        scanning roles/*/defaults/main.yml + collections mirror'
+      - 'allow-comment escape hatch: `# late-bound-allow: <reason>` (reason required)'
+      - "tests/test_validate_no_hardcoded_topology.py \u2014 10 cases covering match,\
+        \ suppression, scope, edge cases"
+      - wired automatically through scripts/validate_repo.sh which already calls the
+        validator with --rule all
+      notes: "Live scan against the branch returns clean (zero existing hits) so\n\
+        the rule lands forward-looking \u2014 no cleanup pass required.\n"
+    phase_4_inventory_as_parameter:
+      status: completed_via_ws0439
+      target_version: 0.180.x
+      notes: "Substrate already shipped through ws-0439:\n  - scripts/deployment.py\
+        \ \u2014 slug resolver + Deployment loader\n  - config/contracts/deployment-v1/{identity,topology,profile}.schema.json\n\
+        \  - Makefile MULTI_DEPLOYMENT_ENABLED=1 + DEPLOYMENT_ARG flag\n  - .local/deployments/<slug>/\
+        \ layout (operator-authored, gitignored)\nws-0445's contribution is the integration\
+        \ test that confirms the\nfork-shape fixtures load + validate through that\
+        \ loader, closing\nthe seam between phase 1.1 (fixtures) and ws-0439 (substrate).\n"
+      done:
+      - "test: tests/test_ws0445_deployment_loader_integration.py \u2014 7 cases proving\
+        \ lv3/0fork/synthetic identity shapes validate through scripts/deployment.py\
+        \ against config/contracts/deployment-v1/ schemas"
+      deferred_to_phase_2:
+      - one-release deprecation warning for legacy `env=production` enum
+      - default-on of MULTI_DEPLOYMENT_ENABLED once all generators verified
+    phase_5_promote_to_required:
+      status: not_started
+      target_version: 0.181.x
+      tasks:
+      - promote convergence dry-run from advisory to required
+      - promote late-bound topology lint from advisory to required
+      - "retire or restructure ws-0438 phase 6 (generic_deploy_ci) \u2014 duplicate\
+        \ ownership"
+  acceptance_criteria:
+  - Three fixture inventories render full platform_service_registry without error
+  - Pre-push gate runs ansible-playbook --check --diff per changed role across all
+    three fixtures
+  - validate_no_hardcoded_topology.py flags default('<known-prod-IP-or-domain>') in
+    role defaults
+  - make converge-X deployment=0fork and make converge-X deployment=lv3 are first-class
+    entry points
+  - ws-0438 phase 6 is retired or restructured (no duplicate ownership)
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0444_docs
+      paths:
+      - docs/adr/0445-phase1-multi-deployment-hardening.md
+      - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+      mode: shared_contract
+      contract: adr-0445-phase1-multi-deployment-hardening-v1
+    - id: ws_0444_fixtures
+      paths:
+      - tests/fixtures/inventories/lv3-shape.yml
+      - tests/fixtures/inventories/0fork-shape.yml
+      - tests/fixtures/inventories/synthetic-shape.yml
+      - tests/fixtures/inventories/README.md
+      mode: shared_contract
+      contract: adr-0445-fork-shape-fixtures-v1
+    - id: ws_0444_dry_run
+      paths:
+      - scripts/converge_dry_run.py
+      - tests/test_converge_dry_run.py
+      mode: shared_contract
+      contract: adr-0445-convergence-dry-run-v1
+    - id: ws_0444_topology_lint_extension
+      paths:
+      - scripts/validate_no_hardcoded_topology.py
+      - tests/test_validate_no_hardcoded_topology.py
+      mode: shared_contract
+      contract: adr-0445-late-bound-topology-lint-v1
+  notes:
+  - 'Phase 1 items 1 (ADR 0438) and 2 (ADR 0439) are already in flight as ws-0438
+    and ws-0439 respectively. This workstream tracks their status under a Phase 1
+    milestone but does not own their surfaces.
+
+    '
+  - 'ws-0438 phase 6 (generic_deploy_ci) overlaps with this workstream''s phase 1
+    + phase 2. On merge, ws-0438 phase 6 should be retired and its remaining tasks
+    subsumed here.
+
+    '
+  - "Phase 4 (inventory as parameter) is coordinated with ADR 0442 but not blocked\
+    \ on its full design \u2014 the inventory generation is the load-bearing mechanism\
+    \ either way.\n"
 - id: ws-0444-nginx-oauth2-proxy-buffer-sizing
   adr: '0444'
   title: "nginx oauth2-proxy buffer sizing \u2014 64k on /oauth2/{auth,callback}"
@@ -1403,387 +1879,6 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
-- id: ws-0447-phase3-llm-ergonomics-and-traceability
-  adr: 295
-  title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
-    \ ADR index, build/traceability.yaml generator"
-  status: in_progress
-  ready_to_merge: true
-  live_applied: false
-  owner: claude
-  branch: claude/objective-carson-cbe0c3
-  worktree_path: .claude/worktrees/objective-carson-cbe0c3
-  doc: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
-  depends_on:
-  - adr-0445-phase1-multi-deployment-hardening
-  - adr-0446-phase2-multi-deployment-hardening
-  - adr-0175-cross-workstream-interface-contracts
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
-  - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
-  - scripts/adr_discovery.py
-  - tests/test_adr_currently_describes.py
-  - scripts/generate_traceability.py
-  - tests/test_generate_traceability.py
-  - build/traceability.yaml
-  - scripts/validate_repo.sh
-  summary: 'Phase 3 of the 20-change platform-maturity review (2026-04-28). Two LLM-ergonomics
-    items with no current owner: status-context tag on the ADR index (item 17) and
-    a generated traceability matrix (item 19). Items 7, 8, 9, 18 are heavy structural
-    refactors tracked elsewhere (ws-0438 phase 2). Item 16 (per-service onboarding
-    cards) deferred pending design refresh.
-
-    '
-  phases:
-    phase_0_open_workstream:
-      status: in_progress
-      target_version: 0.179.x
-      tasks:
-      - draft ADR 0447
-      - draft workstream YAML
-      - regenerate workstreams.yaml + ADR index
-      - commit workstream registration before implementation
-    phase_1_currently_describes:
-      status: completed
-      target_version: 0.179.x
-      tasks:
-      - extend AdrMeta with currently_describes computed field
-      - surface in to_entry and to_compact_entry
-      - "tests/test_adr_currently_describes.py \u2014 pin mapping for every status\
-        \ value"
-      - regenerate docs/adr/.index.yaml + shards
-    phase_2_traceability:
-      status: completed
-      target_version: 0.179.x
-      tasks:
-      - "scripts/generate_traceability.py \u2014 joins workstream YAML \xD7 ADR index"
-      - "build/traceability.yaml \u2014 generated artifact"
-      - "tests/test_generate_traceability.py \u2014 tmp-fixture-based join logic +\
-        \ dangling-ref detection"
-      - wire validate_traceability into scripts/validate_repo.sh as advisory
-    phase_3_onboarding_cards:
-      status: deferred
-      target_version: 0.181.x
-      deferred_reason: 'build/onboarding/service-catalog.yaml already covers flattened
-
-        service info; the per-service card design needs more thought
-
-        before generating duplicative files. Pick up once items 17 + 19
-
-        land and incremental value is measured.
-
-        '
-  acceptance_criteria:
-  - every ADR index entry carries currently_describes
-  - scripts/generate_traceability.py --write emits build/traceability.yaml
-  - "validate_traceability flags broken workstream\u2192ADR refs"
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0447_docs
-      paths:
-      - docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
-      - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
-      mode: shared_contract
-      contract: adr-0447-phase3-llm-ergonomics-v1
-    - id: ws_0447_currently_describes
-      paths:
-      - scripts/adr_discovery.py
-      - tests/test_adr_currently_describes.py
-      mode: shared_contract
-      contract: adr-0447-currently-describes-v1
-    - id: ws_0447_traceability
-      paths:
-      - scripts/generate_traceability.py
-      - tests/test_generate_traceability.py
-      - build/traceability.yaml
-      mode: shared_contract
-      contract: adr-0447-traceability-v1
-  notes:
-  - 'Phase 3 items 7, 8, 9, 18 are heavy structural refactors tracked via ws-0438.
-    Item 16 (per-service onboarding) deferred pending design refresh. This workstream
-    owns 17 + 19.
-
-    '
-- id: ws-0446-phase2-multi-deployment-hardening
-  adr: 294
-  title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\
-    \ + service-registry cross-refs"
-  status: in_progress
-  ready_to_merge: true
-  live_applied: false
-  owner: claude
-  branch: claude/objective-carson-cbe0c3
-  worktree_path: .claude/worktrees/objective-carson-cbe0c3
-  doc: docs/adr/0446-phase2-multi-deployment-hardening.md
-  depends_on:
-  - adr-0445-phase1-multi-deployment-hardening
-  - adr-0438-generic-by-construction
-  - adr-0439-multi-deployment-repo-architecture
-  - adr-0443-continuous-topology-reconciler
-  - adr-0373-service-registry
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0446-phase2-multi-deployment-hardening.md
-  - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
-  - scripts/check_receipt_freshness.py
-  - tests/test_check_receipt_freshness.py
-  - roles/mail_platform_runtime/molecule/**
-  - scripts/validate_service_registry.py
-  - tests/test_validate_service_registry.py
-  summary: "Phase 2 of the 20-change platform-maturity review (2026-04-28). Items\
-    \ 3, 4, 6, 13 from that list have substrate already shipped or in flight (ws-0438,\
-    \ ws-0439). This workstream owns the two items with no current owner \u2014 receipt\
-    \ freshness check (item 14) and Molecule scaffold (item 11) \u2014 plus a bonus\
-    \ service-registry cross-ref extension if validate_service_registry.py turns out\
-    \ not to cover image_catalog_key / host_group cross-refs.\n"
-  phases:
-    phase_0_open_workstream:
-      status: completed
-    phase_1_receipt_freshness:
-      status: completed
-      target_version: 0.179.x
-      done:
-      - "scripts/check_receipt_freshness.py \u2014 versions/stack.yaml parser, --max-age-days,\
-        \ --strict, --json"
-      - "tests/test_check_receipt_freshness.py \u2014 21 cases covering date parsing,\
-        \ threshold logic, malformed-entry handling, CLI advisory/strict/json modes"
-      - wired into scripts/validate_repo.sh as advisory step (validate_receipt_freshness)
-      notes: "Live signal: 72 of 186 receipts on the current branch are stale at\n\
-        the 30-day window. Phase 5 promotion to --strict will require a\ncleanup pass.\
-        \ Surfacing this signal now is the win \u2014 operators\ncan target which\
-        \ services need re-converge based on age, instead\nof waiting for a 502.\n"
-    phase_2_molecule_scaffold:
-      status: deferred
-      target_version: 0.180.x
-      deferred_reason: "The collections-level Molecule scaffold (proxmox-fixture driver)\n\
-        that docker_runtime references is currently a `.gitkeep` \u2014\n`collections/ansible_collections/lv3/platform/molecule/`\
-        \ has no\n`drivers/proxmox-fixture/{create,destroy}.yml`. Adding a second\n\
-        scenario that references the missing driver would land technical\ndebt rather\
-        \ than a working test. Phase 4 picks this up once the\ndriver is wired or\
-        \ once a different driver (delegated container)\nis chosen.\n"
-      deferred_to:
-      - phase_4_expand_molecule
-    phase_3_service_registry_crossrefs:
-      status: completed_already_covered
-      target_version: 0.179.x
-      notes: "Audit of scripts/validate_service_registry.py confirms both\ncross-refs\
-        \ are already enforced:\n  - line 148: host_group not in inventory_names \u2192\
-        \ error\n  - line 167: image_catalog_key not in image_catalog \u2192 error\n\
-        No code change needed; documenting coverage in this ADR is the\ndeliverable.\n"
-    phase_4_expand_molecule:
-      status: not_started
-      target_version: 0.180.x
-      blocked_on: proxmox-fixture-driver-implementation
-      tasks:
-      - implement collections/.../molecule/drivers/proxmox-fixture/{create,destroy}.yml
-        OR pick a delegated-container driver
-      - scenarios for the 9 most-changed roles after mail_platform_runtime
-    phase_5_promote_to_required:
-      status: not_started
-      target_version: 0.181.x
-      tasks:
-      - promote receipt-freshness check from advisory to --strict
-      - cleanup pass on the 72 stale receipts that triggered the surfacing
-  acceptance_criteria:
-  - scripts/check_receipt_freshness.py runs against versions/stack.yaml and reports
-    per-receipt age in --json
-  - tests/test_check_receipt_freshness.py covers date parsing, threshold logic, malformed-entry
-    edge cases
-  - One role has a working Molecule scenario invokable via make
-  - validate_service_registry.py covers image_catalog_key and host_group cross-refs
-    (extended or already)
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0446_docs
-      paths:
-      - docs/adr/0446-phase2-multi-deployment-hardening.md
-      - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
-      mode: shared_contract
-      contract: adr-0446-phase2-multi-deployment-hardening-v1
-    - id: ws_0446_receipt_freshness
-      paths:
-      - scripts/check_receipt_freshness.py
-      - tests/test_check_receipt_freshness.py
-      mode: shared_contract
-      contract: adr-0446-receipt-freshness-v1
-    - id: ws_0446_molecule_scaffold
-      paths:
-      - roles/mail_platform_runtime/molecule/**
-      mode: shared_contract
-      contract: adr-0446-molecule-scaffold-v1
-  notes:
-  - 'Phase 2 items 3, 4, 6, 13 from the 20-change review are tracked elsewhere; this
-    workstream does not redefine them. Item 11 + 14 are the new owned deliverables;
-    the bonus item 15 may collapse into "already covered" after audit.
-
-    '
-- id: ws-0445-phase1-multi-deployment-hardening
-  adr: 293
-  title: "Phase 1 multi-deployment hardening \u2014 fork-shape fixtures, convergence\
-    \ dry-run, late-bound topology lint, inventory parameterization"
-  status: in_progress
-  ready_to_merge: true
-  live_applied: false
-  owner: claude
-  branch: claude/objective-carson-cbe0c3
-  worktree_path: .claude/worktrees/objective-carson-cbe0c3
-  doc: docs/adr/0445-phase1-multi-deployment-hardening.md
-  depends_on:
-  - adr-0438-generic-by-construction
-  - adr-0439-multi-deployment-repo-architecture
-  - adr-0440-per-deployment-identity-and-artifact-isolation
-  - adr-0442-multi-deployment-make-interface
-  - adr-0443-continuous-topology-reconciler
-  - adr-0373-service-registry
-  conflicts_with: []
-  shared_surfaces:
-  - docs/adr/0445-phase1-multi-deployment-hardening.md
-  - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
-  - tests/fixtures/inventories/lv3-shape.yml
-  - tests/fixtures/inventories/0fork-shape.yml
-  - tests/fixtures/inventories/synthetic-shape.yml
-  - tests/fixtures/inventories/README.md
-  - scripts/converge_dry_run.py
-  - tests/test_converge_dry_run.py
-  - scripts/validate_no_hardcoded_topology.py
-  - tests/test_validate_no_hardcoded_topology.py
-  - .githooks/pre-push
-  - scripts/run_gate.py
-  - inventory/hosts.yml
-  - inventory/group_vars/all/identity.yml
-  - Makefile
-  summary: 'Open Phase 1 of the 20-change platform-maturity review (2026-04-28). Adds
-    the four items not already in flight: fork-shape fixture inventories, per-service
-    convergence dry-run in the pre-push gate, a lint banning late-bound topology lookups
-    in role defaults, and parameterization of inventory/hosts.yml from deployment-model.yaml.
-    Tracks (does not redefine) ws-0438 and ws-0439 as Phase 1 items 1 and 2.
-
-    '
-  phases:
-    phase_0_open_workstream:
-      status: completed
-      target_version: 0.179.x
-      tasks:
-      - draft ADR 0445
-      - draft workstream YAML
-      - regenerate workstreams.yaml + ADR index
-      - commit workstream registration before implementation
-    phase_1_fork_shape_fixtures:
-      status: completed
-      target_version: 0.179.x
-      done:
-      - tests/fixtures/inventories/lv3-shape.yml (equal-flavor path)
-      - 'tests/fixtures/inventories/0fork-shape.yml (divergent-flavor path: leading
-        digit stripped)'
-      - tests/fixtures/inventories/synthetic-shape.yml (testfork.invalid third identity)
-      - tests/fixtures/inventories/README.md documenting fixture contract
-      - "tests/test_fixture_inventories.py \u2014 12 cases covering parse, scalars,\
-        \ identity render, prefix uniqueness, shape-path coverage"
-    phase_2_convergence_dry_run:
-      status: completed
-      target_version: 0.179.x
-      done:
-      - "scripts/converge_dry_run.py \u2014 git-diff-based change detection, playbook\
-        \ discovery, per-fixture matrix, advisory mode"
-      - "tests/test_converge_dry_run.py \u2014 13 cases covering helper functions"
-      - wired into .githooks/pre-push as advisory step (SKIP_CONVERGE_DRY_RUN=1 to
-        bypass)
-      notes: 'Default mode is `--syntax-check` (fast, no SSH); `--mode=full` runs
-
-        `--check --diff` for manual investigation. Live smoke run on the
-
-        current branch shows api_gateway_runtime passes 3/3 cells.
-
-        '
-    phase_3_late_bound_topology_lint:
-      status: completed
-      target_version: 0.179.x
-      done:
-      - 'scripts/validate_no_hardcoded_topology.py: new `late_bound_default` rule
-        scanning roles/*/defaults/main.yml + collections mirror'
-      - 'allow-comment escape hatch: `# late-bound-allow: <reason>` (reason required)'
-      - "tests/test_validate_no_hardcoded_topology.py \u2014 10 cases covering match,\
-        \ suppression, scope, edge cases"
-      - wired automatically through scripts/validate_repo.sh which already calls the
-        validator with --rule all
-      notes: "Live scan against the branch returns clean (zero existing hits) so\n\
-        the rule lands forward-looking \u2014 no cleanup pass required.\n"
-    phase_4_inventory_as_parameter:
-      status: completed_via_ws0439
-      target_version: 0.180.x
-      notes: "Substrate already shipped through ws-0439:\n  - scripts/deployment.py\
-        \ \u2014 slug resolver + Deployment loader\n  - config/contracts/deployment-v1/{identity,topology,profile}.schema.json\n\
-        \  - Makefile MULTI_DEPLOYMENT_ENABLED=1 + DEPLOYMENT_ARG flag\n  - .local/deployments/<slug>/\
-        \ layout (operator-authored, gitignored)\nws-0445's contribution is the integration\
-        \ test that confirms the\nfork-shape fixtures load + validate through that\
-        \ loader, closing\nthe seam between phase 1.1 (fixtures) and ws-0439 (substrate).\n"
-      done:
-      - "test: tests/test_ws0445_deployment_loader_integration.py \u2014 7 cases proving\
-        \ lv3/0fork/synthetic identity shapes validate through scripts/deployment.py\
-        \ against config/contracts/deployment-v1/ schemas"
-      deferred_to_phase_2:
-      - one-release deprecation warning for legacy `env=production` enum
-      - default-on of MULTI_DEPLOYMENT_ENABLED once all generators verified
-    phase_5_promote_to_required:
-      status: not_started
-      target_version: 0.181.x
-      tasks:
-      - promote convergence dry-run from advisory to required
-      - promote late-bound topology lint from advisory to required
-      - "retire or restructure ws-0438 phase 6 (generic_deploy_ci) \u2014 duplicate\
-        \ ownership"
-  acceptance_criteria:
-  - Three fixture inventories render full platform_service_registry without error
-  - Pre-push gate runs ansible-playbook --check --diff per changed role across all
-    three fixtures
-  - validate_no_hardcoded_topology.py flags default('<known-prod-IP-or-domain>') in
-    role defaults
-  - make converge-X deployment=0fork and make converge-X deployment=lv3 are first-class
-    entry points
-  - ws-0438 phase 6 is retired or restructured (no duplicate ownership)
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0444_docs
-      paths:
-      - docs/adr/0445-phase1-multi-deployment-hardening.md
-      - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
-      mode: shared_contract
-      contract: adr-0445-phase1-multi-deployment-hardening-v1
-    - id: ws_0444_fixtures
-      paths:
-      - tests/fixtures/inventories/lv3-shape.yml
-      - tests/fixtures/inventories/0fork-shape.yml
-      - tests/fixtures/inventories/synthetic-shape.yml
-      - tests/fixtures/inventories/README.md
-      mode: shared_contract
-      contract: adr-0445-fork-shape-fixtures-v1
-    - id: ws_0444_dry_run
-      paths:
-      - scripts/converge_dry_run.py
-      - tests/test_converge_dry_run.py
-      mode: shared_contract
-      contract: adr-0445-convergence-dry-run-v1
-    - id: ws_0444_topology_lint_extension
-      paths:
-      - scripts/validate_no_hardcoded_topology.py
-      - tests/test_validate_no_hardcoded_topology.py
-      mode: shared_contract
-      contract: adr-0445-late-bound-topology-lint-v1
-  notes:
-  - 'Phase 1 items 1 (ADR 0438) and 2 (ADR 0439) are already in flight as ws-0438
-    and ws-0439 respectively. This workstream tracks their status under a Phase 1
-    milestone but does not own their surfaces.
-
-    '
-  - 'ws-0438 phase 6 (generic_deploy_ci) overlaps with this workstream''s phase 1
-    + phase 2. On merge, ws-0438 phase 6 should be retired and its remaining tasks
-    subsumed here.
-
-    '
-  - "Phase 4 (inventory as parameter) is coordinated with ADR 0442 but not blocked\
-    \ on its full design \u2014 the inventory generation is the load-bearing mechanism\
-    \ either way.\n"
 - id: ws-0377-repo-intake-subdomain
   adr: '0224'
   title: Repo Intake as First-Class Subdomain

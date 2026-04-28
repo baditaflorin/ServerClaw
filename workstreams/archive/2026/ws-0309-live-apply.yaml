@@ -1,5 +1,5 @@
 id: ws-0309-live-apply
-adr: 0309
+adr: "0309"
 title: Live apply task-oriented information architecture across the platform
   workbench from latest origin/main
 status: live_applied

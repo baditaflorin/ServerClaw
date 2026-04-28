@@ -1,5 +1,5 @@
 id: ws-0391-live-apply
-adr: 0391
+adr: "0391"
 title: CPU-only operational automation live apply
 status: live_applied
 ready_to_merge: true

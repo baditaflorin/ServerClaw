@@ -1,5 +1,5 @@
 id: adr-0090-platform-cli
-adr: 0090
+adr: "0090"
 title: Unified platform CLI
 status: merged
 owner: codex

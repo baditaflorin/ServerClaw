@@ -184,6 +184,7 @@ class Deployment:
     identity: dict[str, Any]
     topology: dict[str, Any]
     profile: dict[str, Any]
+    connection: dict[str, Any] | None = None  # ADR 0448 — optional connection registry
 
     @property
     def generated_dir(self) -> Path:
@@ -231,11 +232,16 @@ class Deployment:
         except ImportError:
             return self._validate_minimal()
 
-        for name, payload in [
+        targets: list[tuple[str, Any]] = [
             ("identity", self.identity),
             ("topology", self.topology),
             ("profile", self.profile),
-        ]:
+        ]
+        # ADR 0448 — connection.yml is optional; only validate when present.
+        if self.connection is not None:
+            targets.append(("connection", self.connection))
+
+        for name, payload in targets:
             schema_path = SCHEMA_DIR / f"{name}.schema.json"
             if not schema_path.is_file():
                 continue
@@ -278,10 +284,12 @@ def load(slug: str | None = None, *, validate: bool = True) -> Deployment:
     identity_path = root / "identity.yml"
     topology_path = root / "topology.yml"
     profile_path = root / "profile.yml"
+    connection_path = root / "connection.yml"  # ADR 0448
 
     identity = _read_yaml(identity_path) if identity_path.is_file() else {}
     topology = _read_yaml(topology_path) if topology_path.is_file() else {}
     profile = _read_yaml(profile_path) if profile_path.is_file() else {}
+    connection = _read_yaml(connection_path) if connection_path.is_file() else None
 
     deployment = Deployment(
         slug=slug,
@@ -289,6 +297,7 @@ def load(slug: str | None = None, *, validate: bool = True) -> Deployment:
         identity=identity,
         topology=topology,
         profile=profile,
+        connection=connection,
     )
 
     if validate:
@@ -477,6 +486,88 @@ def _cmd_resolve_dir(args: argparse.Namespace) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# ADR 0448 — connection registry
+# ---------------------------------------------------------------------------
+
+
+def _resolve_ssh_key(value: str, repo_root: Path) -> Path:
+    """Resolve a connection.yml SSH key path.
+
+    Relative paths resolve against ``<main-repo>/.local/ssh/`` so operators
+    can write ``key: bootstrap.id_ed25519`` instead of the full absolute
+    path. Absolute paths are returned unchanged.
+    """
+    p = Path(value)
+    if p.is_absolute():
+        return p
+    return (repo_root / ".local" / "ssh" / p).resolve()
+
+
+def _connection_env_block(deployment: Deployment) -> dict[str, str]:
+    """Return the env-var block for a deployment's connection registry.
+
+    Empty dict when the deployment has no connection.yml. Caller decides
+    how to handle the missing case (the CLI prints a helpful error; the
+    wrapper script falls through to whatever env the operator already
+    has).
+    """
+    if not deployment.connection:
+        return {}
+    proxmox = deployment.connection.get("proxmox_host") or {}
+    guest = deployment.connection.get("guest_ssh") or {}
+
+    env: dict[str, str] = {}
+    if "addr" in proxmox:
+        env["LV3_PROXMOX_HOST_ADDR"] = str(proxmox["addr"])
+    if "port" in proxmox:
+        env["LV3_PROXMOX_HOST_PORT"] = str(proxmox["port"])
+    if "user" in proxmox:
+        env["LV3_PROXMOX_HOST_USER"] = str(proxmox["user"])
+    if "key" in guest:
+        env["LV3_BOOTSTRAP_SSH_PRIVATE_KEY"] = str(_resolve_ssh_key(str(guest["key"]), REPO_ROOT))
+    if "user" in guest:
+        env["LV3_GUEST_SSH_USER"] = str(guest["user"])
+    # PLATFORM_IDENTITY_OVERLAY mirrors ADR 0437 — point Ansible at the
+    # per-deployment identity overlay so extra-vars precedence wins.
+    identity_path = deployment.root / "identity.yml"
+    if identity_path.is_file():
+        env["PLATFORM_IDENTITY_OVERLAY"] = str(identity_path)
+    return env
+
+
+def _cmd_connection(args: argparse.Namespace) -> int:
+    slug = args.slug or resolve_active_slug()
+    try:
+        d = load(slug, validate=False)
+    except DeploymentError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    if d.connection is None:
+        print(
+            f"Deployment {slug!r} has no connection.yml at {d.root / 'connection.yml'} (ADR 0448).",
+            file=sys.stderr,
+        )
+        return 2
+
+    env = _connection_env_block(d)
+    if args.format == "env":
+        for key, value in env.items():
+            print(f"{key}={value}")
+    elif args.format == "shell":
+        for key, value in env.items():
+            # Shell-quote each value so eval-style sourcing is safe.
+            quoted = value.replace("'", "'\\''")
+            print(f"export {key}='{quoted}'")
+    elif args.format == "json":
+        print(json.dumps(env, indent=2, sort_keys=True))
+    else:  # pragma: no cover — argparse choices guard this
+        print(f"unknown format {args.format!r}", file=sys.stderr)
+        return 2
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="deployment", description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -500,6 +591,19 @@ def main(argv: list[str] | None = None) -> int:
     p_dir = sub.add_parser("resolve-dir", help="Print absolute path to a deployment's directory")
     p_dir.add_argument("--slug")
     p_dir.set_defaults(func=_cmd_resolve_dir)
+
+    p_conn = sub.add_parser(
+        "connection",
+        help="Emit per-deployment connection.yml as env vars (ADR 0448)",
+    )
+    p_conn.add_argument("--slug")
+    p_conn.add_argument(
+        "--format",
+        choices=("env", "shell", "json"),
+        default="env",
+        help="Output format. 'env' = KEY=value lines, 'shell' = export KEY='value', 'json' = JSON object.",
+    )
+    p_conn.set_defaults(func=_cmd_connection)
 
     args = parser.parse_args(argv)
     return args.func(args)

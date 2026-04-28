@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schemas/deployment/v1/connection.schema.json",
+  "title": "Per-Deployment Connection Registry",
+  "description": "ADR 0448 — describes how to reach the Proxmox host and its guest VMs for a given deployment. Lives at .local/deployments/<slug>/connection.yml (gitignored).",
+  "type": "object",
+  "required": ["schema_version", "proxmox_host", "guest_ssh"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version. Bump on incompatible changes."
+    },
+    "proxmox_host": {
+      "type": "object",
+      "required": ["addr", "port", "user", "key"],
+      "additionalProperties": true,
+      "properties": {
+        "addr": {
+          "type": "string",
+          "description": "Public address (IPv4 / IPv6 / hostname) of the Proxmox host."
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "SSH port on the Proxmox host."
+        },
+        "user": {
+          "type": "string",
+          "description": "Admin user on the Proxmox host (typically 'root' or 'ops')."
+        },
+        "key": {
+          "type": "string",
+          "description": "Path to the SSH key used to authenticate as <user>@<addr>. Relative paths resolve against the repo's .local/ssh/ directory."
+        }
+      }
+    },
+    "guest_ssh": {
+      "type": "object",
+      "required": ["user", "key"],
+      "additionalProperties": true,
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "Admin user inside guest VMs (typically 'ops')."
+        },
+        "key": {
+          "type": "string",
+          "description": "Path to the SSH key used to authenticate as <user>@<guest>. Relative paths resolve against the repo's .local/ssh/ directory. Often distinct from proxmox_host.key (host root key vs guest ops key)."
+        },
+        "jump_user": {
+          "type": "string",
+          "description": "User on the Proxmox host used as the SSH ProxyCommand jump. Defaults to proxmox_host.user when absent."
+        },
+        "jump_via": {
+          "type": "string",
+          "enum": ["proxmox_host"],
+          "default": "proxmox_host",
+          "description": "ProxyCommand routing mode. Currently only 'proxmox_host' is supported."
+        }
+      }
+    },
+    "extras": {
+      "type": "object",
+      "description": "Optional per-deployment extras (DNS API tokens, registrar credentials, etc.). Free-form to avoid schema churn for one-off bootstrap flows.",
+      "additionalProperties": true
+    }
+  }
+}

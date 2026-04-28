@@ -1,5 +1,5 @@
 id: ws-0108-live-apply
-adr: 0108
+adr: "0108"
 title: Operator onboarding and off-boarding live apply
 status: live_applied
 owner: codex

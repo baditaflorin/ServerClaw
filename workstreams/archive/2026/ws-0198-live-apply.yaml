@@ -1,5 +1,5 @@
 id: ws-0198-live-apply
-adr: 0198
+adr: "0198"
 title: Qdrant vector search semantic platform RAG
 status: implemented
 owner: codex

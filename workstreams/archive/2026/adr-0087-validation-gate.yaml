@@ -1,5 +1,5 @@
 id: adr-0087-validation-gate
-adr: 0087
+adr: "0087"
 title: Repository validation gate
 status: merged
 owner: codex

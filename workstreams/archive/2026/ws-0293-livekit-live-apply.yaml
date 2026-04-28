@@ -1,5 +1,5 @@
 id: ws-0293-livekit-live-apply
-adr: 0293
+adr: "0293"
 title: Live apply LiveKit as the real-time audio and voice channel for agents
   from latest origin/main
 status: live_applied

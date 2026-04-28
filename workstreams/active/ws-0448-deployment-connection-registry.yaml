@@ -1,0 +1,104 @@
+id: ws-0448-deployment-connection-registry
+adr: "0448"
+title: "Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0445-phase1-multi-deployment-hardening
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0448-deployment-connection-registry.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0448_adr
+    paths:
+      - docs/adr/0448-deployment-connection-registry-and-wrapper.md
+    mode: exclusive
+  - id: ws_0448_connection_schema
+    paths:
+      - config/contracts/deployment-v1/connection.schema.json
+    mode: exclusive
+  - id: ws_0448_deployment_loader
+    paths:
+      - scripts/deployment.py
+    mode: shared_contract
+    contract: deployment-loader-v1
+    co_owners:
+      - ws-0445-phase1-multi-deployment-hardening
+      - ws-0446-phase2-multi-deployment-hardening
+  - id: ws_0448_wrapper
+    paths:
+      - scripts/run_with_deployment.sh
+    mode: exclusive
+  - id: ws_0448_role_default
+    paths:
+      - scripts/generate_platform_vars.py
+    mode: shared_contract
+    contract: platform-vars-generator-v1
+  - id: ws_0448_tests
+    paths:
+      - tests/test_ws0448_connection_registry.py
+      - tests/test_ws0448_topology_role_default.py
+    mode: exclusive
+  - id: ws_0448_release_artifacts
+    paths:
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/**
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - docs/status/history/merged-workstreams.md
+      - docs/status/history/live-apply-evidence.md
+      - inventory/group_vars/platform.yml
+      - inventory/group_vars/platform_tls_certs.yml
+      - docs/diagrams/*.excalidraw
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0448_workstream
+    paths:
+      - workstreams/active/ws-0448-deployment-connection-registry.yaml
+      - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0448_yaml_adr_quoting
+    paths:
+      - workstreams/active/**
+      - workstreams/archive/2026/**
+    mode: shared_contract
+    contract: workstream-registry-v1
+notes: |
+  Closes the operator-surface gap left by ws-0445 phase 1: every
+  deployment now carries its SSH/Proxmox-host metadata as committed
+  data (.local/deployments/<slug>/connection.yml), not as a per-target
+  Makefile constant.
+
+  Three pieces:
+  1. config/contracts/deployment-v1/connection.schema.json — schema +
+     Deployment.connection field + `connection` CLI subcommand on
+     scripts/deployment.py emitting LV3_PROXMOX_HOST_*,
+     LV3_BOOTSTRAP_SSH_PRIVATE_KEY, PLATFORM_IDENTITY_OVERLAY.
+  2. scripts/run_with_deployment.sh — exec-style wrapper that resolves
+     the slug, loads the env block, exec's the inner command. No
+     Makefile edits — composes with ws-0445 phase 1's MULTI_DEPLOYMENT
+     opt-in.
+  3. scripts/generate_platform_vars.py — proxmox_guests[*].role now
+     defaults to name when absent, so per-deployment topology overlays
+     stay minimal.
+
+  Out-of-scope for this slice (deferred to follow-ups):
+  - Host-pinning so two deployments can't both install services on the
+    same VM (the lv3↔0fork port-4180 collision).
+  - inventory/hosts.yml parameterization (ws-0445 item 5 owns this).
+  - 0fork's topology.yml still needs more guests — operator data gap,
+    not a code change.

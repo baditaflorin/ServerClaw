@@ -1,5 +1,5 @@
 id: adr-0058-nats-event-bus
-adr: 0058
+adr: "0058"
 title: NATS JetStream for internal event bus and agent coordination
 status: ready
 owner: codex

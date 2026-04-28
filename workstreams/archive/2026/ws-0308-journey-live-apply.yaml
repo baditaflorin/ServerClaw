@@ -1,5 +1,5 @@
 id: ws-0308-journey-live-apply
-adr: 0308
+adr: "0308"
 title: Live apply ADR 0308 journey-aware entry routing and saved home selection
   from latest origin/main
 status: live_applied

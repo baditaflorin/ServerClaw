@@ -1,5 +1,5 @@
 id: adr-0082-remote-build-gateway
-adr: 0082
+adr: "0082"
 title: Remote build execution gateway
 status: live_applied
 owner: codex

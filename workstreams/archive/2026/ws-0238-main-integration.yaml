@@ -1,5 +1,5 @@
 id: ws-0238-main-integration
-adr: 0238
+adr: "0238"
 title: Integrate ADR 0238 operator grid into origin/main
 status: merged
 owner: codex

@@ -1,5 +1,5 @@
 id: adr-0099-backup-restore-verification
-adr: 0099
+adr: "0099"
 title: Automated backup restore verification
 status: merged
 owner: codex

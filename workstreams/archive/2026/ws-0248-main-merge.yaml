@@ -1,5 +1,5 @@
 id: ws-0248-main-merge
-adr: 0248
+adr: "0248"
 title: Integrate ADR 0248 session/logout authority into origin/main
 status: merged
 owner: codex

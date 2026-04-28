@@ -1,5 +1,5 @@
 id: adr-0109-public-status-page
-adr: 0109
+adr: "0109"
 title: Public status page
 status: merged
 owner: codex

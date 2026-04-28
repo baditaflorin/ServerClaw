@@ -1,5 +1,5 @@
 id: ws-0330-runtime-pool-transition-program
-adr: 0319
+adr: "0319"
 title: Complete the phased runtime-pool transition after the first runtime-ai
   split
 status: merged

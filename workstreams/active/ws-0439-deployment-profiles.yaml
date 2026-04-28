@@ -1,5 +1,5 @@
 id: ws-0439-deployment-profiles
-adr: 0439
+adr: "0439"
 title: Deployment profiles — subset-of-services selection for forks
 status: ready
 ready_to_merge: true

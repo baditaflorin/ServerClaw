@@ -1,5 +1,5 @@
 id: adr-0080-maintenance-windows
-adr: 0080
+adr: "0080"
 title: Maintenance window and change suppression protocol
 status: merged
 owner: codex

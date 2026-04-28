@@ -1,5 +1,5 @@
 id: adr-0079-playbook-decomposition
-adr: 0079
+adr: "0079"
 title: Playbook decomposition and shared execution model
 status: merged
 owner: codex

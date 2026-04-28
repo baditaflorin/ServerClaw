@@ -1,5 +1,5 @@
 id: adr-0091-drift-detection
-adr: 0091
+adr: "0091"
 title: Continuous drift detection and reconciliation
 status: merged
 owner: codex

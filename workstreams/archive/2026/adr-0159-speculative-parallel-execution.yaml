@@ -1,5 +1,5 @@
 id: adr-0159-speculative-parallel-execution
-adr: 0159
+adr: "0159"
 title: Speculative parallel execution with compensating transactions
 status: merged
 owner: codex

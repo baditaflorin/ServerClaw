@@ -1,5 +1,5 @@
 id: ws-0446-phase2-multi-deployment-hardening
-adr: 0446
+adr: "0446"
 title: Phase 2 multi-deployment hardening — receipt freshness + Molecule starter + service-registry cross-refs
 status: in_progress
 ready_to_merge: true

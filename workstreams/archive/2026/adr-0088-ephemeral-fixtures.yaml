@@ -1,5 +1,5 @@
 id: adr-0088-ephemeral-fixtures
-adr: 0088
+adr: "0088"
 title: Ephemeral infrastructure fixtures
 status: merged
 owner: codex

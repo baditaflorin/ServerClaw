@@ -1,5 +1,5 @@
 id: adr-0085-opentofu-vm-lifecycle
-adr: 0085
+adr: "0085"
 title: Declarative VM provisioning with OpenTofu
 status: merged
 owner: codex

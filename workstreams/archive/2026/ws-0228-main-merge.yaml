@@ -1,5 +1,5 @@
 id: ws-0228-main-merge
-adr: 0228
+adr: "0228"
 title: Integrate ADR 0228 live apply into origin/main
 status: live_applied
 owner: codex

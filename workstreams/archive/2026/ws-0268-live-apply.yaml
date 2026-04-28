@@ -1,5 +1,5 @@
 id: ws-0268-live-apply
-adr: 0268
+adr: "0268"
 title: Fresh-worktree bootstrap manifests live apply
 status: live_applied
 owner: codex

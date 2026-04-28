@@ -1,5 +1,5 @@
 id: adr-0097-alerting-routing
-adr: 0097
+adr: "0097"
 title: Alerting routing and on-call runbook model
 status: merged
 owner: codex

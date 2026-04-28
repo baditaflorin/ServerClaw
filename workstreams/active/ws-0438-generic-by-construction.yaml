@@ -1,5 +1,5 @@
 id: ws-0438-generic-by-construction
-adr: 0438
+adr: "0438"
 title: Generic-by-construction — eliminate lv3-prefix and credential-variable hardcoding
 status: in_progress
 ready_to_merge: false

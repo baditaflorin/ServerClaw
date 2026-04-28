@@ -1,5 +1,5 @@
 id: ws-0319-live-apply
-adr: 0319
+adr: "0319"
 title: Live apply the first runtime-ai pool split with Nomad, Traefik, and Dapr
   on the latest mainline
 status: live_applied

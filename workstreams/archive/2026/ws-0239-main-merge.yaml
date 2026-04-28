@@ -1,5 +1,5 @@
 id: ws-0239-main-merge
-adr: 0239
+adr: "0239"
 title: Integrate ADR 0239 browser-local search into origin/main
 status: merged
 owner: codex

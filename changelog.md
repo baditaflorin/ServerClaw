@@ -12,33 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- ws-0447 follow-up: traceability false-positive cleanup. Added a
-  `_looks_like_prose` heuristic to `scripts/generate_traceability.py`
-  that skips prose-shaped `shared_surfaces` entries (whitespace, no
-  path separator) — workstreams sometimes describe surface areas in
-  English rather than as paths, and the validator can't stat those.
-  Fixed two of my own workstreams: ws-0445 (`deployment-model.yaml`
-  never landed; substrate moved to `.local/deployments/<slug>/`) and
-  ws-0446 (Molecule scaffold paths collapsed to a glob since the
-  proxmox-fixture driver is still a `.gitkeep`). Live signal drops
-  from 10 → 3 dangling-surface workstreams; the remaining 3 are real
-  file-rename mismatches in other workstreams' YAMLs (out-of-scope).
-- ADR 0447 + ws-0447: Phase 3 LLM ergonomics + traceability —
-  `currently_describes` semantic axis added to every entry in the ADR
-  index (current_state / goal_state / mixed_state / historical /
-  unknown), driven from `implementation_status`. New
-  `scripts/generate_traceability.py` joins workstream YAMLs ×
-  ADR index into a single `build/traceability.yaml`; live signal
-  resolves all 22 active workstreams to ADRs and surfaces 10 with
-  dangling shared_surfaces. Both wired into `validate_repo.sh` as
-  advisory steps.
-
 ## Latest Release
 
-- [0.179.10 release notes](docs/release-notes/0.179.10.md)
+- [0.179.11 release notes](docs/release-notes/0.179.11.md)
 
 ## Previous Releases
 
+- [0.179.10 release notes](docs/release-notes/0.179.10.md)
 - [0.179.9 release notes](docs/release-notes/0.179.9.md)
 - [0.179.8 release notes](docs/release-notes/0.179.8.md)
 - [0.179.7 release notes](docs/release-notes/0.179.7.md)
@@ -50,9 +30,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.1 release notes](docs/release-notes/0.179.1.md)
 - [0.179.0 release notes](docs/release-notes/0.179.0.md)
 - [0.178.232 release notes](docs/release-notes/0.178.232.md)
-- [0.178.231 release notes](docs/release-notes/0.178.231.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (526 releases)](docs/release-notes/index/2026.md)
+- [2026 (527 releases)](docs/release-notes/index/2026.md)

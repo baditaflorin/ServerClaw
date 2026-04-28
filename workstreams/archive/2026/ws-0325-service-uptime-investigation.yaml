@@ -1,5 +1,5 @@
 id: ws-0325-service-uptime-investigation
-adr: 0319
+adr: "0319"
 title: Investigate recurring service restarts and uptime failures across the
   runtime pools
 status: merged

@@ -1,5 +1,5 @@
 id: ws-0297-live-apply
-adr: 0297
+adr: "0297"
 title: Live apply Renovate as the automated stack version upgrade proposer from
   latest origin/main
 status: merged

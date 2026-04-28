@@ -1,5 +1,5 @@
 id: adr-0158-config-merge-protocol
-adr: 0158
+adr: "0158"
 title: Conflict-free configuration merge protocol
 status: live_applied
 owner: codex

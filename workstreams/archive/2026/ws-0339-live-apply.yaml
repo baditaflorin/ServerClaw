@@ -1,5 +1,5 @@
 id: ws-0339-live-apply
-adr: 0339
+adr: "0339"
 title: Live apply reference deployment samples and replaceable provider profiles from
   latest origin/main
 status: live_applied

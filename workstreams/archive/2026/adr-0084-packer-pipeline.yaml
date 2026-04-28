@@ -1,5 +1,5 @@
 id: adr-0084-packer-pipeline
-adr: 0084
+adr: "0084"
 title: Packer VM template pipeline
 status: merged
 owner: codex

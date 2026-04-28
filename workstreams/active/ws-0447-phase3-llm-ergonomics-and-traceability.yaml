@@ -1,5 +1,5 @@
 id: ws-0447-phase3-llm-ergonomics-and-traceability
-adr: 0447
+adr: "0447"
 title: Phase 3 LLM ergonomics + traceability — currently_describes field on ADR index, build/traceability.yaml generator
 status: in_progress
 ready_to_merge: true

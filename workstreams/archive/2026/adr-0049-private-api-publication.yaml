@@ -1,5 +1,5 @@
 id: adr-0049-private-api-publication
-adr: 0049
+adr: "0049"
 title: Private-first API publication model
 status: merged
 owner: codex

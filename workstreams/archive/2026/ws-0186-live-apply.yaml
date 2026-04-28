@@ -1,5 +1,5 @@
 id: ws-0186-live-apply
-adr: 0186
+adr: "0186"
 title: Live apply ADR 0186 prewarmed fixture pools and lease-based ephemeral
   capacity
 status: merged

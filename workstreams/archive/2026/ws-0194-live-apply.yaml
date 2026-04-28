@@ -1,5 +1,5 @@
 id: ws-0194-live-apply
-adr: 0194
+adr: "0194"
 title: Coolify PaaS deploy from repo
 status: merged
 owner: codex

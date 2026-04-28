@@ -1,5 +1,5 @@
 id: ws-0297-main-merge
-adr: 0297
+adr: "0297"
 title: Integrate ADR 0297 live-apply evidence and release updates on main
 status: merged
 owner: codex

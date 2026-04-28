@@ -1,5 +1,5 @@
 id: ws-realtime-dynamic-children
-adr: 0196
+adr: "0196"
 title: Auto-discover all production hosts as Netdata streaming children
 status: in_progress
 owner: claude

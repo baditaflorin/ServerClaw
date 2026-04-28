@@ -1,5 +1,5 @@
 id: ws-0209-live-apply
-adr: 0209
+adr: "0209"
 title: Shared runbook use-case service with thin CLI, API gateway, Windmill, and
   ops portal adapters
 status: live_applied

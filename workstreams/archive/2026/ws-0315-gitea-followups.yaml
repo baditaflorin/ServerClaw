@@ -1,5 +1,5 @@
 id: ws-0315-gitea-followups
-adr: 0297
+adr: "0297"
 title: Resolve Gitea release bundle retention and Renovate PR validation
   checkout drift
 status: live_applied

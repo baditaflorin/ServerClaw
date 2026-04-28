@@ -1,5 +1,5 @@
 id: adr-0168-idempotency-ci
-adr: 0168
+adr: "0168"
 title: Ansible role idempotency CI enforcement
 status: merged
 owner: codex

@@ -1,5 +1,5 @@
 id: ws-0274-artifact-cache-plane
-adr: 0295
+adr: "0295"
 title: Shared artifact cache plane and dedicated cache VM roadmap
 status: live_applied
 owner: codex

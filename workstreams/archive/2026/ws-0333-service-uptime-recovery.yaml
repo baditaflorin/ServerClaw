@@ -1,5 +1,5 @@
 id: ws-0333-service-uptime-recovery
-adr: 0319
+adr: "0319"
 title: Fail closed before runtime-pool retirement or shared-runtime recovery can
   take down legacy services
 status: merged

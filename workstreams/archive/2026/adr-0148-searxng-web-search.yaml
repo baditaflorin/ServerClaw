@@ -1,5 +1,5 @@
 id: adr-0148-searxng-web-search
-adr: 0148
+adr: "0148"
 title: SearXNG for agent web search
 status: merged
 owner: codex

@@ -1,5 +1,5 @@
 id: ws-0329-runtime-library-fit
-adr: 0319
+adr: "0319"
 title: Refine the runtime-pool ADR bundle with battle-tested API-first OSS recommendations
 status: merged
 owner: codex

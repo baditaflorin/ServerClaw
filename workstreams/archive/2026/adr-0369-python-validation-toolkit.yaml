@@ -1,5 +1,5 @@
 id: adr-0369-python-validation-toolkit
-adr: 0369
+adr: "0369"
 title: Shared Python validation toolkit for catalog and registry scripts
 status: merged
 owner: codex

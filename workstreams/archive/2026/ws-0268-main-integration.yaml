@@ -1,5 +1,5 @@
 id: ws-0268-main-integration
-adr: 0268
+adr: "0268"
 title: Integrate ADR 0268 exact-main replay onto current origin/main
 status: merged
 owner: codex

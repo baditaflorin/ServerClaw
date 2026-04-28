@@ -1,5 +1,5 @@
 id: ws-0382-live-apply
-adr: 0382
+adr: "0382"
 title: Latest-main Keycloak interactive login incident closure
 status: merged
 ready_to_merge: true

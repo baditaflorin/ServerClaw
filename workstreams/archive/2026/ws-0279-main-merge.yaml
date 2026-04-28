@@ -1,5 +1,5 @@
 id: ws-0279-main-merge
-adr: 0279
+adr: "0279"
 title: Integrate ADR 0279 exact-main replay onto current origin/main
 status: live_applied
 owner: codex

@@ -1,5 +1,5 @@
 id: ws-0445-phase1-multi-deployment-hardening
-adr: 0445
+adr: "0445"
 title: Phase 1 multi-deployment hardening — fork-shape fixtures, convergence dry-run, late-bound topology lint, inventory parameterization
 status: in_progress
 ready_to_merge: true

@@ -1,5 +1,5 @@
 id: ws-0249-live-apply
-adr: 0249
+adr: "0249"
 title: Live apply HTTPS and TLS assurance through blackbox exporter and
   testssl.sh
 status: live_applied

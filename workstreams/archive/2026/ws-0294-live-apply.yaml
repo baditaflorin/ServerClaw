@@ -1,5 +1,5 @@
 id: ws-0294-live-apply
-adr: 0294
+adr: "0294"
 title: Live apply One-API as the unified LLM API proxy and router from latest
   origin/main
 status: live_applied

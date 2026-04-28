@@ -1,5 +1,5 @@
 id: adr-0083-docker-check-runner
-adr: 0083
+adr: "0083"
 title: Docker-based check runner
 status: merged
 owner: codex

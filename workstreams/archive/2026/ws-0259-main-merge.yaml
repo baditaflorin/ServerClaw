@@ -1,5 +1,5 @@
 id: ws-0259-main-merge
-adr: 0259
+adr: "0259"
 title: Integrate ADR 0259 exact-main replay onto current origin/main
 status: merged
 owner: codex

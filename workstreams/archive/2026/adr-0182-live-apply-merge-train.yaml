@@ -1,5 +1,5 @@
 id: adr-0182-live-apply-merge-train
-adr: 0182
+adr: "0182"
 title: Live apply merge train and rollback bundle
 status: merged
 owner: codex

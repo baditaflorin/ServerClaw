@@ -1,5 +1,5 @@
 id: ws-0335-service-recovery-followup
-adr: 0319
+adr: "0319"
 title: Investigate and recover the remaining degraded services after the runtime-pool
   stabilization merges
 status: live_applied

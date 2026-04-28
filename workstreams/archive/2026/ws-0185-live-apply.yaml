@@ -1,5 +1,5 @@
 id: ws-0185-live-apply
-adr: 0185
+adr: "0185"
 title: Branch-scoped ephemeral preview environments
 status: merged
 owner: codex

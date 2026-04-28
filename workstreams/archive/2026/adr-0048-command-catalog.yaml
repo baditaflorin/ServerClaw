@@ -1,5 +1,5 @@
 id: adr-0048-command-catalog
-adr: 0048
+adr: "0048"
 title: Command catalog and approval gates
 status: live_applied
 owner: codex

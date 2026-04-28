@@ -1,5 +1,5 @@
 id: adr-0169-structured-log-contract
-adr: 0169
+adr: "0169"
 title: Structured log field contract
 status: live_applied
 owner: codex

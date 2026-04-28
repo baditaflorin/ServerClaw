@@ -1,5 +1,5 @@
 id: ws-0319-runtime-pool-bundle
-adr: 0319
+adr: "0319"
 title: Split the overloaded shared runtime into pool-scoped lanes with higher memory
   headroom and bounded autoscaling
 status: merged

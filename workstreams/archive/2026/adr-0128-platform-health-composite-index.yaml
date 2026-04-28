@@ -1,5 +1,5 @@
 id: adr-0128-platform-health-composite-index
-adr: 0128
+adr: "0128"
 title: Platform health composite index
 status: merged
 owner: codex

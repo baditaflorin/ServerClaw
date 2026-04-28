@@ -1,5 +1,5 @@
 id: ws-0368-live-apply
-adr: 0368
+adr: "0368"
 title: ADR 0368 Live Apply and Completion
 status: live_applied
 ready_to_merge: true

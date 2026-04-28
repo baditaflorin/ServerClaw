@@ -1,5 +1,5 @@
 id: ws-0188-live-apply
-adr: 0188
+adr: "0188"
 title: Failover rehearsal gate live apply
 status: live_applied
 owner: codex

@@ -1,5 +1,5 @@
 id: ws-0309-main-integration
-adr: 0309
+adr: "0309"
 title: Integrate ADR 0309 task-oriented information architecture onto main and
   replay it from exact mainline truth
 status: live_applied

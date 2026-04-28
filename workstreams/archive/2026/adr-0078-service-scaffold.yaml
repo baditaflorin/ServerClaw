@@ -1,5 +1,5 @@
 id: adr-0078-service-scaffold
-adr: 0078
+adr: "0078"
 title: Service scaffold generator
 status: merged
 owner: codex

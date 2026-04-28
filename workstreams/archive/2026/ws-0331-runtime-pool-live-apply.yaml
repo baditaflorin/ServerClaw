@@ -1,5 +1,5 @@
 id: ws-0331-runtime-pool-live-apply
-adr: 0319
+adr: "0319"
 title: Guarded live apply for the remaining runtime pool transition
 status: live_applied
 owner: codex

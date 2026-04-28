@@ -1,5 +1,5 @@
 id: adr-0149-semaphore
-adr: 0149
+adr: "0149"
 title: Semaphore for Ansible job management UI and API
 status: implemented
 owner: codex

@@ -1,5 +1,5 @@
 id: ws-0293-main-integration
-adr: 0293
+adr: "0293"
 title: Integrate ADR 0293 exact-main LiveKit replay onto main
 status: merged
 owner: codex

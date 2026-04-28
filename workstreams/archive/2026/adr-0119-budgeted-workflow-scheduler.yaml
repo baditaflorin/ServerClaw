@@ -1,5 +1,5 @@
 id: adr-0119-budgeted-workflow-scheduler
-adr: 0119
+adr: "0119"
 title: Budgeted workflow scheduler
 status: live_applied
 owner: codex

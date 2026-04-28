@@ -1,5 +1,5 @@
 id: adr-0068-container-image-policy
-adr: 0068
+adr: "0068"
 title: Container image policy and supply chain integrity
 status: merged
 owner: codex

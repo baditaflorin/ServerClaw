@@ -408,6 +408,13 @@ def build_guest_catalog(host_vars: dict[str, Any]) -> tuple[dict[str, Any], dict
         guest = require_mapping(guest, f"host_vars.proxmox_guests[{index}]")
         guest_copy = copy.deepcopy(guest)
         name = require_string(guest_copy.get("name"), f"host_vars.proxmox_guests[{index}].name")
+        # ADR 0448: a per-deployment topology overlay can omit `role` and let
+        # it default to `name`. This matches the committed proxmox-host.yml
+        # convention (every guest's role equals its name) and keeps minimal
+        # overlays minimal — operators don't need to copy structural
+        # boilerplate just to clear the validator.
+        if not guest_copy.get("role"):
+            guest_copy["role"] = name
         role = require_string(guest_copy.get("role"), f"host_vars.proxmox_guests[{index}].role")
         ipv4 = require_string(guest_copy.get("ipv4"), f"host_vars.proxmox_guests[{index}].ipv4")
         guests.append(guest_copy)

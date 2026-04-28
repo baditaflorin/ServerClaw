@@ -1,5 +1,5 @@
 id: ws-0359-live-apply
-adr: 0359
+adr: "0359"
 title: Live apply ADR 0359 declarative PostgreSQL client registry from latest origin/main
 status: live_applied
 owner: codex

@@ -1,5 +1,5 @@
 id: adr-0095-unified-search
-adr: 0095
+adr: "0095"
 title: Unified search across platform services
 status: ready
 owner: codex
