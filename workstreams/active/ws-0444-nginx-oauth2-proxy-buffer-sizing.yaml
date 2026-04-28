@@ -1,0 +1,58 @@
+id: ws-0444-nginx-oauth2-proxy-buffer-sizing
+adr: "0444"
+title: "nginx oauth2-proxy buffer sizing — 64k on /oauth2/{auth,callback}"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: nginx_edge_publication_oauth2_buffers
+    paths:
+    - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+    - roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+    - docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+    - docs/adr/.index.yaml
+    - docs/adr/index/**
+    - workstreams/archive/2026/ws-0407-ops-portal-domain-substitution.yaml
+    - docs/status/history/merged-workstreams.md
+    - docs/status/history/live-apply-evidence.md
+    mode: exclusive
+  - id: ws_0444_release_artifacts
+    paths:
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0444_workstream
+    paths:
+    - workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+notes: |
+  Fix 500 Internal Server Error on OIDC-protected sites (ops.<domain>,
+  grafana.<domain>, …) caused by oauth2-proxy header overflow on both
+  the /oauth2/auth subrequest and the /oauth2/callback response.
+
+  Root cause: nginx default proxy_buffer_size (4k / one OS page) is too
+  small for oauth2-proxy responses when Keycloak group/role claims are
+  attached. v0.179.2 hot-fixed only /oauth2/callback (16k); v0.179.4
+  generalises the fix to both locations and bumps to 64k to absorb
+  future claim growth without further hot-patches.
+
+  ADR 0444 codifies the rationale, the chosen value, and the rule that
+  any future oauth2-proxy location must use the same buffer settings.

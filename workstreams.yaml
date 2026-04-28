@@ -17,10 +17,64 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 321
+  total_workstreams: 322
   by_year:
-    '2026': 321
+    '2026': 322
 workstreams:
+- id: ws-0444-nginx-oauth2-proxy-buffer-sizing
+  adr: '0444'
+  title: "nginx oauth2-proxy buffer sizing \u2014 64k on /oauth2/{auth,callback}"
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: nginx_edge_publication_oauth2_buffers
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+      - roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+      - docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - workstreams/archive/2026/ws-0407-ops-portal-domain-substitution.yaml
+      - docs/status/history/merged-workstreams.md
+      - docs/status/history/live-apply-evidence.md
+      mode: exclusive
+    - id: ws_0444_release_artifacts
+      paths:
+      - VERSION
+      - RELEASE.md
+      - README.md
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0444_workstream
+      paths:
+      - workstreams/active/ws-0444-nginx-oauth2-proxy-buffer-sizing.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  notes: "Fix 500 Internal Server Error on OIDC-protected sites (ops.<domain>,\ngrafana.<domain>,\
+    \ \u2026) caused by oauth2-proxy header overflow on both\nthe /oauth2/auth subrequest\
+    \ and the /oauth2/callback response.\n\nRoot cause: nginx default proxy_buffer_size\
+    \ (4k / one OS page) is too\nsmall for oauth2-proxy responses when Keycloak group/role\
+    \ claims are\nattached. v0.179.2 hot-fixed only /oauth2/callback (16k); v0.179.4\n\
+    generalises the fix to both locations and bumps to 64k to absorb\nfuture claim\
+    \ growth without further hot-patches.\n\nADR 0444 codifies the rationale, the\
+    \ chosen value, and the rule that\nany future oauth2-proxy location must use the\
+    \ same buffer settings.\n"
 - id: ws-0443-topology-drift-detection
   adr: '0443'
   title: Continuous Topology Reconciler & Drift Detection (multi-deployment release
@@ -949,73 +1003,6 @@ workstreams:
     Adds: --skip-cert-validation mode for deployments without Hetzner DNS API.
 
     Related postmortem: ADR 0415.
-
-    '
-- id: ws-0407-ops-portal-domain-substitution
-  adr: '0407'
-  title: Ops Portal Sibling-Link IaC Substitution
-  status: in_progress
-  ready_to_merge: true
-  live_applied: false
-  owner: platform-infrastructure
-  branch: claude/crazy-chaplygin-c7c256
-  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
-  doc: docs/adr/0407-generic-by-default-local-overlay-architecture.md
-  depends_on:
-  - adr-0407-generic-by-default-local-overlay-architecture
-  - adr-0093-interactive-ops-portal
-  conflicts_with: []
-  shared_surfaces:
-  - workstreams.yaml
-  - workstreams/active/ws-0407-ops-portal-domain-substitution.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: ops_portal_runtime_role
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/meta/argument_specs.yml
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2
-      mode: exclusive
-    - id: ops_portal_app
-      paths:
-      - scripts/ops_portal/app.py
-      - scripts/ops_portal/templates/base.html
-      - scripts/ops_portal/templates/entry.html
-      - scripts/ops_portal/templates/partials/overview.html
-      - tests/test_interactive_ops_portal.py
-      mode: exclusive
-    - id: ws_0407_release_artifacts
-      paths:
-      - VERSION
-      - RELEASE.md
-      - README.md
-      - changelog.md
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - docs/release-notes/**
-      - inventory/group_vars/platform.yml
-      - inventory/group_vars/platform_tls_certs.yml
-      - docs/diagrams/*.excalidraw
-      - config/subdomain-exposure-registry.json
-      mode: shared_contract
-      contract: release-bump-v1
-    - id: ws_0407_workstream
-      paths:
-      - workstreams/active/ws-0407-ops-portal-domain-substitution.yaml
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-  notes: 'Replace hardcoded example.com sidebar links in the ops portal with deploy-time
-
-    {{ platform_domain }} injection (ADR 0407 generic-by-default pattern).
-
-    Adds OPS_PORTAL_PARENT_DOMAIN and OPS_PORTAL_{HOME,CHANGELOG,GRAFANA,TASKS,WIKI}_URL
-
-    env vars. Registers portal_domain + portal_links as Jinja globals so all templates
-
-    see them with no per-route plumbing. Extends safe_requested_url to allow
-
-    https://*.<portal_domain> deep links so the entry router policy text matches behaviour.
 
     '
 - id: ws-0396-live-apply

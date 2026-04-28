@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-27'
+generated: '2026-04-28'
 facet: concern
 concern: security
-total_adrs: 40
+total_adrs: 41
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -747,3 +747,22 @@ adrs:
     summary: ALLOWREGISTRATION and ALLOWSOCIALREGISTRATION are variabilized in
     filename: 0417-external-attack-surface-hardening.md
     path: docs/adr/0417-external-attack-surface-hardening.md
+  - adr: '0444'
+    title: nginx Buffer Sizing for oauth2-proxy Subrequest and Callback
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - nginx
+      - oauth2-proxy
+      - keycloak
+      - buffer-sizing
+      - header-overflow
+      - buffer
+      - sizing
+      - subrequest
+      - callback
+    summary: Apply proxybuffersize 64k; proxybuffers 4 64k; to both the
+    filename: 0444-nginx-oauth2-proxy-buffer-sizing.md
+    path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md

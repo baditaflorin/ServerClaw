@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-27'
+generated: '2026-04-28'
 facet: range
 label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 38
+total_adrs: 39
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -691,3 +691,22 @@ adrs:
     summary: A new script scripts/validatenohardcodedtopology.py walks all
     filename: 0443-continuous-topology-reconciler.md
     path: docs/adr/0443-continuous-topology-reconciler.md
+  - adr: '0444'
+    title: nginx Buffer Sizing for oauth2-proxy Subrequest and Callback
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - nginx
+      - oauth2-proxy
+      - keycloak
+      - buffer-sizing
+      - header-overflow
+      - buffer
+      - sizing
+      - subrequest
+      - callback
+    summary: Apply proxybuffersize 64k; proxybuffers 4 64k; to both the
+    filename: 0444-nginx-oauth2-proxy-buffer-sizing.md
+    path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md

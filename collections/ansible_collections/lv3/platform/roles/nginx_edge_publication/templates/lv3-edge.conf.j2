@@ -464,6 +464,15 @@ server {
     location = /oauth2/auth {
         proxy_pass {{ protected_site.auth_proxy_upstream }};
         proxy_http_version 1.1;
+        # oauth2-proxy's auth_request response carries X-Auth-Request-* headers
+        # (groups, email, preferred_username, access_token).  With Keycloak
+        # group/role claims they can exceed nginx's default 4k proxy_buffer_size,
+        # producing a 502 from the auth subrequest that nginx surfaces as a 500
+        # to the browser.  See ADR 0444 (nginx oauth2-proxy buffer sizing) for
+        # rationale; 64k covers token rotations + group-claim growth without
+        # repeated hot-fixes.
+        proxy_buffer_size 64k;
+        proxy_buffers 4 64k;
 {{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -486,10 +495,11 @@ server {
         # oauth2-proxy sets a large Set-Cookie header on the callback response that
         # contains the full JWT access token + refresh token.  nginx's default
         # proxy_buffer_size (4k / one OS page) is too small for this header and
-        # causes a 502 "upstream sent too big header" error.  16k comfortably
-        # accommodates Keycloak JWTs up to ~12 KB even with group-membership claims.
-        proxy_buffer_size 16k;
-        proxy_buffers 4 16k;
+        # causes a 502 "upstream sent too big header" error.  See ADR 0444 for
+        # full rationale; 64k matches the /oauth2/auth location and absorbs
+        # Keycloak claim growth (groups + roles) without further hot-fixes.
+        proxy_buffer_size 64k;
+        proxy_buffers 4 64k;
 {{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
