@@ -12,6 +12,16 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0451 + ws-0451: Phase 6 self-healing actions. Three primitives
+  that close the doctor → heal loop: registry-driven role lookup in
+  `refresh_safe_receipts.py` (consults `platform_service_registry`'s
+  `roles:` field before falling back to the heuristic, unblocks the
+  safe_to_refresh signal); `scripts/heal.py` + `make heal` orchestrator
+  over every doctor heal_command (live: 2 actionable signals);
+  `scripts/heal_validator_docstrings.py` synthesises one-line docstrings
+  for validators missing one and **healed all 14 in this release**.
+  Live `make doctor` drift signals dropped 4/7 → 3/7 non-zero.
+  55 new tests (7 + 15 + 33).
 - ADR 0450 + ws-0450: Phase 5 self-healing aggregator + post-merge
   rename hook. `scripts/doctor.py` + `make doctor` aggregates every
   Phase-1/2/3/4 drift signal in one command (live: 4/7 non-zero —
@@ -38,10 +48,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.13 release notes](docs/release-notes/0.179.13.md)
+- [0.179.14 release notes](docs/release-notes/0.179.14.md)
 
 ## Previous Releases
 
+- [0.179.13 release notes](docs/release-notes/0.179.13.md)
 - [0.179.12 release notes](docs/release-notes/0.179.12.md)
 - [0.179.11 release notes](docs/release-notes/0.179.11.md)
 - [0.179.10 release notes](docs/release-notes/0.179.10.md)
@@ -53,9 +64,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.4 release notes](docs/release-notes/0.179.4.md)
 - [0.179.3 release notes](docs/release-notes/0.179.3.md)
 - [0.179.2 release notes](docs/release-notes/0.179.2.md)
-- [0.179.1 release notes](docs/release-notes/0.179.1.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (529 releases)](docs/release-notes/index/2026.md)
+- [2026 (530 releases)](docs/release-notes/index/2026.md)

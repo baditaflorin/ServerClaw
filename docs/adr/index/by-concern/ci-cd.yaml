@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-28'
 facet: concern
 concern: ci-cd
-total_adrs: 45
+total_adrs: 46
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -891,3 +891,20 @@ adrs:
     summary: Add a new GitHub Actions job that runs alongside the existing validate
     filename: 0420-ci-release-readiness-checks.md
     path: docs/adr/0420-ci-release-readiness-checks.md
+  - adr: '0451'
+    title: Phase 6 Self-Healing Actions
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: ci-cd
+    keywords:
+      - heal
+      - registry-driven
+      - validator-docstrings
+      - phase
+      - self-healing
+      - actions
+    summary: Extend scripts/refreshsafereceipts.py::candidaterolepaths to
+    filename: 0451-phase6-self-healing-actions.md
+    path: docs/adr/0451-phase6-self-healing-actions.md

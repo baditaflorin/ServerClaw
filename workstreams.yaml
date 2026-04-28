@@ -1991,6 +1991,108 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0451-phase6-self-healing-actions
+  adr: 297
+  title: "Phase 6 self-healing actions \u2014 registry-driven receipts + make heal\
+    \ + docstring backfill"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0451-phase6-self-healing-actions.md
+  depends_on:
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0449-phase4-self-healing-primitives
+  - adr-0446-phase2-receipt-freshness
+  - adr-0373-service-registry
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0451-phase6-self-healing-actions.md
+  - workstreams/active/ws-0451-phase6-self-healing-actions.yaml
+  - scripts/refresh_safe_receipts.py
+  - tests/test_refresh_safe_receipts.py
+  - scripts/heal.py
+  - tests/test_heal.py
+  - Makefile
+  - scripts/heal_validator_docstrings.py
+  - tests/test_heal_validator_docstrings.py
+  summary: 'Phase 6 turns the doctor''s drift surfaces into self-healing actions.
+    Improves refresh_safe_receipts to consult platform_service_registry for role lookup
+    (unblocks the safe_to_refresh signal currently stuck at 0). Adds make heal as
+    a thin orchestrator over every doctor heal_command. Backfills missing validator
+    docstrings to drive the validator_gaps signal toward zero.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+    phase_1_registry_role_lookup:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "scripts/refresh_safe_receipts.py \u2014 load platform_service_registry, prefer\
+        \ registry-declared roles over heuristic"
+      - tests cover both registry hit and heuristic fallback
+    phase_2_heal_orchestrator:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "scripts/heal.py \u2014 runs doctor --json, surfaces every heal_command, dry-run\
+        \ default"
+      - Makefile heal target
+      - tests/test_heal.py covers JSON parse, dry-run vs apply, missing-doctor degradation
+    phase_3_validator_docstring_backfill:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "scripts/heal_validator_docstrings.py \u2014 synthesises one-line docstring\
+        \ from comment header / filename"
+      - TODO marker on each generated docstring so reviewers refine
+      - tests/test_heal_validator_docstrings.py
+    phase_4_validator_catalogue_refresh:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "regenerate build/validator-catalogue.yaml \u2014 without_docstring count\
+        \ should drop by >=10"
+  acceptance_criteria:
+  - refresh_safe_receipts uses registry; safe_to_refresh count > 0 against live stack.yaml
+  - make heal runs against live repo, lists all heal commands, exits 0 in dry-run
+  - heal_validator_docstrings --apply reduces without_docstring by >=10
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0451_docs
+      paths:
+      - docs/adr/0451-phase6-self-healing-actions.md
+      - workstreams/active/ws-0451-phase6-self-healing-actions.yaml
+      mode: shared_contract
+      contract: adr-0451-phase6-self-healing-v1
+    - id: ws_0451_registry_lookup
+      paths:
+      - scripts/refresh_safe_receipts.py
+      - tests/test_refresh_safe_receipts.py
+      mode: shared_contract
+      contract: adr-0451-registry-lookup-v1
+    - id: ws_0451_heal
+      paths:
+      - scripts/heal.py
+      - tests/test_heal.py
+      mode: shared_contract
+      contract: adr-0451-heal-v1
+    - id: ws_0451_docstring_backfill
+      paths:
+      - scripts/heal_validator_docstrings.py
+      - tests/test_heal_validator_docstrings.py
+      mode: shared_contract
+      contract: adr-0451-docstring-backfill-v1
+  notes:
+  - 'Phase 6 closes the loop the doctor opened in Phase 5. After this workstream merges
+    and `make heal --apply` runs once, the live drift signals should drop measurably
+    across multiple categories.
+
+    '
 - id: ws-0450-phase5-doctor-aggregator-and-rename-hook
   adr: 296
   title: "Phase 5 self-healing \u2014 make doctor aggregator + post-merge rename hook\

@@ -82,6 +82,87 @@ def test_candidate_role_paths_finds_bare_service_name(rsr, tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# Phase 6.1 — registry-driven role lookup
+# ---------------------------------------------------------------------------
+
+
+def _write_registry(tmp_path: Path, services: dict[str, list[str]]) -> Path:
+    """Write a synthetic platform_services.yml with the given services."""
+    import yaml
+
+    path = tmp_path / "inventory" / "group_vars" / "all" / "platform_services.yml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"platform_service_registry": {svc: {"roles": roles} for svc, roles in services.items()}}
+    path.write_text(yaml.safe_dump(payload))
+    return path
+
+
+def test_load_service_registry_roles_picks_up_explicit_roles(rsr, tmp_path):
+    _write_registry(tmp_path, {"alpha": ["alpha_runtime", "alpha_postgres"], "beta": []})
+    roles = rsr.load_service_registry_roles(tmp_path)
+    assert roles["alpha"] == ["alpha_runtime", "alpha_postgres"]
+    assert roles["beta"] == []
+
+
+def test_load_service_registry_roles_handles_missing_file(rsr, tmp_path):
+    assert rsr.load_service_registry_roles(tmp_path) == {}
+
+
+def test_load_service_registry_roles_handles_malformed_yaml(rsr, tmp_path):
+    path = tmp_path / "inventory" / "group_vars" / "all" / "platform_services.yml"
+    path.parent.mkdir(parents=True)
+    path.write_text("[: not valid yaml")
+    assert rsr.load_service_registry_roles(tmp_path) == {}
+
+
+def test_candidate_role_paths_uses_registry_roles_when_present(rsr, tmp_path):
+    """When the registry declares explicit roles, they are picked up
+    even when the heuristic naming convention misses."""
+    _write_registry(tmp_path, {"oddly_named": ["alpha_kit", "beta_kit"]})
+    (tmp_path / "roles" / "alpha_kit").mkdir(parents=True)
+    (tmp_path / "roles" / "beta_kit").mkdir(parents=True)
+    out = rsr.candidate_role_paths("oddly_named", tmp_path)
+    assert "roles/alpha_kit" in out
+    assert "roles/beta_kit" in out
+
+
+def test_candidate_role_paths_registry_then_heuristic_no_dupes(rsr, tmp_path):
+    """Registry entry pointing at one role + heuristic finding another
+    must yield the union, not duplicates."""
+    _write_registry(tmp_path, {"alpha": ["alpha_kit"]})
+    (tmp_path / "roles" / "alpha_kit").mkdir(parents=True)
+    (tmp_path / "roles" / "alpha_runtime").mkdir(parents=True)  # heuristic
+    out = rsr.candidate_role_paths("alpha", tmp_path)
+    assert "roles/alpha_kit" in out
+    assert "roles/alpha_runtime" in out
+    # No duplicates.
+    assert len(out) == len(set(out))
+
+
+def test_candidate_role_paths_registry_role_in_collection_mirror(rsr, tmp_path):
+    """Registry roles also probe the collections mirror."""
+    _write_registry(tmp_path, {"alpha": ["alpha_kit"]})
+    mirror = tmp_path / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "alpha_kit"
+    mirror.mkdir(parents=True)
+    out = rsr.candidate_role_paths("alpha", tmp_path)
+    assert any("collections/ansible_collections" in p for p in out)
+
+
+def test_classify_uses_registry_to_unblock_unknowns(rsr, tmp_path, monkeypatch):
+    """A service that the heuristic alone can't find a role for, but
+    that the registry maps to a real role, should classify as
+    safe_to_refresh / needs_review (not unknown)."""
+    _write_registry(tmp_path, {"oddly_named": ["alpha_kit"]})
+    (tmp_path / "roles" / "alpha_kit").mkdir(parents=True)
+    monkeypatch.setattr(rsr, "changed_since", lambda paths, *, since, repo_root: [])
+    receipts = {"oddly_named": "2026-01-01-x"}
+    today = dt.date(2026, 4, 28)
+    c = rsr.classify(receipts, today=today, max_age_days=30, repo_root=tmp_path)
+    assert c.summary()["safe_to_refresh"] == 1
+    assert c.summary()["unknown"] == 0
+
+
+# ---------------------------------------------------------------------------
 # classify
 # ---------------------------------------------------------------------------
 

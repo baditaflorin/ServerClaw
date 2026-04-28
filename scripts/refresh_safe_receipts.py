@@ -58,10 +58,15 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STACK_YAML = REPO_ROOT / "versions" / "stack.yaml"
 
-# Roles to inspect for a service. The lookup is best-effort: an entry
-# in `platform_service_registry` may name a `<service>_runtime` and/or
-# `<service>_postgres` role, or the service name may itself be the
-# role name. We probe the conventional locations.
+# Roles to inspect for a service. Two-stage lookup:
+#   1. Registry-driven: `inventory/group_vars/all/platform_services.yml`
+#      may declare an explicit `roles:` list per service; we use that
+#      first when present.
+#   2. Heuristic fallback: probe the conventional locations below.
+#
+# This collapses the "unknown — no matching role directory" bucket
+# that the Phase-4.3 heuristic-only lookup left wide open (61 entries
+# unclassified against the live live_apply_evidence ledger).
 _ROLE_PATH_CANDIDATES = (
     "roles/{name}",
     "roles/{name}_runtime",
@@ -69,6 +74,12 @@ _ROLE_PATH_CANDIDATES = (
     "collections/ansible_collections/lv3/platform/roles/{name}",
     "collections/ansible_collections/lv3/platform/roles/{name}_runtime",
     "collections/ansible_collections/lv3/platform/roles/{name}_postgres",
+)
+_SERVICE_REGISTRY_PATH = (
+    "inventory",
+    "group_vars",
+    "all",
+    "platform_services.yml",
 )
 
 
@@ -157,15 +168,80 @@ def load_receipts(stack_yaml_path: Path) -> dict[str, str]:
     return {str(k): str(v) for k, v in receipts.items()}
 
 
-def candidate_role_paths(service: str, repo_root: Path) -> list[str]:
+def load_service_registry_roles(repo_root: Path) -> dict[str, list[str]]:
+    """Load `platform_service_registry` and return {service: [role_names]}.
+
+    Looks up the `roles` field per registry entry; returns an empty
+    list when the entry has no explicit roles declaration. Returns an
+    empty dict if the registry file is missing or malformed (the caller
+    falls back to the heuristic lookup).
+    """
+    path = repo_root.joinpath(*_SERVICE_REGISTRY_PATH)
+    if not path.is_file():
+        return {}
+    try:
+        data = yaml.safe_load(path.read_text()) or {}
+    except yaml.YAMLError:
+        return {}
+    registry = data.get("platform_service_registry")
+    if not isinstance(registry, dict):
+        return {}
+    out: dict[str, list[str]] = {}
+    for service, entry in registry.items():
+        if not isinstance(entry, dict):
+            continue
+        roles = entry.get("roles")
+        if isinstance(roles, list):
+            out[str(service)] = [str(r) for r in roles if r]
+        else:
+            out[str(service)] = []
+    return out
+
+
+def candidate_role_paths(
+    service: str,
+    repo_root: Path,
+    *,
+    registry_roles: dict[str, list[str]] | None = None,
+) -> list[str]:
     """Return repo-relative role-directory paths that exist on disk for
-    this service. Returns an empty list when nothing matches — the
-    caller treats that as "unknown" (no role to scan)."""
+    this service.
+
+    Two-stage lookup (ADR 0451 phase 6.1):
+
+      1. **Registry-driven** — if the service appears in
+         `platform_service_registry` with an explicit `roles:` list,
+         probe each declared role under both the flat `roles/` tree and
+         the `collections/.../roles/` mirror. Registry-named roles win
+         over heuristic guesses.
+      2. **Heuristic fallback** — probe the conventional
+         `<service>` / `<service>_runtime` / `<service>_postgres`
+         locations. Always runs after the registry lookup so explicit
+         entries augment rather than replace the discovery.
+
+    Returns an empty list when nothing matches — the caller treats that
+    as "unknown" (no role to scan).
+    """
     out: list[str] = []
+    seen: set[str] = set()
+    # Stage 1: registry-driven.
+    if registry_roles is None:
+        registry_roles = load_service_registry_roles(repo_root)
+    for role in registry_roles.get(service, []):
+        for tmpl in (
+            "roles/{role}",
+            "collections/ansible_collections/lv3/platform/roles/{role}",
+        ):
+            rel = tmpl.format(role=role)
+            if rel not in seen and (repo_root / rel).is_dir():
+                out.append(rel)
+                seen.add(rel)
+    # Stage 2: heuristic fallback (always runs).
     for tmpl in _ROLE_PATH_CANDIDATES:
         rel = tmpl.format(name=service)
-        if (repo_root / rel).is_dir():
+        if rel not in seen and (repo_root / rel).is_dir():
             out.append(rel)
+            seen.add(rel)
     return out
 
 
@@ -234,6 +310,8 @@ def classify(
     max_age_days: int,
     repo_root: Path,
 ) -> Classification:
+    # Load the registry once; classify reuses it for every receipt.
+    registry_roles = load_service_registry_roles(repo_root)
     result = Classification()
     for service, slug in sorted(receipts.items()):
         date = parse_receipt_date(slug)
@@ -246,7 +324,7 @@ def classify(
         if age <= max_age_days:
             # Already fresh — not in scope. Skip rather than emit.
             continue
-        roles = candidate_role_paths(service, repo_root)
+        roles = candidate_role_paths(service, repo_root, registry_roles=registry_roles)
         if not roles:
             result.unknown.append(
                 UnknownEntry(

@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-28'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 477
+total_adrs: 478
 adr_number_range:
   first: '0001'
-  last: '0450'
-  next_available: '0451'
+  last: '0451'
+  next_available: '0452'
 implementation_status_summary:
   Implemented: 362
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 41
+  Proposed: 42
 decision_status_summary:
   Accepted: 366
-  Proposed: 48
+  Proposed: 49
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 45
+      count: 46
       first_adr: '0400'
-      last_adr: '0450'
+      last_adr: '0451'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -70,7 +70,7 @@ facets:
       count: 9
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 45
+      count: 46
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 23
@@ -131,14 +131,20 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 41
+      count: 42
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0451'
+  next_available_adr: '0452'
 latest_adrs:
+  - adr: '0451'
+    title: Phase 6 Self-Healing Actions
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: ci-cd
+    path: docs/adr/0451-phase6-self-healing-actions.md
   - adr: '0450'
     title: Phase 5 — `make doctor` Aggregator + Post-Merge Rename Hook
     implementation_status: Proposed
@@ -193,12 +199,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: agent-discovery
     path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
-  - adr: '0441'
-    title: Deployment-Scoped Service Subsetting via Service Profiles
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: platform
-    path: docs/adr/0441-deployment-scoped-service-subsetting.md
 discovery_queries:
   how do we bootstrap:
     - '0001'
