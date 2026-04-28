@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 40
+total_adrs: 41
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -730,3 +730,21 @@ adrs:
     summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
     filename: 0445-phase1-multi-deployment-hardening.md
     path: docs/adr/0445-phase1-multi-deployment-hardening.md
+  - adr: '0446'
+    title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - multi-deployment
+      - receipts
+      - molecule
+      - programmatic-deploy
+      - phase
+      - hardening
+      - receipt
+      - freshness
+    summary: 'Three deliverables, in order:'
+    filename: 0446-phase2-multi-deployment-hardening.md
+    path: docs/adr/0446-phase2-multi-deployment-hardening.md

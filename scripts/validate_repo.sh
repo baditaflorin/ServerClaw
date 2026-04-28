@@ -21,7 +21,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|semgrep|compose-runtime-envs|retry-guard|dependency-direction|service-definitions|data-models|cross-catalog|python-type-safety|waiver-escalation-proofs|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|semgrep|compose-runtime-envs|retry-guard|dependency-direction|no-hardcoded-topology|receipt-freshness|service-definitions|data-models|cross-catalog|python-type-safety|waiver-escalation-proofs|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -356,6 +356,14 @@ validate_no_hardcoded_topology() {
   # via the `noqa: topology-hardcode` marker.
   echo "Topology hardcode validation (ADR 0443)"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_no_hardcoded_topology.py"
+}
+
+validate_receipt_freshness() {
+  # ADR 0446 item 14 — flag stale live-apply receipts.
+  # Advisory: prints stale-count summary but exits 0. Promote to --strict
+  # in ADR 0446 phase 5 once the platform is clean.
+  echo "Receipt freshness check (ADR 0446 — advisory)"
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/check_receipt_freshness.py" --quiet
 }
 
 validate_yaml() {
@@ -918,6 +926,7 @@ for stage in "$@"; do
       validate_retry_guard
       validate_dependency_direction
       validate_no_hardcoded_topology
+      validate_receipt_freshness
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -970,6 +979,9 @@ for stage in "$@"; do
       ;;
     no-hardcoded-topology)
       validate_no_hardcoded_topology
+      ;;
+    receipt-freshness)
+      validate_receipt_freshness
       ;;
     service-definitions)
       validate_service_definitions

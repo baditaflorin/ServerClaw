@@ -10,7 +10,7 @@ generated: '2026-04-28'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 37
+total_adrs: 38
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -596,3 +596,21 @@ adrs:
     summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
     filename: 0445-phase1-multi-deployment-hardening.md
     path: docs/adr/0445-phase1-multi-deployment-hardening.md
+  - adr: '0446'
+    title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
+    status: Proposed
+    implementation_status: Proposed
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - multi-deployment
+      - receipts
+      - molecule
+      - programmatic-deploy
+      - phase
+      - hardening
+      - receipt
+      - freshness
+    summary: 'Three deliverables, in order:'
+    filename: 0446-phase2-multi-deployment-hardening.md
+    path: docs/adr/0446-phase2-multi-deployment-hardening.md

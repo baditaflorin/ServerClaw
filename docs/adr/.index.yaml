@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-28'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 472
+total_adrs: 473
 adr_number_range:
   first: '0001'
-  last: '0445'
-  next_available: '0446'
+  last: '0446'
+  next_available: '0447'
 implementation_status_summary:
   Implemented: 361
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 37
+  Proposed: 38
 decision_status_summary:
   Accepted: 365
-  Proposed: 44
+  Proposed: 45
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 40
+      count: 41
       first_adr: '0400'
-      last_adr: '0445'
+      last_adr: '0446'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -97,7 +97,7 @@ facets:
       count: 8
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 42
+      count: 43
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -131,14 +131,19 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 37
+      count: 38
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0446'
+  next_available_adr: '0447'
 latest_adrs:
+  - adr: '0446'
+    title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
+    implementation_status: Proposed
+    concern: security
+    path: docs/adr/0446-phase2-multi-deployment-hardening.md
   - adr: '0445'
     title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
     implementation_status: Proposed
@@ -184,11 +189,6 @@ latest_adrs:
     implementation_status: Proposed
     concern: resilience
     path: docs/adr/0438-generic-by-construction.md
-  - adr: '0437'
-    title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
-    implementation_status: Accepted
-    concern: bootstrap
-    path: docs/adr/0437-overlay-aware-bootstrap.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

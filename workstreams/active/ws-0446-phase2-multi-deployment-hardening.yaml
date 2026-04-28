@@ -1,0 +1,123 @@
+id: ws-0446-phase2-multi-deployment-hardening
+adr: 0446
+title: Phase 2 multi-deployment hardening — receipt freshness + Molecule starter + service-registry cross-refs
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: claude
+branch: claude/objective-carson-cbe0c3
+worktree_path: .claude/worktrees/objective-carson-cbe0c3
+doc: docs/adr/0446-phase2-multi-deployment-hardening.md
+depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0438-generic-by-construction
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0443-continuous-topology-reconciler
+  - adr-0373-service-registry
+conflicts_with: []
+shared_surfaces:
+  # ADR + workstream docs
+  - docs/adr/0446-phase2-multi-deployment-hardening.md
+  - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+  # Item 14 — receipt freshness checker
+  - scripts/check_receipt_freshness.py
+  - tests/test_check_receipt_freshness.py
+  # Item 11 — Molecule scaffold
+  - roles/mail_platform_runtime/molecule/default/molecule.yml
+  - roles/mail_platform_runtime/molecule/default/converge.yml
+  - roles/mail_platform_runtime/molecule/default/verify.yml
+  - roles/mail_platform_runtime/molecule/README.md
+  # Bonus — service registry cross-refs (only if gaps confirmed)
+  - scripts/validate_service_registry.py
+  - tests/test_validate_service_registry.py
+summary: >
+  Phase 2 of the 20-change platform-maturity review (2026-04-28).
+  Items 3, 4, 6, 13 from that list have substrate already shipped or
+  in flight (ws-0438, ws-0439). This workstream owns the two items
+  with no current owner — receipt freshness check (item 14) and
+  Molecule scaffold (item 11) — plus a bonus service-registry
+  cross-ref extension if validate_service_registry.py turns out not
+  to cover image_catalog_key / host_group cross-refs.
+phases:
+  phase_0_open_workstream:
+    status: completed
+  phase_1_receipt_freshness:
+    status: completed
+    target_version: 0.179.x
+    done:
+      - "scripts/check_receipt_freshness.py — versions/stack.yaml parser, --max-age-days, --strict, --json"
+      - "tests/test_check_receipt_freshness.py — 21 cases covering date parsing, threshold logic, malformed-entry handling, CLI advisory/strict/json modes"
+      - "wired into scripts/validate_repo.sh as advisory step (validate_receipt_freshness)"
+    notes: |
+      Live signal: 72 of 186 receipts on the current branch are stale at
+      the 30-day window. Phase 5 promotion to --strict will require a
+      cleanup pass. Surfacing this signal now is the win — operators
+      can target which services need re-converge based on age, instead
+      of waiting for a 502.
+  phase_2_molecule_scaffold:
+    status: deferred
+    target_version: 0.180.x
+    deferred_reason: |
+      The collections-level Molecule scaffold (proxmox-fixture driver)
+      that docker_runtime references is currently a `.gitkeep` —
+      `collections/ansible_collections/lv3/platform/molecule/` has no
+      `drivers/proxmox-fixture/{create,destroy}.yml`. Adding a second
+      scenario that references the missing driver would land technical
+      debt rather than a working test. Phase 4 picks this up once the
+      driver is wired or once a different driver (delegated container)
+      is chosen.
+    deferred_to:
+      - "phase_4_expand_molecule"
+  phase_3_service_registry_crossrefs:
+    status: completed_already_covered
+    target_version: 0.179.x
+    notes: |
+      Audit of scripts/validate_service_registry.py confirms both
+      cross-refs are already enforced:
+        - line 148: host_group not in inventory_names → error
+        - line 167: image_catalog_key not in image_catalog → error
+      No code change needed; documenting coverage in this ADR is the
+      deliverable.
+  phase_4_expand_molecule:
+    status: not_started
+    target_version: 0.180.x
+    blocked_on: proxmox-fixture-driver-implementation
+    tasks:
+      - "implement collections/.../molecule/drivers/proxmox-fixture/{create,destroy}.yml OR pick a delegated-container driver"
+      - "scenarios for the 9 most-changed roles after mail_platform_runtime"
+  phase_5_promote_to_required:
+    status: not_started
+    target_version: 0.181.x
+    tasks:
+      - "promote receipt-freshness check from advisory to --strict"
+      - "cleanup pass on the 72 stale receipts that triggered the surfacing"
+acceptance_criteria:
+  - "scripts/check_receipt_freshness.py runs against versions/stack.yaml and reports per-receipt age in --json"
+  - "tests/test_check_receipt_freshness.py covers date parsing, threshold logic, malformed-entry edge cases"
+  - "One role has a working Molecule scenario invokable via make"
+  - "validate_service_registry.py covers image_catalog_key and host_group cross-refs (extended or already)"
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0446_docs
+      paths:
+        - docs/adr/0446-phase2-multi-deployment-hardening.md
+        - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+      mode: shared_contract
+      contract: adr-0446-phase2-multi-deployment-hardening-v1
+    - id: ws_0446_receipt_freshness
+      paths:
+        - scripts/check_receipt_freshness.py
+        - tests/test_check_receipt_freshness.py
+      mode: shared_contract
+      contract: adr-0446-receipt-freshness-v1
+    - id: ws_0446_molecule_scaffold
+      paths:
+        - roles/mail_platform_runtime/molecule/**
+      mode: shared_contract
+      contract: adr-0446-molecule-scaffold-v1
+notes:
+  - >
+    Phase 2 items 3, 4, 6, 13 from the 20-change review are tracked
+    elsewhere; this workstream does not redefine them. Item 11 + 14
+    are the new owned deliverables; the bonus item 15 may collapse
+    into "already covered" after audit.
