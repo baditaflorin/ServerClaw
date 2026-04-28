@@ -1,5 +1,5 @@
-id: ws-0451-phase6-self-healing-actions
-adr: 0451
+id: "ws-0451-phase6-self-healing-actions"
+adr: "0451"
 title: Phase 6 self-healing actions — registry-driven receipts + make heal + docstring backfill
 status: in_progress
 ready_to_merge: false

@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "audit_id": "2026-04-28-gate-bypass-baseline",
+  "audit_type": "one-time-baseline",
+  "generated_at": "2026-04-28T00:00:00Z",
+  "purpose": "Baseline distribution of gate-bypass reason codes used to seed ADR 0453 thresholds. Establishes the 30d-prior state at the moment ADR 0453 enters Proposed status.",
+  "related_adrs": [
+    "0267",
+    "0453"
+  ],
+  "related_workstream": "ws-0453-integration-health-telemetry",
+  "window": {
+    "start": "2026-03-29",
+    "end": "2026-04-28",
+    "days": 30
+  },
+  "source": "receipts/gate-bypasses/*.json",
+  "totals": {
+    "bypasses_in_window": 19,
+    "distinct_reason_codes": 3,
+    "compliance_rate_against_adr_0267_taxonomy": 1.0
+  },
+  "reason_code_distribution": {
+    "pre_existing_gate_failures": {
+      "count": 15,
+      "first_seen": "2026-04-12",
+      "last_seen": "2026-04-27",
+      "share": 0.789,
+      "would_breach_repeat_threshold_3": true,
+      "notes": "Concentrated around ws-0346, ws-0364–ws-0374, ws-0417 main-merge sequence (April 12–14). The repeat pattern is the strongest evidence that gate erosion is real and ADR 0453's gate_bypass_repeat_reasons_30d metric would have surfaced it earlier."
+    },
+    "gate_timeout": {
+      "count": 3,
+      "first_seen": "2026-04-12",
+      "last_seen": "2026-04-13",
+      "share": 0.158,
+      "would_breach_repeat_threshold_3": true,
+      "notes": "All three are ws-0374 merge-main retries on the same day. Likely the same root-cause incident split across pushes."
+    },
+    "runner_image_pull_failure": {
+      "count": 1,
+      "first_seen": "2026-04-12",
+      "last_seen": "2026-04-12",
+      "share": 0.053,
+      "would_breach_repeat_threshold_3": false,
+      "notes": "Single ws-0364 occurrence; isolated."
+    }
+  },
+  "reclassification_required": [],
+  "reclassification_required_count": 0,
+  "reclassification_notes": "All 19 bypasses in the window already use valid reason codes from config/gate-bypass-waiver-catalog.json per ADR 0267. The earlier metrics review counted 4 'bypasses' from git-grep — those were governance commits *recording* bypasses, not the bypasses themselves. No retroactive reclassification needed.",
+  "threshold_recommendation": {
+    "gate_bypass_rate_30d_max": 8,
+    "gate_bypass_repeat_threshold": 3,
+    "rationale": "Baseline of 19 is dominated by a two-day cluster of legitimate pre-existing failures during the ws-0346/ws-0374/main-merge sequence. A threshold of 8/30d is achievable in a normal month and would flag clustered remediation pushes the way they should be flagged. Repeat threshold of 3 catches systemic gate erosion without firing on isolated retries.",
+    "first_enforcement_window_start": "2026-05-29"
+  },
+  "follow_ups": [
+    {
+      "kind": "implementation",
+      "ref": "ws-0453",
+      "action": "Generator script consumes this baseline file as the seed for build/integration-health.json on first run."
+    },
+    {
+      "kind": "investigation",
+      "ref": "pre_existing_gate_failures cluster",
+      "action": "Audit whether the certificate-mismatch lane that drove most of these bypasses was permanently fixed by ADR 0414/0415, or whether residual cases remain. If permanent, the baseline should drop substantially in the next audit."
+    }
+  ]
+}

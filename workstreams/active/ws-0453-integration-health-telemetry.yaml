@@ -1,0 +1,59 @@
+id: "ws-0453-integration-health-telemetry"
+adr: "0453"
+title: Integration-health telemetry (release stability, bypass rate, live-apply lag)
+status: planned
+owner: claude
+branch: unassigned/ws-0453-integration-health-telemetry
+worktree_path: unassigned/ws-0453-integration-health-telemetry
+doc: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
+depends_on:
+  - adr-0267-expiring-gate-bypass-waivers
+  - adr-0419-pr-based-integration-flow
+  - adr-0420-ci-release-readiness-checks
+  - ws-0452-workstream-lifecycle-auto-close
+conflicts_with: []
+shared_surfaces:
+  - release-readiness-ci
+  - build/integration-health.json
+  - schedule-routines
+ownership_manifest:
+  owned_surfaces:
+    - id: adr_0450_doc
+      paths:
+        - docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
+        - workstreams/active/ws-0453-integration-health-telemetry.yaml
+      mode: exclusive
+    - id: integration_health_generator
+      paths:
+        - scripts/generate_integration_health.py
+        - build/integration-health.json
+      mode: exclusive
+    - id: gate_bypass_baseline_audit
+      paths:
+        - receipts/audits/2026-04-28-gate-bypass-baseline.json
+      mode: exclusive
+acceptance_criteria:
+  - generate_integration_health.py produces build/integration-health.json with the four metrics defined in ADR 0453
+  - Two release cycles run in advisory-only mode before enforcement
+  - Threshold values seeded from receipts/audits/2026-04-28-gate-bypass-baseline.json
+  - Monthly /schedule routine drafted and tested (fires 1st of each month)
+  - Release-readiness CI integration uses INTEGRATION_HEALTH_ACK escape hatch correctly
+  - Does NOT redefine reason codes — bypass governance stays under ADR 0267
+acceptance_criteria_met: false
+lifecycle_state: active
+live_applied: false
+live_apply_receipt: null
+ready_to_merge: false
+portable: true
+portable_notes: |
+  Agent-neutral. The monthly review trigger is intentionally not
+  pinned to one agent runtime — implementation accepts GitHub
+  Actions cron, Gitea Actions cron, or any agent runtime's
+  scheduling primitive. Reassignment: change owner/branch/worktree
+  to the new agent's conventions; everything else stays.
+notes: |
+  Scope explicitly excludes bypass reason-code taxonomy (owned by
+  ADR 0267). Earlier draft of this ADR duplicated that surface; the
+  duplication was removed after audit found 19 receipts already
+  classified against the existing 9-code catalog with 100% compliance.
+  This ADR only adds the rate-tracking layer on top.

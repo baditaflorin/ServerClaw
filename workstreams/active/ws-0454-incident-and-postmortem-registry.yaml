@@ -1,0 +1,57 @@
+id: "ws-0454-incident-and-postmortem-registry"
+adr: "0454"
+title: Incident & postmortem registry (mirror of ADR index pattern)
+status: planned
+owner: claude
+branch: unassigned/ws-0454-incident-and-postmortem-registry
+worktree_path: unassigned/ws-0454-incident-and-postmortem-registry
+doc: docs/adr/0454-incident-and-postmortem-registry.md
+depends_on:
+  - adr-0114-rule-based-incident-triage-engine
+  - adr-0420-ci-release-readiness-checks
+conflicts_with: []
+shared_surfaces:
+  - docs/incidents/
+  - release-readiness-ci
+  - pre-push-hook
+ownership_manifest:
+  owned_surfaces:
+    - id: adr_0451_doc
+      paths:
+        - docs/adr/0454-incident-and-postmortem-registry.md
+        - workstreams/active/ws-0454-incident-and-postmortem-registry.yaml
+      mode: exclusive
+    - id: incidents_directory
+      paths:
+        - docs/incidents/
+        - docs/incidents/.index.yaml
+        - docs/incidents/schema.json
+      mode: exclusive
+    - id: incident_index_generator
+      paths:
+        - scripts/generate_incident_index.py
+      mode: exclusive
+acceptance_criteria:
+  - docs/incidents/ directory layout created (postmortems/, bypasses/, references/)
+  - Schema and index generator implemented, mirroring ADR index pattern
+  - One-time bootstrap migrates 3 known memory-file incidents into postmortems/
+  - Pre-push hook validates incident:/postmortem: commit prefixes
+  - Severity-driven 14-day ADR escalation rule documented and enforced advisory-only initially
+  - Bootstrap migration script removed after one-time use
+acceptance_criteria_met: false
+lifecycle_state: active
+live_applied: false
+live_apply_receipt: null
+ready_to_merge: false
+portable: true
+portable_notes: |
+  Agent-neutral. The bootstrap migration helper accepts notes from
+  any agent's private store (Claude memory, Codex notes, Aider
+  history, operator scratchpads) via a generic `--from <path>`
+  interface. No agent-specific assumptions in either the directory
+  layout, the schema, or the migration script.
+notes: |
+  Independent of ws-0452 and ws-0453 once the ADR-numbering coordination
+  is done. Order in the bundle is: ws-0452 first (lifecycle data), then
+  ws-0454 (creates docs/incidents/bypasses/ that ws-0453 writes into),
+  then ws-0453.

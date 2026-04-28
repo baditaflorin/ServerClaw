@@ -70,6 +70,13 @@
         "skip_remote_gate",
         "skip_cert_validation"
       ]
+    },
+    "cert_lane_pre_existing_failures": {
+      "summary": "The local pre-push SSL certificate validation lane (ADR 0375) is reporting cert_mismatch/expired entries that are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified the push contains no changes to nginx_edge_publication, certbot, or cert lifecycle surfaces. Remediation is owned by the cert lifecycle manager under ADR 0414.",
+      "max_expiry_days": 1,
+      "allowed_bypasses": [
+        "skip_cert_validation"
+      ]
     }
   }
 }

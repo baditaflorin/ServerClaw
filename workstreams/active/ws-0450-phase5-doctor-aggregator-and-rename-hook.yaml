@@ -1,5 +1,5 @@
-id: ws-0450-phase5-doctor-aggregator-and-rename-hook
-adr: 0450
+id: "ws-0450-phase5-doctor-aggregator-and-rename-hook"
+adr: "0450"
 title: Phase 5 self-healing — make doctor aggregator + post-merge rename hook + Windmill schedule template
 status: in_progress
 ready_to_merge: false

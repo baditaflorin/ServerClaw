@@ -1,0 +1,98 @@
+id: "ws-0452-workstream-lifecycle-auto-close"
+adr: "0452"
+title: Workstream lifecycle auto-close + receipt slug convention (umbrella for ADRs 0452/0453/0454)
+status: in_progress
+owner: claude
+branch: claude/sleepy-proskuriakova-a0a263
+worktree_path: .claude/worktrees/sleepy-proskuriakova-a0a263
+doc: docs/adr/0452-workstream-lifecycle-auto-close.md
+depends_on:
+  - adr-0326-workstream-registry-shards
+  - adr-0420-ci-release-readiness-checks
+  - adr-0036-live-apply-receipts
+  - adr-0267-expiring-gate-bypass-waivers
+conflicts_with: []
+shared_surfaces:
+  - workstream-registry
+  - release-readiness-ci
+  - live-apply-receipt-slug-format
+  - gate-bypass-waiver-catalog
+ownership_manifest:
+  owned_surfaces:
+    - id: adr_0452_doc
+      paths:
+        - docs/adr/0452-workstream-lifecycle-auto-close.md
+        - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+      mode: exclusive
+    - id: adr_0453_doc
+      paths:
+        - docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
+        - workstreams/active/ws-0453-integration-health-telemetry.yaml
+      mode: exclusive
+    - id: adr_0454_doc
+      paths:
+        - docs/adr/0454-incident-and-postmortem-registry.md
+        - workstreams/active/ws-0454-incident-and-postmortem-registry.yaml
+      mode: exclusive
+    - id: gate_bypass_baseline_audit
+      paths:
+        - receipts/audits/2026-04-28-gate-bypass-baseline.json
+      mode: exclusive
+    - id: gate_bypass_waiver_catalog_extension
+      paths:
+        - config/gate-bypass-waiver-catalog.json
+      mode: shared_contract
+      contract: gate-bypass-waiver-catalog-v1
+    - id: workstream_registry_compat_artifact
+      paths:
+        - workstreams.yaml
+      mode: generated
+    - id: workstream_registry_script
+      paths:
+        - scripts/workstream_registry.py
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: receipt_slug_grammar
+      paths:
+        - docs/schema/live-apply-receipt.schema.json
+      mode: shared_contract
+      contract: live-apply-receipt-v1
+    - id: pre_existing_yaml_lint_fixes
+      paths:
+        - workstreams/active/ws-0450-phase5-doctor-aggregator-and-rename-hook.yaml
+        - workstreams/active/ws-0451-phase6-self-healing-actions.yaml
+      mode: shared_contract
+      contract: yaml-lint-conformance-v1
+acceptance_criteria:
+  - lifecycle_state field added to active shard schema
+  - --archive-completed flag implemented and idempotent
+  - workstream-staleness, workstream-receipt-orphan, receipt-slug-conformance CI checks land in release-readiness job
+  - 21 existing active shards backfilled with lifecycle_state
+  - At least 5 of the 21 active shards transition to archive on first --archive-completed run (those with matching live-apply receipts)
+  - ADRs 0453 and 0454 land in same PR but remain status=planned with no branch (their implementation branches come later)
+acceptance_criteria_met: false
+lifecycle_state: active
+live_applied: false
+live_apply_receipt: null
+ready_to_merge: false
+portable: true
+portable_notes: |
+  This workstream is agent-neutral. Any LLM agent (Claude, Codex,
+  Aider, Cursor, Devin) or human can pick it up. Reassignment
+  protocol: change `owner` to the new agent's identifier, change
+  `branch` and `worktree_path` to that agent's conventions
+  (e.g. `codex/...` under `.codex/worktrees/`). Acceptance criteria,
+  shared surfaces, and ownership manifest are agent-invariant.
+notes: |
+  Umbrella workstream for the 2026-04-28 ADR-planning trio:
+  ws-0452 (this one) + ws-0453 (integration-health telemetry) +
+  ws-0454 (incident registry). All three ADRs land in this single PR
+  as proposed-status planning artifacts. ws-0453 and ws-0454 are
+  registered as status=planned with no branch — their implementation
+  branches will be created when an agent picks them up later.
+
+  Two pre-existing yaml-lint errors on origin/main
+  (ws-0450-phase5-..., ws-0451-phase6-...) are fixed in this same
+  PR because they were blocking all pushes platform-wide; the fix is
+  identical to the one applied to this PR's own workstream YAMLs
+  (quote id and adr values to avoid implicit-octal parsing).
