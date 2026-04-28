@@ -1,0 +1,68 @@
+id: ws-0448-postmortem-and-handoff
+adr: "0448"
+title: "Cross-agent handoff postmortem for ws-0448 deployment connection registry"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/postmortems/2026-04-28-ws-0448-deployment-connection-registry.md
+depends_on:
+  - adr-0448-deployment-connection-registry-and-wrapper
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0448-postmortem-and-handoff.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0448_postmortem
+    paths:
+      - docs/postmortems/2026-04-28-ws-0448-deployment-connection-registry.md
+    mode: exclusive
+  - id: ws_0448_archive_move
+    paths:
+      - workstreams/archive/2026/ws-0448-deployment-connection-registry.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0448_see_also_pointers
+    paths:
+      - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+      - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+      - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+    co_owners:
+      - ws-0445-phase1-multi-deployment-hardening
+      - ws-0446-phase2-multi-deployment-hardening
+      - ws-0447-phase3-llm-ergonomics-and-traceability
+  - id: ws_0448_handoff_canonical_truth
+    paths:
+      - README.md
+      - docs/status/history/merged-workstreams.md
+      - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: ws_0448_handoff_workstream
+    paths:
+      - workstreams/active/ws-0448-postmortem-and-handoff.yaml
+    mode: exclusive
+notes: |
+  Heads-up note for concurrent agents iterating on ws-0445 / 0446 /
+  0447 surfaces. Captures three cross-cutting changes ws-0448 made
+  that other agents need to know about:
+
+  1. workstreams/active/**.yaml + workstreams/archive/2026/**.yaml all
+     have their `adr:` field quoted now (YAML octal-int parser was
+     coercing 0447 -> 295). Don't revert.
+  2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json
+     was reconstructed because PR #71 referenced it but never committed
+     the file.
+  3. Pre-existing cert-validation drift on lv3.org domains (the box
+     now serves 0fork.com after yesterday's recovery).
+
+  Plus follow-ups not in ws-0448 scope:
+   - Host-pinning per VM (Slice D in the original plan).
+   - Deployment-aware cert validation.
+   - `make new-deployment` / `make use-deployment` (ADR 0442) — the
+     `run_with_deployment.sh` wrapper is the leaf they would invoke.

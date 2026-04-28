@@ -8,6 +8,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](../../adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](../../adr/0407-generic-by-default-local-overlay-architecture.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](../../workstreams/adr-0369-python-validation-toolkit.md) |

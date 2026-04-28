@@ -122,3 +122,9 @@ notes:
     elsewhere; this workstream does not redefine them. Item 11 + 14
     are the new owned deliverables; the bonus item 15 may collapse
     into "already covered" after audit.
+
+see_also:
+  - ws-0448-deployment-connection-registry
+  # ADR 0448 ships the per-deployment connection.yml schema +
+  # scripts/run_with_deployment.sh wrapper that this workstream
+  # implicitly depends on for the operator surface.

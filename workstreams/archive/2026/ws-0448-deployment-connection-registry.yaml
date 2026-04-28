@@ -1,8 +1,8 @@
 id: ws-0448-deployment-connection-registry
 adr: "0448"
 title: "Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill"
-status: in_progress
-ready_to_merge: true
+status: merged
+ready_to_merge: false
 live_applied: false
 owner: platform-infrastructure
 branch: claude/crazy-chaplygin-c7c256

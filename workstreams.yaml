@@ -17,105 +17,70 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 322
+  total_workstreams: 323
   by_year:
-    '2026': 322
+    '2026': 323
 workstreams:
-- id: ws-0448-deployment-connection-registry
+- id: ws-0448-postmortem-and-handoff
   adr: 0448
-  title: Per-deployment connection registry + run_with_deployment wrapper + topology
-    role auto-fill
+  title: Cross-agent handoff postmortem for ws-0448 deployment connection registry
   status: in_progress
   ready_to_merge: true
   live_applied: false
   owner: platform-infrastructure
   branch: claude/crazy-chaplygin-c7c256
   worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
-  doc: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+  doc: docs/postmortems/2026-04-28-ws-0448-deployment-connection-registry.md
   depends_on:
-  - adr-0440-per-deployment-identity-and-artifact-isolation
-  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0448-deployment-connection-registry-and-wrapper
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
-  - workstreams/active/ws-0448-deployment-connection-registry.yaml
+  - workstreams/active/ws-0448-postmortem-and-handoff.yaml
   ownership_manifest:
     owned_surfaces:
-    - id: ws_0448_adr
+    - id: ws_0448_postmortem
       paths:
-      - docs/adr/0448-deployment-connection-registry-and-wrapper.md
+      - docs/postmortems/2026-04-28-ws-0448-deployment-connection-registry.md
       mode: exclusive
-    - id: ws_0448_connection_schema
+    - id: ws_0448_archive_move
       paths:
-      - config/contracts/deployment-v1/connection.schema.json
-      mode: exclusive
-    - id: ws_0448_deployment_loader
-      paths:
-      - scripts/deployment.py
+      - workstreams/archive/2026/ws-0448-deployment-connection-registry.yaml
       mode: shared_contract
-      contract: deployment-loader-v1
+      contract: workstream-registry-v1
+    - id: ws_0448_see_also_pointers
+      paths:
+      - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
+      - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
+      - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
       co_owners:
       - ws-0445-phase1-multi-deployment-hardening
       - ws-0446-phase2-multi-deployment-hardening
-    - id: ws_0448_wrapper
+      - ws-0447-phase3-llm-ergonomics-and-traceability
+    - id: ws_0448_handoff_canonical_truth
       paths:
-      - scripts/run_with_deployment.sh
-      mode: exclusive
-    - id: ws_0448_role_default
-      paths:
-      - scripts/generate_platform_vars.py
-      mode: shared_contract
-      contract: platform-vars-generator-v1
-    - id: ws_0448_tests
-      paths:
-      - tests/test_ws0448_connection_registry.py
-      - tests/test_ws0448_topology_role_default.py
-      mode: exclusive
-    - id: ws_0448_release_artifacts
-      paths:
-      - VERSION
-      - RELEASE.md
       - README.md
-      - changelog.md
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - docs/release-notes/**
-      - docs/adr/.index.yaml
-      - docs/adr/index/**
       - docs/status/history/merged-workstreams.md
-      - docs/status/history/live-apply-evidence.md
-      - inventory/group_vars/platform.yml
-      - inventory/group_vars/platform_tls_certs.yml
-      - docs/diagrams/*.excalidraw
-      mode: shared_contract
-      contract: release-bump-v1
-    - id: ws_0448_workstream
-      paths:
-      - workstreams/active/ws-0448-deployment-connection-registry.yaml
       - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
-    - id: ws_0448_yaml_adr_quoting
+    - id: ws_0448_handoff_workstream
       paths:
-      - workstreams/active/**
-      - workstreams/archive/2026/**
-      mode: shared_contract
-      contract: workstream-registry-v1
-  notes: "Closes the operator-surface gap left by ws-0445 phase 1: every\ndeployment\
-    \ now carries its SSH/Proxmox-host metadata as committed\ndata (.local/deployments/<slug>/connection.yml),\
-    \ not as a per-target\nMakefile constant.\n\nThree pieces:\n1. config/contracts/deployment-v1/connection.schema.json\
-    \ \u2014 schema +\n   Deployment.connection field + `connection` CLI subcommand\
-    \ on\n   scripts/deployment.py emitting LV3_PROXMOX_HOST_*,\n   LV3_BOOTSTRAP_SSH_PRIVATE_KEY,\
-    \ PLATFORM_IDENTITY_OVERLAY.\n2. scripts/run_with_deployment.sh \u2014 exec-style\
-    \ wrapper that resolves\n   the slug, loads the env block, exec's the inner command.\
-    \ No\n   Makefile edits \u2014 composes with ws-0445 phase 1's MULTI_DEPLOYMENT\n\
-    \   opt-in.\n3. scripts/generate_platform_vars.py \u2014 proxmox_guests[*].role\
-    \ now\n   defaults to name when absent, so per-deployment topology overlays\n\
-    \   stay minimal.\n\nOut-of-scope for this slice (deferred to follow-ups):\n-\
-    \ Host-pinning so two deployments can't both install services on the\n  same VM\
-    \ (the lv3\u21940fork port-4180 collision).\n- inventory/hosts.yml parameterization\
-    \ (ws-0445 item 5 owns this).\n- 0fork's topology.yml still needs more guests\
-    \ \u2014 operator data gap,\n  not a code change.\n"
+      - workstreams/active/ws-0448-postmortem-and-handoff.yaml
+      mode: exclusive
+  notes: "Heads-up note for concurrent agents iterating on ws-0445 / 0446 /\n0447\
+    \ surfaces. Captures three cross-cutting changes ws-0448 made\nthat other agents\
+    \ need to know about:\n\n1. workstreams/active/**.yaml + workstreams/archive/2026/**.yaml\
+    \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
+    \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
+    \   was reconstructed because PR #71 referenced it but never committed\n   the\
+    \ file.\n3. Pre-existing cert-validation drift on lv3.org domains (the box\n \
+    \  now serves 0fork.com after yesterday's recovery).\n\nPlus follow-ups not in\
+    \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
+    \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
+    \ \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they would invoke.\n"
 - id: ws-0447-phase3-llm-ergonomics-and-traceability
   adr: '0447'
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
@@ -218,6 +183,8 @@ workstreams:
     owns 17 + 19.
 
     '
+  see_also:
+  - ws-0448-deployment-connection-registry
 - id: ws-0446-phase2-multi-deployment-hardening
   adr: '0446'
   title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\
@@ -331,6 +298,8 @@ workstreams:
     the bonus item 15 may collapse into "already covered" after audit.
 
     '
+  see_also:
+  - ws-0448-deployment-connection-registry
 - id: ws-0445-phase1-multi-deployment-hardening
   adr: '0445'
   title: "Phase 1 multi-deployment hardening \u2014 fork-shape fixtures, convergence\
@@ -497,6 +466,8 @@ workstreams:
   - "Phase 4 (inventory as parameter) is coordinated with ADR 0442 but not blocked\
     \ on its full design \u2014 the inventory generation is the load-bearing mechanism\
     \ either way.\n"
+  see_also:
+  - ws-0448-deployment-connection-registry
 - id: ws-0444-nginx-oauth2-proxy-buffer-sizing
   adr: '0444'
   title: "nginx oauth2-proxy buffer sizing \u2014 64k on /oauth2/{auth,callback}"

@@ -163,3 +163,9 @@ notes:
     Phase 4 (inventory as parameter) is coordinated with ADR 0442 but
     not blocked on its full design — the inventory generation is the
     load-bearing mechanism either way.
+
+see_also:
+  - ws-0448-deployment-connection-registry
+  # ADR 0448 ships the per-deployment connection.yml schema +
+  # scripts/run_with_deployment.sh wrapper that this workstream
+  # implicitly depends on for the operator surface.
