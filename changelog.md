@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Fix education_wemeshup API routing: add Traefik dynamic config to route `/api/` to `catalog-api` backend; add `coolify_traefik_extra_dynamic_configs` for persistent IaC
+
 - ADR 0452 + ws-0452: Phase 7 drives doctor signals from 3/7 → 1/7
   non-zero. Adds `# pending: <reason>` marker filter to
   `scripts/generate_traceability.py` (mirror of ADR 0445's
@@ -62,10 +64,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.15 release notes](docs/release-notes/0.179.15.md)
+- [0.179.16 release notes](docs/release-notes/0.179.16.md)
 
 ## Previous Releases
 
+- [0.179.15 release notes](docs/release-notes/0.179.15.md)
 - [0.179.14 release notes](docs/release-notes/0.179.14.md)
 - [0.179.13 release notes](docs/release-notes/0.179.13.md)
 - [0.179.12 release notes](docs/release-notes/0.179.12.md)
@@ -77,7 +80,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.6 release notes](docs/release-notes/0.179.6.md)
 - [0.179.5 release notes](docs/release-notes/0.179.5.md)
 - [0.179.4 release notes](docs/release-notes/0.179.4.md)
-- [0.179.3 release notes](docs/release-notes/0.179.3.md)
 
 ## Release Archives
 

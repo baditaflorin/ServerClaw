@@ -76,3 +76,11 @@ coolify_smoke_repo_branch: main
 coolify_smoke_base_directory: static
 coolify_smoke_domain: http://apps.{{ platform_domain }}
 coolify_smoke_alias_domain: http://repo-smoke.apps.{{ platform_domain }}
+
+# Extra Traefik dynamic routing config files to deploy to {{ coolify_proxy_path }}/dynamic/.
+# Each entry is a filename under roles/coolify_runtime/files/dynamic/ that adds
+# per-app routers/services Coolify's Docker labels cannot express (e.g. routing
+# /api/ to a backend container that has no Traefik labels of its own).
+# Future: replaced by the coolify_app_deploy role (ws-0447 t3).
+coolify_traefik_extra_dynamic_configs:
+  - education-wemeshup-api.yml

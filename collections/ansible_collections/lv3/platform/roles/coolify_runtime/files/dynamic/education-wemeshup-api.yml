@@ -1,0 +1,29 @@
+# Traefik dynamic config — education_wemeshup API routing
+# Routes /api/ requests to catalog-api (Go backend) with higher priority
+# than the catch-all catalog-web router so the frontend can reach the API.
+#
+# catalog-web Traefik label: Host(`education-wemeshup.apps.0fork.com`) && PathPrefix(`/`)
+# Without this file, ALL traffic (including /api/v1/) goes to the Vite frontend.
+#
+# The catalog-api container IP (10.200.1.4) is stable within the Coolify app
+# network (o96z9s4ospvkdbz2ge1c0p3t). If the app is redeployed and the IP
+# changes, update the url below or replace with the container name when
+# coolify-proxy gains DNS resolution for the app network.
+#
+# See: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
+# Workstream: workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+http:
+  routers:
+    api-education-wemeshup:
+      rule: "Host(`education-wemeshup.apps.0fork.com`) && PathPrefix(`/api/`)"
+      entryPoints:
+        - http
+        - https
+      service: catalog-api-education-wemeshup
+      priority: 200
+      tls: {}
+  services:
+    catalog-api-education-wemeshup:
+      loadBalancer:
+        servers:
+          - url: "http://10.200.1.4:8080"

@@ -172,6 +172,22 @@
     - "{{ coolify_proxy_path }}/dynamic"
     - "{{ coolify_env_file | dirname }}"
 
+- name: Deploy app-specific Traefik dynamic routing configs
+  # These files add per-app routers/services that Coolify's own labels cannot
+  # express (e.g. routing /api/ to a backend container that has no Traefik
+  # labels). Traefik watches the dynamic/ directory and hot-reloads on change.
+  # See: roles/coolify_runtime/files/dynamic/ for the source files.
+  # Future: replace with coolify_app_deploy role (ws-0447 t3) which will
+  # generate these configs dynamically from app inventory.
+  ansible.builtin.copy:
+    src: "dynamic/{{ item }}"
+    dest: "{{ coolify_proxy_path }}/dynamic/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ coolify_traefik_extra_dynamic_configs }}"
+  when: coolify_traefik_extra_dynamic_configs | length > 0
+
 - name: Install the Coolify bootstrap SSH private key on the guest
   ansible.builtin.copy:
     dest: "{{ coolify_bootstrap_private_key_file }}"

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.15",
+  "repo_version": "0.179.16",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-28T17:07:10Z",
-  "next_refresh_at": "2026-04-28T18:07:10Z",
+  "generated_at": "2026-04-28T17:11:37Z",
+  "next_refresh_at": "2026-04-28T18:11:37Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.14",
+    "last_version": "0.179.15",
     "deployed_at": "2026-04-28",
-    "summary": "ADR 0452 + ws-0452: Phase 7 drives doctor signals from 3/7 \u2192 1/7 ADR 0451 + ws-0451: Phase 6 self-healing actions. Three primitives",
-    "release_notes_url": "docs/release-notes/0.179.15.md"
+    "summary": "Fix education_wemeshup API routing: add Traefik dynamic config to route `/api/` to `catalog-api` backend; add `coolify_traefik_extra_dynamic_configs` for persistent IaC ADR 0452 + ws-0452: Phase 7 drives doctor signals from 3/7 \u2192 1/7",
+    "release_notes_url": "docs/release-notes/0.179.16.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
